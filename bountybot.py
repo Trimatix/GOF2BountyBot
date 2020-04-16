@@ -1,9 +1,7 @@
 import discord
-import json
 from datetime import datetime, timedelta
 import asyncio
 import random
-import math
 # from bbdata import System, factions, bountyNames, securityLevels, systems
 import bbdata
 import bbutil

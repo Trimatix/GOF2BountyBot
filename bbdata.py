@@ -1,17 +1,4 @@
-class System:
-    name = ""
-    faction = ""
-    neighbours = []
-    security = -1
-    coordinates = ()
-
-    def __init__(self, name, faction, neighbours, security, coordinates):
-        self.name = name
-        self.faction = faction
-        self.neighbours = neighbours
-        self.security = security
-        self.coordinates = coordinates
-
+from bbutil import System
 
 factions = ["terran", "vossk", "midorian", "nivelian", "neutral"]
 
