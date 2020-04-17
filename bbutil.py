@@ -101,6 +101,6 @@ def bbAStar(start, end, graph):
                     break
             open.insert(insertPos, succ)
 
-        closed.append(succ)
+        closed.append(q)
 
     return "!"

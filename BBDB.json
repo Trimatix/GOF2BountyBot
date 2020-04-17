@@ -1,1 +1,1 @@
-{"users": {"188618589102669826": {"credits": 50}}, "bounties": {"terran": [], "vossk": [], "nivelian": [], "midorian": [], "neutral": []}}
+{"users": {"188618589102669826": {"credits": 50}}, "bounties": {"terran": [{"issueTime": 1587120523.562952, "name": "Gendol Ethor", "route": ["Wolf-Reiser", "Aquila", "Union", "Magnetar", "V'Ikka", "Buntta"], "reward": 600, "endTime": 1587638923.562952}], "vossk": [], "nivelian": [], "midorian": [], "neutral": []}}
