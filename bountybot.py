@@ -238,7 +238,7 @@ async def on_message(message):
                     await message.channel.send(str(message.author.name) + ", you now have " + str(BBDB["users"][str(int(message.author.id))]["credits"]) + " credits!")
                 else:
                     await message.channel.send(str(message.author.name) + ", you did not find any criminals!")
-                BBDB["users"][str(message.author.id)]["bountyCooldownEnd"] = (datetime.utcnow() + timedelta(minutes=5)).timestamp()
+                BBDB["users"][str(message.author.id)]["bountyCooldownEnd"] = (datetime.utcnow() + timedelta(hours=1,minutes=5)).timestamp()
             else:
                 diff = datetime.utcfromtimestamp(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]) - datetime.utcnow()
                 minutes = int(diff.total_seconds() / 60)
