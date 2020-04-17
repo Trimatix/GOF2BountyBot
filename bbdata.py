@@ -1,6 +1,7 @@
 from bbutil import System
 
 factions = ["terran", "vossk", "midorian", "nivelian", "neutral"]
+bountyFactions = ["terran", "vossk", "midorian", "nivelian"]
 
 bountyNames = {"terran": ["Pal Tyyrt", "Kehnor", "Gendol Ethor", "Korr Bekkt", "Hongar Meton"],
                 "vossk": ["Mrrkt Nimkk", "Alvar Julen", "Vortt Baskk", "Oluchi Erland", "Orp Tsam"],

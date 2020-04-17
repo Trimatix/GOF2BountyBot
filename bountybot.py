@@ -9,6 +9,10 @@ import bbPRIVATE
 import bbconfig
 
 
+def initializeUser(userID):
+    BBDB["users"][str(userID)] = {"credits":0, "bountyCooldown":0}
+
+
 def makeRoute(start, end):
     return bbutil.bbAStar(start, end, bbdata.systems)
 
@@ -21,29 +25,34 @@ def makeRoute(start, end):
     endTime = -1
     faction = ""
     visited = {}
+    answer = ""
 
-    def __init__(self, faction="", issueTime=-1.0, name="", route=[], reward=-1.0, endTime=-1.0):
+    def __init__(self, faction="", issueTime=-1.0, name="", route=[], end="", answer="", reward=-1.0, endTime=-1.0, start=""):
         self.issueTime = issueTime
         self.name = name
         self.route = route
         self.reward = reward
         self.endTime = endTime
         self.faction = faction
+        self.answer = answer
 
-        if self.faction == "":
-            self.faction = random.choice(bbdata.factions)
-        if self.faction not in bbdata.factions:
+        if faction == "":
+            self.faction = random.choice(bbdata.bountyFactions)
+        if faction not in bbdata.bountyFactions:
             raise RuntimeError("makeBounty: Invalid faction requested '" + faction + "'")
     
         if self.route == []:
-            start = random.choice(list(bbdata.systems.keys()()))
-            while not bbdata.systems[start].hasJumpGate():
+            if start == "":
                 start = random.choice(list(bbdata.systems.keys()))
-            end = random.choice(list(bbdata.systems.keys()))
-            while start == end or not bbdata.systems[end].hasJumpGate():
+                while start == end or not bbdata.systems[start].hasJumpGate():
+                    start = random.choice(list(bbdata.systems.keys()))
+            if end == "":
                 end = random.choice(list(bbdata.systems.keys()))
+                while start == end or not bbdata.systems[end].hasJumpGate():
+                    end = random.choice(list(bbdata.systems.keys()))
             self.route = makeRoute(start, end)
-
+        if answer == "":
+            self.answer = random.choice(self.route)
         if self.name == "":
             self.name = random.choice(bbdata.bountyNames[faction])
         if self.reward == -1.0:
@@ -53,13 +62,13 @@ def makeRoute(start, end):
         if self.endTime == -1.0:
             self.endTime = (self.issueTime + timedelta(days=len(self.route))).timestamp()
         for station in self.route:
-            self.visited[station] = """
+            self.visited[station] = -1"""
 
 
 def makeBounty(faction="", bountyName="", start="", end=""):
     if faction == "":
-        faction = random.choice(bbdata.factions)
-    if faction not in bbdata.factions:
+        faction = random.choice(bbdata.bountyFactions)
+    if faction not in bbdata.bountyFactions:
         raise RuntimeError("makeBounty: Invalid faction requested '" + faction + "'")
     
     # route = random.choice(bbconfig.bountyRoutes)
@@ -92,7 +101,7 @@ def bountyNameExists(bountiesList, nameToFind):
 
 
 def canMakeBounty():
-    for fac in bbdata.factions:
+    for fac in bbdata.bountyFactions:
         if len(BBDB["bounties"][fac]) < bbconfig.maxBountiesPerFaction:
             return True
     return False
@@ -110,9 +119,9 @@ async def on_ready():
         await asyncio.sleep(bbconfig.newBountyDelay)
         # Make new bounties
         if canMakeBounty():
-            newFaction = random.choice(bbdata.factions)
-            while len(BBDB["bounties"][newFaction]) >= bbconfig.maxBountiesPerFaction or newFaction == "neutral":
-                newFaction = random.choice(bbdata.factions)
+            newFaction = random.choice(bbdata.bountyFactions)
+            while len(BBDB["bounties"][newFaction]) >= bbconfig.maxBountiesPerFaction:
+                newFaction = random.choice(bbdata.bountyFactions)
             newName = random.choice(bbdata.bountyNames[newFaction])
             while bountyNameExists(BBDB["bounties"][newFaction], newName): 
                 newName = random.choice(bbdata.bountyNames[newFaction])
@@ -131,17 +140,22 @@ async def on_message(message):
         if len(message.content.split(" ")) > 1:
             command = message.content.split(" ")[1].lower()
         else:
-            command = "else"
+            command = "help"
         if command == 'hello':
             await message.channel.send('Hello!')
+        elif command == "map":
+            if len(message.content.split(" ")) > 2 and message.content.split(" ")[2] == "-g":
+                await message.channel.send('https://cdn.discordapp.com/attachments/700683544103747594/700683693215318076/gof2_coords.png')
+            else:
+                await message.channel.send('https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png')
         elif command == "setchannel":
             bbconfig.sendChannel = message.channel.id
-        elif command == "win":
+        elif command == "check":
             if str(message.author.id) not in BBDB["users"]:
-                BBDB["users"][str(message.author.id)] = {"credits":0}
-            BBDB["users"][str(message.author.id)]["credits"] += 10
-            await message.channel.send("<@" + str(message.author.id) + ">, you now have " + str(BBDB["users"][str(message.author.id)]["credits"]) + " credits!")
-        elif len(message.content.split(" ")) == 2 and command in bbdata.factions:
+                initializeUser(message.author.id)
+            if datetime.utcfromtimestamp(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]) < datetime.utcnow():
+                await message.channel.send("<@" + str(message.author.id) + ">, you now have " + str(BBDB["users"][str(message.author.id)]["credits"]) + " credits!")
+        elif len(message.content.split(" ")) == 2 and command in bbdata.bountyFactions:
             requestedFaction = command
             if len(BBDB["bounties"][requestedFaction]) == 0:
                 await message.channel.send("There are no " + requestedFaction + " bounties active currently!")
@@ -150,7 +164,7 @@ async def on_message(message):
                 for bounty in BBDB["bounties"][requestedFaction]:
                     outmessage += "\n - " + bounty["name"] + ": " + str(bounty["reward"]) + " credits, issued: " + datetime.utcfromtimestamp(bounty["issueTime"]).strftime("%B-%d %H:%M:%S") + ", ending: " + datetime.utcfromtimestamp(bounty["endTime"]).strftime("%B-%d %H:%M:%S")
                 await message.channel.send(outmessage)
-        elif len(message.content.split(" ")) > 3 and command in bbdata.factions and message.content.split(" ")[2].lower() == "route":
+        elif len(message.content.split(" ")) > 3 and command in bbdata.bountyFactions and message.content.split(" ")[2].lower() == "route":
             requestedBountyName = ""
             for section in message.content.split(" ")[3:]:
                 requestedBountyName += " " + section.title()
@@ -168,9 +182,15 @@ async def on_message(message):
                     await message.channel.send(outmessage)
             if (not bountyFound):
                 await message.channel.send("That pilot is not on the " + requestedFaction + " bounty board!")
-        elif len(message.content.split(" ")) > 3 and command == "route":
-            startSyst = message.content.split(" ")[2].title()
-            endSyst = message.content.split(" ")[3].title()
+        elif command == "route":
+            if len(message.content.split(" ")) <= 3 or "," not in message.content or len(message.content[10:message.content.index(",")]) < 1 or len(message.content[message.content.index(","):]) < 2:
+                await message.channel.send("Please provide source and destination systems, separated with a comma and space.\nFor example: `!bb route Pescal Inartu, Loma`")
+                return
+            if message.content.count(",") > 1:
+                await message.channel.send("Please only provide two systems!")
+                return
+            startSyst = message.content[10:].split(",")[0].title()
+            endSyst = message.content[10:].split(",")[1][1:].title()
             for systArg in [startSyst, endSyst]:
                 if systArg not in bbdata.systems:
                     if len(systArg) < 20:
@@ -201,13 +221,13 @@ async def on_message(message):
                 elif command == "stations":
                     await message.channel.send(bbdata.systems)
                 elif command == "clear":
-                    for fac in bbdata.factions:
+                    for fac in bbdata.bountyFactions:
                         BBDB["bounties"][fac] = []
                 elif command == "make-bounty":
                     if len(message.content.split(" ")) < 3:
-                        newFaction = random.choice(bbdata.factions)
-                        while len(BBDB["bounties"][newFaction]) >= bbconfig.maxBountiesPerFaction or newFaction == "neutral":
-                            newFaction = random.choice(bbdata.factions)
+                        newFaction = random.choice(bbdata.bountyFactions)
+                        while len(BBDB["bounties"][newFaction]) >= bbconfig.maxBountiesPerFaction:
+                            newFaction = random.choice(bbdata.bountyFactions)
                     else:
                         newFaction = message.content.split(" ")[2]
                     newName = random.choice(bbdata.bountyNames[newFaction])
