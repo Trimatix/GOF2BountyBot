@@ -68,7 +68,7 @@ def bbAStar(start, end, graph):
     while open:
         q = open.pop(0)
 
-        count = count + 1
+        count += 1
         if count == 50:
             return "#"
         for succName in q.syst.getNeighbours():

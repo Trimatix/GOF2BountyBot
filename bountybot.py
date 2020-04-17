@@ -17,7 +17,7 @@ def makeRoute(start, end):
     return bbutil.bbAStar(start, end, bbdata.systems)
 
 
-"""class Bounty:
+class Bounty:
     issueTime = -1
     name = ""
     route = []
@@ -38,31 +38,79 @@ def makeRoute(start, end):
 
         if faction == "":
             self.faction = random.choice(bbdata.bountyFactions)
-        if faction not in bbdata.bountyFactions:
-            raise RuntimeError("makeBounty: Invalid faction requested '" + faction + "'")
+        elif faction not in bbdata.bountyFactions:
+            raise RuntimeError("Bounty constructor: Invalid faction requested '" + faction + "'")
     
-        if self.route == []:
+        if route == []:
             if start == "":
                 start = random.choice(list(bbdata.systems.keys()))
                 while start == end or not bbdata.systems[start].hasJumpGate():
                     start = random.choice(list(bbdata.systems.keys()))
+            elif start not in bbdata.systems:
+                raise RuntimeError("Bounty constructor: Invalid start requested '" + start + "'")
             if end == "":
                 end = random.choice(list(bbdata.systems.keys()))
                 while start == end or not bbdata.systems[end].hasJumpGate():
                     end = random.choice(list(bbdata.systems.keys()))
+            elif end not in bbdata.systems:
+                raise RuntimeError("Bounty constructor: Invalid end requested '" + end + "'")
             self.route = makeRoute(start, end)
+        else:
+            for system in route:
+                if system not in bbdata.systems:
+                    raise RuntimeError("Bounty constructor: Invalid system in route '" + system + "'")
         if answer == "":
             self.answer = random.choice(self.route)
-        if self.name == "":
+        elif answer not in bbdata.systems:
+            raise RuntimeError("Bounty constructor: Invalid answer requested '" + answer + "'")
+        if name == "":
             self.name = random.choice(bbdata.bountyNames[faction])
-        if self.reward == -1.0:
+        elif name not in bbdata.bountyNames:
+            raise RuntimeError("Bounty constructor: Invalid name requested '" + name + "'")
+        if reward == -1.0:
             self.reward = len(self.route) * 10
-        if self.issueTime == -1.0:
+        elif reward < 0:
+            raise RuntimeError("Bounty constructor: Invalid reward requested '" + str(reward) + "'")
+        if issueTime == -1.0:
             self.issueTime = datetime.utcnow().timestamp()
-        if self.endTime == -1.0:
+        if endTime == -1.0:
             self.endTime = (self.issueTime + timedelta(days=len(self.route))).timestamp()
+            
         for station in self.route:
-            self.visited[station] = -1"""
+            self.visited[station] = -1
+
+    def check(self, system, userID):
+        if system not in self.route:
+            return 0
+        elif self.systemChecked(system):
+            return 1
+        else:
+            self.visited[system] = userID
+            return self.visited
+
+    def systemChecked(self, system):
+        return self.visited[system] != -1
+
+    def calcRewards(self):
+        rewards = {}
+        checkedSystems = 0
+        for system in self.route:
+            if self.systemChecked(system):
+                checkedSystems += 1
+                rewards[self.visited[system]] = {"reward":0,"checked":0,"won":False}
+
+        uncheckedSystems = len(self.route) - checkedSystems
+
+        for system in self.route:
+            if self.systemChecked(system):
+                if self.answer == system:
+                    rewards[self.visited[system]]["reward"] += (self.reward / len(self.route)) * (uncheckedSystems + 1)
+                    rewards[self.visited[system]]["checked"] += 1
+                    rewards[self.visited[system]]["won"] = True
+                else:
+                    rewards[self.visited[system]]["reward"] += self.reward / len(self.route)
+                    rewards[self.visited[system]]["checked"] += 1
+        return rewards
 
 
 def makeBounty(faction="", bountyName="", start="", end=""):
@@ -90,7 +138,7 @@ def makeBounty(faction="", bountyName="", start="", end=""):
     reward = len(route) * 100
     issue = datetime.utcnow()
     due = issue + timedelta(days=len(route))
-    return faction, {"issueTime": issue.timestamp(), "name": bountyName, "route": route, "reward": reward, "endTime": due.timestamp()}
+    return faction, {"issueTime": issue.timestamp(), "name": bountyName, "route": route, "answer": answer, "reward": reward, "endTime": due.timestamp()}
 
 
 def bountyNameExists(bountiesList, nameToFind):
