@@ -82,7 +82,7 @@ def bbAStar(start, end, graph):
                 return route[::-1]
 
             succ = AStarNode(graph[succName], q)
-            succ.g = q.g + q.syst.distanceTo(succ.syst)
+            succ.g = q.g + 1
             succ.h = heuristic(succ.syst, graph[end])
             succ.f = succ.g + succ.h
 
@@ -103,4 +103,4 @@ def bbAStar(start, end, graph):
 
         closed.append(q)
 
-    return "!"
+    return "! " + start + " -> " + end
