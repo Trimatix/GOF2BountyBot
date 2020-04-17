@@ -38,7 +38,7 @@ systems = { #Terran
             "Suteo": System("Suteo", "nivelian", ["Behen", "Buntta"], 2, (3, 8)),
             "Weymire": System("Weymire", "nivelian", ["Augmenta", "Behen", "Union", "Nesla", "Shima"], 1, (6, 4)),
             #Midorian
-            "Eanya": System("Eanya", "midorian", ["Eanya", "Ginoya"], 3, (2, 3)),
+            "Eanya": System("Eanya", "midorian", ["Nesla", "Ginoya"], 3, (2, 3)),
             "Ginoya": System("Ginoya", "midorian", ["Talidor", "Eanya"], 3, (2, 2)),
             "Loma": System("Loma", "midorian", ["Shima", "Union", "Aquila"], 3, (5, 1)),
             "Mido": System("Mido", "midorian", [], 3, (4, 2)),
@@ -49,3 +49,6 @@ systems = { #Terran
             "Shima": System("Shima", "neutral", ["Loma", "Weymire", "Nesla"], 0, (5, 3)),
             "Skavac": System("Skavac", "neutral", [], 3, (10, 1)),
             "Skor Terpa": System("Skor Terpa", "neutral", [], 3, (7, 1))}
+
+mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/700683544103747594/700683693215318076/gof2_coords.png"
+mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png'
