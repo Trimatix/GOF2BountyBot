@@ -54,30 +54,38 @@ mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/7006835441037475
 mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png'
 
 helpStr = """*--=* __***BountyBot Commands***__ *=--*
-Here are my commands! Prefix commands with `!bb` - for example: `!bb help` ```ini
+:star: Here are my commands! Prefix commands with `!bb` - for example: `!bb help` ```ini
 - help
-   | display information about all available commands.
+    | Display information about all available commands.
 
 - balance <userTag>
-    | get the credits balance of yourself, or a tagged user if one is given.
+    | Get the credits balance of yourself, or a tagged user if one is given.
 
 - map
-    | send the complete GOF2 starmap.
+    | Send the complete GOF2 starmap.
 
 - bounties [faction]
-    | show the faction's currently available bounties.
+    | Show the faction's currently available bounties.
 
 - bounty-route [faction] [name]
-    | get the named criminal's route, from the faction's bounty board.
+    | Get the named criminal's route, from the faction's bounty board.
 
 - check [system]
-    | check if any criminals are in the given system, arrest them, and get paid!
+    | Check if any criminals are in the given system, arrest them, and get paid!
 
 - route [startSystem], [endSystem]
-    | find the shortest route from startSystem to endSystem.
+    | Find the shortest route from startSystem to endSystem.
 
 - system-info [system]
-    | display information about a given system.
+    | Display information about a given system.
     
 - leaderboard
-    | show the credits leaderboard.```"""
+    | Show the credits leaderboard.```"""
+
+adminHelpStr = """*--=* __***BountyBot Admin Commands***__ *=--*
+:star: Here are my administrator commands! Prefix commands with `!bb` - for example: `!bb help` ```ini
+- admin-help
+   | Display information about admin-only commands.
+
+- setchannel
+    | Set the channel where BountyBot will send announcements (e.g new bounties)```"""

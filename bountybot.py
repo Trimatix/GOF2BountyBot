@@ -311,28 +311,28 @@ async def on_message(message):
                     outmessage = outmessage[:-1] + ". :rocket:"
                     await message.channel.send(outmessage)
             if (not bountyFound):
-                await message.channel.send(":x: That pilot is not on the **" + requestedFaction + "** bounty board!")
+                await message.channel.send(":x: That pilot is not on the **" + requestedFaction + "** bounty board! :clipboard:")
         elif command == "route":
             if len(message.content.split(" ")) <= 3 or "," not in message.content or len(message.content[10:message.content.index(",")]) < 1 or len(message.content[message.content.index(","):]) < 2:
-                await message.channel.send("Please provide source and destination systems, separated with a comma and space.\nFor example: `!bb route Pescal Inartu, Loma`")
+                await message.channel.send(":x: Please provide source and destination systems, separated with a comma and space.\nFor example: `!bb route Pescal Inartu, Loma`")
                 return
             if message.content.count(",") > 1:
-                await message.channel.send("Please only provide two systems!")
+                await message.channel.send(":x: Please only provide **two** systems!")
                 return
             startSyst = message.content[10:].split(",")[0].title()
             endSyst = message.content[10:].split(",")[1][1:].title()
             for systArg in [startSyst, endSyst]:
                 if systArg not in bbdata.systems:
                     if len(systArg) < 20:
-                        await message.channel.send("The " + systArg + " system is not on my star map!")
+                        await message.channel.send(":x: The **" + systArg + "** system is not on my star map! :map:")
                     else:
-                        await message.channel.send("The " + systArg[0:15] + "... system is not on my star map!")
+                        await message.channel.send(":x: The **" + systArg[0:15] + "**... system is not on my star map! :map:")
                     return
                 if not bbdata.systems[systArg].hasJumpGate():
                     if len(systArg) < 20:
-                        await message.channel.send("The " + systArg + " system does not have a jump gate!")
+                        await message.channel.send(":x: The **" + systArg + "** system does not have a jump gate! :rocket:")
                     else:
-                        await message.channel.send("The " + systArg[0:15] + "... system does not have a jump gate!")
+                        await message.channel.send(":x: The **" + systArg[0:15] + "**... system does not have a jump gate! :rocket:")
                     return
             routeStr = ""
             for currentSyst in bbutil.bbAStar(startSyst, endSyst, bbdata.systems):
@@ -342,16 +342,16 @@ async def on_message(message):
             elif routeStr.startswith("!"):
                 await message.channel.send(":x: ERR: No route found! :triangular_flag_on_post:")
             else:
-                await message.channel.send("Here's the shortest route from " + startSyst + " to " + endSyst + ":\n> " + routeStr[:-2] + " :rocket:")
+                await message.channel.send("Here's the shortest route from **" + startSyst + "**** to " + endSyst + "**:\n> " + routeStr[:-2] + " :rocket:")
         elif command == "system-info":
             if len(message.content.split(" ")) < 3:
-                await message.channel.send("Please provide a system! Example: `!bb system-info Augmenta`")
+                await message.channel.send(":x: Please provide a system! Example: `!bb system-info Augmenta`")
             systArg = message.content[16:].title()
             if systArg not in bbdata.systems:
                 if len(systArg) < 20:
-                    await message.channel.send("The " + systArg + " system is not on my star map!")
+                    await message.channel.send(":x: The **" + systArg + "** system is not on my star map! :map:")
                 else:
-                    await message.channel.send("The " + systArg[0:15] + "... system is not on my star map!")
+                    await message.channel.send(":x: The **" + systArg[0:15] + "**... system is not on my star map! :map:")
                 return
             else:
                 systObj = bbdata.systems[systArg]
@@ -371,54 +371,59 @@ async def on_message(message):
             sortedUsers = sorted(inputDict.items(), key=operator.itemgetter(1))[::-1]
             outStr = "```--= CREDITS LEADERBOARD =--"
             for place in range(min(len(sortedUsers), 10)):
-                outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + " - " + str(int(sortedUsers[place][1])) + " credits"
+                outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + " - " + str(int(sortedUsers[place][1])) + " Credits"
             outStr += "```"
             await message.channel.send(outStr)
         else:
-            if message.author.id == 188618589102669826:
-                if command == "s":
-                    await message.channel.send("zzzz....")
-                    bbconfig.botLoggedIn = False
-                    await client.logout()
-                    # bbutil.writeJDB("BBDB.json", BBDB)
-                    saveDB(BBDB)
-                elif command == "save":
-                    saveDB(BBDB)
-                    await message.channel.send("saved!")
+            if message.author.id == 188618589102669826 or message.author.administrator:
+                if message.author.id == 188618589102669826:
+                    if command == "s":
+                        await message.channel.send("zzzz....")
+                        bbconfig.botLoggedIn = False
+                        await client.logout()
+                        # bbutil.writeJDB("BBDB.json", BBDB)
+                        saveDB(BBDB)
+                    elif command == "save":
+                        saveDB(BBDB)
+                        await message.channel.send("saved!")
+                    elif command == "chset?":
+                        await message.channel.send(str(message.guild.id) in bbconfig.sendChannel)
+                    elif command == "printch":
+                        await message.channel.send(bbconfig.sendChannel[str(message.guild.id)])
+                    elif command == "stations":
+                        await message.channel.send(bbdata.systems)
+                    elif command == "clear":
+                        for fac in bbdata.bountyFactions:
+                            BBDB["bounties"][fac] = []
+                    elif command == "cooldown":
+                        diff = datetime.utcfromtimestamp(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]) - datetime.utcnow()
+                        minutes = int(diff.total_seconds() / 60)
+                        seconds = int(diff.total_seconds() % 60)
+                        await message.channel.send(str(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]) + " = " + str(minutes) + "m, " + str(seconds) + "s.")
+                        await message.channel.send(datetime.utcfromtimestamp(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]).strftime("%Hh%Mm%Ss"))
+                        await message.channel.send(datetime.utcnow().strftime("%Hh%Mm%Ss"))
+                    elif command == "resetcool":
+                        if len(message.content.split(" ")) < 3:
+                            BBDB["users"][str(message.author.id)]["bountyCooldownEnd"] = datetime.utcnow().timestamp()
+                        else:
+                            BBDB["users"][str(client.get_user(int(message.content[17:-1])).id)]["bountyCooldownEnd"] = datetime.utcnow().timestamp()
+                        await message.channel.send("Done!")
+                    elif command == "make-bounty":
+                        if len(message.content.split(" ")) < 3:
+                            newFaction = ""
+                        else:
+                            newFaction = message.content[16:]
+                        newBounty = Bounty(faction=newFaction)
+                        BBDB["bounties"][newBounty.faction].append(newBounty)
+                        if str(message.guild.id) in bbconfig.sendChannel and bbconfig.sendChannel[str(message.guild.id)] != 0:
+                            await client.get_channel(bbconfig.sendChannel[str(message.guild.id)]).send("New " + newBounty.faction + " bounty: " + newBounty.name)
+                    else:
+                        await message.channel.send("""Can't do that, pilot. Type "!bb help" for a list of commands! o7""")
                 elif command == "setchannel":
                     bbconfig.sendChannel[str(message.guild.id)] = message.channel.id
-                    await message.channel.send("Set!")
-                elif command == "chset?":
-                    await message.channel.send(str(message.guild.id) in bbconfig.sendChannel)
-                elif command == "printch":
-                    await message.channel.send(bbconfig.sendChannel[str(message.guild.id)])
-                elif command == "stations":
-                    await message.channel.send(bbdata.systems)
-                elif command == "clear":
-                    for fac in bbdata.bountyFactions:
-                        BBDB["bounties"][fac] = []
-                elif command == "cooldown":
-                    diff = datetime.utcfromtimestamp(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]) - datetime.utcnow()
-                    minutes = int(diff.total_seconds() / 60)
-                    seconds = int(diff.total_seconds() % 60)
-                    await message.channel.send(str(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]) + " = " + str(minutes) + "m, " + str(seconds) + "s.")
-                    await message.channel.send(datetime.utcfromtimestamp(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]).strftime("%Hh%Mm%Ss"))
-                    await message.channel.send(datetime.utcnow().strftime("%Hh%Mm%Ss"))
-                elif command == "resetcool":
-                    if len(message.content.split(" ")) < 3:
-                        BBDB["users"][str(message.author.id)]["bountyCooldownEnd"] = datetime.utcnow().timestamp()
-                    else:
-                        BBDB["users"][str(client.get_user(int(message.content[17:-1])).id)]["bountyCooldownEnd"] = datetime.utcnow().timestamp()
-                    await message.channel.send("Done!")
-                elif command == "make-bounty":
-                    if len(message.content.split(" ")) < 3:
-                        newFaction = ""
-                    else:
-                        newFaction = message.content[16:]
-                    newBounty = Bounty(faction=newFaction)
-                    BBDB["bounties"][newBounty.faction].append(newBounty)
-                    if str(message.guild.id) in bbconfig.sendChannel and bbconfig.sendChannel[str(message.guild.id)] != 0:
-                        await client.get_channel(bbconfig.sendChannel[str(message.guild.id)]).send("New " + newBounty.faction + " bounty: " + newBounty.name)
+                    await message.channel.send(":ballot_box_with_check: Announcements channel set!")
+                elif command == "admin-help":
+                    await message.channel.send(bbdata.adminHelpStr)
                 else:
                     await message.channel.send("""Can't do that, pilot. Type "!bb help" for a list of commands! o7""")
             else:
