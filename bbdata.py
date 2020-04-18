@@ -53,7 +53,8 @@ systems = { #Terran
 mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/700683544103747594/700683693215318076/gof2_coords.png"
 mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png'
 
-helpStr = """Here are my commands! Prefix commands with `!bb` - for example: `!bb help` ```ini
+helpStr = """*--=* __***BountyBot Commands***__ *=--*
+Here are my commands! Prefix commands with `!bb` - for example: `!bb help` ```ini
 - help
    | display information about all available commands.
 
@@ -66,13 +67,13 @@ helpStr = """Here are my commands! Prefix commands with `!bb` - for example: `!b
 - bounties [faction]
     | show the faction's currently available bounties.
 
-- bounties [faction] route [name]
+- bounty-route [faction] [name]
     | get the named criminal's route, from the faction's bounty board.
 
 - check [system]
     | check if any criminals are in the given system, arrest them, and get paid!
 
-- route [startSystem] [endSystem]
+- route [startSystem], [endSystem]
     | find the shortest route from startSystem to endSystem.
 
 - system-info [system]
