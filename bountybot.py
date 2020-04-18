@@ -182,13 +182,22 @@ async def on_ready():
     bbconfig.botLoggedIn = True
     currentBountyWait = 0
     currentSaveWait = 0
-    currentNewBountyDelay = random.randint(bbconfig.newBountyDelayMin, bbconfig.newBountyDelayMax)
+    newBountyDelayDelta = None
+    if bbconfig.newBountyDelayType == "random":
+        currentNewBountyDelay = random.randint(bbconfig.newBountyDelayMin, bbconfig.newBountyDelayMax)
+    elif bbconfig.newBountyDelayType == "fixed":
+        currentNewBountyDelay = 0
+        newBountyDelayDelta = timedelta(days=bbconfig.newBountyFixedDelta["days"], hours=bbconfig.newBountyFixedDelta["hours"], minutes=bbconfig.newBountyFixedDelta["minutes"], seconds=bbconfig.newBountyFixedDelta["seconds"])
     while bbconfig.botLoggedIn:
         await asyncio.sleep(bbconfig.delayFactor)
         currentBountyWait += bbconfig.delayFactor
         currentSaveWait += bbconfig.delayFactor
         # Make new bounties
-        if currentBountyWait >= currentNewBountyDelay:
+        if (bbconfig.newBountyDelayType == "random" and currentBountyWait >= currentNewBountyDelay) or \
+                (bbconfig.newBountyDelayType == "fixed" and timedelta(seconds=currentBountyWait) >= newBountyDelayDelta and\
+                    datetime.utcnow().replace(hours=0, minutes=0, seconds=0) + newBountyDelayDelta - timedelta(minutes=bbconfig.delayFactor) \
+                    <= datetime.utcnow() \
+                    <= datetime.utcnow().replace(hours=0, minutes=0, seconds=0) + newBountyDelayDelta + timedelta(minutes=bbconfig.delayFactor)):
             if canMakeBounty():
                 newBounty = Bounty()
                 BBDB["bounties"][newBounty.faction].append(newBounty)
@@ -424,6 +433,11 @@ async def on_message(message):
                     await message.channel.send(":ballot_box_with_check: Announcements channel set!")
                 elif command == "admin-help":
                     await message.channel.send(bbdata.adminHelpStr)
+                # elif command == "bounty-cooldown":
+                #     diff =  - datetime.utcnow()
+                #     minutes = int(diff.total_seconds() / 60)
+                #     seconds = int(diff.total_seconds() % 60)
+                #     await message.channel.send("There is " + + "left until a new bounty is added.")
                 else:
                     await message.channel.send("""Can't do that, pilot. Type "!bb help" for a list of commands! o7""")
             else:
