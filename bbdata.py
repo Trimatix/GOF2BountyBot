@@ -61,14 +61,29 @@ mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594
 
 helpStr = """*--=* __***BountyBot Commands***__ *=--*
 :star: Here are my commands! Prefix commands with `!bb` - for example: `!bb help` ```ini
+[ MISCELLANEOUS ]
+
 - help
     | Display information about all available commands.
 
 - balance <userTag>
     | Get the credits balance of yourself, or a tagged user if one is given.
 
+- leaderboard
+    | Show the credits leaderboard.
+
+[   GOF2 INFO   ]
+
 - map
     | Send the complete GOF2 starmap.
+
+- system-info [system]
+    | Display information about a given system.
+
+- route [startSystem], [endSystem]
+    | Find the shortest route from startSystem to endSystem.
+
+[   BOUNTIES    ]
 
 - bounties [faction]
     | Show the faction's currently available bounties.
@@ -77,16 +92,7 @@ helpStr = """*--=* __***BountyBot Commands***__ *=--*
     | Get the named criminal's route, from the faction's bounty board.
 
 - check [system]
-    | Check if any criminals are in the given system, arrest them, and get paid!
-
-- route [startSystem], [endSystem]
-    | Find the shortest route from startSystem to endSystem.
-
-- system-info [system]
-    | Display information about a given system.
-    
-- leaderboard
-    | Show the credits leaderboard.```"""
+    | Check if any criminals are in the given system, arrest them, and get paid!```"""
 
 adminHelpStr = """*--=* __***BountyBot Admin Commands***__ *=--*
 :star: Here are my administrator commands! Prefix commands with `!bb` - for example: `!bb help` ```ini
