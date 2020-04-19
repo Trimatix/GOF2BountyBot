@@ -8,6 +8,12 @@ bountyNames = {"terran": ["Pal Tyyrt", "Kehnor", "Gendol Ethor", "Korr Bekkt", "
                 "midorian": ["Toma Prakupy", "Nombur Talénah", "Bartholomeu Drew", "Doni Trillyx", "Mashon Redal"],
                 "nivelian": ["Borsul Tarand", "Vilhelm Lindon", "Tamir Prakupy", "Merson Surr", "Ganfor Kant"]}
 
+longestBountyNameLength = 0
+for fac in bountyNames:
+    for name in bountyNames[fac]:
+        if len(name) > longestBountyNameLength:
+            longestBountyNameLength = len(name)
+
 securityLevels = ["secure", "average", "risky", "dangerous"]
 
 systems = { #Terran
@@ -89,3 +95,5 @@ adminHelpStr = """*--=* __***BountyBot Admin Commands***__ *=--*
 
 - setchannel
     | Set the channel where BountyBot will send announcements (e.g new bounties)```"""
+
+numExtensions = ["th","st","nd","rd","th","th","th","th","th"]

@@ -61,6 +61,8 @@ def heuristic(start, end):
 
 
 def bbAStar(start, end, graph):
+    if start == end:
+        return [start]
     open = [AStarNode(graph[start], None, h=heuristic(graph[start], graph[end]))]
     closed = []
     count = 0
