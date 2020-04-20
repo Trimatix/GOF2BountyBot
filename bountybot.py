@@ -473,10 +473,10 @@ async def on_message(message):
 
             inputDict = {}
             for userID in BBDB["users"]:
-                if client.get_user(userID) is not None and globalBoard or message.guild.get_member(userID) is not None:
+                if client.get_user(userID) is not None and (globalBoard or message.guild.get_member(userID) is not None):
                     inputDict[userID] = BBDB["users"][userID][stat]
             sortedUsers = sorted(inputDict.items(), key=operator.itemgetter(1))[::-1]
-            outStr = "```--= " + boardPrefix + "LEADERBOARD: " + boardTitle + "=--"
+            outStr = "```--= " + boardPrefix + "LEADERBOARD: " + boardTitle + " =--"
             externalUser = False
             for place in range(min(len(sortedUsers), 10)):
                 if globalBoard and message.guild.get_member(int(sortedUsers[place][0])) is None:
