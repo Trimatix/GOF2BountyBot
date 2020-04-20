@@ -26,23 +26,28 @@ class Bounty:
     faction = ""
     checked = {}
     answer = ""
+    
 
     def __init__(self, faction="", name="", route=[], start="", end="", answer="", checked={}, reward=-1.0, issueTime=-1.0, endTime=-1.0):
-        self.faction = faction
+        self.faction = faction.lower()
         self.name = name
         self.route = route
-        self.answer = answer
+        for i in range(len(route)):
+            route[i] = route[i].title()
+        start = start.title()
+        end = end.title()
+        self.answer = answer.title()
         self.checked = checked
         self.reward = reward
         self.issueTime = issueTime
         self.endTime = endTime
 
-        if faction == "":
+        if self.faction == "":
             self.faction = random.choice(bbdata.bountyFactions)
-        elif faction not in bbdata.bountyFactions:
+        elif self.faction not in bbdata.bountyFactions:
             raise RuntimeError("Bounty constructor: Invalid faction requested '" + faction + "'")
     
-        if route == []:
+        if self.route == []:
             if start == "":
                 start = random.choice(list(bbdata.systems.keys()))
                 while start == end or not bbdata.systems[start].hasJumpGate():
@@ -57,25 +62,25 @@ class Bounty:
                 raise RuntimeError("Bounty constructor: Invalid end requested '" + end + "'")
             self.route = makeRoute(start, end)
         else:
-            for system in route:
+            for system in self.route:
                 if system not in bbdata.systems:
                     raise RuntimeError("Bounty constructor: Invalid system in route '" + system + "'")
-        if answer == "":
+        if self.answer == "":
             self.answer = random.choice(self.route)
-        elif answer not in bbdata.systems:
+        elif self.answer not in bbdata.systems:
             raise RuntimeError("Bounty constructor: Invalid answer requested '" + answer + "'")
-        if name == "":
+        if self.name == "":
             self.name = random.choice(bbdata.bountyNames[self.faction])
-        if reward == -1.0:
-            self.reward = len(self.route) * 100
-        elif reward < 0:
+        if self.reward == -1.0:
+            self.reward = len(self.route) * bbconfig.bPointsToCreditsRatio
+        elif self.reward < 0:
             raise RuntimeError("Bounty constructor: Invalid reward requested '" + str(reward) + "'")
-        if issueTime == -1.0:
+        if self.issueTime == -1.0:
             self.issueTime = datetime.utcnow().replace(second=0).timestamp()
-        if endTime == -1.0:
+        if self.endTime == -1.0:
             self.endTime = (datetime.utcfromtimestamp(self.issueTime) + timedelta(days=len(self.route))).timestamp()
 
-        if checked == {}:
+        if self.checked == {}:
             for station in self.route:
                 self.checked[station] = -1
 
@@ -212,7 +217,7 @@ async def on_ready():
                 BBDB["bounties"][newBounty.faction].append(newBounty)
                 for currentGuild in bbconfig.sendChannel:
                     if currentGuild != 0:
-                        await client.get_channel(bbconfig.sendChannel[currentGuild]).send("```** New " + newBounty.faction + " Bounty Available```New " + newBounty.faction + " bounty: **" + newBounty.name + "**.\nSee the culprit's route with `!bb route " + newBounty.faction + " " + newBounty.name + "`")
+                        await client.get_channel(bbconfig.sendChannel[currentGuild]).send("```** New " + newBounty.faction + " Bounty Available```New " + newBounty.faction + " bounty: **" + newBounty.name + "**.\nSee the culprit's route with `!bb bounty-route " + newBounty.faction + " " + newBounty.name + "`")
             if bbconfig.newBountyDelayType == "random":
                 currentNewBountyDelay = random.randint(bbconfig.newBountyDelayMin, bbconfig.newBountyDelayMax)
             else:
@@ -257,18 +262,19 @@ async def on_message(message):
         elif command == "stats":
             if len(message.content.split(" ")) < 3:
                 if str(message.author.id) not in BBDB["users"]:
-                    initializeUser(message.author.id)
-                requestedUser = message.author
-                # userName = message.author.name
-                userID = str(message.author.id)
+                    await message.channel.send("```yaml\n--=- PILOT STATS: " + str(message.author).upper() + " -=--\n • Credits_balance: 0\n • Lifetime_total_credits_earned: 0\n • Total_systems_checked_for_bounties: 0\n • Total_bounties_won: 0" + "```")
+                return
             else:
                 if len(message.content.split(" ")) > 3 or not (message.content.split(" ")[2].startswith("<@") and message.content.split(" ")[2].endswith(">")) or ("!" in message.content.split(" ")[2] and not isInt(message.content.split(" ")[2][3:-1])) or ("!" not in message.content.split(" ")[2] and not isInt(message.content.split(" ")[2][2:-1])):
                     await message.channel.send(":x: **Invalid user!** use `!bb balance` to display your own balance, or `!bb balance @userTag` to display someone else's balance!")
                     return
                 requestedUser = client.get_user(int(message.content.split(" ")[2][3:-1]))
+                if requestedUser is None:
+                    await message.channel.send(":x: **Invalid user!** use `!bb balance` to display your own balance, or `!bb balance @userTag` to display someone else's balance!")
+                    return
                 userID = str(requestedUser.id)
                 if userID not in BBDB["users"]:
-                    await message.channel.send(":x: I don't have data on that user!")
+                    await message.channel.send("```yaml\n--=- PILOT STATS: " + str(requestedUser).upper() + " -=--\n • Credits_balance: 0\n • Lifetime_total_credits_earned: 0\n • Total_systems_checked_for_bounties: 0\n • Total_bounties_won: 0" + "```")
                     return
                 # userName = requestedUser.name
             await message.channel.send("```yaml\n--=- PILOT STATS: " + str(requestedUser).upper() + " -=--\n • Credits_balance: " + str(BBDB["users"][userID]["credits"]) + "\n • Lifetime_total_credits_earned: " + str(BBDB["users"][userID]["totalCredits"]) + "\n • Total_systems_checked_for_bounties: " + str(BBDB["users"][userID]["systemsChecked"]) + "\n • Total_bounties_won: " + str(BBDB["users"][userID]["wins"]) + "```")
@@ -322,7 +328,7 @@ async def on_message(message):
                     BBDB["users"][str(message.author.id)]["wins"] += 1
                     BBDB["users"][str(message.author.id)]["systemsChecked"] += 1
                     await message.channel.send(":telescope: **" + message.author.name + "**, you did not find any criminals!")
-                BBDB["users"][str(message.author.id)]["bountyCooldownEnd"] = (datetime.utcnow() + timedelta(hours=1,minutes=5)).timestamp()
+                BBDB["users"][str(message.author.id)]["bountyCooldownEnd"] = (datetime.utcnow() + timedelta(minutes=5)).timestamp()
             else:
                 diff = datetime.utcfromtimestamp(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]) - datetime.utcnow()
                 minutes = int(diff.total_seconds() / 60)
@@ -425,28 +431,98 @@ async def on_message(message):
                 neighboursStr = ""
                 for x in systObj.neighbours:
                     neighboursStr += x + ", "
-                neighboursStr = neighboursStr[:-2]
+                if neighboursStr == "":
+                    neighboursStr = ""
+                else:
+                    neighboursStr = neighboursStr[:-2]
                 
-                await message.channel.send("```xml\n<name " + systObj.name + ">\n"
-                                            + "<faction " + systObj.faction + ">\n"
-                                            + "<neighbours " + neighboursStr + ">\n"
-                                            + "<security_level " + bbdata.securityLevels[systObj.security].title() + ">```")
+                await message.channel.send("```xml\n<____System_Name____: " + systObj.name + " >\n"
+                                            + "<______Faction______: " + systObj.faction.title() + " >\n"
+                                            + "<_Neighbour_Systems_: " + neighboursStr + " >\n"
+                                            + "<__Security_Level___: " + bbdata.securityLevels[systObj.security].title() + " >```")
         elif command == "leaderboard":
+            globalBoard = False
+            stat = "totalCredits"
+            boardPrefix = ""
+            boardTitle = "TOTAL CREDITS EARNED"
+            boardUnit = "Credits"
+
+            if len(message.content.split(" ")) > 2:
+                args = message.content.split(" ")[2].lower()
+                if not args.startswith("-"):
+                    await message.channel.send(":x: Please prefix your arguments with a dash! E.g: `!bb leaderboard -gc`")
+                    return
+                if ("g" not in args and len(args) > 2) or ("g" in args and len(args) > 3):
+                    await message.channel.send(":x: Too many arguments! Please only specify one leaderboard. E.g: `!bb leaderboard -gc`")
+                    return
+                if "g" in args:
+                    globalBoard = True
+                    boardPrefix = "GLOBAL "
+                if "c" in args:
+                    stat = "credits"
+                    boardTitle = "CURRENT BALANCE"
+                    boardUnit = "Credits"
+                elif "s" in args:
+                    stat = "systemsChecked"
+                    boardTitle = "SYSTEMS CHECKED"
+                    boardUnit = "Systems"
+                elif "w" in args:
+                    stat = "wins"
+                    boardTitle = "BOUNTIES WON"
+                    boardUnit = "Bounties"
+
             inputDict = {}
             for userID in BBDB["users"]:
-                inputDict[userID] = BBDB["users"][userID]["totalCredits"]
+                if client.get_user(userID) is not None and globalBoard or message.guild.get_user(userID) is not None:
+                    inputDict[userID] = BBDB["users"][userID][stat]
             sortedUsers = sorted(inputDict.items(), key=operator.itemgetter(1))[::-1]
-            outStr = "```--= LEADERBOARD: TOTAL CREDITS EARNED =--"
+            outStr = "```--= " + boardPrefix + "LEADERBOARD: " + boardTitle + "=--"
+            externalUser = False
             for place in range(min(len(sortedUsers), 10)):
-                outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + " - " + str(int(sortedUsers[place][1])) + " Credits"
+                if globalBoard and message.guild.get_user(int(sortedUsers[place][0])) is None:
+                    outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + "* - " + str(int(sortedUsers[place][1])) + " " + boardUnit
+                    externalUser = True
+                else:
+                    outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + " - " + str(int(sortedUsers[place][1])) + " " + boardUnit
+            if externalUser:
+                outStr = "*(An `*` indicates a user that is from another server.)*\n" + outStr
             outStr += "```"
             await message.channel.send(outStr)
         elif command == "make-bounty":
             if len(message.content.split(" ")) < 3:
                 newFaction = ""
-            else:
+            elif len(message.content[16:].split("+")) == 1:
                 newFaction = message.content[16:]
-            newBounty = Bounty(faction=newFaction)
+                newBounty = Bounty(faction=newFaction)
+            elif len(message.content[16:].split("+")) == 8:
+                bData = message.content[16:].split("+")
+                newFaction = bData[0].rstrip(" ")
+                if newFaction == "auto":
+                    newFaction = ""
+                newName = bData[1].rstrip(" ")
+                if newName == "auto":
+                    newName = ""
+                newRoute = list(bData[2].rstrip(" "))
+                if newRoute == ['a', 'u', 't', 'o']:
+                    newRoute = []
+                newStart = bData[3].rstrip(" ")
+                if newStart == "auto":
+                    newStart = ""
+                newEnd = bData[4].rstrip(" ")
+                if newEnd == "auto":
+                    newEnd = ""
+                newAnswer = bData[5].rstrip(" ")
+                if newAnswer == "auto":
+                    newAnswer = ""
+                newReward = bData[6].rstrip(" ")
+                if newReward == "auto":
+                    newReward = -1
+                newReward = int(newReward)
+                newEndTime = bData[7].rstrip(" ")
+                if newEndTime == "auto":
+                    newEndTime = -1.0
+                newEndTime = float(newEndTime)
+                newBounty = Bounty(faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime)
             BBDB["bounties"][newBounty.faction].append(newBounty)
             if str(message.guild.id) in bbconfig.sendChannel and bbconfig.sendChannel[str(message.guild.id)] != 0:
                 await client.get_channel(bbconfig.sendChannel[str(message.guild.id)]).send("```** New " + newBounty.faction.title() + " Bounty Available```\n:chains: A new bounty has been published by " + newBounty.faction.title() + " central command: **" + newBounty.name + "**!\n> See the culprit's route with `!bb route " + newBounty.faction.title() + " " + newBounty.name + "` :rocket:")
@@ -493,7 +569,11 @@ async def on_message(message):
                         if len(message.content.split(" ")) < 3:
                             BBDB["users"][str(message.author.id)]["bountyCooldownEnd"] = datetime.utcnow().timestamp()
                         else:
-                            BBDB["users"][str(client.get_user(int(message.content[17:-1])).id)]["bountyCooldownEnd"] = datetime.utcnow().timestamp()
+                            if "!" in message.content.split(" ")[2]:
+                                requestedUser = client.get_user(int(message.content[17:-1]))
+                            else:
+                                requestedUser = client.get_user(int(message.content[16:-1]))
+                            BBDB["users"][str(requestedUser.id)]["bountyCooldownEnd"] = datetime.utcnow().timestamp()
                         await message.channel.send("Done!")
                     # elif command == "make-bounty":
                     #     if len(message.content.split(" ")) < 3:

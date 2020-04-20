@@ -10,3 +10,4 @@ newBountyDelayMin = 300
 newBountyDelayMax = 4 * 60 * 60
 saveDelay = 30 * 60
 delayFactor = 5
+bPointsToCreditsRatio = 100

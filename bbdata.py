@@ -69,8 +69,13 @@ helpStr = """*--=* __***BountyBot Commands***__ *=--*
 - balance <userTag>
     | Get the credits balance of yourself, or a tagged user if one is given.
 
-- leaderboard
-    | Show the credits leaderboard.
+- stats <userTag>
+    | Get various credits and bounty statistics about yourself, or a tagged user.
+
+- leaderboard <-g|c|s|w>
+    | Show the credits leaderboard. Give -g for the global leaderboard, not just this server.
+    | Give -c for the CURRENT credits leaderboard, -s for the 'systems checked' leaderboard.
+    | Give -w for the 'bounties won' leaderboard.                   E.g: !bb leaderboard -gs
 
 [   GOF2 INFO   ]
 
