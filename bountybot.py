@@ -333,7 +333,7 @@ async def on_message(message):
                 diff = datetime.utcfromtimestamp(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]) - datetime.utcnow()
                 minutes = int(diff.total_seconds() / 60)
                 seconds = int(diff.total_seconds() % 60)
-                await message.channel.send(":stopwatch: **" + message.author.name + ", your *Khador drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
+                await message.channel.send(":stopwatch: **" + message.author.name + "**, your *Khador drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
         elif command == "bounties":
             if len(message.content.split(" ")) < 2:
                 await message.channel.send(":x: Provide a faction to check the bounty board of! E.g: `!bounties Terran`")
