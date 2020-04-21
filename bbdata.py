@@ -86,8 +86,9 @@ helpStr = """*--=* __***BountyBot Commands***__ *=--*
 
 [   BOUNTIES    ]
 
-- bounties [faction]
-    | Show the faction's currently available bounties.
+- bounties <faction>
+    | If no faction is given, name all currently active bounties.
+    | If a faction is given, show detailed info about its active bounties.
 - route [faction] [name]
     | Get the named criminal's route, from the faction's bounty board.
 - check [system]
