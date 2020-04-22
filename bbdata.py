@@ -29,13 +29,13 @@ systems = { #Terran
             "Vulpes": System("Vulpes", "terran", ["Prospero", "Oom'Bak"], 2, (10, 7)),
             "Wolf-Reiser": System("Wolf-Reiser", "terran", ["Aquila"], 0, (10, 3)),
             #Vossk
-            "K'Ontrr": System("K'Ontrr", "vossk", ["S'Kolptorr", "Ni'Mrrod", "Me'Enkk", "Wah'Norr"], 3, (10, 11)),
+            "K'Ontrr": System("K'Ontrr", "vossk", ["S'Kolptorr", "Ni'Mrrod", "Me'Enkk"], 3, (10, 11)),
             "Me'Enkk": System("Me'Enkk", "vossk", ["Ni'Mrrod", "K'Ontrr"], 3, (11, 12)),
             "Ni'Mrrod": System("Ni'Mrrod", "vossk", ["K'Ontrr", "Me'Enkk"], 3, (12, 12)),
             "Oom'Bak": System("Oom'Bak", "vossk", ["Magnetar", "Vulpes", "S'Kolptorr", "V'Ikka"], 1, (9, 8)),
             "S'Kolptorr": System("S'Kolptorr", "vossk", ["K'Ontrr", "Oom'Bak", "V'Ikka"], 2, (9, 9)),
             "V'Ikka": System("V'Ikka", "vossk", ["Augmenta", "Buntta", "Magnetar", "Oom'Bak", "S'Kolptorr"], 1, (7, 8)),
-            "Wah'Norr": System("Wah'Norr", "vossk", ["Ni'Mrrod", "K'Ontrr"], 3, (12, 8)),
+            "Wah'Norr": System("Wah'Norr", "vossk", [], 3, (12, 8)),
             "Y'Mirr": System("Y'Mirr", "vossk", [], 3, (11, 9)),
             #Nivelian
             "Behen": System("Behen", "nivelian", ["Nesla", "Suteo", "Weymire"], 2, (3, 6)),
