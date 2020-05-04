@@ -402,7 +402,7 @@ async def on_message(message):
             for fac in BBDB["bounties"]:
                 for bounty in BBDB["bounties"][fac]:
                     if bounty.getCodeNameTag(client) == requestedBountyName:
-                        outmessage = "**" + requestedBountyName + "**'s current route:"
+                        outmessage = "**" + requestedBountyName + "**'s current route:\n> "
                         for system in bounty.route:
                             outmessage += " " + system + ","
                         outmessage = outmessage[:-1] + ". :rocket:"
@@ -638,9 +638,9 @@ async def on_message(message):
                         BBDB["bounties"][newBounty.faction].append(newBounty)
                         await announceBounty(newBounty)
                     else:
-                        await message.channel.send(""":question: Can't do that, pilot. Type `!bb help` for a list of commands! **o7**""")
+                        await message.channel.send(""":question: Can't do that, commander. Type `!bb help` for a list of commands! **o7**""")
                 else:
-                    await message.channel.send(""":question: Can't do that, pilot. Type `!bb help` for a list of commands! **o7**""")
+                    await message.channel.send(""":question: Can't do that, commander. Type `!bb help` for a list of commands! **o7**""")
             else:
                 await message.channel.send(""":question: Can't do that, pilot. Type `!bb help` for a list of commands! **o7**""")
         
