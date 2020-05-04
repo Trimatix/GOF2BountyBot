@@ -420,8 +420,8 @@ async def on_message(message):
             if message.content.count(",") > 1:
                 await message.channel.send(":x: Please only provide **two** systems!")
                 return
-            startSyst = message.content[10:].split(",")[0].title()
-            endSyst = message.content[10:].split(",")[1][1:].title()
+            startSyst = message.content[15:].split(",")[0].title()
+            endSyst = message.content[15:].split(",")[1][1:].title()
             for systArg in [startSyst, endSyst]:
                 if systArg not in bbdata.systems:
                     if len(systArg) < 20:
@@ -462,14 +462,27 @@ async def on_message(message):
                 for x in systObj.neighbours:
                     neighboursStr += x + ", "
                 if neighboursStr == "":
-                    neighboursStr = ""
+                    neighboursStr = "No Jumpgate"
                 else:
                     neighboursStr = neighboursStr[:-2]
+
+                lines = ["<____System_Name____: " + systObj.name,
+                    "<______Faction______: " + systObj.faction.title(),
+                    "<_Neighbour_Systems_: " + neighboursStr,
+                    "<__Security_Level___: " + bbdata.securityLevels[systObj.security].title()]
                 
-                await message.channel.send("```xml\n<____System_Name____: " + systObj.name + " >\n"
-                                            + "<______Faction______: " + systObj.faction.title() + " >\n"
-                                            + "<_Neighbour_Systems_: " + neighboursStr + " >\n"
-                                            + "<__Security_Level___: " + bbdata.securityLevels[systObj.security].title() + " >```")
+                maxLineLength = 0
+                for line in lines:
+                    if len(line) > maxLineLength:
+                        maxLineLength = len(line)
+                spaces = []
+                for line in lines:
+                    spaces.append(" " * (maxLineLength - len(line)))
+                
+                await message.channel.send("```xml\n<____System_Name____: " + systObj.name + spaces[0] + " >\n"
+                                            + "<______Faction______: " + systObj.faction.title() + spaces[1] + " >\n"
+                                            + "<_Neighbour_Systems_: " + neighboursStr + spaces[2] + " >\n"
+                                            + "<__Security_Level___: " + bbdata.securityLevels[systObj.security].title() + spaces[3] + " >```")
         elif command == "leaderboard":
             globalBoard = False
             stat = "totalCredits"
@@ -482,9 +495,14 @@ async def on_message(message):
                 if not args.startswith("-"):
                     await message.channel.send(":x: Please prefix your arguments with a dash! E.g: `!bb leaderboard -gc`")
                     return
+                args = args[1:]
                 if ("g" not in args and len(args) > 2) or ("g" in args and len(args) > 3):
                     await message.channel.send(":x: Too many arguments! Please only specify one leaderboard. E.g: `!bb leaderboard -gc`")
                     return
+                for arg in args:
+                    if arg not in "gcsw":
+                        await message.channel.send(":x: Unknown argument: '**" + arg + "**'. Please refer to `!bb help leaderboard`")
+                        return
                 if "g" in args:
                     globalBoard = True
                     boardPrefix = "GLOBAL "
