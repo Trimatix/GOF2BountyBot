@@ -201,6 +201,14 @@ async def announceBounty(newBounty):
     for currentGuild in bbconfig.sendChannel:
         await client.get_channel(bbconfig.sendChannel[str(currentGuild)]).send("```** New " + newBounty.faction.title() + " Bounty Available```\n:chains: A new bounty has been published by " + newBounty.faction.title() + " central command: **" + newBounty.name + "**, for " + str(int(newBounty.reward)) + " Credits.\n> See the culprit's route with `!bb route " + newBounty.getCodeNameTag(client) + "` :rocket:")
 
+def makeEmbed(titleTxt="",desc="",col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon=""):
+    embed = discord.Embed(title=titleTxt, description=desc, colour=col)
+    if footerTxt != "": embed.set_footer(text=footerTxt)
+    # embed.set_image(url=img)
+    if thumb != "": embed.set_thumbnail(url=thumb)
+    if icon != "": embed.set_author(name="BountyBot", icon_url=icon)
+    return embed
+
 
 @client.event
 async def on_ready():
@@ -279,10 +287,18 @@ async def on_message(message):
                 await message.channel.send(":moneybag: **" + requestedUser.name + "** has **" + str(int(BBDB["users"][str(requestedUser.id)]["credits"])) + " Credits**.")
         elif command == "stats":
             if len(message.content.split(" ")) < 3:
+                statsEmbed = makeEmbed(col=discord.Colour.gold(), desc="Pilot Statistics", titleTxt=message.author.name, footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url)
                 if str(message.author.id) not in BBDB["users"]:
-                    await message.channel.send("```yaml\n--=- PILOT STATS: " + str(message.author).upper() + " -=--\n • Credits_balance: 0\n • Lifetime_total_credits_earned: 0\n • Total_systems_checked_for_bounties: 0\n • Total_bounties_won: 0" + "```")
+                    statsEmbed.add_field(name="Credits balance:",value=0, inline=False)
+                    statsEmbed.add_field(name="Lifetime total credits earned:", value=0, inline=False)
+                    statsEmbed.add_field(name="Total systems checked for bounties:",value=0, inline=False)
+                    statsEmbed.add_field(name="Total bounties won:", value=0, inline=False)
                 else:
-                    await message.channel.send("```yaml\n--=- PILOT STATS: " + str(message.author).upper() + " -=--\n • Credits_balance: " + str(BBDB["users"][str(message.author.id)]["credits"]) + "\n • Lifetime_total_credits_earned: " + str(BBDB["users"][str(message.author.id)]["totalCredits"]) + "\n • Total_systems_checked_for_bounties: " + str(BBDB["users"][str(message.author.id)]["systemsChecked"]) + "\n • Total_bounties_won: " + str(BBDB["users"][str(message.author.id)]["wins"]) + "```")
+                    statsEmbed.add_field(name="Credits balance:",value=str(BBDB["users"][str(message.author.id)]["credits"]), inline=False)
+                    statsEmbed.add_field(name="Lifetime total credits earned:", value=str(BBDB["users"][str(message.author.id)]["totalCredits"]), inline=False)
+                    statsEmbed.add_field(name="Total systems checked for bounties:",value=str(BBDB["users"][str(message.author.id)]["systemsChecked"]), inline=False)
+                    statsEmbed.add_field(name="Total bounties won:", value=str(BBDB["users"][str(message.author.id)]["wins"]), inline=False)
+                await message.channel.send(embed=statsEmbed)
                 return
             else:
                 if len(message.content.split(" ")) > 3 or not (message.content.split(" ")[2].startswith("<@") and message.content.split(" ")[2].endswith(">")) or ("!" in message.content.split(" ")[2] and not isInt(message.content.split(" ")[2][3:-1])) or ("!" not in message.content.split(" ")[2] and not isInt(message.content.split(" ")[2][2:-1])):
@@ -293,10 +309,18 @@ async def on_message(message):
                     await message.channel.send(":x: **Invalid user!** use `!bb balance` to display your own balance, or `!bb balance @userTag` to display someone else's balance!")
                     return
                 userID = str(requestedUser.id)
+                statsEmbed = makeEmbed(col=discord.Colour.gold(), desc="Pilot Statistics", titleTxt=requestedUser.name, footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url)
                 if userID not in BBDB["users"]:
-                    await message.channel.send("```yaml\n--=- PILOT STATS: " + str(requestedUser).upper() + " -=--\n • Credits_balance: 0\n • Lifetime_total_credits_earned: 0\n • Total_systems_checked_for_bounties: 0\n • Total_bounties_won: 0" + "```")
-                    return
-            await message.channel.send("```yaml\n--=- PILOT STATS: " + str(requestedUser).upper() + " -=--\n • Credits_balance: " + str(BBDB["users"][userID]["credits"]) + "\n • Lifetime_total_credits_earned: " + str(BBDB["users"][userID]["totalCredits"]) + "\n • Total_systems_checked_for_bounties: " + str(BBDB["users"][userID]["systemsChecked"]) + "\n • Total_bounties_won: " + str(BBDB["users"][userID]["wins"]) + "```")
+                    statsEmbed.add_field(name="Credits balance:",value=0, inline=False)
+                    statsEmbed.add_field(name="Lifetime total credits earned:", value=0, inline=False)
+                    statsEmbed.add_field(name="Total systems checked for bounties:",value=0, inline=False)
+                    statsEmbed.add_field(name="Total bounties won:", value=0, inline=False)
+                else:
+                    statsEmbed.add_field(name="Credits balance:",value=str(BBDB["users"][str(requestedUser.id)]["credits"]), inline=False)
+                    statsEmbed.add_field(name="Lifetime total credits earned:", value=str(BBDB["users"][str(requestedUser.id)]["totalCredits"]), inline=False)
+                    statsEmbed.add_field(name="Total systems checked for bounties:",value=str(BBDB["users"][str(requestedUser.id)]["systemsChecked"]), inline=False)
+                    statsEmbed.add_field(name="Total bounties won:", value=str(BBDB["users"][str(requestedUser.id)]["wins"]), inline=False)
+                await message.channel.send(embed=statsEmbed)
         elif command == "map":
             if len(message.content.split(" ")) > 2 and message.content.split(" ")[2] == "-g":
                 await message.channel.send(bbdata.mapImageWithGraphLink)
