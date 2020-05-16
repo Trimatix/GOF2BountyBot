@@ -34,7 +34,10 @@ def readJDB(dbFile):
 
 
 def writeJDB(dbFile, db):
-    txt = json.dumps(db)
+    try:
+        txt = json.dumps(db)
+    except Exception:
+        print(db)
     f = open(dbFile, "w")
     txt = f.write(txt)
     f.close()

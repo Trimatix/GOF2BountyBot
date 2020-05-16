@@ -5,8 +5,41 @@ bountyFactions = ["terran", "vossk", "midorian", "nivelian"]
 
 bountyNames = {"terran": ["Pal Tyyrt", "Kehnor", "Gendol Ethor", "Korr Bekkt", "Hongar Meton"],
                 "vossk": ["Mrrkt Nimkk", "Alvar Julen", "Vortt Baskk", "Oluchi Erland", "Orp Tsam"],
-                "midorian": ["Toma Prakupy", "Nombur Talénah", "Bartholomeu Drew", "Doni Trillyx", "Mashon Redal"],
+                "midorian": ["Toma Prakupy", "Nombur Talenah", "Bartholomeu Drew", "Doni Trillyx", "Mashon Redal"],
                 "nivelian": ["Borsul Tarand", "Vilhelm Lindon", "Tamir Prakupy", "Merson Surr", "Ganfor Kant"]}
+
+                # Terran
+bountyIcons = {"Pal Tyyrt": "https://cdn.discordapp.com/attachments/700683544103747594/711226618919780359/pal_tyyrt.png",
+                "Kehnor": "https://cdn.discordapp.com/attachments/700683544103747594/711226614767419432/kehnor.png",
+                "Gendol Ethor": "https://cdn.discordapp.com/attachments/700683544103747594/711226611608977490/gendol_ethor.png",
+                "Korr Bekkt": "https://cdn.discordapp.com/attachments/700683544103747594/711226617254510602/korr_bekkt.png",
+                "Hongar Meton": "https://cdn.discordapp.com/attachments/700683544103747594/711226613278441543/hongar_meton.png",
+                "Trent Jameson": "https://cdn.discordapp.com/attachments/700683544103747594/711226622195269632/trent_jameson.png",
+                "Qyrr Myfft": "https://cdn.discordapp.com/attachments/700683544103747594/711226620786114590/qyrr_myfft.png",
+
+                # Midorian
+                "Toma Prakupy": "https://cdn.discordapp.com/attachments/700683544103747594/711226704953344060/toma_prakupy.png",
+                "Nombur Talenah": "https://cdn.discordapp.com/attachments/700683544103747594/711226703703310397/nombur_talenah.png",
+                "Bartholomeu Drew": "https://cdn.discordapp.com/attachments/700683544103747594/711226697974022204/bartholomeu_drew.png",
+                "Doni Trillyx": "https://cdn.discordapp.com/attachments/700683544103747594/711226699119067217/doni_trillyx.png",
+                "Heinrich Wickel": "https://cdn.discordapp.com/attachments/700683544103747594/711226700305793085/heinrich_wickel.png",
+                "Mashon Redal": "https://cdn.discordapp.com/attachments/700683544103747594/711226702122057768/mashon_redal.png",
+
+                # Vossk
+                "Mrrkt Nimkk": "https://cdn.discordapp.com/attachments/700683544103747594/711226820854284368/mrrkt_minkk.png",
+                "Alvar Julen": "https://cdn.discordapp.com/attachments/700683544103747594/711226819461775360/alvar_julen.png",
+                "Vortt Baskk": "https://cdn.discordapp.com/attachments/700683544103747594/711226826831298710/vortt_baskk.png",
+                "Oluchi Erland": "https://cdn.discordapp.com/attachments/700683544103747594/711226822540394546/oluchi_erland.png",
+                "Orp Tsam": "https://cdn.discordapp.com/attachments/700683544103747594/711226823966720041/orp_tsam.png",
+                "Urr Sekant": "https://cdn.discordapp.com/attachments/700683544103747594/711226825488990258/urr_sakant.png",
+
+                # Nivelian
+                "Borsul Tarand": "https://cdn.discordapp.com/attachments/700683544103747594/711226764948537374/borsul_tarand.png",
+                "Malon Sentendar": "https://cdn.discordapp.com/attachments/700683544103747594/711226767939207178/malon_sentendar.png",
+                "Vilhelm Lindon": "https://cdn.discordapp.com/attachments/700683544103747594/711226772812726302/vilhelm_lindon.png",
+                "Tamir Prakupy": "https://cdn.discordapp.com/attachments/700683544103747594/711226770707185664/tamir_prakupy.png",
+                "Merson Surr": "https://cdn.discordapp.com/attachments/700683544103747594/711226769327521872/merson_surr.png",
+                "Ganfor Kant": "https://cdn.discordapp.com/attachments/700683544103747594/711226766630584370/ganfor_kant.png"}
 
 longestBountyNameLength = 0
 for fac in bountyNames:
@@ -38,9 +71,9 @@ systems = { #Terran
             "Wah'Norr": System("Wah'Norr", "vossk", [], 3, (12, 8)),
             "Y'Mirr": System("Y'Mirr", "vossk", [], 3, (11, 9)),
             #Nivelian
-            "Behen": System("Behen", "nivelian", ["Nesla", "Suteo", "Weymire"], 2, (3, 6)),
+            "Behen": System("Behen", "nivelian", ["Nesla", "Suteo", "Weymire", "Buntta"], 2, (3, 6)),
             "Pareah": System("Pareah", "nivelian", ["Nesla"], 1, (2, 5)),
-            "Nesla": System("Nesla", "nivelian", ["Behen", "Pareah", "Weymire", "Shima"], 2, (4, 3)),
+            "Nesla": System("Nesla", "nivelian", ["Behen", "Pareah", "Weymire", "Shima", "Eanya"], 2, (4, 3)),
             "Suteo": System("Suteo", "nivelian", ["Behen", "Buntta"], 2, (3, 8)),
             "Weymire": System("Weymire", "nivelian", ["Augmenta", "Behen", "Union", "Nesla", "Shima"], 1, (6, 4)),
             #Midorian
@@ -132,3 +165,4 @@ neutralIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs
 voidIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013699841687602/void.png"
 errorIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/exclamation-mark_2757.png"
 winIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/trophy_1f3c6.png"
+rocketIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/rocket_1f680.png"

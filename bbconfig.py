@@ -1,5 +1,6 @@
 maxBountiesPerFaction = 5
-sendChannel = {}
+announceChannel = {}
+playChannel = {}
 botLoggedIn = False
 # can be fixed or random
 newBountyDelayType = "fixed"
