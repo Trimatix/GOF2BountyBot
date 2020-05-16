@@ -558,10 +558,10 @@ async def on_message(message):
             for place in range(min(len(sortedUsers), 10)):
                 if globalBoard and message.guild.get_member(int(sortedUsers[place][0])) is None:
                     # outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + "* - " + str(int(sortedUsers[place][1])) + " " + boardUnit
-                    leaderboardEmbed.add_field(name="*" + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name, value=str(int(sortedUsers[place][1])) + " " + boardUnit, inline=False)
+                    leaderboardEmbed.add_field(name="*" + str(place + 1) + ". " + str(client.get_user(int(sortedUsers[place][0]))), value=str(int(sortedUsers[place][1])) + " " + boardUnit, inline=False)
                     externalUser = True
                 else:
-                    leaderboardEmbed.add_field(name=str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name, value=str(int(sortedUsers[place][1])) + " " + boardUnit, inline=False)
+                    leaderboardEmbed.add_field(name=str(place + 1) + ". " + message.guild.get_member(int(sortedUsers[place][0])).display_name + "#" + message.guild.get_member(int(sortedUsers[place][0])).discriminator, value=str(int(sortedUsers[place][1])) + " " + boardUnit, inline=False)
                     # outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + " - " + str(int(sortedUsers[place][1])) + " " + boardUnit
             if externalUser:
                 # outStr = "*(An `*` indicates a user that is from another server.)*\n" + outStr
