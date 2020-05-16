@@ -269,7 +269,12 @@ async def on_message(message):
         else:
             command = "help"
         if command == 'help':
-            await message.channel.send(bbdata.helpStr)
+            helpEmbed = makeEmbed(titleTxt="BountyBot Commands")
+            for section in bbdata.helpDict.keys():
+                helpEmbed.add_field(name="‎",value=section, inline=False)
+                for currentCommand in bbdata.helpDict[section].keys():
+                    helpEmbed.add_field(name=currentCommand,value=bbdata.helpDict[section][currentCommand], inline=False)
+            await message.channel.send(bbdata.helpIntro, embed=helpEmbed)
         elif command == "hello":
             await message.channel.send("Greetings, pilot! **o7**")
         elif command == "balance":
@@ -563,7 +568,12 @@ async def on_message(message):
                     bbconfig.sendChannel[str(message.guild.id)] = message.channel.id
                     await message.channel.send(":ballot_box_with_check: Announcements channel set!")
                 elif command == "admin-help":
-                    await message.channel.send(bbdata.adminHelpStr)
+                    helpEmbed = makeEmbed(titleTxt="BB Administrator Commands")
+                    for section in bbdata.adminHelpDict.keys():
+                        helpEmbed.add_field(name="‎",value=section, inline=False)
+                        for currentCommand in bbdata.adminHelpDict[section].keys():
+                            helpEmbed.add_field(name=currentCommand,value=bbdata.adminHelpDict[section][currentCommand], inline=False)
+                    await message.channel.send(bbdata.adminHelpIntro, embed=helpEmbed)
                 elif message.author.id == 188618589102669826:
                     if command == "sleep":
                         await message.channel.send("zzzz....")

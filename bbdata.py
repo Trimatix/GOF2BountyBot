@@ -79,7 +79,7 @@ helpStr = """*--=* __***BountyBot Commands***__ *=--*
 
 - map
     | Send the complete GOF2 starmap.
-- system-info [system]
+- system [system]
     | Display information about a given system.
 - make-route [startSystem], [endSystem]
     | Find the shortest route from startSystem to endSystem.
@@ -94,6 +94,20 @@ helpStr = """*--=* __***BountyBot Commands***__ *=--*
 - check [system]
     | Check if any criminals are in the given system, arrest them, and get paid!```"""
 
+helpIntro = """:star: Here are my commands! Prefix commands with `!bb` - for example: `!bb help`
+**<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
+
+helpDict = {"Miscellaneous":{"help":"Display information about all available commands.",
+                                "balance <userTag>":"Get the credits balance of yourself, or a tagged user if one is given.",
+                                "stats <userTag>":"Get various credits and bounty statistics about yourself, or a tagged user.",
+                                "leaderboard <-g|c|s|w>":"Show the credits leaderboard. Give -g for the global leaderboard, not just this server.\n\t| Give -c for the current credits balance leaderboard.\n\t| Give -s for the 'systems checked' leaderboard.\n\t| Give -w for the 'bounties won' leaderboard.\nE.g: !bb leaderboard -gs"},
+            "GOF2 Info":{"map":"Send the complete GOF2 starmap.",
+                            "system [system]": "Display information about a given system.",
+                            "make-route [startSystem], [endSystem]": "Find the shortest route from startSystem to endSystem."},
+            "Bounties":{"bounties <faction>": "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties.",
+                            "route [faction] [name]":"Get the named criminal's route, from the faction's bounty board.",
+                            "check [system]":"Check if any criminals are in the given system, arrest them, and get paid!"}}
+
 adminHelpStr = """*--=* __***BountyBot Admin Commands***__ *=--*
 :star: Here are my administrator commands! Prefix commands with `!bb` - for example: `!bb help`
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments.```ini
@@ -102,4 +116,17 @@ adminHelpStr = """*--=* __***BountyBot Admin Commands***__ *=--*
 - setchannel
     | Set the channel where BountyBot will send announcements (e.g new bounties)```"""
 
+adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `!bb` - for example: `!bb help`
+**<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
+
+adminHelpDict = {"Miscellaneous":{"admin-help":"Display information about admin-only commands.",
+                                    "setchannel":"Set the channel where BountyBot will send announcements (e.g new bounties)"}}
+
 numExtensions = ["th","st","nd","rd","th","th","th","th","th"]
+
+terranIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013574331596850/terran.png"
+vosskIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013681621893130/vossk.png"
+midorianIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013601019691038/midorian.png"
+nivelianIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013623257890857/nivelian.png"
+neutralIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/rocket_1f680.png"
+voidIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013699841687602/void.png"
