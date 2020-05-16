@@ -512,8 +512,8 @@ async def on_message(message):
         elif command == "leaderboard":
             globalBoard = False
             stat = "totalCredits"
-            boardPrefix = ""
-            boardTitle = "TOTAL CREDITS EARNED"
+            boardPrefix = "Server "
+            boardTitle = "Total Credits Earned"
             boardUnit = "Credits"
 
             if len(message.content.split(" ")) > 2:
@@ -531,18 +531,18 @@ async def on_message(message):
                         return
                 if "g" in args:
                     globalBoard = True
-                    boardPrefix = "GLOBAL "
+                    boardPrefix = "Global "
                 if "c" in args:
                     stat = "credits"
-                    boardTitle = "CURRENT BALANCE"
+                    boardTitle = "Current Balance"
                     boardUnit = "Credits"
                 elif "s" in args:
                     stat = "systemsChecked"
-                    boardTitle = "SYSTEMS CHECKED"
+                    boardTitle = "Systems Checked"
                     boardUnit = "Systems"
                 elif "w" in args:
                     stat = "wins"
-                    boardTitle = "BOUNTIES WON"
+                    boardTitle = "Bounties Won"
                     boardUnit = "Bounties"
 
             inputDict = {}
@@ -550,18 +550,25 @@ async def on_message(message):
                 if (globalBoard and client.get_user(int(userID)) is not None) or (not globalBoard and message.guild.get_member(int(userID)) is not None):
                     inputDict[userID] = BBDB["users"][userID][stat]
             sortedUsers = sorted(inputDict.items(), key=operator.itemgetter(1))[::-1]
-            outStr = "```--= " + boardPrefix + "LEADERBOARD: " + boardTitle + " =--"
+            # outStr = "```--= " + boardPrefix + "LEADERBOARD: " + boardTitle + " =--"
+
+            leaderboardEmbed = makeEmbed(titleTxt=boardTitle, desc=boardPrefix + "Leaderboard", thumb=bbdata.winIcon, col = factionColours["neutral"])
+
             externalUser = False
             for place in range(min(len(sortedUsers), 10)):
                 if globalBoard and message.guild.get_member(int(sortedUsers[place][0])) is None:
-                    outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + "* - " + str(int(sortedUsers[place][1])) + " " + boardUnit
+                    # outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + "* - " + str(int(sortedUsers[place][1])) + " " + boardUnit
+                    leaderboardEmbed.add_field(name="*" + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name, value=str(int(sortedUsers[place][1])) + " " + boardUnit, inline=False)
                     externalUser = True
                 else:
-                    outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + " - " + str(int(sortedUsers[place][1])) + " " + boardUnit
+                    leaderboardEmbed.add_field(name=str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name, value=str(int(sortedUsers[place][1])) + " " + boardUnit, inline=False)
+                    # outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + " - " + str(int(sortedUsers[place][1])) + " " + boardUnit
             if externalUser:
-                outStr = "*(An `*` indicates a user that is from another server.)*\n" + outStr
-            outStr += "```"
-            await message.channel.send(outStr)
+                # outStr = "*(An `*` indicates a user that is from another server.)*\n" + outStr
+                leaderboardEmbed.set_footer(text="An `*` indicates a user that is from another server.", icon_url=bbdata.errorIcon)
+            # outStr += "```"
+            # await message.channel.send(outStr)
+            await message.channel.send(embed=leaderboardEmbed)
         else:
             if message.author.id == 188618589102669826 or message.author.administrator:
                 if command == "setchannel":
