@@ -216,8 +216,8 @@ async def announceNewBounty(newBounty):
     bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
     bountyEmbed.add_field(name="See the culprit's route with:", value="`!bb route " + newBounty.getCodeNameTag() + "`", inline=False)
     for currentGuild in bbconfig.announceChannel:
-        await client.get_channel(bbconfig.announceChannel[str(currentGuild)]).send("A new bounty is now available from **" + newBounty.faction.title() + "** central command:", embed=bountyEmbed)
-        # await client.get_channel(bbconfig.announceChannel[str(currentGuild)]).send("```** New " + newBounty.faction.title() + " Bounty Available```\n:chains: A new bounty has been published by " + newBounty.faction.title() + " central command: **" + newBounty.name + "**, for " + str(int(newBounty.reward)) + " Credits.\n> See the culprit's route with `!bb route " + newBounty.getCodeNameTag() + "` :rocket:")
+        if client.get_channel(bbconfig.announceChannel[str(currentGuild)]) is not None:
+            await client.get_channel(bbconfig.announceChannel[str(currentGuild)]).send("A new bounty is now available from **" + newBounty.faction.title() + "** central command:", embed=bountyEmbed)
 
 async def announceBountyWon(bounty, rewards, winningGuild, winningUser):
     rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!",authorName=bounty.getCodeNameTag() + " Arrested",icon=bounty.icon,col=factionColours[bounty.faction])
@@ -228,10 +228,11 @@ async def announceBountyWon(bounty, rewards, winningGuild, winningUser):
             rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value="<@" + str(userID) + "> checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[winningUser]["checked"]) != 1 else ""), inline=False)
             place += 1
     for currentGuild in bbconfig.playChannel:
-        if int(currentGuild) == winningGuild.id:
-            await client.get_channel(bbconfig.playChannel[str(currentGuild)]).send(":trophy: **You win!**\n**" + winningGuild.get_member(winningUser).display_name + "** located and EMP'd **" + bounty.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
-        else:
-            await client.get_channel(bbconfig.playChannel[str(currentGuild)]).send(":trophy: Another server has located **" + bounty.name + "**!", embed=rewardsEmbed)
+        if client.get_channel(bbconfig.playChannel[str(currentGuild)]) is not None:
+            if int(currentGuild) == winningGuild.id:
+                await client.get_channel(bbconfig.playChannel[str(currentGuild)]).send(":trophy: **You win!**\n**" + winningGuild.get_member(winningUser).display_name + "** located and EMP'd **" + bounty.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+            else:
+                await client.get_channel(bbconfig.playChannel[str(currentGuild)]).send(":trophy: Another server has located **" + bounty.name + "**!", embed=rewardsEmbed)
 
 
 def makeEmbed(titleTxt="",desc="",col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon=""):
