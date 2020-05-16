@@ -299,7 +299,7 @@ async def on_message(message):
         else:
             command = "help"
         if command == 'help':
-            helpEmbed = makeEmbed(titleTxt="BountyBot Commands")
+            helpEmbed = makeEmbed(titleTxt="BountyBot Commands", thumb=client.user.avatar_url_as(size=64))
             for section in bbdata.helpDict.keys():
                 helpEmbed.add_field(name="‎",value=section, inline=False)
                 for currentCommand in bbdata.helpDict[section].keys():

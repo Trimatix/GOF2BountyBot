@@ -122,8 +122,8 @@ helpStr = """*--=* __***BountyBot Commands***__ *=--*
 - bounties <faction>
     | If no faction is given, name all currently active bounties.
     | If a faction is given, show detailed info about its active bounties.
-- route [faction] [name]
-    | Get the named criminal's route, from the faction's bounty board.
+- route [name]
+    | Get the named criminal's current route.
 - check [system]
     | Check if any criminals are in the given system, arrest them, and get paid!```"""
 
@@ -138,7 +138,7 @@ helpDict = {"Miscellaneous":{"help":"Display information about all available com
                             "system [system]": "Display information about a given system.",
                             "make-route [startSystem], [endSystem]": "Find the shortest route from startSystem to endSystem."},
             "Bounties":{"bounties <faction>": "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties.",
-                            "route [faction] [name]":"Get the named criminal's route, from the faction's bounty board.",
+                            "route [name]":"Get the named criminal's current route.",
                             "check [system]":"Check if any criminals are in the given system, arrest them, and get paid!"}}
 
 adminHelpStr = """*--=* __***BountyBot Admin Commands***__ *=--*
