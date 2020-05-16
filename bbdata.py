@@ -130,16 +130,16 @@ helpStr = """*--=* __***BountyBot Commands***__ *=--*
 helpIntro = """:star: Here are my commands! Prefix commands with `!bb` - for example: `!bb help`
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
 
-helpDict = {"Miscellaneous":{"help":"Display information about all available commands.",
-                                "balance <userTag>":"Get the credits balance of yourself, or a tagged user if one is given.",
-                                "stats <userTag>":"Get various credits and bounty statistics about yourself, or a tagged user.",
-                                "leaderboard <-g|c|s|w>":"Show the credits leaderboard. Give -g for the global leaderboard, not just this server.\n\t| Give -c for the current credits balance leaderboard.\n\t| Give -s for the 'systems checked' leaderboard.\n\t| Give -w for the 'bounties won' leaderboard.\nE.g: !bb leaderboard -gs"},
-            "GOF2 Info":{"map":"Send the complete GOF2 starmap.",
-                            "system [system]": "Display information about a given system.",
-                            "make-route [startSystem], [endSystem]": "Find the shortest route from startSystem to endSystem."},
-            "Bounties":{"bounties <faction>": "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties.",
-                            "route [name]":"Get the named criminal's current route.",
-                            "check [system]":"Check if any criminals are in the given system, arrest them, and get paid!"}}
+helpDict = {"__Miscellaneous__":{"**help**":"Display information about all available commands.",
+                                "**balance** *<userTag>*":"Get the credits balance of yourself, or a tagged user if one is given.",
+                                "**stats** *<userTag>*":"Get various credits and bounty statistics about yourself, or a tagged user.",
+                                "**leaderboard** *<-g|-c|-s|-w>*":"Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `!bb leaderboard -gs`"},
+            "__GOF2 Info__":{"**map**":"Send the complete GOF2 starmap.",
+                            "**system [system]**": "Display information about a given system.",
+                            "**make-route [startSystem], [endSystem]**": "Find the shortest route from startSystem to endSystem."},
+            "__Bounties__":{"**bounties** *<faction>*": "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties.",
+                            "**route [criminal name]**":"Get the named criminal's current route.",
+                            "**check [system]**":"Check if any criminals are in the given system, arrest them, and get paid! 💰"}}
 
 adminHelpStr = """*--=* __***BountyBot Admin Commands***__ *=--*
 :star: Here are my administrator commands! Prefix commands with `!bb` - for example: `!bb help`
