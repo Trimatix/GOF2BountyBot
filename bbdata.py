@@ -152,8 +152,9 @@ adminHelpStr = """*--=* __***BountyBot Admin Commands***__ *=--*
 adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `!bb` - for example: `!bb help`
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
 
-adminHelpDict = {"Miscellaneous":{"admin-help":"Display information about admin-only commands.",
-                                    "setchannel":"Set the channel where BountyBot will send announcements (e.g new bounties)"}}
+adminHelpDict = {"__Miscellaneous__":{"**admin-help**":"Display information about admin-only commands.",
+                                    "**set-announce-channel** *<off>*":"Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `!bb set-announce-channel off` to disable announcements.",
+                                    "**set-play-channel** *<off>*":"Set the channel where BountyBot will send info about completed bounties\n> Use `!bb set-play-channel off` to disable completed bounty announcements."}}
 
 numExtensions = ["th","st","nd","rd","th","th","th","th","th"]
 

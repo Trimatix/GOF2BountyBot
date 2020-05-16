@@ -211,10 +211,10 @@ def isInt(x):
 
 
 async def announceNewBounty(newBounty):
-    bountyEmbed = makeEmbed(titleTxt=newBounty.getCodeNameTag(), desc="⛓ New Bounty Available", col=factionColours[newBounty.faction], thumb=newBounty.icon, footerTxt=newBounty.faction.title())
+    bountyEmbed = makeEmbed(titleTxt=newBounty.getCodeNameTag(), desc="⛓ __New Bounty Available__", col=factionColours[newBounty.faction], thumb=newBounty.icon, footerTxt=newBounty.faction.title())
     bountyEmbed.add_field(name="Reward:", value=str(newBounty.reward) + " Credits")
     bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
-    bountyEmbed.add_field(name="See the culprit's route with:", value="!bb route " + newBounty.getCodeNameTag(), inline=False)
+    bountyEmbed.add_field(name="See the culprit's route with:", value="`!bb route " + newBounty.getCodeNameTag() + "`", inline=False)
     for currentGuild in bbconfig.announceChannel:
         await client.get_channel(bbconfig.announceChannel[str(currentGuild)]).send("A new bounty is now available from **" + newBounty.faction.title() + "** central command:", embed=bountyEmbed)
         # await client.get_channel(bbconfig.announceChannel[str(currentGuild)]).send("```** New " + newBounty.faction.title() + " Bounty Available```\n:chains: A new bounty has been published by " + newBounty.faction.title() + " central command: **" + newBounty.name + "**, for " + str(int(newBounty.reward)) + " Credits.\n> See the culprit's route with `!bb route " + newBounty.getCodeNameTag() + "` :rocket:")
@@ -325,7 +325,7 @@ async def on_message(message):
                 await message.channel.send(":moneybag: **" + requestedUser.name + "** has **" + str(int(BBDB["users"][str(requestedUser.id)]["credits"])) + " Credits**.")
         elif command == "stats":
             if len(message.content.split(" ")) < 3:
-                statsEmbed = makeEmbed(col=factionColours["neutral"], desc="Pilot Statistics", titleTxt=message.author.name, footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url_as(size=64))
+                statsEmbed = makeEmbed(col=factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=message.author.name, footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url_as(size=64))
                 if str(message.author.id) not in BBDB["users"]:
                     statsEmbed.add_field(name="Credits balance:",value=0, inline=True)
                     statsEmbed.add_field(name="Lifetime total credits earned:", value=0, inline=True)
@@ -349,7 +349,7 @@ async def on_message(message):
                     await message.channel.send(":x: **Invalid user!** use `!bb balance` to display your own balance, or `!bb balance @userTag` to display someone else's balance!")
                     return
                 userID = str(requestedUser.id)
-                statsEmbed = makeEmbed(col=factionColours["neutral"], desc="Pilot Statistics", titleTxt=requestedUser.name, footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
+                statsEmbed = makeEmbed(col=factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=requestedUser.name, footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
                 if userID not in BBDB["users"]:
                     statsEmbed.add_field(name="Credits balance:",value=0, inline=True)
                     statsEmbed.add_field(name="Lifetime total credits earned:", value=0, inline=True)
@@ -524,7 +524,7 @@ async def on_message(message):
                 else:
                     neighboursStr = neighboursStr[:-2]
                 
-                statsEmbed = makeEmbed(col=factionColours[systObj.faction], desc="System Information", titleTxt=systObj.name, footerTxt=systObj.faction.title(), thumb=factionIcons[systObj.faction])
+                statsEmbed = makeEmbed(col=factionColours[systObj.faction], desc="__System Information__", titleTxt=systObj.name, footerTxt=systObj.faction.title(), thumb=factionIcons[systObj.faction])
                 statsEmbed.add_field(name="Security Level:",value=bbdata.securityLevels[systObj.security].title())
                 statsEmbed.add_field(name="Neighbour Systems:", value=neighboursStr)
                 await message.channel.send(embed=statsEmbed)
@@ -554,15 +554,18 @@ async def on_message(message):
                 if "c" in args:
                     stat = "credits"
                     boardTitle = "Current Balance"
-                    boardUnit = "Credits"
+                    boardUnit = "Credit"
+                    boardUnits = "Credits"
                 elif "s" in args:
                     stat = "systemsChecked"
                     boardTitle = "Systems Checked"
-                    boardUnit = "Systems"
+                    boardUnit = "System"
+                    boardUnits = "Systems"
                 elif "w" in args:
                     stat = "wins"
                     boardTitle = "Bounties Won"
-                    boardUnit = "Bounties"
+                    boardUnit = "Bounty"
+                    boardUnits = "Bounties"
 
             inputDict = {}
             for userID in BBDB["users"]:
@@ -573,12 +576,15 @@ async def on_message(message):
             leaderboardEmbed = makeEmbed(titleTxt=boardTitle, authorName=boardScope, icon=bbdata.winIcon, col = factionColours["neutral"])
 
             externalUser = False
+            first = True
             for place in range(min(len(sortedUsers), 10)):
                 if globalBoard and message.guild.get_member(int(sortedUsers[place][0])) is None:
-                    leaderboardEmbed.add_field(value="*" + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).mention, name=str(int(sortedUsers[place][1])) + " " + boardUnit, inline=False)
+                    leaderboardEmbed.add_field(value="*" + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).mention, name=("⭐ " if first else "") + str(int(sortedUsers[place][1])) + " " + (boardUnit if int(sortedUsers[place][1]) == 1 else boardUnits), inline=False)
                     externalUser = True
+                    if first: first = False
                 else:
-                    leaderboardEmbed.add_field(value=str(place + 1) + ". " + message.guild.get_member(int(sortedUsers[place][0])).mention, name=str(int(sortedUsers[place][1])) + " " + boardUnit, inline=False)
+                    leaderboardEmbed.add_field(value=str(place + 1) + ". " + message.guild.get_member(int(sortedUsers[place][0])).mention, name=("⭐ " if first else "") + str(int(sortedUsers[place][1])) + " " + (boardUnit if int(sortedUsers[place][1]) == 1 else boardUnits), inline=False)
+                    if first: first = False
             if externalUser:
                 leaderboardEmbed.set_footer(text="An `*` indicates a user that is from another server.")
             await message.channel.send(embed=leaderboardEmbed)
@@ -591,7 +597,7 @@ async def on_message(message):
                     bbconfig.playChannel[str(message.guild.id)] = message.channel.id
                     await message.channel.send(":ballot_box_with_check: Bounty play channel set!")
                 elif command == "admin-help":
-                    helpEmbed = makeEmbed(titleTxt="BB Administrator Commands")
+                    helpEmbed = makeEmbed(titleTxt="BB Administrator Commands", thumb=client.user.avatar_url_as(size=64))
                     for section in bbdata.adminHelpDict.keys():
                         helpEmbed.add_field(name="‎",value=section, inline=False)
                         for currentCommand in bbdata.adminHelpDict[section].keys():
