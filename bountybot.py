@@ -533,7 +533,8 @@ async def on_message(message):
             stat = "totalCredits"
             boardScope = message.guild.name
             boardTitle = "Total Credits Earned"
-            boardUnit = "Credits"
+            boardUnit = "Credit"
+            boardUnits = "Credits"
 
             if len(message.content.split(" ")) > 2:
                 args = message.content.split(" ")[2].lower()
