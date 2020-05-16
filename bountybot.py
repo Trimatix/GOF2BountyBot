@@ -514,7 +514,7 @@ async def on_message(message):
         elif command == "leaderboard":
             globalBoard = False
             stat = "totalCredits"
-            boardPrefix = "Server "
+            boardScope = message.guild.name
             boardTitle = "Total Credits Earned"
             boardUnit = "Credits"
 
@@ -533,7 +533,7 @@ async def on_message(message):
                         return
                 if "g" in args:
                     globalBoard = True
-                    boardPrefix = "Global "
+                    boardScope = "Global Leaderboard"
                 if "c" in args:
                     stat = "credits"
                     boardTitle = "Current Balance"
@@ -552,24 +552,18 @@ async def on_message(message):
                 if (globalBoard and client.get_user(int(userID)) is not None) or (not globalBoard and message.guild.get_member(int(userID)) is not None):
                     inputDict[userID] = BBDB["users"][userID][stat]
             sortedUsers = sorted(inputDict.items(), key=operator.itemgetter(1))[::-1]
-            # outStr = "```--= " + boardPrefix + "LEADERBOARD: " + boardTitle + " =--"
 
-            leaderboardEmbed = makeEmbed(titleTxt=boardTitle, desc=boardPrefix + "Leaderboard", thumb=bbdata.winIcon, col = factionColours["neutral"])
+            leaderboardEmbed = makeEmbed(titleTxt=boardTitle, authorName=boardScope, icon=bbdata.winIcon, col = factionColours["neutral"])
 
             externalUser = False
             for place in range(min(len(sortedUsers), 10)):
                 if globalBoard and message.guild.get_member(int(sortedUsers[place][0])) is None:
-                    # outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + "* - " + str(int(sortedUsers[place][1])) + " " + boardUnit
                     leaderboardEmbed.add_field(value="*" + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).mention, name=str(int(sortedUsers[place][1])) + " " + boardUnit, inline=False)
                     externalUser = True
                 else:
                     leaderboardEmbed.add_field(value=str(place + 1) + ". " + message.guild.get_member(int(sortedUsers[place][0])).mention, name=str(int(sortedUsers[place][1])) + " " + boardUnit, inline=False)
-                    # outStr += "\n " + str(place + 1) + ". " + client.get_user(int(sortedUsers[place][0])).name + " - " + str(int(sortedUsers[place][1])) + " " + boardUnit
             if externalUser:
-                # outStr = "*(An `*` indicates a user that is from another server.)*\n" + outStr
                 leaderboardEmbed.set_footer(text="An `*` indicates a user that is from another server.", icon_url=bbdata.errorIcon)
-            # outStr += "```"
-            # await message.channel.send(outStr)
             await message.channel.send(embed=leaderboardEmbed)
         else:
             if message.author.id == 188618589102669826 or message.author.administrator:
