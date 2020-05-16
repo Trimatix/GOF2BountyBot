@@ -287,7 +287,7 @@ async def on_message(message):
                 await message.channel.send(":moneybag: **" + requestedUser.name + "** has **" + str(int(BBDB["users"][str(requestedUser.id)]["credits"])) + " Credits**.")
         elif command == "stats":
             if len(message.content.split(" ")) < 3:
-                statsEmbed = makeEmbed(col=discord.Colour.gold(), desc="Pilot Statistics", titleTxt=message.author.name, footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url)
+                statsEmbed = makeEmbed(col=discord.Colour.gold(), desc="Pilot Statistics", titleTxt=message.author.name, footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url_as(size=64))
                 if str(message.author.id) not in BBDB["users"]:
                     statsEmbed.add_field(name="Credits balance:",value=0, inline=False)
                     statsEmbed.add_field(name="Lifetime total credits earned:", value=0, inline=False)
@@ -309,7 +309,7 @@ async def on_message(message):
                     await message.channel.send(":x: **Invalid user!** use `!bb balance` to display your own balance, or `!bb balance @userTag` to display someone else's balance!")
                     return
                 userID = str(requestedUser.id)
-                statsEmbed = makeEmbed(col=discord.Colour.gold(), desc="Pilot Statistics", titleTxt=requestedUser.name, footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url)
+                statsEmbed = makeEmbed(col=discord.Colour.gold(), desc="Pilot Statistics", titleTxt=requestedUser.name, footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
                 if userID not in BBDB["users"]:
                     statsEmbed.add_field(name="Credits balance:",value=0, inline=False)
                     statsEmbed.add_field(name="Lifetime total credits earned:", value=0, inline=False)
@@ -342,6 +342,7 @@ async def on_message(message):
             if datetime.utcfromtimestamp(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]) < datetime.utcnow():
                 bountyWon = False
                 for fac in BBDB["bounties"]:
+                    toPop = []
                     for bountyIndex in range(len(BBDB["bounties"][fac])):
                         if BBDB["bounties"][fac][bountyIndex].check(requestedSystem, message.author.id) == 3:
                             bountyWon = True
@@ -361,8 +362,10 @@ async def on_message(message):
                                     BBDB["users"][str(userID)]["credits"] += rewards[userID]["reward"]
                                     BBDB["users"][str(userID)]["totalCredits"] += rewards[userID]["reward"]
                                     place += 1
-                            BBDB["bounties"][fac].pop(bountyIndex)
+                            toPop += [bountyIndex]
                             await message.channel.send(outStr)
+                    for bountyIndex in toPop:
+                        BBDB["bounties"][fac].pop(bountyIndex)
                 if bountyWon:
                     BBDB["users"][str(message.author.id)]["wins"] += 1
                     await message.channel.send(":moneybag: **" + message.author.name + "**, you now have **" + str(int(BBDB["users"][str(message.author.id)]["credits"])) + " Credits!**")
