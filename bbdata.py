@@ -156,7 +156,7 @@ adminHelpDict = {"__Miscellaneous__":{"**admin-help**":"Display information abou
                                     "**set-announce-channel** *<off>*":"Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `!bb set-announce-channel off` to disable announcements.",
                                     "**set-play-channel** *<off>*":"Set the channel where BountyBot will send info about completed bounties\n> Use `!bb set-play-channel off` to disable completed bounty announcements."}}
 
-numExtensions = ["th","st","nd","rd","th","th","th","th","th"]
+numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
 
 terranIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013574331596850/terran.png"
 vosskIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013681621893130/vossk.png"

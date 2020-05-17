@@ -17,6 +17,13 @@ def makeRoute(start, end):
     return bbutil.bbAStar(start, end, bbdata.systems)
 
 
+def bountyExists(name, factionBounties):
+    for bounty in factionBounties:
+        if bounty["name"] == name:
+            return True
+    return False
+
+
 class Bounty:
     issueTime = -1
     name = ""
@@ -29,7 +36,7 @@ class Bounty:
     icon = ""
     
 
-    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1.0, issueTime=-1.0, endTime=-1.0, icon="", client=None):
+    def __init__(self, BBDB=None, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1.0, issueTime=-1.0, endTime=-1.0, icon="", client=None):
         self.faction = faction.lower()
         self.name = name
         self.isPlayer = False if isPlayer is None else isPlayer
@@ -77,6 +84,13 @@ class Bounty:
             raise RuntimeError("Bounty constructor: Invalid answer requested '" + answer + "'")
         if self.name == "":
             self.name = random.choice(bbdata.bountyNames[self.faction])
+            if BBDB is not None:
+                while bountyExists(self.name, BBDB["bounties"][self.faction]):
+                    self.name = random.choice(bbdata.bountyNames[self.faction])
+        elif BBDB is not None:
+            for fac in BBDB["bounties"]:
+                if bountyExists(self.name, BBDB["bounties"][fac]):
+                    raise RuntimeError("Bounty constructor: attempted to create a bounty with a pre-existing name: " + self.name)
         if self.icon == "":
             if self.name in bbdata.bountyNames[self.faction]:
                 self.icon = bbdata.bountyIcons[self.name]
@@ -270,7 +284,7 @@ async def on_ready():
                     <= datetime.utcnow() \
                     <= datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta + timedelta(minutes=bbconfig.delayFactor)))):
             if canMakeBounty():
-                newBounty = Bounty()
+                newBounty = Bounty(BBDB=BBDB)
                 BBDB["bounties"][newBounty.faction].append(newBounty)
                 await announceNewBounty(newBounty)
             if bbconfig.newBountyDelayType == "random":
@@ -444,7 +458,16 @@ async def on_message(message):
                 outmessage = "__**Active " + requestedFaction.title() + " Bounties**__\nTimes given in UTC.```css"
                 for bounty in BBDB["bounties"][requestedFaction]:
                     endTimeStr = datetime.utcfromtimestamp(bounty.endTime).strftime("%B %d %H %M %S").split(" ")
-                    outmessage += "\n • [" + bounty.getCodeNameTag() + "]" + " " * (bbdata.longestBountyNameLength + 1 - len(bounty.getCodeNameTag())) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + bbdata.numExtensions[int(endTimeStr[1][-1])] + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
+                    try:
+                        outmessage += "\n • [" + bounty.getCodeNameTag() + "]" + " " * (bbdata.longestBountyNameLength + 1 - len(bounty.getCodeNameTag())) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + bbdata.numExtensions[int(endTimeStr[1][-1])] + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
+                    except Exception:
+                        print("ERROR ON:",endTimeStr)
+                        print("0:",endTimeStr[0])
+                        print("1:",endTimeStr[1])
+                        print("1,-1:",endTimeStr[1][-1])
+                        print("2:",endTimeStr[2])
+                        print("3:",endTimeStr[3])
+                        outmessage += "\n • [" + bounty.getCodeNameTag() + "]" + " " * (bbdata.longestBountyNameLength + 1 - len(bounty.getCodeNameTag())) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + bbdata.numExtensions[int(endTimeStr[1][-1])] + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
                     if endTimeStr[4] != "00":
                         outmessage += ":" + endTimeStr[4]
                     else:
@@ -648,10 +671,10 @@ async def on_message(message):
                         await message.channel.send("Done!")
                     elif command == "make-bounty":
                         if len(message.content.split(" ")) < 3:
-                            newBounty = Bounty()
+                            newBounty = Bounty(BBDB=BBDB)
                         elif len(message.content[16:].split("+")) == 1:
                             newFaction = message.content[16:]
-                            newBounty = Bounty(faction=newFaction)
+                            newBounty = Bounty(BBDB=BBDB, faction=newFaction)
                         elif len(message.content[16:].split("+")) == 9:
                             bData = message.content[16:].split("+")
                             newFaction = bData[0].rstrip(" ")
@@ -698,7 +721,7 @@ async def on_message(message):
                             newIcon = bData[8].rstrip(" ").lower()
                             if newIcon == "auto":
                                 newIcon = ""
-                            newBounty = Bounty(faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=False, icon=newIcon)
+                            newBounty = Bounty(BBDB=BBDB, faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=False, icon=newIcon)
                         BBDB["bounties"][newBounty.faction].append(newBounty)
                         await announceNewBounty(newBounty)
                     elif command == "make-player-bounty":
@@ -707,10 +730,10 @@ async def on_message(message):
                             if not isInt(requestedID) or (client.get_user(int(requestedID))) is None:
                                 await message.channel.send(":x: Player not found!")
                                 return
-                            newBounty = Bounty(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), client=client)
+                            newBounty = Bounty(BBDB=BBDB, name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), client=client)
                         elif len(message.content[23:].split("+")) == 1:
                             newFaction = message.content[23:]
-                            newBounty = Bounty(faction=newFaction)
+                            newBounty = Bounty(BBDB=BBDB, faction=newFaction)
                         elif len(message.content[23:].split("+")) == 9:
                             bData = message.content[23:].split("+")
                             newFaction = bData[0].rstrip(" ")
@@ -750,7 +773,7 @@ async def on_message(message):
                             newIcon = bData[8].rstrip(" ").lower()
                             if newIcon == "auto":
                                 newIcon = str(client.get_user(int(newName.lstrip("<@!").rstrip(">"))).avatar_url_as(size=64))
-                            newBounty = Bounty(client=client, faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon)
+                            newBounty = Bounty(BBDB=BBDB, client=client, faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon)
                         BBDB["bounties"][newBounty.faction].append(newBounty)
                         await announceNewBounty(newBounty)
                     else:
