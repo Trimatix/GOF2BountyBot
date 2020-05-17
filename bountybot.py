@@ -486,11 +486,11 @@ async def on_message(message):
             if len(message.content.split(" ")) < 3:
                 await message.channel.send(":x: Please provide the criminal name! E.g: `!bb route Kehnor`")
                 return
-            requestedBountyName = message.content[10:].title()
+            requestedBountyName = message.content[10:]
             for fac in BBDB["bounties"]:
                 for bounty in BBDB["bounties"][fac]:
-                    if bounty.getCodeNameTag() == requestedBountyName:
-                        outmessage = "**" + requestedBountyName + "**'s current route:\n> "
+                    if bounty.getCodeNameTag().lower() == requestedBountyName.lower():
+                        outmessage = "**" + bounty.getCodeNameTag() + "**'s current route:\n> "
                         for system in bounty.route:
                             outmessage += " " + ("~~" if bounty.checked[system] != -1 else "") + system + ("~~" if bounty.checked[system] != -1 else "") + ","
                         outmessage = outmessage[:-1] + ". :rocket:"
@@ -675,6 +675,15 @@ async def on_message(message):
                                 requestedUser = client.get_user(int(message.content[16:-1]))
                             BBDB["users"][str(requestedUser.id)]["bountyCooldownEnd"] = datetime.utcnow().timestamp()
                         await message.channel.send("Done!")
+                    elif command == "setCheckCooldown":
+                        if len(message.content.split(" ")) != 3:
+                            await message.channel.send(":x: please give the number of minutes!")
+                            return
+                        if not isInt(message.content.split(" ")[2]):
+                            await message.channel.send(":x: that's not a number!")
+                            return
+                        bbconfig.checkCooldown["minutes"] = int(message.content.split(" ")[2])
+                        await message.channel.send("Done! *you still need to update the file though* <@188618589102669826>")
                     elif command == "make-bounty":
                         if len(message.content.split(" ")) < 3:
                             newBounty = Bounty(BBDB=BBDB)
