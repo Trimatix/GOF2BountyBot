@@ -112,7 +112,7 @@ class Bounty:
             self.endTime = (datetime.utcfromtimestamp(self.issueTime) + timedelta(days=len(self.route))).timestamp()
 
         for station in self.route:
-            if station not in self.checked:
+            if station not in self.checked or checked == {}:
                 self.checked[station] = -1
 
     # return 0 => system not in route
@@ -284,7 +284,7 @@ async def on_ready():
         currentBountyWait += bbconfig.delayFactor
         currentSaveWait += bbconfig.delayFactor
         # Make new bounties
-        if (bbconfig.newBountyDelayType == "random" and currentBountyWait >= currentNewBountyDelay) or \
+        if bbconfig.newBountyDelayReset or (bbconfig.newBountyDelayType == "random" and currentBountyWait >= currentNewBountyDelay) or \
                 (bbconfig.newBountyDelayType == "fixed" and timedelta(seconds=currentBountyWait) >= newBountyDelayDelta and ((not bbconfig.newBountyFixedUseDailyTime) or (bbconfig.newBountyFixedUseDailyTime and \
                     datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta - timedelta(minutes=bbconfig.delayFactor) \
                     <= datetime.utcnow() \
@@ -297,6 +297,8 @@ async def on_ready():
                 currentNewBountyDelay = random.randint(bbconfig.newBountyDelayMin, bbconfig.newBountyDelayMax)
             else:
                 currentNewBountyDelay = newBountyDelayDelta
+                if bbconfig.newBountyFixedDeltaChanged:
+                    newBountyDelayDelta = timedelta(days=bbconfig.newBountyFixedDelta["days"], hours=bbconfig.newBountyFixedDelta["hours"], minutes=bbconfig.newBountyFixedDelta["minutes"], seconds=bbconfig.newBountyFixedDelta["seconds"])
             currentBountyWait = 0
         # save the database
         if currentSaveWait >= bbconfig.saveDelay:
@@ -639,7 +641,6 @@ async def on_message(message):
                         await message.channel.send("zzzz....")
                         bbconfig.botLoggedIn = False
                         await client.logout()
-                        # bbutil.writeJDB("BBDB.json", BBDB)
                         saveDB(BBDB)
                     elif command == "save":
                         saveDB(BBDB)
@@ -684,6 +685,29 @@ async def on_message(message):
                             return
                         bbconfig.checkCooldown["minutes"] = int(message.content.split(" ")[2])
                         await message.channel.send("Done! *you still need to update the file though* <@188618589102669826>")
+                    elif command == "setBountyPeriodM":
+                        if len(message.content.split(" ")) != 3:
+                            await message.channel.send(":x: please give the number of minutes!")
+                            return
+                        if not isInt(message.content.split(" ")[2]):
+                            await message.channel.send(":x: that's not a number!")
+                            return
+                        bbconfig.newBountyFixedDelta["minutes"] = int(message.content.split(" ")[2])
+                        bbconfig.newBountyFixedDeltaChanged = True
+                        await message.channel.send("Done! *you still need to update the file though* <@188618589102669826>")
+                    elif command == "setBountyPeriodH":
+                        if len(message.content.split(" ")) != 3:
+                            await message.channel.send(":x: please give the number of minutes!")
+                            return
+                        if not isInt(message.content.split(" ")[2]):
+                            await message.channel.send(":x: that's not a number!")
+                            return
+                        bbconfig.newBountyFixedDeltaChanged = True
+                        bbconfig.newBountyFixedDelta["hours"] = int(message.content.split(" ")[2])
+                        await message.channel.send("Done! *you still need to update the file though* <@188618589102669826>")
+                    elif command == "resetNewBountyCool":
+                        bbconfig.newBountyDelayReset = True
+                        await message.channel.send(":ballot_box_with_check: New bounty cooldown reset!")
                     elif command == "make-bounty":
                         if len(message.content.split(" ")) < 3:
                             newBounty = Bounty(BBDB=BBDB)
