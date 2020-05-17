@@ -17,7 +17,13 @@ def makeRoute(start, end):
     return bbutil.bbAStar(start, end, bbdata.systems)
 
 
-def bountyExists(name, factionBounties):
+def bountyObjExists(name, factionBounties):
+    for bounty in factionBounties:
+        if bounty.name == name:
+            return True
+    return False
+
+def bountyDictExists(name, factionBounties):
     for bounty in factionBounties:
         if bounty["name"] == name:
             return True
@@ -85,11 +91,11 @@ class Bounty:
         if self.name == "":
             self.name = random.choice(bbdata.bountyNames[self.faction])
             if BBDB is not None:
-                while bountyExists(self.name, BBDB["bounties"][self.faction]):
+                while bountyObjExists(self.name, BBDB["bounties"][self.faction]):
                     self.name = random.choice(bbdata.bountyNames[self.faction])
         elif BBDB is not None:
             for fac in BBDB["bounties"]:
-                if bountyExists(self.name, BBDB["bounties"][fac]):
+                if bountyObjExists(self.name, BBDB["bounties"][fac]):
                     raise RuntimeError("Bounty constructor: attempted to create a bounty with a pre-existing name: " + self.name)
         if self.icon == "":
             if self.name in bbdata.bountyNames[self.faction]:
