@@ -431,7 +431,7 @@ async def on_message(message):
                     await message.channel.send(outmsg)
 
                 BBDB["users"][str(message.author.id)]["systemsChecked"] += 1
-                BBDB["users"][str(message.author.id)]["bountyCooldownEnd"] = (datetime.utcnow() + timedelta(minutes=5)).timestamp()
+                BBDB["users"][str(message.author.id)]["bountyCooldownEnd"] = (datetime.utcnow() + timedelta(minutes=bbdata.checkCooldown["minutes"])).timestamp()
             else:
                 diff = datetime.utcfromtimestamp(BBDB["users"][str(message.author.id)]["bountyCooldownEnd"]) - datetime.utcnow()
                 minutes = int(diff.total_seconds() / 60)
