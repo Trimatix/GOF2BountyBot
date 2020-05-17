@@ -317,7 +317,7 @@ async def on_message(message):
         return
 
     if message.content.split(" ")[0].lower() == ('!bb'):
-        msgContent = message.content.replace("‘", "'")
+        msgContent = message.content.replace("‘", "'").replace("’","'")
         if len(msgContent.split(" ")) > 1:
             command = msgContent.split(" ")[1].lower()
         else:
