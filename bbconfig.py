@@ -14,3 +14,4 @@ delayFactor = 5
 bPointsToCreditsRatio = 100
 randomDrinkFactor = 1000
 randomDrinkNum = int(randomDrinkFactor / 3)
+checkCooldown = {"minutes":3}
