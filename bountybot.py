@@ -112,7 +112,7 @@ class Bounty:
             self.endTime = (datetime.utcfromtimestamp(self.issueTime) + timedelta(days=len(self.route))).timestamp()
 
         for station in self.route:
-            if station not in self.checked:
+            if station not in self.checked or checked == {}:
                 self.checked[station] = -1
 
     # return 0 => system not in route
