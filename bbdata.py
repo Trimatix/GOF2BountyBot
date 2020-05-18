@@ -1,11 +1,11 @@
-from bbutil import System
+from bbutil import Aliasable, System, Criminal
 
 factions = ["terran", "vossk", "midorian", "nivelian", "neutral"]
 bountyFactions = ["terran", "vossk", "midorian", "nivelian"]
 
 bountyNames = {"terran": ["Pal Tyyrt", "Kehnor", "Gendol Ethor", "Korr Bekkt", "Hongar Meton"],
                 "vossk": ["Mrrkt Nimkk", "Alvar Julen", "Vortt Baskk", "Oluchi Erland", "Orp Tsam"],
-                "midorian": ["Toma Prakupy", "Nombur Talenah", "Bartholomeu Drew", "Doni Trillyx", "Mashon Redal"],
+                "midorian": ["Toma Prakupy", "Nombur Telénah", "Bartholomeu Drew", "Doni Trillyx", "Mashon Redal"],
                 "nivelian": ["Borsul Tarand", "Vilhelm Lindon", "Tamir Prakupy", "Merson Surr", "Ganfor Kant"]}
 
                 # Terran
@@ -19,7 +19,7 @@ bountyIcons = {"Pal Tyyrt": "https://cdn.discordapp.com/attachments/700683544103
 
                 # Midorian
                 "Toma Prakupy": "https://cdn.discordapp.com/attachments/700683544103747594/711226704953344060/toma_prakupy.png",
-                "Nombur Talenah": "https://cdn.discordapp.com/attachments/700683544103747594/711226703703310397/nombur_talenah.png",
+                "Nombur Telénah": "https://cdn.discordapp.com/attachments/700683544103747594/711226703703310397/nombur_talenah.png",
                 "Bartholomeu Drew": "https://cdn.discordapp.com/attachments/700683544103747594/711226697974022204/bartholomeu_drew.png",
                 "Doni Trillyx": "https://cdn.discordapp.com/attachments/700683544103747594/711226699119067217/doni_trillyx.png",
                 "Heinrich Wickel": "https://cdn.discordapp.com/attachments/700683544103747594/711226700305793085/heinrich_wickel.png",
@@ -41,6 +41,38 @@ bountyIcons = {"Pal Tyyrt": "https://cdn.discordapp.com/attachments/700683544103
                 "Merson Surr": "https://cdn.discordapp.com/attachments/700683544103747594/711226769327521872/merson_surr.png",
                 "Ganfor Kant": "https://cdn.discordapp.com/attachments/700683544103747594/711226766630584370/ganfor_kant.png"}
 
+criminals = {"Pal Tyyrt": Criminal("Pal Tyyrt", "terran", "https://cdn.discordapp.com/attachments/700683544103747594/711226618919780359/pal_tyyrt.png", aliases=["tyyrt"], wiki="https://galaxyonfire.fandom.com/wiki/Pal_Tyyrt"),
+                "Kehnor": Criminal("Kehnor", "terran", "https://cdn.discordapp.com/attachments/700683544103747594/711226614767419432/kehnor.png", aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Kehnor"),
+                "Gendol Ethor": Criminal("Gendol Ethor", "terran", "https://cdn.discordapp.com/attachments/700683544103747594/711226611608977490/gendol_ethor.png", aliases=["gendol","ethor"], wiki="https://galaxyonfire.fandom.com/wiki/Gendol_Ethor"),
+                "Korr Bekkt": Criminal("Korr Bekkt", "terran", "https://cdn.discordapp.com/attachments/700683544103747594/711226617254510602/korr_bekkt.png", aliases=["korr", "bekkt"], wiki="https://galaxyonfire.fandom.com/wiki/Korr_Bekkt"),
+                "Hongar Meton": Criminal("Hongar Meton", "terran", "https://cdn.discordapp.com/attachments/700683544103747594/711226613278441543/hongar_meton.png", aliases=["hongar", "meton"], wiki="https://galaxyonfire.fandom.com/wiki/Hongar_Meton"),
+                "Trent Jameson": Criminal("Trent Jameson", "terran", "https://cdn.discordapp.com/attachments/700683544103747594/711226622195269632/trent_jameson.png", aliases=["trent", "jameson"], wiki="https://galaxyonfire.fandom.com/wiki/Trent_Jameson"),
+                "Qyrr Myfft": Criminal("Qyrr Myfft", "terran", "https://cdn.discordapp.com/attachments/700683544103747594/711226620786114590/qyrr_myfft.png", aliases=["qyrr","myfft"], wiki="https://galaxyonfire.fandom.com/wiki/Qyrr_Myfft"),
+
+                # Midorian
+                "Toma Prakupy": Criminal("Toma Prakupy", "midorian", "https://cdn.discordapp.com/attachments/700683544103747594/711226704953344060/toma_prakupy.png", aliases=["toma"], wiki="https://galaxyonfire.fandom.com/wiki/Toma_Prakupy"),
+                "Nombur Telénah": Criminal("Nombur Telénah", "midorian", "https://cdn.discordapp.com/attachments/700683544103747594/711226703703310397/nombur_talenah.png", aliases=["nombur","telenah","telénah"], wiki="https://galaxyonfire.fandom.com/wiki/Nombur_Telénah"),
+                "Bartholomeu Drew": Criminal("Bartholomeu Drew", "midorian", "https://cdn.discordapp.com/attachments/700683544103747594/711226697974022204/bartholomeu_drew.png", aliases=["bart","bartholomeu","drew"], wiki="https://galaxyonfire.fandom.com/wiki/bartholomeu_drew"),
+                "Doni Trillyx": Criminal("Doni Trillyx", "midorian", "https://cdn.discordapp.com/attachments/700683544103747594/711226699119067217/doni_trillyx.png", aliases=["doni","trillyx"], wiki="https://galaxyonfire.fandom.com/wiki/doni_trillyx"),
+                "Heinrich Wickel": Criminal("Heinrich Wickel", "midorian", "https://cdn.discordapp.com/attachments/700683544103747594/711226700305793085/heinrich_wickel.png", aliases=["heinrich","wickel"], wiki="https://galaxyonfire.fandom.com/wiki/heinrich_wickel"),
+                "Mashon Redal": Criminal("Mashon Redal", "midorian", "https://cdn.discordapp.com/attachments/700683544103747594/711226702122057768/mashon_redal.png", aliases=["mashon","redal"], wiki="https://galaxyonfire.fandom.com/wiki/mashon_redal"),
+
+                # Vossk
+                "Mrrkt Nimkk": Criminal("Mrrkt Nimkk", "vossk", "https://cdn.discordapp.com/attachments/700683544103747594/711226820854284368/mrrkt_minkk.png", aliases=["mrrkt","nimkk"], wiki="https://galaxyonfire.fandom.com/wiki/mrrkt_minkk"),
+                "Alvar Julen": Criminal("Alvar Julen", "vossk", "https://cdn.discordapp.com/attachments/700683544103747594/711226819461775360/alvar_julen.png", aliases=["alvar","julen"], wiki="https://galaxyonfire.fandom.com/wiki/alvar_julen"),
+                "Vortt Baskk": Criminal("Vortt Baskk", "vossk", "https://cdn.discordapp.com/attachments/700683544103747594/711226826831298710/vortt_baskk.png", aliases=["vortt","baskk"], wiki="https://galaxyonfire.fandom.com/wiki/vortt_baskk"),
+                "Oluchi Erland": Criminal("Oluchi Erland", "vossk", "https://cdn.discordapp.com/attachments/700683544103747594/711226822540394546/oluchi_erland.png", aliases=["oluchi","erland"], wiki="https://galaxyonfire.fandom.com/wiki/oluchi_erland"),
+                "Orp Tsam": Criminal("Orp Tsam", "vossk", "https://cdn.discordapp.com/attachments/700683544103747594/711226823966720041/orp_tsam.png", aliases=["orp", "tsam"], wiki="https://galaxyonfire.fandom.com/wiki/orp_tsam"),
+                "Urr Sekant": Criminal("Urr Sekant", "vossk", "https://cdn.discordapp.com/attachments/700683544103747594/711226825488990258/urr_sakant.png", aliases=["urr", "sekant"], wiki="https://galaxyonfire.fandom.com/wiki/urr_sakant"),
+
+                # Nivelian
+                "Borsul Tarand": Criminal("Borsul Tarand", "nivelian", "https://cdn.discordapp.com/attachments/700683544103747594/711226764948537374/borsul_tarand.png", aliases=["borsul","tarand"], wiki="https://galaxyonfire.fandom.com/wiki/borsul_tarand"),
+                "Malon Sentendar": Criminal("Malon Sentendar", "nivelian", "https://cdn.discordapp.com/attachments/700683544103747594/711226767939207178/malon_sentendar.png", aliases=["malon","sendendar"], wiki="https://galaxyonfire.fandom.com/wiki/malon_sentendar"),
+                "Vilhelm Lindon": Criminal("Vilhelm Lindon", "nivelian", "https://cdn.discordapp.com/attachments/700683544103747594/711226772812726302/vilhelm_lindon.png", aliases=["volhelm","lindon"], wiki="https://galaxyonfire.fandom.com/wiki/vilhelm_lindon"),
+                "Tamir Prakupy": Criminal("Tamir Prakupy", "nivelian", "https://cdn.discordapp.com/attachments/700683544103747594/711226770707185664/tamir_prakupy.png", aliases=["tamir"], wiki="https://galaxyonfire.fandom.com/wiki/tamir_prakupy"),
+                "Merson Surr": Criminal("Merson Surr", "nivelian", "https://cdn.discordapp.com/attachments/700683544103747594/711226769327521872/merson_surr.png", aliases=["merson","surr"], wiki="https://galaxyonfire.fandom.com/wiki/merson_surr"),
+                "Ganfor Kant": Criminal("Ganfor Kant", "nivelian", "https://cdn.discordapp.com/attachments/700683544103747594/711226766630584370/ganfor_kant.png", aliases=["ganfor","kant"], wiki="https://galaxyonfire.fandom.com/wiki/ganfor_kant")}
+
 longestBountyNameLength = 0
 for fac in bountyNames:
     for name in bountyNames[fac]:
@@ -50,44 +82,44 @@ for fac in bountyNames:
 securityLevels = ["secure", "average", "risky", "dangerous"]
 
 systems = { #Terran
-            "Aquila": System("Aquila", "terran", ["Wolf-Reiser", "Loma", "Union"], 2, (9, 2)),
-            "Augmenta": System("Augmenta", "terran", ["Weymire", "Magnetar", "V'Ikka", "Buntta"], 0, (6, 6)), 
-            "Beidan": System("Beidan", "terran", [], 0, (12, 6)),
-            "Buntta": System("Buntta", "terran", ["Suteo", "Behen", "Augmenta", "V'Ikka", "Pescal Inartu", "Pan"], 1, (5, 9)),
-            "Magnetar": System("Magnetar", "terran", ["Union", "Oom'Bak", "V'Ikka", "Augmenta"], 0, (6, 8)),
-            "Pan": System("Pan", "terran", ["Buntta", "Pescal Inartu"], 2, (3, 11)),
-            "Pescal Inartu": System("Pescal Inartu", "terran", ["Pan", "Buntta"], 2, (6, 12)),
-            "Prospero": System("Prospero", "terran", ["Union", "Vulpes"], 2, (5, 10)),
-            "Union": System("Union", "terran", ["Loma", "Aquila", "Prospero", "Magnetar", "Weymire"], 1, (7, 4)),
-            "Vulpes": System("Vulpes", "terran", ["Prospero", "Oom'Bak"], 2, (10, 7)),
-            "Wolf-Reiser": System("Wolf-Reiser", "terran", ["Aquila"], 0, (10, 3)),
+            "Aquila": System("Aquila", "terran", ["Wolf-Reiser", "Loma", "Union"], 2, (9, 2), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Aquila_system"),
+            "Augmenta": System("Augmenta", "terran", ["Weymire", "Magnetar", "V'Ikka", "Buntta"], 0, (6, 6), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Augmenta_system"), 
+            "Beidan": System("Beidan", "terran", [], 0, (12, 6), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Beidan"),
+            "Buntta": System("Buntta", "terran", ["Suteo", "Behén", "Augmenta", "V'Ikka", "Pescal Inartu", "Pan"], 1, (5, 9), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Buntta"),
+            "Magnetar": System("Magnetar", "terran", ["Union", "Oom'Bak", "V'Ikka", "Augmenta"], 0, (6, 8), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Magnetar_system"),
+            "Pan": System("Pan", "terran", ["Buntta", "Pescal Inartu"], 2, (3, 11), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Pan"),
+            "Pescal Inartu": System("Pescal Inartu", "terran", ["Pan", "Buntta"], 2, (6, 12), aliases=["pescal","inartu"], wiki="https://galaxyonfire.fandom.com/wiki/Category:Pescal_Inartu"),
+            "Prospero": System("Prospero", "terran", ["Union", "Vulpes"], 2, (5, 10), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Prospero"),
+            "Union": System("Union", "terran", ["Loma", "Aquila", "Prospero", "Magnetar", "Weymire"], 1, (7, 4), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Union_system"),
+            "Vulpes": System("Vulpes", "terran", ["Prospero", "Oom'Bak"], 2, (10, 7), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Vulpes"),
+            "Wolf-Reiser": System("Wolf-Reiser", "terran", ["Aquila"], 0, (10, 3), aliases=["wolfreiser","wolf","reiser"], wiki="https://galaxyonfire.fandom.com/wiki/Category:Wolf-Reiser"),
             #Vossk
-            "K'Ontrr": System("K'Ontrr", "vossk", ["S'Kolptorr", "Ni'Mrrod", "Me'Enkk"], 3, (10, 11)),
-            "Me'Enkk": System("Me'Enkk", "vossk", ["Ni'Mrrod", "K'Ontrr"], 3, (11, 12)),
-            "Ni'Mrrod": System("Ni'Mrrod", "vossk", ["K'Ontrr", "Me'Enkk"], 3, (12, 12)),
-            "Oom'Bak": System("Oom'Bak", "vossk", ["Magnetar", "Vulpes", "S'Kolptorr", "V'Ikka"], 1, (9, 8)),
-            "S'Kolptorr": System("S'Kolptorr", "vossk", ["K'Ontrr", "Oom'Bak", "V'Ikka"], 2, (9, 9)),
-            "V'Ikka": System("V'Ikka", "vossk", ["Augmenta", "Buntta", "Magnetar", "Oom'Bak", "S'Kolptorr"], 1, (7, 8)),
-            "Wah'Norr": System("Wah'Norr", "vossk", [], 3, (12, 8)),
-            "Y'Mirr": System("Y'Mirr", "vossk", [], 3, (11, 9)),
+            "K'Ontrr": System("K'Ontrr", "vossk", ["S'Kolptorr", "Ni'Mrrod", "Me'Enkk"], 3, (10, 11), aliases=["kontrr"], wiki="https://galaxyonfire.fandom.com/wiki/Category:K'Ontrr"),
+            "Me'Enkk": System("Me'Enkk", "vossk", ["Ni'Mrrod", "K'Ontrr"], 3, (11, 12), aliases=["meenkk"], wiki="https://galaxyonfire.fandom.com/wiki/Category:Me'Enkk"),
+            "Ni'Mrrod": System("Ni'Mrrod", "vossk", ["K'Ontrr", "Me'Enkk"], 3, (12, 12), aliases=["nimrrod"], wiki="https://galaxyonfire.fandom.com/wiki/Category:Ni'Mrrod"),
+            "Oom'Bak": System("Oom'Bak", "vossk", ["Magnetar", "Vulpes", "S'Kolptorr", "V'Ikka"], 1, (9, 8), aliases=["oombak"], wiki="https://galaxyonfire.fandom.com/wiki/Category:Oom'Bak"),
+            "S'Kolptorr": System("S'Kolptorr", "vossk", ["K'Ontrr", "Oom'Bak", "V'Ikka"], 2, (9, 9), aliases=["skolptorr"], wiki="https://galaxyonfire.fandom.com/wiki/Category:S'Kolptorr"),
+            "V'Ikka": System("V'Ikka", "vossk", ["Augmenta", "Buntta", "Magnetar", "Oom'Bak", "S'Kolptorr"], 1, (7, 8), aliases=["vikka"], wiki="https://galaxyonfire.fandom.com/wiki/Category:V'Ikka"),
+            "Wah'Norr": System("Wah'Norr", "vossk", [], 3, (12, 8), aliases=["wahnorr"], wiki="https://galaxyonfire.fandom.com/wiki/Category:Wah'Norr"),
+            "Y'Mirr": System("Y'Mirr", "vossk", [], 3, (11, 9), aliases=["ymirr"], wiki="https://galaxyonfire.fandom.com/wiki/Category:Y'Mirr"),
             #Nivelian
-            "Behen": System("Behen", "nivelian", ["Nesla", "Suteo", "Weymire", "Buntta"], 2, (3, 6)),
-            "Pareah": System("Pareah", "nivelian", ["Nesla"], 1, (2, 5)),
-            "Nesla": System("Nesla", "nivelian", ["Behen", "Pareah", "Weymire", "Shima", "Eanya"], 2, (4, 3)),
-            "Suteo": System("Suteo", "nivelian", ["Behen", "Buntta"], 2, (3, 8)),
-            "Weymire": System("Weymire", "nivelian", ["Augmenta", "Behen", "Union", "Nesla", "Shima"], 1, (6, 4)),
+            "Behén": System("Behén", "nivelian", ["Nesla", "Suteo", "Weymire", "Buntta"], 2, (3, 6), aliases=["behen"], wiki="https://galaxyonfire.fandom.com/wiki/Category:Behén"),
+            "Paréah": System("Paréah", "nivelian", ["Nesla"], 1, (2, 5), aliases=["pareah"], wiki="https://galaxyonfire.fandom.com/wiki/Category:Paréah"),
+            "Nesla": System("Nesla", "nivelian", ["Behén", "Paréah", "Weymire", "Shima", "Eanya"], 2, (4, 3), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Nesla"),
+            "Suteo": System("Suteo", "nivelian", ["Behén", "Buntta"], 2, (3, 8), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Suteo"),
+            "Weymire": System("Weymire", "nivelian", ["Augmenta", "Behén", "Union", "Nesla", "Shima"], 1, (6, 4), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Weymire"),
             #Midorian
-            "Eanya": System("Eanya", "midorian", ["Nesla", "Ginoya"], 3, (2, 3)),
-            "Ginoya": System("Ginoya", "midorian", ["Talidor", "Eanya"], 3, (2, 2)),
-            "Loma": System("Loma", "midorian", ["Shima", "Union", "Aquila"], 3, (5, 1)),
-            "Mido": System("Mido", "midorian", [], 3, (4, 2)),
-            "Talidor": System("Talidor", "midorian", ["Ginoya"], 3, (3, 1)),
+            "Eanya": System("Eanya", "midorian", ["Nesla", "Ginoya"], 3, (2, 3), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Eanya"),
+            "Ginoya": System("Ginoya", "midorian", ["Talidor", "Eanya"], 3, (2, 2), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Ginoya"),
+            "Loma": System("Loma", "midorian", ["Shima", "Union", "Aquila"], 3, (5, 1), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Loma"),
+            "Mido": System("Mido", "midorian", [], 3, (4, 2), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Mido"),
+            "Talidor": System("Talidor", "midorian", ["Ginoya"], 3, (3, 1), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Talidor"),
             #Neutral
-            "Alda": System("Alda", "neutral", [], 3, (8, 13)),
-            "Her Jaza": System("Her Jaza", "neutral", [], 3, (8, 12)),
-            "Shima": System("Shima", "neutral", ["Loma", "Weymire", "Nesla"], 0, (5, 3)),
-            "Skavac": System("Skavac", "neutral", [], 3, (10, 1)),
-            "Skor Terpa": System("Skor Terpa", "neutral", [], 3, (7, 1))}
+            "Alda": System("Alda", "neutral", [], 3, (8, 13), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Alda"),
+            "Her Jaza": System("Her Jaza", "neutral", [], 3, (8, 12), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Her_Jaza"),
+            "Shima": System("Shima", "neutral", ["Loma", "Weymire", "Nesla"], 0, (5, 3), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Shima"),
+            "Skavac": System("Skavac", "neutral", [], 3, (10, 1), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Skavac"),
+            "Skor Terpa": System("Skor Terpa", "neutral", [], 3, (7, 1), aliases=[], wiki="https://galaxyonfire.fandom.com/wiki/Category:Skor_Terpa")}
 
 mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/700683544103747594/700683693215318076/gof2_coords.png"
 mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png'

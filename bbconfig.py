@@ -14,6 +14,6 @@ newBountyDelayMax = 4 * 60 * 60
 saveDelay = 30 * 60
 delayFactor = 5
 bPointsToCreditsRatio = 100
-randomDrinkFactor = 1000
+randomDrinkFactor = 500
 randomDrinkNum = int(randomDrinkFactor / 3)
 checkCooldown = {"minutes":3}
