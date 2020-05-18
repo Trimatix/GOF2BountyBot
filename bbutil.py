@@ -1,19 +1,48 @@
 import json
 import math
+from abc import ABC, abstractmethod
 
-class System:
+class Aliasable (ABC):
+    name = ""
+    aliases = []
+
+    def __init__(self, name, aliases):
+        self.name = name
+        for alias in range(len(aliases)):
+            aliases[alias] = aliases[alias].lower()
+        self.aliases = aliases
+        if name.lower() not in aliases:
+            self.aliases += [name.lower()]
+    
+    def __eq__(self, other):
+        return type(other) == self.getType() and self.isCalled(other.name) or other.isCalled(self.name)
+
+    def isCalled(self, name):
+        return name.lower() == self.name.lower() or name.lower() in self.aliases
+
+    @abstractmethod
+    def getType(self):
+        pass
+
+
+class System (Aliasable):
     name = ""
     faction = ""
     neighbours = []
     security = -1
     coordinates = ()
+    wiki = ""
+    hasWiki = False
 
-    def __init__(self, name, faction, neighbours, security, coordinates):
+    def __init__(self, name, faction, neighbours, security, coordinates, aliases=[], wiki=""):
+        super(System, self).__init__(name, aliases)
         self.name = name
         self.faction = faction
         self.neighbours = neighbours
         self.security = security
         self.coordinates = coordinates
+        self.wiki = wiki
+        self.hasWiki = wiki != ""
 
     def getNeighbours(self):
         return self.neighbours
@@ -24,6 +53,30 @@ class System:
 
     def hasJumpGate(self):
         return bool(self.neighbours)
+
+    def getType(self):
+        return System
+
+
+class Criminal (Aliasable):
+    name = ""
+    faction = ""
+    icon = ""
+    wiki = ""
+    hasWiki = False
+    isPlayer = False
+
+    def __init__(self, name, faction, icon, isPlayer= False, aliases=[], wiki=""):
+        super(Criminal, self).__init__(name, aliases)
+        self.name = name
+        self.faction = faction
+        self.icon = icon
+        self.wiki = wiki
+        self.hasWiki = wiki != ""
+        self.isPlayer = isPlayer
+
+    def getType(self):
+        return Criminal
 
 
 def readJDB(dbFile):
