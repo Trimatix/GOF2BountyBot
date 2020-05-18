@@ -148,6 +148,8 @@ helpStr = """*--=* __***BountyBot Commands***__ *=--*
     | Display information about a given system.
 - make-route [startSystem], [endSystem]
     | Find the shortest route from startSystem to endSystem.
+- criminal [criminal name]
+    | Get information about a criminal, including their wiki page and name aliases.
 
 [   BOUNTIES    ]
 
@@ -165,7 +167,8 @@ helpIntro = """:star: Here are my commands! Prefix commands with `!bb` - for exa
 helpDict = {"__Miscellaneous__":{"**help**":"Display information about all available commands.",
                                 "**balance** *<userTag>*":"Get the credits balance of yourself, or a tagged user if one is given.",
                                 "**stats** *<userTag>*":"Get various credits and bounty statistics about yourself, or a tagged user.",
-                                "**leaderboard** *<-g|-c|-s|-w>*":"Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `!bb leaderboard -gs`"},
+                                "**leaderboard** *<-g|-c|-s|-w>*":"Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `!bb leaderboard -gs`",
+                                "**criminal [name]**": "Get information about a named criminal.\nAlso gives the criminal's usable aliases for the bounties system."},
             "__GOF2 Info__":{"**map**":"Send the complete GOF2 starmap.",
                             "**system [system]**": "Display information about a given system.",
                             "**make-route [startSystem], [endSystem]**": "Find the shortest route from startSystem to endSystem."},
