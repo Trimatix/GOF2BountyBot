@@ -111,8 +111,10 @@ class Bounty:
         if self.endTime == -1.0:
             self.endTime = (datetime.utcfromtimestamp(self.issueTime) + timedelta(days=len(self.route))).timestamp()
 
+        if not dbReload:
+            self.checked = {}
         for station in self.route:
-            if dbReload or station not in self.checked or checked == {}:
+            if (not dbReload) or station not in self.checked or checked == {}:
                 self.checked[station] = -1
 
     # return 0 => system not in route
@@ -290,7 +292,7 @@ async def on_ready():
                     <= datetime.utcnow() \
                     <= datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta + timedelta(minutes=bbconfig.delayFactor)))):
             if canMakeBounty():
-                newBounty = Bounty(dbReload=True, BBDB=BBDB)
+                newBounty = Bounty(BBDB=BBDB)
                 BBDB["bounties"][newBounty.faction].append(newBounty)
                 await announceNewBounty(newBounty)
             if bbconfig.newBountyDelayType == "random":
@@ -711,10 +713,10 @@ async def on_message(message):
                         await message.channel.send(":ballot_box_with_check: New bounty cooldown reset!")
                     elif command == "make-bounty":
                         if len(msgContent.split(" ")) < 3:
-                            newBounty = Bounty(dbReload=True, BBDB=BBDB)
+                            newBounty = Bounty(BBDB=BBDB)
                         elif len(msgContent[16:].split("+")) == 1:
                             newFaction = msgContent[16:]
-                            newBounty = Bounty(dbReload=True, BBDB=BBDB, faction=newFaction)
+                            newBounty = Bounty(BBDB=BBDB, faction=newFaction)
                         elif len(msgContent[16:].split("+")) == 9:
                             bData = msgContent[16:].split("+")
                             newFaction = bData[0].rstrip(" ")
@@ -773,7 +775,7 @@ async def on_message(message):
                             newBounty = Bounty(BBDB=BBDB, name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), client=client)
                         elif len(msgContent[23:].split("+")) == 1:
                             newFaction = msgContent[23:]
-                            newBounty = Bounty(dbReload=True, BBDB=BBDB, faction=newFaction)
+                            newBounty = Bounty(BBDB=BBDB, faction=newFaction)
                         elif len(msgContent[23:].split("+")) == 9:
                             bData = msgContent[23:].split("+")
                             newFaction = bData[0].rstrip(" ")
