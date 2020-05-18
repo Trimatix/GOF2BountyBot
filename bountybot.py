@@ -42,7 +42,7 @@ class Bounty:
     icon = ""
     
 
-    def __init__(self, BBDB=None, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1.0, issueTime=-1.0, endTime=-1.0, icon="", client=None):
+    def __init__(self, dbReload=False, BBDB=None, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1.0, issueTime=-1.0, endTime=-1.0, icon="", client=None):
         self.faction = faction.lower()
         self.name = name
         self.isPlayer = False if isPlayer is None else isPlayer
@@ -112,7 +112,7 @@ class Bounty:
             self.endTime = (datetime.utcfromtimestamp(self.issueTime) + timedelta(days=len(self.route))).timestamp()
 
         for station in self.route:
-            if station not in self.checked or checked == {}:
+            if dbReload or station not in self.checked or checked == {}:
                 self.checked[station] = -1
 
     # return 0 => system not in route
@@ -190,7 +190,7 @@ def loadDB(DCClient):
         for fac in db["bounties"]:
             currentBounties = []
             for bounty in db["bounties"][fac]:
-                currentBounties.append(Bounty(faction=bounty["faction"], name=bounty["name"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], issueTime=bounty["issueTime"], endTime=bounty["endTime"], isPlayer=bounty["isPlayer"], icon=bounty["icon"], client=(DCClient if bounty["isPlayer"] else None)))
+                currentBounties.append(Bounty(dbReload=True, faction=bounty["faction"], name=bounty["name"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], issueTime=bounty["issueTime"], endTime=bounty["endTime"], isPlayer=bounty["isPlayer"], icon=bounty["icon"], client=(DCClient if bounty["isPlayer"] else None)))
             db["bounties"][fac] = currentBounties
     return db
 
@@ -290,7 +290,7 @@ async def on_ready():
                     <= datetime.utcnow() \
                     <= datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta + timedelta(minutes=bbconfig.delayFactor)))):
             if canMakeBounty():
-                newBounty = Bounty(BBDB=BBDB)
+                newBounty = Bounty(dbReload=True, BBDB=BBDB)
                 BBDB["bounties"][newBounty.faction].append(newBounty)
                 await announceNewBounty(newBounty)
             if bbconfig.newBountyDelayType == "random":
@@ -711,10 +711,10 @@ async def on_message(message):
                         await message.channel.send(":ballot_box_with_check: New bounty cooldown reset!")
                     elif command == "make-bounty":
                         if len(msgContent.split(" ")) < 3:
-                            newBounty = Bounty(BBDB=BBDB)
+                            newBounty = Bounty(dbReload=True, BBDB=BBDB)
                         elif len(msgContent[16:].split("+")) == 1:
                             newFaction = msgContent[16:]
-                            newBounty = Bounty(BBDB=BBDB, faction=newFaction)
+                            newBounty = Bounty(dbReload=True, BBDB=BBDB, faction=newFaction)
                         elif len(msgContent[16:].split("+")) == 9:
                             bData = msgContent[16:].split("+")
                             newFaction = bData[0].rstrip(" ")
@@ -773,7 +773,7 @@ async def on_message(message):
                             newBounty = Bounty(BBDB=BBDB, name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), client=client)
                         elif len(msgContent[23:].split("+")) == 1:
                             newFaction = msgContent[23:]
-                            newBounty = Bounty(BBDB=BBDB, faction=newFaction)
+                            newBounty = Bounty(dbReload=True, BBDB=BBDB, faction=newFaction)
                         elif len(msgContent[23:].split("+")) == 9:
                             bData = msgContent[23:].split("+")
                             newFaction = bData[0].rstrip(" ")
