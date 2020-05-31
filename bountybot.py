@@ -7,6 +7,20 @@ import bbdata
 import bbutil
 import bbPRIVATE
 import bbconfig
+import bbBounty
+import bbBountyConfig
+
+
+def criminalNameOrDiscrim(client, criminal):
+    if not criminal.isPlayer:
+        return criminal.name
+
+    userID = int(criminal.name.lstrip("<@!").rstrip(">"))
+    if client.get_user(userID) is not None:
+        return str(client.get_user(userID))
+
+    # Return criminal name as a fall back - might replace this with '#UNKNOWNUSER#' at some point.    
+    return criminal.name
 
 
 def initializeUser(userID):
@@ -28,170 +42,6 @@ def bountyDictExists(name, factionBounties):
         if bounty["criminal"]["name"] == name:
             return True
     return False
-
-
-class Bounty:
-    criminal = None
-    builtIn = False
-    issueTime = -1
-    route = []
-    reward = 0.0
-    endTime = -1
-    faction = ""
-    checked = {}
-    answer = ""
-
-    def __init__(self, BBDB, criminal, dbReload=False, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1.0, issueTime=-1.0, endTime=-1.0, icon="", client=None):
-        self.route = route
-        for i in range(len(route)):
-            route[i] = route[i].title()
-        start = start.title()
-        end = end.title()
-        self.answer = answer.title()
-        self.checked = checked
-        self.reward = reward
-        self.issueTime = issueTime
-        self.endTime = endTime
-
-        if criminal is None:
-            self.builtIn = True
-            if isPlayer and client is None:
-                raise RuntimeError("Bounty constructor: Attempted to make player bounty but didn't provide client '" + name + "'")
-            self.client = client
-
-            self.faction = faction.lower()
-            name = name.title()
-            self.isPlayer = False if isPlayer is None else isPlayer
-            # icon = icon
-
-            if name in bbdata.bountyNames:
-                self.criminal = bbdata.criminals[name]
-            else:
-                if self.faction == "":
-                    self.faction = random.choice(bbdata.bountyFactions)
-                elif self.faction not in bbdata.bountyFactions:
-                    raise RuntimeError("Bounty constructor: Invalid faction requested '" + faction + "'")
-
-                if name == "":
-                    name = random.choice(bbdata.bountyNames[self.faction])
-                    if BBDB is not None:
-                        while bountyObjExists(name, BBDB["bounties"][self.faction]):
-                            name = random.choice(bbdata.bountyNames[self.faction])
-                    self.criminal = bbdata.criminals[name]
-                else:
-                    if BBDB is not None:
-                        if bountyObjExists(name, BBDB["bounties"][self.faction]):
-                            raise RuntimeError("Bounty constructor: attempted to create pre-existing bounty: " + name)
-                
-                    if icon == "":
-                        icon = bbdata.rocketIcon
-
-                    self.criminal = bbutil.Criminal(name, self.faction, icon)
-        else:
-            if criminal.isPlayer and client is None:
-                raise RuntimeError("Bounty constructor: Attempted to make player bounty but didn't provide client '" + criminal.name + "'")
-            self.client = client
-            if BBDB is not None:
-                if bountyObjExists(name, BBDB["bounties"][self.faction]):
-                    raise RuntimeError("Bounty constructor: attempted to create pre-existing bounty: " + criminal.name)
-            self.criminal = criminal
-            self.builtIn = criminal.name in bbdata.bountyNames
-        self.faction = self.criminal.faction
-    
-        if self.route == []:
-            if start == "":
-                start = random.choice(list(bbdata.systems.keys()))
-                while start == end or not bbdata.systems[start].hasJumpGate():
-                    start = random.choice(list(bbdata.systems.keys()))
-            elif start not in bbdata.systems:
-                raise RuntimeError("Bounty constructor: Invalid start requested '" + start + "'")
-            if end == "":
-                end = random.choice(list(bbdata.systems.keys()))
-                while start == end or not bbdata.systems[end].hasJumpGate():
-                    end = random.choice(list(bbdata.systems.keys()))
-            elif end not in bbdata.systems:
-                raise RuntimeError("Bounty constructor: Invalid end requested '" + end + "'")
-            self.route = makeRoute(start, end)
-        else:
-            for system in self.route:
-                if system not in bbdata.systems:
-                    raise RuntimeError("Bounty constructor: Invalid system in route '" + system + "'")
-        if self.answer == "":
-            self.answer = random.choice(self.route)
-        elif self.answer not in bbdata.systems:
-            raise RuntimeError("Bounty constructor: Invalid answer requested '" + answer + "'")
-        
-        if self.reward == -1.0:
-            self.reward = len(self.route) * bbconfig.bPointsToCreditsRatio
-        elif self.reward < 0:
-            raise RuntimeError("Bounty constructor: Invalid reward requested '" + str(reward) + "'")
-        if self.issueTime == -1.0:
-            self.issueTime = datetime.utcnow().replace(second=0).timestamp()
-        if self.endTime == -1.0:
-            self.endTime = (datetime.utcfromtimestamp(self.issueTime) + timedelta(days=len(self.route))).timestamp()
-
-        if not dbReload:
-            self.checked = {}
-        for station in self.route:
-            if (not dbReload) or station not in self.checked or checked == {}:
-                self.checked[station] = -1
-
-    # return 0 => system not in route
-    # return 1 => system already checked
-    # return 2 => system was unchecked, but is not the answer
-    # return 3 => win!
-    def check(self, system, userID):
-        if system not in self.route:
-            return 0
-        elif self.systemChecked(system):
-            return 1
-        else:
-            self.checked[system] = userID
-            if self.answer == system:
-                return 3
-            return 2
-
-    def systemChecked(self, system):
-        return self.checked[system] != -1
-
-    def calcRewards(self):
-        rewards = {}
-        checkedSystems = 0
-        for system in self.route:
-            if self.systemChecked(system):
-                checkedSystems += 1
-                rewards[self.checked[system]] = {"reward":0,"checked":0,"won":False}
-
-        uncheckedSystems = len(self.route) - checkedSystems
-
-        for system in self.route:
-            if self.systemChecked(system):
-                if self.answer == system:
-                    rewards[self.checked[system]]["reward"] += (self.reward / len(self.route)) * (uncheckedSystems + 1)
-                    rewards[self.checked[system]]["checked"] += 1
-                    rewards[self.checked[system]]["won"] = True
-                else:
-                    rewards[self.checked[system]]["reward"] += self.reward / len(self.route)
-                    rewards[self.checked[system]]["checked"] += 1
-        return rewards
-
-    def toDict(self):
-        data = {"faction": self.faction, "route": self.route, "answer": self.answer, "checked": self.checked, "reward": self.reward, "issueTime": self.issueTime, "endTime": self.endTime}
-        if self.builtIn:
-            print("BUILT IN")
-            data["criminal"] = {"builtIn":True, "name":self.criminal.name}
-        else:
-            print("NOT BUILT IN")
-            data["criminal"] = {"builtIn":False, "isPlayer": self.criminal.isPlayer, "name":self.criminal.name, "icon":self.criminal.icon}
-        return data
-
-    def getCodeNameTag(self): 
-        if not self.criminal.isPlayer:
-            return self.criminal.name
-        userID = int(self.criminal.name.lstrip("<@!").rstrip(">"))
-        if self.client.get_user(userID) is not None:
-            return str(self.client.get_user(userID))
-        return self.criminal.name
 
 
 def bountyNameExistsInDict(bountiesList, nameToFind):
@@ -218,10 +68,7 @@ def loadDB(DCClient):
         for fac in db["bounties"]:
             currentBounties = []
             for bounty in db["bounties"][fac]:
-                if bounty["criminal"]["builtIn"]:
-                    currentBounties.append(Bounty(None, bbdata.criminals[bounty["criminal"]["name"]], dbReload=True, faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))
-                else:
-                    currentBounties.append(Bounty(None, bbutil.Criminal(bounty["criminal"]["name"], bounty["faction"], bounty["criminal"]["icon"], isPlayer=bounty["criminal"]["isPlayer"]), client=(DCClient if bounty["criminal"]["isPlayer"] else None), dbReload=True, faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))
+                currentBounties.append(bbBounty.fromDict(bounty, dbReload=True))
             db["bounties"][fac] = currentBounties
     return db
 
@@ -261,18 +108,18 @@ def isInt(x):
     return True
 
 
-async def announceNewBounty(newBounty):
-    bountyEmbed = makeEmbed(titleTxt=newBounty.getCodeNameTag(), desc="⛓ __New Bounty Available__", col=factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
+async def announceNewBounty(client, newBounty):
+    bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(client, newBounty.criminal), desc="⛓ __New Bounty Available__", col=factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
     bountyEmbed.add_field(name="Reward:", value=str(newBounty.reward) + " Credits")
     bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
-    bountyEmbed.add_field(name="See the culprit's route with:", value="`!bb route " + newBounty.getCodeNameTag() + "`", inline=False)
+    bountyEmbed.add_field(name="See the culprit's route with:", value="`!bb route " + criminalNameOrDiscrim(client, newBounty.criminal) + "`", inline=False)
     for currentGuild in bbconfig.announceChannel:
         if client.get_channel(bbconfig.announceChannel[str(currentGuild)]) is not None:
             await client.get_channel(bbconfig.announceChannel[str(currentGuild)]).send("A new bounty is now available from **" + newBounty.faction.title() + "** central command:", embed=bountyEmbed)
 
 async def announceBountyWon(bounty, rewards, winningGuild, winningUser):
     for currentGuild in bbconfig.playChannel:
-        rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!",authorName=bounty.getCodeNameTag() + " Arrested",icon=bounty.criminal.icon,col=factionColours[bounty.faction])
+        rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!",authorName=criminalNameOrDiscrim(client, bounty.criminal) + " Arrested",icon=bounty.criminal.icon,col=factionColours[bounty.faction])
         if client.get_channel(bbconfig.playChannel[str(currentGuild)]).guild.get_member(winningUser) is None:
             rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUser]["reward"]) + " credits:", value=str(client.get_user(winningUser)) + " checked " + str(int(rewards[winningUser]["checked"])) + " system" + ("s" if int(rewards[winningUser]["checked"]) != 1 else ""), inline=False)
         else:
@@ -303,6 +150,8 @@ def makeEmbed(titleTxt="",desc="",col=discord.Colour.blue(), footerTxt="", img="
 
 @client.event
 async def on_ready():
+    # This function accesses global variable "client"
+
     print('We have logged in as {0.user}'.format(client))
     bbconfig.botLoggedIn = True
     currentBountyWait = 0
@@ -327,9 +176,9 @@ async def on_ready():
                     <= datetime.utcnow() \
                     <= datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta + timedelta(minutes=bbconfig.delayFactor)))):
             if canMakeBounty():
-                newBounty = Bounty(BBDB, None)
+                newBounty = bbBounty.Bounty(BBDB, None)
                 BBDB["bounties"][newBounty.faction].append(newBounty)
-                await announceNewBounty(newBounty)
+                await announceNewBounty(client, newBounty)
             if bbconfig.newBountyDelayType == "random":
                 currentNewBountyDelay = random.randint(bbconfig.newBountyDelayMin, bbconfig.newBountyDelayMax)
             else:
@@ -345,6 +194,8 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    # The global "client" variable is accessed within this function.
+
     bbconfig.randomDrinkNum -= 1
     if bbconfig.randomDrinkNum == 0:
         await message.channel.send("!drink")
@@ -474,7 +325,7 @@ async def on_message(message):
                         for bounty in BBDB["bounties"][fac]:
                             if requestedSystem in bounty.route:
                                 if 0 < bounty.route.index(bounty.answer) - bounty.route.index(requestedSystem) < 4:
-                                    outmsg += "\n       • Local security forces spotted **" + bounty.getCodeNameTag()+ "** here recently. "
+                                    outmsg += "\n       • Local security forces spotted **" + criminalNameOrDiscrim(client, bounty.criminal) + "** here recently. "
                     await message.channel.send(outmsg)
 
                 BBDB["users"][str(message.author.id)]["systemsChecked"] += 1
@@ -492,7 +343,7 @@ async def on_message(message):
                     if len(BBDB["bounties"][fac]) != 0:
                         outmessage += "\n • [" + fac.title() + "]: "
                         for bounty in BBDB["bounties"][fac]:
-                            outmessage += bounty.getCodeNameTag() + ", "
+                            outmessage += criminalNameOrDiscrim(client, bounty.criminal) + ", "
                         outmessage = outmessage[:-2]
                 if len(outmessage) == preLen:
                     outmessage += "\n[  No currently active bounties! Please check back later.  ]"
@@ -512,7 +363,7 @@ async def on_message(message):
                 for bounty in BBDB["bounties"][requestedFaction]:
                     endTimeStr = datetime.utcfromtimestamp(bounty.endTime).strftime("%B %d %H %M %S").split(" ")
                     try:
-                        outmessage += "\n • [" + bounty.getCodeNameTag() + "]" + " " * (bbdata.longestBountyNameLength + 1 - len(bounty.getCodeNameTag())) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + bbdata.numExtensions[int(endTimeStr[1][-1])] + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
+                        outmessage += "\n • [" + criminalNameOrDiscrim(client, bounty.criminal) + "]" + " " * (bbdata.longestBountyNameLength + 1 - len(criminalNameOrDiscrim(client, bounty.criminal))) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + bbdata.numExtensions[int(endTimeStr[1][-1])] + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
                     except Exception:
                         print("ERROR ON:",endTimeStr)
                         print("0:",endTimeStr[0])
@@ -520,7 +371,7 @@ async def on_message(message):
                         print("1,-1:",endTimeStr[1][-1])
                         print("2:",endTimeStr[2])
                         print("3:",endTimeStr[3])
-                        outmessage += "\n • [" + bounty.getCodeNameTag() + "]" + " " * (bbdata.longestBountyNameLength + 1 - len(bounty.getCodeNameTag())) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + bbdata.numExtensions[int(endTimeStr[1][-1])] + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
+                        outmessage += "\n • [" + criminalNameOrDiscrim(client, bounty.criminal) + "]" + " " * (bbdata.longestBountyNameLength + 1 - len(criminalNameOrDiscrim(client, bounty.criminal))) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + bbdata.numExtensions[int(endTimeStr[1][-1])] + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
                     if endTimeStr[4] != "00":
                         outmessage += ":" + endTimeStr[4]
                     else:
@@ -537,7 +388,7 @@ async def on_message(message):
             for fac in BBDB["bounties"]:
                 for bounty in BBDB["bounties"][fac]:
                     if bounty.criminal.isCalled(requestedBountyName.lower()):
-                        outmessage = "**" + bounty.getCodeNameTag() + "**'s current route:\n> "
+                        outmessage = "**" + criminalNameOrDiscrim(client, bounty.criminal) + "**'s current route:\n> "
                         for system in bounty.route:
                             outmessage += " " + ("~~" if bounty.checked[system] != -1 else "") + system + ("~~" if bounty.checked[system] != -1 else "") + ","
                         outmessage = outmessage[:-1] + ". :rocket:"
@@ -796,10 +647,10 @@ async def on_message(message):
                         await message.channel.send(":ballot_box_with_check: New bounty cooldown reset!")
                     elif command == "make-bounty":
                         if len(msgContent.split(" ")) < 3:
-                            newBounty = Bounty(BBDB, None)
+                            newBounty = bbBounty.Bounty(BBDB, None)
                         elif len(msgContent[16:].split("+")) == 1:
                             newFaction = msgContent[16:]
-                            newBounty = Bounty(BBDB, None, faction=newFaction)
+                            newBounty = bbBounty.Bounty(BBDB, None, faction=newFaction)
                         elif len(msgContent[16:].split("+")) == 9:
                             bData = msgContent[16:].split("+")
                             newFaction = bData[0].rstrip(" ")
@@ -843,19 +694,19 @@ async def on_message(message):
                             newIcon = bData[8].rstrip(" ").lower()
                             if newIcon == "auto":
                                 newIcon = ""
-                            newBounty = Bounty(BBDB, None, faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=False, icon=newIcon)
+                            newBounty = bbBounty.Bounty(BBDB, None, faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=False, icon=newIcon)
                         BBDB["bounties"][newBounty.faction].append(newBounty)
-                        await announceNewBounty(newBounty)
+                        await announceNewBounty(client, newBounty)
                     elif command == "make-player-bounty":
                         if len(msgContent.split(" ")) < 4:
                             requestedID = int(msgContent.split(" ")[2].lstrip("<@!").rstrip(">"))
                             if not isInt(requestedID) or (client.get_user(int(requestedID))) is None:
                                 await message.channel.send(":x: Player not found!")
                                 return
-                            newBounty = Bounty(BBDB, None, name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), client=client)
+                            newBounty = bbBounty.Bounty(BBDB, None, name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), client=client)
                         elif len(msgContent[23:].split("+")) == 1:
                             newFaction = msgContent[23:]
-                            newBounty = Bounty(BBDB, None, faction=newFaction)
+                            newBounty = bbBounty.Bounty(BBDB, None, faction=newFaction)
                         elif len(msgContent[23:].split("+")) == 9:
                             bData = msgContent[23:].split("+")
                             newFaction = bData[0].rstrip(" ")
@@ -895,9 +746,9 @@ async def on_message(message):
                             newIcon = bData[8].rstrip(" ").lower()
                             if newIcon == "auto":
                                 newIcon = str(client.get_user(int(newName.lstrip("<@!").rstrip(">"))).avatar_url_as(size=64))
-                            newBounty = Bounty(BBDB, None, client=client, faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon)
+                            newBounty = bbBounty.Bounty(BBDB, None, client=client, faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon)
                         BBDB["bounties"][newBounty.faction].append(newBounty)
-                        await announceNewBounty(newBounty)
+                        await announceNewBounty(client, newBounty)
                     else:
                         await message.channel.send(""":question: Can't do that, commander. Type `!bb help` for a list of commands! **o7**""")
                 else:
