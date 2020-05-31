@@ -6,9 +6,13 @@ class Aliasable (ABC):
     name = ""
     aliases = []
 
-    def __init__(self, name, aliases):
+    def __init__(self, name, aliases, forceAllowEmpty=False):
+        if not name and not forceAllowEmpty:
+            raise RuntimeError("ALIAS_CONS_NONAM: Attempted to create an aliasable with an empty name")
         self.name = name
         for alias in range(len(aliases)):
+            if not aliases[alias] and not forceAllowEmpty:
+                raise RuntimeError("ALIAS_CONS_EMPTALIAS: Attempted to create an aliasable with an empty alias")
             aliases[alias] = aliases[alias].lower()
         self.aliases = aliases
         if name.lower() not in aliases:
@@ -56,27 +60,6 @@ class System (Aliasable):
 
     def getType(self):
         return System
-
-
-class Criminal (Aliasable):
-    name = ""
-    faction = ""
-    icon = ""
-    wiki = ""
-    hasWiki = False
-    isPlayer = False
-
-    def __init__(self, name, faction, icon, isPlayer= False, aliases=[], wiki=""):
-        super(Criminal, self).__init__(name, aliases)
-        self.name = name
-        self.faction = faction
-        self.icon = icon
-        self.wiki = wiki
-        self.hasWiki = wiki != ""
-        self.isPlayer = isPlayer
-
-    def getType(self):
-        return Criminal
 
 
 def readJDB(dbFile):
