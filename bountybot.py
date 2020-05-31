@@ -176,7 +176,7 @@ async def on_ready():
                     <= datetime.utcnow() \
                     <= datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta + timedelta(minutes=bbconfig.delayFactor)))):
             if canMakeBounty():
-                newBounty = bbBounty.Bounty(BBDB, None)
+                newBounty = bbBounty.Bounty(bountyDB=BBDB)
                 BBDB["bounties"][newBounty.faction].append(newBounty)
                 await announceNewBounty(client, newBounty)
             if bbconfig.newBountyDelayType == "random":
@@ -647,10 +647,10 @@ async def on_message(message):
                         await message.channel.send(":ballot_box_with_check: New bounty cooldown reset!")
                     elif command == "make-bounty":
                         if len(msgContent.split(" ")) < 3:
-                            newBounty = bbBounty.Bounty(BBDB, None)
+                            newBounty = bbBounty.Bounty(bountyDB=BBDB)
                         elif len(msgContent[16:].split("+")) == 1:
                             newFaction = msgContent[16:]
-                            newBounty = bbBounty.Bounty(BBDB, None, faction=newFaction)
+                            newBounty = bbBounty.Bounty(bountyDB=BBDB, config=bbBountyConfig.BountyConfig(faction=newFaction))
                         elif len(msgContent[16:].split("+")) == 9:
                             bData = msgContent[16:].split("+")
                             newFaction = bData[0].rstrip(" ")
@@ -694,7 +694,7 @@ async def on_message(message):
                             newIcon = bData[8].rstrip(" ").lower()
                             if newIcon == "auto":
                                 newIcon = ""
-                            newBounty = bbBounty.Bounty(BBDB, None, faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=False, icon=newIcon)
+                            newBounty = bbBounty.Bounty(bountyDB=BBDB, config=bbBountyConfig.BountyConfig(faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=False, icon=newIcon))
                         BBDB["bounties"][newBounty.faction].append(newBounty)
                         await announceNewBounty(client, newBounty)
                     elif command == "make-player-bounty":
@@ -703,10 +703,10 @@ async def on_message(message):
                             if not isInt(requestedID) or (client.get_user(int(requestedID))) is None:
                                 await message.channel.send(":x: Player not found!")
                                 return
-                            newBounty = bbBounty.Bounty(BBDB, None, name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), client=client)
+                            newBounty = bbBounty.Bounty(bountyDB=BBDB, config=bbBountyConfig.BountyConfig(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64))))
                         elif len(msgContent[23:].split("+")) == 1:
                             newFaction = msgContent[23:]
-                            newBounty = bbBounty.Bounty(BBDB, None, faction=newFaction)
+                            newBounty = bbBounty.Bounty(bountyDB=BBDB, config=bbBountyConfig.BountyConfig(faction=newFaction))
                         elif len(msgContent[23:].split("+")) == 9:
                             bData = msgContent[23:].split("+")
                             newFaction = bData[0].rstrip(" ")
@@ -746,7 +746,7 @@ async def on_message(message):
                             newIcon = bData[8].rstrip(" ").lower()
                             if newIcon == "auto":
                                 newIcon = str(client.get_user(int(newName.lstrip("<@!").rstrip(">"))).avatar_url_as(size=64))
-                            newBounty = bbBounty.Bounty(BBDB, None, client=client, faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon)
+                            newBounty = bbBounty.Bounty(bountyDB=BBDB, config=bbBountyConfig.BountyConfig(faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon))
                         BBDB["bounties"][newBounty.faction].append(newBounty)
                         await announceNewBounty(client, newBounty)
                     else:
