@@ -4,7 +4,6 @@ import bbCriminal
 
 class Bounty:
     criminal = None
-    builtIn = False
     issueTime = -1
     route = []
     reward = 0.0
@@ -18,8 +17,9 @@ class Bounty:
             raise ValueError("Bounty constructor: No bounty database given")
         makeFresh = criminalObj is None
 
-        if makeFresh and config is None:
-            config = bbBountyConfig.BountyConfig()
+        if config is None:
+            # generate bounty details and validate given details
+            config = bbBountyConfig.BountyConfig() if makeFresh else bbBountyConfig.BountyConfig(faction=criminalObj.faction, name=criminalObj.name)
 
         if not config.generated:
             config.generate(bountyDB, noCriminal=makeFresh, forceKeepChecked=dbReload, forceNoDBCheck=dbReload)
@@ -29,13 +29,18 @@ class Bounty:
                 self.criminal = bbdata.criminals[config.name]
             else:
                 self.criminal = bbCriminal.Criminal(config.name, config.faction, config.icon)
-        
+
         else:
-            if bountyDB.bountyNameExists(criminalObj.name):
-                raise IndexError("Bounty constructor: attempted to create pre-existing bounty: " + criminalObj.name)
-            
             config.builtIn = not criminalObj.isPlayer and criminalObj.name in bbdata.bountyNames
             self.criminal = criminalObj
+
+        self.faction = self.criminal.faction
+        self.issueTime = config.issueTime
+        self.endTime = config.endTime
+        self.route = config.route
+        self.reward = config.reward
+        self.checked = config.checked
+        self.answer = config.answer
 
         
     # return 0 => system not in route
@@ -78,18 +83,11 @@ class Bounty:
         return rewards
 
     def toDict(self):
-        data = {"faction": self.faction, "route": self.route, "answer": self.answer, "checked": self.checked, "reward": self.reward, "issueTime": self.issueTime, "endTime": self.endTime}
-        if self.builtIn:
-            print("BUILT IN")
-            data["criminal"] = {"builtIn":True, "name":self.criminal.name}
-        else:
-            print("NOT BUILT IN")
-            data["criminal"] = {"builtIn":False, "isPlayer": self.criminal.isPlayer, "name":self.criminal.name, "icon":self.criminal.icon}
-        return data
+        return {"faction": self.faction, "route": self.route, "answer": self.answer, "checked": self.checked, "reward": self.reward, "issueTime": self.issueTime, "endTime": self.endTime, "criminal": self.criminal.toDict()}
 
 
 
 def fromDict(bounty, dbReload=False):
     return Bounty(dbReload=dbReload, \
                     criminalObj=bbCriminal.fromDict(bounty["criminal"]), \
-                    config=bbBountyConfig.bbconfig(faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))
+                    config=bbBountyConfig.BountyConfig(faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))
