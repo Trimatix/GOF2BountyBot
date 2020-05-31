@@ -31,7 +31,8 @@ class Bounty:
                 self.criminal = bbCriminal.Criminal(config.name, config.faction, config.icon)
 
         else:
-            config.builtIn = not criminalObj.isPlayer and criminalObj.name in bbdata.bountyNames
+            # config.builtIn = not criminalObj.isPlayer and criminalObj.name in bbdata.bountyNames
+            
             self.criminal = criminalObj
 
         self.faction = self.criminal.faction

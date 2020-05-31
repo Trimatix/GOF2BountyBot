@@ -32,11 +32,9 @@ class Criminal (bbutil.Aliasable):
 
     def toDict(self):
         if self.builtIn:
-            print("BUILT IN")
-            data["criminal"] = {"builtIn":True, "name":self.criminal.name}
+            return {"builtIn":True, "name":self.name}
         else:
-            print("NOT BUILT IN")
-            data["criminal"] = {"builtIn":False, "isPlayer": self.criminal.isPlayer, "name":self.criminal.name, "icon":self.criminal.icon}
+            return {"builtIn":False, "isPlayer": self.isPlayer, "name":self.name, "icon":self.icon, "faction":self.faction, "aliases":self.aliases, "wiki":self.wiki}
 
 
 def fromDict(crimDict):
