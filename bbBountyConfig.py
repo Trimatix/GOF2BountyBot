@@ -37,6 +37,7 @@ class BountyConfig:
         self.endTime = endTime
         self.icon = icon
         self.generated = False
+        self.builtIn = False
 
         # if isPlayer and client is None:
         #     raise ValueError("BOUCONF_CONS_NOCLIENT: Attempted to make player bounty but didn't provide client '" + name + "'")
