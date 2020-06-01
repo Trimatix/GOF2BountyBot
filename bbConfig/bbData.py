@@ -1,4 +1,4 @@
-from bbutil import Aliasable, System, Criminal
+from ..bbUtil import Aliasable, System, Criminal
 
 factions = ["terran", "vossk", "midorian", "nivelian", "neutral"]
 bountyFactions = ["terran", "vossk", "midorian", "nivelian"]

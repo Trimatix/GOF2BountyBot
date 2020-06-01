@@ -1,5 +1,5 @@
 import bbBountyConfig
-import bbdata
+import bbData
 import bbCriminal
 
 class Bounty:
@@ -26,12 +26,12 @@ class Bounty:
 
         if makeFresh:
             if config.builtIn:
-                self.criminal = bbdata.criminals[config.name]
+                self.criminal = bbData.criminals[config.name]
             else:
                 self.criminal = bbCriminal.Criminal(config.name, config.faction, config.icon)
 
         else:
-            # config.builtIn = not criminalObj.isPlayer and criminalObj.name in bbdata.bountyNames
+            # config.builtIn = not criminalObj.isPlayer and criminalObj.name in bbData.bountyNames
             
             self.criminal = criminalObj
 

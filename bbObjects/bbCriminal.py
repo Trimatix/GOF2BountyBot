@@ -1,7 +1,7 @@
-import bbutil
-import bbdata
+from ..bbConfig import bbData
+import ..bbUtil
 
-class Criminal (bbutil.Aliasable):
+class Criminal (bbUtil.Aliasable):
     name = ""
     faction = ""
     icon = ""
@@ -39,6 +39,6 @@ class Criminal (bbutil.Aliasable):
 
 def fromDict(crimDict):
     if crimDict["builtIn"]:
-        return bbdata.criminals[crimDict["name"]]
+        return bbData.criminals[crimDict["name"]]
     else:
         return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"])
