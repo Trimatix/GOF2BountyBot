@@ -1,5 +1,5 @@
 from ..bbConfig import bbData
-import ..bbUtil
+from .. import bbUtil
 
 class Criminal (bbUtil.Aliasable):
     name = ""
@@ -37,8 +37,7 @@ class Criminal (bbUtil.Aliasable):
             return {"builtIn":False, "isPlayer": self.isPlayer, "name":self.name, "icon":self.icon, "faction":self.faction, "aliases":self.aliases, "wiki":self.wiki}
 
 
-def fromDict(crimDict):
-    if crimDict["builtIn"]:
-        return bbData.criminals[crimDict["name"]]
-    else:
-        return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"])
+def fromDict(crimDict, builtIn=False):
+    if "builtIn" in crimDict:
+        return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=crimDict["builtIn"] or builtIn)
+    return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)

@@ -4,9 +4,9 @@ import asyncio
 import random
 import operator
 
-from bbConfig import bbConfig, bbData, bbPRIVATE
-from bbObjects import bbBounty, bbBountyConfig
-import bbUtil
+from .bbConfig import bbConfig, bbData, bbPRIVATE
+from .bbObjects import bbBounty, bbBountyConfig
+from . import bbUtil
 
 
 def criminalNameOrDiscrim(client, criminal):
