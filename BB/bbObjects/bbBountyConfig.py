@@ -2,7 +2,7 @@ import random
 from datetime import datetime, timedelta
 
 from ..bbConfig import bbData, bbConfig
-import ..bbUtil
+from .. import bbUtil
 
 class BountyConfig:
     faction = ""
@@ -78,26 +78,26 @@ class BountyConfig:
         
         if self.route == []:
             if self.start == "":
-                self.start = random.choice(list(bbData.systems.keys()))
-                while self.start == self.end or not bbData.systems[self.start].hasJumpGate():
-                    self.start = random.choice(list(bbData.systems.keys()))
-            elif self.start not in bbData.systems:
+                self.start = random.choice(list(bbData.builtInSystemObjs.keys()))
+                while self.start == self.end or not bbData.builtInSystemObjs[self.start].hasJumpGate():
+                    self.start = random.choice(list(bbData.builtInSystemObjs.keys()))
+            elif self.start not in bbData.builtInSystemObjs:
                 raise KeyError("BountyConfig: Invalid start system requested '" + self.start + "'")
             if self.end == "":
-                self.end = random.choice(list(bbData.systems.keys()))
-                while self.start == self.end or not bbData.systems[self.end].hasJumpGate():
-                    self.end = random.choice(list(bbData.systems.keys()))
-            elif self.end not in bbData.systems:
+                self.end = random.choice(list(bbData.builtInSystemObjs.keys()))
+                while self.start == self.end or not bbData.builtInSystemObjs[self.end].hasJumpGate():
+                    self.end = random.choice(list(bbData.builtInSystemObjs.keys()))
+            elif self.end not in bbData.builtInSystemObjs:
                 raise KeyError("BountyConfig: Invalid end system requested '" + self.end + "'")
             # self.route = makeRoute(self.start, self.end)
-            self.route = bbUtil.bbAStar(self.start, self.end, bbData.systems)
+            self.route = bbUtil.bbAStar(self.start, self.end, bbData.builtInSystemObjs)
         else:
             for system in self.route:
-                if system not in bbData.systems:
+                if system not in bbData.builtInSystemObjs:
                     raise KeyError("BountyConfig: Invalid system in route '" + system + "'")
         if self.answer == "":
             self.answer = random.choice(self.route)
-        elif self.answer not in bbData.systems:
+        elif self.answer not in bbData.builtInSystemObjs:
             raise KeyError("Bounty constructor: Invalid answer requested '" + self.answer + "'")
         
         if self.reward == -1.0:
