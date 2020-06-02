@@ -5,7 +5,9 @@ import random
 import operator
 
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .bbObjects import bbBounty, bbBountyConfig
+from .bbObjects import bbBounty
+# python complains when this is on the same line as the bbBounty import (?)
+from .bbObjects import bbBountyConfig
 from . import bbUtil
 
 
@@ -26,7 +28,7 @@ def initializeUser(userID):
 
 
 def makeRoute(start, end):
-    return bbUtil.bbAStar(start, end, bbData.systems)
+    return bbUtil.bbAStar(start, end, bbData.builtInSystemObjs)
 
 
 def bountyObjExists(name, factionBounties):
@@ -284,9 +286,9 @@ async def on_message(message):
                 return
             requestedSystem = msgContent[10:].title()
             systObj = None
-            for syst in bbData.systems.keys():
-                if bbData.systems[syst].isCalled(requestedSystem):
-                    systObj = bbData.systems[syst]
+            for syst in bbData.builtInSystemObjs.keys():
+                if bbData.builtInSystemObjs[syst].isCalled(requestedSystem):
+                    systObj = bbData.builtInSystemObjs[syst]
 
             if systObj is None:
                 if len(requestedSystem) < 20:
@@ -407,20 +409,20 @@ async def on_message(message):
             startSyst = msgContent[15:].split(",")[0].title()
             endSyst = msgContent[15:].split(",")[1][1:].title()
             for criminalName in [startSyst, endSyst]:
-                if criminalName not in bbData.systems:
+                if criminalName not in bbData.builtInSystemObjs:
                     if len(criminalName) < 20:
                         await message.channel.send(":x: The **" + criminalName + "** system is not on my star map! :map:")
                     else:
                         await message.channel.send(":x: The **" + criminalName[0:15] + "**... system is not on my star map! :map:")
                     return
-                if not bbData.systems[criminalName].hasJumpGate():
+                if not bbData.builtInSystemObjs[criminalName].hasJumpGate():
                     if len(criminalName) < 20:
                         await message.channel.send(":x: The **" + criminalName + "** system does not have a jump gate! :rocket:")
                     else:
                         await message.channel.send(":x: The **" + criminalName[0:15] + "**... system does not have a jump gate! :rocket:")
                     return
             routeStr = ""
-            for currentSyst in bbUtil.bbAStar(startSyst, endSyst, bbData.systems):
+            for currentSyst in bbUtil.bbAStar(startSyst, endSyst, bbData.builtInSystemObjs):
                 routeStr += currentSyst + ", "
             if routeStr.startswith("#"):
                 await message.channel.send(":x: ERR: Processing took too long! :stopwatch:")
@@ -436,9 +438,9 @@ async def on_message(message):
                 return
             systArg = msgContent[11:].title()
             systObj = None
-            for syst in bbData.systems.keys():
-                if bbData.systems[syst].isCalled(systArg):
-                    systObj = bbData.systems[syst]
+            for syst in bbData.builtInSystemObjs.keys():
+                if bbData.builtInSystemObjs[syst].isCalled(systArg):
+                    systObj = bbData.builtInSystemObjs[syst]
 
             if systObj is None:
                 if len(systArg) < 20:
@@ -473,9 +475,9 @@ async def on_message(message):
                 return
             criminalName = msgContent[13:].title()
             criminalObj = None
-            for crim in bbData.criminals.keys():
-                if bbData.criminals[crim].isCalled(criminalName):
-                    criminalObj = bbData.criminals[crim]
+            for crim in bbData.builtInCriminalObjs.keys():
+                if bbData.builtInCriminalObjs[crim].isCalled(criminalName):
+                    criminalObj = bbData.builtInCriminalObjs[crim]
 
             if criminalObj is None:
                 if len(criminalName) < 20:
@@ -589,7 +591,7 @@ async def on_message(message):
                     elif command == "printplch":
                         await message.channel.send(bbConfig.playChannel[str(message.guild.id)])
                     elif command == "stations":
-                        await message.channel.send(bbData.systems)
+                        await message.channel.send(bbData.builtInSystemObjs)
                     elif command == "clear":
                         for fac in bbData.bountyFactions:
                             BBDB["bounties"][fac] = []
