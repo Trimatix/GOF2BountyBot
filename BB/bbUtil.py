@@ -109,3 +109,13 @@ def bbAStar(start, end, graph):
         closed.append(q)
 
     return "! " + start + " -> " + end
+
+
+def isInt(x):
+    try:
+        int(x)
+    except TypeError:
+        return False
+    except ValueError:
+        return False
+    return True

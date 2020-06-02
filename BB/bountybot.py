@@ -24,7 +24,7 @@ def criminalNameOrDiscrim(client, criminal):
 
 
 def initializeUser(userID):
-    BBDB["users"][str(userID)] = {"credits":0, "bountyCooldownEnd":0, "totalCredits":0, "systemsChecked":0, "wins":0}
+    BBDB["users"][str(userID)] = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "wins":0}
 
 
 def makeRoute(start, end):
@@ -96,16 +96,6 @@ client = discord.Client()
 BBDB = loadDB(client)
 factionColours = {"terran":discord.Colour.gold(), "vossk":discord.Colour.dark_green(), "midorian":discord.Colour.dark_red(), "nivelian":discord.Colour.teal(), "neutral":discord.Colour.purple()}
 factionIcons = {"terran":bbData.terranIcon, "vossk":bbData.vosskIcon, "midorian":bbData.midorianIcon, "nivelian":bbData.nivelianIcon, "neutral":bbData.neutralIcon}
-
-
-def isInt(x):
-    try:
-        int(x)
-    except TypeError:
-        return False
-    except ValueError:
-        return False
-    return True
 
 
 async def announceNewBounty(client, newBounty):
@@ -225,7 +215,7 @@ async def on_message(message):
                     initializeUser(message.author.id)
                 await message.channel.send(":moneybag: **" + message.author.name + "**, you have **" + str(int(BBDB["users"][str(message.author.id)]["credits"])) + " Credits**.")
             else:
-                if len(msgContent.split(" ")) > 3 or not (msgContent.split(" ")[2].startswith("<@") and msgContent.split(" ")[2].endswith(">")) or ("!" in msgContent.split(" ")[2] and not isInt(msgContent.split(" ")[2][3:-1])) or ("!" not in msgContent.split(" ")[2] and not isInt(msgContent.split(" ")[2][2:-1])):
+                if len(msgContent.split(" ")) > 3 or not (msgContent.split(" ")[2].startswith("<@") and msgContent.split(" ")[2].endswith(">")) or ("!" in msgContent.split(" ")[2] and not bbUtil.isInt(msgContent.split(" ")[2][3:-1])) or ("!" not in msgContent.split(" ")[2] and not bbUtil.isInt(msgContent.split(" ")[2][2:-1])):
                     await message.channel.send(":x: **Invalid user!** use `!bb balance` to display your own balance, or `!bb balance @userTag` to display someone else's balance!")
                     return
                 if "!" in msgContent.split(" ")[2]:
@@ -246,14 +236,14 @@ async def on_message(message):
                     statsEmbed.add_field(name="Total bounties won:", value=0, inline=True)
                 else:
                     statsEmbed.add_field(name="Credits balance:",value=str(int(BBDB["users"][str(message.author.id)]["credits"])), inline=True)
-                    statsEmbed.add_field(name="Lifetime total credits earned:", value=str(int(BBDB["users"][str(message.author.id)]["totalCredits"])), inline=True)
+                    statsEmbed.add_field(name="Lifetime total credits earned:", value=str(int(BBDB["users"][str(message.author.id)]["lifetimeCredits"])), inline=True)
                     statsEmbed.add_field(name="‎",value="‎", inline=False)
                     statsEmbed.add_field(name="Total systems checked:",value=str(BBDB["users"][str(message.author.id)]["systemsChecked"]), inline=True)
                     statsEmbed.add_field(name="Total bounties won:", value=str(BBDB["users"][str(message.author.id)]["wins"]), inline=True)
                 await message.channel.send(embed=statsEmbed)
                 return
             else:
-                if len(msgContent.split(" ")) > 3 or not (msgContent.split(" ")[2].startswith("<@") and msgContent.split(" ")[2].endswith(">")) or ("!" in msgContent.split(" ")[2] and not isInt(msgContent.split(" ")[2][3:-1])) or ("!" not in msgContent.split(" ")[2] and not isInt(msgContent.split(" ")[2][2:-1])):
+                if len(msgContent.split(" ")) > 3 or not (msgContent.split(" ")[2].startswith("<@") and msgContent.split(" ")[2].endswith(">")) or ("!" in msgContent.split(" ")[2] and not bbUtil.isInt(msgContent.split(" ")[2][3:-1])) or ("!" not in msgContent.split(" ")[2] and not bbUtil.isInt(msgContent.split(" ")[2][2:-1])):
                     await message.channel.send(":x: **Invalid user!** use `!bb balance` to display your own balance, or `!bb balance @userTag` to display someone else's balance!")
                     return
                 requestedUser = client.get_user(int(msgContent.split(" ")[2][3:-1]))
@@ -270,7 +260,7 @@ async def on_message(message):
                     statsEmbed.add_field(name="Total bounties won:", value=0, inline=True)
                 else:
                     statsEmbed.add_field(name="Credits balance:",value=str(int(BBDB["users"][str(requestedUser.id)]["credits"])), inline=True)
-                    statsEmbed.add_field(name="Lifetime total credits earned:", value=str(int(BBDB["users"][str(requestedUser.id)]["totalCredits"])), inline=True)
+                    statsEmbed.add_field(name="Lifetime total credits earned:", value=str(int(BBDB["users"][str(requestedUser.id)]["lifetimeCredits"])), inline=True)
                     statsEmbed.add_field(name="‎",value="‎", inline=False)
                     statsEmbed.add_field(name="Total systems checked:",value=str(BBDB["users"][str(requestedUser.id)]["systemsChecked"]), inline=True)
                     statsEmbed.add_field(name="Total bounties won:", value=str(BBDB["users"][str(requestedUser.id)]["wins"]), inline=True)
@@ -311,7 +301,7 @@ async def on_message(message):
                             rewards = bounty.calcRewards()
                             for userID in rewards:
                                 BBDB["users"][str(userID)]["credits"] += rewards[userID]["reward"]
-                                BBDB["users"][str(userID)]["totalCredits"] += rewards[userID]["reward"]
+                                BBDB["users"][str(userID)]["lifetimeCredits"] += rewards[userID]["reward"]
                             toPop += [bountyIndex]
                             await announceBountyWon(bounty, rewards, message.guild, message.author.id)
                     for bountyIndex in toPop:
@@ -499,7 +489,7 @@ async def on_message(message):
                 await message.channel.send(embed=statsEmbed)
         elif command == "leaderboard":
             globalBoard = False
-            stat = "totalCredits"
+            stat = "lifetimeCredits"
             boardScope = message.guild.name
             boardTitle = "Total Credits Earned"
             boardUnit = "Credit"
@@ -617,7 +607,7 @@ async def on_message(message):
                         if len(msgContent.split(" ")) != 3:
                             await message.channel.send(":x: please give the number of minutes!")
                             return
-                        if not isInt(msgContent.split(" ")[2]):
+                        if not bbUtil.isInt(msgContent.split(" ")[2]):
                             await message.channel.send(":x: that's not a number!")
                             return
                         bbConfig.checkCooldown["minutes"] = int(msgContent.split(" ")[2])
@@ -626,7 +616,7 @@ async def on_message(message):
                         if len(msgContent.split(" ")) != 3:
                             await message.channel.send(":x: please give the number of minutes!")
                             return
-                        if not isInt(msgContent.split(" ")[2]):
+                        if not bbUtil.isInt(msgContent.split(" ")[2]):
                             await message.channel.send(":x: that's not a number!")
                             return
                         bbConfig.newBountyFixedDelta["minutes"] = int(msgContent.split(" ")[2])
@@ -636,7 +626,7 @@ async def on_message(message):
                         if len(msgContent.split(" ")) != 3:
                             await message.channel.send(":x: please give the number of minutes!")
                             return
-                        if not isInt(msgContent.split(" ")[2]):
+                        if not bbUtil.isInt(msgContent.split(" ")[2]):
                             await message.channel.send(":x: that's not a number!")
                             return
                         bbConfig.newBountyFixedDeltaChanged = True
@@ -700,7 +690,7 @@ async def on_message(message):
                     elif command == "make-player-bounty":
                         if len(msgContent.split(" ")) < 4:
                             requestedID = int(msgContent.split(" ")[2].lstrip("<@!").rstrip(">"))
-                            if not isInt(requestedID) or (client.get_user(int(requestedID))) is None:
+                            if not bbUtil.isInt(requestedID) or (client.get_user(int(requestedID))) is None:
                                 await message.channel.send(":x: Player not found!")
                                 return
                             newBounty = bbBounty.Bounty(bountyDB=BBDB, config=bbBountyConfig.BountyConfig(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64))))
@@ -717,7 +707,7 @@ async def on_message(message):
                                 newName = ""
                             else:
                                 requestedID = int(newName.lstrip("<@!").rstrip(">"))
-                                if not isInt(requestedID) or (client.get_user(int(requestedID))) is None:
+                                if not bbUtil.isInt(requestedID) or (client.get_user(int(requestedID))) is None:
                                     await message.channel.send(":x: Player not found!")
                                     return
                             newRoute = bData[2].rstrip(" ")
