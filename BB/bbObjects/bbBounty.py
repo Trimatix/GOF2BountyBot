@@ -26,7 +26,7 @@ class Bounty:
 
         if makeFresh:
             if config.builtIn:
-                self.criminal = bbData.criminals[config.name]
+                self.criminal = bbData.builtInCriminalObjs[config.name]
             else:
                 self.criminal = bbCriminal.Criminal(config.name, config.faction, config.icon)
 
@@ -89,6 +89,6 @@ class Bounty:
 
 
 def fromDict(bounty, dbReload=False):
-    return Bounty(dbReload=dbReload, \
-                    criminalObj=bbCriminal.fromDict(bounty["criminal"]), \
+    return Bounty(dbReload=dbReload,
+                    criminalObj=bbCriminal.fromDict(bounty["criminal"]), 
                     config=bbBountyConfig.BountyConfig(faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))
