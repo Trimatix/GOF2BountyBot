@@ -18,7 +18,6 @@ def criminalNameOrDiscrim(client, criminal):
     userID = int(criminal.name.lstrip("<@!").rstrip(">"))
     if client.get_user(userID) is not None:
         return str(client.get_user(userID))
-
     # Return criminal name as a fall back - might replace this with '#UNKNOWNUSER#' at some point.    
     return criminal.name
 
@@ -29,12 +28,8 @@ def makeRoute(start, end):
 
 def loadUsersDB(filePath):
     return bbUserDB.fromDict(bbUtil.readJSON(filePath))
-
-
 def loadGuildsDB(filePath):
     return bbGuildDB.fromDict(bbUtil.readJSON(filePath))
-
-
 def loadBountiesDB(filePath):
     return bbBountyDB.fromDict(bbUtil.readJSON(filePath), dbReload=True)
 
@@ -44,24 +39,29 @@ def saveDB(dbPath, db):
     print(datetime.now().strftime("%H:%M:%S: Data saved!"))
 
 
+## Global Variables
 client = discord.Client()
 usersDB = loadUsersDB(bbConfig.userDBPath)
 guildsDB = loadGuildsDB(bbConfig.guildDBPath)
 bounties = loadBountiesDB(bbConfig.bountyDBPath)
 
 
-async def announceNewBounty(client, newBounty):
-    bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(client, newBounty.criminal), desc="⛓ __New Bounty Available__", col=factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
+async def announceNewBounty(newBounty):
+    bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(client, newBounty.criminal), desc="⛓ __New Bounty Available__", col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
     bountyEmbed.add_field(name="Reward:", value=str(newBounty.reward) + " Credits")
     bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
     bountyEmbed.add_field(name="See the culprit's route with:", value="`!bb route " + criminalNameOrDiscrim(client, newBounty.criminal) + "`", inline=False)
-    for currentGuild in bbConfig.announceChannel:
-        if client.get_channel(bbConfig.announceChannel[str(currentGuild)]) is not None:
-            await client.get_channel(bbConfig.announceChannel[str(currentGuild)]).send("A new bounty is now available from **" + newBounty.faction.title() + "** central command:", embed=bountyEmbed)
+    msg = "A new bounty is now available from **" + newBounty.faction.title() + "** central command:"
+
+    for currentGuild in guildsDB.getIDs():
+        if currentGuild.hasAnnounceChannel():
+            currentChannel = client.get_channel(currentGuild.getAnnounceChannelId())
+            if currentChannel is not None:
+                await currentChannel.send(msg, embed=bountyEmbed)
 
 async def announceBountyWon(bounty, rewards, winningGuild, winningUser):
     for currentGuild in bbConfig.playChannel:
-        rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!",authorName=criminalNameOrDiscrim(client, bounty.criminal) + " Arrested",icon=bounty.criminal.icon,col=factionColours[bounty.faction])
+        rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!",authorName=criminalNameOrDiscrim(client, bounty.criminal) + " Arrested",icon=bounty.criminal.icon,col=bbData.factionColours[bounty.faction])
         if client.get_channel(bbConfig.playChannel[str(currentGuild)]).guild.get_member(winningUser) is None:
             rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUser]["reward"]) + " credits:", value=str(client.get_user(winningUser)) + " checked " + str(int(rewards[winningUser]["checked"])) + " system" + ("s" if int(rewards[winningUser]["checked"]) != 1 else ""), inline=False)
         else:
@@ -179,7 +179,7 @@ async def on_message(message):
                 await message.channel.send(":moneybag: **" + requestedUser.name + "** has **" + str(int(BBDB["users"][str(requestedUser.id)]["credits"])) + " Credits**.")
         elif command == "stats":
             if len(msgContent.split(" ")) < 3:
-                statsEmbed = makeEmbed(col=factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=message.author.name, footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url_as(size=64))
+                statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=message.author.name, footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url_as(size=64))
                 if str(message.author.id) not in BBDB["users"]:
                     statsEmbed.add_field(name="Credits balance:",value=0, inline=True)
                     statsEmbed.add_field(name="Lifetime total credits earned:", value=0, inline=True)
@@ -203,7 +203,7 @@ async def on_message(message):
                     await message.channel.send(":x: **Invalid user!** use `!bb balance` to display your own balance, or `!bb balance @userTag` to display someone else's balance!")
                     return
                 userID = str(requestedUser.id)
-                statsEmbed = makeEmbed(col=factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=requestedUser.name, footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
+                statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=requestedUser.name, footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
                 if userID not in BBDB["users"]:
                     statsEmbed.add_field(name="Credits balance:",value=0, inline=True)
                     statsEmbed.add_field(name="Lifetime total credits earned:", value=0, inline=True)
@@ -400,7 +400,7 @@ async def on_message(message):
                 else:
                     neighboursStr = neighboursStr[:-2]
                 
-                statsEmbed = makeEmbed(col=factionColours[systObj.faction], desc="__System Information__", titleTxt=systObj.name, footerTxt=systObj.faction.title(), thumb=factionIcons[systObj.faction])
+                statsEmbed = makeEmbed(col=bbData.factionColours[systObj.faction], desc="__System Information__", titleTxt=systObj.name, footerTxt=systObj.faction.title(), thumb=factionIcons[systObj.faction])
                 statsEmbed.add_field(name="Security Level:",value=bbData.securityLevels[systObj.security].title())
                 statsEmbed.add_field(name="Neighbour Systems:", value=neighboursStr)
                 if len(systObj.aliases) > 1:
@@ -429,7 +429,7 @@ async def on_message(message):
                 return
 
             else:
-                statsEmbed = makeEmbed(col=factionColours[criminalObj.faction], desc="__Criminal File__", titleTxt=criminalObj.name, thumb=criminalObj.icon)
+                statsEmbed = makeEmbed(col=bbData.factionColours[criminalObj.faction], desc="__Criminal File__", titleTxt=criminalObj.name, thumb=criminalObj.icon)
                 statsEmbed.add_field(name="Wanted By:",value=criminalObj.faction.title() + "s")
                 if len(criminalObj.aliases) > 1:
                     aliasStr = ""
@@ -485,7 +485,7 @@ async def on_message(message):
                     inputDict[userID] = BBDB["users"][userID][stat]
             sortedUsers = sorted(inputDict.items(), key=operator.itemgetter(1))[::-1]
 
-            leaderboardEmbed = makeEmbed(titleTxt=boardTitle, authorName=boardScope, icon=bbData.winIcon, col = factionColours["neutral"])
+            leaderboardEmbed = makeEmbed(titleTxt=boardTitle, authorName=boardScope, icon=bbData.winIcon, col = bbData.factionColours["neutral"])
 
             externalUser = False
             first = True
