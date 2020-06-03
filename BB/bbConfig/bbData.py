@@ -211,3 +211,5 @@ voidIcon = "https://cdn.discordapp.com/attachments/700683544103747594/7110136998
 errorIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/exclamation-mark_2757.png"
 winIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/trophy_1f3c6.png"
 rocketIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/rocket_1f680.png"
+
+factionIcons = {"terran":bbData.terranIcon, "vossk":bbData.vosskIcon, "midorian":bbData.midorianIcon, "nivelian":bbData.nivelianIcon, "neutral":bbData.neutralIcon}
