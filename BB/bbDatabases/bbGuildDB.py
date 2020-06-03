@@ -50,7 +50,7 @@ class bbGuildDB:
     
     def toDict(self):
         data = {}
-        for guild in self.getIDs():
+        for guild in self.getGuilds():
             # JSON stores properties as strings, so ids must be converted to str first.
             data[str(guild.id)] = guild.toDictNoId()
         return data
