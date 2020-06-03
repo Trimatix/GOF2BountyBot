@@ -32,7 +32,7 @@ def loadUsersDB(filePath):
 def loadGuildsDB(filePath):
     return bbGuildDB.fromDict(bbUtil.readJSON(filePath))
 def loadBountiesDB(filePath):
-    return bbBountyDB.fromDict(bbUtil.readJSON(filePath), dbReload=True)
+    return bbBountyDB.fromDict(bbUtil.readJSON(filePath), bbConfig.maxBountiesPerFaction, dbReload=True)
 
 
 def saveDB(dbPath, db):
@@ -79,7 +79,7 @@ async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
                     place += 1
             
             if client.get_channel(currentGuild.getPlayChannelId()) is not None:
-                if int(currentGuild) == winningGuildObj.id:
+                if int(currentGuild.id) == winningGuildObj.id:
                     await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuildObj.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
                 else:
                     await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
@@ -272,7 +272,7 @@ async def on_message(message):
                     for bounty in toPop:
                         bountiesDB.removeBountyObj(bounty)
                 if bountyWon:
-                    usersDB.getUser(message.author.id).wins += 1
+                    usersDB.getUser(message.author.id).bountyWins += 1
                     await message.channel.send(":moneybag: **" + message.author.name + "**, you now have **" + str(usersDB.getUser(message.author.id).credits) + " Credits!**")
                 else:
                     outmsg = ":telescope: **" + message.author.name + "**, you did not find any criminals!"
@@ -295,7 +295,7 @@ async def on_message(message):
                 outmessage = "__**Active Bounties**__\nTimes given in UTC. See more detailed information with `!bb bounties <faction>`\n```css"
                 preLen = len(outmessage)
                 for fac in bountiesDB.getFactions():
-                    if bountiesDB.hasBounties(fac):
+                    if bountiesDB.hasBounties(faction=fac):
                         outmessage += "\n • [" + fac.title() + "]: "
                         for bounty in bountiesDB.getFactionBounties(fac):
                             outmessage += criminalNameOrDiscrim(client, bounty.criminal) + ", "
@@ -311,7 +311,7 @@ async def on_message(message):
                 else:
                     await message.channel.send(":x: Unrecognised faction **" + requestedFaction[0:15] + "**...")
                 return
-            if bountiesDB.hasBounties(fac):
+            if not bountiesDB.hasBounties(faction=requestedFaction):
                 await message.channel.send(":stopwatch: There are no **" + requestedFaction.title() + "** bounties active currently!")
             else:
                 outmessage = "__**Active " + requestedFaction.title() + " Bounties**__\nTimes given in UTC.```css"
@@ -360,20 +360,32 @@ async def on_message(message):
             if msgContent.count(",") > 1:
                 await message.channel.send(":x: Please only provide **two** systems!")
                 return
-            startSyst = msgContent[15:].split(",")[0].title()
-            endSyst = msgContent[15:].split(",")[1][1:].title()
-            for criminalName in [startSyst, endSyst]:
-                if criminalName not in bbData.builtInSystemObjs:
-                    if len(criminalName) < 20:
-                        await message.channel.send(":x: The **" + criminalName + "** system is not on my star map! :map:")
+            requestedStart = msgContent[15:].split(",")[0].title()
+            requestedEnd = msgContent[15:].split(",")[1][1:].title()
+            startSyst = ""
+            endSyst = ""
+            systemsFound = {requestedStart: False, requestedEnd: False}
+            for syst in bbData.builtInSystemObjs.keys():
+                if bbData.builtInSystemObjs[syst].isCalled(requestedStart):
+                    systemsFound[requestedStart] = True
+                    startSyst = syst
+                if bbData.builtInSystemObjs[syst].isCalled(requestedEnd):
+                    systemsFound[requestedEnd] = True
+                    endSyst = syst
+                    
+            for syst in [requestedStart, requestedEnd]:
+                if not systemsFound[syst]:
+                    if len(syst) < 20:
+                        await message.channel.send(":x: The **" + syst + "** system is not on my star map! :map:")
                     else:
-                        await message.channel.send(":x: The **" + criminalName[0:15] + "**... system is not on my star map! :map:")
+                        await message.channel.send(":x: The **" + syst[0:15] + "**... system is not on my star map! :map:")
                     return
-                if not bbData.builtInSystemObjs[criminalName].hasJumpGate():
-                    if len(criminalName) < 20:
-                        await message.channel.send(":x: The **" + criminalName + "** system does not have a jump gate! :rocket:")
+            for syst in [startSyst, endSyst]:
+                if not bbData.builtInSystemObjs[syst].hasJumpGate():
+                    if len(syst) < 20:
+                        await message.channel.send(":x: The **" + syst + "** system does not have a jump gate! :rocket:")
                     else:
-                        await message.channel.send(":x: The **" + criminalName[0:15] + "**... system does not have a jump gate! :rocket:")
+                        await message.channel.send(":x: The **" + syst[0:15] + "**... system does not have a jump gate! :rocket:")
                     return
             routeStr = ""
             for currentSyst in makeRoute(startSyst, endSyst):
@@ -486,7 +498,7 @@ async def on_message(message):
                     boardUnit = "System"
                     boardUnits = "Systems"
                 elif "w" in args:
-                    stat = "wins"
+                    stat = "bountyWins"
                     boardTitle = "Bounties Won"
                     boardUnit = "Bounty"
                     boardUnits = "Bounties"
@@ -572,7 +584,7 @@ async def on_message(message):
                                 requestedUser = client.get_user(int(msgContent[16:-1]))
                             usersDB.getUser(message.author.id).bountyCooldownEnd = datetime.utcnow().timestamp()
                         await message.channel.send("Done!")
-                    elif command == "setCheckCooldown":
+                    elif command == "setcheckcooldown":
                         if len(msgContent.split(" ")) != 3:
                             await message.channel.send(":x: please give the number of minutes!")
                             return
@@ -581,7 +593,7 @@ async def on_message(message):
                             return
                         bbConfig.checkCooldown["minutes"] = int(msgContent.split(" ")[2])
                         await message.channel.send("Done! *you still need to update the file though* <@188618589102669826>")
-                    elif command == "setBountyPeriodM":
+                    elif command == "setbountyperiodm":
                         if len(msgContent.split(" ")) != 3:
                             await message.channel.send(":x: please give the number of minutes!")
                             return
@@ -591,7 +603,7 @@ async def on_message(message):
                         bbConfig.newBountyFixedDelta["minutes"] = int(msgContent.split(" ")[2])
                         bbConfig.newBountyFixedDeltaChanged = True
                         await message.channel.send("Done! *you still need to update the file though* <@188618589102669826>")
-                    elif command == "setBountyPeriodH":
+                    elif command == "setbountyperiodh":
                         if len(msgContent.split(" ")) != 3:
                             await message.channel.send(":x: please give the number of minutes!")
                             return
@@ -601,9 +613,15 @@ async def on_message(message):
                         bbConfig.newBountyFixedDeltaChanged = True
                         bbConfig.newBountyFixedDelta["hours"] = int(msgContent.split(" ")[2])
                         await message.channel.send("Done! *you still need to update the file though* <@188618589102669826>")
-                    elif command == "resetNewBountyCool":
+                    elif command == "resetnewnountycool":
                         bbConfig.newBountyDelayReset = True
                         await message.channel.send(":ballot_box_with_check: New bounty cooldown reset!")
+                    elif command == "canmakebounty":
+                        newFaction = msgContent[18:].lower()
+                        if not bountiesDB.factionExists(newFaction):
+                            await message.channel.send("not a faction: '" + newFaction + "'")
+                        else:
+                            await message.channel.send(bountiesDB.factionCanMakeBounty(newFaction.lower()))
                     elif command == "make-bounty":
                         if len(msgContent.split(" ")) < 3:
                             newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
