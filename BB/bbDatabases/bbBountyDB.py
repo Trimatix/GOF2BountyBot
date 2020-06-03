@@ -8,10 +8,11 @@ class bbBountyDB:
     factions = []
 
 
-    def __init__(self, factions):
+    def __init__(self, factions, maxBountiesPerFaction):
         self.factions = factions
         for fac in factions:
             self.bounties[fac] = []
+        self.maxBountiesPerFaction = maxBountiesPerFaction
 
 
     def addFaction(self, faction):
@@ -136,8 +137,8 @@ class bbBountyDB:
         return "<bbBountyDB: " + str(len(self.bounties)) + " factions>"
 
     
-def fromDict(bountyDBDict, dbReload=False):
-    newDB = bbBountyDB(bountyDBDict.keys())
+def fromDict(bountyDBDict, maxBountiesPerFaction, dbReload=False):
+    newDB = bbBountyDB(bountyDBDict.keys(), maxBountiesPerFaction)
     for fac in bountyDBDict.keys():
         for bountyDict in bountyDBDict[fac]:
             newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
