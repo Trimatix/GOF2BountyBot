@@ -1,6 +1,9 @@
+from .bbObjects import bbSystem
+
 import json
 import math
 from abc import ABC, abstractmethod
+
 
 class Aliasable (ABC):
     name = ""
@@ -43,7 +46,7 @@ def writeJDB(dbFile, db):
     f.close()
 
 
-class AStarNode(System):
+class AStarNode(bbSystem.System):
     syst = None
     parent = None
     g = 0
