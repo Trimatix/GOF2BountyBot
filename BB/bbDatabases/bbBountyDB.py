@@ -126,9 +126,9 @@ class bbBountyDB:
         return "<bbBountyDB: " + str(len(self.bounties)) + " factions>"
 
     
-def fromDict(bountyDBDict):
+def fromDict(bountyDBDict, dbReload=False):
     newDB = bbBountyDB(bountyDBDict.keys())
     for fac in bountyDBDict.keys():
         for bountyDict in bountyDBDict[fac]:
-            newDB.addBounty(bbBounty.fromDict(bountyDict))
+            newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
     return newDB
