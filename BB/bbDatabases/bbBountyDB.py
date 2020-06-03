@@ -1,9 +1,7 @@
 from ..bbObjects import bbBounty
 
 class bbBountyDB:
-    # Dictionary of faction name : 
-    #                               dict of bounty name : bounty object
-    #                               was previously, and is still stored in JSON as, just a list
+    # Dictionary of faction name : list of bounties
     bounties = {}
     maxBountiesPerFaction = 0
     factions = []
@@ -12,13 +10,13 @@ class bbBountyDB:
     def __init__(self, factions):
         self.factions = factions
         for fac in factions:
-            self.bounties[fac] = {}
+            self.bounties[fac] = []
 
 
     def addFaction(self, faction):
         if self.factionExists(faction):
             raise KeyError("Attempted to add a faction that already exists: " + faction)
-        self.bounties[faction] = {}
+        self.bounties[faction] = []
 
 
     def removeFaction(self, faction):
@@ -31,7 +29,7 @@ class bbBountyDB:
         if faction is not None:
             if not self.factionExists(faction):
                 raise KeyError("Unrecognised faction: " + faction)
-            self.bounties[faction] = {}
+            self.bounties[faction] = []
         else:
             for fac in self.getFactions():
                 self.clearBounties(faction=fac)
@@ -55,11 +53,14 @@ class bbBountyDB:
 
     def getBounty(self, name, faction=None):
         if faction is not None:
-            return self.bounties[faction][name]
+            for bounty in self.bounties[faction]:
+                if bounty.isCalled(name):
+                    return bounty
         else:
             for fac in self.getFactions():
-                if name in self.bounties[fac]:
-                    return self.bounties[fac][name]
+                for bounty in self.bounties[fac]:
+                    if bounty.isCalled(name):
+                        return bounty
         raise KeyError("Bounty not found: " + name)
 
 
@@ -83,7 +84,15 @@ class bbBountyDB:
 
     
     def bountyObjExists(self, bounty):
-        return self.bountyNameExists(bounty.name, faction=bounty.faction)
+        return bounty in self.bounties[bounty.faction]
+
+
+    # def getBountyObjIndex(self, bounty):
+    #     return self.bounties[bounty.faction].index(bounty)
+
+    
+    # def getBountyNameIndex(self, name, faction=None):
+    #     return self.getBountyObjIndex(self.getBounty(name, faction=faction))
 
 
     def addBounty(self, bounty):
@@ -92,7 +101,7 @@ class bbBountyDB:
         if self.bountyObjExists(bounty):
             raise KeyError("Attempted to add a bounty that already exists: " + bounty.name)
 
-        self.bounties[bounty.faction][bounty.name] = bounty
+        self.bounties[bounty.faction].append(bounty)
 
     
     def removeBountyName(self, name, faction=None):
@@ -100,7 +109,7 @@ class bbBountyDB:
 
 
     def removeBountyObj(self, bounty):
-        self.bounties[bounty.faction].pop(bounty.name)
+        self.bounties[bounty.faction].remove(bounty)
 
     
     def toDict(self):
