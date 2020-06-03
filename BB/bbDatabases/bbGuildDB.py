@@ -64,5 +64,5 @@ def fromDict(bountyDBDict):
     newDB = bbGuildDB()
     for id in bountyDBDict.keys():
         # JSON stores properties as strings, so ids must be converted to int first.
-        newDB.addGuildObj(bbGuild.fromDict(int(id), bountyDBDict[int(id)]))
+        newDB.addGuildObj(bbGuild.fromDict(int(id), bountyDBDict[id]))
     return newDB

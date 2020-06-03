@@ -97,5 +97,5 @@ def fromDict(userDBDict):
     newDB = bbUserDB()
     for id in userDBDict.keys():
         # JSON stores properties as strings, so ids must be converted to int first.
-        newDB.addUserObj(bbUser.fromDict(int(id), userDBDict[int(id)]))
+        newDB.addUserObj(bbUser.fromDict(int(id), userDBDict[id]))
     return newDB
