@@ -1,3 +1,6 @@
+# Shame, but i'd rather this than keep factionColours in bountybot.py
+from discord import Colour
+
 factions = ["terran", "vossk", "midorian", "nivelian", "neutral"]
 bountyFactions = ["terran", "vossk", "midorian", "nivelian"]
 
@@ -212,4 +215,5 @@ errorIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/1
 winIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/trophy_1f3c6.png"
 rocketIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/rocket_1f680.png"
 
-factionIcons = {"terran":bbData.terranIcon, "vossk":bbData.vosskIcon, "midorian":bbData.midorianIcon, "nivelian":bbData.nivelianIcon, "neutral":bbData.neutralIcon}
+factionIcons = {"terran":terranIcon, "vossk":vosskIcon, "midorian":midorianIcon, "nivelian":nivelianIcon, "neutral":neutralIcon}
+factionColours = {"terran":Colour.gold(), "vossk":Colour.dark_green(), "midorian":Colour.dark_red(), "nivelian":Colour.teal(), "neutral":Colour.purple()}

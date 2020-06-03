@@ -48,10 +48,6 @@ client = discord.Client()
 usersDB = loadUsersDB(bbConfig.userDBPath)
 guildsDB = loadGuildsDB(bbConfig.guildDBPath)
 bounties = loadBountiesDB(bbConfig.bountyDBPath)
-# usersDB = bbUtil.readJSON(bbConfig.userDBPath, )
-# guildsDB = bbUtil.readJSON(bbConfig.guildDBPath)
-BBDB = loadDB(client)
-factionColours = {"terran":discord.Colour.gold(), "vossk":discord.Colour.dark_green(), "midorian":discord.Colour.dark_red(), "nivelian":discord.Colour.teal(), "neutral":discord.Colour.purple()}
 
 
 async def announceNewBounty(client, newBounty):
