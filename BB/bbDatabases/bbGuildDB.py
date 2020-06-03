@@ -4,6 +4,10 @@ class bbGuildDB:
     guilds = {}
 
 
+    def getIDs(self):
+        return self.guilds.keys()
+
+
     def getGuild(self, id):
         return self.guilds[id]
 
@@ -42,7 +46,7 @@ class bbGuildDB:
     
     def toDict(self):
         data = {}
-        for guild in self.guilds.keys():
+        for guild in self.getIDs():
             data[guild.id] = guild.toDictNoId()
         return data
 
