@@ -4,10 +4,10 @@ import asyncio
 import random
 import operator
 
+# may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .bbObjects import bbBounty
-# python complains when this is on the same line as the bbBounty import (?)
-from .bbObjects import bbBountyConfig
+from .bbObjects import bbBounty, bbBountyConfig
+from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB
 from . import bbUtil
 
 
