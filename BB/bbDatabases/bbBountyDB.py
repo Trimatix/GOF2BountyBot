@@ -122,6 +122,16 @@ class bbBountyDB:
         return data
 
 
+    def hasBounties(self, faction=None):
+        if faction is not None:
+            for fac in self.getFactions():
+                if self.getFactionNumBounties(fac) != 0:
+                    return True
+        else:
+            return self.getFactionNumBounties(fac) != 0
+        return False 
+
+
     def __str__(self):
         return "<bbBountyDB: " + str(len(self.bounties)) + " factions>"
 
