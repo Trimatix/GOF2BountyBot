@@ -66,7 +66,8 @@ class bbUserDB:
     def toDict(self):
         data = {}
         for id in self.users.keys():
-            data[id] = self.users[id].toDictNoId()
+            # JSON stores properties as strings, so ids must be converted to str first.
+            data[str(id)] = self.users[id].toDictNoId()
         return data
 
 
@@ -95,5 +96,6 @@ class bbUserDB:
 def fromDict(userDBDict):
     newDB = bbUserDB()
     for id in userDBDict.keys():
-        newDB.addUserObj(bbUser.fromDict(id, userDBDict[id]))
+        # JSON stores properties as strings, so ids must be converted to int first.
+        newDB.addUserObj(bbUser.fromDict(int(id), userDBDict[int(id)]))
     return newDB

@@ -51,7 +51,8 @@ class bbGuildDB:
     def toDict(self):
         data = {}
         for guild in self.getIDs():
-            data[guild.id] = guild.toDictNoId()
+            # JSON stores properties as strings, so ids must be converted to str first.
+            data[str(guild.id)] = guild.toDictNoId()
         return data
 
 
@@ -62,5 +63,6 @@ class bbGuildDB:
 def fromDict(bountyDBDict):
     newDB = bbGuildDB()
     for id in bountyDBDict.keys():
-        newDB.addGuildObj(bbGuild.fromDict(id, bountyDBDict[id]))
+        # JSON stores properties as strings, so ids must be converted to int first.
+        newDB.addGuildObj(bbGuild.fromDict(int(id), bountyDBDict[int(id)]))
     return newDB
