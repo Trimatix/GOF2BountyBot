@@ -32,18 +32,26 @@ class Aliasable (ABC):
         pass
 
 
-def readJDB(dbFile):
+def readJSON(dbFile):
     f = open(dbFile, "r")
     txt = f.read()
     f.close()
     return json.loads(txt)
 
 
-def writeJDB(dbFile, db):
+def writeJSON(dbFile, db):
     txt = json.dumps(db)
     f = open(dbFile, "w")
     txt = f.write(txt)
     f.close()
+
+
+# def readJDB(dbFile, dbTypeModule):
+#     return dbTypeModule.fromDict(readJSON(dbFile))
+
+
+# def writeJDB(dbFile, db):
+#     writeJSON(dbFile, db.toDict())
 
 
 class AStarNode(bbSystem.System):
