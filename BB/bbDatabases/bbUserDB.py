@@ -81,3 +81,4 @@ def fromDict(userDBDict):
     newDB = bbUserDB()
     for id in userDBDict.keys():
         newDB.addUserObj(bbUser.fromDict(id, userDBDict[id]))
+    return newDB
