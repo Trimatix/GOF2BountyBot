@@ -1,8 +1,7 @@
-from ..bbObjects import bbSystem
-from .. import bbUtil
+from . import bbAliasable
 import math
 
-class System (bbUtil.Aliasable):
+class System (bbAliasable.Aliasable):
     name = ""
     faction = ""
     neighbours = []

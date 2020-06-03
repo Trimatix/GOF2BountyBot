@@ -1,7 +1,7 @@
 from ..bbConfig import bbData
-from .. import bbUtil
+from . import bbAliasable
 
-class Criminal (bbUtil.Aliasable):
+class Criminal (bbAliasable.Aliasable):
     name = ""
     faction = ""
     icon = ""
