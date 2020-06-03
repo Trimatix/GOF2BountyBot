@@ -27,46 +27,29 @@ def makeRoute(start, end):
     return bbUtil.bbAStar(start, end, bbData.builtInSystemObjs)
 
 
+def loadUsersDB(filePath):
+    return bbUserDB.fromDict(bbUtil.readJSON(filePath))
 
 
-
-def loadDB(DCClient):
-    db = bbUtil.readJDB("BBDB.json")
-    if "announceChannel" in db:
-        bbConfig.announceChannel = db["announceChannel"]
-    if "playChannel" in db:
-        bbConfig.playChannel = db["playChannel"]
-    if "bounties" in db:
-        for fac in db["bounties"]:
-            currentBounties = []
-            for bounty in db["bounties"][fac]:
-                currentBounties.append(bbBounty.fromDict(bounty, dbReload=True))
-            db["bounties"][fac] = currentBounties
-    return db
+def loadGuildsDB(filePath):
+    return bbGuildDB.fromDict(bbUtil.readJSON(filePath))
 
 
-def saveDB(db):
-    BBDB["announceChannel"] = bbConfig.announceChannel
-    BBDB["playChannel"] = bbConfig.playChannel
-    bounties = {}
-    for fac in bbData.bountyFactions:
-        bounties[fac] = []
-    if "bounties" in db:
-        for fac in db["bounties"]:
-            currentBounties = []
-            for bounty in db["bounties"][fac]:
-                bounties[fac].append(bounty)
-                currentBounties.append(bounty.toDict())
-            db["bounties"][fac] = currentBounties
-    bbUtil.writeJDB("BBDB.json", db)
-    db["bounties"] = bounties
+def loadBountiesDB(filePath):
+    return bbBountyDB.fromDict(bbUtil.readJSON(filePath), dbReload=True)
+
+
+def saveDB(dbPath, db):
+    bbUtil.writeJSON(dbPath, db.toDict())
     print(datetime.now().strftime("%H:%M:%S: Data saved!"))
 
 
 client = discord.Client()
-usersDB = loadUsersDB()
-guildsDB = loadGuildsDB()
-bounties = loadBountiesDB()
+usersDB = loadUsersDB(bbConfig.userDBPath)
+guildsDB = loadGuildsDB(bbConfig.guildDBPath)
+bounties = loadBountiesDB(bbConfig.bountyDBPath)
+# usersDB = bbUtil.readJDB(bbConfig.userDBPath, )
+# guildsDB = bbUtil.readJDB(bbConfig.guildDBPath)
 BBDB = loadDB(client)
 factionColours = {"terran":discord.Colour.gold(), "vossk":discord.Colour.dark_green(), "midorian":discord.Colour.dark_red(), "nivelian":discord.Colour.teal(), "neutral":discord.Colour.purple()}
 
