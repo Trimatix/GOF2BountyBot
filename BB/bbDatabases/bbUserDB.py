@@ -4,6 +4,15 @@ from .. import bbUtil
 class bbUserDB:
     users = {}
 
+
+    def userIDExists(self, id):
+        return id in self.users.keys()
+
+
+    def userObjExists(self, user):
+        return self.userIDExists(user.id)
+
+
     def validateID(self, id):
         if type(id) == str:
             if not bbUtil.isInt(id):
@@ -15,36 +24,34 @@ class bbUserDB:
     
 
     def reinitUser(self, id):
-        id = self.validateID
-        if not id in self.users:
+        id = self.validateID(id)
+        if not self.userIDExists(id):
             raise KeyError("user not found: " + str(id))
         self.users[id].resetUser()
 
 
     def addUser(self, id):
-        id = self.validateID
-        if id in self.users:
+        id = self.validateID(id)
+        if self.userIDExists(id):
             raise KeyError("Attempted to add a user that is already in this bbUserDB")
         self.users[id] = bbUser.fromDict(id, {"credits":0, "bountyCooldownEnd":0, "totalCredits":0, "systemsChecked":0, "wins":0})
 
     
     def addUserObj(self, userObj):
-        if userObj.id in self.users:
+        if self.userIDExists(id):
             raise KeyError("Attempted to add a user that is already in this bbUserDB: " + str(userObj))
         self.users[userObj.id] = userObj
 
     
     def removeUser(self, id):
-        id = self.validateID
-        if not id in self.users:
+        id = self.validateID(id)
+        if not self.userIDExists(id):
             raise KeyError("user not found: " + str(id))
         del self.users[id]
 
 
     def getUser(self, id):
-        id = self.validateID
-        if not id in self.users:
-            raise KeyError("user not found: " + str(id))
+        id = self.validateID(id)
         return self.users[id]
 
     
