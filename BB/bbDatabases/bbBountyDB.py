@@ -6,15 +6,43 @@ class bbBountyDB:
     #                               was previously, and is still stored in JSON as, just a list
     bounties = {}
     maxBountiesPerFaction = 0
+    factions = []
 
 
     def __init__(self, factions):
+        self.factions = factions
         for fac in factions:
             self.bounties[fac] = {}
 
+
+    def addFaction(self, faction):
+        if self.factionExists(faction):
+            raise KeyError("Attempted to add a faction that already exists: " + faction)
+        self.bounties[faction] = {}
+
+
+    def removeFaction(self, faction):
+        if not self.factionExists(faction):
+            raise KeyError("Unrecognised faction: " + faction)
+        self.bounties.pop(faction)
+
+
+    def clearBounties(self, faction=None):
+        if faction is not None:
+            if not self.factionExists(faction):
+                raise KeyError("Unrecognised faction: " + faction)
+            self.bounties[faction] = {}
+        else:
+            for fac in self.getFactions():
+                self.clearBounties(faction=fac)
+
     
     def getFactions(self):
-        return self.bounties.keys()
+        return self.factions
+
+
+    def factionExists(self, faction):
+        return faction in self.getFactions()
 
     
     def getFactionBounties(self, faction):
