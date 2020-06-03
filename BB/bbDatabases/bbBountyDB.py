@@ -2,6 +2,7 @@ from ..bbObjects import bbBounty
 
 class bbBountyDB:
     # Dictionary of faction name : list of bounties
+    # I would like instead of lists of bounties use dicts of criminal:bounty, but criminal is not hashable
     bounties = {}
     maxBountiesPerFaction = 0
     factions = []
@@ -54,12 +55,12 @@ class bbBountyDB:
     def getBounty(self, name, faction=None):
         if faction is not None:
             for bounty in self.bounties[faction]:
-                if bounty.isCalled(name):
+                if bounty.criminal.isCalled(name):
                     return bounty
         else:
             for fac in self.getFactions():
                 for bounty in self.bounties[fac]:
-                    if bounty.isCalled(name):
+                    if bounty.criminal.isCalled(name):
                         return bounty
         raise KeyError("Bounty not found: " + name)
 
