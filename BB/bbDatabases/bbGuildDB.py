@@ -8,6 +8,10 @@ class bbGuildDB:
         return self.guilds.keys()
 
 
+    def getGuilds(self):
+        return self.guilds.values()
+
+
     def getGuild(self, id):
         return self.guilds[id]
 
