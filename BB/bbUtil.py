@@ -3,6 +3,8 @@ from .bbObjects import bbSystem
 import json
 import math
 
+import os
+
 
 def readJSON(dbFile):
     f = open(dbFile, "r")
