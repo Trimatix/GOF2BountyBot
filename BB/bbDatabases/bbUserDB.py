@@ -14,7 +14,7 @@ class bbUserDB:
         return id
     
 
-    def initUser(self, id):
+    def reinitUser(self, id):
         id = self.validateID
         if not id in self.users:
             raise KeyError("user not found: " + str(id))
