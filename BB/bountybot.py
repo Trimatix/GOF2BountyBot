@@ -515,10 +515,10 @@ async def on_message(message):
         else:
             if message.author.id == 188618589102669826 or message.author.permissions_in(message.channel).administrator:
                 if command == "set-announce-channel":
-                    guildsDB.getGuild(message.guild.id).setAnnounceChannel(message.channel.id)
+                    guildsDB.getGuild(message.guild.id).setAnnounceChannelId(message.channel.id)
                     await message.channel.send(":ballot_box_with_check: Announcements channel set!")
                 elif command == "set-play-channel":
-                    guildsDB.getGuild(message.guild.id).setPlayChannel(message.channel.id)
+                    guildsDB.getGuild(message.guild.id).setPlayChannelId(message.channel.id)
                     await message.channel.send(":ballot_box_with_check: Bounty play channel set!")
                 elif command == "admin-help":
                     helpEmbed = makeEmbed(titleTxt="BB Administrator Commands", thumb=client.user.avatar_url_as(size=64))
