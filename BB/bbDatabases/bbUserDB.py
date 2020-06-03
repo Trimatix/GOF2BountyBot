@@ -51,7 +51,7 @@ class bbUserDB:
     def toDict(self):
         data = {}
         for id in self.users.keys():
-            data[id] = self.users[id].toDict()
+            data[id] = self.users[id].toDictNoId()
         return data
 
 
