@@ -37,7 +37,6 @@ def loadBountiesDB(filePath):
 
 def saveDB(dbPath, db):
     bbUtil.writeJSON(dbPath, db.toDict())
-    print(datetime.now().strftime("%H:%M:%S: Data saved!"))
 
 
 ## Global Variables
@@ -142,6 +141,7 @@ async def on_ready():
             saveDB(bbConfig.userDBPath, usersDB)
             saveDB(bbConfig.bountyDBPath, bountiesDB)
             saveDB(bbConfig.guildDBPath, guildsDB)
+            print(datetime.now().strftime("%H:%M:%S: Data saved!"))
             currentSaveWait = 0
 
 
@@ -535,10 +535,12 @@ async def on_message(message):
                         saveDB(bbConfig.userDBPath, usersDB)
                         saveDB(bbConfig.bountyDBPath, bountiesDB)
                         saveDB(bbConfig.guildDBPath, guildsDB)
+                        print(datetime.now().strftime("%H:%M:%S: Data saved!"))
                     elif command == "save":
                         saveDB(bbConfig.userDBPath, usersDB)
                         saveDB(bbConfig.bountyDBPath, bountiesDB)
                         saveDB(bbConfig.guildDBPath, guildsDB)
+                        print(datetime.now().strftime("%H:%M:%S: Data saved manually!"))
                         await message.channel.send("saved!")
                     elif command == "anchset?":
                         await message.channel.send(guildsDB.getGuild(message.guild.id).hasAnnounceChannel())
