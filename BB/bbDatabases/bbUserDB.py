@@ -55,6 +55,14 @@ class bbUserDB:
         return self.users[id]
 
     
+    def getUsers(self):
+        return self.users.values()
+
+    
+    def getIds(self):
+        return self.users.keys()
+
+    
     def toDict(self):
         data = {}
         for id in self.users.keys():
