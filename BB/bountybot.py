@@ -295,7 +295,7 @@ async def on_message(message):
                 outmessage = "__**Active Bounties**__\nTimes given in UTC. See more detailed information with `!bb bounties <faction>`\n```css"
                 preLen = len(outmessage)
                 for fac in bountiesDB.getFactions():
-                    if not bountiesDB.hasBounties(fac):
+                    if bountiesDB.hasBounties(fac):
                         outmessage += "\n • [" + fac.title() + "]: "
                         for bounty in bountiesDB.getFactionBounties(fac):
                             outmessage += criminalNameOrDiscrim(client, bounty.criminal) + ", "
