@@ -43,7 +43,7 @@ def saveDB(dbPath, db):
 client = discord.Client()
 usersDB = loadUsersDB(bbConfig.userDBPath)
 guildsDB = loadGuildsDB(bbConfig.guildDBPath)
-bounties = loadBountiesDB(bbConfig.bountyDBPath)
+bountiesDB = loadBountiesDB(bbConfig.bountyDBPath)
 
 
 async def announceNewBounty(newBounty):
@@ -59,15 +59,15 @@ async def announceNewBounty(newBounty):
             if currentChannel is not None:
                 await currentChannel.send(msg, embed=bountyEmbed)
 
-async def announceBountyWon(bounty, rewards, winningGuild, winningUser):
+async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
     for currentGuild in guildsDB.getGuilds():
         if currentGuild.hasPlayChannel():
             rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!",authorName=criminalNameOrDiscrim(client, bounty.criminal) + " Arrested",icon=bounty.criminal.icon,col=bbData.factionColours[bounty.faction])
             
-            if client.get_guild(currentGuild.id).get_member(winningUser) is None:
-                rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUser]["reward"]) + " credits:", value=str(client.get_user(winningUser)) + " checked " + str(int(rewards[winningUser]["checked"])) + " system" + ("s" if int(rewards[winningUser]["checked"]) != 1 else ""), inline=False)
+            if client.get_guild(currentGuild.id).get_member(winningUserId) is None:
+                rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUserId]["reward"]) + " credits:", value=str(client.get_user(winningUserId)) + " checked " + str(int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
             else:
-                rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUser]["reward"]) + " credits:", value="<@" + str(winningUser) + "> checked " + str(int(rewards[winningUser]["checked"])) + " system" + ("s" if int(rewards[winningUser]["checked"]) != 1 else ""), inline=False)
+                rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUserId]["reward"]) + " credits:", value="<@" + str(winningUserId) + "> checked " + str(int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
             
             place = 2
             for userID in rewards:
@@ -79,8 +79,8 @@ async def announceBountyWon(bounty, rewards, winningGuild, winningUser):
                     place += 1
             
             if client.get_channel(currentGuild.getPlayChannelId()) is not None:
-                if int(currentGuild) == winningGuild.id:
-                    await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuild.get_member(winningUser).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+                if int(currentGuild) == winningGuildObj.id:
+                    await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuildObj.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
                 else:
                     await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
 
@@ -104,6 +104,7 @@ async def on_ready():
     currentSaveWait = 0
     newBountyDelayDelta = None
     newBountyFixedDailyTime = None
+
     if bbConfig.newBountyDelayType == "random":
         currentNewBountyDelay = random.randint(bbConfig.newBountyDelayMin, bbConfig.newBountyDelayMax)
     elif bbConfig.newBountyDelayType == "fixed":
@@ -111,20 +112,23 @@ async def on_ready():
         newBountyDelayDelta = timedelta(days=bbConfig.newBountyFixedDelta["days"], hours=bbConfig.newBountyFixedDelta["hours"], minutes=bbConfig.newBountyFixedDelta["minutes"], seconds=bbConfig.newBountyFixedDelta["seconds"])
         if bbConfig.newBountyFixedUseDailyTime:
             newBountyFixedDailyTime = timedelta(hours=bbConfig.newBountyFixedDailyTime["hours"], minutes=bbConfig.newBountyFixedDailyTime["minutes"], seconds=bbConfig.newBountyFixedDailyTime["seconds"])
+    
     while bbConfig.botLoggedIn:
         await asyncio.sleep(bbConfig.delayFactor)
         currentBountyWait += bbConfig.delayFactor
         currentSaveWait += bbConfig.delayFactor
+        
         # Make new bounties
         if bbConfig.newBountyDelayReset or (bbConfig.newBountyDelayType == "random" and currentBountyWait >= currentNewBountyDelay) or \
                 (bbConfig.newBountyDelayType == "fixed" and timedelta(seconds=currentBountyWait) >= newBountyDelayDelta and ((not bbConfig.newBountyFixedUseDailyTime) or (bbConfig.newBountyFixedUseDailyTime and \
                     datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta - timedelta(minutes=bbConfig.delayFactor) \
                     <= datetime.utcnow() \
                     <= datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
-            if canMakeBounty():
-                newBounty = bbBounty.Bounty(bountyDB=BBDB)
-                BBDB["bounties"][newBounty.faction].append(newBounty) # addBounty implmeneted
-                await announceNewBounty(client, newBounty)
+            if bountiesDB.canMakeBounty():
+                newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
+                bountiesDB.addBounty(newBounty)
+                await announceNewBounty(newBounty)
+
             if bbConfig.newBountyDelayType == "random":
                 currentNewBountyDelay = random.randint(bbConfig.newBountyDelayMin, bbConfig.newBountyDelayMax)
             else:
@@ -134,7 +138,9 @@ async def on_ready():
             currentBountyWait = 0
         # save the database
         if currentSaveWait >= bbConfig.saveDelay:
-            saveDB(BBDB)
+            saveDB(bbConfig.userDBPath, usersDB)
+            saveDB(bbConfig.bountyDBPath, bountiesDB)
+            saveDB(bbConfig.guildDBPath, guildsDB)
             currentSaveWait = 0
 
 
