@@ -7,17 +7,34 @@ class bbUser:
     bountyWins = 0
 
     def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0):
-        if type(id) != int:
+        if type(id) == float:
+            id = int(id)
+        elif type(id) != int:
             raise TypeError("id must be int, given " + str(type(id)))
-        if type(credits) != int:
+
+        if type(credits) == float:
+            credits = int(credits)
+        elif type(credits) != int:
             raise TypeError("credits must be int, given " + str(type(credits)))
-        if type(lifetimeCredits) != int:
+
+        if type(lifetimeCredits) == float:
+            lifetimeCredits = int(lifetimeCredits)
+        elif type(lifetimeCredits) != int:
             raise TypeError("lifetimeCredits must be int, given " + str(type(lifetimeCredits)))
-        if type(bountyCooldownEnd) != int:
+
+        if type(bountyCooldownEnd) == float:
+            bountyCooldownEnd = int(bountyCooldownEnd)
+        elif type(bountyCooldownEnd) != int:
             raise TypeError("bountyCooldownEnd must be int, given " + str(type(bountyCooldownEnd)))
-        if type(systemsChecked) != int:
+
+        if type(systemsChecked) == float:
+            systemsChecked = int(systemsChecked)
+        elif type(systemsChecked) != int:
             raise TypeError("systemsChecked must be int, given " + str(type(systemsChecked)))
-        if type(bountyWins) != int:
+
+        if type(bountyWins) == float:
+            bountyWins = int(bountyWins)
+        elif type(bountyWins) != int:
             raise TypeError("bountyWins must be int, given " + str(type(bountyWins)))
 
         self.id = id

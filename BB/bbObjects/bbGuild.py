@@ -5,6 +5,22 @@ class bbGuild:
 
 
     def __init__(self, id, announceChannel=-1, playChannel=-1):
+        if type(id) == float:
+            id = int(id)
+        elif type(id) != int:
+            raise TypeError("id must be int, given " + str(type(id)))
+
+        if type(announceChannel) == float:
+            announceChannel = int(announceChannel)
+        elif type(announceChannel) != int:
+            raise TypeError("announceChannel must be int, given " + str(type(credits)))
+
+        if type(playChannel) == float:
+            playChannel = int(playChannel)
+        elif type(playChannel) != int:
+            raise TypeError("playChannel must be int, given " + str(type(lifetimeCredits)))
+
+
         self.id = id
         self.announceChannel = announceChannel
         self.playChannel = playChannel
