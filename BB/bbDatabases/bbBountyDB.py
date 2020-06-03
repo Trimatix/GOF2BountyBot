@@ -1,5 +1,4 @@
 from ..bbObjects import bbBounty
-from .. import bbUtil
 
 class bbBountyDB:
     # Dictionary of faction name : 
@@ -56,11 +55,7 @@ class bbBountyDB:
 
     
     def bountyObjExists(self, bounty):
-        try:
-            self.getBounty(bounty.name, faction=bounty.faction)
-        except KeyError:
-            return False
-        return True
+        return self.bountyNameExists(bounty.name, faction=bounty.faction)
 
 
     def addBounty(self, bounty):
