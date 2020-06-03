@@ -33,6 +33,8 @@ class BountyConfig:
         self.answer = answer.title()
         self.checked = checked
         self.reward = reward
+        if type(reward) == float:
+            self.reward = int(reward)
         self.issueTime = issueTime
         self.endTime = endTime
         self.icon = icon
@@ -51,13 +53,13 @@ class BountyConfig:
             else:
                 if self.faction == "":
                     self.faction = random.choice(bbData.bountyFactions)
-                    while doDBCheck and not bountyDB.canMakeBounty(faction=self.faction):
+                    while doDBCheck and not bountyDB.factionCanMakeBounty(self.faction):
                         self.faction = random.choice(bbData.bountyFactions)
 
                 else:
                     if self.faction not in bbData.bountyFactions:
                         raise ValueError("BOUCONF_CONS_INVFAC: Invalid faction requested '" + self.faction + "'")
-                    if doDBCheck and not bountyDB.canMakeBounty(faction=self.faction):
+                    if doDBCheck and not bountyDB.factionCanMakeBounty(self.faction):
                         raise IndexError("BOUCONF_CONS_FACDBFULL: Attempted to generate new bounty config when no slots are available for faction: '" + self.faction + "'")
 
                 if self.name == "":
@@ -73,7 +75,7 @@ class BountyConfig:
                         self.icon = bbData.rocketIcon
         
         else:
-            if doDBCheck and not bountyDB.canMakeBounty(faction=self.faction):
+            if doDBCheck and not bountyDB.factionCanMakeBounty(self.faction):
                 raise IndexError("BOUCONF_CONS_FACDBFULL: Attempted to generate new bounty config when no slots are available for faction: '" + self.faction + "'")
         
         if self.route == []:
