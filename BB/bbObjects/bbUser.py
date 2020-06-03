@@ -34,7 +34,7 @@ class bbUser:
         self.systemsChecked = 0
         self.bountyWins = 0
 
-    def toDict(self):
+    def toDictNoId(self):
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins}

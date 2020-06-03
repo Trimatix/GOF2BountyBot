@@ -4,10 +4,10 @@ import asyncio
 import random
 import operator
 
+# may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .bbObjects import bbBounty
-# python complains when this is on the same line as the bbBounty import (?)
-from .bbObjects import bbBountyConfig
+from .bbObjects import bbBounty, bbBountyConfig
+from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB
 from . import bbUtil
 
 
@@ -47,13 +47,6 @@ def bountyDictExists(name, factionBounties):
 def bountyNameExistsInDict(bountiesList, nameToFind):
     for bounty in bountiesList:
         if bounty["criminal"]["name"] == nameToFind:
-            return True
-    return False
-
-
-def canMakeBounty():
-    for fac in bbData.bountyFactions:
-        if len(BBDB["bounties"][fac]) < bbConfig.maxBountiesPerFaction:
             return True
     return False
 
@@ -167,7 +160,7 @@ async def on_ready():
                     <= datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
             if canMakeBounty():
                 newBounty = bbBounty.Bounty(bountyDB=BBDB)
-                BBDB["bounties"][newBounty.faction].append(newBounty)
+                BBDB["bounties"][newBounty.faction].append(newBounty) # addBounty implmeneted
                 await announceNewBounty(client, newBounty)
             if bbConfig.newBountyDelayType == "random":
                 currentNewBountyDelay = random.randint(bbConfig.newBountyDelayMin, bbConfig.newBountyDelayMax)

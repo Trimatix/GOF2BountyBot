@@ -14,7 +14,7 @@ class bbUserDB:
         return id
     
 
-    def initUser(self, id):
+    def reinitUser(self, id):
         id = self.validateID
         if not id in self.users:
             raise KeyError("user not found: " + str(id))
@@ -51,7 +51,7 @@ class bbUserDB:
     def toDict(self):
         data = {}
         for id in self.users.keys():
-            data[id] = self.users[id].toDict()
+            data[id] = self.users[id].toDictNoId()
         return data
 
 
