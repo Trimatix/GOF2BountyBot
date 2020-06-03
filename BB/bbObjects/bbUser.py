@@ -9,6 +9,17 @@ class bbUser:
     def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0):
         if type(id) != int:
             raise TypeError("id must be int, given " + str(type(id)))
+        if type(credits) != int:
+            raise TypeError("credits must be int, given " + str(type(credits)))
+        if type(lifetimeCredits) != int:
+            raise TypeError("lifetimeCredits must be int, given " + str(type(lifetimeCredits)))
+        if type(bountyCooldownEnd) != int:
+            raise TypeError("bountyCooldownEnd must be int, given " + str(type(bountyCooldownEnd)))
+        if type(systemsChecked) != int:
+            raise TypeError("systemsChecked must be int, given " + str(type(systemsChecked)))
+        if type(bountyWins) != int:
+            raise TypeError("bountyWins must be int, given " + str(type(bountyWins)))
+
         self.id = id
         self.credits = credits
         self.lifetimeCredits = lifetimeCredits
