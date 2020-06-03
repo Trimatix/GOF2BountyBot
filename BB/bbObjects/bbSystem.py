@@ -35,5 +35,5 @@ class System (bbAliasable.Aliasable):
 
 
 def fromDict(sysDict):
-    return bbSystem.bbSystem(sysDict["name"], sysDict["faction"], sysDict["neighbours"], sysDict["security"], sysDict["coordinates"],
+    return System(sysDict["name"], sysDict["faction"], sysDict["neighbours"], sysDict["security"], sysDict["coordinates"],
                                 aliases=sysDict["aliases"] if "aliases" in sysDict else [], wiki=sysDict["wiki"] if "wiki" in sysDict else "")
