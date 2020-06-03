@@ -1,6 +1,4 @@
 maxBountiesPerFaction = 5
-announceChannel = {}
-playChannel = {}
 botLoggedIn = False
 # can be fixed or random
 newBountyDelayType = "fixed"
@@ -17,3 +15,6 @@ bPointsToCreditsRatio = 100
 randomDrinkFactor = 500
 randomDrinkNum = int(randomDrinkFactor / 3)
 checkCooldown = {"minutes":3}
+userDBPath = "saveData/users.json"
+guildDBPath = "saveData/guilds.json"
+bountyDBPath = "saveData/bounties.json"
