@@ -51,13 +51,6 @@ def bountyNameExistsInDict(bountiesList, nameToFind):
     return False
 
 
-def canMakeBounty():
-    for fac in bbData.bountyFactions:
-        if len(BBDB["bounties"][fac]) < bbConfig.maxBountiesPerFaction:
-            return True
-    return False
-
-
 def loadDB(DCClient):
     db = bbUtil.readJDB("BBDB.json")
     if "announceChannel" in db:
@@ -167,7 +160,7 @@ async def on_ready():
                     <= datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
             if canMakeBounty():
                 newBounty = bbBounty.Bounty(bountyDB=BBDB)
-                BBDB["bounties"][newBounty.faction].append(newBounty)
+                BBDB["bounties"][newBounty.faction].append(newBounty) # addBounty implmeneted
                 await announceNewBounty(client, newBounty)
             if bbConfig.newBountyDelayType == "random":
                 currentNewBountyDelay = random.randint(bbConfig.newBountyDelayMin, bbConfig.newBountyDelayMax)
