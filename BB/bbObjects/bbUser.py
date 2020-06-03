@@ -45,6 +45,20 @@ class bbUser:
             data += str(att) + "/"
         return data[:-1]
 
+    def getStatByName(self, stat):
+        if stat == "id":
+            return self.id
+        elif stat == "credits":
+            return self.credits
+        elif stat == "lifetimeCredits":
+            return self.lifetimeCredits
+        elif stat == "bountyCooldownEnd":
+            return self.bountyCooldownEnd
+        elif stat == "systemsChecked":
+            return self.systemsChecked
+        elif stat == "bountyWins":
+            return self.bountyWins
+
     def __str__(self):
         return "<bbUser #" + str(self.id) + ">"
 
