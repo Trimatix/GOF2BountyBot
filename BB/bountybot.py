@@ -53,32 +53,36 @@ async def announceNewBounty(newBounty):
     bountyEmbed.add_field(name="See the culprit's route with:", value="`!bb route " + criminalNameOrDiscrim(client, newBounty.criminal) + "`", inline=False)
     msg = "A new bounty is now available from **" + newBounty.faction.title() + "** central command:"
 
-    for currentGuild in guildsDB.getIDs():
+    for currentGuild in guildsDB.getGuilds():
         if currentGuild.hasAnnounceChannel():
             currentChannel = client.get_channel(currentGuild.getAnnounceChannelId())
             if currentChannel is not None:
                 await currentChannel.send(msg, embed=bountyEmbed)
 
 async def announceBountyWon(bounty, rewards, winningGuild, winningUser):
-    for currentGuild in bbConfig.playChannel:
-        rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!",authorName=criminalNameOrDiscrim(client, bounty.criminal) + " Arrested",icon=bounty.criminal.icon,col=bbData.factionColours[bounty.faction])
-        if client.get_channel(bbConfig.playChannel[str(currentGuild)]).guild.get_member(winningUser) is None:
-            rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUser]["reward"]) + " credits:", value=str(client.get_user(winningUser)) + " checked " + str(int(rewards[winningUser]["checked"])) + " system" + ("s" if int(rewards[winningUser]["checked"]) != 1 else ""), inline=False)
-        else:
-            rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUser]["reward"]) + " credits:", value="<@" + str(winningUser) + "> checked " + str(int(rewards[winningUser]["checked"])) + " system" + ("s" if int(rewards[winningUser]["checked"]) != 1 else ""), inline=False)
-        place = 2
-        for userID in rewards:
-            if not rewards[userID]["won"]:
-                if client.get_channel(bbConfig.playChannel[str(currentGuild)]).guild.get_member(userID) is None:
-                    rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value=str(client.get_user(userID)) + " checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
-                else:
-                    rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value="<@" + str(userID) + "> checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
-                place += 1
-        if client.get_channel(bbConfig.playChannel[str(currentGuild)]) is not None:
-            if int(currentGuild) == winningGuild.id:
-                await client.get_channel(bbConfig.playChannel[str(currentGuild)]).send(":trophy: **You win!**\n**" + winningGuild.get_member(winningUser).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+    for currentGuild in guildsDB.getGuilds():
+        if currentGuild.hasPlayChannel():
+            rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!",authorName=criminalNameOrDiscrim(client, bounty.criminal) + " Arrested",icon=bounty.criminal.icon,col=bbData.factionColours[bounty.faction])
+            
+            if client.get_guild(currentGuild.id).get_member(winningUser) is None:
+                rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUser]["reward"]) + " credits:", value=str(client.get_user(winningUser)) + " checked " + str(int(rewards[winningUser]["checked"])) + " system" + ("s" if int(rewards[winningUser]["checked"]) != 1 else ""), inline=False)
             else:
-                await client.get_channel(bbConfig.playChannel[str(currentGuild)]).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
+                rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUser]["reward"]) + " credits:", value="<@" + str(winningUser) + "> checked " + str(int(rewards[winningUser]["checked"])) + " system" + ("s" if int(rewards[winningUser]["checked"]) != 1 else ""), inline=False)
+            
+            place = 2
+            for userID in rewards:
+                if not rewards[userID]["won"]:
+                    if client.get_guild(currentGuild.id).get_member(userID) is None:
+                        rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value=str(client.get_user(userID)) + " checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
+                    else:
+                        rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value="<@" + str(userID) + "> checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
+                    place += 1
+            
+            if client.get_channel(currentGuild.getPlayChannelId()) is not None:
+                if int(currentGuild) == winningGuild.id:
+                    await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuild.get_member(winningUser).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+                else:
+                    await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
 
 
 def makeEmbed(titleTxt="",desc="",col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon=""):
