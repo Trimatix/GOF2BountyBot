@@ -23,32 +23,11 @@ def criminalNameOrDiscrim(client, criminal):
     return criminal.name
 
 
-def initializeUser(userID):
-    BBDB["users"][str(userID)] = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "wins":0}
-
-
 def makeRoute(start, end):
     return bbUtil.bbAStar(start, end, bbData.builtInSystemObjs)
 
 
-def bountyObjExists(name, factionBounties):
-    for bounty in factionBounties:
-        if bounty.criminal.isCalled(name):
-            return True
-    return False
 
-def bountyDictExists(name, factionBounties):
-    for bounty in factionBounties:
-        if bounty["criminal"]["name"] == name:
-            return True
-    return False
-
-
-def bountyNameExistsInDict(bountiesList, nameToFind):
-    for bounty in bountiesList:
-        if bounty["criminal"]["name"] == nameToFind:
-            return True
-    return False
 
 
 def loadDB(DCClient):
@@ -85,10 +64,11 @@ def saveDB(db):
 
 
 client = discord.Client()
-
+usersDB = loadUsersDB()
+guildsDB = loadGuildsDB()
+bounties = loadBountiesDB()
 BBDB = loadDB(client)
 factionColours = {"terran":discord.Colour.gold(), "vossk":discord.Colour.dark_green(), "midorian":discord.Colour.dark_red(), "nivelian":discord.Colour.teal(), "neutral":discord.Colour.purple()}
-factionIcons = {"terran":bbData.terranIcon, "vossk":bbData.vosskIcon, "midorian":bbData.midorianIcon, "nivelian":bbData.nivelianIcon, "neutral":bbData.neutralIcon}
 
 
 async def announceNewBounty(client, newBounty):
