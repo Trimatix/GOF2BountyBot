@@ -39,5 +39,7 @@ class Criminal (bbAliasable.Aliasable):
 
 def fromDict(crimDict, builtIn=False):
     if "builtIn" in crimDict:
+        if crimDict["builtIn"]:
+            return bbData.builtInCriminalObjs[crimDict["name"]]
         return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=crimDict["builtIn"] or builtIn)
     return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)
