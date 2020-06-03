@@ -1,5 +1,6 @@
-from ..bbConfig import bbData
+from ..bbObjects import bbSystem
 from .. import bbUtil
+import math
 
 class System (bbUtil.Aliasable):
     name = ""
@@ -35,5 +36,5 @@ class System (bbUtil.Aliasable):
 
 
 def fromDict(sysDict):
-    return Criminal(sysDict["name"], sysDict["faction"], sysDict["neighbours"], sysDict["security"], sysDict["coordinates"],
-                    aliases=sysDict["aliases"] if "aliases" in sysDict else [], wiki=sysDict["wiki"] if "wiki" in sysDict else "")
+    return bbSystem.bbSystem(sysDict["name"], sysDict["faction"], sysDict["neighbours"], sysDict["security"], sysDict["coordinates"],
+                                aliases=sysDict["aliases"] if "aliases" in sysDict else [], wiki=sysDict["wiki"] if "wiki" in sysDict else "")
