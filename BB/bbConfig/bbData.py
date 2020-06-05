@@ -1,16 +1,20 @@
 # Shame, but i'd rather this than keep factionColours in bountybot.py
 from discord import Colour
 
+# all factions recognised by BB
 factions = ["terran", "vossk", "midorian", "nivelian", "neutral"]
+# all factions useable in bounties
 bountyFactions = ["terran", "vossk", "midorian", "nivelian"]
 
+# names of criminals in builtIn bounties
 bountyNames = {"terran": ["Pal Tyyrt", "Kehnor", "Gendol Ethor", "Korr Bekkt", "Hongar Meton"],
                 "vossk": ["Mrrkt Nimkk", "Alvar Julen", "Vortt Baskk", "Oluchi Erland", "Orp Tsam"],
                 "midorian": ["Toma Prakupy", "Nombur Telénah", "Bartholomeu Drew", "Doni Trillyx", "Mashon Redal"],
                 "nivelian": ["Borsul Tarand", "Vilhelm Lindon", "Tamir Prakupy", "Merson Surr", "Ganfor Kant"]}
 
-                # Terran
-bountyIcons = {"Pal Tyyrt": "https://cdn.discordapp.com/attachments/700683544103747594/711226618919780359/pal_tyyrt.png",
+# icons for builtIn criminals
+bountyIcons = { # Terran
+                "Pal Tyyrt": "https://cdn.discordapp.com/attachments/700683544103747594/711226618919780359/pal_tyyrt.png",
                 "Kehnor": "https://cdn.discordapp.com/attachments/700683544103747594/711226614767419432/kehnor.png",
                 "Gendol Ethor": "https://cdn.discordapp.com/attachments/700683544103747594/711226611608977490/gendol_ethor.png",
                 "Korr Bekkt": "https://cdn.discordapp.com/attachments/700683544103747594/711226617254510602/korr_bekkt.png",
@@ -42,6 +46,7 @@ bountyIcons = {"Pal Tyyrt": "https://cdn.discordapp.com/attachments/700683544103
                 "Merson Surr": "https://cdn.discordapp.com/attachments/700683544103747594/711226769327521872/merson_surr.png",
                 "Ganfor Kant": "https://cdn.discordapp.com/attachments/700683544103747594/711226766630584370/ganfor_kant.png"}
 
+# data for builtIn criminals to be used in bbCriminal.fromDict
 # criminals marked as not builtIn to allow for dictionary init. The criminal object is then marked as builtIn during package __init__.py
 builtInCriminalData = {"Pal Tyyrt": {"name":"Pal Tyyrt", "faction":"terran", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226618919780359/pal_tyyrt.png", "aliases":["tyyrt"], "wiki":"https://galaxyonfire.fandom.com/wiki/Pal_Tyyrt", "builtIn":False, "isPlayer":False},
                 "Kehnor": {"name":"Kehnor", "faction":"terran", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226614767419432/kehnor.png", "aliases":[], "wiki":"https://galaxyonfire.fandom.com/wiki/Kehnor", "builtIn":False, "isPlayer":False},
@@ -78,14 +83,17 @@ builtInCriminalData = {"Pal Tyyrt": {"name":"Pal Tyyrt", "faction":"terran", "ic
 # To be populated during package init
 builtInCriminalObjs = {}
 
+# find the length of the longest criminal name, to be used in padding during !bb bounties
 longestBountyNameLength = 0
 for fac in bountyNames:
     for name in bountyNames[fac]:
         if len(name) > longestBountyNameLength:
             longestBountyNameLength = len(name)
 
+# levels of security in bbSystems (bbSystem security is stored as an index in this list)
 securityLevels = ["secure", "average", "risky", "dangerous"]
 
+# data for builtIn systems to be used in bbSystem.fromDict
 builtInSystemData = { #Terran
             "Aquila": {"name":"Aquila", "faction":"terran", "neighbours":["Wolf-Reiser", "Loma", "Union"], "security":2, "coordinates":(9, 2), "aliases":[], "wiki":"https://galaxyonfire.fandom.com/wiki/Aquila_system"},
             "Augmenta": {"name":"Augmenta", "faction":"terran", "neighbours":["Weymire", "Magnetar", "V'Ikka", "Buntta"], "security":0, "coordinates":(6, 6), "aliases":[], "wiki":"https://galaxyonfire.fandom.com/wiki/Augmenta_system"},
@@ -134,49 +142,15 @@ builtInSystemData = { #Terran
 # To be populated during package init
 builtInSystemObjs = {}
 
+# map image URLS for !bb map
 mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/700683544103747594/700683693215318076/gof2_coords.png"
 mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png'
 
-helpStr = """*--=* __***BountyBot Commands***__ *=--*
-:star: Here are my commands! Prefix commands with `!bb` - for example: `!bb help`
-**<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments.```ini
-[ MISCELLANEOUS ]
-
-- help
-    | Display information about all available commands.
-- balance <userTag>
-    | Get the credits balance of yourself, or a tagged user if one is given.
-- stats <userTag>
-    | Get various credits and bounty statistics about yourself, or a tagged user.
-- leaderboard <-g|c|s|w>
-    | Show the credits leaderboard. Give -g for the global leaderboard, not just this server.
-    | Give -c for the CURRENT credits leaderboard, -s for the 'systems checked' leaderboard.
-    | Give -w for the 'bounties won' leaderboard.                   E.g: !bb leaderboard -gs
-
-[   GOF2 INFO   ]
-
-- map
-    | Send the complete GOF2 starmap.
-- system [system]
-    | Display information about a given system.
-- make-route [startSystem], [endSystem]
-    | Find the shortest route from startSystem to endSystem.
-- criminal [criminal name]
-    | Get information about a criminal, including their wiki page and name aliases.
-
-[   BOUNTIES    ]
-
-- bounties <faction>
-    | If no faction is given, name all currently active bounties.
-    | If a faction is given, show detailed info about its active bounties.
-- route [name]
-    | Get the named criminal's current route.
-- check [system]
-    | Check if any criminals are in the given system, arrest them, and get paid!```"""
-
+# intro for help commands
 helpIntro = """:star: Here are my commands! Prefix commands with `!bb` - for example: `!bb help`
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
 
+# help strings for bb commands
 helpDict = {"__Miscellaneous__":{"**help**":"Display information about all available commands.",
                                 "**balance** *<userTag>*":"Get the credits balance of yourself, or a tagged user if one is given.",
                                 "**stats** *<userTag>*":"Get various credits and bounty statistics about yourself, or a tagged user.",
@@ -189,23 +163,19 @@ helpDict = {"__Miscellaneous__":{"**help**":"Display information about all avail
                             "**route [criminal name]**":"Get the named criminal's current route.",
                             "**check [system]**":"Check if any criminals are in the given system, arrest them, and get paid! 💰"}}
 
-adminHelpStr = """*--=* __***BountyBot Admin Commands***__ *=--*
-:star: Here are my administrator commands! Prefix commands with `!bb` - for example: `!bb help`
-**<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments.```ini
-- admin-help
-   | Display information about admin-only commands.
-- setchannel
-    | Set the channel where BountyBot will send announcements (e.g new bounties)```"""
-
+# intro for admin help commands
 adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `!bb` - for example: `!bb help`
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
 
+# help strings for admin bb commands
 adminHelpDict = {"__Miscellaneous__":{"**admin-help**":"Display information about admin-only commands.",
                                     "**set-announce-channel** *<off>*":"Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `!bb set-announce-channel off` to disable announcements.",
                                     "**set-play-channel** *<off>*":"Set the channel where BountyBot will send info about completed bounties\n> Use `!bb set-play-channel off` to disable completed bounty announcements."}}
 
+# string extensions for numbers, e.g 11th, 1st, 23rd...
 numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
 
+# icons for factions
 terranIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013574331596850/terran.png"
 vosskIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013681621893130/vossk.png"
 midorianIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013601019691038/midorian.png"
@@ -216,5 +186,8 @@ errorIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/1
 winIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/trophy_1f3c6.png"
 rocketIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/rocket_1f680.png"
 
+# list associating faction names with icons
 factionIcons = {"terran":terranIcon, "vossk":vosskIcon, "midorian":midorianIcon, "nivelian":nivelianIcon, "neutral":neutralIcon}
+
+# colours to use in faction-related embed strips
 factionColours = {"terran":Colour.gold(), "vossk":Colour.dark_green(), "midorian":Colour.dark_red(), "nivelian":Colour.teal(), "neutral":Colour.purple()}
