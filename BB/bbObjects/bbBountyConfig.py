@@ -20,7 +20,7 @@ class BountyConfig:
     builtIn = False
     generated = False
 
-    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1.0, issueTime=-1.0, endTime=-1.0, icon=""):
+    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki=""):
         self.faction = faction.lower()
         self.name = name.title()
         self.isPlayer = False if isPlayer is None else isPlayer
@@ -40,6 +40,9 @@ class BountyConfig:
         self.icon = icon
         self.generated = False
         self.builtIn = False
+
+        self.aliases = aliases
+        self.wiki = wiki
 
         # if isPlayer and client is None:
         #     raise ValueError("BOUCONF_CONS_NOCLIENT: Attempted to make player bounty but didn't provide client '" + name + "'")
@@ -66,10 +69,10 @@ class BountyConfig:
                     self.builtIn = True
                     self.name = random.choice(bbData.bountyNames[self.faction])
                     while doDBCheck and bountyDB.bountyNameExists(self.name):
-                        name = random.choice(bbData.bountyNames[self.faction])
+                        self.name = random.choice(bbData.bountyNames[self.faction])
                 else:
                     if doDBCheck and bountyDB.bountyNameExists(self.name):
-                        raise KeyError("BountyConfig: attempted to create config for pre-existing bounty: " + name)
+                        raise KeyError("BountyConfig: attempted to create config for pre-existing bounty: " + self.name)
                     
                     if self.icon == "":
                         self.icon = bbData.rocketIcon
@@ -102,8 +105,8 @@ class BountyConfig:
         elif self.answer not in bbData.builtInSystemObjs:
             raise KeyError("Bounty constructor: Invalid answer requested '" + self.answer + "'")
         
-        if self.reward == -1.0:
-            self.reward = len(self.route) * bbConfig.bPointsToCreditsRatio
+        if self.reward == -1:
+            self.reward = int(len(self.route) * bbConfig.bPointsToCreditsRatio)
         elif self.reward < 0:
             raise ValueError("Bounty constructor: Invalid reward requested '" + str(self.reward) + "'")
         if self.issueTime == -1.0:
