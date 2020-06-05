@@ -19,3 +19,4 @@ userDBPath = "saveData/users.json"
 guildDBPath = "saveData/guilds.json"
 bountyDBPath = "saveData/bounties.json"
 commandPrefix = "!bb "
+developers = [188618589102669826]
