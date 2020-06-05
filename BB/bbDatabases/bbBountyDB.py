@@ -124,12 +124,12 @@ class bbBountyDB:
 
 
     def hasBounties(self, faction=None):
-        if faction is not None:
+        if faction is None:
             for fac in self.getFactions():
                 if self.getFactionNumBounties(fac) != 0:
                     return True
         else:
-            return self.getFactionNumBounties(fac) != 0
+            return self.getFactionNumBounties(faction) != 0
         return False 
 
 
