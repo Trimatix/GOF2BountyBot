@@ -1,26 +1,58 @@
 maxBountiesPerFaction = 5
-botLoggedIn = False
-# can be fixed or random
+
+# can be "fixed" or "random"
 newBountyDelayType = "fixed"
+
+# only spawn bounties at this time
 newBountyFixedDailyTime = {"hours":18, "minutes":40, "seconds":0}
+# use the above, or just spawn after every newBountyFixedDelta
 newBountyFixedUseDailyTime = False
+
+# time to wait inbetween spawning bounties
 newBountyFixedDelta = {"days":0, "hours":2, "minutes":0, "seconds":0}
+
+# do not change this!
 newBountyFixedDeltaChanged = False
+# do not change this!
 newBountyDelayReset = False
+
+# when using random delay generation, use this as the minimum wait time in seconds
 newBountyDelayMin = 300
+# when using random delay generation, use this as the maximum wait time in seconds
 newBountyDelayMax = 4 * 60 * 60
+
+# the number of seconds to wait in between each save
 saveDelay = 30 * 60
+
+# the number of seconds to wait before checking if a delay time is passed. should be a factor all delays given.
 delayFactor = 5
+
+# The number of credits to award for each bPoint (each system in a criminal route)
 bPointsToCreditsRatio = 100
+
+# max number of messages to wait before sending random !drink
 randomDrinkFactor = 500
+# wait time for initial period
 randomDrinkNum = int(randomDrinkFactor / 3)
+
+# time to put users on cooldown between using !bb check
 checkCooldown = {"minutes":3}
+
+# path to JSON files for database saves
 userDBPath = "saveData/users.json"
 guildDBPath = "saveData/guilds.json"
 bountyDBPath = "saveData/bounties.json"
+
+# prefix for bot commands. dont forget a space!
 commandPrefix = "!bb "
+
+# discord user IDs of all developers
 developers = [188618589102669826]
+
+# number of bounties ahead of a checked system in a route to report a recent criminal spotting (+1)
 closeBountyThreshold = 4
+
+# titles to give each type of user when reporting error messages etc
 devTitle = "officer"
 adminTitle = "commander"
 userTitle = "pilot"

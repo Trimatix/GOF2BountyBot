@@ -79,6 +79,9 @@ bountiesDB = loadBountiesDB(bbConfig.bountyDBPath)
 # BountyBot commands DB
 bbCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB()
 
+# Do not change this!
+botLoggedIn = False
+
 
 
 ####### UTIL FUNCTIONS #######
@@ -871,7 +874,7 @@ developer command saving all data to JSON and then shutting down the bot
 """
 async def dev_cmd_sleep(message, args):
     await message.channel.send("zzzz....")
-    bbConfig.botLoggedIn = False
+    botLoggedIn = False
     await client.logout()
     saveDB(bbConfig.userDBPath, usersDB)
     saveDB(bbConfig.bountyDBPath, bountiesDB)
@@ -1343,7 +1346,7 @@ async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
     # bot is now logged in
-    bbConfig.botLoggedIn = True
+    botLoggedIn = True
     # amount of time waited since last bounty generation
     currentBountyWait = 0
     # amount of time waited since last save
@@ -1365,7 +1368,7 @@ async def on_ready():
             newBountyFixedDailyTime = timedelta(hours=bbConfig.newBountyFixedDailyTime["hours"], minutes=bbConfig.newBountyFixedDailyTime["minutes"], seconds=bbConfig.newBountyFixedDailyTime["seconds"])
     
     # execute regular tasks while the bot is logged in
-    while bbConfig.botLoggedIn:
+    while botLoggedIn:
         # select for bbConfig.delayFactor - should be a factor of all delay times (poor system!)
         await asyncio.sleep(bbConfig.delayFactor)
         # track the time waited
