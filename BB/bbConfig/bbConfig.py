@@ -20,3 +20,7 @@ guildDBPath = "saveData/guilds.json"
 bountyDBPath = "saveData/bounties.json"
 commandPrefix = "!bb "
 developers = [188618589102669826]
+closeBountyThreshold = 4
+devTitle = "officer"
+adminTitle = "commander"
+userTitle = "pilot"
