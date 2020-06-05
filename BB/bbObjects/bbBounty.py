@@ -28,7 +28,7 @@ class Bounty:
             if config.builtIn:
                 self.criminal = bbData.builtInCriminalObjs[config.name]
             else:
-                self.criminal = bbCriminal.Criminal(config.name, config.faction, config.icon)
+                self.criminal = bbCriminal.Criminal(config.name, config.faction, config.icon, isPlayer=config.isPlayer, aliases=config.aliases, wiki=config.wiki)
 
         else:
             # config.builtIn = not criminalObj.isPlayer and criminalObj.name in bbData.bountyNames
@@ -77,10 +77,10 @@ class Bounty:
             if self.systemChecked(system):
                 rewards[self.checked[system]]["checked"] += 1
                 if self.answer == system:
-                    rewards[self.checked[system]]["reward"] += (self.reward / len(self.route)) * (uncheckedSystems + 1)
+                    rewards[self.checked[system]]["reward"] += int(self.reward / len(self.route)) * (uncheckedSystems + 1)
                     rewards[self.checked[system]]["won"] = True
                 else:
-                    rewards[self.checked[system]]["reward"] += self.reward / len(self.route)
+                    rewards[self.checked[system]]["reward"] += int(self.reward / len(self.route))
         return rewards
 
     def toDict(self):
