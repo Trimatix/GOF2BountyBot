@@ -3,6 +3,7 @@ from .. import bbAliasable
 class bbShip(bbAliasable.Aliasable):
     hasWiki = False
     wiki = ""
+    nickname = ""
 
     armour = 0.0
     cargo = 0
@@ -188,3 +189,32 @@ class bbShip(bbAliasable.Aliasable):
             total += upgrade.value
 
         return total
+
+    
+    def applyUpgrade(self, upgrade):
+        if upgrade.applied:
+            raise RuntimeError("Attempted to apply a ship upgrade that has already been applied")
+
+        upgrade.applied = True
+        self.upgradesApplied.append(upgrade)
+
+        self.armour += upgrade.armour
+        self.armour *= upgrade.armourMultiplier
+
+        self.cargo += upgrade.cargo
+        self.cargo *= upgrade.cargoMultiplier
+
+        self.numSecondaries += upgrade.numSecondaries
+        self.numSecondaries *= upgrade.numSecondariesMultiplier
+
+        self.handling += upgrade.handling
+        self.handling *= upgrade.handlingMultiplier
+
+        self.maxPrimaries += upgrade.maxPrimaries
+        self.maxPrimaries *= upgrade.maxPrimariesMultiplier
+        
+        self.maxTurrets += upgrade.maxTurrets
+        self.maxTurrets *= upgrade.maxTurretsMultiplier
+
+        self.maxModules += upgrade.maxModules
+        self.maxModules *= upgrade.maxModulesMultiplier
