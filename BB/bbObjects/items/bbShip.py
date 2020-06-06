@@ -3,6 +3,8 @@ from .. import bbAliasable
 class bbShip(bbAliasable.Aliasable):
     hasWiki = False
     wiki = ""
+
+    hasNickname = False
     nickname = ""
 
     armour = 0.0
@@ -22,7 +24,7 @@ class bbShip(bbAliasable.Aliasable):
     upgradesApplied = []
 
 
-    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[]):
+    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname=""):
         super(bbShip, self).__init__(name, aliases)
 
         if len(weapons) > maxPrimaries:
@@ -49,6 +51,9 @@ class bbShip(bbAliasable.Aliasable):
         self.weapons = weapons
         self.modules = modules
         self.turrets = turrets
+
+        self.hasNickname = nickname != ""
+        self.nickname = nickname
 
 
     def getNumWeaponsEquipped(self):
@@ -218,3 +223,13 @@ class bbShip(bbAliasable.Aliasable):
 
         self.maxModules += upgrade.maxModules
         self.maxModules *= upgrade.maxModulesMultiplier
+
+    
+    def changeNickname(self, nickname):
+        self.nickname = nickname
+        self.hasNickname = nickname != ""
+
+    
+    def removeNickname(self, nickname):
+        self.nickname = ""
+        self.hasNickname = False
