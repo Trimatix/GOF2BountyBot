@@ -13,4 +13,4 @@ class bbWeapon(bbAliasable.Aliasable):
 
 
 def fromDict(weaponDict):
-    return bbWeapon(weaponDict["name"], weaponDict["aliases"])
+    return bbWeapon(weaponDict["name"], weaponDict["aliases"], dps=weaponDict["dps"], value=weaponDict["value"])

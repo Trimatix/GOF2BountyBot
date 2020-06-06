@@ -237,3 +237,13 @@ class bbShip(bbAliasable.Aliasable):
 
     def getType(self):
         return bbShip
+
+
+def fromDict(shipDict):
+    return bbShip(shipDict["name"], shipDict["maxPrimaries"], shipDict["maxTurrets"], shipDict["maxModules"],
+                    armour=shipDict["armour"] if "armour" in shipDict else 0, cargo=shipDict["cargo"] if "cargo" in shipDict else 0,
+                    numSecondaries=shipDict["numSecondaries"] if "numSecondaries" in shipDict else 0, handling=shipDict["handling"] if "handling" in shipDict else 0,
+                    value=shipDict["value"] if "value" in shipDict else 0, aliases=shipDict["aliases"] if "aliases" in shipDict else [],
+                    weapons=shipDict["weapons"] if "weapons" in shipDict else [], modules=shipDict["modules"] if "modules" in shipDict else [],
+                    turrets=shipDict["turrets"] if "turrets" in shipDict else [], wiki=shipDict["wiki"] if "wiki" in shipDict else "0",
+                    upgradesApplied=shipDict["upgradesApplied"] if "upgradesApplied" in shipDict else [], nickname=shipDict["nickname"] if "nickname" in shipDict else "")

@@ -57,3 +57,20 @@ class bbShipUpgrade:
 
     def __eq__(self, other):
         return type(self) == type(other) and self.name == other.name
+
+
+def fromDict(upgradeDict):
+    return bbShipUpgrade(upgradeDict["name"], upgradeDict["value"], armour=upgradeDict["armour"] if "armour" in upgradeDict else 0.0,
+                            armourMultiplier=upgradeDict["armourMultiplier"] if "armourMultiplier" in upgradeDict else 1.0,
+                            cargo=upgradeDict["cargo"] if "cargo" in upgradeDict else 0,
+                            cargoMultiplier=upgradeDict["cargoMultiplier"] if "cargoMultiplier" in upgradeDict else 1.0,
+                            numSecondaries=upgradeDict["numSecondaries"] if "numSecondaries" in upgradeDict else 0,
+                            numSecondariesMultiplier=upgradeDict["numSecondariesMultiplier"] if "numSecondariesMultiplier" in upgradeDict else 1.0,
+                            handling=upgradeDict["handling"] if "handling" in upgradeDict else 0,
+                            handlingMultiplier=upgradeDict["handlingMultiplier"] if "handlingMultiplier" in upgradeDict else 1.0,
+                            maxPrimaries=upgradeDict["maxPrimaries"] if "maxPrimaries" in upgradeDict else 0,
+                            maxPrimariesMultiplier=upgradeDict["maxPrimariesMultiplier"] if "maxPrimariesMultiplier" in upgradeDict else 1.0,
+                            maxTurrets=upgradeDict["maxTurrets"] if "maxTurrets" in upgradeDict else 0,
+                            maxTurretsMultiplier=upgradeDict["maxTurretsMultiplier"] if "maxTurretsMultiplier" in upgradeDict else 1.0,
+                            maxModules=upgradeDict["maxModules"] if "maxModules" in upgradeDict else 0,
+                            maxModulesMultiplier=upgradeDict["maxModulesMultiplier"] if "maxModulesMultiplier" in upgradeDict else 1.0)
