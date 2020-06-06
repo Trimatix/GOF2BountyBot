@@ -233,3 +233,7 @@ class bbShip(bbAliasable.Aliasable):
     def removeNickname(self, nickname):
         self.nickname = ""
         self.hasNickname = False
+    
+
+    def getType(self):
+        return bbShip
