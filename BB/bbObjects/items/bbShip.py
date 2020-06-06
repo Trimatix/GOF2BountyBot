@@ -1,6 +1,9 @@
 from .. import bbAliasable
 
 class bbShip(bbAliasable.Aliasable):
+    hasWiki = False
+    wiki = ""
+
     armour = 0.0
     cargo = 0
     numSecondaries = 0
@@ -15,7 +18,10 @@ class bbShip(bbAliasable.Aliasable):
     modules = []
     turrets = []
 
-    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[]):
+    upgradesApplied = []
+
+
+    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[]):
         super(bbShip, self).__init__(name, aliases)
 
         if len(weapons) > maxPrimaries:
@@ -25,15 +31,23 @@ class bbShip(bbAliasable.Aliasable):
         if len(turrets) > maxTurrets:
             ValueError("passed more turrets than can be stored on this ship - maxTurrets")
 
+        self.hasWiki = wiki != ""
+        self.wiki = wiki
+
         self.name = name
-        self.maxPrimaries = maxPrimaries
-        self.maxTurrets = maxTurrets
-        self.maxModules = maxModules
         self.armour = armour
         self.cargo = cargo
         self.numSecondaries = numSecondaries
         self.handling = handling
         self.value = value
+        
+        self.maxPrimaries = maxPrimaries
+        self.maxTurrets = maxTurrets
+        self.maxModules = maxModules
+
+        self.weapons = weapons
+        self.modules = modules
+        self.turrets = turrets
 
 
     def getNumWeaponsEquipped(self):
@@ -112,3 +126,65 @@ class bbShip(bbAliasable.Aliasable):
 
     def getTurretAtIndex(self, index):
         return self.turrets[index]
+
+    
+    def getDPS(self):
+        total = 0
+        multiplier = 1
+        for weapon in self.weapons:
+            total += weapon.dps
+        for module in self.modules:
+            total += module.dps
+            multiplier *= module.dpsMultiplier
+        return total * multiplier
+
+    
+    def getShield(self):
+        total = 0
+        multiplier = 1
+        for module in self.modules:
+            total += module.shield
+            multiplier *= module.shieldMultiplier
+        return total * multiplier
+
+
+    def getArmour(self):
+        total = self.armour
+        multiplier = 1
+        for module in self.modules:
+            total += module.armour
+            multiplier *= module.armourMultiplier
+        return total * multiplier
+
+
+    def getCargo(self):
+        total = self.cargo
+        multiplier = 1
+        for module in self.modules:
+            total += module.cargo
+            multiplier *= module.cargoMultiplier
+        return total * multiplier
+
+
+    def getHandling(self):
+        total = self.handling
+        multiplier = 1
+        for module in self.modules:
+            total += module.handling
+            multiplier *= module.handlingMultiplier
+        return total * multiplier
+
+
+    def getValue(self):
+        total = self.value
+
+        for module in self.modules:
+            total += module.value
+        for weapon in self.weapons:
+            total += weapon.value
+        for turret in self.turrets:
+            total += turret.value
+        for upgrade in self.upgradesApplied:
+            total += upgrade.value
+
+        return total
