@@ -3,6 +3,7 @@ from .. import bbAliasable
 class bbShip(bbAliasable.Aliasable):
     hasWiki = False
     wiki = ""
+    manufacturer = ""
 
     hasNickname = False
     nickname = ""
@@ -24,7 +25,7 @@ class bbShip(bbAliasable.Aliasable):
     upgradesApplied = []
 
 
-    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname=""):
+    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname=""):
         super(bbShip, self).__init__(name, aliases)
 
         if len(weapons) > maxPrimaries:
@@ -197,10 +198,11 @@ class bbShip(bbAliasable.Aliasable):
 
     
     def applyUpgrade(self, upgrade):
-        if upgrade.applied:
-            raise RuntimeError("Attempted to apply a ship upgrade that has already been applied")
+        # if upgrade.applied:
+        #     raise RuntimeError("Attempted to apply a ship upgrade that has already been applied")
 
-        upgrade.applied = True
+        # upgrade.applied = True
+        # upgrade.value = upgrade.valueForShip(self)
         self.upgradesApplied.append(upgrade)
 
         self.armour += upgrade.armour
@@ -226,21 +228,50 @@ class bbShip(bbAliasable.Aliasable):
 
     
     def changeNickname(self, nickname):
+        if self.hasNickname:
+            self.removeAlias(self.nickname)
         self.nickname = nickname
-        self.hasNickname = nickname != ""
+        if nickname != "":
+            self.hasNickname = True
+            self.addAlias(nickname)
 
     
     def removeNickname(self, nickname):
-        self.nickname = ""
-        self.hasNickname = False
+        if self.hasNickname:
+            self.removeAlias(self.nickname)
+            self.nickname = ""
+            self.hasNickname = False
     
 
     def getType(self):
         return bbShip
 
 
+    def toDict(self):
+        weaponsList = []
+        for weapon in self.weapons:
+            weaponsList.append(weapon.toDict())
+        
+        modulesList = []
+        for module in self.modules:
+            modulesList.append(module.toDict())
+
+        turretsList = []
+        for turret in self.turrets:
+            turretsList.append(turret.toDict())
+        
+        upgradesList = []
+        for upgrade in self.upgradesApplied:
+            upgradesList.append(upgrade.toDict())
+
+        return {"name":self.name, "aliases":self.aliases, "wiki":self.wiki, "manufacturer":self.manufacturer,
+                    "nickname":self.nickname, "armour":self.armour, "cargo": self.cargo, "numSecondaries":self.numSecondaries,
+                    "handling":self.handling, "value":self.value, "maxPrimaries":self.maxPrimaries, "maxTurrets":self.maxTurrets,
+                    "maxModules":self.maxModules, "weapons":weaponsList, "modules":modulesList, "turrets":turretsList, "upgradesApplied":upgradesList}
+
+
 def fromDict(shipDict):
-    return bbShip(shipDict["name"], shipDict["maxPrimaries"], shipDict["maxTurrets"], shipDict["maxModules"],
+    return bbShip(shipDict["name"], shipDict["maxPrimaries"], shipDict["maxTurrets"], shipDict["maxModules"], manufacturer=shipDict["manufacturer"] if "manufacturer" in shipDict else "",
                     armour=shipDict["armour"] if "armour" in shipDict else 0, cargo=shipDict["cargo"] if "cargo" in shipDict else 0,
                     numSecondaries=shipDict["numSecondaries"] if "numSecondaries" in shipDict else 0, handling=shipDict["handling"] if "handling" in shipDict else 0,
                     value=shipDict["value"] if "value" in shipDict else 0, aliases=shipDict["aliases"] if "aliases" in shipDict else [],
