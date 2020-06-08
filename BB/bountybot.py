@@ -225,6 +225,23 @@ def makeEmbed(titleTxt="",desc="",col=discord.Colour.blue(), footerTxt="", img="
     return embed
 
 
+"""
+Construct a datetime.timedelta from a dictionary,
+transforming keys into keyword arguments fot the timedelta constructor.
+
+@param timeDict -- dictionary containing measurements for each time interval. i.e weeks, days, hours, minutes, seconds, microseconds and milliseconds. all are optional and case sensitive.
+@return -- a timedelta with all of the attributes requested in the dictionary.
+"""
+def timeDeltaFromDict(timeDict):
+    return timedelta(   weeks=timeDict["weeks"] if "weeks" in timeDict else 0,
+                        days=timeDict["days"] if "days" in timeDict else 0,
+                        hours=timeDict["hours"] if "hours" in timeDict else 0,
+                        minutes=timeDict["minutes"] if "minutes" in timeDict else 0,
+                        seconds=timeDict["seconds"] if "seconds" in timeDict else 0,
+                        microseconds=timeDict["microseconds"] if "microseconds" in timeDict else 0,
+                        milliseconds=timeDict["milliseconds"] if "milliseconds" in timeDict else 0)
+
+
 
 ####### USER COMMANDS #######
 
@@ -813,6 +830,87 @@ async def cmd_leaderboard(message, args):
 bbCommands.register("leaderboard", cmd_leaderboard)
 
 
+"""
+return a page listing the target user's items.
+can apply to a specified user, or the calling user if none is specified.
+can apply to a type of item (ships, modules, turrets or weapons), or all items if none is specified.
+can apply to a page, or the first page if none is specified.
+Arguments can be given in any order, and must be separated by a single space.
+
+@param message -- the discord message calling the command
+@param args -- string containing the arguments as specified above
+"""
+async def cmd_hangar(message, args):
+    argsSplit = args.split(" ")
+
+    requestedUser = message.author
+    item = "all"
+    page = 1
+
+    foundUser = False
+    foundItem = False
+    foundPage = False
+
+    useDummyData = False
+
+    if len(argsSplit) > 3:
+        await message.channel.send(":x: Too many arguments! I can only take a target user, an item type (ship/weapon/module), and a page number!")
+        return
+    
+    if args != "":
+        argNum = 1
+        for arg in argsSplit:
+            if arg[0:2] == "<@" and arg[-1] == ">" and bbUtil.isInt(arg[2:-1]):
+                if foundUser:
+                    await message.channel.send(":x: I can only take one user!")
+                    return
+                else:
+                    requestedUser = client.get_user(int(arg[2:-1]))
+                    foundUser = True
+                    
+            elif arg in bbConfig.validItemNamesWithPlural:
+                if foundItem:
+                    await message.channel.send(":x: I can only take one item type (ship/weapon/module/turret)!")
+                    return
+                else:
+                    item = arg
+                    foundItem = True
+
+            elif bbUtil.isInt(arg):
+                if foundPage:
+                    await message.channel.send(":x: I can only take one page number!")
+                    return
+                else:
+                    page = int(arg)
+                    foundPage = True
+            else:
+                await message.channel.send(":x: " + str(argNum) + bbData.numExtensions[argNum] + " argument invalid! I can only take a target user, an item type (ship/weapon/module/turret), and a page number!")
+            argNum += 1
+    
+    if requestedUser is None:
+        await message.channel.send(":x: Unrecognised user!")
+        return
+
+    if not usersDB.userIDExists(requestedUser.id):
+        if not foundUser:
+            usersDB.addUser(requestedUser.id)
+        else:
+            useDummyData = True
+
+    # TODO: unfinished
+    if useDummyData:
+        if page > 1:
+            await message.channel.send(":x: The requested user only has one page of items. Showing page one:")
+            page = 1
+        
+    else:
+        if page < 1:
+            await message.channel.send(":x: Invalid page number. Showing page one:")
+            page = 1
+        else:
+            maxPage = usersDB.getUser(requestedUser.id).numInventoryPages(item)
+
+
 
 ####### ADMINISTRATOR COMMANDS #######
 
@@ -1339,7 +1437,7 @@ Currently includes:
     - new bounty spawning
     - regular database saving to JSON
 
-TODO: the delays system needs to be completely rewritten.
+TODO: the delays system needs to be completely rewritten. Currently it sums up the amount of time waited against each delayed task. Instead, it should generate a datetime at which the delay runs out, just like with bounty cooldowns.
 """
 @client.event
 async def on_ready():
@@ -1351,10 +1449,16 @@ async def on_ready():
     currentBountyWait = 0
     # amount of time waited since last save
     currentSaveWait = 0
+
     # new bounty delay period as a datetime.timedelta
     newBountyDelayDelta = None
     # fixed daily time to spawn bounties at as a datetime.timedelta
     newBountyFixedDailyTime = None
+
+    # the time that the next shop stock refresh should occur, calculated by 12am today + bbConfig.shopRefreshStockPeriod
+    # I may wish to add a fixed daily time this should occur at. To implement, simply generate it as a timedelta and ADD it here (and when regenerating nextShopRefresh lower down)
+    nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0, millisecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
+
 
     # generate the amount of time to wait until the next bounty generation
     if bbConfig.newBountyDelayType == "random":
@@ -1363,9 +1467,9 @@ async def on_ready():
     elif bbConfig.newBountyDelayType == "fixed":
         # This system should be changed to isntead generate a currentNewBountyDelay, rather than repeatedly checking against newBountyFixedDailyTime
         currentNewBountyDelay = 0
-        newBountyDelayDelta = timedelta(days=bbConfig.newBountyFixedDelta["days"], hours=bbConfig.newBountyFixedDelta["hours"], minutes=bbConfig.newBountyFixedDelta["minutes"], seconds=bbConfig.newBountyFixedDelta["seconds"])
+        newBountyDelayDelta = timeDeltaFromDict(bbConfig.newBountyFixedDelta)
         if bbConfig.newBountyFixedUseDailyTime:
-            newBountyFixedDailyTime = timedelta(hours=bbConfig.newBountyFixedDailyTime["hours"], minutes=bbConfig.newBountyFixedDailyTime["minutes"], seconds=bbConfig.newBountyFixedDailyTime["seconds"])
+            newBountyFixedDailyTime = timeDeltaFromDict(bbConfig.newBountyFixedDailyTime)
     
     # execute regular tasks while the bot is logged in
     while botLoggedIn:
@@ -1374,13 +1478,20 @@ async def on_ready():
         # track the time waited
         currentBountyWait += bbConfig.delayFactor
         currentSaveWait += bbConfig.delayFactor
+
+        # Refresh all shop stocks
+        if datetime.utcnow() >= nextShopRefresh:
+            guildsDB.refreshAllShopStocks()
+            # Reset the shop stock refresh cooldown
+            nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0, millisecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
         
         # Make new bounties
+            # has the bounty delay period been reset manually? Is random 
         if bbConfig.newBountyDelayReset or (bbConfig.newBountyDelayType == "random" and currentBountyWait >= currentNewBountyDelay) or \
                 (bbConfig.newBountyDelayType == "fixed" and timedelta(seconds=currentBountyWait) >= newBountyDelayDelta and ((not bbConfig.newBountyFixedUseDailyTime) or (bbConfig.newBountyFixedUseDailyTime and \
-                    datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta - timedelta(minutes=bbConfig.delayFactor) \
+                    datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0, millisecond=0) + newBountyDelayDelta - timedelta(minutes=bbConfig.delayFactor) \
                     <= datetime.utcnow() \
-                    <= datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
+                    <= datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0, millisecond=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
             # ensure a new bounty can be created
             if bountiesDB.canMakeBounty():
                 newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
@@ -1394,8 +1505,9 @@ async def on_ready():
             else:
                 currentNewBountyDelay = newBountyDelayDelta
                 if bbConfig.newBountyFixedDeltaChanged:
-                    newBountyDelayDelta = timedelta(days=bbConfig.newBountyFixedDelta["days"], hours=bbConfig.newBountyFixedDelta["hours"], minutes=bbConfig.newBountyFixedDelta["minutes"], seconds=bbConfig.newBountyFixedDelta["seconds"])
+                    newBountyDelayDelta = timeDeltaFromDict(bbConfig.newBountyFixedDelta)
             currentBountyWait = 0
+
         # save the database
         if currentSaveWait >= bbConfig.saveDelay:
             saveDB(bbConfig.userDBPath, usersDB)
