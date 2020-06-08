@@ -1,3 +1,6 @@
+# Amount of time to wait between refreshing stock of all shops
+shopRefreshStockPeriod = {"days":1, "hours":0, "minutes":0, "seconds":0}
+
 maxBountiesPerFaction = 5
 
 # can be "fixed" or "random"
@@ -56,3 +59,26 @@ closeBountyThreshold = 4
 devTitle = "officer"
 adminTitle = "commander"
 userTitle = "pilot"
+
+# The number of ranks to use when randomly picking shop stock
+numShipRanks = 10
+numWeaponRanks = 10
+numModuleRanks = 7
+numTurretRanks = 3
+
+# The default number of items shops should generate every shopRefreshStockPeriod
+shopDefaultShipsNum = 5
+shopDefaultWeaponsNum = 5
+shopDefaultModulesNum = 3
+shopDefaultTurretsNum = 2
+
+# bbTurret is the only item that has a probability not to be spawned. This metric indicates the percentage chance of turrets being stocked on a given day
+turretSpawnProbability = 33
+
+# The maximum number of items that will be displayed per page of a user's hangar, when all item types are requested
+maxItemsPerHangarPageAll = 5
+# The maximum number of items that will be displayed per page of a user's hangar, when a single item type is requested
+maxItemsPerHangarPageIndividual = 10
+
+# Names to be used when checking input to !bb hangar and bbUser.numInventoryPages
+validItemNamesWithPlural = ["ship", "ships", "weapon", "weapons", "module", "modules", "turret", "turrets, ""all"]
