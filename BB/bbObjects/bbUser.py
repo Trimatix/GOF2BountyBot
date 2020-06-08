@@ -1,3 +1,14 @@
+from .items import bbShip, bbModule, bbWeapon
+from ..bbConfig import bbConfig
+
+
+defaultShipLoadoutDict = {"name": "Betty", "manufacturer": "midorian", "maxPrimaries": 1, "maxTurrets": 0, "maxModules": 3, "armour": 95, "cargo": 25, "numSecondaries": 1, "handling": 120, "value": 16038, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Betty", "builtIn":False,
+                        "weapons":[{"name": "Nirai Impulse EX 1", "builtIn": True}, {"name": "Micro Gun MK I", "builtIn": True}],
+                        "modules":[{"name": "E2 Exoclad", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}]}
+
+defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict}
+
+
 class bbUser:
     id = 0
     credits = 0
@@ -6,7 +17,14 @@ class bbUser:
     systemsChecked = 0
     bountyWins = 0
 
-    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0):
+    activeShip = None
+    inactiveShips = []
+    inactiveModules = []
+    inactiveWeapons = []
+    inactiveTurrets = []
+    
+
+    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[]):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -43,24 +61,87 @@ class bbUser:
         self.bountyCooldownEnd = bountyCooldownEnd
         self.systemsChecked = systemsChecked
         self.bountyWins = bountyWins
+
+        self.activeShip = activeShip
+        self.inactiveShips = inactiveShips
+        self.inactiveModules = inactiveModules
+        self.inactiveWeapons = inactiveWeapons
+        self.inactiveTurrets = inactiveTurrets
     
+
     def resetUser(self):
         self.credits = 0
         self.lifetimeCredits = 0
         self.bountyCooldownEnd = -1
         self.systemsChecked = 0
         self.bountyWins = 0
+        self.activeShip = bbShip.fromDict(defaultShipLoadoutDict)
+        self.inactiveModules = []
+        self.inactiveShips = []
+        self.inactiveWeapons = []
+        self.inactiveTurrets = []
+
+
+    def numInventoryPages(self, item):
+        if item not in bbConfig.validItemNamesWithPlural:
+            raise ValueError("Requested an invalid item name: " + item)
+
+        item = item.rstrip("s")
+
+        numWeapons = len(self.inactiveWeapons)
+        numModules = len(self.inactiveModules)
+        numTurrets = len(self.inactiveTurrets)
+
+        itemsNum = 0
+        maxPerPage = 0
+
+        if item == "all":
+            itemsNum = numWeapons + numModules + numTurrets
+            maxPerPage = bbConfig.maxItemsPerHangarPageAll * 3
+
+        else:
+            maxPerPage = bbConfig.maxItemsPerHangarPageIndividual
+            if item == "module":
+                itemsNum = numModules
+            elif item == "weapon":
+                itemsNum = numWeapons
+            elif item == "turret":
+                itemsNum = numTurrets
+            else:
+                raise NotImplementedError("Valid but unsupported item name: " + item)
+
+        return int(itemsNum/maxPerPage) + 0 if itemsNum % maxPerPage == 0 else 1
+
 
     def toDictNoId(self):
+        inactiveShipsDict = []
+        for ship in self.inactiveShips:
+            inactiveShipsDict.append(ship.toDict())
+
+        inactiveModulesDict = []
+        for module in self.inactiveModules:
+            inactiveModulesDict.append(module.toDict())
+
+        inactiveWeaponsDict = []
+        for weapon in self.inactiveWeapons:
+            inactiveWeaponsDict.append(weapon.toDict())
+
+        inactiveTurretsDict = []
+        for turret in self.inactiveTurrets:
+            inactiveTurretsDict.append(turret.toDict())
+
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
-                "bountyWins":self.bountyWins}
+                "bountyWins":self.bountyWins, "activeShip": self.activeShip, "inactiveShips":inactiveShipsDict,
+                "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict},
+
 
     def userDump(self):
         data = "bbUser #" + str(self.id) + ": "
         for att in [self.credits, self.lifetimeCredits, self.bountyCooldownEnd, self.systemsChecked, self.bountyWins]:
             data += str(att) + "/"
         return data[:-1]
+
 
     def getStatByName(self, stat):
         if stat == "id":
@@ -76,11 +157,35 @@ class bbUser:
         elif stat == "bountyWins":
             return self.bountyWins
 
+
     def __str__(self):
         return "<bbUser #" + str(self.id) + ">"
 
 
 def fromDict(id, userDict):
+    activeShip = bbShip.fromDict(userDict["activeShip"])
+
+    inactiveShips = []
+    if "inactiveShips" in userDict:
+        for ship in userDict["inactiveShips"]:
+            inactiveShips.append(bbShip.fromDict(ship))
+
+    inactiveWeapons = []
+    if "inactiveWeapons" in userDict:
+        for weapon in userDict["inactiveWeapons"]:
+            inactiveWeapons.append(bbShip.fromDict(weapon))
+
+    inactiveModules = []
+    if "inactiveModules" in userDict:
+        for module in userDict["inactiveModules"]:
+            inactiveModules.append(bbShip.fromDict(module))
+
+    inactiveTurrets = []
+    if "inactiveTurrets" in userDict:
+        for turret in userDict["inactiveTurrets"]:
+            inactiveTurrets.append(bbShip.fromDict(turret))
+
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
-                    bountyWins=userDict["bountyWins"])
+                    bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
+                    inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets)
