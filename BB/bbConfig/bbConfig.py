@@ -81,4 +81,4 @@ maxItemsPerHangarPageAll = 5
 maxItemsPerHangarPageIndividual = 10
 
 # Names to be used when checking input to !bb hangar and bbUser.numInventoryPages
-validItemNamesWithPlural = ["ship", "ships", "weapon", "weapons", "module", "modules", "turret", "turrets, ""all"]
+validItemNamesWithPlural = ["ship", "ships", "weapon", "weapons", "module", "modules", "turret", "turrets", "all"]
