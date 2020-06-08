@@ -48,6 +48,11 @@ class bbGuildDB:
         self.removeGuildId(guild.id)
 
     
+    def refreshAllShopStocks(self):
+        for guild in self.guilds:
+            guild.shop.refreshStock()
+
+    
     def toDict(self):
         data = {}
         for guild in self.getGuilds():
