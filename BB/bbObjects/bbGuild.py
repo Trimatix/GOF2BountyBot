@@ -1,10 +1,13 @@
+from . import bbShop
+
 class bbGuild:
     id = 0
     announceChannel = -1
     playChannel = -1
+    shop = None
 
 
-    def __init__(self, id, announceChannel=-1, playChannel=-1):
+    def __init__(self, id, announceChannel=-1, playChannel=-1, shop=None):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -13,17 +16,21 @@ class bbGuild:
         if type(announceChannel) == float:
             announceChannel = int(announceChannel)
         elif type(announceChannel) != int:
-            raise TypeError("announceChannel must be int, given " + str(type(credits)))
+            raise TypeError("announceChannel must be int, given " + str(type(announceChannel)))
 
         if type(playChannel) == float:
             playChannel = int(playChannel)
         elif type(playChannel) != int:
-            raise TypeError("playChannel must be int, given " + str(type(lifetimeCredits)))
-
+            raise TypeError("playChannel must be int, given " + str(type(playChannel)))
+        
+        if shop is not None and type(shop) != bbShop.bbShop:
+            raise TypeError("shop must be bbShop, given " + str(type(shop)))
 
         self.id = id
         self.announceChannel = announceChannel
         self.playChannel = playChannel
+
+        self.shop = bbShop.bbShop() if shop is None else shop
 
 
     def getAnnounceChannelId(self):
