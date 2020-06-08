@@ -3,7 +3,7 @@ import operator
 from . import bbData
 from . import bbConfig
 from ..bbObjects import bbCriminal, bbSystem
-from ..bbObjects.items import bbShip, bbModule, bbWeapon, bbShipUpgrade
+from ..bbObjects.items import bbShip, bbModule, bbWeapon, bbShipUpgrade, bbTurret
 
 # generate bbCriminal objects from data in bbData
 for criminalDict in bbData.builtInCriminalData.values():
@@ -40,6 +40,12 @@ for upgradeDict in bbData.builtInUpgradeData.values():
     bbData.builtInUpgradeObjs[upgradeDict["name"]] = bbShipUpgrade.fromDict(upgradeDict)
     bbData.builtInUpgradeData[systemDict["name"]]["builtIn"] = True
     bbData.builtInUpgradeObjs[systemDict["name"]].builtIn = True
+
+# generate bbTurret objects from data in bbData
+for turretDict in bbData.builtInTurretData.values():
+    bbData.builtInTurretObjs[turretDict["name"]] = bbTurret.fromDict(turretDict)
+    bbData.builtInTurretData[systemDict["name"]]["builtIn"] = True
+    bbData.builtInTurretObjs[systemDict["name"]].builtIn = True
 
 
 # Sort ships by value
@@ -80,3 +86,16 @@ for keyIndex in range(len(sortedModuleKeys) - 1, -1, -1):
     currentModule = bbData.builtInModuleObjs[sortedModuleKeys[keyIndex][0]]
     for n in range(int(keyIndex / bbConfig.numModuleRanks)):
         bbData.rankedModuleObjs.append(currentModule)
+
+
+# Sort turrets by value
+unsortedTurretKeys = {}
+for turretKey in bbData.builtInTurretObjs.keys():
+    unsortedTurretKeys[turretKey] = bbData.builtInTurretObjs[turretKey].value
+sortedTurretKeys = sorted(unsortedTurretKeys.items(), key=operator.itemgetter(1))[::-1]
+
+# Make a list of turrets ranked by value for random picking
+for keyIndex in range(len(sortedTurretKeys) - 1, -1, -1):
+    currentTurret = bbData.builtInTurretObjs[sortedTurretKeys[keyIndex][0]]
+    for n in range(int(keyIndex / bbConfig.numTurretRanks)):
+        bbData.rankedTurretObjs.append(currentTurret)
