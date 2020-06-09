@@ -190,7 +190,7 @@ class bbShop:
                     "shipsStock":shipsStockDict, "weaponsStock":weaponsStockDict, "modulesStock":modulesStockDict, "turretsStock":turretsStockDict}
 
 
-def fromDict(self, shopDict):
+def fromDict(shopDict):
     shipsStock = []
     for shipDict in shopDict["shipsStock"]:
         shipsStock.append(bbShip.fromDict(shipDict))
