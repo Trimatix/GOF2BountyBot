@@ -62,8 +62,11 @@ class bbGuild:
 
 
     def toDictNoId(self):
-        return {"announceChannel":self.announceChannel, "playChannel":self.playChannel}
+        return {"announceChannel":self.announceChannel, "playChannel":self.playChannel
+        # Shop saving disabled for now, it's not super important.
+                # , "shop": self.shop.toDict()
+                }
 
 
 def fromDict(id, guildDict):
-    return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"])
+    return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"], shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop())
