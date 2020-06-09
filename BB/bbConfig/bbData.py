@@ -331,10 +331,10 @@ builtInWeaponData = {   # Lasers
                         "Berger FlaK 9-9": {"name": "Berger FlaK 9-9", "aliases": ["Berger FlaK 9-9", "Berger FlaK", "Berger 9-9", "Flak 9-9", "9-9"], "dps":25.33, "value":135058, "wiki": "https://galaxyonfire.fandom.com/wiki/Berger_FlaK_9-9", "builtIn":False},
                         "Icarus Heavy AS": {"name": "Icarus Heavy AS", "aliases": ["Icarus Heavy AS", "Icarus Heavy", "Icarus AS", "Heavy AS", "Icarus"], "dps":33.33, "value":356787, "wiki": "https://galaxyonfire.fandom.com/wiki/Icarus_Heavy_AS", "builtIn":False}}
 
-builtInUpgradeData = {  "+30 Cargo Space": {"name": "+30 Cargo Space", "shipToUpgradeValueMult":0.3, "cargo": 30, "builtIn":False},
-                        "+20 Handling": {"name": "+20 Handling", "shipToUpgradeValueMult":0.2, "handling": 20, "builtIn":False},
-                        "Extra Equipment Slot": {"name": "Extra Equipment Slot", "shipToUpgradeValueMult":0.4, "maxModules": 1, "builtIn":False},
-                        "+40 Armor": {"name": "+40 Armor", "shipToUpgradeValueMult":0.2, "armour": 40, "builtIn":False}}
+builtInUpgradeData = {  "+30 Cargo Space": {"name": "+30 Cargo Space", "shipToUpgradeValueMult":0.3, "cargo": 30, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"},
+                        "+20 Handling": {"name": "+20 Handling", "shipToUpgradeValueMult":0.2, "handling": 20, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"},
+                        "Extra Equipment Slot": {"name": "Extra Equipment Slot", "shipToUpgradeValueMult":0.4, "maxModules": 1, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"},
+                        "+40 Armor": {"name": "+40 Armor", "shipToUpgradeValueMult":0.2, "armour": 40, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"}}
 
 # data for builtIn criminals to be used in bbCriminal.fromDict
 # criminals marked as not builtIn to allow for dictionary init. The criminal object is then marked as builtIn during package __init__.py
