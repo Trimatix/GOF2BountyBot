@@ -9,6 +9,10 @@ class bbTurret(bbAliasable.Aliasable):
         super(bbTurret, self).__init__(name, aliases)
 
 
+    def toDict(self):
+        return {"name": self.name, "builtIn": True}
+
+
     def getType(self):
         return bbTurret
 

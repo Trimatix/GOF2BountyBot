@@ -69,6 +69,10 @@ class bbShipUpgrade:
     def valueForShip(self, ship):
         return ship.value * self.shipToUpgradeValueMult
 
+    
+    def toDict(self):
+        return {"name": self.name, "builtIn": True}
+
 
 def fromDict(upgradeDict):
     if upgradeDict["builtIn"]:

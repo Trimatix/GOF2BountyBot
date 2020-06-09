@@ -9,6 +9,10 @@ class bbWeapon(bbAliasable.Aliasable):
         super(bbWeapon, self).__init__(name, aliases)
 
 
+    def toDict(self):
+        return {"name": self.name, "builtIn": True}
+
+
     def getType(self):
         return bbWeapon
 
