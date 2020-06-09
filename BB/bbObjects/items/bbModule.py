@@ -29,45 +29,47 @@ class bbModule(bbAliasable.Aliasable):
 
 
     def toDict(self):
-        data = {"name": self.name}
-        if self.armour != 0:
-            data["armour"] = self.armour
+        # data = {"name": self.name, "aliases": self.aliases}
+        # if self.armour != 0:
+        #     data["armour"] = self.armour
 
-        if self.armourMultiplier != 1.0:
-            data["armourMultiplier"] = self.armourMultiplier
+        # if self.armourMultiplier != 1.0:
+        #     data["armourMultiplier"] = self.armourMultiplier
 
-        if self.shield != 0:
-            data["shield"] = self.shield
+        # if self.shield != 0:
+        #     data["shield"] = self.shield
 
-        if self.shieldMultiplier != 1.0:
-            data["shieldMultiplier"] = self.shieldMultiplier
+        # if self.shieldMultiplier != 1.0:
+        #     data["shieldMultiplier"] = self.shieldMultiplier
 
-        if self.dps != 0:
-            data["dps"] = self.dps
+        # if self.dps != 0:
+        #     data["dps"] = self.dps
 
-        if self.dpsMultiplier != 1.0:
-            data["dpsMultiplier"] = self.dpsMultiplier
+        # if self.dpsMultiplier != 1.0:
+        #     data["dpsMultiplier"] = self.dpsMultiplier
 
-        if self.cargo != 0:
-            data["cargo"] = self.cargo
+        # if self.cargo != 0:
+        #     data["cargo"] = self.cargo
 
-        if self.cargoMultiplier != 1.0:
-            data["cargoMultiplier"] = self.cargoMultiplier
+        # if self.cargoMultiplier != 1.0:
+        #     data["cargoMultiplier"] = self.cargoMultiplier
 
-        if self.handling != 0:
-            data["handling"] = self.handling
+        # if self.handling != 0:
+        #     data["handling"] = self.handling
 
-        if self.handlingMultiplier != 1.0:
-            data["handlingMultiplier"] = self.handlingMultiplier
+        # if self.handlingMultiplier != 1.0:
+        #     data["handlingMultiplier"] = self.handlingMultiplier
 
-        return data
+        # return data
+
+        return {"name": self.name, "builtIn": True}
 
 
 def fromDict(moduleDict):
-    if moduleDict["builtIn"]:
-        return bbData.builtInModuleObjs["name"]
+    if "builtIn" in moduleDict and moduleDict["builtIn"]:
+        return bbData.builtInModuleObjs[moduleDict["name"]]
     else:
-        return bbModule(moduleDict["name"], moduleDict["aliases"], armour=moduleDict["armour"] if "armour" in "moduleDict" else 0,
+        return bbModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], armour=moduleDict["armour"] if "armour" in "moduleDict" else 0,
         armourMultiplier=moduleDict["armourMultiplier"] if "armourMultiplier" in "moduleDict" else 1, shield=moduleDict["shield"] if "shield" in "moduleDict" else 0,
         shieldMultiplier=moduleDict["shieldMultiplier"] if "shieldMultiplier" in "moduleDict" else 1, dps=moduleDict["dps"] if "dps" in "moduleDict" else 0,
         dpsMultiplier=moduleDict["dpsMultiplier"] if "dpsMultiplier" in "moduleDict" else 1, cargo=moduleDict["cargo"] if "cargo" in "moduleDict" else 0,
