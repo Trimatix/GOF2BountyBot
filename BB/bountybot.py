@@ -837,6 +837,9 @@ can apply to a type of item (ships, modules, turrets or weapons), or all items i
 can apply to a page, or the first page if none is specified.
 Arguments can be given in any order, and must be separated by a single space.
 
+If all items are requested (or none is specified), the user's active items are displayed along with the first page of each inventory.
+If an item other than all is specified, the user's active items are not displayed
+
 @param message -- the discord message calling the command
 @param args -- string containing the arguments as specified above
 """
@@ -902,13 +905,26 @@ async def cmd_hangar(message, args):
         if page > 1:
             await message.channel.send(":x: The requested user only has one page of items. Showing page one:")
             page = 1
+        elif page < 1:
+            await message.channel.send(":x: Invalid page number. Showing page one:")
+            page = 1
         
     else:
+        requestedBBUser = usersDB.getUser(requestedUser.id)
+
         if page < 1:
             await message.channel.send(":x: Invalid page number. Showing page one:")
             page = 1
         else:
-            maxPage = usersDB.getUser(requestedUser.id).numInventoryPages(item)
+            maxPage = requestedBBUser.numInventoryPages(item)
+            if page > maxPage:
+                await message.channel.send(":x: The requested user only has " + str(maxPage) + " page(s) of items. Showing page " + str(maxPage) + ":")
+                page = maxPage
+        
+        hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items" if item == "all" else item.rstrip("s").title() + "s - page " + str(page))
+
+        if item == "all":
+            hangarEmbed.add_field("Active Ship:", requestedBBUser.activeShip.getName())
 
 
 
