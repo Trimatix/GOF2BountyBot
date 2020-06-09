@@ -114,6 +114,23 @@ class bbUser:
         return 1 if itemsNum == 0 else (int(itemsNum/maxPerPage) + (0 if itemsNum % maxPerPage == 0 else 1))
 
 
+    def numEmptySlotsOnInventoryPage(self, item, pageNum, maxPerPage):
+        if item not in bbConfig.validItemNames:
+            raise ValueError("Requested an invalid item name: " + item)
+        if pageNum < self.numInventoryPages(item):
+            return 0
+        elif item == "ship":
+            return maxPerPage - (len(self.inactiveShips) % maxPerPage)
+        elif item == "weapon":
+            return maxPerPage - (len(self.inactiveWeapons) % maxPerPage)
+        elif item == "module":
+            return maxPerPage - (len(self.inactiveModules) % maxPerPage)
+        elif item == "turret":
+            return maxPerPage - (len(self.inactiveTurrets) % maxPerPage)
+        else:
+            raise NotImplementedError("Valid but unsupported item name: " + item)
+
+
     def toDictNoId(self):
         inactiveShipsDict = []
         for ship in self.inactiveShips:
