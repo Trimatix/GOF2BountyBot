@@ -1,4 +1,5 @@
 from .. import bbAliasable
+from . import bbModule, bbTurret, bbWeapon, bbShipUpgrade
 
 class bbShip(bbAliasable.Aliasable):
     hasWiki = False
@@ -279,10 +280,29 @@ class bbShip(bbAliasable.Aliasable):
 
 
 def fromDict(shipDict):
+    weapons = []
+    if "weapon" in shipDict:
+        for weapon in shipDict["weapons"]:
+            weapon.append(bbWeapon.fromDict(weapon))
+
+    modules = []
+    if "module" in shipDict:
+        for module in shipDict["modules"]:
+            module.append(bbModule.fromDict(weapon))
+
+    turrets = []
+    if "turret" in shipDict:
+        for turret in shipDict["turrets"]:
+            turret.append(bbTurret.fromDict(weapon))
+
+    shipUpgrades = []
+    if "shipUpgrade" in shipDict:
+        for shipUpgrade in shipDict["shipUpgrades"]:
+            shipUpgrade.append(bbShipUpgrade.fromDict(weapon))
+
     return bbShip(shipDict["name"], shipDict["maxPrimaries"], shipDict["maxTurrets"], shipDict["maxModules"], manufacturer=shipDict["manufacturer"] if "manufacturer" in shipDict else "",
                     armour=shipDict["armour"] if "armour" in shipDict else 0, cargo=shipDict["cargo"] if "cargo" in shipDict else 0,
                     numSecondaries=shipDict["numSecondaries"] if "numSecondaries" in shipDict else 0, handling=shipDict["handling"] if "handling" in shipDict else 0,
                     value=shipDict["value"] if "value" in shipDict else 0, aliases=shipDict["aliases"] if "aliases" in shipDict else [],
-                    weapons=shipDict["weapons"] if "weapons" in shipDict else [], modules=shipDict["modules"] if "modules" in shipDict else [],
-                    turrets=shipDict["turrets"] if "turrets" in shipDict else [], wiki=shipDict["wiki"] if "wiki" in shipDict else "0",
-                    upgradesApplied=shipDict["upgradesApplied"] if "upgradesApplied" in shipDict else [], nickname=shipDict["nickname"] if "nickname" in shipDict else "")
+                    weapons=weapons, modules=modules, turrets=turrets, wiki=shipDict["wiki"] if "wiki" in shipDict else "0",
+                    upgradesApplied=shipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else "")
