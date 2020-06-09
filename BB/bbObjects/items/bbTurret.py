@@ -4,9 +4,16 @@ from ...bbConfig import bbData
 class bbTurret(bbAliasable.Aliasable):
     dps = 0.0
     value = 0
+    wiki = ""
+    hasWiki = False
 
     def __init__(self, name, aliases, dps=0.0, value=0, wiki=""):
         super(bbTurret, self).__init__(name, aliases)
+
+        self.dps = dps
+        self.value = value
+        self.wiki = wiki
+        self.hasWiki = wiki != ""
 
 
     def toDict(self):

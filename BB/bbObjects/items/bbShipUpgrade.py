@@ -1,6 +1,8 @@
 from ...bbConfig import bbData
 
 class bbShipUpgrade:
+    wiki = ""
+    hasWiki = False
     name = ""
     value = 0
     shipToUpgradeValueMult = 1.0
@@ -33,7 +35,7 @@ class bbShipUpgrade:
     def __init__(self, name, shipToUpgradeValueMult,
                     armour=0.0, armourMultiplier=1.0, cargo=0, cargoMultiplier=1.0, numSecondaries=0, numSecondariesMultiplier=1.0,
                     handling=0, handlingMultiplier=1.0, maxPrimaries=0, maxPrimariesMultiplier=1.0, maxTurrets=0, maxTurretsMultiplier=1.0,
-                    maxModules=0, maxModulesMultiplier=1.0, vendor=""):
+                    maxModules=0, maxModulesMultiplier=1.0, vendor="", wiki=""):
         self.name = name
         self.shipToUpgradeValueMult = shipToUpgradeValueMult
         self.vendor = vendor
@@ -59,6 +61,9 @@ class bbShipUpgrade:
 
         self.maxModules = maxModules
         self.maxModulesMultiplier = maxModulesMultiplier
+
+        self.wiki = wiki
+        self.hasWiki = wiki != ""
 
 
 
@@ -92,4 +97,5 @@ def fromDict(upgradeDict):
                                 maxTurretsMultiplier=upgradeDict["maxTurretsMultiplier"] if "maxTurretsMultiplier" in upgradeDict else 1.0,
                                 maxModules=upgradeDict["maxModules"] if "maxModules" in upgradeDict else 0,
                                 maxModulesMultiplier=upgradeDict["maxModulesMultiplier"] if "maxModulesMultiplier" in upgradeDict else 1.0,
-                                vendor=upgradeDict["vendor"] if "vendor" in upgradeDict else "")
+                                vendor=upgradeDict["vendor"] if "vendor" in upgradeDict else "",
+                                wiki=upgradeDict["wiki"] if "wiki" in upgradeDict else "")
