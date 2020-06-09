@@ -83,20 +83,19 @@ class bbUser:
 
 
     def numInventoryPages(self, item):
-        if item not in bbConfig.validItemNamesWithPlural:
+        if item not in bbConfig.validItemNames:
             raise ValueError("Requested an invalid item name: " + item)
-
-        item = item.rstrip("s")
 
         numWeapons = len(self.inactiveWeapons)
         numModules = len(self.inactiveModules)
         numTurrets = len(self.inactiveTurrets)
+        numShips = len(self.inactiveShips)
 
         itemsNum = 0
         maxPerPage = 0
 
         if item == "all":
-            itemsNum = numWeapons + numModules + numTurrets
+            itemsNum = numWeapons + numModules + numTurrets + numShips
             maxPerPage = bbConfig.maxItemsPerHangarPageAll * 3
 
         else:
@@ -107,6 +106,8 @@ class bbUser:
                 itemsNum = numWeapons
             elif item == "turret":
                 itemsNum = numTurrets
+            elif item == "ship":
+                itemsNum = numShips
             else:
                 raise NotImplementedError("Valid but unsupported item name: " + item)
 
@@ -132,7 +133,7 @@ class bbUser:
 
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
-                "bountyWins":self.bountyWins, "activeShip": self.activeShip, "inactiveShips":inactiveShipsDict,
+                "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict},
 
 
