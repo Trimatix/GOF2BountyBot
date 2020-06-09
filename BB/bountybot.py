@@ -838,7 +838,6 @@ can apply to a type of item (ships, modules, turrets or weapons), or all items i
 can apply to a page, or the first page if none is specified.
 Arguments can be given in any order, and must be separated by a single space.
 
-The user's active items are displayed along with the first page of each inventory.
 TODO: try displaying as a discord message rather than embed?
 TODO: add icons for ships and items!?
 
@@ -866,7 +865,7 @@ async def cmd_hangar(message, args):
         argNum = 1
         for arg in argsSplit:
             if arg != "":
-                if arg[0:2] == "<@" and arg[-1] == ">" and bbUtil.isInt(arg.lstrip("<@!")[:-1]):
+                if args.startswith("<@") and arg[-1] == ">" and bbUtil.isInt(arg.lstrip("<@!")[:-1]):
                     if foundUser:
                         await message.channel.send(":x: I can only take one user!")
                         return
@@ -891,6 +890,7 @@ async def cmd_hangar(message, args):
                         foundPage = True
                 else:
                     await message.channel.send(":x: " + str(argNum) + bbData.numExtensions[argNum] + " argument invalid! I can only take a target user, an item type (ship/weapon/module/turret), and a page number!")
+                    return
                 argNum += 1
     
     if requestedUser is None:
@@ -903,7 +903,6 @@ async def cmd_hangar(message, args):
         else:
             useDummyData = True
 
-    # TODO: unfinished
     if useDummyData:
         if page > 1:
             await message.channel.send(":x: The requested user only has one page of items. Showing page one:")
@@ -913,19 +912,8 @@ async def cmd_hangar(message, args):
             page = 1
 
         hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items" if item == "all" else item.rstrip("s").title() + "s - page " + str(page), thumb=requestedUser.avatar_url_as(size=64))
-        activeShip = bbShip.fromDict(bbUser.defaultShipLoadoutDict)
-        hangarEmbed.add_field(name="Active Ship:", value=activeShip.name, inline=False)
         
-        for weaponNum in range(1, len(activeShip.weapons) + 1):
-            hangarEmbed.add_field(name=("Equipped Weapons:\n" if weaponNum == 1 else "") + str(weaponNum) + ".", value=activeShip.weapons[weaponNum - 1].name, inline=False if weaponNum == 1 else True)
-
-        for moduleNum in range(1, len(activeShip.modules) + 1):
-            hangarEmbed.add_field(name=("Equipped Modules:\n" if moduleNum == 1 else "") + str(moduleNum) + ".", value=activeShip.modules[moduleNum - 1].name, inline=False if moduleNum == 1 else True)
-        
-        for turretNum in range(1, len(activeShip.turrets) + 1):
-            hangarEmbed.add_field(name=("Equipped Turrets:\n" if turretNum == 1 else "") + str(turretNum) + ".", value=activeShip.turrets[turretNum - 1].name, inline=False if turretNum == 1 else True)
-        
-        hangarEmbed.add_field(name="Stored Items:", value="None", inline=False)
+        hangarEmbed.add_field(name="No Stored Items", value="‎", inline=False)
         await message.channel.send(embed=hangarEmbed)
         return
 
@@ -942,44 +930,30 @@ async def cmd_hangar(message, args):
                 page = maxPage
         
         hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items" if item == "all" else item.rstrip("s").title() + "s - page " + str(page), thumb=requestedUser.avatar_url_as(size=64))
-
-        if page == 1:
-            activeShip = requestedBBUser.activeShip
-            if activeShip is None:
-                hangarEmbed.add_field(name="Active Ship:", value="None", inline=False)
-            elif page == 1:
-                hangarEmbed.add_field(name="Active Ship:", value=activeShip.getNameAndNick(), inline=False)
-
-                for weaponNum in range(1, len(activeShip.weapons) + 1):
-                    hangarEmbed.add_field(name=("Equipped Weapons:\n" if weaponNum == 1 else "") + str(weaponNum) + ".", value=activeShip.weapons[weaponNum - 1].name, inline=False if weaponNum == 1 else True)
-
-                for moduleNum in range(1, len(activeShip.modules) + 1):
-                    hangarEmbed.add_field(name=("Equipped Modules:\n" if moduleNum == 1 else "") + str(moduleNum) + ".", value=activeShip.modules[moduleNum - 1].name, inline=False if moduleNum == 1 else True)
-                
-                for turretNum in range(1, len(activeShip.turrets) + 1):
-                    hangarEmbed.add_field(name=("Equipped Turrets:\n" if turretNum == 1 else "") + str(turretNum) + ".", value=activeShip.turrets[turretNum - 1].name, inline=False if turretNum == 1 else True)
         
         if item == "all":
+            maxPerPage = bbConfig.maxItemsPerHangarPageAll
             firstPlace = bbConfig.maxItemsPerHangarPageAll * (page - 1) + 1
             lastPlace = firstPlace + bbConfig.maxItemsPerHangarPageAll - 1
         else:
+            maxPerPage = bbConfig.maxItemsPerHangarPageIndividual
             firstPlace = bbConfig.maxItemsPerHangarPageIndividual * (page - 1) + 1
             lastPlace = firstPlace + bbConfig.maxItemsPerHangarPageIndividual
 
-        if item in ["all, ship"]:
-            for shipNum in range(firstPlace, lastPlace):
+        if item in ["all", "ship"]:
+            for shipNum in range(firstPlace, lastPlace - requestedBBUser.numEmptySlotsOnInventoryPage("ship", page, maxPerPage)):
                 hangarEmbed.add_field(name=("Stored Ships:\n" if shipNum == firstPlace else "") + str(shipNum) + ".", value=requestedBBUser.inactiveShips[shipNum - 1].getNameAndNick(), inline=False if shipNum == 1 else True)
 
-        if item in ["all, weapon"]:
-            for weaponNum in range(firstPlace, lastPlace):
+        if item in ["all", "weapon"]:
+            for weaponNum in range(firstPlace, lastPlace - requestedBBUser.numEmptySlotsOnInventoryPage("weapon", page, maxPerPage)):
                 hangarEmbed.add_field(name=("Stored Weapons:\n" if weaponNum == firstPlace else "") + str(weaponNum) + ".", value=requestedBBUser.inactiveWeapons[weaponNum - 1].name, inline=False if weaponNum == 1 else True)
 
-        if item in ["all, module"]:
-            for moduleNum in range(firstPlace, lastPlace):
+        if item in ["all", "module"]:
+            for moduleNum in range(firstPlace, lastPlace - requestedBBUser.numEmptySlotsOnInventoryPage("module", page, maxPerPage)):
                 hangarEmbed.add_field(name=("Stored Modules:\n" if moduleNum == firstPlace else "") + str(moduleNum) + ".", value=requestedBBUser.inactiveModules[moduleNum - 1].name, inline=False if moduleNum == 1 else True)
 
-        if item in ["all, turret"]:
-            for turretNum in range(firstPlace, lastPlace):
+        if item in ["all", "turret"]:
+            for turretNum in range(firstPlace, lastPlace - requestedBBUser.numEmptySlotsOnInventoryPage("turret", page, maxPerPage)):
                 hangarEmbed.add_field(name=("Stored Turrets:\n" if turretNum == firstPlace else "") + str(turretNum) + ".", value=requestedBBUser.inactiveTurrets[turretNum - 1].name, inline=False if turretNum == 1 else True)
 
         await message.channel.send(embed=hangarEmbed)
@@ -988,19 +962,111 @@ bbCommands.register("hangar", cmd_hangar)
 
 
 """
-return a page listing the target user's items.
-can apply to a specified user, or the calling user if none is specified.
-can apply to a type of item (ships, modules, turrets or weapons), or all items if none is specified.
-can apply to a page, or the first page if none is specified.
-Arguments can be given in any order, and must be separated by a single space.
-
-The user's active items are displayed along with the first page of each inventory.
+list the current stock of the bbShop owned by the guild containing the sent message.
+Can specify an item type to list. TODO: Make specified item listings more detailed as in !bb bounties
 
 @param message -- the discord message calling the command
-@param args -- string containing the arguments as specified above
+@param args -- either empty string, or one of bbConfig.validItemNames
 """
-# async def cmd_shop(message, args):
+async def cmd_shop(message, args):
+    item = "all"
+    if args.rstrip("s") in bbConfig.validItemNames:
+        item = args.rstrip("s")
+    elif args != "":
+        await message.channel.send(":x: Invalid item type! (ship/weapon/module/turret)")
+        return
 
+    requestedShop = guildsDB.getGuild(message.guild.id).shop
+    shopEmbed = makeEmbed(titleTxt="Shop", desc=message.guild.name, footerTxt="All items" if item == "all" else (item + "s").title())
+
+    if item in ["all", "ship"]:
+        for shipNum in range(1, len(requestedShop.shipsStock) + 1):
+            shopEmbed.add_field(name=("Ships:\n" if shipNum == 1 else "") + str(shipNum) + ". " + str(requestedShop.shipsStock[shipNum - 1].getValue()) + " Credits", value=requestedShop.shipsStock[shipNum - 1].getNameAndNick(), inline=False)# if shipNum == 1 else True)
+
+    if item in ["all", "weapon"]:
+        for weaponNum in range(1, len(requestedShop.weaponsStock) + 1):
+            shopEmbed.add_field(name=("Weapons:\n" if weaponNum == 1 else "") + str(weaponNum) + ". " + str(requestedShop.weaponsStock[weaponNum - 1].value) + " Credits", value=requestedShop.weaponsStock[weaponNum - 1].name, inline=False)# if weaponNum == 1 else True)
+
+    if item in ["all", "module"]:
+        for moduleNum in range(1, len(requestedShop.modulesStock) + 1):
+            shopEmbed.add_field(name=("Modules:\n" if moduleNum == 1 else "") + str(moduleNum) + ". " + str(requestedShop.modulesStock[moduleNum - 1].value) + " Credits", value=requestedShop.modulesStock[moduleNum - 1].name, inline=False)# if moduleNum == 1 else True)
+
+    if item in ["all", "turret"]:
+        for turretNum in range(1, len(requestedShop.turretsStock) + 1):
+            shopEmbed.add_field(name=("Turrets:\n" if turretNum == 1 else "") + str(turretNum) + ". " + str(requestedShop.turretsStock[turretNum - 1].value) + " Credits", value=requestedShop.turretsStock[turretNum - 1].name, inline=False)# if turretNum == 1 else True)
+
+    await message.channel.send(embed=shopEmbed)
+
+bbCommands.register("shop", cmd_shop)
+
+
+"""
+list the requested user's currently equipped items.
+
+@param message -- the discord message calling the command
+@param args -- either empty string, or a user mention
+"""
+async def cmd_loadout(message, args):
+    requestedUser = message.author
+    useDummyData = False
+    userFound = False
+
+    if len(args.split(" ")) > 1:
+        await message.channel.send(":x: Too many arguments! I can only take a target user!")
+        return
+    
+    if args != "" and args.startswith("<@") and args[-1] == ">" and bbUtil.isInt(args.lstrip("<@!")[:-1]):
+        requestedUser = client.get_user(int(args.lstrip("<@!")[:-1]))
+        userFound = True
+        if requestedUser is None:
+            await message.channel.send(":x: Unrecognised user!")
+            return
+
+    if not usersDB.userIDExists(requestedUser.id):
+        if not userFound:
+            usersDB.addUser(requestedUser.id)
+        else:
+            useDummyData = True
+
+    if useDummyData:
+        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours["neutral"], thumb=requestedUser.avatar_url_as(size=64))
+        activeShip = bbShip.fromDict(bbUser.defaultShipLoadoutDict)
+        loadoutEmbed.add_field(name="Active Ship:", value=activeShip.name, inline=False)
+        
+        for weaponNum in range(1, len(activeShip.weapons) + 1):
+            loadoutEmbed.add_field(name=("Equipped Weapons:\n" if weaponNum == 1 else "") + str(weaponNum) + ".", value=activeShip.weapons[weaponNum - 1].name, inline=False if weaponNum == 1 else True)
+
+        for moduleNum in range(1, len(activeShip.modules) + 1):
+            loadoutEmbed.add_field(name=("Equipped Modules:\n" if moduleNum == 1 else "") + str(moduleNum) + ".", value=activeShip.modules[moduleNum - 1].name, inline=False if moduleNum == 1 else True)
+        
+        for turretNum in range(1, len(activeShip.turrets) + 1):
+            loadoutEmbed.add_field(name=("Equipped Turrets:\n" if turretNum == 1 else "") + str(turretNum) + ".", value=activeShip.turrets[turretNum - 1].name, inline=False if turretNum == 1 else True)
+        
+        await message.channel.send(embed=loadoutEmbed)
+        return
+
+    else:
+        requestedBBUser = usersDB.getUser(requestedUser.id)
+        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours["neutral"], thumb=requestedUser.avatar_url_as(size=64))
+
+        activeShip = requestedBBUser.activeShip
+        if activeShip is None:
+            loadoutEmbed.add_field(name="Active Ship:", value="None", inline=False)
+        else:
+            loadoutEmbed.add_field(name="Active Ship:", value=activeShip.getNameAndNick(), inline=False)
+
+            for weaponNum in range(1, len(activeShip.weapons) + 1):
+                loadoutEmbed.add_field(name=("Equipped Weapons:\n" if weaponNum == 1 else "") + str(weaponNum) + ".", value=activeShip.weapons[weaponNum - 1].name, inline=False if weaponNum == 1 else True)
+
+            for moduleNum in range(1, len(activeShip.modules) + 1):
+                loadoutEmbed.add_field(name=("Equipped Modules:\n" if moduleNum == 1 else "") + str(moduleNum) + ".", value=activeShip.modules[moduleNum - 1].name, inline=False if moduleNum == 1 else True)
+            
+            for turretNum in range(1, len(activeShip.turrets) + 1):
+                loadoutEmbed.add_field(name=("Equipped Turrets:\n" if turretNum == 1 else "") + str(turretNum) + ".", value=activeShip.turrets[turretNum - 1].name, inline=False if turretNum == 1 else True)
+        
+        await message.channel.send(embed=loadoutEmbed)
+
+bbCommands.register("loadout", cmd_loadout)
 
 
 
