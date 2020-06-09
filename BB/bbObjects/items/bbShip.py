@@ -241,6 +241,14 @@ class bbShip(bbAliasable.Aliasable):
             self.removeAlias(self.nickname)
             self.nickname = ""
             self.hasNickname = False
+
+        
+    def getNameOrNick(self):
+        return self.nickname if self.hasNickname else self.name
+
+    
+    def getNameAndNick(self):
+        return self.name if not self.hasNickname else self.nickname + " (" + self.name + ")"
     
 
     def getType(self):
