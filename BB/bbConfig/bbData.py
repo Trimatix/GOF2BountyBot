@@ -425,12 +425,12 @@ builtInTurretData = { # Manual
                         # Auto
                         "Berger AGT 20mm": {"name": "Berger AGT 20mm", "aliases": ["Berger AGT", "Berger 20mm", "20mm", "AGT", "AGT 20mm"], "dps": 40, "value": 227040, "wiki": "https://galaxyonfire.fandom.com/wiki/Berger_AGT_20mm", "builtIn":False},
                         "Skuld AT XR": {"name": "Skuld AT XR", "aliases": ["Skuld XR", "Skuld", "AT XR", "Skuld AT", "XR"], "dps": 47.36, "value": 407793, "wiki": "https://galaxyonfire.fandom.com/wiki/Skuld_AT_XR", "builtIn":False},
-                        'HH-AT "Archimedes"': {"name": 'HH-AT "Archimedes', "aliases": ["HH-AT", "HHAT Archimedes", "Archimedes", '"Archimedes"'], "dps": 53.33, "value": 586176, "wiki": 'https://galaxyonfire.fandom.com/wiki/HH-AT_"Archimedes"', "builtIn":False},
+                        'HH-AT "Archimedes"': {"name": 'HH-AT "Archimedes"', "aliases": ["HH-AT", "HHAT Archimedes", "Archimedes", '"Archimedes"'], "dps": 53.33, "value": 586176, "wiki": 'https://galaxyonfire.fandom.com/wiki/HH-AT_"Archimedes"', "builtIn":False},
 
                         # plasma collectors
-                        "PE Proton": {"name": "PE Proton", "aliases": ["Proton"], "value": 43856, "wiki": "https://galaxyonfire.fandom.com/wiki/PE_Proton", "builtIn":False},
-                        "PE Ambipolar-5": {"name": "PE Ambipolar-5", "aliases": ["Ambipolar", "PE Ambipolar 5", "PE Ambipolar"], "value": 115169, "wiki": "https://galaxyonfire.fandom.com/wiki/PE_Ambipolar-5", "builtIn":False},
-                        "PE Fusion H2": {"name": "PE Fusion H2", "aliases": ["Fusion", "PE Fusion"], "value": 631720, "wiki": "https://galaxyonfire.fandom.com/wiki/PE_Fusion_H2", "builtIn":False}}
+                        "PE Proton": {"name": "PE Proton", "aliases": ["Proton"], "dps":0, "value": 43856, "wiki": "https://galaxyonfire.fandom.com/wiki/PE_Proton", "builtIn":False},
+                        "PE Ambipolar-5": {"name": "PE Ambipolar-5", "aliases": ["Ambipolar", "PE Ambipolar 5", "PE Ambipolar"], "dps":0, "value": 115169, "wiki": "https://galaxyonfire.fandom.com/wiki/PE_Ambipolar-5", "builtIn":False},
+                        "PE Fusion H2": {"name": "PE Fusion H2", "aliases": ["Fusion", "PE Fusion"], "dps":0, "value": 631720, "wiki": "https://galaxyonfire.fandom.com/wiki/PE_Fusion_H2", "builtIn":False}}
 
 # To be populated during package init
 builtInSystemObjs = {}
