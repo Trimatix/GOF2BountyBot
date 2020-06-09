@@ -15,7 +15,8 @@ import operator
 
 # may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .bbObjects import bbBounty, bbBountyConfig
+from .bbObjects import bbBounty, bbBountyConfig, bbUser
+from .bbObjects.items import bbShip
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from . import bbUtil
 
@@ -838,6 +839,8 @@ can apply to a page, or the first page if none is specified.
 Arguments can be given in any order, and must be separated by a single space.
 
 The user's active items are displayed along with the first page of each inventory.
+TODO: try displaying as a discord message rather than embed?
+TODO: add icons for ships and items!?
 
 @param message -- the discord message calling the command
 @param args -- string containing the arguments as specified above
@@ -908,7 +911,24 @@ async def cmd_hangar(message, args):
         elif page < 1:
             await message.channel.send(":x: Invalid page number. Showing page one:")
             page = 1
+
+        hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items" if item == "all" else item.rstrip("s").title() + "s - page " + str(page), thumb=requestedUser.avatar_url_as(size=64))
+        activeShip = bbShip.fromDict(bbUser.defaultShipLoadoutDict)
+        hangarEmbed.add_field(name="Active Ship:", value=activeShip.name, inline=False)
         
+        for weaponNum in range(1, len(activeShip.weapons) + 1):
+            hangarEmbed.add_field(name=("Equipped Weapons:\n" if weaponNum == 1 else "") + str(weaponNum) + ".", value=activeShip.weapons[weaponNum - 1].name, inline=False if weaponNum == 1 else True)
+
+        for moduleNum in range(1, len(activeShip.modules) + 1):
+            hangarEmbed.add_field(name=("Equipped Modules:\n" if moduleNum == 1 else "") + str(moduleNum) + ".", value=activeShip.modules[moduleNum - 1].name, inline=False if moduleNum == 1 else True)
+        
+        for turretNum in range(1, len(activeShip.turrets) + 1):
+            hangarEmbed.add_field(name=("Equipped Turrets:\n" if turretNum == 1 else "") + str(turretNum) + ".", value=activeShip.turrets[turretNum - 1].name, inline=False if turretNum == 1 else True)
+        
+        hangarEmbed.add_field(name="Stored Items:", value="None", inline=False)
+        await message.channel.send(embed=hangarEmbed)
+        return
+
     else:
         requestedBBUser = usersDB.getUser(requestedUser.id)
 
@@ -921,7 +941,7 @@ async def cmd_hangar(message, args):
                 await message.channel.send(":x: The requested user only has " + str(maxPage) + " page(s) of items. Showing page " + str(maxPage) + ":")
                 page = maxPage
         
-        hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items" if item == "all" else item.rstrip("s").title() + "s - page " + str(page))
+        hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items" if item == "all" else item.rstrip("s").title() + "s - page " + str(page), thumb=requestedUser.avatar_url_as(size=64))
 
         if page == 1:
             activeShip = requestedBBUser.activeShip
@@ -965,6 +985,22 @@ async def cmd_hangar(message, args):
         await message.channel.send(embed=hangarEmbed)
 
 bbCommands.register("hangar", cmd_hangar)
+
+
+"""
+return a page listing the target user's items.
+can apply to a specified user, or the calling user if none is specified.
+can apply to a type of item (ships, modules, turrets or weapons), or all items if none is specified.
+can apply to a page, or the first page if none is specified.
+Arguments can be given in any order, and must be separated by a single space.
+
+The user's active items are displayed along with the first page of each inventory.
+
+@param message -- the discord message calling the command
+@param args -- string containing the arguments as specified above
+"""
+# async def cmd_shop(message, args):
+
 
 
 
