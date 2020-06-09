@@ -111,7 +111,7 @@ class bbUser:
             else:
                 raise NotImplementedError("Valid but unsupported item name: " + item)
 
-        return int(itemsNum/maxPerPage) + 0 if itemsNum % maxPerPage == 0 else 1
+        return 1 if itemsNum == 0 else (int(itemsNum/maxPerPage) + (0 if itemsNum % maxPerPage == 0 else 1))
 
 
     def toDictNoId(self):
@@ -134,7 +134,7 @@ class bbUser:
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
-                "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict},
+                "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict}
 
 
     def userDump(self):
