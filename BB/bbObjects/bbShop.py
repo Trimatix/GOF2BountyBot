@@ -14,26 +14,35 @@ class bbShop:
     maxTurrets = 0
 
     
-    def __init__(self, numShips=bbConfig.shopDefaultShipsNum, numModules=bbConfig.shopDefaultModulesNum, numWeapons=bbConfig.shopDefaultWeaponsNum, maxTurrets=bbConfig.shopDefaultTurretsNum, shipsStock=[], weaponsStock=[], modulesStock=[], turretsStock=[]):
-        self.numShips = numShips
-        self.numModules = numModules
-        self.numWeapons = numWeapons
+    def __init__(self, maxShips=bbConfig.shopDefaultShipsNum, maxModules=bbConfig.shopDefaultModulesNum, maxWeapons=bbConfig.shopDefaultWeaponsNum, maxTurrets=bbConfig.shopDefaultTurretsNum, shipsStock=[], weaponsStock=[], modulesStock=[], turretsStock=[]):
+        self.maxShips = maxShips
+        self.maxModules = maxModules
+        self.maxWeapons = maxWeapons
         self.maxTurrets = maxTurrets
 
-        self.shipsStock = shipsStock
-        self.weaponsStock = weaponsStock
-        self.modulesStock = modulesStock
-        self.turretsStock = turretsStock
+        if shipsStock == [] and weaponsStock == [] and modulesStock == [] and turretsStock == []:
+            self.refreshStock()
+        else:
+            self.shipsStock = shipsStock
+            self.weaponsStock = weaponsStock
+            self.modulesStock = modulesStock
+            self.turretsStock = turretsStock
 
 
     def refreshStock(self):
+        print("refresh stock")
         self.shipsStock = []
         self.weaponsStock = []
         self.modulesStock = []
         self.turretsStock = []
 
+        print(self.maxShips)
+        print(self.maxModules)
+        print(self.maxWeapons)
+        print(self.maxTurrets)
+
         for i in range(self.maxShips):
-            self.shipsStock.append(bbShip.fromDict(random.choice(bbData.builtInShipData)))
+            self.shipsStock.append(bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.rankedShipKeys)]))
 
         for i in range(self.maxModules):
             self.modulesStock.append(random.choice(bbData.rankedModuleObjs))
@@ -44,6 +53,11 @@ class bbShop:
         if random.randint(1, 100) <= bbConfig.turretSpawnProbability:
             for i in range(self.maxTurrets):
                 self.turretsStock.append(random.choice(bbData.rankedTurretObjs))
+
+        print(self.shipsStock)
+        print(self.weaponsStock)
+        print(self.modulesStock)
+        print(self.turretsStock)
 
 
     # SHIP MANAGEMENT
