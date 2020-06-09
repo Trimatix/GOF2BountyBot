@@ -56,6 +56,7 @@ class bbShip(bbAliasable.Aliasable):
 
         self.hasNickname = nickname != ""
         self.nickname = nickname
+        self.manufacturer = manufacturer
 
 
     def getNumWeaponsEquipped(self):
@@ -281,24 +282,24 @@ class bbShip(bbAliasable.Aliasable):
 
 def fromDict(shipDict):
     weapons = []
-    if "weapon" in shipDict:
+    if "weapons" in shipDict:
         for weapon in shipDict["weapons"]:
-            weapon.append(bbWeapon.fromDict(weapon))
+            weapons.append(bbWeapon.fromDict(weapon))
 
     modules = []
-    if "module" in shipDict:
+    if "modules" in shipDict:
         for module in shipDict["modules"]:
-            module.append(bbModule.fromDict(weapon))
+            modules.append(bbModule.fromDict(module))
 
     turrets = []
-    if "turret" in shipDict:
+    if "turrets" in shipDict:
         for turret in shipDict["turrets"]:
-            turret.append(bbTurret.fromDict(weapon))
+            turrets.append(bbTurret.fromDict(turret))
 
     shipUpgrades = []
     if "shipUpgrade" in shipDict:
         for shipUpgrade in shipDict["shipUpgrades"]:
-            shipUpgrade.append(bbShipUpgrade.fromDict(weapon))
+            shipUpgrades.append(bbShipUpgrade.fromDict(shipUpgrade))
 
     return bbShip(shipDict["name"], shipDict["maxPrimaries"], shipDict["maxTurrets"], shipDict["maxModules"], manufacturer=shipDict["manufacturer"] if "manufacturer" in shipDict else "",
                     armour=shipDict["armour"] if "armour" in shipDict else 0, cargo=shipDict["cargo"] if "cargo" in shipDict else 0,
