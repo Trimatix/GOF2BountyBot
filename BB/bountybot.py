@@ -837,8 +837,7 @@ can apply to a type of item (ships, modules, turrets or weapons), or all items i
 can apply to a page, or the first page if none is specified.
 Arguments can be given in any order, and must be separated by a single space.
 
-If all items are requested (or none is specified), the user's active items are displayed along with the first page of each inventory.
-If an item other than all is specified, the user's active items are not displayed
+The user's active items are displayed along with the first page of each inventory.
 
 @param message -- the discord message calling the command
 @param args -- string containing the arguments as specified above
@@ -863,32 +862,33 @@ async def cmd_hangar(message, args):
     if args != "":
         argNum = 1
         for arg in argsSplit:
-            if arg[0:2] == "<@" and arg[-1] == ">" and bbUtil.isInt(arg[2:-1]):
-                if foundUser:
-                    await message.channel.send(":x: I can only take one user!")
-                    return
-                else:
-                    requestedUser = client.get_user(int(arg[2:-1]))
-                    foundUser = True
-                    
-            elif arg in bbConfig.validItemNamesWithPlural:
-                if foundItem:
-                    await message.channel.send(":x: I can only take one item type (ship/weapon/module/turret)!")
-                    return
-                else:
-                    item = arg
-                    foundItem = True
+            if arg != "":
+                if arg[0:2] == "<@" and arg[-1] == ">" and bbUtil.isInt(arg[2:-1]):
+                    if foundUser:
+                        await message.channel.send(":x: I can only take one user!")
+                        return
+                    else:
+                        requestedUser = client.get_user(int(arg[2:-1]))
+                        foundUser = True
+                        
+                elif arg in bbConfig.validItemNames:
+                    if foundItem:
+                        await message.channel.send(":x: I can only take one item type (ship/weapon/module/turret)!")
+                        return
+                    else:
+                        item = arg.rstrip("s")
+                        foundItem = True
 
-            elif bbUtil.isInt(arg):
-                if foundPage:
-                    await message.channel.send(":x: I can only take one page number!")
-                    return
+                elif bbUtil.isInt(arg):
+                    if foundPage:
+                        await message.channel.send(":x: I can only take one page number!")
+                        return
+                    else:
+                        page = int(arg)
+                        foundPage = True
                 else:
-                    page = int(arg)
-                    foundPage = True
-            else:
-                await message.channel.send(":x: " + str(argNum) + bbData.numExtensions[argNum] + " argument invalid! I can only take a target user, an item type (ship/weapon/module/turret), and a page number!")
-            argNum += 1
+                    await message.channel.send(":x: " + str(argNum) + bbData.numExtensions[argNum] + " argument invalid! I can only take a target user, an item type (ship/weapon/module/turret), and a page number!")
+                argNum += 1
     
     if requestedUser is None:
         await message.channel.send(":x: Unrecognised user!")
@@ -923,8 +923,52 @@ async def cmd_hangar(message, args):
         
         hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items" if item == "all" else item.rstrip("s").title() + "s - page " + str(page))
 
+        if page == 1:
+            activeShip = requestedBBUser.activeShip
+            if activeShip is None:
+                hangarEmbed.add_field(name="Active Ship:", value="None")
+            elif page == 1:
+                hangarEmbed.add_field(name="Active Ship:", value=activeShip.getNameAndNick())
+
+                place = 1
+                for weapon in activeShip.weapons:
+                    hangarEmbed.add_field(name=("Equipped Weapons:\n" if place == 1 else "") + str(place) + ".", value=weapon.name)
+                    place += 1
+
+                place = 1
+                for module in activeShip.modules:
+                    hangarEmbed.add_field(name=("Equipped Modules:\n" if place == 1 else "") + str(place) + ".", value=module.name)
+                    place += 1
+
+                place = 1
+                for turret in activeShip.turrets:
+                    hangarEmbed.add_field(name=("Equipped Turrets:\n" if place == 1 else "") + str(place) + ".", value=turret.name)
+                    place += 1
+        
         if item == "all":
-            hangarEmbed.add_field("Active Ship:", requestedBBUser.activeShip.getName())
+            firstPlace = bbConfig.maxItemsPerHangarPageAll * (page - 1) + 1
+            lastPlace = firstPlace + bbConfig.maxItemsPerHangarPageAll - 1
+        else:
+            firstPlace = bbConfig.maxItemsPerHangarPageIndividual * (page - 1) + 1
+            lastPlace = firstPlace + bbConfig.maxItemsPerHangarPageIndividual - 1
+
+        if item in ["all, ship"]:
+            for shipNum in range(firstPlace, lastPlace):
+                hangarEmbed.add_field(name=("Stored Ships:\n" if shipNum == firstPlace else "") + str(shipNum) + ".", value=requestedBBUser.inactiveShips[shipNum - 1].getNameAndNick())
+
+        if item in ["all, weapon"]:
+            for weaponNum in range(firstPlace, lastPlace):
+                hangarEmbed.add_field(name=("Stored Weapons:\n" if weaponNum == firstPlace else "") + str(weaponNum) + ".", value=requestedBBUser.inactiveWeapons[weaponNum - 1].name)
+
+        if item in ["all, module"]:
+            for moduleNum in range(firstPlace, lastPlace):
+                hangarEmbed.add_field(name=("Stored Modules:\n" if moduleNum == firstPlace else "") + str(moduleNum) + ".", value=requestedBBUser.inactiveModules[moduleNum - 1].name)
+
+        if item in ["all, turret"]:
+            for turretNum in range(firstPlace, lastPlace):
+                hangarEmbed.add_field(name=("Stored Turrets:\n" if turretNum == firstPlace else "") + str(turretNum) + ".", value=requestedBBUser.inactiveTurrets[turretNum - 1].name)
+
+bbCommands.register("hangar", cmd_hangar)
 
 
 
@@ -1473,7 +1517,7 @@ async def on_ready():
 
     # the time that the next shop stock refresh should occur, calculated by 12am today + bbConfig.shopRefreshStockPeriod
     # I may wish to add a fixed daily time this should occur at. To implement, simply generate it as a timedelta and ADD it here (and when regenerating nextShopRefresh lower down)
-    nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0, millisecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
+    nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
 
 
     # generate the amount of time to wait until the next bounty generation
@@ -1499,15 +1543,15 @@ async def on_ready():
         if datetime.utcnow() >= nextShopRefresh:
             guildsDB.refreshAllShopStocks()
             # Reset the shop stock refresh cooldown
-            nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0, millisecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
+            nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
         
         # Make new bounties
             # has the bounty delay period been reset manually? Is random 
         if bbConfig.newBountyDelayReset or (bbConfig.newBountyDelayType == "random" and currentBountyWait >= currentNewBountyDelay) or \
                 (bbConfig.newBountyDelayType == "fixed" and timedelta(seconds=currentBountyWait) >= newBountyDelayDelta and ((not bbConfig.newBountyFixedUseDailyTime) or (bbConfig.newBountyFixedUseDailyTime and \
-                    datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0, millisecond=0) + newBountyDelayDelta - timedelta(minutes=bbConfig.delayFactor) \
+                    datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + newBountyDelayDelta - timedelta(minutes=bbConfig.delayFactor) \
                     <= datetime.utcnow() \
-                    <= datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0, millisecond=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
+                    <= datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
             # ensure a new bounty can be created
             if bountiesDB.canMakeBounty():
                 newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
