@@ -31,7 +31,7 @@ saveDelay = 30 * 60
 delayFactor = 5
 
 # The number of credits to award for each bPoint (each system in a criminal route)
-bPointsToCreditsRatio = 100
+bPointsToCreditsRatio = 1000
 
 # max number of messages to wait before sending random !drink
 randomDrinkFactor = 500
