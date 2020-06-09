@@ -26,32 +26,32 @@ for systemDict in bbData.builtInSystemData.values():
 # generate bbModule objects from data in bbData
 for moduleDict in bbData.builtInModuleData.values():
     bbData.builtInModuleObjs[moduleDict["name"]] = bbModule.fromDict(moduleDict)
-    bbData.builtInModuleData[systemDict["name"]]["builtIn"] = True
-    bbData.builtInModuleObjs[systemDict["name"]].builtIn = True
+    bbData.builtInModuleData[moduleDict["name"]]["builtIn"] = True
+    bbData.builtInModuleObjs[moduleDict["name"]].builtIn = True
 
 # generate bbWeapon objects from data in bbData
 for weaponDict in bbData.builtInWeaponData.values():
     bbData.builtInWeaponObjs[weaponDict["name"]] = bbWeapon.fromDict(weaponDict)
-    bbData.builtInWeaponData[systemDict["name"]]["builtIn"] = True
-    bbData.builtInWeaponObjs[systemDict["name"]].builtIn = True
+    bbData.builtInWeaponData[weaponDict["name"]]["builtIn"] = True
+    bbData.builtInWeaponObjs[weaponDict["name"]].builtIn = True
 
 # generate bbUpgrade objects from data in bbData
 for upgradeDict in bbData.builtInUpgradeData.values():
     bbData.builtInUpgradeObjs[upgradeDict["name"]] = bbShipUpgrade.fromDict(upgradeDict)
-    bbData.builtInUpgradeData[systemDict["name"]]["builtIn"] = True
-    bbData.builtInUpgradeObjs[systemDict["name"]].builtIn = True
+    bbData.builtInUpgradeData[upgradeDict["name"]]["builtIn"] = True
+    bbData.builtInUpgradeObjs[upgradeDict["name"]].builtIn = True
 
 # generate bbTurret objects from data in bbData
 for turretDict in bbData.builtInTurretData.values():
     bbData.builtInTurretObjs[turretDict["name"]] = bbTurret.fromDict(turretDict)
-    bbData.builtInTurretData[systemDict["name"]]["builtIn"] = True
-    bbData.builtInTurretObjs[systemDict["name"]].builtIn = True
+    bbData.builtInTurretData[turretDict["name"]]["builtIn"] = True
+    bbData.builtInTurretObjs[turretDict["name"]].builtIn = True
 
 
 # Sort ships by value
 unsortedShipKeys = {}
 for shipKey in bbData.builtInShipData.keys():
-    unsortedShipKeys[shipKey] = bbData.builtInShipData[shipKey].value
+    unsortedShipKeys[shipKey] = bbData.builtInShipData[shipKey]["value"]
 sortedShipKeys = sorted(unsortedShipKeys.items(), key=operator.itemgetter(1))[::-1]
 
 # Make a list of ship KEYS ranked by value for random picking
