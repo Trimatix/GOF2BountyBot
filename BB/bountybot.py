@@ -863,12 +863,12 @@ async def cmd_hangar(message, args):
         argNum = 1
         for arg in argsSplit:
             if arg != "":
-                if arg[0:2] == "<@" and arg[-1] == ">" and bbUtil.isInt(arg[2:-1]):
+                if arg[0:2] == "<@" and arg[-1] == ">" and bbUtil.isInt(arg.lstrip("<@!")[:-1]):
                     if foundUser:
                         await message.channel.send(":x: I can only take one user!")
                         return
                     else:
-                        requestedUser = client.get_user(int(arg[2:-1]))
+                        requestedUser = client.get_user(int(arg.lstrip("<@!")[:-1]))
                         foundUser = True
                         
                 elif arg in bbConfig.validItemNames:
@@ -926,47 +926,43 @@ async def cmd_hangar(message, args):
         if page == 1:
             activeShip = requestedBBUser.activeShip
             if activeShip is None:
-                hangarEmbed.add_field(name="Active Ship:", value="None")
+                hangarEmbed.add_field(name="Active Ship:", value="None", inline=False)
             elif page == 1:
-                hangarEmbed.add_field(name="Active Ship:", value=activeShip.getNameAndNick())
+                hangarEmbed.add_field(name="Active Ship:", value=activeShip.getNameAndNick(), inline=False)
 
-                place = 1
-                for weapon in activeShip.weapons:
-                    hangarEmbed.add_field(name=("Equipped Weapons:\n" if place == 1 else "") + str(place) + ".", value=weapon.name)
-                    place += 1
+                for weaponNum in range(1, len(activeShip.weapons) + 1):
+                    hangarEmbed.add_field(name=("Equipped Weapons:\n" if weaponNum == 1 else "") + str(weaponNum) + ".", value=activeShip.weapons[weaponNum - 1].name, inline=False if weaponNum == 1 else True)
 
-                place = 1
-                for module in activeShip.modules:
-                    hangarEmbed.add_field(name=("Equipped Modules:\n" if place == 1 else "") + str(place) + ".", value=module.name)
-                    place += 1
-
-                place = 1
-                for turret in activeShip.turrets:
-                    hangarEmbed.add_field(name=("Equipped Turrets:\n" if place == 1 else "") + str(place) + ".", value=turret.name)
-                    place += 1
+                for moduleNum in range(1, len(activeShip.modules) + 1):
+                    hangarEmbed.add_field(name=("Equipped Modules:\n" if moduleNum == 1 else "") + str(moduleNum) + ".", value=activeShip.modules[moduleNum - 1].name, inline=False if moduleNum == 1 else True)
+                
+                for turretNum in range(1, len(activeShip.turrets) + 1):
+                    hangarEmbed.add_field(name=("Equipped Turrets:\n" if turretNum == 1 else "") + str(turretNum) + ".", value=activeShip.turrets[turretNum - 1].name, inline=False if turretNum == 1 else True)
         
         if item == "all":
             firstPlace = bbConfig.maxItemsPerHangarPageAll * (page - 1) + 1
             lastPlace = firstPlace + bbConfig.maxItemsPerHangarPageAll - 1
         else:
             firstPlace = bbConfig.maxItemsPerHangarPageIndividual * (page - 1) + 1
-            lastPlace = firstPlace + bbConfig.maxItemsPerHangarPageIndividual - 1
+            lastPlace = firstPlace + bbConfig.maxItemsPerHangarPageIndividual
 
         if item in ["all, ship"]:
             for shipNum in range(firstPlace, lastPlace):
-                hangarEmbed.add_field(name=("Stored Ships:\n" if shipNum == firstPlace else "") + str(shipNum) + ".", value=requestedBBUser.inactiveShips[shipNum - 1].getNameAndNick())
+                hangarEmbed.add_field(name=("Stored Ships:\n" if shipNum == firstPlace else "") + str(shipNum) + ".", value=requestedBBUser.inactiveShips[shipNum - 1].getNameAndNick(), inline=False if shipNum == 1 else True)
 
         if item in ["all, weapon"]:
             for weaponNum in range(firstPlace, lastPlace):
-                hangarEmbed.add_field(name=("Stored Weapons:\n" if weaponNum == firstPlace else "") + str(weaponNum) + ".", value=requestedBBUser.inactiveWeapons[weaponNum - 1].name)
+                hangarEmbed.add_field(name=("Stored Weapons:\n" if weaponNum == firstPlace else "") + str(weaponNum) + ".", value=requestedBBUser.inactiveWeapons[weaponNum - 1].name, inline=False if weaponNum == 1 else True)
 
         if item in ["all, module"]:
             for moduleNum in range(firstPlace, lastPlace):
-                hangarEmbed.add_field(name=("Stored Modules:\n" if moduleNum == firstPlace else "") + str(moduleNum) + ".", value=requestedBBUser.inactiveModules[moduleNum - 1].name)
+                hangarEmbed.add_field(name=("Stored Modules:\n" if moduleNum == firstPlace else "") + str(moduleNum) + ".", value=requestedBBUser.inactiveModules[moduleNum - 1].name, inline=False if moduleNum == 1 else True)
 
         if item in ["all, turret"]:
             for turretNum in range(firstPlace, lastPlace):
-                hangarEmbed.add_field(name=("Stored Turrets:\n" if turretNum == firstPlace else "") + str(turretNum) + ".", value=requestedBBUser.inactiveTurrets[turretNum - 1].name)
+                hangarEmbed.add_field(name=("Stored Turrets:\n" if turretNum == firstPlace else "") + str(turretNum) + ".", value=requestedBBUser.inactiveTurrets[turretNum - 1].name, inline=False if turretNum == 1 else True)
+
+        await message.channel.send(embed=hangarEmbed)
 
 bbCommands.register("hangar", cmd_hangar)
 
