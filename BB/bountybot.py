@@ -1610,7 +1610,7 @@ async def cmd_unnameship(message, args):
     requestedBBUser.activeShip.removeNickname()
     await message.channel.send(":pencil: You reset your **" + requestedBBUser.activeShip.name + "**'s nickname.")
 
-bbCommands.register("unnameship", cmd_nameship)
+bbCommands.register("unnameship", cmd_unnameship)
 
 
 
