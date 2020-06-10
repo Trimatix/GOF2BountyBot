@@ -14,13 +14,13 @@ class HeirarchicalCommandsDB:
     @param isAdmin -- whether the caller requires admin privilages to call the command. Default: False
     @param isDev -- whether the caller requires developer privilages to call the command. Default: False  
     """
-    def register(self, command, function, isAdmin=False, isDev=False):
+    def register(self, command, function, isAdmin=False, isDev=False, forceKeepArgsCasing=False, forceKeepCommandCasing = False):
         if isDev:
-            self.devCommands[command] = function
+            self.devCommands[command if forceKeepCommandCasing else command.lower()] = (function, forceKeepArgsCasing, forceKeepCommandCasing)
         elif isAdmin:
-            self.adminCommands[command] = function
+            self.adminCommands[command if forceKeepCommandCasing else command.lower()] = (function, forceKeepArgsCasing, forceKeepCommandCasing)
         else:
-            self.userCommands[command] = function
+            self.userCommands[command if forceKeepCommandCasing else command.lower()] = (function, forceKeepArgsCasing, forceKeepCommandCasing)
 
     """
     Call a command or send an error message.
@@ -34,22 +34,29 @@ class HeirarchicalCommandsDB:
     """
     async def call(self, command, message, args, isAdmin=False, isDev=False):
         # First search user commands
-        try:
-            await self.userCommands[command](message, args)
+        if command in self.userCommands and self.userCommands[command][2]:
+            await self.userCommands[command][0](message, args if self.userCommands[command][1] else args.lower())
             return True
-        except KeyError:
+        elif command.lower() in self.userCommands and not self.userCommands[command.lower()][2]:
+            await self.userCommands[command.lower()][0](message, args if self.userCommands[command.lower()][1] else args.lower())
+            return True
+        else:
             # Then search admin commands (if privilages are present)
             if isAdmin or isDev:
-                try:
-                    await self.adminCommands[command](message, args)
+                if command in self.adminCommands and self.adminCommands[command][2]:
+                    await self.adminCommands[command][0](message, args if self.adminCommands[command][1] else args.lower())
                     return True
-                except KeyError:
+                elif command.lower() in self.adminCommands and not self.adminCommands[command.lower()][2]:
+                    await self.adminCommands[command.lower()][0](message, args if self.adminCommands[command.lower()][1] else args.lower())
+                    return True
+                else:
                     # Finally, search developer commands (if privilages are present)
                     if isDev:
-                        try:
-                            await self.devCommands[command](message, args)
+                        if command in self.devCommands and self.devCommands[command][2]:
+                            await self.devCommands[command][0](message, args if self.devCommands[command][1] else args.lower())
                             return True
-                        except KeyError:
-                            pass
+                        elif command.lower() in self.devCommands and not self.devCommands[command.lower()][2]:
+                            await self.devCommands[command.lower()][0](message, args if self.devCommands[command.lower()][1] else args.lower())
+                            return True
             # command not found
             return False
