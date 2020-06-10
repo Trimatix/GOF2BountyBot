@@ -270,7 +270,7 @@ async def cmd_help(message, args):
             for section in bbData.helpDict.keys():
                 if args in bbData.helpDict[section]:
                     helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
-                    helpEmbed.add_field(name=bbData.helpDict[section][args][0],value=bbData.helpDict[section][args][1].replace("$COMMANDPREFIX",bbConfig.commandPrefix), inline=False)
+                    helpEmbed.add_field(name=bbData.helpDict[section][args][0],value=bbData.helpDict[section][args][1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
                     await message.channel.send(embed=helpEmbed)
                     return
             await message.channel.send(":x: Help: Command not found!")
@@ -280,8 +280,8 @@ async def cmd_help(message, args):
     section = list(bbData.helpDict.keys())[page - 1]
     helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
     for currentCommand in bbData.helpDict[section].values():
-        helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1], inline=False)
-    await message.channel.send(bbData.helpIntro.replace("$COMMANDPREFIX",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
+        helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
+    await message.channel.send(bbData.helpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
     
 bbCommands.register("help", cmd_help)
 

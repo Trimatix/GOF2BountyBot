@@ -61,7 +61,7 @@ mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/7006835441037475
 mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png'
 
 # intro for help commands
-helpIntro = """:star: Here are my commands! Prefix commands with `!bb` - for example: `$COMMANDPREFIX$help`
+helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
 
 # help strings for bb commands
@@ -90,7 +90,7 @@ helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display informati
                             "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")}}
 
 # intro for admin help commands
-adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `!bb` - for example: `$COMMANDPREFIX$help`
+adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
 
 # help strings for admin bb commands
