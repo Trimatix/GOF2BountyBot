@@ -1,12 +1,12 @@
-from .items import bbShip, bbModule, bbWeapon
+from .items import bbShip, bbModule, bbWeapon, bbTurret
 from ..bbConfig import bbConfig
 
 
 defaultShipLoadoutDict = {"name": "Betty", "manufacturer": "midorian", "maxPrimaries": 1, "maxTurrets": 0, "maxModules": 3, "armour": 95, "cargo": 25, "numSecondaries": 1, "handling": 120, "value": 16038, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Betty", "builtIn":False,
-                        "weapons":[{"name": "Nirai Impulse EX 1", "builtIn": True}, {"name": "Micro Gun MK I", "builtIn": True}],
+                        "weapons":[{"name": "Micro Gun MK I", "builtIn": True}],
                         "modules":[{"name": "E2 Exoclad", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}]}
 
-defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict}
+defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"name": "Nirai Impulse EX 1", "builtIn": True}]}
 
 
 class bbUser:
@@ -82,7 +82,7 @@ class bbUser:
         self.inactiveTurrets = []
 
 
-    def numInventoryPages(self, item):
+    def numInventoryPages(self, item, maxPerPage):
         if item not in bbConfig.validItemNames:
             raise ValueError("Requested an invalid item name: " + item)
 
@@ -92,43 +92,78 @@ class bbUser:
         numShips = len(self.inactiveShips)
 
         itemsNum = 0
-        maxPerPage = 0
 
         if item == "all":
-            itemsNum = numWeapons + numModules + numTurrets + numShips
-            maxPerPage = bbConfig.maxItemsPerHangarPageAll * 3
-
-        else:
-            maxPerPage = bbConfig.maxItemsPerHangarPageIndividual
-            if item == "module":
-                itemsNum = numModules
-            elif item == "weapon":
-                itemsNum = numWeapons
-            elif item == "turret":
-                itemsNum = numTurrets
-            elif item == "ship":
-                itemsNum = numShips
-            else:
-                raise NotImplementedError("Valid but unsupported item name: " + item)
-
-        return 1 if itemsNum == 0 else (int(itemsNum/maxPerPage) + (0 if itemsNum % maxPerPage == 0 else 1))
-
-
-    def numEmptySlotsOnInventoryPage(self, item, pageNum, maxPerPage):
-        if item not in bbConfig.validItemNames:
-            raise ValueError("Requested an invalid item name: " + item)
-        if pageNum < self.numInventoryPages(item):
-            return 0
-        elif item == "ship":
-            return maxPerPage - (len(self.inactiveShips) % maxPerPage)
-        elif item == "weapon":
-            return maxPerPage - (len(self.inactiveWeapons) % maxPerPage)
+            itemsNum = max(numWeapons, numModules, numTurrets, numShips)
         elif item == "module":
-            return maxPerPage - (len(self.inactiveModules) % maxPerPage)
+            itemsNum = numModules
+        elif item == "weapon":
+            itemsNum = numWeapons
         elif item == "turret":
-            return maxPerPage - (len(self.inactiveTurrets) % maxPerPage)
+            itemsNum = numTurrets
+        elif item == "ship":
+            itemsNum = numShips
         else:
             raise NotImplementedError("Valid but unsupported item name: " + item)
+        
+        return int(itemsNum/maxPerPage) + (0 if itemsNum % maxPerPage == 0 else 1)
+
+    
+    def lastItemNumberOnPage(self, item, pageNum, maxPerPage):
+        if item not in bbConfig.validItemNames:
+            raise ValueError("Requested an invalid item name: " + item)
+        if pageNum < self.numInventoryPages(item, maxPerPage):
+            return pageNum * maxPerPage
+            
+        elif item == "ship":
+            return len(self.inactiveShips)
+        elif item == "weapon":
+            return len(self.inactiveWeapons)
+        elif item == "module":
+            return len(self.inactiveModules)
+        elif item == "turret":
+            return len(self.inactiveTurrets)
+        else:
+            raise NotImplementedError("Valid but unsupported item name: " + item)
+
+
+    def unequipAll(self, ship):
+        if not type(ship) == bbShip.bbShip:
+            raise TypeError("Can only transfer items to another bbShip. Given " + str(type(ship)))
+
+        if not (self.activeShip == ship or ship in self.inactiveShips):
+            raise RuntimeError("Attempted to unequipAll on a ship that isnt owned by this bbUser")
+
+        for weapon in ship.weapons:
+            self.inactiveWeapons.append(weapon)
+            # ship.unequipWeaponObj(weapon)
+        ship.weapons = []
+        for module in ship.modules:
+            self.inactiveModules.append(module)
+            # ship.unequipModuleObj(module)
+        ship.modules = []
+        for turret in ship.turrets:
+            self.inactiveTurrets.append(turret)
+            # ship.unequipTurretObj(turret)
+        ship.turrets = []
+
+
+    def equipShipObj(self, ship, noSaveActive=False):
+        if not (self.activeShip == ship or ship in self.inactiveShips):
+            raise RuntimeError("Attempted to equip a ship that isnt owned by this bbUser")
+        if not noSaveActive and self.activeShip is not None:
+            self.inactiveShips.append(self.activeShip)
+        if ship in self.inactiveShips:
+            self.inactiveShips.remove(ship)
+        self.activeShip = ship
+
+    
+    def equipShipIndex(self, index):
+        if not (0 <= index <= len(self.inactiveShips) - 1):
+            raise RuntimeError("Index out of range")
+        if self.activeShip is not None:
+            self.inactiveShips.append(self.activeShip)
+        self.activeShip = self.inactiveShips.pop(index)
 
 
     def toDictNoId(self):
@@ -176,6 +211,21 @@ class bbUser:
             return self.bountyWins
 
 
+    def getInactivesByName(self, item):
+        if item == "all" or item not in bbConfig.validItemNames:
+            raise ValueError("Invalid item type: " + item)
+        if item == "ship":
+            return self.inactiveShips
+        if item == "weapon":
+            return self.inactiveWeapons
+        if item == "module":
+            return self.inactiveModules
+        if item == "turret":
+            return self.inactiveTurrets
+        else:
+            raise NotImplementedError("Valid, not unrecognised item type: " + item)
+
+
     def __str__(self):
         return "<bbUser #" + str(self.id) + ">"
 
@@ -191,17 +241,17 @@ def fromDict(id, userDict):
     inactiveWeapons = []
     if "inactiveWeapons" in userDict:
         for weapon in userDict["inactiveWeapons"]:
-            inactiveWeapons.append(bbShip.fromDict(weapon))
+            inactiveWeapons.append(bbWeapon.fromDict(weapon))
 
     inactiveModules = []
     if "inactiveModules" in userDict:
         for module in userDict["inactiveModules"]:
-            inactiveModules.append(bbShip.fromDict(module))
+            inactiveModules.append(bbModule.fromDict(module))
 
     inactiveTurrets = []
     if "inactiveTurrets" in userDict:
         for turret in userDict["inactiveTurrets"]:
-            inactiveTurrets.append(bbShip.fromDict(turret))
+            inactiveTurrets.append(bbTurret.fromDict(turret))
 
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
