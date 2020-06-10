@@ -47,7 +47,7 @@ guildDBPath = "saveData/guilds.json"
 bountyDBPath = "saveData/bounties.json"
 
 # prefix for bot commands. dont forget a space!
-commandPrefix = "!bb "
+commandPrefix = "$"
 
 # discord user IDs of all developers
 developers = [188618589102669826]
@@ -76,9 +76,9 @@ shopDefaultTurretsNum = 2
 turretSpawnProbability = 33
 
 # The maximum number of items that will be displayed per page of a user's hangar, when all item types are requested
-maxItemsPerHangarPageAll = 5
+maxItemsPerHangarPageAll = 3
 # The maximum number of items that will be displayed per page of a user's hangar, when a single item type is requested
-maxItemsPerHangarPageIndividual = 10
+maxItemsPerHangarPageIndividual = 5
 
 # Names to be used when checking input to !bb hangar and bbUser.numInventoryPages
 validItemNames = ["ship", "weapon", "module", "turret", "all"]
