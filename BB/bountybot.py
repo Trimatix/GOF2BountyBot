@@ -1668,8 +1668,8 @@ async def admin_cmd_admin_help(message, args):
     for section in bbData.adminHelpDict.keys():
         helpEmbed.add_field(name="‎",value=section, inline=False)
         for currentCommand in bbData.adminHelpDict[section].keys():
-            helpEmbed.add_field(name=currentCommand,value=bbData.adminHelpDict[section][currentCommand], inline=False)
-    await message.channel.send(bbData.adminHelpIntro, embed=helpEmbed)
+            helpEmbed.add_field(name=currentCommand,value=bbData.adminHelpDict[section][currentCommand].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
+    await message.channel.send(bbData.adminHelpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix), embed=helpEmbed)
     
 bbCommands.register("admin-help", admin_cmd_admin_help, isAdmin=True)
 
