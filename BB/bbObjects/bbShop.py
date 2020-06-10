@@ -49,6 +49,21 @@ class bbShop:
                 self.turretsStock.append(random.choice(bbData.rankedTurretObjs))
 
 
+    def getStockByName(self, item):
+        if item == "all" or item not in bbConfig.validItemNames:
+            raise ValueError("Invalid item type: " + item)
+        if item == "ship":
+            return self.shipsStock
+        if item == "weapon":
+            return self.weaponsStock
+        if item == "module":
+            return self.modulesStock
+        if item == "turret":
+            return self.turretsStock
+        else:
+            raise NotImplementedError("Valid, not unrecognised item type: " + item)
+
+
     # SHIP MANAGEMENT
     def userCanAffordShipObj(self, user, ship):
         return user.credits >= ship.getValue()
@@ -56,6 +71,14 @@ class bbShop:
     
     def userCanAffordShipIndex(self, user, index):
         return self.userCanAffordShipObj(user, self.shipsStock[index])
+
+
+    def amountCanAffordShipObj(self, amount, ship):
+        return amount >= ship.getValue()
+
+    
+    def amountCanAffordShipIndex(self, amount, index):
+        return self.amountCanAffordShipObj(amount, self.shipsStock[index])
 
 
     def userBuyShipIndex(self, user, index):
