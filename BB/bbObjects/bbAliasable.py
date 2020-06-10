@@ -23,6 +23,14 @@ class Aliasable (ABC):
     def isCalled(self, name):
         return name.lower() == self.name.lower() or name.lower() in self.aliases
 
+    def removeAlias(self, name):
+        if name.lower() in self.aliases:
+            self.aliases.remove(name.lower())
+
+    def addAlias(self, name):
+        if name.lower() not in self.aliases:
+            self.aliases.append(name.lower())
+
     @abstractmethod
     def getType(self):
         pass

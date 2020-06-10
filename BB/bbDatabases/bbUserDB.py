@@ -34,7 +34,9 @@ class bbUserDB:
         id = self.validateID(id)
         if self.userIDExists(id):
             raise KeyError("Attempted to add a user that is already in this bbUserDB")
-        self.users[id] = bbUser.fromDict(id, {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0})
+        newUser = bbUser.fromDict(id, bbUser.defaultUserDict)
+        self.users[id] = newUser
+        return newUser
 
     
     def addUserObj(self, userObj):

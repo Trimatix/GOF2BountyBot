@@ -15,7 +15,8 @@ import operator
 
 # may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .bbObjects import bbBounty, bbBountyConfig
+from .bbObjects import bbBounty, bbBountyConfig, bbUser
+from .bbObjects.items import bbShip
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from . import bbUtil
 
@@ -223,6 +224,23 @@ def makeEmbed(titleTxt="",desc="",col=discord.Colour.blue(), footerTxt="", img="
     if thumb != "": embed.set_thumbnail(url=thumb)
     if icon != "": embed.set_author(name=authorName, icon_url=icon)
     return embed
+
+
+"""
+Construct a datetime.timedelta from a dictionary,
+transforming keys into keyword arguments fot the timedelta constructor.
+
+@param timeDict -- dictionary containing measurements for each time interval. i.e weeks, days, hours, minutes, seconds, microseconds and milliseconds. all are optional and case sensitive.
+@return -- a timedelta with all of the attributes requested in the dictionary.
+"""
+def timeDeltaFromDict(timeDict):
+    return timedelta(   weeks=timeDict["weeks"] if "weeks" in timeDict else 0,
+                        days=timeDict["days"] if "days" in timeDict else 0,
+                        hours=timeDict["hours"] if "hours" in timeDict else 0,
+                        minutes=timeDict["minutes"] if "minutes" in timeDict else 0,
+                        seconds=timeDict["seconds"] if "seconds" in timeDict else 0,
+                        microseconds=timeDict["microseconds"] if "microseconds" in timeDict else 0,
+                        milliseconds=timeDict["milliseconds"] if "milliseconds" in timeDict else 0)
 
 
 
@@ -813,6 +831,779 @@ async def cmd_leaderboard(message, args):
 bbCommands.register("leaderboard", cmd_leaderboard)
 
 
+"""
+return a page listing the target user's items.
+can apply to a specified user, or the calling user if none is specified.
+can apply to a type of item (ships, modules, turrets or weapons), or all items if none is specified.
+can apply to a page, or the first page if none is specified.
+Arguments can be given in any order, and must be separated by a single space.
+
+TODO: try displaying as a discord message rather than embed?
+TODO: add icons for ships and items!?
+
+@param message -- the discord message calling the command
+@param args -- string containing the arguments as specified above
+"""
+async def cmd_hangar(message, args):
+    argsSplit = args.split(" ")
+
+    requestedUser = message.author
+    item = "all"
+    page = 1
+
+    foundUser = False
+    foundItem = False
+    foundPage = False
+
+    useDummyData = False
+
+    if len(argsSplit) > 3:
+        await message.channel.send(":x: Too many arguments! I can only take a target user, an item type (ship/weapon/module), and a page number!")
+        return
+    
+    if args != "":
+        argNum = 1
+        for arg in argsSplit:
+            if arg != "":
+                if args.startswith("<@") and arg[-1] == ">" and bbUtil.isInt(arg.lstrip("<@!")[:-1]):
+                    if foundUser:
+                        await message.channel.send(":x: I can only take one user!")
+                        return
+                    else:
+                        requestedUser = client.get_user(int(arg.lstrip("<@!")[:-1]))
+                        foundUser = True
+                        
+                elif arg in bbConfig.validItemNames:
+                    if foundItem:
+                        await message.channel.send(":x: I can only take one item type (ship/weapon/module/turret)!")
+                        return
+                    else:
+                        item = arg.rstrip("s")
+                        foundItem = True
+
+                elif bbUtil.isInt(arg):
+                    if foundPage:
+                        await message.channel.send(":x: I can only take one page number!")
+                        return
+                    else:
+                        page = int(arg)
+                        foundPage = True
+                else:
+                    await message.channel.send(":x: " + str(argNum) + bbData.numExtensions[argNum] + " argument invalid! I can only take a target user, an item type (ship/weapon/module/turret), and a page number!")
+                    return
+                argNum += 1
+    
+    if requestedUser is None:
+        await message.channel.send(":x: Unrecognised user!")
+        return
+
+    if not usersDB.userIDExists(requestedUser.id):
+        if not foundUser:
+            usersDB.addUser(requestedUser.id)
+        else:
+            useDummyData = True
+
+    if useDummyData:
+        if page > 1:
+            await message.channel.send(":x: " + ("The requested pilot" if foundUser else "You") + " only " + ("has" if foundUser else "have") + " one page of items. Showing page one:")
+            page = 1
+        elif page < 1:
+            await message.channel.send(":x: Invalid page number. Showing page one:")
+            page = 1
+
+        hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items" if item == "all" else item.rstrip("s").title() + "s - page " + str(page), thumb=requestedUser.avatar_url_as(size=64))
+        
+        hangarEmbed.add_field(name="No Stored Items", value="‎", inline=False)
+        await message.channel.send(embed=hangarEmbed)
+        return
+
+    else:
+        requestedBBUser = usersDB.getUser(requestedUser.id)
+
+        if item == "all":
+            maxPerPage = bbConfig.maxItemsPerHangarPageAll
+        else:
+            maxPerPage = bbConfig.maxItemsPerHangarPageIndividual
+
+        if page < 1:
+            await message.channel.send(":x: Invalid page number. Showing page one:")
+            page = 1
+        else:
+            maxPage = requestedBBUser.numInventoryPages(item, maxPerPage)
+            if maxPage == 0:
+                await message.channel.send(":x: " + ("The requested pilot doesn't" if foundUser else "You don't") + " have any " + ("items" if item == "all" else "of that item") + "!")
+                return
+            elif page > maxPage:
+                await message.channel.send(":x: " + ("The requested pilot" if foundUser else "You") + " only " + ("has" if foundUser else "have") + str(maxPage) + " page(s) of items. Showing page " + str(maxPage) + ":")
+                page = maxPage
+        
+        hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt=("All item" if item == "all" else item.rstrip("s").title()) + "s - page " + str(page) + "/" + str(requestedBBUser.numInventoryPages(item, maxPerPage)), thumb=requestedUser.avatar_url_as(size=64))
+        firstPlace = maxPerPage * (page - 1) + 1
+
+        if item in ["all", "ship"]:
+            for shipNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("ship", page, maxPerPage) + 1):
+                if shipNum == firstPlace:
+                    hangarEmbed.add_field(name="‎", value="__**Stored Ships**__", inline=False)
+                hangarEmbed.add_field(name=str(shipNum) + ". " + requestedBBUser.inactiveShips[shipNum - 1].getNameAndNick(), value=requestedBBUser.inactiveShips[shipNum - 1].statsStringShort(), inline=False)
+        
+        if item in ["all", "weapon"]:
+            for weaponNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("weapon", page, maxPerPage) + 1):
+                if weaponNum == firstPlace:
+                    hangarEmbed.add_field(name="‎", value="__**Stored Weapons**__", inline=False)
+                hangarEmbed.add_field(name=str(weaponNum) + ". " + requestedBBUser.inactiveWeapons[weaponNum - 1].name, value=requestedBBUser.inactiveWeapons[weaponNum - 1].statsStringShort(), inline=False)
+
+        if item in ["all", "module"]:
+            for moduleNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("module", page, maxPerPage) + 1):
+                if moduleNum == firstPlace:
+                    hangarEmbed.add_field(name="‎", value="__**Stored Modules**__", inline=False)
+                hangarEmbed.add_field(name=str(moduleNum) + ". " + requestedBBUser.inactiveModules[moduleNum - 1].name, value=requestedBBUser.inactiveModules[moduleNum - 1].statsStringShort(), inline=False)
+
+        if item in ["all", "turret"]:
+            for turretNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("turret", page, maxPerPage) + 1):
+                if turretNum == firstPlace:
+                    hangarEmbed.add_field(name="‎", value="__**Stored Turrets**__", inline=False)
+                hangarEmbed.add_field(name=str(turretNum) + ". " + requestedBBUser.inactiveTurrets[turretNum - 1].name, value=requestedBBUser.inactiveTurrets[turretNum - 1].statsStringShort(), inline=False)
+
+        await message.channel.send(embed=hangarEmbed)
+
+bbCommands.register("hangar", cmd_hangar)
+
+
+"""
+list the current stock of the bbShop owned by the guild containing the sent message.
+Can specify an item type to list. TODO: Make specified item listings more detailed as in !bb bounties
+
+@param message -- the discord message calling the command
+@param args -- either empty string, or one of bbConfig.validItemNames
+"""
+async def cmd_shop(message, args):
+    item = "all"
+    if args.rstrip("s") in bbConfig.validItemNames:
+        item = args.rstrip("s")
+    elif args != "":
+        await message.channel.send(":x: Invalid item type! (ship/weapon/module/turret)")
+        return
+
+    requestedShop = guildsDB.getGuild(message.guild.id).shop
+    shopEmbed = makeEmbed(titleTxt="Shop", desc=message.guild.name, footerTxt="All items" if item == "all" else (item + "s").title(), thumb="https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64")
+
+    if item in ["all", "ship"]:
+        for shipNum in range(1, len(requestedShop.shipsStock) + 1):
+            if shipNum == 1:
+                shopEmbed.add_field(name="‎", value="__**Ships**__", inline=False)
+            shopEmbed.add_field(name=str(shipNum) + ". " + str(requestedShop.shipsStock[shipNum - 1].getValue()) + " Credits", value= "**" + requestedShop.shipsStock[shipNum - 1].getNameAndNick() + "**\n" + requestedShop.shipsStock[shipNum - 1].statsStringShort(), inline=True)
+
+    if item in ["all", "weapon"]:
+        for weaponNum in range(1, len(requestedShop.weaponsStock) + 1):
+            if weaponNum == 1:
+                shopEmbed.add_field(name="‎", value="__**Weapons**__", inline=False)
+            shopEmbed.add_field(name=str(weaponNum) + ". " + str(requestedShop.weaponsStock[weaponNum - 1].value) + " Credits", value= "**" + requestedShop.weaponsStock[weaponNum - 1].name + "**\n" + requestedShop.weaponsStock[weaponNum - 1].statsStringShort(), inline=True)
+
+    if item in ["all", "module"]:
+        for moduleNum in range(1, len(requestedShop.modulesStock) + 1):
+            if moduleNum == 1:
+                shopEmbed.add_field(name="‎", value="__**Modules**__", inline=False)
+            shopEmbed.add_field(name=str(moduleNum) + ". " + str(requestedShop.modulesStock[moduleNum - 1].value) + " Credits", value= "**" + requestedShop.modulesStock[moduleNum - 1].name + "**\n" + requestedShop.modulesStock[moduleNum - 1].statsStringShort(), inline=True)
+
+    if item in ["all", "turret"]:
+        for turretNum in range(1, len(requestedShop.turretsStock) + 1):
+            if turretNum == 1:
+                shopEmbed.add_field(name="‎", value="__**Turrets**__", inline=False)
+            shopEmbed.add_field(name=str(turretNum) + ". " + str(requestedShop.turretsStock[turretNum - 1].value) + " Credits", value= "**" + requestedShop.turretsStock[turretNum - 1].name + "**\n" + requestedShop.turretsStock[turretNum - 1].statsStringShort(), inline=True)
+
+    await message.channel.send(embed=shopEmbed)
+
+bbCommands.register("shop", cmd_shop)
+
+
+"""
+list the requested user's currently equipped items.
+
+@param message -- the discord message calling the command
+@param args -- either empty string, or a user mention
+"""
+async def cmd_loadout(message, args):
+    requestedUser = message.author
+    useDummyData = False
+    userFound = False
+
+    if len(args.split(" ")) > 1:
+        await message.channel.send(":x: Too many arguments! I can only take a target user!")
+        return
+    
+    if args != "" and args.startswith("<@") and args[-1] == ">" and bbUtil.isInt(args.lstrip("<@!")[:-1]):
+        requestedUser = client.get_user(int(args.lstrip("<@!")[:-1]))
+        userFound = True
+        if requestedUser is None:
+            await message.channel.send(":x: Unrecognised user!")
+            return
+
+    if not usersDB.userIDExists(requestedUser.id):
+        if not userFound:
+            usersDB.addUser(requestedUser.id)
+        else:
+            useDummyData = True
+
+    if useDummyData:
+        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours["neutral"], thumb=requestedUser.avatar_url_as(size=64))
+        activeShip = bbShip.fromDict(bbUser.defaultShipLoadoutDict)
+        loadoutEmbed.add_field(name="Active Ship:", value=activeShip.name + "\n" + activeShip.statsStringNoItems(), inline=False)
+        
+        loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
+        for weaponNum in range(1, len(activeShip.weapons) + 1):
+            loadoutEmbed.add_field(name=str(weaponNum) + ". " + activeShip.weapons[weaponNum - 1].name, value=activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
+
+
+        loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + "*", inline=False)
+        for moduleNum in range(1, len(activeShip.modules) + 1):
+            loadoutEmbed.add_field(name=str(moduleNum) + ". " + activeShip.modules[moduleNum - 1].name, value=activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
+        
+        
+        loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + "*", inline=False)
+        for turretNum in range(1, len(activeShip.turrets) + 1):
+            loadoutEmbed.add_field(name=str(turretNum) + ". " + activeShip.turrets[turretNum - 1].name, value=activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
+        
+        await message.channel.send(embed=loadoutEmbed)
+        return
+
+    else:
+        requestedBBUser = usersDB.getUser(requestedUser.id)
+        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours["neutral"], thumb=requestedUser.avatar_url_as(size=64))
+
+        activeShip = requestedBBUser.activeShip
+        if activeShip is None:
+            loadoutEmbed.add_field(name="Active Ship:", value="None", inline=False)
+        else:
+            loadoutEmbed.add_field(name="Active Ship:", value=activeShip.getNameAndNick() + "\n" + activeShip.statsStringNoItems(), inline=False)
+
+            if activeShip.getMaxPrimaries() > 0:
+                loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
+                for weaponNum in range(1, len(activeShip.weapons) + 1):
+                    loadoutEmbed.add_field(name=str(weaponNum) + ". " + activeShip.weapons[weaponNum - 1].name, value=activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
+
+            if activeShip.getMaxModules() > 0:
+                loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + "*", inline=False)
+                for moduleNum in range(1, len(activeShip.modules) + 1):
+                    loadoutEmbed.add_field(name=str(moduleNum) + ". " + activeShip.modules[moduleNum - 1].name, value=activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
+            
+            if activeShip.getMaxTurrets() > 0:
+                loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + "*", inline=False)
+                for turretNum in range(1, len(activeShip.turrets) + 1):
+                    loadoutEmbed.add_field(name=str(turretNum) + ". " + activeShip.turrets[turretNum - 1].name, value=activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
+        
+        await message.channel.send(embed=loadoutEmbed)
+
+bbCommands.register("loadout", cmd_loadout)
+
+
+"""
+Buy the item of the given item type, at the given index, from the guild's shop.
+if "transfer" is specified, the new ship's items are unequipped, and the old ship's items attempt to fill the new ship.
+any items left unequipped are added to the user's inactive items lists.
+if "sell" is specified, the user's old activeShip is stripped of items and sold to the shop.
+"transfer" and "sell" are only valid when buying a ship.
+
+@param message -- the discord message calling the command
+@param args -- string containing an item type and an index number, and optionally "transfer", and optionally "sell" separated by a single space
+"""
+async def cmd_shop_buy(message, args):
+    argsSplit = args.split(" ")
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `!bb shop`")
+        return
+    if len(argsSplit) > 4:
+        await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` and/or `sell` when buying a ship.")
+        return
+
+    item = argsSplit[0].rstrip("s")
+    if item == "all" or item not in bbConfig.validItemNames:
+        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
+        return
+
+    itemNum = argsSplit[1]
+    requestedShop = guildsDB.getGuild(message.guild.id).shop
+    if not bbUtil.isInt(itemNum):
+        await message.channel.send(":x: Invalid item number!")
+        return
+    itemNum = int(itemNum)
+    if itemNum > len(requestedShop.getStockByName(item)):
+        if len(requestedShop.getStockByName(item)) == 0:
+            await message.channel.send(":x: This shop has no " + item + "s in stock!")
+        else:
+            await message.channel.send(":x: Invalid item number! This shop has " + str(len(requestedShop.getStockByName(item))) + " " + item + "(s).")
+        return
+        
+    if itemNum < 1:
+        await message.channel.send(":x: Invalid item number! Must be at least 1.")
+        return
+    
+
+    transferItems = False
+    sellOldShip = False
+    if len(argsSplit) > 2:
+        for arg in argsSplit[2:]:
+            if arg == "transfer":
+                if transferItems:
+                    await message.channel.send(":x: Invalid argument! Please only specify `transfer` once!")
+                    return
+                if item != "ship":
+                    await message.channel.send(":x: `transfer` can only be used when buying a ship!")
+                    return
+                transferItems = True
+            elif arg == "sell":
+                if sellOldShip:
+                    await message.channel.send(":x: Invalid argument! Please only specify `sell` once!")
+                    return
+                if item != "ship":
+                    await message.channel.send(":x: `sell` can only be used when buying a ship!")
+                    return
+                sellOldShip = True
+            else:
+                await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` and/or `sell` when buying a ship.")
+                return
+
+    if usersDB.userIDExists(message.author.id):
+        requestedBBUser = usersDB.getUser(message.author.id)
+    else:
+        requestedBBUser = usersDB.addUser(message.author.id)
+
+    if item == "ship":
+        requestedShip = requestedShop.shipsStock[itemNum - 1]
+        
+        if (not requestedShop.userCanAffordShipObj(requestedBBUser, requestedShip) and not sellOldShip) or \
+                (sellOldShip and not requestedShop.amountCanAffordShipObj(requestedBBUser.credits + requestedBBUser.activeShip.getValueStripped(), requestedShip)):
+            await message.channel.send(":x: You can't afford that item! (" + str(requestedShip.getValue()) + ")")
+            return
+
+        activeShip = requestedBBUser.activeShip
+        requestedBBUser.inactiveShips.append(requestedShip)
+        
+        if transferItems:
+            requestedBBUser.unequipAll(requestedShip)
+            activeShip.transferItemsTo(requestedShip)
+            requestedBBUser.unequipAll(activeShip)
+
+        if sellOldShip:
+            # TODO: move to a separate sellActiveShip function
+            requestedBBUser.credits += activeShip.getValueStripped()
+            requestedBBUser.unequipAll(activeShip)
+            requestedShop.shipsStock.append(activeShip)
+        
+        requestedBBUser.equipShipObj(requestedShip, noSaveActive=sellOldShip)
+        requestedBBUser.credits -= requestedShip.getValue()
+        requestedShop.shipsStock.remove(requestedShip)
+        
+        outStr = ":moneybag: Congratulations on your new **" + requestedShip.name + "**!"
+        if sellOldShip:
+            outStr += "\nYou received **" + str(activeShip.getValueStripped()) + " credits** for your old **" + str(activeShip.name) + "**."
+        else:
+            outStr += " Your old **" + activeShip.name + "** can be found in the hangar."
+        if transferItems:
+            outStr += "\nItems thay could not fit in your new ship can be found in the hangar."
+        outStr += "\n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**."
+
+        await message.channel.send(outStr)
+
+    elif item == "weapon":
+        requestedWeapon = requestedShop.weaponsStock[itemNum - 1]
+        if not requestedShop.userCanAffordWeaponObj(requestedBBUser, requestedWeapon):
+            await message.channel.send(":x: You can't afford that item! (" + str(requestedWeapon.value) + ")")
+            return
+        
+        requestedBBUser.credits -= requestedWeapon.value
+        requestedBBUser.inactiveWeapons.append(requestedWeapon)
+        requestedShop.weaponsStock.remove(requestedWeapon)
+
+        await message.channel.send(":moneybag: Congratulations on your new **" + requestedWeapon.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
+
+    elif item == "module":
+        requestedModule = requestedShop.modulesStock[itemNum - 1]
+        if not requestedShop.userCanAffordModuleObj(requestedBBUser, requestedModule):
+            await message.channel.send(":x: You can't afford that item! (" + str(requestedModule.value) + ")")
+            return
+        
+        requestedBBUser.credits -= requestedModule.value
+        requestedBBUser.inactiveModules.append(requestedModule)
+        requestedShop.modulesStock.remove(requestedModule)
+
+        await message.channel.send(":moneybag: Congratulations on your new **" + requestedModule.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
+
+    elif item == "turret":
+        requestedTurret = requestedShop.turretsStock[itemNum - 1]
+        if not requestedShop.userCanAffordTurretObj(requestedBBUser, requestedTurret):
+            await message.channel.send(":x: You can't afford that item! (" + str(requestedTurret.value) + ")")
+            return
+        
+        requestedBBUser.credits -= requestedTurret.value
+        requestedBBUser.inactiveTurrets.append(requestedTurret)
+        requestedShop.turretsStock.remove(requestedTurret)
+
+        await message.channel.send(":moneybag: Congratulations on your new **" + requestedTurret.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
+
+    else:
+        raise NotImplementedError("Valid but unsupported item name: " + item)
+
+bbCommands.register("buy", cmd_shop_buy)
+
+
+"""
+Sell the item of the given item type, at the given index, from the user's inactive items, to the guild's shop.
+if "clear" is specified, the ship's items are unequipped before selling.
+"clear" is only valid when selling a ship.
+
+@param message -- the discord message calling the command
+@param args -- string containing an item type and an index number, and optionally "clear", separated by a single space
+"""
+async def cmd_shop_sell(message, args):
+    argsSplit = args.split(" ")
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `!bb hangar`")
+        return
+    if len(argsSplit) > 3:
+        await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `clear` when selling a ship.")
+        return
+
+    item = argsSplit[0].rstrip("s")
+    if item == "all" or item not in bbConfig.validItemNames:
+        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
+        return
+
+    if usersDB.userIDExists(message.author.id):
+        requestedBBUser = usersDB.getUser(message.author.id)
+    else:
+        requestedBBUser = usersDB.addUser(message.author.id)
+
+    itemNum = argsSplit[1]
+    if not bbUtil.isInt(itemNum):
+        await message.channel.send(":x: Invalid item number!")
+        return
+    itemNum = int(itemNum)
+    if itemNum > len(requestedBBUser.getInactivesByName(item)):
+        await message.channel.send(":x: Invalid item number! You have " + str(len(requestedBBUser.getInactivesByName(item))) + " " + item + "s.")
+        return
+    if itemNum < 1:
+        await message.channel.send(":x: Invalid item number! Must be at least 1.")
+        return
+    
+
+    clearItems = False
+    if len(argsSplit) == 3:
+        if argsSplit[2] == "clear":
+            if item != "ship":
+                await message.channel.send(":x: `clear` can only be used when selling a ship!")
+                return
+            clearItems = True
+        else:
+            await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `clear` when selling a ship.")
+            return
+
+    requestedShop = guildsDB.getGuild(message.guild.id).shop
+
+    if item == "ship":
+        requestedShip = requestedBBUser.inactiveShips[itemNum - 1]
+        if clearItems:
+            requestedBBUser.unequipAll(requestedShip)
+        
+        requestedBBUser.credits += requestedShip.getValue()
+        requestedBBUser.inactiveShips.remove(requestedShip)
+        requestedShop.shipsStock.append(requestedShip)
+
+        outStr = ":moneybag: You sold your **" + requestedShip.getNameOrNick() + "** for **" + str(requestedShip.getValue()) + " credits**!"
+        if clearItems:
+            outStr += "\nItems removed from the ship can be found in the hangar."
+        await message.channel.send(outStr)
+    
+    elif item == "weapon":
+        requestedWeapon = requestedBBUser.inactiveWeapons[itemNum - 1]
+        requestedBBUser.credits += requestedWeapon.value
+        requestedBBUser.inactiveWeapons.remove(requestedWeapon)
+        requestedShop.weaponsStock.append(requestedWeapon)
+
+        await message.channel.send(":moneybag: You sold your **" + requestedWeapon.name + "** for **" + str(requestedWeapon.value) + " credits**!")
+
+    elif item == "module":
+        requestedModule = requestedBBUser.inactiveModules[itemNum - 1]
+        requestedBBUser.credits += requestedModule.value
+        requestedBBUser.inactiveModules.remove(requestedModule)
+        requestedShop.modulesStock.append(requestedModule)
+
+        await message.channel.send(":moneybag: You sold your **" + requestedModule.name + "** for **" + str(requestedModule.value) + " credits**!")
+
+    elif item == "turret":
+        requestedTurret = requestedBBUser.inactiveTurrets[itemNum - 1]
+        requestedBBUser.credits += requestedTurret.value
+        requestedBBUser.inactiveTurrets.remove(requestedTurret)
+        requestedShop.turretsStock.append(requestedTurret)
+
+        await message.channel.send(":moneybag: You sold your **" + requestedTurret.name + "** for **" + str(requestedTurret.value) + " credits**!")
+
+    else:
+        raise NotImplementedError("Valid but unsupported item name: " + item)
+
+bbCommands.register("sell", cmd_shop_sell)
+
+
+"""
+Equip the item of the given item type, at the given index, from the user's inactive items.
+if "transfer" is specified, the new ship's items are cleared, and the old ship's items attempt to fill new ship.
+"transfer" is only valid when equipping a ship.
+
+@param message -- the discord message calling the command
+@param args -- string containing an item type and an index number, and optionally "transfer", separated by a single space
+"""
+async def cmd_equip(message, args):
+    argsSplit = args.split(" ")
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `!bb hangar`")
+        return
+    if len(argsSplit) > 3:
+        await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` when equipping a ship.")
+        return
+
+    item = argsSplit[0].rstrip("s")
+    if item == "all" or item not in bbConfig.validItemNames:
+        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
+        return
+
+    if usersDB.userIDExists(message.author.id):
+        requestedBBUser = usersDB.getUser(message.author.id)
+    else:
+        requestedBBUser = usersDB.addUser(message.author.id)
+
+    itemNum = argsSplit[1]
+    if not bbUtil.isInt(itemNum):
+        await message.channel.send(":x: Invalid item number!")
+        return
+    itemNum = int(itemNum)
+    if itemNum > len(requestedBBUser.getInactivesByName(item)):
+        await message.channel.send(":x: Invalid item number! You have " + str(len(requestedBBUser.getInactivesByName(item))) + " " + item + "s.")
+        return
+    if itemNum < 1:
+        await message.channel.send(":x: Invalid item number! Must be at least 1.")
+        return
+    
+
+    transferItems = False
+    if len(argsSplit) == 3:
+        if argsSplit[2] == "transfer":
+            if item != "ship":
+                await message.channel.send(":x: `transfer` can only be used when equipping a ship!")
+                return
+            transferItems = True
+        else:
+            await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` when equipping a ship.")
+            return
+
+    if item == "ship":
+        requestedShip = requestedBBUser.inactiveShips[itemNum - 1]
+        activeShip = requestedBBUser.activeShip
+        if transferItems:
+            requestedBBUser.unequipAll(requestedShip)
+            requestedBBUser.activeShip.transferItemsTo(requestedShip)
+            requestedBBUser.unequipAll(activeShip)
+        
+        requestedBBUser.equipShipObj(requestedShip)
+
+        outStr = ":rocket: You switched to the **" + requestedShip.getNameOrNick() + "**."
+        if transferItems:
+            outStr += "\nItems thay could not fit in your new ship can be found in the hangar."
+        await message.channel.send(outStr)
+    
+    elif item == "weapon":
+        if not requestedBBUser.activeShip.canEquipMoreWeapons():
+            await message.channel.send(":x: Your active ship does not have any free weapon slots!")
+            return
+        requestedItem = requestedBBUser.inactiveWeapons[itemNum - 1]
+        requestedBBUser.activeShip.equipWeapon(requestedItem)
+        requestedBBUser.inactiveWeapons.pop(itemNum - 1)
+
+        await message.channel.send(":wrench: You equipped the **" + requestedItem.name + "**.")
+
+    elif item == "module":
+        if not requestedBBUser.activeShip.canEquipMoreModules():
+            await message.channel.send(":x: Your active ship does not have any free module slots!")
+            return
+        requestedItem = requestedBBUser.inactiveModules[itemNum - 1]
+        requestedBBUser.activeShip.equipModule(requestedItem)
+        requestedBBUser.inactiveModules.pop(itemNum - 1)
+
+        await message.channel.send(":wrench: You equipped the **" + requestedItem.name + "**.")
+
+    elif item == "turret":
+        if not requestedBBUser.activeShip.canEquipMoreTurrets():
+            await message.channel.send(":x: Your active ship does not have any free turret slots!")
+            return
+        requestedItem = requestedBBUser.inactiveTurrets[itemNum - 1]
+        requestedBBUser.activeShip.equipTurret(requestedItem)
+        requestedBBUser.inactiveTurrets.pop(itemNum - 1)
+
+        await message.channel.send(":wrench: You equipped the **" + requestedItem.name + "**.")
+
+    else:
+        raise NotImplementedError("Valid but unsupported item name: " + item)
+
+bbCommands.register("equip", cmd_equip)
+
+
+"""
+Unequip the item of the given item type, at the given index, from the user's active ship.
+
+@param message -- the discord message calling the command
+@param args -- string containing either "all", or (an item type and either an index number or "all", separated by a single space)
+"""
+async def cmd_unequip(message, args):
+    argsSplit = args.split(" ")
+    unequipAllItems = len(argsSplit) > 0 and argsSplit[0] == "all"
+
+    if not unequipAllItems and len(argsSplit) < 2:
+        await message.channel.send(":x: Not enough arguments! Please provide both an item type (all/weapon/module/turret) and an item number from `!bb hangar` or `all`.")
+        return
+    if len(argsSplit) > 2:
+        await message.channel.send(":x: Too many arguments! Please only give an item type (all/weapon/module/turret), an item number or `all`.")
+        return
+
+    if usersDB.userIDExists(message.author.id):
+        requestedBBUser = usersDB.getUser(message.author.id)
+    else:
+        requestedBBUser = usersDB.addUser(message.author.id)
+
+    if unequipAllItems:
+        requestedBBUser.unequipAll(requestedBBUser.activeShip)
+        
+        await message.channel.send(":wrench: You unequipped **all items** from your ship.")
+        return
+
+    item = argsSplit[0].rstrip("s")
+    if item not in bbConfig.validItemNames:
+        await message.channel.send(":x: Invalid item name! Please choose from: weapon, module or turret.")
+        return
+    if item == "ship":
+        await message.channel.send(":x: You can't go without a ship! Instead, switch to another one.")
+        return
+
+    unequipAll = argsSplit[1] == "all"
+    if not unequipAll:
+        itemNum = argsSplit[1]
+        if not bbUtil.isInt(itemNum):
+            await message.channel.send(":x: Invalid item number!")
+            return
+        itemNum = int(itemNum)
+        if itemNum > len(requestedBBUser.activeShip.getActivesByName(item)):
+            await message.channel.send(":x: Invalid item number! Your ship has " + str(len(requestedBBUser.activeShip.getActivesByName(item))) + " " + item + "s.")
+            return
+        if itemNum < 1:
+            await message.channel.send(":x: Invalid item number! Must be at least 1.")
+            return
+
+    if item == "weapon":
+        if not requestedBBUser.activeShip.hasWeaponsEquipped():
+            await message.channel.send(":x: Your active ship does not have any weapons equipped!")
+            return
+        if unequipAll:
+            for weapon in requestedBBUser.activeShip.weapons:
+                requestedBBUser.inactiveWeapons.append(weapon)
+                requestedBBUser.activeShip.unequipWeaponObj(weapon)
+
+            await message.channel.send(":wrench: You unequipped all **weapons**.")
+        else:
+            requestedItem = requestedBBUser.activeShip.weapons[itemNum - 1]
+            requestedBBUser.inactiveWeapons.append(requestedItem)
+            requestedBBUser.activeShip.unequipWeaponIndex(itemNum - 1)
+
+            await message.channel.send(":wrench: You unequipped the **" + requestedItem.name + "**.")
+
+    elif item == "module":
+        if not requestedBBUser.activeShip.hasModulesEquipped():
+            await message.channel.send(":x: Your active ship does not have any modules equipped!")
+            return
+        if unequipAll:
+            for module in requestedBBUser.activeShip.modules:
+                requestedBBUser.inactiveModules.append(module)
+                requestedBBUser.activeShip.unequipModuleObj(module)
+
+            await message.channel.send(":wrench: You unequipped all **modules**.")
+        else:
+            requestedItem = requestedBBUser.activeShip.modules[itemNum - 1]
+            requestedBBUser.inactiveModules.append(requestedItem)
+            requestedBBUser.activeShip.unequipModuleIndex(itemNum - 1)
+
+            await message.channel.send(":wrench: You unequipped the **" + requestedItem.name + "**.")
+
+    elif item == "turret":
+        if not requestedBBUser.activeShip.hasTurretsEquipped():
+            await message.channel.send(":x: Your active ship does not have any turrets equipped!")
+            return
+        if unequipAll:
+            for turret in requestedBBUser.activeShip.turrets:
+                requestedBBUser.inactiveTurrets.append(turret)
+                requestedBBUser.activeShip.unequipTurretObj(turret)
+
+            await message.channel.send(":wrench: You unequipped all **turrets**.")
+        else:
+            requestedItem = requestedBBUser.activeShip.turrets[itemNum - 1]
+            requestedBBUser.inactiveTurrets.append(requestedItem)
+            requestedBBUser.activeShip.unequipTurretIndex(itemNum - 1)
+
+            await message.channel.send(":wrench: You unequipped the **" + requestedItem.name + "**.")
+
+    else:
+        raise NotImplementedError("Valid but unsupported item name: " + item)
+
+bbCommands.register("unequip", cmd_unequip)
+
+
+"""
+Set the nickname of the active ship.
+
+@param message -- the discord message calling the command
+@param args -- string containing the new nickname.
+"""
+async def cmd_nameship(message, args):
+    if usersDB.userIDExists(message.author.id):
+        requestedBBUser = usersDB.getUser(message.author.id)
+    else:
+        requestedBBUser = usersDB.addUser(message.author.id)
+
+    if requestedBBUser.activeShip is None:
+        await message.channel.send(":x: You do not have a ship equipped!")
+        return
+
+    if args == "":
+        await message.channel.send(":x: Not enough arguments. Please give the new nickname!")
+        return
+
+    requestedBBUser.activeShip.changeNickname(args)
+    await message.channel.send(":pencil: You named your " + requestedBBUser.activeShip.name + ": **" + args + "**.")
+
+bbCommands.register("nameship", cmd_nameship, forceKeepArgsCasing=True)
+
+
+"""
+Remove the nickname of the active ship.
+
+@param message -- the discord message calling the command
+@param args -- ignored
+"""
+async def cmd_unnameship(message, args):
+    if usersDB.userIDExists(message.author.id):
+        requestedBBUser = usersDB.getUser(message.author.id)
+    else:
+        requestedBBUser = usersDB.addUser(message.author.id)
+
+    if requestedBBUser.activeShip is None:
+        await message.channel.send(":x: You do not have a ship equipped!")
+        return
+
+    if not requestedBBUser.activeShip.hasNickname:
+        await message.channel.send(":x: Your active ship does not have a nickname!")
+        return
+
+    requestedBBUser.activeShip.removeNickname()
+    await message.channel.send(":pencil: You reset your **" + requestedBBUser.activeShip.name + "**'s nickname.")
+
+bbCommands.register("unnameship", cmd_nameship)
+
+
 
 ####### ADMINISTRATOR COMMANDS #######
 
@@ -1339,7 +2130,7 @@ Currently includes:
     - new bounty spawning
     - regular database saving to JSON
 
-TODO: the delays system needs to be completely rewritten.
+TODO: the delays system needs to be completely rewritten. Currently it sums up the amount of time waited against each delayed task. Instead, it should generate a datetime at which the delay runs out, just like with bounty cooldowns.
 """
 @client.event
 async def on_ready():
@@ -1351,10 +2142,16 @@ async def on_ready():
     currentBountyWait = 0
     # amount of time waited since last save
     currentSaveWait = 0
+
     # new bounty delay period as a datetime.timedelta
     newBountyDelayDelta = None
     # fixed daily time to spawn bounties at as a datetime.timedelta
     newBountyFixedDailyTime = None
+
+    # the time that the next shop stock refresh should occur, calculated by 12am today + bbConfig.shopRefreshStockPeriod
+    # I may wish to add a fixed daily time this should occur at. To implement, simply generate it as a timedelta and ADD it here (and when regenerating nextShopRefresh lower down)
+    nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
+
 
     # generate the amount of time to wait until the next bounty generation
     if bbConfig.newBountyDelayType == "random":
@@ -1363,9 +2160,9 @@ async def on_ready():
     elif bbConfig.newBountyDelayType == "fixed":
         # This system should be changed to isntead generate a currentNewBountyDelay, rather than repeatedly checking against newBountyFixedDailyTime
         currentNewBountyDelay = 0
-        newBountyDelayDelta = timedelta(days=bbConfig.newBountyFixedDelta["days"], hours=bbConfig.newBountyFixedDelta["hours"], minutes=bbConfig.newBountyFixedDelta["minutes"], seconds=bbConfig.newBountyFixedDelta["seconds"])
+        newBountyDelayDelta = timeDeltaFromDict(bbConfig.newBountyFixedDelta)
         if bbConfig.newBountyFixedUseDailyTime:
-            newBountyFixedDailyTime = timedelta(hours=bbConfig.newBountyFixedDailyTime["hours"], minutes=bbConfig.newBountyFixedDailyTime["minutes"], seconds=bbConfig.newBountyFixedDailyTime["seconds"])
+            newBountyFixedDailyTime = timeDeltaFromDict(bbConfig.newBountyFixedDailyTime)
     
     # execute regular tasks while the bot is logged in
     while botLoggedIn:
@@ -1374,13 +2171,20 @@ async def on_ready():
         # track the time waited
         currentBountyWait += bbConfig.delayFactor
         currentSaveWait += bbConfig.delayFactor
+
+        # Refresh all shop stocks
+        if datetime.utcnow() >= nextShopRefresh:
+            guildsDB.refreshAllShopStocks()
+            # Reset the shop stock refresh cooldown
+            nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
         
         # Make new bounties
+            # has the bounty delay period been reset manually? Is random 
         if bbConfig.newBountyDelayReset or (bbConfig.newBountyDelayType == "random" and currentBountyWait >= currentNewBountyDelay) or \
                 (bbConfig.newBountyDelayType == "fixed" and timedelta(seconds=currentBountyWait) >= newBountyDelayDelta and ((not bbConfig.newBountyFixedUseDailyTime) or (bbConfig.newBountyFixedUseDailyTime and \
-                    datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta - timedelta(minutes=bbConfig.delayFactor) \
+                    datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + newBountyDelayDelta - timedelta(minutes=bbConfig.delayFactor) \
                     <= datetime.utcnow() \
-                    <= datetime.utcnow().replace(hour=0, minute=0, second=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
+                    <= datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
             # ensure a new bounty can be created
             if bountiesDB.canMakeBounty():
                 newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
@@ -1394,8 +2198,9 @@ async def on_ready():
             else:
                 currentNewBountyDelay = newBountyDelayDelta
                 if bbConfig.newBountyFixedDeltaChanged:
-                    newBountyDelayDelta = timedelta(days=bbConfig.newBountyFixedDelta["days"], hours=bbConfig.newBountyFixedDelta["hours"], minutes=bbConfig.newBountyFixedDelta["minutes"], seconds=bbConfig.newBountyFixedDelta["seconds"])
+                    newBountyDelayDelta = timeDeltaFromDict(bbConfig.newBountyFixedDelta)
             currentBountyWait = 0
+
         # save the database
         if currentSaveWait >= bbConfig.saveDelay:
             saveDB(bbConfig.userDBPath, usersDB)
@@ -1426,20 +2231,26 @@ async def on_message(message):
         bbConfig.randomDrinkNum = random.randint(bbConfig.randomDrinkFactor / 10, bbConfig.randomDrinkFactor)
 
     # For any messages beginning with bbConfig.commandPrefix
-    if message.content.split(" ")[0].lower() == (bbConfig.commandPrefix.rstrip(" ")):
+    # New method without space-splitting to allow for prefixes that dont end in a space
+    if len(message.content) >= len(bbConfig.commandPrefix) and message.content[0:len(bbConfig.commandPrefix)].lower() == bbConfig.commandPrefix.lower():
+    # Old method with space-splitting
+    # if message.content.split(" ")[0].lower() == (bbConfig.commandPrefix.rstrip(" ")):
         # replace special apostraphe characters with the universal '
         msgContent = message.content.replace("‘", "'").replace("’","'")
 
         # split the message into command and arguments
-        if len(msgContent.split(" ")) > 1:
-            # [!] command and args converted to lower case, watch out
-            command = msgContent.split(" ")[1].lower()
-            args = msgContent[len(bbConfig.commandPrefix) + len(command) + 1:].lower()
+        if len(msgContent[len(bbConfig.commandPrefix):]) > 0:
+            command = msgContent[len(bbConfig.commandPrefix):].split(" ")[0]
+            args = msgContent[len(bbConfig.commandPrefix) + len(command) + 1:]
 
         # if no command is given, call help with no arguments
         else:
             args = ""
             command = "help"
+
+        # Debug: Print the recognised command args strings
+        # print("COMMAND '" + command + "'")
+        # print("ARGS '" + args + "'")
 
         # infer the message author's permissions
         userIsAdmin = message.author.permissions_in(message.channel).administrator
