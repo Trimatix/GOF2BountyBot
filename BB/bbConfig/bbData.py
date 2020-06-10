@@ -65,17 +65,29 @@ helpIntro = """:star: Here are my commands! Prefix commands with `!bb` - for exa
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
 
 # help strings for bb commands
-helpDict = {"__Miscellaneous__":{"**help**":"Display information about all available commands.",
-                                "**balance** *<userTag>*":"Get the credits balance of yourself, or a tagged user if one is given.",
-                                "**stats** *<userTag>*":"Get various credits and bounty statistics about yourself, or a tagged user.",
-                                "**leaderboard** *<-g|-c|-s|-w>*":"Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `!bb leaderboard -gs`",
-                                "**criminal [name]**": "Get information about a named criminal.\nAlso gives the criminal's usable aliases for the bounties system."},
-            "__GOF2 Info__":{"**map**":"Send the complete GOF2 starmap.",
-                            "**system [system]**": "Display information about a given system.",
-                            "**make-route [startSystem], [endSystem]**": "Find the shortest route from startSystem to endSystem."},
-            "__Bounties__":{"**bounties** *<faction>*": "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties.",
-                            "**route [criminal name]**":"Get the named criminal's current route.",
-                            "**check [system]**":"Check if any criminals are in the given system, arrest them, and get paid! 💰"}}
+helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display information about the requested command. If no command is given, all available commands are displayed."),
+                            "balance": ("**balance** *<userTag>*", "Get the credits balance of yourself, or a tagged user if one is given."),
+                            "stats": ("**stats** *<userTag>*", "Get various credits and bounty statistics about yourself, or a tagged user."),
+                            "leaderboard": ("**leaderboard** *<-g|-c|-s|-w>*", "Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `!bb leaderboard -gs`"),
+                            "criminal": ("**criminal [name]**", "Get information about a named criminal.\nAlso gives the criminal's usable aliases for the bounties system.")},
+            
+            "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
+                            "system": ("**system [system]**", "Display information about a given system."),
+                            "make-route": ("**make-route [startSystem], [endSystem]**", "Find the shortest route from startSystem to endSystem.")},
+            
+            "Bounties":{    "bounties": ("**bounties** *<faction>*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
+                            "route": ("**route [criminal name]**", "Get the named criminal's current route."),
+                            "check": ("**check [system]**", "Check if any criminals are in the given system, arrest them, and get paid! 💰")},
+            
+            "Items":{       "hangar": ("**hangar** *<item-type>*", "Display the items in your hangar. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+                            "shop": ("**shop** *<item-type>*", "Display all items currently for sale. Shop stock is refreshed daily. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+                            "loadout": ("**loadout**", "Display your current ship and the items equipped onto it."),
+                            "buy": ("**buy [item-type] [item-number]** *<transfer> <sell>*", "Buy the requested item from the shop. Item numbers can be gotten from `!bb shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
+                            "sell": ("**sell [item-type] [item-number]** *<clear>*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `!bb hangar`. When selling a ship, specify `clear` to first remove all items from the ship."),
+                            "equip": ("**equip [item-type] [item-num]** *<transfer>*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `!bb hanger`. When equipping a ship, specify `transfer` to move all items to the new ship."),
+                            "unequip": ("**unequip [item-type] [item-num]**", "Unequip the requested item from your active ship, into your hanger. Item numbers can be gotten from `!bb loadout`."),
+                            "nameShip": ("**nameShip [nickname]**", "Give your active ship a nickname!"),
+                            "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")}}
 
 # intro for admin help commands
 adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `!bb` - for example: `!bb help`

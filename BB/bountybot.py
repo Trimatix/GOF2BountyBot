@@ -249,20 +249,29 @@ def timeDeltaFromDict(timeDict):
 
 
 """
-Print the help strings defined in bbData as an embed
-TODO: extend to allow the user to request help for a specific command. Shouold be simple, just use the command as the key for the help strings dict.
+Print the help strings defined in bbData as an embed.
+If a command is provided in args, the associated help string for just that command is printed.
 
 @param message -- the discord message calling the command
-@param args -- ignored
+@param args -- empty, or a single command name
 """
 # @client.command(name='runHelp')
 async def cmd_help(message, args):
     helpEmbed = makeEmbed(titleTxt="BountyBot Commands", thumb=client.user.avatar_url_as(size=64))
-    for section in bbData.helpDict.keys():
-        helpEmbed.add_field(name="‎",value=section, inline=False)
-        for currentCommand in bbData.helpDict[section].keys():
-            helpEmbed.add_field(name=currentCommand,value=bbData.helpDict[section][currentCommand], inline=False)
-    await message.channel.send(bbData.helpIntro, embed=helpEmbed)
+    if args == "":
+        for section in bbData.helpDict.keys():
+            helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
+            for currentCommand in bbData.helpDict[section].values():
+                helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1], inline=False)
+        await message.channel.send(bbData.helpIntro, embed=helpEmbed)
+    else:
+        for section in bbData.helpDict.keys():
+            if args in bbData.helpDict[section]:
+                helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
+                helpEmbed.add_field(name=bbData.helpDict[section][args][0],value=bbData.helpDict[section][args][1], inline=False)
+                await message.channel.send(embed=helpEmbed)
+                return
+        await message.channel.send(":x: Command not found!")
     
 bbCommands.register("help", cmd_help)
 
