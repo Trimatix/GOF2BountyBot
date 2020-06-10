@@ -15,6 +15,10 @@ class bbTurret(bbAliasable.Aliasable):
         self.wiki = wiki
         self.hasWiki = wiki != ""
 
+    
+    def statsStringShort(self):
+        return "*Dps: " + str(self.dps) + "*"
+
 
     def toDict(self):
         return {"name": self.name, "builtIn": True}

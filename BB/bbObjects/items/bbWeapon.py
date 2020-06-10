@@ -18,6 +18,10 @@ class bbWeapon(bbAliasable.Aliasable):
     def toDict(self):
         return {"name": self.name, "builtIn": True}
 
+    
+    def statsStringShort(self):
+        return "*Dps: " + str(self.dps) + "*"
+
 
     def getType(self):
         return bbWeapon
