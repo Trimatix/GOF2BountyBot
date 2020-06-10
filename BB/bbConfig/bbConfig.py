@@ -12,7 +12,7 @@ newBountyFixedDailyTime = {"hours":18, "minutes":40, "seconds":0}
 newBountyFixedUseDailyTime = False
 
 # time to wait inbetween spawning bounties
-newBountyFixedDelta = {"days":0, "hours":2, "minutes":0, "seconds":0}
+newBountyFixedDelta = {"days":0, "hours":0, "minutes":30, "seconds":0}
 
 # do not change this!
 newBountyFixedDeltaChanged = False
