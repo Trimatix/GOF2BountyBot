@@ -46,7 +46,7 @@ bountyIcons = { # Terran
                 "Merson Surr": "https://cdn.discordapp.com/attachments/700683544103747594/711226769327521872/merson_surr.png",
                 "Ganfor Kant": "https://cdn.discordapp.com/attachments/700683544103747594/711226766630584370/ganfor_kant.png"}
 
-# find the length of the longest criminal name, to be used in padding during !bb bounties
+# find the length of the longest criminal name, to be used in padding during $COMMANDPREFIX$bounties
 longestBountyNameLength = 0
 for fac in bountyNames:
     for name in bountyNames[fac]:
@@ -56,19 +56,19 @@ for fac in bountyNames:
 # levels of security in bbSystems (bbSystem security is stored as an index in this list)
 securityLevels = ["secure", "average", "risky", "dangerous"]
 
-# map image URLS for !bb map
+# map image URLS for $COMMANDPREFIX$map
 mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/700683544103747594/700683693215318076/gof2_coords.png"
 mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png'
 
 # intro for help commands
-helpIntro = """:star: Here are my commands! Prefix commands with `!bb` - for example: `!bb help`
+helpIntro = """:star: Here are my commands! Prefix commands with `!bb` - for example: `$COMMANDPREFIX$help`
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
 
 # help strings for bb commands
 helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display information about the requested command. If no command is given, all available commands are displayed."),
                             "balance": ("**balance** *<userTag>*", "Get the credits balance of yourself, or a tagged user if one is given."),
                             "stats": ("**stats** *<userTag>*", "Get various credits and bounty statistics about yourself, or a tagged user."),
-                            "leaderboard": ("**leaderboard** *<-g|-c|-s|-w>*", "Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `!bb leaderboard -gs`"),
+                            "leaderboard": ("**leaderboard** *<-g|-c|-s|-w>*", "Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
                             "criminal": ("**criminal [name]**", "Get information about a named criminal.\nAlso gives the criminal's usable aliases for the bounties system.")},
             
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
@@ -82,21 +82,21 @@ helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display informati
             "Items":{       "hangar": ("**hangar** *<item-type>*", "Display the items in your hangar. Give an item type (ship/weapon/turret/module) to only list items of that type."),
                             "shop": ("**shop** *<item-type>*", "Display all items currently for sale. Shop stock is refreshed daily. Give an item type (ship/weapon/turret/module) to only list items of that type."),
                             "loadout": ("**loadout**", "Display your current ship and the items equipped onto it."),
-                            "buy": ("**buy [item-type] [item-number]** *<transfer> <sell>*", "Buy the requested item from the shop. Item numbers can be gotten from `!bb shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
-                            "sell": ("**sell [item-type] [item-number]** *<clear>*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `!bb hangar`. When selling a ship, specify `clear` to first remove all items from the ship."),
-                            "equip": ("**equip [item-type] [item-num]** *<transfer>*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `!bb hanger`. When equipping a ship, specify `transfer` to move all items to the new ship."),
-                            "unequip": ("**unequip [item-type] [item-num]**", "Unequip the requested item from your active ship, into your hanger. Item numbers can be gotten from `!bb loadout`."),
+                            "buy": ("**buy [item-type] [item-number]** *<transfer> <sell>*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
+                            "sell": ("**sell [item-type] [item-number]** *<clear>*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship."),
+                            "equip": ("**equip [item-type] [item-num]** *<transfer>*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hanger`. When equipping a ship, specify `transfer` to move all items to the new ship."),
+                            "unequip": ("**unequip [item-type] [item-num]**", "Unequip the requested item from your active ship, into your hanger. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),
                             "nameShip": ("**nameShip [nickname]**", "Give your active ship a nickname!"),
                             "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")}}
 
 # intro for admin help commands
-adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `!bb` - for example: `!bb help`
+adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `!bb` - for example: `$COMMANDPREFIX$help`
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
 
 # help strings for admin bb commands
 adminHelpDict = {"__Miscellaneous__":{"**admin-help**":"Display information about admin-only commands.",
-                                    "**set-announce-channel** *<off>*":"Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `!bb set-announce-channel off` to disable announcements.",
-                                    "**set-play-channel** *<off>*":"Set the channel where BountyBot will send info about completed bounties\n> Use `!bb set-play-channel off` to disable completed bounty announcements."}}
+                                    "**set-announce-channel** *<off>*":"Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements.",
+                                    "**set-play-channel** *<off>*":"Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements."}}
 
 # string extensions for numbers, e.g 11th, 1st, 23rd...
 numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]

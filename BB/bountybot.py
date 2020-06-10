@@ -258,20 +258,30 @@ If a command is provided in args, the associated help string for just that comma
 # @client.command(name='runHelp')
 async def cmd_help(message, args):
     helpEmbed = makeEmbed(titleTxt="BountyBot Commands", thumb=client.user.avatar_url_as(size=64))
-    if args == "":
-        for section in bbData.helpDict.keys():
-            helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
-            for currentCommand in bbData.helpDict[section].values():
-                helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1], inline=False)
-        await message.channel.send(bbData.helpIntro, embed=helpEmbed)
-    else:
-        for section in bbData.helpDict.keys():
-            if args in bbData.helpDict[section]:
-                helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
-                helpEmbed.add_field(name=bbData.helpDict[section][args][0],value=bbData.helpDict[section][args][1], inline=False)
-                await message.channel.send(embed=helpEmbed)
-                return
-        await message.channel.send(":x: Command not found!")
+    page = 1
+    maxPage = len(bbData.helpDict)
+    if args != "":
+        if bbUtil.isInt(args):
+            page = int(args)
+            if page > maxPage:
+                await message.channel.send(":x: There are only " + str(maxPage) + " help pages! Showing page " + str(maxPage) + ":")
+                page = maxPage
+        else:
+            for section in bbData.helpDict.keys():
+                if args in bbData.helpDict[section]:
+                    helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
+                    helpEmbed.add_field(name=bbData.helpDict[section][args][0],value=bbData.helpDict[section][args][1].replace("$COMMANDPREFIX",bbConfig.commandPrefix), inline=False)
+                    await message.channel.send(embed=helpEmbed)
+                    return
+            await message.channel.send(":x: Help: Command not found!")
+            return
+
+    helpEmbed.set_footer(text="Page " + str(page) + "/" + str(maxPage))
+    section = list(bbData.helpDict.keys())[page - 1]
+    helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
+    for currentCommand in bbData.helpDict[section].values():
+        helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1], inline=False)
+    await message.channel.send(bbData.helpIntro.replace("$COMMANDPREFIX",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
     
 bbCommands.register("help", cmd_help)
 
@@ -989,8 +999,11 @@ async def cmd_shop(message, args):
     item = "all"
     if args.rstrip("s") in bbConfig.validItemNames:
         item = args.rstrip("s")
-    elif args != "":
-        await message.channel.send(":x: Invalid item type! (ship/weapon/module/turret)")
+    elif args == "":
+        await message.channel.send(":x: Please request an item type! (ship/weapon/module/turret/all)")
+        return
+    else:
+        await message.channel.send(":x: Invalid item type! (ship/weapon/module/turret/all)")
         return
 
     requestedShop = guildsDB.getGuild(message.guild.id).shop
@@ -1118,7 +1131,7 @@ if "sell" is specified, the user's old activeShip is stripped of items and sold 
 async def cmd_shop_buy(message, args):
     argsSplit = args.split(" ")
     if len(argsSplit) < 2:
-        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `!bb shop`")
+        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `" + bbConfig.commandPrefix + "shop`")
         return
     if len(argsSplit) > 4:
         await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` and/or `sell` when buying a ship.")
@@ -1266,7 +1279,7 @@ if "clear" is specified, the ship's items are unequipped before selling.
 async def cmd_shop_sell(message, args):
     argsSplit = args.split(" ")
     if len(argsSplit) < 2:
-        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `!bb hangar`")
+        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `" + bbConfig.commandPrefix + "hangar`")
         return
     if len(argsSplit) > 3:
         await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `clear` when selling a ship.")
@@ -1363,7 +1376,7 @@ if "transfer" is specified, the new ship's items are cleared, and the old ship's
 async def cmd_equip(message, args):
     argsSplit = args.split(" ")
     if len(argsSplit) < 2:
-        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `!bb hangar`")
+        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `" + bbConfig.commandPrefix + "hangar`")
         return
     if len(argsSplit) > 3:
         await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` when equipping a ship.")
@@ -1465,7 +1478,7 @@ async def cmd_unequip(message, args):
     unequipAllItems = len(argsSplit) > 0 and argsSplit[0] == "all"
 
     if not unequipAllItems and len(argsSplit) < 2:
-        await message.channel.send(":x: Not enough arguments! Please provide both an item type (all/weapon/module/turret) and an item number from `!bb hangar` or `all`.")
+        await message.channel.send(":x: Not enough arguments! Please provide both an item type (all/weapon/module/turret) and an item number from `" + bbConfig.commandPrefix + "hangar` or `all`.")
         return
     if len(argsSplit) > 2:
         await message.channel.send(":x: Too many arguments! Please only give an item type (all/weapon/module/turret), an item number or `all`.")
