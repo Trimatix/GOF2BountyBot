@@ -78,6 +78,46 @@ class bbShipUpgrade:
     def toDict(self):
         return {"name": self.name, "builtIn": True}
 
+    
+    def statsStringShort(self):
+        stats = "*"
+        if self.armour != 0:
+            stats += "Armour: " + ("+" if self.armour > 0 else "-") + str(self.armour) + ", "
+        if self.armourMultiplier != 1:
+            stats += "Armour: " + ("+" if self.armourMultiplier > 1 else "-") + str(round(((self.armourMultiplier - 1) * 100) if self.armourMultiplier > 1 else (self.armourMultiplier * 100))) + ", "
+
+        if self.cargo != 0:
+            stats += "Cargo: " + ("+" if self.cargo > 0 else "-") + str(self.cargo) + ", "
+        if self.cargoMultiplier != 1:
+            stats += "Cargo: " + ("+" if self.cargoMultiplier > 1 else "-") + str(round(((self.cargoMultiplier - 1) * 100) if self.cargoMultiplier > 1 else (self.cargoMultiplier * 100))) + ", "
+
+        if self.numSecondaries != 0:
+            stats += "Max secondaries: " + ("+" if self.numSecondaries > 0 else "-") + str(self.numSecondaries) + ", "
+        if self.numSecondariesMultiplier != 1:
+            stats += "Max secondaries: " + ("+" if self.numSecondariesMultiplier > 1 else "-") + str(round(((self.numSecondariesMultiplier - 1) * 100) if self.numSecondariesMultiplier > 1 else (self.numSecondariesMultiplier * 100))) + ", "
+
+        if self.handling != 0:
+            stats += "Handling: " + ("+" if self.handling > 0 else "-") + str(self.handling) + ", "
+        if self.handlingMultiplier != 1:
+            stats += "Handling: " + ("+" if self.handlingMultiplier > 1 else "-") + str(round(((self.handlingMultiplier - 1) * 100) if self.handlingMultiplier > 1 else (self.handlingMultiplier * 100))) + ", "
+
+        if self.maxPrimaries != 0:
+            stats += "Max primaries: " + ("+" if self.maxPrimaries > 0 else "-") + str(self.maxPrimaries) + ", "
+        if self.maxPrimariesMultiplier != 1:
+            stats += "Max primaries: " + ("+" if self.maxPrimariesMultiplier > 1 else "-") + str(round(((self.maxPrimariesMultiplier - 1) * 100) if self.maxPrimariesMultiplier > 1 else (self.maxPrimariesMultiplier * 100))) + ", "
+        
+        if self.maxTurrets != 0:
+            stats += "Max turrets: " + ("+" if self.maxTurrets > 0 else "-") + str(self.maxTurrets) + ", "
+        if self.maxTurretsMultiplier != 1:
+            stats += "Max turrets: " + ("+" if self.maxTurretsMultiplier > 1 else "-") + str(round(((self.maxTurretsMultiplier - 1) * 100) if self.maxTurretsMultiplier > 1 else (self.maxTurretsMultiplier * 100))) + ", "
+
+        if self.maxModules != 0:
+            stats += "Max modules: " + ("+" if self.maxModules > 0 else "-") + str(self.maxModules) + ", "
+        if self.maxModulesMultiplier != 1:
+            stats += "Max modules: " + ("+" if self.maxModulesMultiplier > 1 else "-") + str(round(((self.maxModulesMultiplier - 1) * 100) if self.maxModulesMultiplier > 1 else (self.maxModulesMultiplier * 100))) + ", "
+
+        return (stats[:-2] + "*") if stats != "*" else "*No effect*"
+
 
 def fromDict(upgradeDict):
     if upgradeDict["builtIn"]:
