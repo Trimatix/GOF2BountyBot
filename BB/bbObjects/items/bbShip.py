@@ -148,14 +148,15 @@ class bbShip(bbAliasable.Aliasable):
         return self.turrets[index]
 
     
-    def getDPS(self):
+    def getDPS(self, shipUpgradesOnly=False):
         total = 0
         multiplier = 1
-        for weapon in self.weapons:
-            total += weapon.dps
-        for module in self.modules:
-            total += module.dps
-            multiplier *= module.dpsMultiplier
+        if not shipUpgradesOnly:
+            for weapon in self.weapons:
+                total += weapon.dps
+            for module in self.modules:
+                total += module.dps
+                multiplier *= module.dpsMultiplier
         
         for upgrade in self.upgradesApplied:
             total += upgrade.dps
@@ -163,12 +164,13 @@ class bbShip(bbAliasable.Aliasable):
         return total * multiplier
 
     
-    def getShield(self):
+    def getShield(self, shipUpgradesOnly=False):
         total = 0
         multiplier = 1
-        for module in self.modules:
-            total += module.shield
-            multiplier *= module.shieldMultiplier
+        if not shipUpgradesOnly:
+            for module in self.modules:
+                total += module.shield
+                multiplier *= module.shieldMultiplier
         
         for upgrade in self.upgradesApplied:
             total += upgrade.shield
@@ -176,12 +178,13 @@ class bbShip(bbAliasable.Aliasable):
         return total * multiplier
 
 
-    def getArmour(self):
+    def getArmour(self, shipUpgradesOnly=False):
         total = self.armour
         multiplier = 1
-        for module in self.modules:
-            total += module.armour
-            multiplier *= module.armourMultiplier
+        if not shipUpgradesOnly:
+            for module in self.modules:
+                total += module.armour
+                multiplier *= module.armourMultiplier
         
         for upgrade in self.upgradesApplied:
             total += upgrade.armour
@@ -189,12 +192,13 @@ class bbShip(bbAliasable.Aliasable):
         return total * multiplier
 
 
-    def getCargo(self):
+    def getCargo(self, shipUpgradesOnly=False):
         total = self.cargo
         multiplier = 1
-        for module in self.modules:
-            total += module.cargo
-            multiplier *= module.cargoMultiplier
+        if not shipUpgradesOnly:
+            for module in self.modules:
+                total += module.cargo
+                multiplier *= module.cargoMultiplier
         
         for upgrade in self.upgradesApplied:
             total += upgrade.cargo
@@ -202,12 +206,13 @@ class bbShip(bbAliasable.Aliasable):
         return total * multiplier
 
 
-    def getHandling(self):
+    def getHandling(self, shipUpgradesOnly=False):
         total = self.handling
         multiplier = 1
-        for module in self.modules:
-            total += module.handling
-            multiplier *= module.handlingMultiplier
+        if not shipUpgradesOnly:
+            for module in self.modules:
+                total += module.handling
+                multiplier *= module.handlingMultiplier
         
         for upgrade in self.upgradesApplied:
             total += upgrade.handling
@@ -215,7 +220,7 @@ class bbShip(bbAliasable.Aliasable):
         return total * multiplier
 
 
-    def getNumSecondaries(self):
+    def getNumSecondaries(self, shipUpgradesOnly=False):
         total = self.numSecondaries
         multiplier = 1
         
@@ -225,7 +230,7 @@ class bbShip(bbAliasable.Aliasable):
         return total * multiplier
 
 
-    def getMaxPrimaries(self):
+    def getMaxPrimaries(self, shipUpgradesOnly=False):
         total = self.maxPrimaries
         multiplier = 1
         
@@ -235,7 +240,7 @@ class bbShip(bbAliasable.Aliasable):
         return total * multiplier
 
 
-    def getMaxTurrets(self):
+    def getMaxTurrets(self, shipUpgradesOnly=False):
         total = self.maxTurrets
         multiplier = 1
         
@@ -245,7 +250,7 @@ class bbShip(bbAliasable.Aliasable):
         return total * multiplier
 
 
-    def getMaxModules(self):
+    def getMaxModules(self, shipUpgradesOnly=False):
         total = self.maxModules
         multiplier = 1
         
@@ -255,24 +260,16 @@ class bbShip(bbAliasable.Aliasable):
         return total * multiplier
 
 
-    def getValue(self):
+    def getValue(self, shipUpgradesOnly=False):
         total = self.value
 
-        for module in self.modules:
-            total += module.value
-        for weapon in self.weapons:
-            total += weapon.value
-        for turret in self.turrets:
-            total += turret.value
-        for upgrade in self.upgradesApplied:
-            total += upgrade.value
-
-        return total
-
-
-    def getValueStripped(self):
-        total = self.value
-
+        if not shipUpgradesOnly:
+            for module in self.modules:
+                total += module.value
+            for weapon in self.weapons:
+                total += weapon.value
+            for turret in self.turrets:
+                total += turret.value
         for upgrade in self.upgradesApplied:
             total += upgrade.value
 
@@ -281,27 +278,6 @@ class bbShip(bbAliasable.Aliasable):
     
     def applyUpgrade(self, upgrade):
         self.upgradesApplied.append(upgrade)
-
-        """self.armour += upgrade.armour
-        self.armour *= upgrade.armourMultiplier
-
-        self.cargo += upgrade.cargo
-        self.cargo *= upgrade.cargoMultiplier
-
-        self.numSecondaries += upgrade.numSecondaries
-        self.numSecondaries *= upgrade.numSecondariesMultiplier
-
-        self.handling += upgrade.handling
-        self.handling *= upgrade.handlingMultiplier
-
-        self.maxPrimaries += upgrade.maxPrimaries
-        self.maxPrimaries *= upgrade.maxPrimariesMultiplier
-        
-        self.maxTurrets += upgrade.maxTurrets
-        self.maxTurrets *= upgrade.maxTurretsMultiplier
-
-        self.maxModules += upgrade.maxModules
-        self.maxModules *= upgrade.maxModulesMultiplier"""
 
     
     def changeNickname(self, nickname):
