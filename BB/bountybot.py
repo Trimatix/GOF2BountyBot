@@ -268,6 +268,19 @@ def getNumExtension(num):
     return bbData.numExtensions[int(str(num)[-1])] if not (num > 10 and num < 20) else "th"
 
 
+"""
+Insert commas into every third position in a string.
+
+@param num -- string to insert commas into. probably just containing digits
+@return outStr -- num, but split with commas at every third digit
+"""
+def commaSplitNum(num):
+    outStr = num
+    for i in range(len(num), 0, -3):
+	    outStr = outStr[0:i] + "," + outStr[i:]
+    return outStr[:-1]
+
+
 
 ####### USER COMMANDS #######
 
@@ -1083,25 +1096,25 @@ async def cmd_shop(message, args):
         for shipNum in range(1, len(requestedShop.shipsStock) + 1):
             if shipNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Ships**__", inline=False)
-            shopEmbed.add_field(name=str(shipNum) + ". " + str(requestedShop.shipsStock[shipNum - 1].getValue()) + " Credits", value= "**" + requestedShop.shipsStock[shipNum - 1].getNameAndNick() + "**\n" + requestedShop.shipsStock[shipNum - 1].statsStringShort(), inline=True)
+            shopEmbed.add_field(value=commaSplitNum(str(requestedShop.shipsStock[shipNum - 1].getValue())) + " Credits\n" + requestedShop.shipsStock[shipNum - 1].statsStringShort(), name=str(shipNum) + ". " + "**" + requestedShop.shipsStock[shipNum - 1].getNameAndNick() + "**", inline=True)
 
     if item in ["all", "weapon"]:
         for weaponNum in range(1, len(requestedShop.weaponsStock) + 1):
             if weaponNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Weapons**__", inline=False)
-            shopEmbed.add_field(name=str(weaponNum) + ". " + str(requestedShop.weaponsStock[weaponNum - 1].value) + " Credits", value= "**" + requestedShop.weaponsStock[weaponNum - 1].name + "**\n" + requestedShop.weaponsStock[weaponNum - 1].statsStringShort(), inline=True)
+            shopEmbed.add_field(value=commaSplitNum(str(requestedShop.weaponsStock[weaponNum - 1].value)) + " Credits\n" + requestedShop.weaponsStock[weaponNum - 1].statsStringShort(), name=str(weaponNum) + ". " + "**" + requestedShop.weaponsStock[weaponNum - 1].name + "**", inline=True)
 
     if item in ["all", "module"]:
         for moduleNum in range(1, len(requestedShop.modulesStock) + 1):
             if moduleNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Modules**__", inline=False)
-            shopEmbed.add_field(name=str(moduleNum) + ". " + str(requestedShop.modulesStock[moduleNum - 1].value) + " Credits", value= "**" + requestedShop.modulesStock[moduleNum - 1].name + "**\n" + requestedShop.modulesStock[moduleNum - 1].statsStringShort(), inline=True)
+            shopEmbed.add_field(value=commaSplitNum(str(requestedShop.modulesStock[moduleNum - 1].value)) + " Credits\n" + requestedShop.modulesStock[moduleNum - 1].statsStringShort(), name=str(moduleNum) + ". " + "**" + requestedShop.modulesStock[moduleNum - 1].name + "**", inline=True)
 
     if item in ["all", "turret"]:
         for turretNum in range(1, len(requestedShop.turretsStock) + 1):
             if turretNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Turrets**__", inline=False)
-            shopEmbed.add_field(name=str(turretNum) + ". " + str(requestedShop.turretsStock[turretNum - 1].value) + " Credits", value= "**" + requestedShop.turretsStock[turretNum - 1].name + "**\n" + requestedShop.turretsStock[turretNum - 1].statsStringShort(), inline=True)
+            shopEmbed.add_field(value=commaSplitNum(str(requestedShop.turretsStock[turretNum - 1].value)) + " Credits\n" + requestedShop.turretsStock[turretNum - 1].statsStringShort(), name=str(turretNum) + ". " + "**" + requestedShop.turretsStock[turretNum - 1].name + "**", inline=True)
 
     await sendChannel.send(embed=shopEmbed)
     if sendDM:
