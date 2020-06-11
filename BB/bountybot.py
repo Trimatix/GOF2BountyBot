@@ -2319,6 +2319,10 @@ async def on_ready():
                     datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + newBountyDelayDelta - timedelta(minutes=bbConfig.delayFactor) \
                     <= datetime.utcnow() \
                     <= datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
+            
+            # mark bounty delay as reset
+            bbConfig.newBountyDelayReset = False
+            
             # ensure a new bounty can be created
             if bountiesDB.canMakeBounty():
                 newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
