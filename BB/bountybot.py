@@ -1720,7 +1720,41 @@ async def cmd_pay(message, args):
     if len(argsSplit) < 2:
         await message.channel.send(":x: Please give a target user and an amount!")
         return
-    if
+    if not bbUtil.isMention(argsSplit[0]):
+        await message.channel.send(":x: Invalid user tag!")
+        return
+    if not bbUtil.isInt(argsSplit(1)):
+        await message.channel.send(":x: Invalid amount!")
+        return
+
+    requestedUser = client.get_user(int(argsSplit[0].lstrip("<@!").rstrip(">")))
+    if requestedUser is None:
+        await message.channel.send(":x: Unknown user!")
+        return
+
+    amount = int(argsSplit[1])
+    if amount < 1:
+        await message.channel.send(":x: You have to pay at least 1 credit!")
+        return
+
+    if usersDB.userIDExists(message.author.id):
+        sourceBBUser = usersDB.getUser(message.author.id)
+    else:
+        sourceBBUser = usersDB.addUser(message.author.id)
+
+    if not sourceBBUser.credits >= amount:
+        await message.channel.send(":x: You don't have that many credits!")
+        return
+
+    if usersDB.userIDExists(requestedUser.id):
+        targetBBUser = usersDB.getUser(requestedUser.id)
+    else:
+        targetBBUser = usersDB.addUser(requestedUser.id)
+
+    sourceBBUser.credits -= amount
+    targetBBUser.credits += amount
+
+bbCommands.register("pay", cmd_pay)
 
 
 
