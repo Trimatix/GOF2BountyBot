@@ -258,6 +258,16 @@ def timeDeltaFromDict(timeDict):
                         milliseconds=timeDict["milliseconds"] if "milliseconds" in timeDict else 0)
 
 
+"""
+Return the string extension for an integer, e.g 'th' or 'rd'.
+
+@param num -- The integer to find the extension for
+@return -- string containing a number extension from bbData.numExtensions
+"""
+def getNumExtension(num):
+    return bbData.numExtensions[int(str(num)[-1])] if not (num > 10 and num < 20) else "th"
+
+
 
 ####### USER COMMANDS #######
 
@@ -583,7 +593,7 @@ async def cmd_bounties(message, args):
             outmessage = "__**Active " + requestedFaction.title() + " Bounties**__\nTimes given in UTC.```css"
             for bounty in bountiesDB.getFactionBounties(requestedFaction):
                 endTimeStr = datetime.utcfromtimestamp(bounty.endTime).strftime("%B %d %H %M %S").split(" ")
-                outmessage += "\n • [" + criminalNameOrDiscrim(bounty.criminal) + "]" + " " * (bbData.longestBountyNameLength + 1 - len(criminalNameOrDiscrim(bounty.criminal))) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + bbData.numExtensions[int(endTimeStr[1][-1])] + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
+                outmessage += "\n • [" + criminalNameOrDiscrim(bounty.criminal) + "]" + " " * (bbData.longestBountyNameLength + 1 - len(criminalNameOrDiscrim(bounty.criminal))) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + getNumExtension(int(endTimeStr[1])) + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
                 if endTimeStr[4] != "00":
                     outmessage += ":" + endTimeStr[4]
                 else:
@@ -938,7 +948,7 @@ async def cmd_hangar(message, args):
                         page = int(arg)
                         foundPage = True
                 else:
-                    await message.channel.send(":x: " + str(argNum) + bbData.numExtensions[argNum] + " argument invalid! I can only take a target user, an item type (ship/weapon/module/turret), and a page number!")
+                    await message.channel.send(":x: " + str(argNum) + getNumExtension(argNum) + " argument invalid! I can only take a target user, an item type (ship/weapon/module/turret), and a page number!")
                     return
                 argNum += 1
     
