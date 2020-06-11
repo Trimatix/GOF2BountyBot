@@ -2204,6 +2204,38 @@ def dev_cmd_refreshshop(message, args):
 bbCommands.register("refreshshop",dev_cmd_refreshshop, isDev=True)
 
 
+"""
+developer command setting the requested user's balance.
+
+@param message -- the discord message calling the command
+@param args -- string containing a user mention and an integer number of credits
+"""
+async def dev_cmd_setbalance(message, args):
+    argsSplit = args.split(" ")
+    # verify both a user and a balance were given
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Please give a user mention followed by the new balance!")
+        return
+    # verify the requested balance is an integer
+    if not bbUtil.isInt(argsSplit[1]):
+        await message.channel.send(":x: that's not a number!")
+        return
+    # verify the requested user
+    requestedUser = client.get_user(int(argsSplit[0].lstrip("<@!").rstrip(">")))
+    if requestedUser is None:
+        await message.channel.send(":x: invalid user!!")
+        return
+    if not usersDB.userIDExists(requestedUser.id):
+        requestedBBUser = usersDB.addUser(requestedUser.id)
+    else:
+        requestedBBUser = usersDB.getUser(requestedUser.id)
+    # update the balance
+    requestedBBUser.credits = int(argsSplit[1])
+    await message.channel.send("Done!")
+    
+bbCommands.register("setbalance", dev_cmd_setcheckcooldown, isDev=True)
+
+
 
 ####### MAIN FUNCTIONS #######
 
