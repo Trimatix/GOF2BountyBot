@@ -348,10 +348,10 @@ async def cmd_balance(message, args):
             await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
             return
         # Get the discord user object for the given tag
-        if "!" in args:
-            requestedUser = client.get_user(int(args[3:-1]))
-        else:
-            requestedUser = client.get_user(int(args[2:-1]))
+        requestedUser = client.get_user(int(args.lstrip("<@!").rstrip(">")))
+        if requestedUser is None:
+            await message.channel.send(":x: Uknown user!")
+            return
         # ensure that the user is in the users database
         if not usersDB.userIDExists(requestedUser.id):
             usersDB.addUser(requestedUser.id)
@@ -1760,15 +1760,16 @@ bbCommands.register("save", dev_cmd_save, isDev=True)
 
 
 """
-developer command printing whether or not the current channel is the current guild's announcements channel
+developer command printing whether or not the current guild has an announcements channel set
 
 @param message -- the discord message calling the command
 @param args -- ignored
 """
-async def dev_cmd_is_announce(message, args):
-    await message.channel.send(guildsDB.getGuild(message.guild.id).hasAnnounceChannel())
+async def dev_cmd_has_announce(message, args):
+    guild = guildsDB.getGuild(message.guild.id)
+    await message.channel.send(":x: Unknown guild!" if guild is None else guild.hasAnnounceChannel())
     
-bbCommands.register("is-announce", dev_cmd_is_announce, isDev=True)
+bbCommands.register("has-announce", dev_cmd_has_announce, isDev=True)
 
 
 """
@@ -1784,15 +1785,16 @@ bbCommands.register("get-announce", dev_cmd_get_announce, isDev=True)
 
 
 """
-developer command printing whether or not the current channel is the current guild's play channel
+developer command printing whether or not the current guild has a play channel set
 
 @param message -- the discord message calling the command
 @param args -- ignored
 """
-async def dev_cmd_is_play(message, args):
-    await message.channel.send(guildsDB.getGuild(message.guild.id).hasPlayChannel())
+async def dev_cmd_has_play(message, args):
+    guild = guildsDB.getGuild(message.guild.id)
+    await message.channel.send(":x: Unknown guild!" if guild is None else guild.hasPlayChannel())
     
-bbCommands.register("is-play", dev_cmd_is_play, isDev=True)
+bbCommands.register("has-play", dev_cmd_has_play, isDev=True)
 
 
 """
