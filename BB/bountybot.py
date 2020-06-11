@@ -204,6 +204,21 @@ async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
 
 
 """
+Announce the refreshing of shop stocks to all guilds.
+Messages will be sent to the playChannels of all guilds in the guildsDB, if they have one
+"""
+async def announceNewShopStock():
+    # loop over all guilds
+    for guild in guildsDB.guilds.values():
+        # ensure guild has a valid playChannel
+        if guild.hasPlayChannel():
+            playCh = client.get_channel(guild.getPlayChannelId())
+            if playCh is not None:
+                # send the announcement
+                await playCh.send(":arrows_counterclockwise: The shop stock has been refreshed!")
+
+
+"""
 Build a simple discord embed.
 
 @param titleTxt -- The title of the embed
@@ -243,6 +258,16 @@ def timeDeltaFromDict(timeDict):
                         milliseconds=timeDict["milliseconds"] if "milliseconds" in timeDict else 0)
 
 
+"""
+Return the string extension for an integer, e.g 'th' or 'rd'.
+
+@param num -- The integer to find the extension for
+@return -- string containing a number extension from bbData.numExtensions
+"""
+def getNumExtension(num):
+    return bbData.numExtensions[int(str(num)[-1])] if not (num > 10 and num < 20) else "th"
+
+
 
 ####### USER COMMANDS #######
 
@@ -260,6 +285,7 @@ async def cmd_help(message, args):
     helpEmbed = makeEmbed(titleTxt="BountyBot Commands", thumb=client.user.avatar_url_as(size=64))
     page = 1
     maxPage = len(bbData.helpDict)
+
     if args != "":
         if bbUtil.isInt(args):
             page = int(args)
@@ -276,13 +302,27 @@ async def cmd_help(message, args):
             await message.channel.send(":x: Help: Command not found!")
             return
 
+    sendChannel = None
+    sendDM = False
+
+    if message.author.dm_channel is None:
+        await message.author.create_dm()
+    if message.author.dm_channel is None:
+        sendChannel = message.channel
+    else:
+        sendChannel = message.author.dm_channel
+        sendDM = True
+    
     helpEmbed.set_footer(text="Page " + str(page) + "/" + str(maxPage))
     section = list(bbData.helpDict.keys())[page - 1]
     helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
     for currentCommand in bbData.helpDict[section].values():
         helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
-    await message.channel.send(bbData.helpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
     
+    await sendChannel.send(bbData.helpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
+    if sendDM:
+        await message.add_reaction(bbConfig.dmSentEmoji)
+
 bbCommands.register("help", cmd_help)
 
 
@@ -318,10 +358,10 @@ async def cmd_balance(message, args):
             await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
             return
         # Get the discord user object for the given tag
-        if "!" in args:
-            requestedUser = client.get_user(int(args[3:-1]))
-        else:
-            requestedUser = client.get_user(int(args[2:-1]))
+        requestedUser = client.get_user(int(args.lstrip("<@!").rstrip(">")))
+        if requestedUser is None:
+            await message.channel.send(":x: Uknown user!")
+            return
         # ensure that the user is in the users database
         if not usersDB.userIDExists(requestedUser.id):
             usersDB.addUser(requestedUser.id)
@@ -553,7 +593,7 @@ async def cmd_bounties(message, args):
             outmessage = "__**Active " + requestedFaction.title() + " Bounties**__\nTimes given in UTC.```css"
             for bounty in bountiesDB.getFactionBounties(requestedFaction):
                 endTimeStr = datetime.utcfromtimestamp(bounty.endTime).strftime("%B %d %H %M %S").split(" ")
-                outmessage += "\n • [" + criminalNameOrDiscrim(bounty.criminal) + "]" + " " * (bbData.longestBountyNameLength + 1 - len(criminalNameOrDiscrim(bounty.criminal))) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + bbData.numExtensions[int(endTimeStr[1][-1])] + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
+                outmessage += "\n • [" + criminalNameOrDiscrim(bounty.criminal) + "]" + " " * (bbData.longestBountyNameLength + 1 - len(criminalNameOrDiscrim(bounty.criminal))) + ": " + str(int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + getNumExtension(int(endTimeStr[1])) + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
                 if endTimeStr[4] != "00":
                     outmessage += ":" + endTimeStr[4]
                 else:
@@ -908,7 +948,7 @@ async def cmd_hangar(message, args):
                         page = int(arg)
                         foundPage = True
                 else:
-                    await message.channel.send(":x: " + str(argNum) + bbData.numExtensions[argNum] + " argument invalid! I can only take a target user, an item type (ship/weapon/module/turret), and a page number!")
+                    await message.channel.send(":x: " + str(argNum) + getNumExtension(argNum) + " argument invalid! I can only take a target user, an item type (ship/weapon/module/turret), and a page number!")
                     return
                 argNum += 1
     
@@ -921,6 +961,20 @@ async def cmd_hangar(message, args):
             usersDB.addUser(requestedUser.id)
         else:
             useDummyData = True
+
+    sendChannel = None
+    sendDM = False
+
+    if item == "all":
+        if message.author.dm_channel is None:
+            await message.author.create_dm()
+        if message.author.dm_channel is None:
+            sendChannel = message.channel
+        else:
+            sendChannel = message.author.dm_channel
+            sendDM = True
+    else:
+        sendChannel = message.channel
 
     if useDummyData:
         if page > 1:
@@ -983,7 +1037,9 @@ async def cmd_hangar(message, args):
                     hangarEmbed.add_field(name="‎", value="__**Stored Turrets**__", inline=False)
                 hangarEmbed.add_field(name=str(turretNum) + ". " + requestedBBUser.inactiveTurrets[turretNum - 1].name, value=requestedBBUser.inactiveTurrets[turretNum - 1].statsStringShort(), inline=False)
 
-        await message.channel.send(embed=hangarEmbed)
+        await sendChannel.send(embed=hangarEmbed)
+        if sendDM:
+            await message.add_reaction(bbConfig.dmSentEmoji)
 
 bbCommands.register("hangar", cmd_hangar)
 
@@ -1005,6 +1061,20 @@ async def cmd_shop(message, args):
     else:
         await message.channel.send(":x: Invalid item type! (ship/weapon/module/turret/all)")
         return
+
+    sendChannel = None
+    sendDM = False
+
+    if item == "all":
+        if message.author.dm_channel is None:
+            await message.author.create_dm()
+        if message.author.dm_channel is None:
+            sendChannel = message.channel
+        else:
+            sendChannel = message.author.dm_channel
+            sendDM = True
+    else:
+        sendChannel = message.channel
 
     requestedShop = guildsDB.getGuild(message.guild.id).shop
     shopEmbed = makeEmbed(titleTxt="Shop", desc=message.guild.name, footerTxt="All items" if item == "all" else (item + "s").title(), thumb="https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64")
@@ -1033,7 +1103,9 @@ async def cmd_shop(message, args):
                 shopEmbed.add_field(name="‎", value="__**Turrets**__", inline=False)
             shopEmbed.add_field(name=str(turretNum) + ". " + str(requestedShop.turretsStock[turretNum - 1].value) + " Credits", value= "**" + requestedShop.turretsStock[turretNum - 1].name + "**\n" + requestedShop.turretsStock[turretNum - 1].statsStringShort(), inline=True)
 
-    await message.channel.send(embed=shopEmbed)
+    await sendChannel.send(embed=shopEmbed)
+    if sendDM:
+        await message.add_reaction(bbConfig.dmSentEmoji)
 
 bbCommands.register("shop", cmd_shop)
 
@@ -1594,6 +1666,10 @@ async def cmd_nameship(message, args):
         await message.channel.send(":x: Not enough arguments. Please give the new nickname!")
         return
 
+    if len(args) > bbConfig.maxShipNickLength:
+        await message.channel.send(":x: Nicknames must be " + str(bbConfig.maxShipNickLength) + " characters or less!")
+        return
+
     requestedBBUser.activeShip.changeNickname(args)
     await message.channel.send(":pencil: You named your " + requestedBBUser.activeShip.name + ": **" + args + "**.")
 
@@ -1714,15 +1790,16 @@ bbCommands.register("save", dev_cmd_save, isDev=True)
 
 
 """
-developer command printing whether or not the current channel is the current guild's announcements channel
+developer command printing whether or not the current guild has an announcements channel set
 
 @param message -- the discord message calling the command
 @param args -- ignored
 """
-async def dev_cmd_is_announce(message, args):
-    await message.channel.send(guildsDB.getGuild(message.guild.id).hasAnnounceChannel())
+async def dev_cmd_has_announce(message, args):
+    guild = guildsDB.getGuild(message.guild.id)
+    await message.channel.send(":x: Unknown guild!" if guild is None else guild.hasAnnounceChannel())
     
-bbCommands.register("is-announce", dev_cmd_is_announce, isDev=True)
+bbCommands.register("has-announce", dev_cmd_has_announce, isDev=True)
 
 
 """
@@ -1738,15 +1815,16 @@ bbCommands.register("get-announce", dev_cmd_get_announce, isDev=True)
 
 
 """
-developer command printing whether or not the current channel is the current guild's play channel
+developer command printing whether or not the current guild has a play channel set
 
 @param message -- the discord message calling the command
 @param args -- ignored
 """
-async def dev_cmd_is_play(message, args):
-    await message.channel.send(guildsDB.getGuild(message.guild.id).hasPlayChannel())
+async def dev_cmd_has_play(message, args):
+    guild = guildsDB.getGuild(message.guild.id)
+    await message.channel.send(":x: Unknown guild!" if guild is None else guild.hasPlayChannel())
     
-bbCommands.register("is-play", dev_cmd_is_play, isDev=True)
+bbCommands.register("has-play", dev_cmd_has_play, isDev=True)
 
 
 """
@@ -2141,6 +2219,53 @@ async def dev_cmd_make_player_bounty(message, args):
 bbCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True)
 
 
+"""
+Refresh the shop stock of the current guild. Does not reset the shop stock cooldown.
+
+@param message -- the discord message calling the command
+@param args -- ignored
+"""
+async def dev_cmd_refreshshop(message, args):
+    guild = guildsDB.getGuild(message.guild.id)
+    guild.shop.refreshStock()
+    if guild.hasPlayChannel():
+        await client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!")
+
+bbCommands.register("refreshshop",dev_cmd_refreshshop, isDev=True)
+
+
+"""
+developer command setting the requested user's balance.
+
+@param message -- the discord message calling the command
+@param args -- string containing a user mention and an integer number of credits
+"""
+async def dev_cmd_setbalance(message, args):
+    argsSplit = args.split(" ")
+    # verify both a user and a balance were given
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Please give a user mention followed by the new balance!")
+        return
+    # verify the requested balance is an integer
+    if not bbUtil.isInt(argsSplit[1]):
+        await message.channel.send(":x: that's not a number!")
+        return
+    # verify the requested user
+    requestedUser = client.get_user(int(argsSplit[0].lstrip("<@!").rstrip(">")))
+    if requestedUser is None:
+        await message.channel.send(":x: invalid user!!")
+        return
+    if not usersDB.userIDExists(requestedUser.id):
+        requestedBBUser = usersDB.addUser(requestedUser.id)
+    else:
+        requestedBBUser = usersDB.getUser(requestedUser.id)
+    # update the balance
+    requestedBBUser.credits = int(argsSplit[1])
+    await message.channel.send("Done!")
+    
+bbCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
+
+
 
 ####### MAIN FUNCTIONS #######
 
@@ -2197,6 +2322,7 @@ async def on_ready():
         # Refresh all shop stocks
         if datetime.utcnow() >= nextShopRefresh:
             guildsDB.refreshAllShopStocks()
+            announceNewShopStock()
             # Reset the shop stock refresh cooldown
             nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
         
@@ -2207,6 +2333,10 @@ async def on_ready():
                     datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + newBountyDelayDelta - timedelta(minutes=bbConfig.delayFactor) \
                     <= datetime.utcnow() \
                     <= datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
+            
+            # mark bounty delay as reset
+            bbConfig.newBountyDelayReset = False
+            
             # ensure a new bounty can be created
             if bountiesDB.canMakeBounty():
                 newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
@@ -2242,8 +2372,8 @@ Currently handles:
 """
 @client.event
 async def on_message(message):
-    # ignore messages sent by BountyBot
-    if message.author == client.user:
+    # ignore messages sent by BountyBot and DMs
+    if message.author == client.user or type(message.channel) == discord.DMChannel:
         return
 
     # randomly send '!drink' to the same channel
