@@ -2304,8 +2304,8 @@ Currently handles:
 """
 @client.event
 async def on_message(message):
-    # ignore messages sent by BountyBot
-    if message.author == client.user:
+    # ignore messages sent by BountyBot and DMs
+    if message.author == client.user or type(message.channel) == discord.DMChannel:
         return
 
     # randomly send '!drink' to the same channel
