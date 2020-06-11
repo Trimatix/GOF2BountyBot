@@ -273,7 +273,7 @@ If a command is provided in args, the associated help string for just that comma
 # @client.command(name='runHelp')
 async def cmd_help(message, args):
     helpEmbed = makeEmbed(titleTxt="BountyBot Commands", thumb=client.user.avatar_url_as(size=64))
-    page = 0
+    page = 1
     maxPage = len(bbData.helpDict)
 
     if args != "":
@@ -309,9 +309,9 @@ async def cmd_help(message, args):
     for currentCommand in bbData.helpDict[section].values():
         helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
     
-    await message.channel.send(bbData.helpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
+    await sendChannel.send(bbData.helpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
     if sendDM:
-        await message.add_reaction(client.get_emoji(bbConfig.dmSentEmoji))
+        await message.add_reaction(bbConfig.dmSentEmoji)
 
 bbCommands.register("help", cmd_help)
 
@@ -1079,7 +1079,7 @@ async def cmd_shop(message, args):
 
     await sendChannel.send(embed=shopEmbed)
     if sendDM:
-        await message.add_reaction(client.get_emoji(bbConfig.dmSentEmoji))
+        await message.add_reaction(bbConfig.dmSentEmoji)
 
 bbCommands.register("shop", cmd_shop)
 
@@ -2195,7 +2195,7 @@ Refresh the shop stock of the current guild. Does not reset the shop stock coold
 @param message -- the discord message calling the command
 @param args -- ignored
 """
-def dev_cmd_refreshshop(message, args):
+async def dev_cmd_refreshshop(message, args):
     guild = guildsDB.getGuild(message.guild.id)
     guild.shop.refreshStock()
     if guild.hasPlayChannel():
