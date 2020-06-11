@@ -1723,7 +1723,7 @@ async def cmd_pay(message, args):
     if not bbUtil.isMention(argsSplit[0]):
         await message.channel.send(":x: Invalid user tag!")
         return
-    if not bbUtil.isInt(argsSplit(1)):
+    if not bbUtil.isInt(argsSplit[1]):
         await message.channel.send(":x: Invalid amount!")
         return
 
@@ -1753,6 +1753,8 @@ async def cmd_pay(message, args):
 
     sourceBBUser.credits -= amount
     targetBBUser.credits += amount
+
+    await message.channel.send(":money_bag: You paid " +userTagOrDiscrim(targetBBUser.id) + " **" + str(amount) + "** credits!")
 
 bbCommands.register("pay", cmd_pay)
 
