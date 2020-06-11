@@ -204,6 +204,21 @@ async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
 
 
 """
+Announce the refreshing of shop stocks to all guilds.
+Messages will be sent to the playChannels of all guilds in the guildsDB, if they have one
+"""
+async def announceNewShopStock():
+    # loop over all guilds
+    for guild in guildsDB.guilds.values():
+        # ensure guild has a valid playChannel
+        if guild.hasPlayChannel():
+            playCh = client.get_channel(guild.getPlayChannelID())
+            if playCh is not None:
+                # send the announcement
+                await playCh.send(":arrows_counterclockwise: The shop stock has been refreshed!")
+
+
+"""
 Build a simple discord embed.
 
 @param titleTxt -- The title of the embed
@@ -2197,6 +2212,7 @@ async def on_ready():
         # Refresh all shop stocks
         if datetime.utcnow() >= nextShopRefresh:
             guildsDB.refreshAllShopStocks()
+            announceNewShopStock()
             # Reset the shop stock refresh cooldown
             nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
         
