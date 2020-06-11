@@ -2061,7 +2061,7 @@ async def dev_cmd_broadcast(message, args):
             if guild.hasPlayChannel:
                 await client.get_channel(guild.getPlayChannelId()).send(args)
 
-bbCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepCommandCasing=True)
+bbCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
 
 
 """
