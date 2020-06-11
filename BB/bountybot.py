@@ -273,8 +273,9 @@ If a command is provided in args, the associated help string for just that comma
 # @client.command(name='runHelp')
 async def cmd_help(message, args):
     helpEmbed = makeEmbed(titleTxt="BountyBot Commands", thumb=client.user.avatar_url_as(size=64))
-    page = 1
+    page = 0
     maxPage = len(bbData.helpDict)
+
     if args != "":
         if bbUtil.isInt(args):
             page = int(args)
@@ -291,13 +292,27 @@ async def cmd_help(message, args):
             await message.channel.send(":x: Help: Command not found!")
             return
 
+    sendChannel = None
+    sendDM = False
+
+    if message.author.dm_channel is None:
+        await message.author.create_dm()
+    if message.author.dm_channel is None:
+        sendChannel = message.channel
+    else:
+        sendChannel = message.author.dm_channel
+        sendDM = True
+    
     helpEmbed.set_footer(text="Page " + str(page) + "/" + str(maxPage))
     section = list(bbData.helpDict.keys())[page - 1]
     helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
     for currentCommand in bbData.helpDict[section].values():
         helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
-    await message.channel.send(bbData.helpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
     
+    await message.channel.send(bbData.helpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
+    if sendDM:
+        await message.add_reaction(client.get_emoji(bbConfig.dmSentEmoji))
+
 bbCommands.register("help", cmd_help)
 
 
