@@ -952,6 +952,20 @@ async def cmd_hangar(message, args):
         else:
             useDummyData = True
 
+    sendChannel = None
+    sendDM = False
+
+    if item == "all":
+        if message.author.dm_channel is None:
+            await message.author.create_dm()
+        if message.author.dm_channel is None:
+            sendChannel = message.channel
+        else:
+            sendChannel = message.author.dm_channel
+            sendDM = True
+    else:
+        sendChannel = message.channel
+
     if useDummyData:
         if page > 1:
             await message.channel.send(":x: " + ("The requested pilot" if foundUser else "You") + " only " + ("has" if foundUser else "have") + " one page of items. Showing page one:")
@@ -1013,7 +1027,9 @@ async def cmd_hangar(message, args):
                     hangarEmbed.add_field(name="‎", value="__**Stored Turrets**__", inline=False)
                 hangarEmbed.add_field(name=str(turretNum) + ". " + requestedBBUser.inactiveTurrets[turretNum - 1].name, value=requestedBBUser.inactiveTurrets[turretNum - 1].statsStringShort(), inline=False)
 
-        await message.channel.send(embed=hangarEmbed)
+        await sendChannel.send(embed=hangarEmbed)
+        if sendDM:
+            await message.add_reaction(bbConfig.dmSentEmoji)
 
 bbCommands.register("hangar", cmd_hangar)
 
