@@ -85,3 +85,6 @@ validItemNames = ["ship", "weapon", "module", "turret", "all"]
 
 # When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
 dmSentEmoji = "📬"
+
+# max number of characters accepted by nameShip
+maxShipNickLength = 30

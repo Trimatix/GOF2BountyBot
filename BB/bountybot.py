@@ -1666,6 +1666,10 @@ async def cmd_nameship(message, args):
         await message.channel.send(":x: Not enough arguments. Please give the new nickname!")
         return
 
+    if len(args) > bbConfig.maxShipNickLength:
+        await message.channel.send(":x: Nicknames must be " + str(bbConfig.maxShipNickLength) + " characters or less!")
+        return
+
     requestedBBUser.activeShip.changeNickname(args)
     await message.channel.send(":pencil: You named your " + requestedBBUser.activeShip.name + ": **" + args + "**.")
 
