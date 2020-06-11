@@ -2053,6 +2053,12 @@ async def dev_cmd_canmakebounty(message, args):
 bbCommands.register("canmakebounty", dev_cmd_canmakebounty, isDev=True)
 
 
+"""
+developer command sending a message to the playChannel of all guilds that have one
+
+@param message -- the discord message calling the command
+@param args -- string containing the message to broadcast
+"""
 async def dev_cmd_broadcast(message, args):
     if args == "":
         await message.channel.send("provide a message!")
