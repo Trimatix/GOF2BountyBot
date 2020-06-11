@@ -367,7 +367,7 @@ async def cmd_balance(message, args):
     # If a user is specified
     else:
         # Verify the passed user tag
-        if len(args.split(" ")) > 1 or not (args.startswith("<@") and args.endswith(">")) or ("!" in args and not bbUtil.isInt(args[3:-1])) or ("!" not in args and not bbUtil.isInt(args[2:-1])):
+        if not bbUtil.isMention(args):
             await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
             return
         # Get the discord user object for the given tag
@@ -418,7 +418,7 @@ async def cmd_stats(message, args):
     # If a user is specified
     else:
         # verify the user mention
-        if len(args.split(" ")) > 1 or not (args.startswith("<@") and args.endswith(">")) or ("!" in args and not bbUtil.isInt(args[3:-1])) or ("!" not in args and not bbUtil.isInt(args[2:-1])):
+        if not bbUtil.isMention(args):
             await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
             return
 
@@ -646,7 +646,7 @@ async def cmd_route(message, args):
         # display an error
         outmsg = ":x: That pilot isn't on any bounty boards! :clipboard:"
         # accept user name + discrim instead of tags to avoid mention spam
-        if requestedBountyName.startswith("<@"):
+        if bbUtil.isMention(requestedBountyName):
             outmsg += "\n:warning: **Don't tag users**, use their name and ID number like so: `" + bbConfig.commandPrefix + "route Trimatix#2244`"
         await message.channel.send(outmsg)
     
@@ -937,7 +937,7 @@ async def cmd_hangar(message, args):
         argNum = 1
         for arg in argsSplit:
             if arg != "":
-                if args.startswith("<@") and arg[-1] == ">" and bbUtil.isInt(arg.lstrip("<@!")[:-1]):
+                if bbUtil.isMention(arg):
                     if foundUser:
                         await message.channel.send(":x: I can only take one user!")
                         return
@@ -1138,7 +1138,7 @@ async def cmd_loadout(message, args):
         await message.channel.send(":x: Too many arguments! I can only take a target user!")
         return
     
-    if args != "" and args.startswith("<@") and args[-1] == ">" and bbUtil.isInt(args.lstrip("<@!")[:-1]):
+    if bbUtil.isMention(args):
         requestedUser = client.get_user(int(args.lstrip("<@!")[:-1]))
         userFound = True
         if requestedUser is None:
@@ -1713,6 +1713,14 @@ async def cmd_unnameship(message, args):
     await message.channel.send(":pencil: You reset your **" + requestedBBUser.activeShip.name + "**'s nickname.")
 
 bbCommands.register("unnameship", cmd_unnameship)
+
+
+async def cmd_pay(message, args):
+    argsSplit = args.split(" ")
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Please give a target user and an amount!")
+        return
+    if
 
 
 

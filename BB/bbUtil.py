@@ -96,3 +96,7 @@ def isInt(x):
     except ValueError:
         return False
     return True
+
+
+def isMention(mention):
+    return mention.endswith(">") and ((mention.startswith("<@") and isInt(mention[2:-1])) or (mention.startswith("<@!") and isInt(mention[3:-1])))
