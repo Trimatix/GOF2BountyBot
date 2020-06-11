@@ -1754,7 +1754,7 @@ async def cmd_pay(message, args):
     sourceBBUser.credits -= amount
     targetBBUser.credits += amount
 
-    await message.channel.send(":money_bag: You paid " +userTagOrDiscrim(targetBBUser.id) + " **" + str(amount) + "** credits!")
+    await message.channel.send(":moneybag: You paid " + userTagOrDiscrim(str(targetBBUser.id)) + " **" + str(amount) + "** credits!")
 
 bbCommands.register("pay", cmd_pay)
 
