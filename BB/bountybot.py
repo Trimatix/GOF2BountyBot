@@ -212,7 +212,7 @@ async def announceNewShopStock():
     for guild in guildsDB.guilds.values():
         # ensure guild has a valid playChannel
         if guild.hasPlayChannel():
-            playCh = client.get_channel(guild.getPlayChannelID())
+            playCh = client.get_channel(guild.getPlayChannelId())
             if playCh is not None:
                 # send the announcement
                 await playCh.send(":arrows_counterclockwise: The shop stock has been refreshed!")
@@ -2215,7 +2215,7 @@ async def dev_cmd_refreshshop(message, args):
     guild = guildsDB.getGuild(message.guild.id)
     guild.shop.refreshStock()
     if guild.hasPlayChannel():
-        await client.get_channel(guild.getPlayChannelID()).send(":arrows_counterclockwise: The shop stock has been refreshed!")
+        await client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!")
 
 bbCommands.register("refreshshop",dev_cmd_refreshshop, isDev=True)
 
