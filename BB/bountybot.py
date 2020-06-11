@@ -2233,7 +2233,7 @@ async def dev_cmd_setbalance(message, args):
     requestedBBUser.credits = int(argsSplit[1])
     await message.channel.send("Done!")
     
-bbCommands.register("setbalance", dev_cmd_setcheckcooldown, isDev=True)
+bbCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 
 
 
