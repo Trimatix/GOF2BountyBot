@@ -1754,7 +1754,7 @@ async def cmd_pay(message, args):
     sourceBBUser.credits -= amount
     targetBBUser.credits += amount
 
-    await message.channel.send(":moneybag: You paid " + userTagOrDiscrim(str(targetBBUser.id)) + " **" + str(amount) + "** credits!")
+    await message.channel.send(":moneybag: You paid " + requestedUser.name + " **" + str(amount) + "** credits!")
 
 bbCommands.register("pay", cmd_pay)
 
@@ -2051,6 +2051,17 @@ async def dev_cmd_canmakebounty(message, args):
         await message.channel.send(bountiesDB.factionCanMakeBounty(newFaction.lower()))
     
 bbCommands.register("canmakebounty", dev_cmd_canmakebounty, isDev=True)
+
+
+async def dev_cmd_broadcast(message, args):
+    if args == "":
+        await message.channel.send("provide a message!")
+    else:
+        for guild in guildsDB.guilds.values():
+            if guild.hasPlayChannel:
+                await client.get_channel(guild.getPlayChannelId()).send(args)
+
+bbCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepCommandCasing=True)
 
 
 """
