@@ -1152,8 +1152,8 @@ async def cmd_loadout(message, args):
             useDummyData = True
 
     if useDummyData:
-        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours["neutral"], thumb=requestedUser.avatar_url_as(size=64))
         activeShip = bbShip.fromDict(bbUser.defaultShipLoadoutDict)
+        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours["neutral"], thumb=activeShip.icon if activeShip.hasIcon else requestedUser.avatar_url_as(size=64))
         loadoutEmbed.add_field(name="Active Ship:", value=activeShip.name + "\n" + activeShip.statsStringNoItems(), inline=False)
         
         loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
@@ -1175,9 +1175,9 @@ async def cmd_loadout(message, args):
 
     else:
         requestedBBUser = usersDB.getUser(requestedUser.id)
-        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours["neutral"], thumb=requestedUser.avatar_url_as(size=64))
-
         activeShip = requestedBBUser.activeShip
+        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours["neutral"], thumb=activeShip.icon if activeShip.hasIcon else requestedUser.avatar_url_as(size=64))
+
         if activeShip is None:
             loadoutEmbed.add_field(name="Active Ship:", value="None", inline=False)
         else:
