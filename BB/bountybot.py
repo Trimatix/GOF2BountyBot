@@ -1021,6 +1021,20 @@ async def cmd_shop(message, args):
         await message.channel.send(":x: Invalid item type! (ship/weapon/module/turret/all)")
         return
 
+    sendChannel = None
+    sendDM = False
+
+    if item == "all":
+        if message.author.dm_channel is None:
+            await message.author.create_dm()
+        if message.author.dm_channel is None:
+            sendChannel = message.channel
+        else:
+            sendChannel = message.author.dm_channel
+            sendDM = True
+    else:
+        sendChannel = message.channel
+
     requestedShop = guildsDB.getGuild(message.guild.id).shop
     shopEmbed = makeEmbed(titleTxt="Shop", desc=message.guild.name, footerTxt="All items" if item == "all" else (item + "s").title(), thumb="https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64")
 
@@ -1048,7 +1062,9 @@ async def cmd_shop(message, args):
                 shopEmbed.add_field(name="‎", value="__**Turrets**__", inline=False)
             shopEmbed.add_field(name=str(turretNum) + ". " + str(requestedShop.turretsStock[turretNum - 1].value) + " Credits", value= "**" + requestedShop.turretsStock[turretNum - 1].name + "**\n" + requestedShop.turretsStock[turretNum - 1].statsStringShort(), inline=True)
 
-    await message.channel.send(embed=shopEmbed)
+    await sendChannel.send(embed=shopEmbed)
+    if sendDM:
+        await message.add_reaction(client.get_emoji(bbConfig.dmSentEmoji))
 
 bbCommands.register("shop", cmd_shop)
 
