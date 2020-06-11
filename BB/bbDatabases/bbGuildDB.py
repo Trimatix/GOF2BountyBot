@@ -49,7 +49,7 @@ class bbGuildDB:
 
     
     def refreshAllShopStocks(self):
-        for guild in self.guilds:
+        for guild in self.guilds.values():
             guild.shop.refreshStock()
 
     
