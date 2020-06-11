@@ -2156,6 +2156,21 @@ async def dev_cmd_make_player_bounty(message, args):
 bbCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True)
 
 
+"""
+Refresh the shop stock of the current guild. Does not reset the shop stock cooldown.
+
+@param message -- the discord message calling the command
+@param args -- ignored
+"""
+def dev_cmd_refreshshop(message, args):
+    guild = guildsDB.getGuild(message.guild.id)
+    guild.shop.refreshStock()
+    if guild.hasPlayChannel():
+        await client.get_channel(guild.getPlayChannelID()).send(":arrows_counterclockwise: The shop stock has been refreshed!")
+
+bbCommands.register("refreshshop",dev_cmd_refreshshop, isDev=True)
+
+
 
 ####### MAIN FUNCTIONS #######
 
