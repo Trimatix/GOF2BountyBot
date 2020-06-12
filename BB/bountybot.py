@@ -382,11 +382,14 @@ async def cmd_balance(message, args):
     # If a user is specified
     else:
         # Verify the passed user tag
-        if not bbUtil.isMention(args):
+        if not bbUtil.isMention(args) and not bbUtil.isInt(args):
             await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
             return
-        # Get the discord user object for the given tag
-        requestedUser = client.get_user(int(args.lstrip("<@!").rstrip(">")))
+        if bbUtil.isMention(args):
+            # Get the discord user object for the given tag
+            requestedUser = client.get_user(int(args.lstrip("<@!").rstrip(">")))
+        else:
+            requestedUser = client.get_user(int(args))
         if requestedUser is None:
             await message.channel.send(":x: Uknown user!")
             return
@@ -434,12 +437,15 @@ async def cmd_stats(message, args):
     # If a user is specified
     else:
         # verify the user mention
-        if not bbUtil.isMention(args):
+        if not bbUtil.isMention(args) and not bbUtil.isInt(args):
             await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
             return
 
-        # get the discord user object for the requested user
-        requestedUser = client.get_user(int(args[3:-1]))
+        if bbUtil.isMention(args):
+            # Get the discord user object for the given tag
+            requestedUser = client.get_user(int(args.lstrip("<@!").rstrip(">")))
+        else:
+            requestedUser = client.get_user(int(args))
         # ensure the mentioned user could be found
         if requestedUser is None:
             await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
@@ -1242,6 +1248,9 @@ async def cmd_hangar(message, args):
                         foundItem = True
 
                 elif bbUtil.isInt(arg):
+                    if client.get_user(int(arg)) is not None and not foundUser:
+                        requestedUser = client.get_user(int(args))
+                        continue
                     if foundPage:
                         await message.channel.send(":x: I can only take one page number!")
                         return
@@ -1429,9 +1438,12 @@ async def cmd_loadout(message, args):
         await message.channel.send(":x: Too many arguments! I can only take a target user!")
         return
     
-    if bbUtil.isMention(args):
-        requestedUser = client.get_user(int(args.lstrip("<@!")[:-1]))
-        userFound = True
+    if bbUtil.isMention(args) or bbUtil.isInt(args):
+        if bbUtil.isMention(args):
+            # Get the discord user object for the given tag
+            requestedUser = client.get_user(int(args.lstrip("<@!").rstrip(">")))
+        else:
+            requestedUser = client.get_user(int(args))
         if requestedUser is None:
             await message.channel.send(":x: Unrecognised user!")
             return
@@ -2018,14 +2030,18 @@ async def cmd_pay(message, args):
     if len(argsSplit) < 2:
         await message.channel.send(":x: Please give a target user and an amount!")
         return
-    if not bbUtil.isMention(argsSplit[0]):
+    if not bbUtil.isMention(argsSplit[0]) and not bbUtil.isInt(argsSplit[0]):
         await message.channel.send(":x: Invalid user tag!")
         return
     if not bbUtil.isInt(argsSplit[1]):
         await message.channel.send(":x: Invalid amount!")
         return
 
-    requestedUser = client.get_user(int(argsSplit[0].lstrip("<@!").rstrip(">")))
+    if bbUtil.isMention(argsSplit[0]):
+        # Get the discord user object for the given tag
+        requestedUser = client.get_user(int(argsSplit[0].lstrip("<@!").rstrip(">")))
+    else:
+        requestedUser = client.get_user(int(argsSplit[0]))
     if requestedUser is None:
         await message.channel.send(":x: Unknown user!")
         return
