@@ -1059,9 +1059,9 @@ async def cmd_module(message, args):
     # look up the module object
     itemName = args.title()
     itemObj = None
-    for module in bbData.builtInItemObjs.keys():
-        if bbData.builtInItemObjs[module].isCalled(itemName):
-            itemObj = bbData.builtInItemObjs[module]
+    for module in bbData.builtInModuleObjs.keys():
+        if bbData.builtInModuleObjs[module].isCalled(itemName):
+            itemObj = bbData.builtInModuleObjs[module]
 
     # report unrecognised module names
     if itemObj is None:
@@ -1104,9 +1104,9 @@ async def cmd_turret(message, args):
     # look up the turret object
     itemName = args.title()
     itemObj = None
-    for turr in bbData.builtInItemObjs.keys():
-        if bbData.builtInItemObjs[turr].isCalled(itemName):
-            itemObj = bbData.builtInItemObjs[turr]
+    for turr in bbData.builtInTurretObjs.keys():
+        if bbData.builtInTurretObjs[turr].isCalled(itemName):
+            itemObj = bbData.builtInTurretObjs[turr]
 
     # report unrecognised turret names
     if itemObj is None:
@@ -1152,9 +1152,9 @@ async def cmd_commodity(message, args):
     # look up the commodity object
     itemName = args.title()
     itemObj = None
-    for crim in bbData.builtInItemObjs.keys():
-        if bbData.builtInItemObjs[crim].isCalled(itemName):
-            itemObj = bbData.builtInItemObjs[crim]
+    for crim in bbData.builtInCommodityObjs.keys():
+        if bbData.builtInCommodityObjs[crim].isCalled(itemName):
+            itemObj = bbData.builtInCommodityObjs[crim]
 
     # report unrecognised commodity names
     if itemObj is None:
