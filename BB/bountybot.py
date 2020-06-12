@@ -155,8 +155,12 @@ async def announceNewBounty(newBounty):
             # ensure the announceChannel is valid
             currentChannel = client.get_channel(currentGuild.getAnnounceChannelId())
             if currentChannel is not None:
-                # announce to the given channel
-                await currentChannel.send(msg, embed=bountyEmbed)
+                if currentGuild.hasBountyNotifyRoleId():
+                    # announce to the given channel
+                    await currentChannel.send("<@&" + str(currentGuild.getBountyNotifyRoleId()) + "> " + msg, embed=bountyEmbed)
+                else:
+                    await currentChannel.send(msg, embed=bountyEmbed)
+
             # TODO: may wish to add handling for invalid announceChannels - e.g remove them from the bbGuild object
 
 
