@@ -2133,6 +2133,10 @@ bbCommands.register("admin-help", admin_cmd_admin_help, isAdmin=True)
 # dmCommands.register("admin-help", err_nodm, isAdmin=True)
 
 
+async def admin_cmd_set_bounty_notify_role(message, args):
+    
+
+
 
 ####### DEVELOPER COMMANDS #######
 

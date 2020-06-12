@@ -5,9 +5,10 @@ class bbGuild:
     announceChannel = -1
     playChannel = -1
     shop = None
+    bountyNotifyRoleId = -1
 
 
-    def __init__(self, id, announceChannel=-1, playChannel=-1, shop=None):
+    def __init__(self, id, announceChannel=-1, playChannel=-1, shop=None, bountyNotifyRoleId=-1):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -31,6 +32,7 @@ class bbGuild:
         self.playChannel = playChannel
 
         self.shop = bbShop.bbShop() if shop is None else shop
+        self.bountyNotifyRoleId = bountyNotifyRoleId
 
 
     def getAnnounceChannelId(self):
@@ -61,12 +63,20 @@ class bbGuild:
         return self.playChannel != -1
 
 
+    def hasBountyNotifyRoleId(self):
+        return self.bountyNotifyRoleId != -1
+
+    
+    def getBountyNotifyRoleId(self):
+        return self.bountyNotifyRoleId
+
+
     def toDictNoId(self):
-        return {"announceChannel":self.announceChannel, "playChannel":self.playChannel
+        return {"announceChannel":self.announceChannel, "playChannel":self.playChannel, "bountyNotifyRoleId":self.bountyNotifyRoleId
         # Shop saving disabled for now, it's not super important.
                 # , "shop": self.shop.toDict()
                 }
 
 
 def fromDict(id, guildDict):
-    return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"], shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop())
+    return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"], shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(), bountyNotifyRoleId=guildDict["bountyNotifyRoleId"] if "bountyNotifyRoleId" in guildDict else -1)
