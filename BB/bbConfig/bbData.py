@@ -94,9 +94,9 @@ adminHelpIntro = """:star: Here are my administrator commands! Prefix commands w
 **<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
 
 # help strings for admin bb commands
-adminHelpDict = {"__Miscellaneous__":{"**admin-help**":"Display information about admin-only commands.",
-                                    "**set-announce-channel** *<off>*":"Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements.",
-                                    "**set-play-channel** *<off>*":"Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements."}}
+adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display information about admin-only commands."),
+                                        "set-announce-channel": ("**set-announce-channel** *<off>*", "Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements."),
+                                        "set-play-channel": ("**set-play-channel** *<off>*", "Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements.")}}
 
 # string extensions for numbers, e.g 11th, 1st, 23rd...
 numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]

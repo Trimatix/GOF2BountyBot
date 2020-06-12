@@ -2126,13 +2126,27 @@ admin command printing help strings for admin commands as defined in bbData
 @param args -- ignored
 """
 async def admin_cmd_admin_help(message, args):
+    sendChannel = None
+    sendDM = False
+
+    if message.author.dm_channel is None:
+        await message.author.create_dm()
+    if message.author.dm_channel is None:
+        sendChannel = message.channel
+    else:
+        sendChannel = message.author.dm_channel
+        sendDM = True
+
     helpEmbed = makeEmbed(titleTxt="BB Administrator Commands", thumb=client.user.avatar_url_as(size=64))
     for section in bbData.adminHelpDict.keys():
-        helpEmbed.add_field(name="‎",value=section, inline=False)
-        for currentCommand in bbData.adminHelpDict[section].keys():
-            helpEmbed.add_field(name=currentCommand,value=bbData.adminHelpDict[section][currentCommand].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
-    await message.channel.send(bbData.adminHelpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix), embed=helpEmbed)
+        helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
+        for currentCommand in bbData.adminHelpDict[section].values():
+            helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
     
+    await sendChannel.send(bbData.adminHelpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix), embed=helpEmbed)
+    if sendDM:
+        await message.add_reaction(bbConfig.dmSentEmoji)
+
 bbCommands.register("admin-help", admin_cmd_admin_help, isAdmin=True)
 # dmCommands.register("admin-help", err_nodm, isAdmin=True)
 
