@@ -34,4 +34,4 @@ def fromDict(turretDict):
     if turretDict["builtIn"]:
         return bbData.builtInTurretObjs[turretDict["name"]]
     else:
-        return bbTurret(turretDict["name"], turretDict["aliases"], dps=turretDict["dps"], value=turretDict["value"], wiki=turretDict["wiki"] if "wiki" in turretDict else "", manufacturer=weaponDict["manufacturer"] if "manufacturer" in weaponDict)
+        return bbTurret(turretDict["name"], turretDict["aliases"], dps=turretDict["dps"], value=turretDict["value"], wiki=turretDict["wiki"] if "wiki" in turretDict else "", manufacturer=turretDict["manufacturer"] if "manufacturer" in turretDict else "")

@@ -19,11 +19,12 @@ class bbModule(bbAliasable.Aliasable):
 
     wiki = ""
     hasWiki = False
+    manufacturer = ""
 
     value = 0
 
     def __init__(self, name, aliases, armour=0, armourMultiplier=1.0, shield=0, shieldMultiplier=1.0, dps=0,
-                    dpsMultiplier=1.0, cargo=0, cargoMultiplier=1.0, handling=0, handlingMultiplier=1.0, value=0, wiki=""):
+                    dpsMultiplier=1.0, cargo=0, cargoMultiplier=1.0, handling=0, handlingMultiplier=1.0, value=0, wiki="", manufacturer=""):
         super(bbModule, self).__init__(name, aliases)
         self.armour = armour
         self.armourMultiplier = armourMultiplier
@@ -38,6 +39,7 @@ class bbModule(bbAliasable.Aliasable):
         self.value = value
         self.wiki = wiki
         self.hasWiki = wiki != ""
+        self.manufacturer = manufacturer
 
     
     def statsStringShort(self):
@@ -117,4 +119,4 @@ def fromDict(moduleDict):
                         dpsMultiplier=moduleDict["dpsMultiplier"] if "dpsMultiplier" in moduleDict else 1, cargo=moduleDict["cargo"] if "cargo" in moduleDict else 0,
                         cargoMultiplier=moduleDict["cargoMultiplier"] if "cargoMultiplier" in moduleDict else 1, handling=moduleDict["handling"] if "handling" in moduleDict else 0,
                         handlingMultiplier=moduleDict["handlingMultiplier"] if "handlingMultiplier" in moduleDict else 1, value=moduleDict["value"] if "value" in moduleDict else 0,
-                        wiki=moduleDict["wiki"] if "wiki" in moduleDict else "")
+                        wiki=moduleDict["wiki"] if "wiki" in moduleDict else "", manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "")
