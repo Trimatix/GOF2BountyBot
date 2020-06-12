@@ -2,7 +2,7 @@ from .items import bbShip, bbModule, bbWeapon, bbTurret
 from ..bbConfig import bbConfig
 
 
-defaultShipLoadoutDict = {"name": "Betty", "manufacturer": "midorian", "maxPrimaries": 1, "maxTurrets": 0, "maxModules": 3, "armour": 95, "cargo": 25, "numSecondaries": 1, "handling": 120, "value": 16038, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Betty", "builtIn":False,
+defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
                         "weapons":[{"name": "Micro Gun MK I", "builtIn": True}],
                         "modules":[{"name": "E2 Exoclad", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}]}
 
