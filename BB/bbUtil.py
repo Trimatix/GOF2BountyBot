@@ -100,3 +100,7 @@ def isInt(x):
 
 def isMention(mention):
     return mention.endswith(">") and ((mention.startswith("<@") and isInt(mention[2:-1])) or (mention.startswith("<@!") and isInt(mention[3:-1])))
+
+
+def isRoleMention(mention):
+    return mention.endswith(">") and (mention.startswith("<@&") and isInt(mention[3:-1])
