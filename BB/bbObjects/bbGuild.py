@@ -70,6 +70,10 @@ class bbGuild:
     def getBountyNotifyRoleId(self):
         return self.bountyNotifyRoleId
 
+    
+    def setBountyNotifyRoleId(self, newId):
+        self.bountyNotifyRoleId = newId
+
 
     def toDictNoId(self):
         return {"announceChannel":self.announceChannel, "playChannel":self.playChannel, "bountyNotifyRoleId":self.bountyNotifyRoleId
