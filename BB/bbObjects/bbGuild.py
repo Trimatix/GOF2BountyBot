@@ -76,7 +76,7 @@ class bbGuild:
 
 
     def removeBountyNotifyRoleId(self):
-        sef.bountyNotifyRoleId = -1
+        self.bountyNotifyRoleId = -1
 
 
     def toDictNoId(self):
