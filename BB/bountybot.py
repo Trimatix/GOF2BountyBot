@@ -2161,8 +2161,10 @@ can take either a role mention or ID.
 async def admin_cmd_set_bounty_notify_role(message, args):
     if args == "":
         await message.channel.send(":x: Please provide either a role mention or ID!")
+        return
     if not (bbUtil.isInt(args) or bbUtil.isRoleMention(args)):
         await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
+        return
     
     if bbUtil.isRoleMention(args):
         requestedRole = message.guild.get_role(int(args[3:-1]))
