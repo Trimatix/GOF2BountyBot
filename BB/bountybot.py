@@ -1352,6 +1352,7 @@ async def cmd_hangar(message, args):
             await message.add_reaction(bbConfig.dmSentEmoji)
 
 bbCommands.register("hangar", cmd_hangar)
+bbCommands.register("hanger", cmd_hangar)
 # dmCommands.register("hangar", cmd_hangar)
 
 
