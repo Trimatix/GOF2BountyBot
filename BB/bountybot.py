@@ -1581,13 +1581,14 @@ async def cmd_shop_buy(message, args):
 
     if item == "ship":
         requestedShip = requestedShop.shipsStock[itemNum - 1]
-        
-        if (not requestedShop.userCanAffordShipObj(requestedBBUser, requestedShip) and not sellOldShip) or \
-                (sellOldShip and not requestedShop.amountCanAffordShipObj(requestedBBUser.credits + requestedBBUser.activeShip.getValue(shipUpgradesOnly=True), requestedShip)):
+        activeShip = requestedBBUser.activeShip
+
+        # Check the item can be afforded
+        if (not sellOldShip and not requestedShop.userCanAffordShipObj(requestedBBUser, requestedShip)) or \
+                (sellOldShip and not requestedShop.amountCanAffordShipObj(requestedBBUser.credits + requestedBBUser.activeShip.getValue(shipUpgradesOnly=transferItems), requestedShip)):
             await message.channel.send(":x: You can't afford that item! (" + str(requestedShip.getValue()) + ")")
             return
 
-        activeShip = requestedBBUser.activeShip
         requestedBBUser.inactiveShips.append(requestedShip)
         
         if transferItems:
@@ -1597,7 +1598,9 @@ async def cmd_shop_buy(message, args):
 
         if sellOldShip:
             # TODO: move to a separate sellActiveShip function
-            requestedBBUser.credits += activeShip.getValue(shipUpgradesOnly=True)
+            oldShipValue = activeShip.getValue(shipUpgradesOnly=transferItems)
+            print(oldShipValue)
+            requestedBBUser.credits += oldShipValue
             requestedBBUser.unequipAll(activeShip)
             requestedShop.shipsStock.append(activeShip)
         
@@ -1607,7 +1610,7 @@ async def cmd_shop_buy(message, args):
         
         outStr = ":moneybag: Congratulations on your new **" + requestedShip.name + "**!"
         if sellOldShip:
-            outStr += "\nYou received **" + str(activeShip.getValue(shipUpgradesOnly=True)) + " credits** for your old **" + str(activeShip.name) + "**."
+            outStr += "\nYou received **" + str(oldShipValue) + " credits** for your old **" + str(activeShip.name) + "**."
         else:
             outStr += " Your old **" + activeShip.name + "** can be found in the hangar."
         if transferItems:
