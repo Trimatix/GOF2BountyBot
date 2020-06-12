@@ -2087,6 +2087,8 @@ admin command for setting the current guild's announcements channel
 @param args -- ignored
 """
 async def admin_cmd_set_announce_channel(message, args):
+    if not guildsDB.guildIdExists(message.guild.id):
+        guildsDB.addGuildID(message.guild.id)
     guildsDB.getGuild(message.guild.id).setAnnounceChannelId(message.channel.id)
     await message.channel.send(":ballot_box_with_check: Announcements channel set!")
     
@@ -2101,6 +2103,8 @@ admin command for setting the current guild's play channel
 @param args -- ignored
 """
 async def admin_cmd_set_play_channel(message, args):
+    if not guildsDB.guildIdExists(message.guild.id):
+        guildsDB.addGuildID(message.guild.id)
     guildsDB.getGuild(message.guild.id).setPlayChannelId(message.channel.id)
     await message.channel.send(":ballot_box_with_check: Bounty play channel set!")
     
