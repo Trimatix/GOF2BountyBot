@@ -2133,8 +2133,37 @@ bbCommands.register("admin-help", admin_cmd_admin_help, isAdmin=True)
 # dmCommands.register("admin-help", err_nodm, isAdmin=True)
 
 
+"""
+For the current guild, set a role to mention when new bounties are spawned.
+can take either a role mention or ID.
+
+@param message -- the discord message calling the command
+@param args -- either a role mention or a role ID
+"""
 async def admin_cmd_set_bounty_notify_role(message, args):
+    if args == "":
+        await message.channel.send(":x: Please provide either a role mention or ID!")
+    if not (bbUtil.isInt(args) or bbUtil.isRoleMention(args)):
+        await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
     
+    if bbUtil.isRoleMention(args):
+        requestedRole = message.guild.get_role(int(args[3:-1]))
+    else:
+        requestedRole = message.guild.get_role(int(args))
+    
+    if requestedRole is None:
+        await message.channel.send(":x: Role not found!")
+        return
+
+    if not guildsDB.guildIdExists(message.guild.id):
+        guildsDB.addGuildID(message.guild.id).setBountyNotifyRoleId(requestedRole.id)
+    else:
+        guildsDB.getGuild(message.guild.id).setBountyNotifyRoleId(requestedRole.id)
+
+    await message.channel.send(":white_check_mark: Bounty notify role set!")
+
+bbCommands.register("set-bounty-notify-role", admin_cmd_set_bounty_notify_role, isAdmin=True)
+# dmCommands.register("set-bounty-notify-role", err_nodm)
 
 
 
