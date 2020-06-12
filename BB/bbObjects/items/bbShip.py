@@ -337,23 +337,23 @@ class bbShip(bbAliasable.Aliasable):
 
     def statsStringShort(self):
         stats = ""
-        stats += "• *Armour: " + str(self.armour) + ("(+)" if self.armour < self.getArmour() else "") + "*\n"
+        stats += "• *Armour: " + str(self.armour) + ("(+)" if self.armour < self.getArmour(shipUpgradesOnly=True) else "") + "*\n"
         # stats += "Cargo hold: " + str(self.cargo) + ", "
         # stats += "Handling: " + str(self.handling) + ", "
-        stats += "• *Primaries: " + str(len(self.weapons)) + "/" + str(self.maxPrimaries) + ("(+)" if self.maxPrimaries < self.getMaxPrimaries() else "") + "*\n"
+        stats += "• *Primaries: " + str(len(self.weapons)) + "/" + str(self.maxPrimaries) + ("(+)" if self.maxPrimaries < self.getMaxPrimaries(shipUpgradesOnly=True) else "") + "*\n"
         if len(self.weapons) > 0:
             stats += "*["
             for weapon in self.weapons:
                 stats += weapon.name + ", "
             stats = stats[:-2] + "]*\n"
         # stats += "Max secondaries: " + str(self.numSecondaries) + ", "
-        stats += "• *Turrets: " + str(len(self.turrets)) + "/" + str(self.maxTurrets) + ("(+)" if self.maxTurrets < self.getMaxTurrets() else "") + "*\n"
+        stats += "• *Turrets: " + str(len(self.turrets)) + "/" + str(self.maxTurrets) + ("(+)" if self.maxTurrets < self.getMaxTurrets(shipUpgradesOnly=True) else "") + "*\n"
         if len(self.turrets) > 0:
             stats += "*["
             for turret in self.turrets:
                 stats += turret.name + ", "
             stats = stats[:-2] + "]*\n"
-        stats += "• *Modules: " + str(len(self.modules)) + "/" + str(self.maxModules) + ("(+)" if self.maxModules < self.getMaxModules() else "") + "*\n"
+        stats += "• *Modules: " + str(len(self.modules)) + "/" + str(self.maxModules) + ("(+)" if self.maxModules < self.getMaxModules(shipUpgradesOnly=True) else "") + "*\n"
         if len(self.modules) > 0:
             stats += "*["
             for module in self.modules:
@@ -364,10 +364,10 @@ class bbShip(bbAliasable.Aliasable):
     
     def statsStringNoItems(self):
         stats = ""
-        stats += "*Armour: " + str(self.armour) + ("(+)" if self.armour < self.getArmour() else "") + ", "
-        stats += "Cargo hold: " + str(self.cargo) + ("(+)" if self.cargo < self.getCargo() else "") + ", "
-        stats += "Handling: " + str(self.handling) + ("(+)" if self.handling < self.getHandling() else "") + ", "
-        stats += "Max secondaries: " + str(self.numSecondaries) + ("(+)" if self.numSecondaries < self.getNumSecondaries() else "") + "*"
+        stats += "*Armour: " + str(self.armour) + ("(+)" if self.armour < self.getArmour(shipUpgradesOnly=True) else "") + ", "
+        stats += "Cargo hold: " + str(self.cargo) + ("(+)" if self.cargo < self.getCargo(shipUpgradesOnly=True) else "") + ", "
+        stats += "Handling: " + str(self.handling) + ("(+)" if self.handling < self.getHandling(shipUpgradesOnly=True) else "") + ", "
+        stats += "Max secondaries: " + str(self.numSecondaries) + ("(+)" if self.numSecondaries < self.getNumSecondaries(shipUpgradesOnly=True) else "") + "*"
         return stats
     
 
