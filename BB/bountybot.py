@@ -579,7 +579,7 @@ async def cmd_check(message, args):
         await message.channel.send(":stopwatch: **" + message.author.name + "**, your *Khador drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
     
 bbCommands.register("check", cmd_check)
-dmCommands.register("check", cmd_check)
+dmCommands.register("check", err_nodm)
 
 
 """
@@ -2800,7 +2800,7 @@ async def on_message(message):
         
         # infer the message author's permissions
         userIsDev = message.author.id in bbConfig.developers
-        if isinstance(message.channel, discord.DMChannel):
+        if message.channel.type == discord.ChannelType.private:
             # Call the requested command
             commandFound = await dmCommands.call(command, message, args, isAdmin=False, isDev=userIsDev)
         else:
