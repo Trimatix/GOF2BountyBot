@@ -38,6 +38,7 @@ class bbGuildDB:
         if self.guildIdExists(id):
             raise KeyError("Attempted to add a guild that already exists: " + id)
         self.guilds[id] = bbGuild.bbGuild(id)
+        return self.guilds[id]
 
     
     def removeGuildId(self, id):
