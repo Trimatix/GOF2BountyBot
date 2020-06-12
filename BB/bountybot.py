@@ -80,7 +80,7 @@ bountiesDB = loadBountiesDB(bbConfig.bountyDBPath)
 # BountyBot commands DB
 bbCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB()
 # Commands usable in DMs
-dmCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB()
+# dmCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB()
 
 # Do not change this!
 botLoggedIn = False
@@ -351,7 +351,7 @@ async def cmd_help(message, args):
         await message.add_reaction(bbConfig.dmSentEmoji)
 
 bbCommands.register("help", cmd_help)
-dmCommands.register("help", cmd_help)
+# dmCommands.register("help", cmd_help)
 
 
 """
@@ -397,7 +397,7 @@ async def cmd_balance(message, args):
         await message.channel.send(":moneybag: **" + requestedUser.name + "** has **" + str(usersDB.getUser(requestedUser.id).credits) + " Credits**.")
     
 bbCommands.register("balance", cmd_balance)
-dmCommands.register("balance", cmd_balance)
+# dmCommands.register("balance", cmd_balance)
 
 
 """
@@ -467,7 +467,7 @@ async def cmd_stats(message, args):
         await message.channel.send(embed=statsEmbed)
     
 bbCommands.register("stats", cmd_stats)
-dmCommands.register("stats", cmd_stats)
+# dmCommands.register("stats", cmd_stats)
 
 
 """
@@ -485,7 +485,7 @@ async def cmd_map(message, args):
         await message.channel.send(bbData.mapImageNoGraphLink)
     
 bbCommands.register("map", cmd_map)
-dmCommands.register("map", cmd_map)
+# dmCommands.register("map", cmd_map)
 
 
 """
@@ -579,7 +579,7 @@ async def cmd_check(message, args):
         await message.channel.send(":stopwatch: **" + message.author.name + "**, your *Khador drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
     
 bbCommands.register("check", cmd_check)
-dmCommands.register("check", err_nodm)
+# dmCommands.register("check", err_nodm)
 
 
 """
@@ -636,7 +636,7 @@ async def cmd_bounties(message, args):
             await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!")
 
 bbCommands.register("bounties", cmd_bounties)
-dmCommands.register("bounties", cmd_bounties)
+# dmCommands.register("bounties", cmd_bounties)
 
 
 """
@@ -671,7 +671,7 @@ async def cmd_route(message, args):
         await message.channel.send(outmsg)
     
 bbCommands.register("route", cmd_route)
-dmCommands.register("route", cmd_route)
+# dmCommands.register("route", cmd_route)
 
 
 """
@@ -736,7 +736,7 @@ async def cmd_make_route(message, args):
         await message.channel.send("Here's the shortest route from **" + startSyst + "** to **" + endSyst + "**:\n> " + routeStr[:-2] + " :rocket:")
     
 bbCommands.register("make-route", cmd_make_route)
-dmCommands.register("make-route", cmd_make_route)
+# dmCommands.register("make-route", cmd_make_route)
 
 
 """
@@ -1099,7 +1099,7 @@ async def cmd_info(message, args):
         await message.channel.send(":x: Unknown object type! (system/criminal/ship/weapon/module/turret/commodity)")
 
 bbCommands.register("info", cmd_info)
-dmCommands.register("info", cmd_info) 
+# dmCommands.register("info", cmd_info) 
 
 
 """
@@ -1188,7 +1188,7 @@ async def cmd_leaderboard(message, args):
     await message.channel.send(embed=leaderboardEmbed)
     
 bbCommands.register("leaderboard", cmd_leaderboard)
-dmCommands.register("leaderboard", err_nodm)
+# dmCommands.register("leaderboard", err_nodm)
 
 
 """
@@ -1343,7 +1343,7 @@ async def cmd_hangar(message, args):
             await message.add_reaction(bbConfig.dmSentEmoji)
 
 bbCommands.register("hangar", cmd_hangar)
-dmCommands.register("hangar", cmd_hangar)
+# dmCommands.register("hangar", cmd_hangar)
 
 
 """
@@ -1410,7 +1410,8 @@ async def cmd_shop(message, args):
         await message.add_reaction(bbConfig.dmSentEmoji)
 
 bbCommands.register("shop", cmd_shop)
-dmCommands.register("shop", err_nodm)
+bbCommands.register("store", cmd_shop)
+# dmCommands.register("shop", err_nodm)
 
 
 """
@@ -1491,7 +1492,7 @@ async def cmd_loadout(message, args):
         await message.channel.send(embed=loadoutEmbed)
 
 bbCommands.register("loadout", cmd_loadout)
-dmCommands.register("loadout", cmd_loadout)
+# dmCommands.register("loadout", cmd_loadout)
 
 
 """
@@ -1642,7 +1643,7 @@ async def cmd_shop_buy(message, args):
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
 bbCommands.register("buy", cmd_shop_buy)
-dmCommands.register("buy", err_nodm)
+# dmCommands.register("buy", err_nodm)
 
 
 """
@@ -1740,7 +1741,7 @@ async def cmd_shop_sell(message, args):
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
 bbCommands.register("sell", cmd_shop_sell)
-dmCommands.register("sell", err_nodm)
+# dmCommands.register("sell", err_nodm)
 
 
 """
@@ -1843,7 +1844,7 @@ async def cmd_equip(message, args):
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
 bbCommands.register("equip", cmd_equip)
-dmCommands.register("equip", cmd_equip)
+# dmCommands.register("equip", cmd_equip)
 
 
 """
@@ -1951,7 +1952,7 @@ async def cmd_unequip(message, args):
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
 bbCommands.register("unequip", cmd_unequip)
-dmCommands.register("unequip", cmd_unequip)
+# dmCommands.register("unequip", cmd_unequip)
 
 
 """
@@ -1982,7 +1983,7 @@ async def cmd_nameship(message, args):
     await message.channel.send(":pencil: You named your " + requestedBBUser.activeShip.name + ": **" + args + "**.")
 
 bbCommands.register("nameship", cmd_nameship, forceKeepArgsCasing=True)
-dmCommands.register("nameship", cmd_nameship, forceKeepArgsCasing=True)
+# dmCommands.register("nameship", cmd_nameship, forceKeepArgsCasing=True)
 
 
 """
@@ -2009,7 +2010,7 @@ async def cmd_unnameship(message, args):
     await message.channel.send(":pencil: You reset your **" + requestedBBUser.activeShip.name + "**'s nickname.")
 
 bbCommands.register("unnameship", cmd_unnameship)
-dmCommands.register("unnameship", cmd_unnameship)
+# dmCommands.register("unnameship", cmd_unnameship)
 
 
 async def cmd_pay(message, args):
@@ -2054,7 +2055,7 @@ async def cmd_pay(message, args):
     await message.channel.send(":moneybag: You paid " + requestedUser.name + " **" + str(amount) + "** credits!")
 
 bbCommands.register("pay", cmd_pay)
-dmCommands.register("pay", cmd_pay)
+# dmCommands.register("pay", cmd_pay)
 
 
 
@@ -2073,7 +2074,7 @@ async def admin_cmd_set_announce_channel(message, args):
     await message.channel.send(":ballot_box_with_check: Announcements channel set!")
     
 bbCommands.register("set-announce-channel", admin_cmd_set_announce_channel, isAdmin=True)
-dmCommands.register("set-announce-channel", err_nodm, isAdmin=True)
+# dmCommands.register("set-announce-channel", err_nodm, isAdmin=True)
 
 
 """
@@ -2087,7 +2088,7 @@ async def admin_cmd_set_play_channel(message, args):
     await message.channel.send(":ballot_box_with_check: Bounty play channel set!")
     
 bbCommands.register("set-play-channel", admin_cmd_set_play_channel, isAdmin=True)
-dmCommands.register("set-play-channel", err_nodm, isAdmin=True)
+# dmCommands.register("set-play-channel", err_nodm, isAdmin=True)
 
 
 """
@@ -2105,7 +2106,7 @@ async def admin_cmd_admin_help(message, args):
     await message.channel.send(bbData.adminHelpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix), embed=helpEmbed)
     
 bbCommands.register("admin-help", admin_cmd_admin_help, isAdmin=True)
-dmCommands.register("admin-help", err_nodm, isAdmin=True)
+# dmCommands.register("admin-help", err_nodm, isAdmin=True)
 
 
 
@@ -2129,7 +2130,7 @@ async def dev_cmd_sleep(message, args):
     print(datetime.now().strftime("%H:%M:%S: Data saved!"))
     
 bbCommands.register("sleep", dev_cmd_sleep, isDev=True)
-dmCommands.register("sleep", dev_cmd_sleep, isDev=True)
+# dmCommands.register("sleep", dev_cmd_sleep, isDev=True)
 
 
 """
@@ -2146,7 +2147,7 @@ async def dev_cmd_save(message, args):
     await message.channel.send("saved!")
     
 bbCommands.register("save", dev_cmd_save, isDev=True)
-dmCommands.register("save", dev_cmd_save, isDev=True)
+# dmCommands.register("save", dev_cmd_save, isDev=True)
 
 
 """
@@ -2160,7 +2161,7 @@ async def dev_cmd_has_announce(message, args):
     await message.channel.send(":x: Unknown guild!" if guild is None else guild.hasAnnounceChannel())
     
 bbCommands.register("has-announce", dev_cmd_has_announce, isDev=True)
-dmCommands.register("has-announce", err_nodm, isDev=True)
+# dmCommands.register("has-announce", err_nodm, isDev=True)
 
 
 """
@@ -2173,7 +2174,7 @@ async def dev_cmd_get_announce(message, args):
     await message.channel.send("<#" + str(guildsDB.getGuild(message.guild.id).getAnnounceChannelId()) + ">")
     
 bbCommands.register("get-announce", dev_cmd_get_announce, isDev=True)
-dmCommands.register("get-announce", err_nodm, isDev=True)
+# dmCommands.register("get-announce", err_nodm, isDev=True)
 
 
 """
@@ -2187,7 +2188,7 @@ async def dev_cmd_has_play(message, args):
     await message.channel.send(":x: Unknown guild!" if guild is None else guild.hasPlayChannel())
     
 bbCommands.register("has-play", dev_cmd_has_play, isDev=True)
-dmCommands.register("has-play", err_nodm, isDev=True)
+# dmCommands.register("has-play", err_nodm, isDev=True)
 
 
 """
@@ -2200,7 +2201,7 @@ async def dev_cmd_get_play(message, args):
     await message.channel.send("<#" + str(guildsDB.getGuild(message.guild.id).getPlayChannelId()) + ">")
     
 bbCommands.register("get-play", dev_cmd_get_play, isDev=True)
-dmCommands.register("get-play", err_nodm, isDev=True)
+# dmCommands.register("get-play", err_nodm, isDev=True)
 
 
 """
@@ -2214,7 +2215,7 @@ async def dev_cmd_clear_bounties(message, args):
     await message.channel.send(":ballot_box_with_check: Active bounties cleared!")
     
 bbCommands.register("clear-bounties", dev_cmd_clear_bounties, isDev=True)
-dmCommands.register("clear-bounties", dev_cmd_clear_bounties, isDev=True)
+# dmCommands.register("clear-bounties", dev_cmd_clear_bounties, isDev=True)
 
 
 """
@@ -2232,7 +2233,7 @@ async def dev_cmd_get_cooldown(message, args):
     await message.channel.send(datetime.utcnow().strftime("%Hh%Mm%Ss"))
     
 bbCommands.register("get-cool ", dev_cmd_get_cooldown, isDev=True)
-dmCommands.register("get-cool ", dev_cmd_get_cooldown, isDev=True)
+# dmCommands.register("get-cool ", dev_cmd_get_cooldown, isDev=True)
 
 
 """
@@ -2256,7 +2257,7 @@ async def dev_cmd_reset_cooldown(message, args):
     await message.channel.send("Done!")
     
 bbCommands.register("reset-cool", dev_cmd_reset_cooldown, isDev=True)
-dmCommands.register("reset-cool", dev_cmd_reset_cooldown, isDev=True)
+# dmCommands.register("reset-cool", dev_cmd_reset_cooldown, isDev=True)
 
 
 """
@@ -2280,7 +2281,7 @@ async def dev_cmd_setcheckcooldown(message, args):
     await message.channel.send("Done! *you still need to update the file though* " + message.author.mention)
     
 bbCommands.register("setcheckcooldown", dev_cmd_setcheckcooldown, isDev=True)
-dmCommands.register("setcheckcooldown", dev_cmd_setcheckcooldown, isDev=True)
+# dmCommands.register("setcheckcooldown", dev_cmd_setcheckcooldown, isDev=True)
 
 
 """
@@ -2306,7 +2307,7 @@ async def dev_cmd_setbountyperiodm(message, args):
     await message.channel.send("Done! *you still need to update the file though* " + message.author.mention)
     
 bbCommands.register("setbountyperiodm", dev_cmd_setbountyperiodm, isDev=True)
-dmCommands.register("setbountyperiodm", dev_cmd_setbountyperiodm, isDev=True)
+# dmCommands.register("setbountyperiodm", dev_cmd_setbountyperiodm, isDev=True)
 
 
 """
@@ -2332,7 +2333,7 @@ async def dev_cmd_setbountyperiodh(message, args):
     await message.channel.send("Done! *you still need to update the file though* " + message.author.mention)
     
 bbCommands.register("setbountyperiodh", dev_cmd_setbountyperiodh, isDev=True)
-dmCommands.register("setbountyperiodh", dev_cmd_setbountyperiodh, isDev=True)
+# dmCommands.register("setbountyperiodh", dev_cmd_setbountyperiodh, isDev=True)
 
 
 """
@@ -2347,7 +2348,7 @@ async def dev_cmd_resetnewbountycool(message, args):
     await message.channel.send(":ballot_box_with_check: New bounty cooldown reset!")
     
 bbCommands.register("resetnewbountycool", dev_cmd_resetnewbountycool, isDev=True)
-dmCommands.register("resetnewbountycool", dev_cmd_resetnewbountycool, isDev=True)
+# dmCommands.register("resetnewbountycool", dev_cmd_resetnewbountycool, isDev=True)
 
 
 """
@@ -2365,7 +2366,7 @@ async def dev_cmd_canmakebounty(message, args):
         await message.channel.send(bountiesDB.factionCanMakeBounty(newFaction.lower()))
     
 bbCommands.register("canmakebounty", dev_cmd_canmakebounty, isDev=True)
-dmCommands.register("canmakebounty", dev_cmd_canmakebounty, isDev=True)
+# dmCommands.register("canmakebounty", dev_cmd_canmakebounty, isDev=True)
 
 
 """
@@ -2383,7 +2384,7 @@ async def dev_cmd_broadcast(message, args):
                 await client.get_channel(guild.getPlayChannelId()).send(args)
 
 bbCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
-dmCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
+# dmCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
 
 
 """
@@ -2495,7 +2496,7 @@ async def dev_cmd_make_bounty(message, args):
     await announceNewBounty(newBounty)
     
 bbCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True)
-dmCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True)
+# dmCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True)
 
 
 """
@@ -2608,7 +2609,7 @@ async def dev_cmd_make_player_bounty(message, args):
     await announceNewBounty(newBounty)
     
 bbCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True)
-dmCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True)
+# dmCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True)
 
 
 """
@@ -2624,7 +2625,7 @@ async def dev_cmd_refreshshop(message, args):
         await client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!")
 
 bbCommands.register("refreshshop",dev_cmd_refreshshop, isDev=True)
-dmCommands.register("refreshshop",err_nodm, isDev=True)
+# dmCommands.register("refreshshop",err_nodm, isDev=True)
 
 
 """
@@ -2657,7 +2658,7 @@ async def dev_cmd_setbalance(message, args):
     await message.channel.send("Done!")
     
 bbCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
-dmCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
+# dmCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 
 
 
@@ -2770,6 +2771,9 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    if message.channel.type == discord.ChannelType.private:
+        return
+
     # randomly send '!drink' to the same channel
     bbConfig.randomDrinkNum -= 1
     if bbConfig.randomDrinkNum == 0:
@@ -2800,16 +2804,18 @@ async def on_message(message):
         
         # infer the message author's permissions
         userIsDev = message.author.id in bbConfig.developers
-        if message.channel.type == discord.ChannelType.private:
-            # Call the requested command
-            commandFound = await dmCommands.call(command, message, args, isAdmin=False, isDev=userIsDev)
-        else:
+        # if message.channel.type == discord.ChannelType.text:
 
-            # infer the message author's permissions
-            userIsAdmin = message.author.permissions_in(message.channel).administrator
+        # infer the message author's permissions
+        userIsAdmin = message.author.permissions_in(message.channel).administrator
 
-            # Call the requested command
-            commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
+        # Call the requested command
+        commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
+
+        # elif message.channel.type == discord.ChannelType.private:
+        #     # Call the requested command
+        #     commandFound = await dmCommands.call(command, message, args, isAdmin=False, isDev=userIsDev)
+        
 
         # Command not found, send an error message.
         if not commandFound:
