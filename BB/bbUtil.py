@@ -103,4 +103,4 @@ def isMention(mention):
 
 
 def isRoleMention(mention):
-    return mention.endswith(">") and (mention.startswith("<@&") and isInt(mention[3:-1])
+    return mention.endswith(">") and mention.startswith("<@&") and isInt(mention[3:-1])
