@@ -292,7 +292,7 @@ def commaSplitNum(num):
 Print an error message when a command is requested that cannot function outside of a guild
 """
 async def err_nodm(message, args):
-    await message.channel.send("This command can only be used from inside of a server!")
+    await message.channel.send(":x: This command can only be used from inside of a server!")
 
 
 
@@ -2800,7 +2800,7 @@ async def on_message(message):
         
         # infer the message author's permissions
         userIsDev = message.author.id in bbConfig.developers
-        if type(message.channel) == discord.DMChannel:
+        if isinstance(message.channel, discord.DMChannel):
             # Call the requested command
             commandFound = await dmCommands.call(command, message, args, isAdmin=False, isDev=userIsDev)
         else:

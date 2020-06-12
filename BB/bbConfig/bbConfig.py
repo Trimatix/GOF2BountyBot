@@ -4,7 +4,7 @@ shopRefreshStockPeriod = {"days":1, "hours":0, "minutes":0, "seconds":0}
 maxBountiesPerFaction = 5
 
 # can be "fixed" or "random"
-newBountyDelayType = "fixed"
+newBountyDelayType = "random"
 
 # only spawn bounties at this time
 newBountyFixedDailyTime = {"hours":18, "minutes":40, "seconds":0}
@@ -20,9 +20,9 @@ newBountyFixedDeltaChanged = False
 newBountyDelayReset = False
 
 # when using random delay generation, use this as the minimum wait time in seconds
-newBountyDelayMin = 300
+newBountyDelayMin = 30 * 60
 # when using random delay generation, use this as the maximum wait time in seconds
-newBountyDelayMax = 4 * 60 * 60
+newBountyDelayMax = 3 * 60 * 60
 
 # the number of seconds to wait in between each save
 saveDelay = 30 * 60
