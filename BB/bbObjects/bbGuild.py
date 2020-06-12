@@ -75,6 +75,10 @@ class bbGuild:
         self.bountyNotifyRoleId = newId
 
 
+    def removeBountyNotifyRoleId(self):
+        sef.bountyNotifyRoleId = -1
+
+
     def toDictNoId(self):
         return {"announceChannel":self.announceChannel, "playChannel":self.playChannel, "bountyNotifyRoleId":self.bountyNotifyRoleId
         # Shop saving disabled for now, it's not super important.

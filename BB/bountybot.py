@@ -2170,6 +2170,29 @@ bbCommands.register("set-bounty-notify-role", admin_cmd_set_bounty_notify_role, 
 # dmCommands.register("set-bounty-notify-role", err_nodm)
 
 
+"""
+For the current guild, remove the role to mention when new bounties are spawned.
+
+@param message -- the discord message calling the command
+@param args -- ignored
+"""
+async def admin_cmd_remove_bounty_notify_role(message, args):
+    if not guildsDB.guildIdExists(message.guild.id):
+        requestedBBGuild = guildsDB.addGuildID(message.guild.id)
+    else:
+        requestedBBGuild = guildsDB.getGuild(message.guild.id)
+
+    if not requestedBBGuild.hasBountyNotifyRoleId():
+        await message.channel.send(":x: This server does not have a bounty notify role set!")
+        return
+    
+    requestedBBGuild.removeBountyNotifyRoleId()
+    await message.channel.send(":white_check_mark: Bounty notify role removed!")
+
+bbCommands.register("remove-bounty-notify-role", admin_cmd_remove_bounty_notify_role, isAdmin=True)
+# dmCommands.register("remove-bounty-notify-role", err_nodm)
+
+
 
 ####### DEVELOPER COMMANDS #######
 
