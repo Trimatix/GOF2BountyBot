@@ -68,11 +68,10 @@ helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX
 helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display information about the requested command. If no command is given, all available commands are displayed."),
                             "balance": ("**balance** *<userTag>*", "Get the credits balance of yourself, or a tagged user if one is given."),
                             "stats": ("**stats** *<userTag>*", "Get various credits and bounty statistics about yourself, or a tagged user."),
-                            "leaderboard": ("**leaderboard** *<-g|-c|-s|-w>*", "Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
-                            "criminal": ("**criminal [name]**", "Get information about a named criminal.\nAlso gives the criminal's usable aliases for the bounties system.")},
+                            "leaderboard": ("**leaderboard** *<-g|-c|-s|-w>*", "Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`")},
             
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
-                            "system": ("**system [system]**", "Display information about a given system."),
+                            "info": ("**info [object-type] [name]**", "Display information about something. object-type must be criminal, system, ship, weapon, module, turret, or turret. Also gives the usable aliases for an object."),
                             "make-route": ("**make-route [startSystem], [endSystem]**", "Find the shortest route from startSystem to endSystem.")},
             
             "Bounties":{    "bounties": ("**bounties** *<faction>*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
@@ -181,8 +180,8 @@ builtInShipData = {# Terran
                     
                     # Deep Science
                     "Cronus": {"name": "Cronus", "manufacturer": "deep science", "maxPrimaries": 2, "maxTurrets": 7, "maxModules": 190, "armour": 190, "cargo": 95, "numSecondaries": 2, "handling": 120, "value": 1200000, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Cronus", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720693576509554818/cronus.png"},
-                    "Typhon": {"name": "Typhon", "manufacturer": "deep science", "maxPrimaries": 4, "maxTurrets": 12, "maxModules": 175, "armour": 175, "cargo": 40, "numSecondaries": 0, "handling": 145, "value": 2500000, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Typhon", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720693589973270603/nemesis.png"},
-                    "Nemesis": {"name": "Nemesis", "manufacturer": "deep science", "maxPrimaries": 4, "maxTurrets": 14, "maxModules": 235, "armour": 235, "cargo": 105, "numSecondaries": 1, "handling": 95, "value": 6800000, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Nemesis", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720693603428728862/typhon.png"},
+                    "Typhon": {"name": "Typhon", "manufacturer": "deep science", "maxPrimaries": 4, "maxTurrets": 0, "maxModules": 12, "armour": 175, "cargo": 40, "numSecondaries": 0, "handling": 145, "value": 2500000, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Typhon", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720693589973270603/nemesis.png"},
+                    "Nemesis": {"name": "Nemesis", "manufacturer": "deep science", "maxPrimaries": 4, "maxTurrets": 0, "maxModules": 14, "armour": 235, "cargo": 105, "numSecondaries": 1, "handling": 95, "value": 6800000, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Nemesis", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720693603428728862/typhon.png"},
                     
                     # Most Wanted
                     "Blue Fyre": {"name": "Blue Fyre", "manufacturer": "most wanted", "maxPrimaries": 3, "maxTurrets": 0, "maxModules": 13, "armour": 270, "cargo": 125, "numSecondaries": 3, "handling": 116, "value": 4455000, "aliases": ["Blue", "Fyre", "BlueFyre", "Blue Fire", "BlueFire"], "wiki": "https://galaxyonfire.fandom.com/wiki/Blue_Fyre", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720787143596834816/blue_fyre.png"},

@@ -768,7 +768,7 @@ async def cmd_system(message, args):
         # send the embed
         await message.channel.send(embed=statsEmbed)
     
-bbCommands.register("system", cmd_system)
+# bbCommands.register("system", cmd_system)
 
 
 """
@@ -812,7 +812,405 @@ async def cmd_criminal(message, args):
         # send the embed
         await message.channel.send(embed=statsEmbed)
     
-bbCommands.register("criminal", cmd_criminal)
+# bbCommands.register("criminal", cmd_criminal)
+
+
+"""
+return statistics about a specified inbuilt criminal
+
+@param message -- the discord message calling the command
+@param args -- string containing a criminal name
+"""
+async def cmd_criminal(message, args):
+    # verify a criminal was given
+    if args == "":
+        await message.channel.send(":x: Please provide a criminal! Example: `" + bbConfig.commandPrefix + "criminal Toma Prakupy`")
+        return
+
+    # look up the criminal object
+    criminalName = args.title()
+    criminalObj = None
+    for crim in bbData.builtInCriminalObjs.keys():
+        if bbData.builtInCriminalObjs[crim].isCalled(criminalName):
+            criminalObj = bbData.builtInCriminalObjs[crim]
+
+    # report unrecognised criminal names
+    if criminalObj is None:
+        if len(criminalName) < 20:
+            await message.channel.send(":x: **" + criminalName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + criminalName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        # build the stats embed
+        statsEmbed = makeEmbed(col=bbData.factionColours[criminalObj.faction], desc="__Criminal File__", titleTxt=criminalObj.name, thumb=criminalObj.icon)
+        statsEmbed.add_field(name="Wanted By:",value=criminalObj.faction.title() + "s")
+        # include the criminal's aliases and wiki if they exist
+        if len(criminalObj.aliases) > 1:
+            aliasStr = ""
+            for alias in criminalObj.aliases:
+                aliasStr += alias + ", "
+            statsEmbed.add_field(name="Aliases:", value=aliasStr[:-2], inline=False)
+        if criminalObj.hasWiki:
+            statsEmbed.add_field(name="‎", value="[Wiki](" + criminalObj.wiki + ")", inline=False)
+        # send the embed
+        await message.channel.send(embed=statsEmbed)
+    
+# bbCommands.register("criminal", cmd_criminal)
+
+
+"""
+return statistics about a specified inbuilt criminal
+
+@param message -- the discord message calling the command
+@param args -- string containing a criminal name
+"""
+async def cmd_criminal(message, args):
+    # verify a criminal was given
+    if args == "":
+        await message.channel.send(":x: Please provide a criminal! Example: `" + bbConfig.commandPrefix + "criminal Toma Prakupy`")
+        return
+
+    # look up the criminal object
+    criminalName = args.title()
+    criminalObj = None
+    for crim in bbData.builtInCriminalObjs.keys():
+        if bbData.builtInCriminalObjs[crim].isCalled(criminalName):
+            criminalObj = bbData.builtInCriminalObjs[crim]
+
+    # report unrecognised criminal names
+    if criminalObj is None:
+        if len(criminalName) < 20:
+            await message.channel.send(":x: **" + criminalName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + criminalName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        # build the stats embed
+        statsEmbed = makeEmbed(col=bbData.factionColours[criminalObj.faction], desc="__Criminal File__", titleTxt=criminalObj.name, thumb=criminalObj.icon)
+        statsEmbed.add_field(name="Wanted By:",value=criminalObj.faction.title() + "s")
+        # include the criminal's aliases and wiki if they exist
+        if len(criminalObj.aliases) > 1:
+            aliasStr = ""
+            for alias in criminalObj.aliases:
+                aliasStr += alias + ", "
+            statsEmbed.add_field(name="Aliases:", value=aliasStr[:-2], inline=False)
+        if criminalObj.hasWiki:
+            statsEmbed.add_field(name="‎", value="[Wiki](" + criminalObj.wiki + ")", inline=False)
+        # send the embed
+        await message.channel.send(embed=statsEmbed)
+    
+# bbCommands.register("criminal", cmd_criminal)
+
+
+"""
+return statistics about a specified inbuilt criminal
+
+@param message -- the discord message calling the command
+@param args -- string containing a criminal name
+"""
+async def cmd_criminal(message, args):
+    # verify a criminal was given
+    if args == "":
+        await message.channel.send(":x: Please provide a criminal! Example: `" + bbConfig.commandPrefix + "criminal Toma Prakupy`")
+        return
+
+    # look up the criminal object
+    criminalName = args.title()
+    criminalObj = None
+    for crim in bbData.builtInCriminalObjs.keys():
+        if bbData.builtInCriminalObjs[crim].isCalled(criminalName):
+            criminalObj = bbData.builtInCriminalObjs[crim]
+
+    # report unrecognised criminal names
+    if criminalObj is None:
+        if len(criminalName) < 20:
+            await message.channel.send(":x: **" + criminalName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + criminalName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        # build the stats embed
+        statsEmbed = makeEmbed(col=bbData.factionColours[criminalObj.faction], desc="__Criminal File__", titleTxt=criminalObj.name, thumb=criminalObj.icon)
+        statsEmbed.add_field(name="Wanted By:",value=criminalObj.faction.title() + "s")
+        # include the criminal's aliases and wiki if they exist
+        if len(criminalObj.aliases) > 1:
+            aliasStr = ""
+            for alias in criminalObj.aliases:
+                aliasStr += alias + ", "
+            statsEmbed.add_field(name="Aliases:", value=aliasStr[:-2], inline=False)
+        if criminalObj.hasWiki:
+            statsEmbed.add_field(name="‎", value="[Wiki](" + criminalObj.wiki + ")", inline=False)
+        # send the embed
+        await message.channel.send(embed=statsEmbed)
+    
+# bbCommands.register("criminal", cmd_criminal)
+
+
+"""
+return statistics about a specified inbuilt ship
+
+@param message -- the discord message calling the command
+@param args -- string containing a ship name
+"""
+async def cmd_ship(message, args):
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "ship Groza Mk II`")
+        return
+
+    # look up the ship object
+    itemName = args.title()
+    itemObj = None
+    for ship in bbData.builtInShipData.values():
+        shipObj = bbShip.fromDict(ship)
+        if shipObj.isCalled(itemName):
+            itemObj = shipObj
+
+    # report unrecognised ship names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        # build the stats embed
+        statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Ship File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        statsEmbed.add_field(name="Ship Base Value",value=commaSplitNum(str(itemObj.getValue(shipUpgradesOnly=True))) + " Credits")
+        statsEmbed.add_field(name="Armour",value=str(itemObj.getArmour()))
+        statsEmbed.add_field(name="Cargo",value=str(itemObj.getCargo()))
+        statsEmbed.add_field(name="Handling",value=str(itemObj.getHandling()))
+        statsEmbed.add_field(name="Max Primaries",value=str(itemObj.getMaxPrimaries()))
+        statsEmbed.add_field(name="Max Secondaries",value=str(itemObj.getNumSecondaries()))
+        statsEmbed.add_field(name="Turret Slots",value=str(itemObj.getMaxTurrets()))
+        statsEmbed.add_field(name="Modules Slots",value=str(itemObj.getMaxModules()))
+        # include the item's aliases and wiki if they exist
+        if len(itemObj.aliases) > 1:
+            aliasStr = ""
+            for alias in itemObj.aliases:
+                aliasStr += alias + ", "
+            statsEmbed.add_field(name="Aliases:", value=aliasStr[:-2], inline=False)
+        if itemObj.hasWiki:
+            statsEmbed.add_field(name="‎", value="[Wiki](" + itemObj.wiki + ")", inline=False)
+        # send the embed
+        await message.channel.send(embed=statsEmbed)
+    
+# bbCommands.register("ship", cmd_ship)
+
+
+"""
+return statistics about a specified inbuilt weapon
+
+@param message -- the discord message calling the command
+@param args -- string containing a weapon name
+"""
+async def cmd_weapon(message, args):
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a weapon! Example: `" + bbConfig.commandPrefix + "weapon Nirai Impulse EX 1`")
+        return
+
+    # look up the weapon object
+    itemName = args.title()
+    itemObj = None
+    for weap in bbData.builtInWeaponObjs.keys():
+        if bbData.builtInWeaponObjs[weap].isCalled(itemName):
+            itemObj = bbData.builtInWeaponObjs[weap]
+
+    # report unrecognised weapon names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        # build the stats embed
+        statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Weapon File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        statsEmbed.add_field(name="Value:",value=str(itemObj.value))
+        statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
+        # include the item's aliases and wiki if they exist
+        if len(itemObj.aliases) > 1:
+            aliasStr = ""
+            for alias in itemObj.aliases:
+                aliasStr += alias + ", "
+            statsEmbed.add_field(name="Aliases:", value=aliasStr[:-2], inline=False)
+        if itemObj.hasWiki:
+            statsEmbed.add_field(name="‎", value="[Wiki](" + itemObj.wiki + ")", inline=False)
+        # send the embed
+        await message.channel.send(embed=statsEmbed)
+    
+# bbCommands.register("weapon", cmd_weapon)
+
+
+"""
+return statistics about a specified inbuilt module
+
+@param message -- the discord message calling the command
+@param args -- string containing a module name
+"""
+async def cmd_module(message, args):
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a module! Example: `" + bbConfig.commandPrefix + "module Groza Mk II`")
+        return
+
+    # look up the module object
+    itemName = args.title()
+    itemObj = None
+    for module in bbData.builtInItemObjs.keys():
+        if bbData.builtInItemObjs[module].isCalled(itemName):
+            itemObj = bbData.builtInItemObjs[module]
+
+    # report unrecognised module names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        # build the stats embed
+        statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Module File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        statsEmbed.add_field(name="Value:",value=str(itemObj.value))
+        statsEmbed.add_field(name="Stats:",value=str(itemObj.statsStringShort()))
+        # include the item's aliases and wiki if they exist
+        if len(itemObj.aliases) > 1:
+            aliasStr = ""
+            for alias in itemObj.aliases:
+                aliasStr += alias + ", "
+            statsEmbed.add_field(name="Aliases:", value=aliasStr[:-2], inline=False)
+        if itemObj.hasWiki:
+            statsEmbed.add_field(name="‎", value="[Wiki](" + itemObj.wiki + ")", inline=False)
+        # send the embed
+        await message.channel.send(embed=statsEmbed)
+    
+# bbCommands.register("module", cmd_module)
+
+
+"""
+return statistics about a specified inbuilt turret
+
+@param message -- the discord message calling the command
+@param args -- string containing a turret name
+"""
+async def cmd_turret(message, args):
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a turret! Example: `" + bbConfig.commandPrefix + "turret Groza Mk II`")
+        return
+
+    # look up the turret object
+    itemName = args.title()
+    itemObj = None
+    for turr in bbData.builtInItemObjs.keys():
+        if bbData.builtInItemObjs[turr].isCalled(itemName):
+            itemObj = bbData.builtInItemObjs[turr]
+
+    # report unrecognised turret names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        # build the stats embed
+        statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Turret File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        statsEmbed.add_field(name="Value:",value=str(itemObj.value))
+        statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
+        # include the item's aliases and wiki if they exist
+        if len(itemObj.aliases) > 1:
+            aliasStr = ""
+            for alias in itemObj.aliases:
+                aliasStr += alias + ", "
+            statsEmbed.add_field(name="Aliases:", value=aliasStr[:-2], inline=False)
+        if itemObj.hasWiki:
+            statsEmbed.add_field(name="‎", value="[Wiki](" + itemObj.wiki + ")", inline=False)
+        # send the embed
+        await message.channel.send(embed=statsEmbed)
+    
+# bbCommands.register("turret", cmd_turret)
+
+
+"""
+return statistics about a specified inbuilt commodity
+
+@param message -- the discord message calling the command
+@param args -- string containing a commodity name
+"""
+async def cmd_commodity(message, args):
+    await message.channel.send("Commodity items have not been implemented yet!")
+    return
+
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a commodity! Example: `" + bbConfig.commandPrefix + "commodity Groza Mk II`")
+        return
+
+    # look up the commodity object
+    itemName = args.title()
+    itemObj = None
+    for crim in bbData.builtInItemObjs.keys():
+        if bbData.builtInItemObjs[crim].isCalled(itemName):
+            itemObj = bbData.builtInItemObjs[crim]
+
+    # report unrecognised commodity names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        # build the stats embed
+        statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.faction], desc="__Item File__", titleTxt=itemObj.name, thumb=itemObj.icon)
+        statsEmbed.add_field(name="Wanted By:",value=itemObj.faction.title() + "s")
+        # include the item's aliases and wiki if they exist
+        if len(itemObj.aliases) > 1:
+            aliasStr = ""
+            for alias in itemObj.aliases:
+                aliasStr += alias + ", "
+            statsEmbed.add_field(name="Aliases:", value=aliasStr[:-2], inline=False)
+        if itemObj.hasWiki:
+            statsEmbed.add_field(name="‎", value="[Wiki](" + itemObj.wiki + ")", inline=False)
+        # send the embed
+        await message.channel.send(embed=statsEmbed)
+    
+# bbCommands.register("commodity", cmd_commodity)
+
+
+async def cmd_info(message, args):
+    if args == "":
+        await message.channel.send(":x: Please give an object type to look up! (system/criminal/ship/weapon/module/turret/commodity)")
+        return
+    
+    argsSplit = args.split(" ")
+    if argsSplit[0] not in ["system","criminal","ship","weapon","module","turret","commodity"]:
+        await message.channel.send(":x: Invalid object type! (system/criminal/ship/weapon/module/turret/commodity)")
+        return
+    
+    if argsSplit[0] == "system":
+        await cmd_system(message, args[7:])
+    elif argsSplit[0] == "criminal":
+        await cmd_criminal(message, args[9:])
+    elif argsSplit[0] == "ship":
+        await cmd_ship(message, args[5:])
+    elif argsSplit[0] == "weapon":
+        await cmd_weapon(message, args[7:])
+    elif argsSplit[0] == "module":
+        await cmd_module(message, args[7:])
+    elif argsSplit[0] == "turret":
+        await cmd_turret(message, args[7:])
+    elif argsSplit[0] == "commodity":
+        await cmd_commodity(message, args[10:])
+    else:
+        await message.channel.send(":x: Unknown object type! (system/criminal/ship/weapon/module/turret/commodity)")
+
+bbCommands.register("info", cmd_info)
+
+    
 
 
 """
@@ -1292,7 +1690,7 @@ async def cmd_shop_buy(message, args):
 
         if sellOldShip:
             # TODO: move to a separate sellActiveShip function
-            requestedBBUser.credits += activeShip.getValueStripped(shipUpgradesOnly=True)
+            requestedBBUser.credits += activeShip.getValue(shipUpgradesOnly=True)
             requestedBBUser.unequipAll(activeShip)
             requestedShop.shipsStock.append(activeShip)
         
@@ -1302,7 +1700,7 @@ async def cmd_shop_buy(message, args):
         
         outStr = ":moneybag: Congratulations on your new **" + requestedShip.name + "**!"
         if sellOldShip:
-            outStr += "\nYou received **" + str(activeShip.getValueStripped(shipUpgradesOnly=True)) + " credits** for your old **" + str(activeShip.name) + "**."
+            outStr += "\nYou received **" + str(activeShip.getValue(shipUpgradesOnly=True)) + " credits** for your old **" + str(activeShip.name) + "**."
         else:
             outStr += " Your old **" + activeShip.name + "** can be found in the hangar."
         if transferItems:
