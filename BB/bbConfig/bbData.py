@@ -353,7 +353,7 @@ builtInUpgradeData = {  "+30 Cargo Space": {"name": "+30 Cargo Space", "shipToUp
 
 # data for builtIn criminals to be used in bbCriminal.fromDict
 # criminals marked as not builtIn to allow for dictionary init. The criminal object is then marked as builtIn during package __init__.py
-builtInCriminalData = {"Pal Tyyrt": {"name":"Pal Tyyrt", "faction":"terran", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226618919780359/pal_tyyrt.png", "aliases":["tyyrt"], "wiki":"https://galaxyonfire.fandom.com/wiki/Pal_Tyyrt", "builtIn":False, "isPlayer":False},
+builtInCriminalData = {"Pal Tyyrt": {"name":"Pal Tyyrt", "faction":"terran", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226618919780359/pal_tyyrt.png", "aliases":["pal", "tyyrt"], "wiki":"https://galaxyonfire.fandom.com/wiki/Pal_Tyyrt", "builtIn":False, "isPlayer":False},
                 "Kehnor": {"name":"Kehnor", "faction":"terran", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226614767419432/kehnor.png", "aliases":[], "wiki":"https://galaxyonfire.fandom.com/wiki/Kehnor", "builtIn":False, "isPlayer":False},
                 "Gendol Ethor": {"name":"Gendol Ethor", "faction":"terran", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226611608977490/gendol_ethor.png", "aliases":["gendol","ethor"], "wiki":"https://galaxyonfire.fandom.com/wiki/Gendol_Ethor", "builtIn":False, "isPlayer":False},
                 "Korr Bekkt": {"name":"Korr Bekkt", "faction":"terran", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226617254510602/korr_bekkt.png", "aliases":["korr", "bekkt"], "wiki":"https://galaxyonfire.fandom.com/wiki/Korr_Bekkt", "builtIn":False, "isPlayer":False},
