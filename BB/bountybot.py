@@ -2091,6 +2091,9 @@ For example, a ping when a requested item is in stock in the guild's shop.
 @param args -- the notification type (e.g ship), possibly followed by a specific notification (e.g groza mk II), separated by a single space.
 """
 async def cmd_notify(message, args):
+    if not message.guild.me.guild_permissions.manage_roles:
+        await message.channel.send(":x: I do not have the 'Manage Roles' permission in this server! Please contact an admin :robot:")
+        return
     if args == "":
         await message.channel.send(":x: Please name what you would like to be notified for! E.g `" + bbConfig.commandPrefix + "notify bounties`")
         return
@@ -2101,15 +2104,15 @@ async def cmd_notify(message, args):
             notifyRole = discord.utils.get(message.guild.roles, id=requestedBBGuild.getBountyNotifyRoleId())
             try:
                 if notifyRole in message.author.roles:
-                    await message.author.add_roles(notifyRole, reason="User has unsubscribed from new bounty notifications.")
+                    await message.author.remove_roles(notifyRole, reason="User has unsubscribed from new bounty notifications.")
                     await message.channel.send(":white_check_mark: You have unsubscribed from new bounty notifications!")
                 else:
-                    await message.author.remove_roles(notifyRole, reason="User has subscribed to new bounty notifications.")
+                    await message.author.add_roles(notifyRole, reason="User has subscribed to new bounty notifications.")
                     await message.channel.send(":white_check_mark: You have subscribed to new bounty notifications!")
             except discord.Forbidden:
-                await message.channel.send(":woozy: I don't have permission to do that! Please ensure the requested role is beneath the BountyBot role.")
+                await message.channel.send(":woozy_face: I don't have permission to do that! Please ensure the requested role is beneath the BountyBot role.")
             except discord.HTTPException:
-                await message.channel.send(":woozy: Something went wrong! Please contact an admin or try again later.")
+                await message.channel.send(":woozy_face: Something went wrong! Please contact an admin or try again later.")
         else:
             await message.channel.send(":x: This server does not have a role for new bounty notifications. :robot:")
     elif argsSplit[0] in bbConfig.validItemNames and argsSplit[0] != "all":
