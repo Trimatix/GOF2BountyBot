@@ -2082,6 +2082,44 @@ bbCommands.register("pay", cmd_pay)
 # dmCommands.register("pay", cmd_pay)
 
 
+"""
+Allow a user to subscribe and unsubscribe from pings when certain events occur.
+Currently only new bounty notifications are implemented, but more are planned.
+For example, a ping when a requested item is in stock in the guild's shop.
+
+@param message -- the discord message calling the command
+@param args -- the notification type (e.g ship), possibly followed by a specific notification (e.g groza mk II), separated by a single space.
+"""
+async def cmd_notify(message, args):
+    if args == "":
+        await message.channel.send(":x: Please name what you would like to be notified for! E.g `" + bbConfig.commandPrefix + "notify bounties`")
+        return
+    argsSplit = args.split(" ")
+    if argsSplit[0] in ["bounty", "bounties"]:
+        requestedBBGuild = guildsDB.getGuild(message.guild.id)
+        if requestedBBGuild.hasBountyNotifyRoleId():
+            notifyRole = discord.utils.get(message.guild.roles, id=requestedBBGuild.getBountyNotifyRoleId())
+            try:
+                if notifyRole in message.author.roles:
+                    await message.author.add_roles(notifyRole, reason="User has unsubscribed from new bounty notifications.")
+                    await message.channel.send(":white_check_mark: You have unsubscribed from new bounty notifications!")
+                else:
+                    await message.author.remove_roles(notifyRole, reason="User has subscribed to new bounty notifications.")
+                    await message.channel.send(":white_check_mark: You have subscribed to new bounty notifications!")
+            except discord.Forbidden:
+                await message.channel.send(":woozy: I don't have permission to do that! Please ensure the requested role is beneath the BountyBot role.")
+            except discord.HTTPException:
+                await message.channel.send(":woozy: Something went wrong! Please contact an admin or try again later.")
+        else:
+            await message.channel.send(":x: This server does not have a role for new bounty notifications. :robot:")
+    elif argsSplit[0] in bbConfig.validItemNames and argsSplit[0] != "all":
+        await message.channel.send("Item notifications have not been implemented yet! \:(")
+    else:
+        await message.channel.send(":x: Unknown notification type - only `bounties` is currently supported!")
+
+bbCommands.register("notify", cmd_notify)
+
+
 
 ####### ADMINISTRATOR COMMANDS #######
 
@@ -2788,6 +2826,8 @@ TODO: the delays system needs to be completely rewritten. Currently it sums up t
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
+
+    await client.change_presence(activity=discord.Game("Galaxy on Fire 2™ Full HD"))
 
     # bot is now logged in
     botLoggedIn = True
