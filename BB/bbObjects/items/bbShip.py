@@ -285,17 +285,13 @@ class bbShip(bbAliasable.Aliasable):
 
     
     def changeNickname(self, nickname):
-        if self.hasNickname:
-            self.removeAlias(self.nickname)
         self.nickname = nickname
         if nickname != "":
             self.hasNickname = True
-            self.addAlias(nickname)
 
     
     def removeNickname(self):
         if self.hasNickname:
-            self.removeAlias(self.nickname)
             self.nickname = ""
             self.hasNickname = False
 
