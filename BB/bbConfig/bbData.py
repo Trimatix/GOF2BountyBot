@@ -73,7 +73,7 @@ helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display informati
                             "notify": ("**notify [type]** *<item>*", "Subscribe to pings when events take place. Currently, only `$notify bounties` is implemented, which will notify you when new bounties are available.")},
             
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
-                            "info": ("**info [object-type] [name]**", "Display information about something. object-type must be criminal, system, ship, weapon, module, turret, or turret. Also gives the usable aliases for an object."),
+                            "info": ("**info [object-type] [name]**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
                             "make-route": ("**make-route [startSystem], [endSystem]**", "Find the shortest route from startSystem to endSystem.")},
             
             "Bounties":{    "bounties": ("**bounties** *<faction>*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
@@ -85,8 +85,8 @@ helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display informati
                             "loadout": ("**loadout**", "Display your current ship and the items equipped onto it."),
                             "buy": ("**buy [item-type] [item-number]** *<transfer> <sell>*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
                             "sell": ("**sell [item-type] [item-number]** *<clear>*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship."),
-                            "equip": ("**equip [item-type] [item-num]** *<transfer>*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hanger`. When equipping a ship, specify `transfer` to move all items to the new ship."),
-                            "unequip": ("**unequip [item-type] [item-num]**", "Unequip the requested item from your active ship, into your hanger. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),
+                            "equip": ("**equip [item-type] [item-num]** *<transfer>*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When equipping a ship, specify `transfer` to move all items to the new ship."),
+                            "unequip": ("**unequip [item-type] [item-num]**", "Unequip the requested item from your active ship, into your hangar. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),
                             "nameShip": ("**nameShip [nickname]**", "Give your active ship a nickname!"),
                             "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")}}
 
