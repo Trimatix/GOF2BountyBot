@@ -68,7 +68,9 @@ helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX
 helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display information about the requested command. If no command is given, all available commands are displayed."),
                             "balance": ("**balance** *<userTag>*", "Get the credits balance of yourself, or a tagged user if one is given."),
                             "stats": ("**stats** *<userTag>*", "Get various credits and bounty statistics about yourself, or a tagged user."),
-                            "leaderboard": ("**leaderboard** *<-g|-c|-s|-w>*", "Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`")},
+                            "leaderboard": ("**leaderboard** *<-g|-c|-s|-w>*", "Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
+                            "pay": ("**pay [user] [amount]**", "Pay the mentioned user an amount of credits from your balance."),
+                            "notify": ("**notify [type]** *<item>*", "Subscribe to pings when events take place. Currently, only `$notify bounties` is implemented, which will notify you when new bounties are available.")},
             
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
                             "info": ("**info [object-type] [name]**", "Display information about something. object-type must be criminal, system, ship, weapon, module, turret, or turret. Also gives the usable aliases for an object."),
@@ -86,8 +88,7 @@ helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display informati
                             "equip": ("**equip [item-type] [item-num]** *<transfer>*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hanger`. When equipping a ship, specify `transfer` to move all items to the new ship."),
                             "unequip": ("**unequip [item-type] [item-num]**", "Unequip the requested item from your active ship, into your hanger. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),
                             "nameShip": ("**nameShip [nickname]**", "Give your active ship a nickname!"),
-                            "unnameShip": ("**unnameShip**", "Reset your active ship's nickname."),
-                            "pay": ("**pay [user] [amount]**", "Pay the mentioned user an amount of credits from your balance.")}}
+                            "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")}}
 
 # intro for admin help commands
 adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
