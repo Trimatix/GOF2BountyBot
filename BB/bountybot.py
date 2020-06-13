@@ -2509,9 +2509,81 @@ async def dev_cmd_broadcast(message, args):
     if args == "":
         await message.channel.send("provide a message!")
     else:
-        for guild in guildsDB.guilds.values():
-            if guild.hasPlayChannel:
-                await client.get_channel(guild.getPlayChannelId()).send(args)
+        useAnnounceChannel = False
+        broadcastEmbed = None
+        msg = args
+        if args.split(" ")[0].lower() == "announce-channel":
+            useAnnounceChannel = True
+            msg = args[17:]
+
+        if msg.startswith("embed="):
+            titleTxt=""
+            desc=""
+            footerTxt=""
+            thumb=""
+
+            try:
+                startIndex=msg.index("titleTxt='")+len("titleTxt=")+1
+                endIndex=startIndex + msg[msg.index("titleTxt='")+len("titleTxt='"):].index("'")
+                titleTxt=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("desc='")+len("desc=")+1
+                endIndex=startIndex + msg[msg.index("desc='")+len("desc='"):].index("'")
+                desc=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("footerTxt='")+len("footerTxt=")+1
+                endIndex=startIndex + msg[msg.index("footerTxt='")+len("footerTxt='"):].index("'")
+                footerTxt=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("thumb='")+len("thumb=")+1
+                endIndex=startIndex + msg[msg.index("thumb='")+len("thumb='"):].index("'")
+                thumb=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            broadcastEmbed = makeEmbed(titleTxt=titleTxt, desc=desc, footerTxt=footerTxt, thumb=thumb)
+            
+            try:
+                msg.index('\n')
+                fieldsExist = True
+            except ValueError:
+                fieldsExist = False
+            while fieldsExist:
+                nextNL = msg.index('\n')
+                try:
+                    closingNL = nextNL + msg[nextNL+1:].index('\n')
+                except ValueError:
+                    fieldsExist = False
+                
+                if fieldsExist:
+                    print("name=",msg[:nextNL],"value=",msg[nextNL+1:closingNL+1])
+                    broadcastEmbed.add_field(name=msg[:nextNL], value=msg[nextNL+1:closingNL+1])
+                    msg = msg[closingNL+2:]
+                else:
+                    print("name=",msg[:nextNL],"value=",msg[nextNL+1:])
+                    broadcastEmbed.add_field(name=msg[:nextNL], value=msg[nextNL+1:])
+
+        if useAnnounceChannel:
+            for guild in guildsDB.guilds.values():
+                if guild.hasPlayChannel:
+                    await client.get_channel(guild.getAnnounceChannelId()).send(msg, embed=broadcastEmbed)
+        else:
+            for guild in guildsDB.guilds.values():
+                if guild.hasPlayChannel:
+                    await client.get_channel(guild.getPlayChannelId()).send(msg, embed=broadcastEmbed)
 
 bbCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
 # dmCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
