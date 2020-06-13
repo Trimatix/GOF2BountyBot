@@ -2516,7 +2516,18 @@ async def dev_cmd_broadcast(message, args):
             useAnnounceChannel = True
             msg = args[17:]
 
-        if msg.startswith("embed="):
+        try:
+            embedIndex = msg.index("embed=")
+        except ValueError:
+            embedIndex = -1
+        
+        if embedIndex != -1:
+            msgText = msg[:embedIndex]
+        else:
+            msgText = msg
+
+        if embedIndex != -1:
+            msg = msg[embedIndex:]
             titleTxt=""
             desc=""
             footerTxt=""
@@ -2569,21 +2580,19 @@ async def dev_cmd_broadcast(message, args):
                     fieldsExist = False
                 
                 if fieldsExist:
-                    print("name=",msg[:nextNL],"value=",msg[nextNL+1:closingNL+1])
-                    broadcastEmbed.add_field(name=msg[:nextNL], value=msg[nextNL+1:closingNL+1])
+                    broadcastEmbed.add_field(name=msg[:nextNL].replace("{NL}", "\n"), value=msg[nextNL+1:closingNL+1].replace("{NL}", "\n"), inline=False)
                     msg = msg[closingNL+2:]
                 else:
-                    print("name=",msg[:nextNL],"value=",msg[nextNL+1:])
-                    broadcastEmbed.add_field(name=msg[:nextNL], value=msg[nextNL+1:])
+                    broadcastEmbed.add_field(name=msg[:nextNL].replace("{NL}", "\n"), value=msg[nextNL+1:].replace("{NL}", "\n"), inline=False)
 
         if useAnnounceChannel:
             for guild in guildsDB.guilds.values():
                 if guild.hasPlayChannel:
-                    await client.get_channel(guild.getAnnounceChannelId()).send(msg, embed=broadcastEmbed)
+                    await client.get_channel(guild.getAnnounceChannelId()).send(msgText, embed=broadcastEmbed)
         else:
             for guild in guildsDB.guilds.values():
                 if guild.hasPlayChannel:
-                    await client.get_channel(guild.getPlayChannelId()).send(msg, embed=broadcastEmbed)
+                    await client.get_channel(guild.getPlayChannelId()).send(msgText, embed=broadcastEmbed)
 
 bbCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
 # dmCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
