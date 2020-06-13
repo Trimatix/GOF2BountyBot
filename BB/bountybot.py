@@ -2094,8 +2094,6 @@ admin command for setting the current guild's announcements channel
 @param args -- ignored
 """
 async def admin_cmd_set_announce_channel(message, args):
-    if not guildsDB.guildIdExists(message.guild.id):
-        guildsDB.addGuildID(message.guild.id)
     guildsDB.getGuild(message.guild.id).setAnnounceChannelId(message.channel.id)
     await message.channel.send(":ballot_box_with_check: Announcements channel set!")
     
@@ -2110,8 +2108,6 @@ admin command for setting the current guild's play channel
 @param args -- ignored
 """
 async def admin_cmd_set_play_channel(message, args):
-    if not guildsDB.guildIdExists(message.guild.id):
-        guildsDB.addGuildID(message.guild.id)
     guildsDB.getGuild(message.guild.id).setPlayChannelId(message.channel.id)
     await message.channel.send(":ballot_box_with_check: Bounty play channel set!")
     
@@ -2175,11 +2171,7 @@ async def admin_cmd_set_bounty_notify_role(message, args):
         await message.channel.send(":x: Role not found!")
         return
 
-    if not guildsDB.guildIdExists(message.guild.id):
-        guildsDB.addGuildID(message.guild.id).setBountyNotifyRoleId(requestedRole.id)
-    else:
-        guildsDB.getGuild(message.guild.id).setBountyNotifyRoleId(requestedRole.id)
-
+    guildsDB.getGuild(message.guild.id).setBountyNotifyRoleId(requestedRole.id)
     await message.channel.send(":white_check_mark: Bounty notify role set!")
 
 bbCommands.register("set-bounty-notify-role", admin_cmd_set_bounty_notify_role, isAdmin=True)
@@ -2193,10 +2185,7 @@ For the current guild, remove the role to mention when new bounties are spawned.
 @param args -- ignored
 """
 async def admin_cmd_remove_bounty_notify_role(message, args):
-    if not guildsDB.guildIdExists(message.guild.id):
-        requestedBBGuild = guildsDB.addGuildID(message.guild.id)
-    else:
-        requestedBBGuild = guildsDB.getGuild(message.guild.id)
+    requestedBBGuild = guildsDB.getGuild(message.guild.id)
 
     if not requestedBBGuild.hasBountyNotifyRoleId():
         await message.channel.send(":x: This server does not have a bounty notify role set!")
@@ -2764,6 +2753,28 @@ bbCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 
 ####### MAIN FUNCTIONS #######
 
+
+
+"""
+Create a database entry for new guilds when one is joined.
+
+@param guild -- the guild just joined.
+"""
+@client.event
+async def on_guild_join(guild):
+    if not guildsDB.guildIdExists(guild.id):
+        guildsDB.addGuildID(guild.id)
+
+
+"""
+Remove the database entry for any guilds the bot leaves.
+
+@param guild -- the guild just left.
+"""
+@client.event
+async def on_guild_remove(guild):
+    if guildsDB.guildIdExists(guild.id):
+        guildsDB.removeGuildId(guild.id)
 
 
 """
