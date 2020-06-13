@@ -20,9 +20,9 @@ newBountyFixedDeltaChanged = False
 newBountyDelayReset = False
 
 # when using random delay generation, use this as the minimum wait time in seconds
-newBountyDelayMin = 30 * 60
+newBountyDelayMin = 15 * 60
 # when using random delay generation, use this as the maximum wait time in seconds
-newBountyDelayMax = 3 * 60 * 60
+newBountyDelayMax = 1 * 60 * 60
 
 # the number of seconds to wait in between each save
 saveDelay = 30 * 60
