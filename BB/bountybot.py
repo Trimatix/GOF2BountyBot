@@ -1186,7 +1186,7 @@ async def cmd_leaderboard(message, args):
     for place in range(min(len(sortedUsers), 10)):
         # handling for global leaderboards and users not in the local guild
         if globalBoard and message.guild.get_member(sortedUsers[place][0]) is None:
-            leaderboardEmbed.add_field(value="*" + str(place + 1) + ". " + client.get_user(sortedUsers[place][0]).mention, name=("⭐ " if first else "") + str(sortedUsers[place][1]) + " " + (boardUnit if sortedUsers[place][1] == 1 else boardUnits), inline=False)
+            leaderboardEmbed.add_field(value="*" + str(place + 1) + ". " + str(client.get_user(sortedUsers[place][0])), name=("⭐ " if first else "") + str(sortedUsers[place][1]) + " " + (boardUnit if sortedUsers[place][1] == 1 else boardUnits), inline=False)
             externalUser = True
             if first: first = False
         else:
