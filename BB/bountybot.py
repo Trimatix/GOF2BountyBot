@@ -589,6 +589,7 @@ async def cmd_check(message, args):
         await message.channel.send(":stopwatch: **" + message.author.name + "**, your *Khador drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
     
 bbCommands.register("check", cmd_check)
+bbCommands.register("search", cmd_check)
 # dmCommands.register("check", err_nodm)
 
 
@@ -1603,7 +1604,6 @@ async def cmd_shop_buy(message, args):
         if sellOldShip:
             # TODO: move to a separate sellActiveShip function
             oldShipValue = activeShip.getValue(shipUpgradesOnly=transferItems)
-            print(oldShipValue)
             requestedBBUser.credits += oldShipValue
             requestedBBUser.unequipAll(activeShip)
             requestedShop.shipsStock.append(activeShip)
@@ -2817,7 +2817,7 @@ async def on_ready():
         # Refresh all shop stocks
         if datetime.utcnow() >= nextShopRefresh:
             guildsDB.refreshAllShopStocks()
-            announceNewShopStock()
+            await announceNewShopStock()
             # Reset the shop stock refresh cooldown
             nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
         
