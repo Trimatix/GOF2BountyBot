@@ -21,6 +21,10 @@ class bbWeapon(bbAliasable.Aliasable):
         self.icon = icon
         self.hasIcon = icon != ""
 
+    
+    def getValue(self):
+        return self.value
+
 
     def toDict(self):
         return {"name": self.name, "builtIn": True}

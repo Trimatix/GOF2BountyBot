@@ -1115,7 +1115,7 @@ bbCommands.register("info", cmd_info)
 
 """
 display leaderboards for different statistics
-if no arguments are given, display the local leaderboard for lifetimeCredits
+if no arguments are given, display the local leaderboard for pilot value (value of loadout, hangar and balance, summed)
 if -g is given, display the appropriate leaderbaord across all guilds
 if -c is given, display the leaderboard for current balance
 if -s is given, display the leaderboard for systems checked
@@ -1128,11 +1128,11 @@ async def cmd_leaderboard(message, args):
     # across all guilds?
     globalBoard = False
     # stat to display
-    stat = "lifetimeCredits"
+    stat = "value"
     # "global" or the local guild name
     boardScope = message.guild.name
     # user friendly string for the stat
-    boardTitle = "Total Credits Earned"
+    boardTitle = "Total Player Value"
     # units for the stat
     boardUnit = "Credit"
     boardUnits = "Credits"

@@ -209,6 +209,22 @@ class bbUser:
             return self.systemsChecked
         elif stat == "bountyWins":
             return self.bountyWins
+        elif stat == "value":
+            modulesValue = 0
+            for module in self.inactiveModules:
+                modulesValue += module.getValue()
+            turretsValue = 0
+            for turret in self.inactiveTurrets:
+                turretsValue += turret.getValue()
+            weaponsValue = 0
+            for weapon in self.inactiveWeapons:
+                weaponsValue += weapon.getValue()
+            shipsValue = 0
+            for ship in self.inactiveShips:
+                shipsValue += ship.getValue()
+
+            return modulesValue + turretsValue + weaponsValue + shipsValue + self.activeShip.getValue() + self.credits
+
 
 
     def getInactivesByName(self, item):

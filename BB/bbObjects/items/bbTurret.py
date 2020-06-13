@@ -22,6 +22,10 @@ class bbTurret(bbAliasable.Aliasable):
         self.hasIcon = icon != ""
 
     
+    def getValue(self):
+        return self.value
+
+    
     def statsStringShort(self):
         return "*Dps: " + str(self.dps) + "*"
 

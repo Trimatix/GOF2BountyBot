@@ -68,7 +68,7 @@ helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX
 helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display information about the requested command. If no command is given, all available commands are displayed."),
                             "balance": ("**balance** *<userTag>*", "Get the credits balance of yourself, or a tagged user if one is given."),
                             "stats": ("**stats** *<userTag>*", "Get various credits and bounty statistics about yourself, or a tagged user."),
-                            "leaderboard": ("**leaderboard** *<-g|-c|-s|-w>*", "Show the credits leaderboard. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
+                            "leaderboard": ("**leaderboard** *<-g|-c|-s|-w>*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
                             "pay": ("**pay [user] [amount]**", "Pay the mentioned user an amount of credits from your balance."),
                             "notify": ("**notify [type]** *<item>*", "Subscribe to pings when events take place. Currently, only `$notify bounties` is implemented, which will notify you when new bounties are available.")},
             
@@ -329,7 +329,7 @@ builtInWeaponData = {   # Lasers
                         # Auto Cannons
                         "Micro Gun MK I": {"name": "Micro Gun MK I", "aliases": ["Micro MK I", "Micro I"], "dps":9.09, "value":2577, "wiki": "https://galaxyonfire.fandom.com/wiki/Micro_Gun_MK_I", "builtIn":False},
                         "Micro Gun MK II": {"name": "Micro Gun MK II", "aliases": ["Micro MK II", "Micro II"], "dps":11.76, "value":5538, "wiki": "https://galaxyonfire.fandom.com/wiki/Micro_Gun_MK_II", "builtIn":False},
-                        "64MJ Railgun": {"name": "64MJ Railgun", "aliases": ["64MJ Railgun", "64 Rail"], "dps":14.28, "value":15343, "wiki": "https://galaxyonfire.fandom.com/wiki/64MJ_Railgun", "builtIn":False},
+                        "64MJ Railgun": {"name": "64MJ Railgun", "aliases": ["64MJ", "64MJ Railgun", "64 Rail"], "dps":14.28, "value":15343, "wiki": "https://galaxyonfire.fandom.com/wiki/64MJ_Railgun", "builtIn":False},
                         "Scram Cannon": {"name": "Scram Cannon", "aliases": ["scram"], "dps":20.00, "value":47203, "wiki": "https://galaxyonfire.fandom.com/wiki/Scram_Cannon", "builtIn":False},
                         "128MJ Railgun": {"name": "128MJ Railgun", "aliases": ["128MJ Railgun", "128 Rail"], "dps":25.00, "value":24675, "wiki": "https://galaxyonfire.fandom.com/wiki/128MJ_Railgun", "builtIn":False},
                         "Mass Driver MD 10": {"name": "Mass Driver MD 10", "aliases": ["MD 10", "MD10", "Mass Driver 10", "Mass Driver MD10"], "dps":44.44, "value":114314, "wiki": "https://galaxyonfire.fandom.com/wiki/Mass_Driver_MD_10", "builtIn":False},

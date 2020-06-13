@@ -47,6 +47,10 @@ class bbModule(bbAliasable.Aliasable):
         self.hasIcon = icon != ""
 
     
+    def getValue(self):
+        return self.value
+
+    
     def statsStringShort(self):
         stats = "*"
         if self.armour != 0:
