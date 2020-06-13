@@ -3009,11 +3009,13 @@ async def on_message(message):
     if message.channel.type == discord.ChannelType.private:
         return
 
+    """
     # randomly send '!drink' to the same channel
     bbConfig.randomDrinkNum -= 1
     if bbConfig.randomDrinkNum == 0:
         await message.channel.send("!drink")
         bbConfig.randomDrinkNum = random.randint(bbConfig.randomDrinkFactor / 10, bbConfig.randomDrinkFactor)
+    """
 
     # For any messages beginning with bbConfig.commandPrefix
     # New method without space-splitting to allow for prefixes that dont end in a space
