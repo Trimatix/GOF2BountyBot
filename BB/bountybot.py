@@ -178,7 +178,7 @@ async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
     for currentGuild in guildsDB.getGuilds():
         if currentGuild.hasPlayChannel():
             # Create the announcement embed
-            rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!",authorName=criminalNameOrDiscrim(bounty.criminal) + " Arrested",icon=bounty.criminal.icon,col=bbData.factionColours[bounty.faction])
+            rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!",authorName=criminalNameOrDiscrim(bounty.criminal) + " Arrested",icon=bounty.criminal.icon,col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
             
             # Add the winning user to the embed
             # If the winning user is not in the current guild, use the user's name and discriminator
