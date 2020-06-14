@@ -158,6 +158,8 @@ class bbShip(bbAliasable.Aliasable):
         if not shipUpgradesOnly:
             for weapon in self.weapons:
                 total += weapon.dps
+            for turret in self.turrets:
+                total += turret.dps
             for module in self.modules:
                 total += module.dps
                 multiplier *= module.dpsMultiplier

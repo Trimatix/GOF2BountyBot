@@ -2,8 +2,7 @@ from .bbObjects import bbSystem
 
 import json
 import math
-
-import os
+import random
 
 
 def readJSON(dbFile):
@@ -104,3 +103,36 @@ def isMention(mention):
 
 def isRoleMention(mention):
     return mention.endswith(">") and mention.startswith("<@&") and isInt(mention[3:-1])
+
+
+def fightShips(ship1, ship2, variancePercent):
+    ship1HP = ship1.getArmour() + ship1.getShield()
+    ship1HPVariance = ship1HP * variancePercent
+    ship2HP = ship2.getArmour() + ship2.getShield()
+    ship2HPVariance = ship2HP * variancePercent
+
+    ship1HPVaried = random.randint(ship1HP - ship1HPVariance, ship1HP + ship1HPVariance)
+    ship2HPVaried = random.randint(ship2HP - ship2HPVariance, ship2HP + ship2HPVariance)
+
+    ship1DPS = ship1.getDPS()
+    ship1DPSVariance = ship1DPS * variancePercent
+    ship2DPS = ship2.getDPS()
+    ship2DPSVariance = ship2DPS * variancePercent
+
+    ship1DPSVaried = random.randint(ship1DPS - ship1DPSVariance, ship1DPS + ship1DPSVariance)
+    ship2DPSVaried = random.randint(ship2DPS - ship2DPSVariance, ship2DPS + ship2DPSVariance)
+
+    ship1TTK = ship1HPVaried / ship2DPSVaried
+    ship2TTK = ship2HPVaried / ship1DPSVaried
+
+    # ship1Handling = ship1.getHandling()
+    # ship2Handling = ship2.getHandling()
+
+    # ship1HandlingPenalty = 
+
+    if ship1TTK > ship2TTK:
+        return ship1
+    elif ship2TTK > ship1TTK:
+        return ship2
+    else:
+        return None
