@@ -1368,7 +1368,11 @@ async def cmd_hangar(message, args):
                     hangarEmbed.add_field(name="‎", value="__**Stored Turrets**__", inline=False)
                 hangarEmbed.add_field(name=str(turretNum) + ". " + requestedBBUser.inactiveTurrets[turretNum - 1].name, value=requestedBBUser.inactiveTurrets[turretNum - 1].statsStringShort(), inline=False)
 
-        await sendChannel.send(embed=hangarEmbed)
+        try:
+            await sendChannel.send(embed=hangarEmbed)
+        except discord.Forbidden:
+            await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
+        return
         if sendDM:
             await message.add_reaction(bbConfig.dmSentEmoji)
 
@@ -1436,7 +1440,11 @@ async def cmd_shop(message, args):
                 shopEmbed.add_field(name="‎", value="__**Turrets**__", inline=False)
             shopEmbed.add_field(value=commaSplitNum(str(requestedShop.turretsStock[turretNum - 1].value)) + " Credits\n" + requestedShop.turretsStock[turretNum - 1].statsStringShort(), name=str(turretNum) + ". " + "**" + requestedShop.turretsStock[turretNum - 1].name + "**", inline=True)
 
-    await sendChannel.send(embed=shopEmbed)
+    try:
+        await sendChannel.send(embed=shopEmbed)
+    except discord.Forbidden:
+        await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
+        return
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji)
 
@@ -2233,7 +2241,11 @@ async def admin_cmd_admin_help(message, args):
         for currentCommand in bbData.adminHelpDict[section].values():
             helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
     
-    await sendChannel.send(bbData.adminHelpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix), embed=helpEmbed)
+    try:
+        await sendChannel.send(bbData.adminHelpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix), embed=helpEmbed)
+    except discord.Forbidden:
+        await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
+        return
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji)
 
