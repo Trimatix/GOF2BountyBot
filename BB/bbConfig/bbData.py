@@ -62,44 +62,44 @@ mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594
 
 # intro for help commands
 helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
-**<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
+**[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
 
 # help strings for bb commands
-helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display information about the requested command. If no command is given, all available commands are displayed."),
-                            "balance": ("**balance** *<userTag>*", "Get the credits balance of yourself, or a tagged user if one is given."),
-                            "stats": ("**stats** *<userTag>*", "Get various credits and bounty statistics about yourself, or a tagged user."),
-                            "leaderboard": ("**leaderboard** *<-g|-c|-s|-w>*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
-                            "pay": ("**pay [user] [amount]**", "Pay the mentioned user an amount of credits from your balance."),
-                            "notify": ("**notify [type]** *<item>*", "Subscribe to pings when events take place. Currently, only `$notify bounties` is implemented, which will notify you when new bounties are available.")},
+helpDict = {"Miscellaneous":{"help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently four pages, and four sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Items`."),
+                            "balance": ("**balance** *[userTag]*", "Get the credits balance of yourself, or a tagged user if one is given."),
+                            "stats": ("**stats** *[userTag]*", "Get various credits and bounty statistics about yourself, or a tagged user."),
+                            "leaderboard": ("**leaderboard** *[-g|-c|-s|-w]*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
+                            "pay": ("**pay <user> <amount>**", "Pay the mentioned user an amount of credits from your balance."),
+                            "notify": ("**notify <type>** *[item]*", "Subscribe to pings when events take place. Currently, only `$notify bounties` is implemented, which will notify you when new bounties are available.")},
             
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
-                            "info": ("**info [object-type] [name]**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
-                            "make-route": ("**make-route [startSystem], [endSystem]**", "Find the shortest route from startSystem to endSystem.")},
+                            "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
+                            "make-route": ("**make-route <startSystem>, <endSystem>**", "Find the shortest route from startSystem to endSystem.")},
             
-            "Bounties":{    "bounties": ("**bounties** *<faction>*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
-                            "route": ("**route [criminal name]**", "Get the named criminal's current route."),
-                            "check": ("**check [system]**", "Check if any criminals are in the given system, arrest them, and get paid! 💰")},
+            "Bounties":{    "bounties": ("**bounties** *[faction]*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
+                            "route": ("**route <criminal name>**", "Get the named criminal's current route."),
+                            "check": ("**check <system>**", "Check if any criminals are in the given system, arrest them, and get paid! 💰")},
             
-            "Items":{       "hangar": ("**hangar** *<item-type>*", "Display the items in your hangar. Give an item type (ship/weapon/turret/module) to only list items of that type."),
-                            "shop": ("**shop** *<item-type>*", "Display all items currently for sale. Shop stock is refreshed daily. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+            "Items":{       "hangar": ("**hangar** *[item-type]*", "Display the items in your hangar. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+                            "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed daily. Give an item type (ship/weapon/turret/module) to only list items of that type."),
                             "loadout": ("**loadout**", "Display your current ship and the items equipped onto it."),
-                            "buy": ("**buy [item-type] [item-number]** *<transfer> <sell>*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
-                            "sell": ("**sell [item-type] [item-number]** *<clear>*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship."),
-                            "equip": ("**equip [item-type] [item-num]** *<transfer>*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When equipping a ship, specify `transfer` to move all items to the new ship."),
-                            "unequip": ("**unequip [item-type] [item-num]**", "Unequip the requested item from your active ship, into your hangar. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),
-                            "nameShip": ("**nameShip [nickname]**", "Give your active ship a nickname!"),
+                            "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
+                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship."),
+                            "equip": ("**equip <item-type> <item-num>** *[transfer]*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When equipping a ship, specify `transfer` to move all items to the new ship."),
+                            "unequip": ("**unequip <item-type> <item-num>**", "Unequip the requested item from your active ship, into your hangar. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),
+                            "nameShip": ("**nameShip <nickname>**", "Give your active ship a nickname!"),
                             "unnameShip": ("**unnameShip**", "Reset your active ship's nickname."),
-                            "total-value":("**total-value** *<userTag>*", "Get the total value of all of your items, including your credits balance. Give a user mention to check someone else's total inventory value.")}}
+                            "total-value":("**total-value** *[userTag]*", "Get the total value of all of your items, including your credits balance. Give a user mention to check someone else's total inventory value.")}}
 
 # intro for admin help commands
 adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
-**<Angled brackets>** indicate *optional* arguments, **[square brackets]** indicate *required* arguments."""
+**[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
 
 # help strings for admin bb commands
 adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display information about admin-only commands."),
-                                        "set-announce-channel": ("**set-announce-channel** *<off>*", "Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements."),
-                                        "set-play-channel": ("**set-play-channel** *<off>*", "Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements."),
-                                        "set-bounty-notify-role": ("**set-bounty-notify-role [role]**", "Set a role to ping when new bounties are created. **[role]** can be either a role mention, or a role ID."),
+                                        "set-announce-channel": ("**set-announce-channel** *[off]*", "Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements."),
+                                        "set-play-channel": ("**set-play-channel** *[off]*", "Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements."),
+                                        "set-bounty-notify-role": ("**set-bounty-notify-role <role>**", "Set a role to ping when new bounties are created. **<role>** can be either a role mention, or a role ID."),
                                         "remove-bounty-notify-role": ("**remove-bounty-notify-role**", "Stop pinging the bounty notify role when new bounties are created.")}}
 
 # string extensions for numbers, e.g 11th, 1st, 23rd...

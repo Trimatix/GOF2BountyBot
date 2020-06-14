@@ -314,7 +314,7 @@ If a command is provided in args, the associated help string for just that comma
 # @client.command(name='runHelp')
 async def cmd_help(message, args):
     helpEmbed = makeEmbed(titleTxt="BountyBot Commands", thumb=client.user.avatar_url_as(size=64))
-    page = 1
+    page = 0
     maxPage = len(bbData.helpDict)
 
     if args != "":
@@ -323,7 +323,9 @@ async def cmd_help(message, args):
             if page > maxPage:
                 await message.channel.send(":x: There are only " + str(maxPage) + " help pages! Showing page " + str(maxPage) + ":")
                 page = maxPage
-        else:
+        elif args.title() in bbData.helpDict.keys():
+            page = list(bbData.helpDict.keys()).index(args.title()) + 1
+        elif args != "all":
             for section in bbData.helpDict.keys():
                 if args in bbData.helpDict[section]:
                     helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
@@ -343,14 +345,28 @@ async def cmd_help(message, args):
     else:
         sendChannel = message.author.dm_channel
         sendDM = True
+
+    if page == 0:
+        helpEmbed.set_footer(text="All Pages")
+        for section in bbData.helpDict.keys():
+        # section = list(bbData.helpDict.keys())[page - 1]
+            helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
+            for currentCommand in bbData.helpDict[section].values():
+                helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
+
+    else:
+        helpEmbed.set_footer(text="Page " + str(page) + "/" + str(maxPage))
+        section = list(bbData.helpDict.keys())[page - 1]
+        helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
+        for currentCommand in bbData.helpDict[section].values():
+            helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
     
-    helpEmbed.set_footer(text="Page " + str(page) + "/" + str(maxPage))
-    section = list(bbData.helpDict.keys())[page - 1]
-    helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
-    for currentCommand in bbData.helpDict[section].values():
-        helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
-    
-    await sendChannel.send(bbData.helpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
+    try:
+        await sendChannel.send(bbData.helpIntro.replace("$COMMANDPREFIX$",bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
+    except discord.Forbidden:
+        await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
+        return
+
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji)
 
