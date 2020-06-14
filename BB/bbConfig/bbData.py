@@ -88,7 +88,8 @@ helpDict = {"Miscellaneous":{"help": ("**help** *<command>*", "Display informati
                             "equip": ("**equip [item-type] [item-num]** *<transfer>*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When equipping a ship, specify `transfer` to move all items to the new ship."),
                             "unequip": ("**unequip [item-type] [item-num]**", "Unequip the requested item from your active ship, into your hangar. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),
                             "nameShip": ("**nameShip [nickname]**", "Give your active ship a nickname!"),
-                            "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")}}
+                            "unnameShip": ("**unnameShip**", "Reset your active ship's nickname."),
+                            "value":("**value** *<userTag>*", "Get the total value of all of your items, including your credits balance. Give a user mention to check someone else's total inventory value.")}}
 
 # intro for admin help commands
 adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
