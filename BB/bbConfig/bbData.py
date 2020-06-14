@@ -292,7 +292,10 @@ builtInModuleData = {   # armour
                         "Nirai Overdrive": {"name": "Nirai Overdrive", "aliases": ["Overdrive"], "dpsMultiplier":1.1, "value": 30143, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_Overdrive", "builtIn":False},
 
                         # hyperdrives
-                        "Khador Drive": {"name": "Khador Drive", "aliases": ["Khador"], "value": 310037, "wiki": "https://galaxyonfire.fandom.com/wiki/Khador_Drive", "builtIn":False}}
+                        "Khador Drive": {"name": "Khador Drive", "aliases": ["Khador"], "value": 310037, "wiki": "https://galaxyonfire.fandom.com/wiki/Khador_Drive", "builtIn":False},
+                        
+                        # misc
+                        "Emergency System": {"name": "Emergency System", "aliases": ["Emergency"], "value": 6860, "wiki": "https://galaxyonfire.fandom.com/wiki/Emergency_System", "builtIn":False}}
                         
 builtInWeaponData = {   # Lasers
                         "Nirai Impulse EX 1": {"name": "Nirai Impulse EX 1", "aliases": ["Impulse EX 1", "Nirai EX 1", "EX 1", "Impulse 1", "Impulse EX1", "EX1", "Nirai Impulse EX1", "Nirai Impulse EX I", "Impulse EX I", "Nirai EX I", "EX I", "Impulse I", "Impulse EXI", "EXI", "Nirai Impulse EXI"], "dps":7.5, "value":2500, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_Impulse_EX_1", "builtIn":False},
