@@ -2129,7 +2129,7 @@ print the total value of the specified user, use the calling user if no user is 
 @param message -- the discord message calling the command
 @param args -- string, can be empty or contain a user mention or ID
 """
-async def cmd_value(message, args):
+async def cmd_total_value(message, args):
     # If no user is specified, send the balance of the calling user
     if args == "":
         if not usersDB.userIDExists(message.author.id):
@@ -2140,7 +2140,7 @@ async def cmd_value(message, args):
     else:
         # Verify the passed user tag
         if not bbUtil.isMention(args) and not bbUtil.isInt(args):
-            await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "value` to display your own total value, or `" + bbConfig.commandPrefix + "value @userTag` to display someone else's total value!")
+            await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "total-value` to display your own total value, or `" + bbConfig.commandPrefix + "total-value @userTag` to display someone else's total value!")
             return
         if bbUtil.isMention(args):
             # Get the discord user object for the given tag
@@ -2156,7 +2156,7 @@ async def cmd_value(message, args):
         # send the user's balance
         await message.channel.send(":moneybag: **" + requestedUser.name + "**'s items and balance have a total value of **" + str(usersDB.getUser(requestedUser.id).getValue()) + " Credits**.")
     
-bbCommands.register("value", cmd_value)
+bbCommands.register("total-value", cmd_total_value)
 # dmCommands.register("value", cmd_value)
 
 
