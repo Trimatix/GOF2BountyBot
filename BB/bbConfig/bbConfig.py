@@ -4,7 +4,7 @@ shopRefreshStockPeriod = {"days":1, "hours":0, "minutes":0, "seconds":0}
 maxBountiesPerFaction = 5
 
 # can be "fixed" or "random"
-newBountyDelayType = "fixed"
+newBountyDelayType = "random"
 
 # only spawn bounties at this time
 newBountyFixedDailyTime = {"hours":18, "minutes":40, "seconds":0}
