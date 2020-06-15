@@ -106,30 +106,36 @@ def isRoleMention(mention):
 
 
 def fightShips(ship1, ship2, variancePercent):
+    # Fetch ship total healths
     ship1HP = ship1.getArmour() + ship1.getShield()
-    ship1HPVariance = ship1HP * variancePercent
     ship2HP = ship2.getArmour() + ship2.getShield()
-    ship2HPVariance = ship2HP * variancePercent
 
+    # Vary healths by +=variancePercent
+    ship1HPVariance = ship1HP * variancePercent
+    ship2HPVariance = ship2HP * variancePercent
     ship1HPVaried = random.randint(ship1HP - ship1HPVariance, ship1HP + ship1HPVariance)
     ship2HPVaried = random.randint(ship2HP - ship2HPVariance, ship2HP + ship2HPVariance)
 
+    # Fetch ship total DPSs
     ship1DPS = ship1.getDPS()
-    ship1DPSVariance = ship1DPS * variancePercent
     ship2DPS = ship2.getDPS()
-    ship2DPSVariance = ship2DPS * variancePercent
 
+    # Vary DPSs by +=variancePercent
+    ship1DPSVariance = ship1DPS * variancePercent
+    ship2DPSVariance = ship2DPS * variancePercent
     ship1DPSVaried = random.randint(ship1DPS - ship1DPSVariance, ship1DPS + ship1DPSVariance)
     ship2DPSVaried = random.randint(ship2DPS - ship2DPSVariance, ship2DPS + ship2DPSVariance)
 
+    # Handling to be implemented
+    # ship1Handling = ship1.getHandling()
+    # ship2Handling = ship2.getHandling()
+    # ship1HandlingPenalty = 
+
+    # Calculate ship TTKs
     ship1TTK = ship1HPVaried / ship2DPSVaried
     ship2TTK = ship2HPVaried / ship1DPSVaried
 
-    # ship1Handling = ship1.getHandling()
-    # ship2Handling = ship2.getHandling()
-
-    # ship1HandlingPenalty = 
-
+    # Return the ship with the longest TTK as the winner
     if ship1TTK > ship2TTK:
         return ship1
     elif ship2TTK > ship1TTK:

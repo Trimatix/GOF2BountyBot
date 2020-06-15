@@ -17,6 +17,7 @@ import operator
 from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .bbObjects import bbBounty, bbBountyConfig, bbUser
 from .bbObjects.items import bbShip
+from .bbObjects.tasks import TimedTask, TimedTaskAsync
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from . import bbUtil
 
@@ -82,7 +83,7 @@ bbCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB()
 # Commands usable in DMs
 # dmCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB()
 
-# Do not change this!
+# Do not change these!
 botLoggedIn = False
 
 
@@ -155,11 +156,14 @@ async def announceNewBounty(newBounty):
             # ensure the announceChannel is valid
             currentChannel = client.get_channel(currentGuild.getAnnounceChannelId())
             if currentChannel is not None:
-                if currentGuild.hasBountyNotifyRoleId():
-                    # announce to the given channel
-                    await currentChannel.send("<@&" + str(currentGuild.getBountyNotifyRoleId()) + "> " + msg, embed=bountyEmbed)
-                else:
-                    await currentChannel.send(msg, embed=bountyEmbed)
+                try:
+                    if currentGuild.hasBountyNotifyRoleId():
+                        # announce to the given channel
+                        await currentChannel.send("<@&" + str(currentGuild.getBountyNotifyRoleId()) + "> " + msg, embed=bountyEmbed)
+                    else:
+                        await currentChannel.send(msg, embed=bountyEmbed)
+                except discord.Forbidden:
+                    print("FAILED TO ANNOUNCE BOUNTY TO GUILD " + client.get_guild(currentGuild.id).name + " IN CHANNEL " + currentChannel.name)
 
             # TODO: may wish to add handling for invalid announceChannels - e.g remove them from the bbGuild object
 
@@ -285,6 +289,40 @@ def commaSplitNum(num):
     for i in range(len(num), 0, -3):
 	    outStr = outStr[0:i] + "," + outStr[i:]
     return outStr[:-1]
+
+
+def getFixedDelay(delayDict):
+    return timeDeltaFromDict(delayDict)
+
+
+def getFixedDailyTime(delayDict):
+    return (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(delayDict)) - datetime.utcnow()
+
+
+# TODO: Convert to random across two dicts
+def getRandomDelaySeconds(minmaxDict):
+    return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))
+
+
+async def refreshAndAnnounceAllShopStocks():
+    guildsDB.refreshAllShopStocks()
+    await announceNewShopStock()
+
+
+async def spawnAndAnnounceRandomBounty():
+    # ensure a new bounty can be created
+    if bountiesDB.canMakeBounty():
+        newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
+        # activate and announce the bounty
+        bountiesDB.addBounty(newBounty)
+        await announceNewBounty(newBounty)
+
+
+def saveAllDBs():
+    saveDB(bbConfig.userDBPath, usersDB)
+    saveDB(bbConfig.bountyDBPath, bountiesDB)
+    saveDB(bbConfig.guildDBPath, guildsDB)
+    print(datetime.now().strftime("%H:%M:%S: Data saved!"))
 
 
 
@@ -2172,7 +2210,7 @@ async def cmd_total_value(message, args):
         else:
             requestedUser = client.get_user(int(args))
         if requestedUser is None:
-            await message.channel.send(":x: Uknown user!")
+            await message.channel.send(":x: Unknown user!")
             return
         # ensure that the user is in the users database
         if not usersDB.userIDExists(requestedUser.id):
@@ -2182,6 +2220,12 @@ async def cmd_total_value(message, args):
     
 bbCommands.register("total-value", cmd_total_value)
 # dmCommands.register("value", cmd_value)
+
+
+"""
+"""
+async def cmd_duel(message, args):
+    pass
 
 
 
@@ -2944,6 +2988,7 @@ bbCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 
 """
 Create a database entry for new guilds when one is joined.
+TODO: Once deprecation databases are implemented, if guilds now store important information consider searching for them in deprecated
 
 @param guild -- the guild just joined.
 """
@@ -2955,6 +3000,7 @@ async def on_guild_join(guild):
 
 """
 Remove the database entry for any guilds the bot leaves.
+TODO: Once deprecation databases are implemented, if guilds now store important information consider moving them to deprecated.
 
 @param guild -- the guild just left.
 """
@@ -2968,93 +3014,52 @@ async def on_guild_remove(guild):
 Bot initialisation (called on bot login) and behaviour loops.
 Currently includes:
     - new bounty spawning
+    - shop stock refreshing
     - regular database saving to JSON
 
-TODO: the delays system needs to be completely rewritten. Currently it sums up the amount of time waited against each delayed task. Instead, it should generate a datetime at which the delay runs out, just like with bounty cooldowns.
+TODO: Add bounty expiry and reaction menu (e.g duel challenges) expiry
+TODO: Implement dynamic timedtask checking period
 """
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
-
     await client.change_presence(activity=discord.Game("Galaxy on Fire 2™ Full HD"))
-
     # bot is now logged in
     botLoggedIn = True
-    # amount of time waited since last bounty generation
-    currentBountyWait = 0
-    # amount of time waited since last save
-    currentSaveWait = 0
 
-    # new bounty delay period as a datetime.timedelta
-    newBountyDelayDelta = None
-    # fixed daily time to spawn bounties at as a datetime.timedelta
-    newBountyFixedDailyTime = None
+    bountyDelayGenerators = {"fixed":getFixedDelay, "random":getRandomDelaySeconds}
+    bountyDelayGeneratorArgs = {"fixed":bbConfig.newBountyFixedDelta, "random":{"min": bbConfig.newBountyDelayMin, "max": bbConfig.newBountyDelayMax}}
 
-    # the time that the next shop stock refresh should occur, calculated by 12am today + bbConfig.shopRefreshStockPeriod
-    # I may wish to add a fixed daily time this should occur at. To implement, simply generate it as a timedelta and ADD it here (and when regenerating nextShopRefresh lower down)
-    nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
+    try:
+        newBountyTT = TimedTaskAsync.DynamicRescheduleTaskAsync(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty, asyncExpiryFunction=True)
+    except KeyError:
+        raise ValueError("bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
+    
+    shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDailyTime, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
+    dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
 
+    if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
+        raise ValueError("bbConfig: Invalid timedTaskCheckingType '" + bbConfig.timedTaskCheckingType + "'")
 
-    # generate the amount of time to wait until the next bounty generation
-    if bbConfig.newBountyDelayType == "random":
-        # the amount of time to wait until generating a new bounty
-        currentNewBountyDelay = random.randint(bbConfig.newBountyDelayMin, bbConfig.newBountyDelayMax)
-    elif bbConfig.newBountyDelayType == "fixed":
-        # This system should be changed to isntead generate a currentNewBountyDelay, rather than repeatedly checking against newBountyFixedDailyTime
-        currentNewBountyDelay = 0
-        newBountyDelayDelta = timeDeltaFromDict(bbConfig.newBountyFixedDelta)
-        if bbConfig.newBountyFixedUseDailyTime:
-            newBountyFixedDailyTime = timeDeltaFromDict(bbConfig.newBountyFixedDailyTime)
+    # TODO: find next closest task and delay by that amount
+    # newTaskAdded = False
+    # nextTask
     
     # execute regular tasks while the bot is logged in
     while botLoggedIn:
-        # select for bbConfig.delayFactor - should be a factor of all delay times (poor system!)
-        await asyncio.sleep(bbConfig.delayFactor)
-        # track the time waited
-        currentBountyWait += bbConfig.delayFactor
-        currentSaveWait += bbConfig.delayFactor
+        if bbConfig.timedTaskCheckingType == "fixed":
+            await asyncio.sleep(bbConfig.timedTaskLatenessThresholdSeconds)
+        # elif bbConfig.timedTaskCheckingType == "dynamic":
 
-        # Refresh all shop stocks
-        if datetime.utcnow() >= nextShopRefresh:
-            guildsDB.refreshAllShopStocks()
-            await announceNewShopStock()
-            # Reset the shop stock refresh cooldown
-            nextShopRefresh = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(bbConfig.shopRefreshStockPeriod)
-        
-        # Make new bounties
-            # has the bounty delay period been reset manually? Is random 
-        if bbConfig.newBountyDelayReset or (bbConfig.newBountyDelayType == "random" and currentBountyWait >= currentNewBountyDelay) or \
-                (bbConfig.newBountyDelayType == "fixed" and timedelta(seconds=currentBountyWait) >= newBountyDelayDelta and ((not bbConfig.newBountyFixedUseDailyTime) or (bbConfig.newBountyFixedUseDailyTime and \
-                    datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + newBountyDelayDelta - timedelta(minutes=bbConfig.delayFactor) \
-                    <= datetime.utcnow() \
-                    <= datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + newBountyDelayDelta + timedelta(minutes=bbConfig.delayFactor)))):
-            
-            # mark bounty delay as reset
+        await shopRefreshTT.doExpiryCheck()
+
+        if bbConfig.newBountyDelayReset:
+            await newBountyTT.forceExpire()
             bbConfig.newBountyDelayReset = False
-            
-            # ensure a new bounty can be created
-            if bountiesDB.canMakeBounty():
-                newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
-                # activate and announce the bounty
-                bountiesDB.addBounty(newBounty)
-                await announceNewBounty(newBounty)
-
-            # reset and regenerate the delay time for this period
-            if bbConfig.newBountyDelayType == "random":
-                currentNewBountyDelay = random.randint(bbConfig.newBountyDelayMin, bbConfig.newBountyDelayMax)
-            else:
-                currentNewBountyDelay = newBountyDelayDelta
-                if bbConfig.newBountyFixedDeltaChanged:
-                    newBountyDelayDelta = timeDeltaFromDict(bbConfig.newBountyFixedDelta)
-            currentBountyWait = 0
-
-        # save the database
-        if currentSaveWait >= bbConfig.saveDelay:
-            saveDB(bbConfig.userDBPath, usersDB)
-            saveDB(bbConfig.bountyDBPath, bountiesDB)
-            saveDB(bbConfig.guildDBPath, guildsDB)
-            print(datetime.now().strftime("%H:%M:%S: Data saved!"))
-            currentSaveWait = 0
+        else:
+            await newBountyTT.doExpiryCheck()
+        
+        dbSaveTT.doExpiryCheck()
 
 
 """

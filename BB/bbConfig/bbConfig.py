@@ -4,7 +4,7 @@ shopRefreshStockPeriod = {"days":1, "hours":0, "minutes":0, "seconds":0}
 maxBountiesPerFaction = 5
 
 # can be "fixed" or "random"
-newBountyDelayType = "random"
+newBountyDelayType = "fixed"
 
 # only spawn bounties at this time
 newBountyFixedDailyTime = {"hours":18, "minutes":40, "seconds":0}
@@ -12,23 +12,36 @@ newBountyFixedDailyTime = {"hours":18, "minutes":40, "seconds":0}
 newBountyFixedUseDailyTime = False
 
 # time to wait inbetween spawning bounties
-newBountyFixedDelta = {"days":0, "hours":0, "minutes":30, "seconds":0}
-
-# do not change this!
-newBountyFixedDeltaChanged = False
-# do not change this!
-newBountyDelayReset = False
+newBountyFixedDelta = {"days":0, "hours":0, "minutes":40, "seconds":0}
 
 # when using random delay generation, use this as the minimum wait time in seconds
 newBountyDelayMin = 15 * 60
 # when using random delay generation, use this as the maximum wait time in seconds
 newBountyDelayMax = 1 * 60 * 60
 
+"""
+# DEPRECATED
 # the number of seconds to wait in between each save
 saveDelay = 30 * 60
+"""
 
+# The time to wait inbetween database autosaves.
+savePeriod = {"hours":1}
+
+
+"""
+# DEPRACATED
 # the number of seconds to wait before checking if a delay time is passed. should be a factor all delays given.
 delayFactor = 5
+"""
+
+# Whether to execute timedtask checks every timedTaskLatenessThresholdSeconds ("fixed"), or to calculate the delay to wait until the next TimedTask is schedule to expire ("dynamic")
+timedTaskCheckingType = "fixed"
+
+# How late a timed task acceptably be
+# I.e a scheduled task may expire up to timedTaskLatenessThresholdSeconds seconds after their intended expiration time.
+# replaces the depracated 'delayFactor' variable
+timedTaskLatenessThresholdSeconds = 10
 
 # The number of credits to award for each bPoint (each system in a criminal route)
 bPointsToCreditsRatio = 1000
@@ -88,3 +101,7 @@ dmSentEmoji = "📬"
 
 # max number of characters accepted by nameShip
 maxShipNickLength = 30
+
+# Do not touch these!
+newBountyDelayReset = False
+newBountyFixedDeltaChanged = False
