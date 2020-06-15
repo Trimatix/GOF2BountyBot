@@ -18,7 +18,7 @@ from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .bbObjects import bbBounty, bbBountyConfig, bbUser
 from .bbObjects.items import bbShip
 from .bbObjects.tasks import TimedTask, TimedTaskAsync
-from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
+from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB, TimedTaskDB
 from . import bbUtil
 
 
@@ -1648,6 +1648,7 @@ async def cmd_shop_buy(message, args):
 
     if item == "ship":
         requestedShip = requestedShop.shipsStock[itemNum - 1]
+        newShipValue = requestedShip.getValue()
         activeShip = requestedBBUser.activeShip
 
         # Check the item can be afforded
@@ -1671,7 +1672,7 @@ async def cmd_shop_buy(message, args):
             requestedShop.shipsStock.append(activeShip)
         
         requestedBBUser.equipShipObj(requestedShip, noSaveActive=sellOldShip)
-        requestedBBUser.credits -= requestedShip.getValue()
+        requestedBBUser.credits -= newShipValue
         requestedShop.shipsStock.remove(requestedShip)
         
         outStr = ":moneybag: Congratulations on your new **" + requestedShip.name + "**!"
@@ -3038,6 +3039,8 @@ async def on_ready():
     shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDailyTime, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
     dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
 
+    duelRequestTTDB = TimedTaskDB.TimedTaskAsyncDB()
+
     if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" + bbConfig.timedTaskCheckingType + "'")
 
@@ -3060,6 +3063,8 @@ async def on_ready():
             await newBountyTT.doExpiryCheck()
         
         dbSaveTT.doExpiryCheck()
+
+        duelRequestTTDB.doTaskChecking()
 
 
 """
