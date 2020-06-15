@@ -10,6 +10,7 @@ class TimedTaskAsync:
     hasExpiryFunctionArgs = False
     asyncExpiryFunction = False
     autoReschedule = False
+    gravestone = False
 
     def __init__(self, issueTime=None, expiryTime=None, expiryDelta=None, expiryFunction=None, expiryFunctionArgs={}, autoReschedule=False, asyncExpiryFunction=False):
         if expiryTime is None:
@@ -27,7 +28,8 @@ class TimedTaskAsync:
 
     
     def isExpired(self):
-        return self.expiryTime <= datetime.utcnow()
+        self.gravestone = self.gravestone or self.expiryTime <= datetime.utcnow()
+        return self.gravestone
 
 
     async def callExpiryFunction(self):
@@ -56,6 +58,7 @@ class TimedTaskAsync:
     async def reschedule(self, expiryTime=None, expiryDelta=None):
         self.issueTime = datetime.utcnow()
         self.expiryTime = self.issueTime + (self.expiryDelta if expiryDelta is None else expiryDelta) if expiryTime is None else expiryTime
+        self.gravestone = False
 
 
     async def forceExpire(self, callExpiryFunc=True):
@@ -64,6 +67,8 @@ class TimedTaskAsync:
             await self.callExpiryFunction()
         if self.autoReschedule:
             await self.reschedule()
+        else:
+            self.gravestone = True
 
 
 class DynamicRescheduleTaskAsync(TimedTaskAsync):
@@ -96,3 +101,4 @@ class DynamicRescheduleTaskAsync(TimedTaskAsync):
     async def reschedule(self):
         self.issueTime = datetime.utcnow()
         self.expiryTime = self.issueTime + await self.callDelayTimeGenerator()
+        self.gravestone = False

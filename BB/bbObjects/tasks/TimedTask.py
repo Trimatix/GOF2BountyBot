@@ -9,6 +9,7 @@ class TimedTask:
     hasExpiryFunction = False
     hasExpiryFunctionArgs = False
     autoReschedule = False
+    gravestone = False
 
     def __init__(self, issueTime=None, expiryTime=None, expiryDelta=None, expiryFunction=None, expiryFunctionArgs={}, autoReschedule=False):
         if expiryTime is None:
@@ -23,9 +24,26 @@ class TimedTask:
         self.hasExpiryFunctionArgs = expiryFunctionArgs != {}
         self.autoReschedule = autoReschedule
 
+
+    def __lt__(self, other):
+        return self.expiryTime < other.expiryTime
+
+
+    def __gt__(self, other):
+        return self.expiryTime > other.expiryTime
+
+
+    def __lte__(self, other):
+        return self.expiryTime <= other.expiryTime
+
+
+    def __gte__(self, other):
+        return self.expiryTime >= other.expiryTime
+
     
     def isExpired(self):
-        return self.expiryTime <= datetime.utcnow()
+        self.gravestone = self.gravestone or self.expiryTime <= datetime.utcnow()
+        return self.gravestone
 
 
     def callExpiryFunction(self):
@@ -48,6 +66,7 @@ class TimedTask:
     def reschedule(self, expiryTime=None, expiryDelta=None):
         self.issueTime = datetime.utcnow()
         self.expiryTime = self.issueTime + (self.expiryDelta if expiryDelta is None else expiryDelta) if expiryTime is None else expiryTime
+        self.gravestone = False
 
 
     def forceExpire(self, callExpiryFunc=True):
@@ -56,6 +75,8 @@ class TimedTask:
             self.callExpiryFunction()
         if self.autoReschedule:
             self.reschedule()
+        else:
+            self.gravestone = True
 
 
 class DynamicRescheduleTask(TimedTask):
@@ -81,3 +102,4 @@ class DynamicRescheduleTask(TimedTask):
     def reschedule(self):
         self.issueTime = datetime.utcnow()
         self.expiryTime = self.issueTime + self.callDelayTimeGenerator()
+        self.gravestone = False
