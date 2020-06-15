@@ -2265,11 +2265,11 @@ give 'accept' to accept another user's duel request targetted at you.
 async def cmd_duel(message, args):
     argsSplit = args.split(" ")
     if len(argsSplit) == 0:
-        await message.channel.send(":x: Please provide an action (`challenge`/`cancel`/`accept`), a user, and the stakes (an amount of credits)!")
+        await message.channel.send(":x: Please provide an action (`challenge`/`cancel`/`accept`/`reject`), a user, and the stakes (an amount of credits)!")
         return
     action = argsSplit[0]
-    if action not in ["challenge", "cancel", "accept"]:
-        await message.channel.send(":x: Invalid action! please choose from `challenge`, `cancel` or `accept`.")
+    if action not in ["challenge", "cancel", "accept", "reject"]:
+        await message.channel.send(":x: Invalid action! please choose from `challenge`, `cancel`, `reject` or `accept`.")
         return
     if action == "challenge":
         if len(argsSplit) < 3:
@@ -2342,6 +2342,21 @@ async def cmd_duel(message, args):
         await sourceBBUser.duelRequests[targetBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
         sourceBBUser.removeDuelChallengeTarget(targetBBUser)
         await message.channel.send(":white_check_mark: You have cancelled your duel challenge for **" + str(requestedUser) + "**.")
+
+    elif action == "reject":
+        if not targetBBUser.hasDuelChallengeFor(sourceBBUser):
+            await message.channel.send(":x: This user does not have an active duel challenge for you! Did it expire?")
+            return
+        
+        await targetBBUser.duelRequests[sourceBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
+        targetBBUser.removeDuelChallengeTarget(sourceBBUser)
+        await message.channel.send(":white_check_mark: You have rejected **" + str(requestedUser) + "**'s duel challenge.")
+        if message.guild.get_member(targetBBUser.id) is None:
+            targerDCGuild = findBBUserDCGuild(targetBBUser)
+                if targerDCGuild is not None:
+                    targetBBGuild = guildsDB.getGuild(targerDCGuild.id)
+                    if targetBBGuild.hasPlayChannel():
+                        client.get_channel(targetBBGuild.getPlayChannelId()).send(":-1: <@" + requestedBBUser.id + ">, **" + str(message.author) + "** has rejected your duel request!")
     
     elif action == "accept":
         if not targetBBUser.hasDuelChallengeFor(sourceBBUser):
