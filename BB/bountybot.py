@@ -1459,10 +1459,7 @@ async def cmd_shop(message, args):
     item = "all"
     if args.rstrip("s") in bbConfig.validItemNames:
         item = args.rstrip("s")
-    elif args == "":
-        await message.channel.send(":x: Please request an item type! (ship/weapon/module/turret/all)")
-        return
-    else:
+    elif args != "":
         await message.channel.send(":x: Invalid item type! (ship/weapon/module/turret/all)")
         return
 
