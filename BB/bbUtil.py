@@ -113,18 +113,27 @@ def fightShips(ship1, ship2, variancePercent):
     # Vary healths by +=variancePercent
     ship1HPVariance = ship1HP * variancePercent
     ship2HPVariance = ship2HP * variancePercent
-    ship1HPVaried = random.randint(ship1HP - ship1HPVariance, ship1HP + ship1HPVariance)
-    ship2HPVaried = random.randint(ship2HP - ship2HPVariance, ship2HP + ship2HPVariance)
+    ship1HPVaried = random.randint(int(ship1HP - ship1HPVariance), int(ship1HP + ship1HPVariance))
+    ship2HPVaried = random.randint(int(ship2HP - ship2HPVariance), int(ship2HP + ship2HPVariance))
 
     # Fetch ship total DPSs
     ship1DPS = ship1.getDPS()
     ship2DPS = ship2.getDPS()
 
+    if ship1DPS == 0:
+        if ship2DPS == 0:
+            return None
+        return ship2
+    if ship2DPS == 0:
+        if ship1DPS == 0:
+            return None
+        return ship1
+
     # Vary DPSs by +=variancePercent
     ship1DPSVariance = ship1DPS * variancePercent
     ship2DPSVariance = ship2DPS * variancePercent
-    ship1DPSVaried = random.randint(ship1DPS - ship1DPSVariance, ship1DPS + ship1DPSVariance)
-    ship2DPSVaried = random.randint(ship2DPS - ship2DPSVariance, ship2DPS + ship2DPSVariance)
+    ship1DPSVaried = random.randint(int(ship1DPS - ship1DPSVariance), int(ship1DPS + ship1DPSVariance))
+    ship2DPSVaried = random.randint(int(ship2DPS - ship2DPSVariance), int(ship2DPS + ship2DPSVariance))
 
     # Handling to be implemented
     # ship1Handling = ship1.getHandling()

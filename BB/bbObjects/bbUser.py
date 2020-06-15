@@ -16,15 +16,21 @@ class bbUser:
     bountyCooldownEnd = -1
     systemsChecked = 0
     bountyWins = 0
+    lastSeenGuildId = -1
+    hasLastSeenGuildId = False
 
     activeShip = None
     inactiveShips = []
     inactiveModules = []
     inactiveWeapons = []
     inactiveTurrets = []
+
+    # dict of targetBBUser:DuelRequest
+    duelRequests = {}
+    duelWins = 0
     
 
-    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[]):
+    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -67,6 +73,11 @@ class bbUser:
         self.inactiveModules = inactiveModules
         self.inactiveWeapons = inactiveWeapons
         self.inactiveTurrets = inactiveTurrets
+
+        self.lastSeenGuildId = lastSeenGuildId
+        self.haslastSeenGuildId = lastSeenGuildId != -1
+
+        self.duelWins = duelWins
     
 
     def resetUser(self):
@@ -186,7 +197,8 @@ class bbUser:
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
-                "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict}
+                "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "lastSeenGuildId":self.lastSeenGuildId,
+                "duelWins": self.duelWins}
 
 
     def userDump(self):
@@ -226,7 +238,6 @@ class bbUser:
             return modulesValue + turretsValue + weaponsValue + shipsValue + self.activeShip.getValue() + self.credits
 
 
-
     def getInactivesByName(self, item):
         if item == "all" or item not in bbConfig.validItemNames:
             raise ValueError("Invalid item type: " + item)
@@ -240,6 +251,30 @@ class bbUser:
             return self.inactiveTurrets
         else:
             raise NotImplementedError("Valid, not unrecognised item type: " + item)
+
+
+    def hasDuelChallengeFor(self, targetBBUser):
+        return targetBBUser in self.duelRequests
+
+
+    def addDuelChallenge(self, duelReq):
+        if duelReq.sourceBBUser is not self:
+            raise ValueError("Attempted to add a DuelRequest for a different source user: " + str(duelReq.sourceBBUser.id))
+        if self.hasDuelChallengeFor(duelReq.targetBBUser):
+            raise ValueError("Attempted to add a DuelRequest for an already challenged user: " + str(duelReq.sourceBBUser.id))
+        if duelReq.targetBBUser is self:
+            raise ValueError("Attempted to add a DuelRequest for self: " + str(duelReq.sourceBBUser.id))
+        self.duelRequests[duelReq.targetBBUser] = duelReq
+
+
+    def removeDuelChallengeObj(self, duelReq):
+        if not duelReq.targetBBUser in self.duelRequests or self.duelRequests[duelReq.targetBBUser] is not duelReq:
+            raise ValueError("Duel request not found: " + str(duelReq.sourceBBUser.id) + " -> " + str(duelReq.sourceBBUser.id))
+        del self.duelRequests[duelReq.targetBBUser]
+    
+    
+    def removeDuelChallengeTarget(self, duelTarget):
+        self.removeDuelChallengeObj(self.duelRequests[duelTarget])
 
 
     def __str__(self):
@@ -272,4 +307,5 @@ def fromDict(id, userDict):
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
                     bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
-                    inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets)
+                    inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
+                    duelWins=userDict["duelWins"] if "duelWins" in userDict else 0)

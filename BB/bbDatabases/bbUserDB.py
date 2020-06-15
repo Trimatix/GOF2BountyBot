@@ -44,6 +44,10 @@ class bbUserDB:
             raise KeyError("Attempted to add a user that is already in this bbUserDB: " + str(userObj))
         self.users[userObj.id] = userObj
 
+
+    def getOrAddID(self, id):
+        return self.getUser(id) if self.userIDExists(id) else self.addUser(id)
+
     
     def removeUser(self, id):
         id = self.validateID(id)

@@ -15,11 +15,12 @@ import operator
 
 # may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .bbObjects import bbBounty, bbBountyConfig, bbUser
+from .bbObjects import bbBounty, bbBountyConfig, bbUser, DuelRequest
 from .bbObjects.items import bbShip
 from .bbObjects.tasks import TimedTask, TimedTaskAsync
-from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB, TimedTaskDB
-from . import bbUtil
+from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
+from .bbDatabases.tasks import TimedTaskAsyncHeap
+from . import bbUtil, ActiveTimedTasks
 
 
 
@@ -324,6 +325,34 @@ def saveAllDBs():
     saveDB(bbConfig.guildDBPath, guildsDB)
     print(datetime.now().strftime("%H:%M:%S: Data saved!"))
 
+
+async def expireAndAnnounceDuelReq(duelReqDict):
+    duelReq = duelReqDict["duelReq"]
+    await duelReq.duelTimeoutTask.forceExpire(callExpiryFunc=False)
+    if duelReq.sourceBBGuild.hasPlayChannel():
+        playCh = client.get_channel(duelReq.sourceBBGuild.getPlayChannelId())
+        if playCh is not None:
+            await playCh.send(":stopwatch: <@" + str(duelReq.sourceBBUser.id) + ">, your duel challenge for **" + str(client.get_user(duelReq.targetBBUser.id)) + "** has now expired.")
+    duelReq.sourceBBUser.removeDuelChallengeObj(duelReq)
+
+
+def findBBUserDCGuild(user):
+    if user.hasLastSeenGuildId:
+        lastSeenGuild = client.get_guild(user.lastSeenGuldId)
+        if lastSeenGuild is None or lastSeenGuild.get_member(user.id) is None:
+            user.hasLastSeenGuildId = False
+        else:
+            return lastSeenGuild
+
+    if not user.hasLastSeenGuildId:
+        for guild in guildsDB.guilds.values():
+            lastSeenGuild = client.get_guild(guild.id)
+            if lastSeenGuild is not None and lastSeenGuild.get_member(user.id) is not None:
+                user.lastSeenGuildId = guild.id
+                user.hasLastSeenGuildId = True
+                return guild
+    
+    return None
 
 
 ####### SYSTEM COMMANDS #######
@@ -2224,10 +2253,164 @@ bbCommands.register("total-value", cmd_total_value)
 
 
 """
+Challenge another player to a duel, with an amount of credits as the stakes.
+The winning user is given stakes credits, the loser has stakes credits taken away.
+give 'challenge' to create a new duel request.
+give 'cancel' to cancel an existing duel request.
+give 'accept' to accept another user's duel request targetted at you.
+
+@param message -- the discord message calling the command
+@param args -- string containing the action (challenge/cancel/accept), a target user (mention or ID), and the stakes (int amount of credits). stakes are only required when "challenge" is specified.
 """
 async def cmd_duel(message, args):
-    pass
+    argsSplit = args.split(" ")
+    if len(argsSplit) == 0:
+        await message.channel.send(":x: Please provide an action (`challenge`/`cancel`/`accept`), a user, and the stakes (an amount of credits)!")
+        return
+    action = argsSplit[0]
+    if action not in ["challenge", "cancel", "accept"]:
+        await message.channel.send(":x: Invalid action! please choose from `challenge`, `cancel` or `accept`.")
+        return
+    if action == "challenge":
+        if len(argsSplit) < 3:
+            await message.channel.send(":x: Please provide a user and the stakes (an amount of credits)!")
+            return
+    else:
+        if len(argsSplit) < 2:
+            await message.channel.send(":x: Please provide a user!")
+            return
+    if not bbUtil.isMention(argsSplit[1]) and not bbUtil.isInt(argsSplit[1]):
+        await message.channel.send(":x: Invalid user!")
+        return
+    if bbUtil.isMention(argsSplit[1]):
+        requestedUser = client.get_user(int(argsSplit[1].strip("<@!").rstrip(">")))
+    else:
+        requestedUser = client.get_user(int(argsSplit[1]))
+    if requestedUser is None:
+        await message.channel.send(":x: User not found!")
+        return
+    if requestedUser.id == message.author.id:
+        await message.channel.send(":x: You can't challenge yourself!")
+        return
+    if action == "challenge" and (not bbUtil.isInt(argsSplit[2]) or int(argsSplit[2]) < 0):
+        await message.channel.send(":x: Invalid stakes (amount of credits)!")
+        return
 
+    sourceBBUser = usersDB.getOrAddID(message.author.id)
+    targetBBUser = usersDB.getOrAddID(requestedUser.id)
+
+    if action == "challenge":
+        stakes = int(argsSplit[2])
+        if sourceBBUser.hasDuelChallengeFor(targetBBUser):
+            await message.channel.send(":x: You already have a duel challenge pending for " + requestedUser.name + "! To make a new one, cancel it first. (see `$help duel`)")
+            return
+
+        try:
+            newDuelReq = DuelRequest.DuelRequest(sourceBBUser, targetBBUser, stakes, None, guildsDB.getGuild(message.guild.id))
+            duelTT = TimedTaskAsync.TimedTaskAsync(expiryDelta=timeDeltaFromDict(bbConfig.duelReqExpiryTime), expiryFunction=expireAndAnnounceDuelReq, expiryFunctionArgs={"duelReq":newDuelReq}, asyncExpiryFunction=True)
+            newDuelReq.duelTimeoutTask = duelTT
+            ActiveTimedTasks.duelRequestTTDB.scheduleTask(duelTT)
+            sourceBBUser.addDuelChallenge(newDuelReq)
+        except KeyError:
+            await message.channel.send(":x: User not found! Did they leave the server?")
+            return
+        except Exception:
+            await message.channel.send(":woozy_face: An unexpected error occurred! Tri, what did you do...")
+            return
+
+        expiryTimesSplit = duelTT.expiryTime.strftime("%e %B %H %M").split(" ")
+        duelExpiryTimeString = "This duel request will expire on the **" + expiryTimesSplit[0] + getNumExtension(int(expiryTimesSplit[0])) + "** of **" + expiryTimesSplit[1] + "**, at **" + expiryTimesSplit[2] + ":" + expiryTimesSplit[3] + "** CST."
+
+        if message.guild.get_member(requestedUser.id) is None:
+            targetUserDCGuild = findBBUserDCGuild(targetBBUser)
+            if targetUserDCGuild is None:
+                await message.channel.send(":x: User not found! Did they leave the server?")
+                return
+            else:
+                targetUserBBGuild = guildsDB.getGuild(targetUserDCGuild.id)
+                if targetUserBBGuild.hasPlayChannel():
+                    await client.get_channel(targetUserBBGuild.getPlayChannelId()).send(":crossed_swords: **" + str(message.author) + "** challenged " + requestedUser.mention + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
+            await message.channel.send(":crossed_swords: " + message.author.mention + " challenged **" + str(requestedUser) + "** to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
+        else:
+            await message.channel.send(":crossed_swords: " + message.author.mention + " challenged " + requestedUser.mention + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
+    
+    elif action == "cancel":
+        if not sourceBBUser.hasDuelChallengeFor(targetBBUser):
+            await message.channel.send(":x: You do not have an active duel challenge for this user! Did it already expire?")
+            return
+        
+        await sourceBBUser.duelRequests[targetBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
+        sourceBBUser.removeDuelChallengeTarget(targetBBUser)
+        await message.channel.send(":white_check_mark: You have cancelled your duel challenge for **" + str(requestedUser) + "**.")
+    
+    elif action == "accept":
+        if not targetBBUser.hasDuelChallengeFor(sourceBBUser):
+            await message.channel.send(":x: This user does not have an active duel challenge for you! Did it expire?")
+            return
+
+        requestedDuel = targetBBUser.duelRequests[sourceBBUser]
+
+        if sourceBBUser.credits < requestedDuel.stakes:
+            await message.channel.send(":x: You do not have enough credits to accept this duel request! (" + str(requestedDuel.stakes) + ")")
+            return
+        if targetBBUser.credits < requestedDuel.stakes:
+            await message.channel.send(":x:" + str(requestedUser) + " does not have enough credits to fight this duel! (" + str(requestedDuel.stakes) + ")")
+            return
+        
+        winningShip = bbUtil.fightShips(sourceBBUser.activeShip, targetBBUser.activeShip, bbConfig.duelVariancePercent)
+
+        if winningShip is sourceBBUser.activeShip:
+            winningBBUser = sourceBBUser
+            losingBBUser = targetBBUser
+        elif winningShip is targetBBUser.activeShip:
+            winningBBUser = targetBBUser
+            losingBBUser = sourceBBUser
+        else:
+            winningBBUser = None
+            losingBBUser = None
+
+        # winningBBUser = sourceBBUser if winningShip is sourceBBUser.activeShip else (targetBBUser if winningShip is targetBBUser.activeShip else None)
+        # losingBBUser = None if winningBBUser is None else (sourceBBUser if winningBBUser is targetBBUser else targetBBUser)
+
+        if winningBBUser is None:
+            await message.channel.send(":crossed_swords: **Stalemate!** " + str(requestedUser) + " and " + message.author.mention + " drew in a duel!")
+            if message.guild.get_member(requestedUser.id) is None:
+                targerDCGuild = findBBUserDCGuild(targetBBUser)
+                if targerDCGuild is not None:
+                    targetBBGuild = guildsDB.getGuild(targerDCGuild.id)
+                    if targetBBGuild.hasPlayChannel():
+                        client.get_channel(targetBBGuild.getPlayChannelId()).send(":crossed_swords: **Stalemate!** " + targerDCGuild.get_member(requestedUser.id).mention + " and " + str(message.author) + " drew in a duel!")
+            else:
+                await message.channel.send(":crossed_swords: **Stalemate!** " + requestedUser.mention + " and " + message.author.mention + " drew in a duel!")
+        else:
+            if message.guild.get_member(winningBBUser.id) is None:
+                await message.channel.send(":crossed_swords: **Fight!** " + str(client.get_user(winningBBUser.id)) + " beat " + client.get_user(losingBBUser.id).mention + " in a duel!")
+                winnerDCGuild = findBBUserDCGuild(winningBBUser)
+                if winnerDCGuild is not None:
+                    winnerBBGuild = guildsDB.getGuild(winnerDCGuild.id)
+                    if winnerBBGuild.hasPlayChannel():
+                        client.get_channel(winnerBBGuild.getPlayChannelId()).send(":crossed_swords: **Fight!** " + winnerDCGuild.get_member(winningBBUser.id).mention + " beat " + str(client.get_user(losingBBUser.id)) + " in a duel!")
+            else:
+                winningBBUser.credits += requestedDuel.stakes
+                losingBBUser.credits -= requestedDuel.stakes
+                creditsMsg = "The stakes were **" + str(requestedDuel.stakes) + "** credit" + ("s" if requestedDuel.stakes != 1 else "") + ".\n**" + client.get_user(winningBBUser.id).name + "** now has **" + str(winningBBUser.credits) + " credits**.\n**" +  client.get_user(losingBBUser.id).name + "** now has **" + str(losingBBUser.credits) + " credits**."
+                if message.guild.get_member(losingBBUser.id) is None:
+                    await message.channel.send(":crossed_swords: **Fight!** " + client.get_user(winningBBUser.id).mention + " beat " + str(client.get_user(losingBBUser.id)) + " in a duel!\n" + creditsMsg)
+                    loserDCGuild = findBBUserDCGuild(losingBBUser)
+                    if loserDCGuild is not None:
+                        loserBBGuild = guildsDB.getGuild(loserDCGuild.id)
+                        if loserBBGuild.hasPlayChannel():
+                            client.get_channel(loserBBGuild.getPlayChannelId()).send(":crossed_swords: **Fight!** " + str(client.get_user(winningBBUser.id)) + " beat " + loserDCGuild.get_member(losingBBUser.id).mention + " in a duel!\n" + creditsMsg)
+                else:
+                    await message.channel.send(":crossed_swords: **Fight!** " + client.get_user(winningBBUser.id).mention + " beat " + client.get_user(losingBBUser.id).mention + " in a duel!\n" + creditsMsg)
+
+        await targetBBUser.duelRequests[sourceBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
+        targetBBUser.removeDuelChallengeObj(requestedDuel)
+
+bbCommands.register("duel", cmd_duel)
+
+        
+            
 
 
 ####### ADMINISTRATOR COMMANDS #######
@@ -3032,14 +3215,14 @@ async def on_ready():
     bountyDelayGeneratorArgs = {"fixed":bbConfig.newBountyFixedDelta, "random":{"min": bbConfig.newBountyDelayMin, "max": bbConfig.newBountyDelayMax}}
 
     try:
-        newBountyTT = TimedTaskAsync.DynamicRescheduleTaskAsync(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty, asyncExpiryFunction=True)
+        ActiveTimedTasks.newBountyTT = TimedTaskAsync.DynamicRescheduleTaskAsync(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty, asyncExpiryFunction=True)
     except KeyError:
         raise ValueError("bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
-    shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDailyTime, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
-    dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
+    ActiveTimedTasks.shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDailyTime, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
+    ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
 
-    duelRequestTTDB = TimedTaskDB.TimedTaskAsyncDB()
+    ActiveTimedTasks.duelRequestTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()
 
     if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" + bbConfig.timedTaskCheckingType + "'")
@@ -3054,17 +3237,17 @@ async def on_ready():
             await asyncio.sleep(bbConfig.timedTaskLatenessThresholdSeconds)
         # elif bbConfig.timedTaskCheckingType == "dynamic":
 
-        await shopRefreshTT.doExpiryCheck()
+        await ActiveTimedTasks.shopRefreshTT.doExpiryCheck()
 
         if bbConfig.newBountyDelayReset:
-            await newBountyTT.forceExpire()
+            await ActiveTimedTasks.newBountyTT.forceExpire()
             bbConfig.newBountyDelayReset = False
         else:
-            await newBountyTT.doExpiryCheck()
+            await ActiveTimedTasks.newBountyTT.doExpiryCheck()
         
-        dbSaveTT.doExpiryCheck()
+        ActiveTimedTasks.dbSaveTT.doExpiryCheck()
 
-        duelRequestTTDB.doTaskChecking()
+        await ActiveTimedTasks.duelRequestTTDB.doTaskChecking()
 
 
 """

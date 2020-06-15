@@ -1,3 +1,10 @@
+# Amount of time before a duel request expires
+duelReqExpiryTime = {"ds":1}
+# duelReqExpiryTime as a user-friendly string for printing
+duelReqExpiryTimeStr = "1 day"
+# The amount to vary ship stats (+-) by before executing a duel
+duelVariancePercent = 0.05
+
 # Amount of time to wait between refreshing stock of all shops
 shopRefreshStockPeriod = {"days":1, "hours":0, "minutes":0, "seconds":0}
 

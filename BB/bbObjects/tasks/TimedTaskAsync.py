@@ -26,6 +26,22 @@ class TimedTaskAsync:
         self.asyncExpiryFunction = asyncExpiryFunction
         self.autoReschedule = autoReschedule
 
+
+    def __lt__(self, other):
+        return self.expiryTime < other.expiryTime
+
+
+    def __gt__(self, other):
+        return self.expiryTime > other.expiryTime
+
+
+    def __lte__(self, other):
+        return self.expiryTime <= other.expiryTime
+
+
+    def __gte__(self, other):
+        return self.expiryTime >= other.expiryTime
+
     
     def isExpired(self):
         self.gravestone = self.gravestone or self.expiryTime <= datetime.utcnow()

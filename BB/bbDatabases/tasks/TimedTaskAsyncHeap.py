@@ -1,8 +1,9 @@
 from ...bbObjects.tasks import TimedTaskAsync
-from heapq import heappop, heappush, heap
+from heapq import heappop, heappush
 
 class TimedTaskAsyncHeap:
     # taskType = None
+    tasksHeap = []
     expiryFunction = None
     expiryFunctionArgs = {}
     hasExpiryFunction = False
@@ -19,12 +20,12 @@ class TimedTaskAsyncHeap:
 
 
     def cleanHead(self):
-        while heap[0].gravestone:
-            heappop()
+        while len(self.tasks) > 0 and self.tasksHeap[0].gravestone:
+            heappop(self.tasksHeap)
 
     
     def scheduleTask(self, task):
-        heappush(task)
+        heappush(self.tasksHeap, task)
 
     
     # overrides task autoRescheduling
@@ -47,10 +48,10 @@ class TimedTaskAsyncHeap:
 
     
     async def doTaskChecking(self):
-        while heap[0].gravestone or await heap[0].doExpiryCheck():
+        while len(self.tasksHeap) > 0 and (self.tasksHeap[0].gravestone or await self.tasksHeap[0].doExpiryCheck()):
             if self.hasExpiryFunction:
                 await self.callExpiryFunction()
-            task = heappop()
+            task = heappop(self.tasksHeap)
             # push autorescheduling tasks back onto the heap
             if not task.gravestone:
-                heappush(task)
+                heappush(self.tasksHeap, task)
