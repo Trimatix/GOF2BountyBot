@@ -146,8 +146,14 @@ def fightShips(ship1, ship2, variancePercent):
 
     # Return the ship with the longest TTK as the winner
     if ship1TTK > ship2TTK:
-        return ship1
+        winningShip = ship1
     elif ship2TTK > ship1TTK:
-        return ship2
+        winningShip = ship2
     else:
-        return None
+        winningShip = None
+    
+    return {"winningShip":winningShip,
+            "ship1":{"health":{"stock":ship1HP, "varied":ship1HPVaried},
+                    "DPS":{"stock":ship1DPS, "varied:":ship1DPSVaried}},
+            "ship2":{"health":{"stock":ship2HP, "varied":ship2HPVaried},
+                    "DPS":{"stock":ship2DPS, "varied:":ship2DPSVaried}}}
