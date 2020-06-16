@@ -966,9 +966,29 @@ async def cmd_ship(message, args):
         statsEmbed.add_field(name="Cargo",value=str(itemObj.getCargo()))
         statsEmbed.add_field(name="Handling",value=str(itemObj.getHandling()))
         statsEmbed.add_field(name="Max Primaries",value=str(itemObj.getMaxPrimaries()))
+        if len(itemObj.weapons) > 0:
+            weaponStr = "*["
+            for weapon in itemObj.weapons:
+                weaponStr += weapon.name + ", "
+            statsEmbed.add_field(name="Equipped Primaries",value=weaponStr[:-2] + "]*")
         statsEmbed.add_field(name="Max Secondaries",value=str(itemObj.getNumSecondaries()))
+        # if len(itemObj.secondaries) > 0:
+        #     secondariesStr = "*["
+        #     for secondary in itemObj.secondaries:
+        #         secondariesStr += secondary.name + ", "
+        #     statsEmbed.add_field(name="Equipped Secondaries",value=secondariesStr[:-2] + "]*")
         statsEmbed.add_field(name="Turret Slots",value=str(itemObj.getMaxTurrets()))
+        if len(itemObj.turrets) > 0:
+            turretsStr = "*["
+            for turret in itemObj.turrets:
+                turretsStr += turret.name + ", "
+            statsEmbed.add_field(name="Equipped Turrets",value=turretsStr[:-2] + "]*")
         statsEmbed.add_field(name="Modules Slots",value=str(itemObj.getMaxModules()))
+        if len(itemObj.modules) > 0:
+            modulesStr = "*["
+            for module in itemObj.modules:
+                modulesStr += module.name + ", "
+            statsEmbed.add_field(name="Equipped Modules",value=modulesStr[:-2] + "]*")
         statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
