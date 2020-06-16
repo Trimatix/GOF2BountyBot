@@ -93,7 +93,7 @@ shopDefaultModulesNum = 5
 shopDefaultTurretsNum = 2
 
 # bbTurret is the only item that has a probability not to be spawned. This metric indicates the percentage chance of turrets being stocked on a given day
-turretSpawnProbability = 33
+turretSpawnProbability = 45
 
 # The maximum number of items that will be displayed per page of a user's hangar, when all item types are requested
 maxItemsPerHangarPageAll = 3
