@@ -9,6 +9,7 @@ class bbTurret(bbAliasable.Aliasable):
     manufacturer = ""
     icon = ""
     hasIcon = False
+    shopSpawnRate = 0
 
     def __init__(self, name, aliases, dps=0.0, value=0, wiki="", manufacturer="", icon=""):
         super(bbTurret, self).__init__(name, aliases)

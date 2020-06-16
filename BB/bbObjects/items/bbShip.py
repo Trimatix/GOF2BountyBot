@@ -27,6 +27,7 @@ class bbShip(bbAliasable.Aliasable):
     turrets = []
 
     upgradesApplied = []
+    shopSpawnRate = 0
 
 
     def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon=""):
@@ -45,6 +46,8 @@ class bbShip(bbAliasable.Aliasable):
         self.hasIcon = icon != ""
 
         self.name = name
+        if self.name in bbData.builtInShipData:
+            self.shopSpawnRate = bbData.shipKeySpawnRates[self.name]
         self.armour = armour
         self.cargo = cargo
         self.numSecondaries = numSecondaries

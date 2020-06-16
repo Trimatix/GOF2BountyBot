@@ -1,5 +1,5 @@
 # Amount of time before a duel request expires
-duelReqExpiryTime = {"ds":1}
+duelReqExpiryTime = {"days":1}
 # duelReqExpiryTime as a user-friendly string for printing
 duelReqExpiryTimeStr = "1 day"
 # The amount to vary ship stats (+-) by before executing a duel

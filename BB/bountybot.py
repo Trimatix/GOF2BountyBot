@@ -969,6 +969,7 @@ async def cmd_ship(message, args):
         statsEmbed.add_field(name="Max Secondaries",value=str(itemObj.getNumSecondaries()))
         statsEmbed.add_field(name="Turret Slots",value=str(itemObj.getMaxTurrets()))
         statsEmbed.add_field(name="Modules Slots",value=str(itemObj.getMaxModules()))
+        statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1014,6 +1015,7 @@ async def cmd_weapon(message, args):
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Weapon File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
+        statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1059,6 +1061,7 @@ async def cmd_module(message, args):
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Module File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="Stats:",value=str(itemObj.statsStringShort()))
+        statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1104,6 +1107,7 @@ async def cmd_turret(message, args):
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Turret File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
+        statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
