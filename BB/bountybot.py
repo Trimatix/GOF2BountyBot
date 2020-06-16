@@ -338,7 +338,7 @@ async def expireAndAnnounceDuelReq(duelReqDict):
 
 def findBBUserDCGuild(user):
     if user.hasLastSeenGuildId:
-        lastSeenGuild = client.get_guild(user.lastSeenGuldId)
+        lastSeenGuild = client.get_guild(user.lastSeenGuildId)
         if lastSeenGuild is None or lastSeenGuild.get_member(user.id) is None:
             user.hasLastSeenGuildId = False
         else:
@@ -669,7 +669,7 @@ async def cmd_check(message, args):
         diff = datetime.utcfromtimestamp(usersDB.getUser(message.author.id).bountyCooldownEnd) - datetime.utcnow()
         minutes = int(diff.total_seconds() / 60)
         seconds = int(diff.total_seconds() % 60)
-        await message.channel.send(":stopwatch: **" + message.author.name + "**, your *Khador drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
+        await message.channel.send(":stopwatch: **" + message.author.name + "**, your *Khador Drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
     
 bbCommands.register("check", cmd_check)
 bbCommands.register("search", cmd_check)
