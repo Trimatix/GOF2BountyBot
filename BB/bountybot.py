@@ -3256,7 +3256,7 @@ async def on_ready():
     except KeyError:
         raise ValueError("bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
-    ActiveTimedTasks.shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDailyTime, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
+    ActiveTimedTasks.shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
     ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
 
     ActiveTimedTasks.duelRequestTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()
