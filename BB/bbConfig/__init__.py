@@ -125,4 +125,4 @@ for keyIndex in range(len(sortedTurretKeys) - 1, -1, -1):
 numRankedTurretObjs = len(bbData.builtInTurretObjs)
 
 for turret in bbData.builtInTurretObjs.values():
-    turret.shopSpawnRate = round((turretKeysNum[turret.name] / numRankedTurretObjs) * 100, 2)
+    turret.shopSpawnRate = round(((turretKeysNum[turret.name] / numRankedTurretObjs) * 100) * (bbConfig.turretSpawnProbability / 100), 2)
