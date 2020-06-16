@@ -350,7 +350,7 @@ def findBBUserDCGuild(user):
             if lastSeenGuild is not None and lastSeenGuild.get_member(user.id) is not None:
                 user.lastSeenGuildId = guild.id
                 user.hasLastSeenGuildId = True
-                return guild
+                return lastSeenGuild
     
     return None
 
