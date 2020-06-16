@@ -205,100 +205,100 @@ builtInShipData = {# Terran
                     "Kinzer RS": {"name": "Kinzer RS", "manufacturer": "kaamo club", "maxPrimaries": 4, "maxTurrets": 0, "maxModules": 15, "armour": 420, "cargo": 65, "numSecondaries": 4, "handling": 125, "value": 8930000, "aliases": ["KinzerRS"], "wiki": "https://galaxyonfire.fandom.com/wiki/Kinzer_RS", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/720787863171629056/kinzer_rs.png"}}
                     
 builtInModuleData = {   # armour
-                        "E2 Exoclad": {"name": "E2 Exoclad", "aliases": ["E2", "Exoclad", "Exoclad E2"], "armour": 40, "value": 1070, "wiki": "https://galaxyonfire.fandom.com/wiki/E2_Exoclad", "builtIn":False},
-                        "E4 Ultra Lamina": {"name": "E4 Ultra Lamina", "aliases": ["E4", "Lamina", "E4 Ultra", "E4 Lamina", "Ultra Lamina"], "armour": 80, "value": 4705, "wiki": "https://galaxyonfire.fandom.com/wiki/E4_Ultra_Lamina", "builtIn":False},
-                        "E6 D-X Plating": {"name": "E6 D-X Plating", "aliases": ["E6", "D-X Plating", "E6 Plating", "E6 D-X"], "armour": 110, "value": 20171, "wiki": "https://galaxyonfire.fandom.com/wiki/E6_D-X_Plating", "builtIn":False},
-                        "D'iol": {"name": "D'iol", "aliases": ["Diol"], "armour": 160, "value": 51449, "wiki": "https://galaxyonfire.fandom.com/wiki/D%27iol", "builtIn":False},
-                        "T'yol": {"name": "T'yol", "aliases": ["Tyol"], "armour": 250, "value": 117922, "wiki": "https://galaxyonfire.fandom.com/wiki/T%27yol", "builtIn":False},
+                        "E2 Exoclad": {"type": "armour", "name": "E2 Exoclad", "aliases": ["E2", "Exoclad", "Exoclad E2"], "armour": 40, "value": 1070, "wiki": "https://galaxyonfire.fandom.com/wiki/E2_Exoclad", "builtIn":False},
+                        "E4 Ultra Lamina": {"type": "armour", "name": "E4 Ultra Lamina", "aliases": ["E4", "Lamina", "E4 Ultra", "E4 Lamina", "Ultra Lamina"], "armour": 80, "value": 4705, "wiki": "https://galaxyonfire.fandom.com/wiki/E4_Ultra_Lamina", "builtIn":False},
+                        "E6 D-X Plating": {"type": "armour", "name": "E6 D-X Plating", "aliases": ["E6", "D-X Plating", "E6 Plating", "E6 D-X"], "armour": 110, "value": 20171, "wiki": "https://galaxyonfire.fandom.com/wiki/E6_D-X_Plating", "builtIn":False},
+                        "D'iol": {"type": "armour", "name": "D'iol", "aliases": ["Diol"], "armour": 160, "value": 51449, "wiki": "https://galaxyonfire.fandom.com/wiki/D%27iol", "builtIn":False},
+                        "T'yol": {"type": "armour", "name": "T'yol", "aliases": ["Tyol"], "armour": 250, "value": 117922, "wiki": "https://galaxyonfire.fandom.com/wiki/T%27yol", "builtIn":False},
                         
                         # boosters
-                        "Linear Boost": {"name": "Linear Boost", "aliases": ["Linear"], "value": 5704, "wiki": "https://galaxyonfire.fandom.com/wiki/Linear_Boost", "builtIn":False},
-                        "Cyclotron Boost": {"name": "Cyclotron Boost", "aliases": ["Cyclotron"], "value": 11553, "wiki": "https://galaxyonfire.fandom.com/wiki/Cyclotron_Boost", "builtIn":False},
-                        "Synchrotron Boost": {"name": "Synchrotron Boost", "aliases": ["Synchrotron"], "value": 22373, "wiki": "https://galaxyonfire.fandom.com/wiki/Synchrotron_Boost", "builtIn":False},
-                        "Me'al": {"name": "Me'al", "aliases": ["Meal"], "value": 46897, "wiki": "https://galaxyonfire.fandom.com/wiki/Me%27al", "builtIn":False},
-                        "Polytron Boost": {"name": "Polytron Boost", "aliases": ["Polytron"], "value": 86815, "wiki": "https://galaxyonfire.fandom.com/wiki/Polytron_Boost", "builtIn":False},
+                        "Linear Boost": {"type": "booster", "name": "Linear Boost", "aliases": ["Linear"], "value": 5704, "wiki": "https://galaxyonfire.fandom.com/wiki/Linear_Boost", "builtIn":False},
+                        "Cyclotron Boost": {"type": "booster", "name": "Cyclotron Boost", "aliases": ["Cyclotron"], "value": 11553, "wiki": "https://galaxyonfire.fandom.com/wiki/Cyclotron_Boost", "builtIn":False},
+                        "Synchrotron Boost": {"type": "booster", "name": "Synchrotron Boost", "aliases": ["Synchrotron"], "value": 22373, "wiki": "https://galaxyonfire.fandom.com/wiki/Synchrotron_Boost", "builtIn":False},
+                        "Me'al": {"type": "booster", "name": "Me'al", "aliases": ["Meal"], "value": 46897, "wiki": "https://galaxyonfire.fandom.com/wiki/Me%27al", "builtIn":False},
+                        "Polytron Boost": {"type": "booster", "name": "Polytron Boost", "aliases": ["Polytron"], "value": 86815, "wiki": "https://galaxyonfire.fandom.com/wiki/Polytron_Boost", "builtIn":False},
                         
                         # cabins
-                        "Small Cabin": {"name": "Small Cabin", "aliases": [], "value": 3170, "wiki": "https://galaxyonfire.fandom.com/wiki/Small_Cabin", "builtIn":False},
-                        "Medium Cabin": {"name": "Medium Cabin", "aliases": [], "value": 6347, "wiki": "https://galaxyonfire.fandom.com/wiki/Medium_Cabin", "builtIn":False},
-                        "Large Cabin": {"name": "Large Cabin", "aliases": [], "value": 14190, "wiki": "https://galaxyonfire.fandom.com/wiki/Large_Cabin", "builtIn":False},
+                        "Small Cabin": {"type": "cabin", "name": "Small Cabin", "aliases": [], "value": 3170, "wiki": "https://galaxyonfire.fandom.com/wiki/Small_Cabin", "builtIn":False},
+                        "Medium Cabin": {"type": "cabin", "name": "Medium Cabin", "aliases": [], "value": 6347, "wiki": "https://galaxyonfire.fandom.com/wiki/Medium_Cabin", "builtIn":False},
+                        "Large Cabin": {"type": "cabin", "name": "Large Cabin", "aliases": [], "value": 14190, "wiki": "https://galaxyonfire.fandom.com/wiki/Large_Cabin", "builtIn":False},
 
                         # cloaks
-                        "U'tool": {"name": "U'tool", "aliases": ["Utool"], "duration":10, "value": 47367, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
-                        "Sight Suppressor II": {"name": "Sight Suppressor II", "aliases": ["Sight Suppressor 2", "Sight 2", "Suppressor II", "duration":20, "Suppressor II"], "value": 29599, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
-                        "Yin Co. Shadow Ninja": {"name": "Yin Co. Shadow Ninja", "aliases": ["Shadow Ninja", "Yin", "Yin Co Shadow Ninja"], "duration":40, "value": 69183, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
+                        "U'tool": {"type": "cloak", "name": "U'tool", "aliases": ["Utool"], "duration":10, "value": 47367, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
+                        "Sight Suppressor II": {"type": "cloak", "name": "Sight Suppressor II", "aliases": ["Sight Suppressor 2", "Sight 2", "Suppressor II", "Suppressor II"], "duration":20, "value": 29599, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
+                        "Yin Co. Shadow Ninja": {"type": "cloak", "name": "Yin Co. Shadow Ninja", "aliases": ["Shadow Ninja", "Yin", "Yin Co Shadow Ninja"], "duration":40, "value": 69183, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
 
                         # compressors
-                        "ZMI Optistore": {"name": "ZMI Optistore", "aliases": ["Optistore"], "cargoMultiplier":1.15, "value": 2576, "wiki": "https://galaxyonfire.fandom.com/wiki/ZMI_Optistore", "builtIn":False},
-                        "Autopacker 2": {"name": "Autopacker 2", "aliases": ["Autopacker"], "cargoMultiplier":1.25, "value": 5747, "wiki": "https://galaxyonfire.fandom.com/wiki/Autopacker_2", "builtIn":False},
-                        "Ultracompact": {"name": "Ultracompact", "aliases": [], "cargoMultiplier":1.4, "value": 14992, "wiki": "https://galaxyonfire.fandom.com/wiki/Ultracompact", "builtIn":False},
-                        "Shrinker BT": {"name": "Shrinker BT", "aliases": ["Shrinker", "BT"], "cargoMultiplier":1.75, "value": 28571, "wiki": "https://galaxyonfire.fandom.com/wiki/Shrinker_BT", "builtIn":False},
-                        "Rhoda Blackhole": {"name": "Rhoda Blackhole", "aliases": ["Blackhole", "Black Hole", "Rhoda Black Hole"], "cargoMultiplier":2, "value": 66305, "wiki": "https://galaxyonfire.fandom.com/wiki/Rhoda_Blackhole", "builtIn":False},
+                        "ZMI Optistore": {"type": "compressor", "name": "ZMI Optistore", "aliases": ["Optistore"], "cargoMultiplier":1.15, "value": 2576, "wiki": "https://galaxyonfire.fandom.com/wiki/ZMI_Optistore", "builtIn":False},
+                        "Autopacker 2": {"type": "compressor", "name": "Autopacker 2", "aliases": ["Autopacker"], "cargoMultiplier":1.25, "value": 5747, "wiki": "https://galaxyonfire.fandom.com/wiki/Autopacker_2", "builtIn":False},
+                        "Ultracompact": {"type": "compressor", "name": "Ultracompact", "aliases": [], "cargoMultiplier":1.4, "value": 14992, "wiki": "https://galaxyonfire.fandom.com/wiki/Ultracompact", "builtIn":False},
+                        "Shrinker BT": {"type": "compressor", "name": "Shrinker BT", "aliases": ["Shrinker", "BT"], "cargoMultiplier":1.75, "value": 28571, "wiki": "https://galaxyonfire.fandom.com/wiki/Shrinker_BT", "builtIn":False},
+                        "Rhoda Blackhole": {"type": "compressor", "name": "Rhoda Blackhole", "aliases": ["Blackhole", "Black Hole", "Rhoda Black Hole"], "cargoMultiplier":2, "value": 66305, "wiki": "https://galaxyonfire.fandom.com/wiki/Rhoda_Blackhole", "builtIn":False},
                         
                         # gamma shields
-                        "Gamma Shield I": {"name": "Gamma Shield I", "aliases": ["Gamma Shield 1", "Gamma I", "Gamma 1"], "value": 27526, "wiki": "https://galaxyonfire.fandom.com/wiki/Gamma_Shield_I", "builtIn":False},
-                        "Gamma Shield II": {"name": "Gamma Shield II", "aliases": ["Gamma Shield 2", "Gamma 2", "Gamma II"], "value": 43202, "wiki": "https://galaxyonfire.fandom.com/wiki/Gamma_Shield_II", "builtIn":False},
+                        "Gamma Shield I": {"type": "gamma shield", "name": "Gamma Shield I", "aliases": ["Gamma Shield 1", "Gamma I", "Gamma 1"], "value": 27526, "wiki": "https://galaxyonfire.fandom.com/wiki/Gamma_Shield_I", "builtIn":False},
+                        "Gamma Shield II": {"type": "gamma shield", "name": "Gamma Shield II", "aliases": ["Gamma Shield 2", "Gamma 2", "Gamma II"], "value": 43202, "wiki": "https://galaxyonfire.fandom.com/wiki/Gamma_Shield_II", "builtIn":False},
 
                         # mining drills
-                        "IMT Extract 1.3": {"name": "IMT Extract 1.3", "aliases": ["IMT 1.3", "Extract 1.3"], "value": 4347, "wiki": "https://galaxyonfire.fandom.com/wiki/IMT_Extract_1.3", "builtIn":False},
-                        "IMT Extract 2.7": {"name": "IMT Extract 2.7", "aliases": ["IMT 2.7", "Extract 2.7"], "value": 17297, "wiki": "https://galaxyonfire.fandom.com/wiki/IMT_Extract_2.7", "builtIn":False},
-                        "K'yuul": {"name": "K'yuul", "aliases": ["Kyuul"], "value": 37743, "wiki": "https://galaxyonfire.fandom.com/wiki/K%27yuul", "builtIn":False},
-                        "IMT Extract 4.0X": {"name": "IMT Extract 4.0X", "aliases": ["IMT Extract 4", "IMT 4.0X", "IMT 4", "Extract 4.0X", "Extract 4"], "value": 73093, "wiki": "https://galaxyonfire.fandom.com/wiki/IMT_Extract_4.0X", "builtIn":False},
-                        "Gunant's Drill": {"name": "Gunant's Drill", "aliases": ["Gunant's", "Gunants", "Gunants Drill"], "value": 209353, "wiki": "https://galaxyonfire.fandom.com/wiki/Gunant%27s_Drill", "builtIn":False},
+                        "IMT Extract 1.3": {"type": "mining drill", "name": "IMT Extract 1.3", "aliases": ["IMT 1.3", "Extract 1.3"], "value": 4347, "wiki": "https://galaxyonfire.fandom.com/wiki/IMT_Extract_1.3", "builtIn":False},
+                        "IMT Extract 2.7": {"type": "mining drill", "name": "IMT Extract 2.7", "aliases": ["IMT 2.7", "Extract 2.7"], "value": 17297, "wiki": "https://galaxyonfire.fandom.com/wiki/IMT_Extract_2.7", "builtIn":False},
+                        "K'yuul": {"type": "mining drill", "name": "K'yuul", "aliases": ["Kyuul"], "value": 37743, "wiki": "https://galaxyonfire.fandom.com/wiki/K%27yuul", "builtIn":False},
+                        "IMT Extract 4.0X": {"type": "mining drill", "name": "IMT Extract 4.0X", "aliases": ["IMT Extract 4", "IMT 4.0X", "IMT 4", "Extract 4.0X", "Extract 4"], "value": 73093, "wiki": "https://galaxyonfire.fandom.com/wiki/IMT_Extract_4.0X", "builtIn":False},
+                        "Gunant's Drill": {"type": "mining drill", "name": "Gunant's Drill", "aliases": ["Gunant's", "Gunants", "Gunants Drill"], "value": 209353, "wiki": "https://galaxyonfire.fandom.com/wiki/Gunant%27s_Drill", "builtIn":False},
 
                         # repair beams
-                        "Nirai SPP-C1": {"name": "Nirai SPP-C1", "aliases": ["SPP-C1", "Nirai C1"], "value": 68336, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_SPP-C1", "builtIn":False},
-                        "Nirai SPP-M50": {"name": "Nirai SPP-M50", "aliases": ["SPP-M50", "Nirai M50"], "value": 365681, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_SPP-M50", "builtIn":False},
+                        "Nirai SPP-C1": {"type": "", "name": "Nirai SPP-C1", "aliases": ["SPP-C1", "Nirai C1"], "value": 68336, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_SPP-C1", "builtIn":False},
+                        "Nirai SPP-M50": {"type": "", "name": "Nirai SPP-M50", "aliases": ["SPP-M50", "Nirai M50"], "value": 365681, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_SPP-M50", "builtIn":False},
 
                         # repair bots
-                        "Ketar Repair Bot": {"name": "Ketar Repair Bot", "aliases": ["Repair Bot", "Ketar Bot"], "value": 15285, "wiki": "https://galaxyonfire.fandom.com/wiki/Ketar_Repair_Bot", "builtIn":False},
-                        "Ketar Repair Bot II": {"name": "Ketar Repair Bot II", "aliases": ["Katar Repair Bot 2", "Repair Bot 2", "Repair Bot II", "Ketar Bot 2", "Ketar Bot II"], "value": 141949, "wiki": "https://galaxyonfire.fandom.com/wiki/Ketar_Repair_Bot_II", "builtIn":False},
+                        "Ketar Repair Bot": {"type": "repair bot", "name": "Ketar Repair Bot", "aliases": ["Repair Bot", "Ketar Bot"], "value": 15285, "wiki": "https://galaxyonfire.fandom.com/wiki/Ketar_Repair_Bot", "builtIn":False},
+                        "Ketar Repair Bot II": {"type": "repair bot", "name": "Ketar Repair Bot II", "aliases": ["Katar Repair Bot 2", "Repair Bot 2", "Repair Bot II", "Ketar Bot 2", "Ketar Bot II"], "value": 141949, "wiki": "https://galaxyonfire.fandom.com/wiki/Ketar_Repair_Bot_II", "builtIn":False},
 
                         # scanners
-                        "Telta Quickscan": {"name": "Telta Quickscan", "aliases": ["Quickscan"], "value": 2438, "wiki": "https://galaxyonfire.fandom.com/wiki/Telta_Quickscan", "builtIn":False},
-                        "Telta Ecoscan": {"name": "Telta Ecoscan", "aliases": ["Ecoscan"], "value": 8647, "wiki": "https://galaxyonfire.fandom.com/wiki/Telta_Ecoscan", "builtIn":False},
-                        "Hiroto Proscan": {"name": "Hiroto Proscan", "aliases": ["Proscan"], "value": 38955, "wiki": "https://galaxyonfire.fandom.com/wiki/Hiroto_Proscan", "builtIn":False},
-                        "Hiroto Ultrascan": {"name": "Hiroto Ultrascan", "aliases": ["Ultrascan"], "value": 95309, "wiki": "https://galaxyonfire.fandom.com/wiki/Hiroto_Ultrascan", "builtIn":False},
+                        "Telta Quickscan": {"type": "scanner", "name": "Telta Quickscan", "aliases": ["Quickscan"], "value": 2438, "wiki": "https://galaxyonfire.fandom.com/wiki/Telta_Quickscan", "builtIn":False},
+                        "Telta Ecoscan": {"type": "scanner", "name": "Telta Ecoscan", "aliases": ["Ecoscan"], "value": 8647, "wiki": "https://galaxyonfire.fandom.com/wiki/Telta_Ecoscan", "builtIn":False},
+                        "Hiroto Proscan": {"type": "scanner", "name": "Hiroto Proscan", "aliases": ["Proscan"], "value": 38955, "wiki": "https://galaxyonfire.fandom.com/wiki/Hiroto_Proscan", "builtIn":False},
+                        "Hiroto Ultrascan": {"type": "scanner", "name": "Hiroto Ultrascan", "aliases": ["Ultrascan"], "value": 95309, "wiki": "https://galaxyonfire.fandom.com/wiki/Hiroto_Ultrascan", "builtIn":False},
 
                         # shields
-                        "Targe Shield": {"name": "Targe Shield", "aliases": ["Targe"], "shield": 50, "value": 1620, "wiki": "https://galaxyonfire.fandom.com/wiki/Targe_Shield", "builtIn":False},
-                        "Riot Shield": {"name": "Riot Shield", "aliases": ["Riot"], "shield": 80, "value": 5306, "wiki": "https://galaxyonfire.fandom.com/wiki/Riot_Shield", "builtIn":False},
-                        "H'Belam": {"name": "H'Belam", "aliases": ["HBelam"], "shield": 120, "value": 13043, "wiki": "https://galaxyonfire.fandom.com/wiki/H%27Belam", "builtIn":False},
-                        "Beamshield II": {"name": "Beamshield II", "aliases": ["Beamshield 2", "Beamshield"], "shield": 150, "value": 39331, "wiki": "https://galaxyonfire.fandom.com/wiki/Beamshield_II", "builtIn":False},
-                        "Fluxed Matter Shield": {"name": "Fluxed Matter Shield", "aliases": ["Fluxed", "Matter Shield", "Fluxed Shield"], "shield": 220, "value": 101914, "wiki": "https://galaxyonfire.fandom.com/wiki/Fluxed_Matter_Shield", "builtIn":False},
-                        "Particle Shield": {"name": "Particle Shield", "aliases": ["Particle"], "shield": 380, "value": 189194, "wiki": "https://galaxyonfire.fandom.com/wiki/Particle_Shield", "builtIn":False},
+                        "Targe Shield": {"type": "shield", "name": "Targe Shield", "aliases": ["Targe"], "shield": 50, "value": 1620, "wiki": "https://galaxyonfire.fandom.com/wiki/Targe_Shield", "builtIn":False},
+                        "Riot Shield": {"type": "shield", "name": "Riot Shield", "aliases": ["Riot"], "shield": 80, "value": 5306, "wiki": "https://galaxyonfire.fandom.com/wiki/Riot_Shield", "builtIn":False},
+                        "H'Belam": {"type": "shield", "name": "H'Belam", "aliases": ["HBelam"], "shield": 120, "value": 13043, "wiki": "https://galaxyonfire.fandom.com/wiki/H%27Belam", "builtIn":False},
+                        "Beamshield II": {"type": "shield", "name": "Beamshield II", "aliases": ["Beamshield 2", "Beamshield"], "shield": 150, "value": 39331, "wiki": "https://galaxyonfire.fandom.com/wiki/Beamshield_II", "builtIn":False},
+                        "Fluxed Matter Shield": {"type": "shield", "name": "Fluxed Matter Shield", "aliases": ["Fluxed", "Matter Shield", "Fluxed Shield"], "shield": 220, "value": 101914, "wiki": "https://galaxyonfire.fandom.com/wiki/Fluxed_Matter_Shield", "builtIn":False},
+                        "Particle Shield": {"type": "shield", "name": "Particle Shield", "aliases": ["Particle"], "shield": 380, "value": 189194, "wiki": "https://galaxyonfire.fandom.com/wiki/Particle_Shield", "builtIn":False},
 
                         # spectral filters
-                        "Spectral Filter SA-1": {"name": "Spectral Filter SA-1", "aliases": ["Spectral SA-1", "Spectral Filter SA-1", "Filter SA-1", "Spectral SA1", "Filter SA1"], "value": 43856, "wiki": "https://galaxyonfire.fandom.com/wiki/Spectral_Filter_SA-1", "builtIn":False},
-                        "Spectral Filter ST-X": {"name": "Spectral Filter ST-X", "aliases": ["Spectral SA-X", "Spectral Filter SA-X", "Filter SA-X", "Spectral SAX", "Filter SAX"], "value": 154662, "wiki": "https://galaxyonfire.fandom.com/wiki/Spectral_Filter_ST-X", "builtIn":False},
-                        "Spectral Filter Omega": {"name": "Spectral Filter Omega", "aliases": ["Spectral Omega", "Filter Omega", "Omega"], "value": 485406, "wiki": "https://galaxyonfire.fandom.com/wiki/Spectral_Filter_Omega", "builtIn":False},
+                        "Spectral Filter SA-1": {"type": "spectral filter", "name": "Spectral Filter SA-1", "aliases": ["Spectral SA-1", "Spectral Filter SA-1", "Filter SA-1", "Spectral SA1", "Filter SA1"], "value": 43856, "wiki": "https://galaxyonfire.fandom.com/wiki/Spectral_Filter_SA-1", "builtIn":False},
+                        "Spectral Filter ST-X": {"type": "spectral filter", "name": "Spectral Filter ST-X", "aliases": ["Spectral SA-X", "Spectral Filter SA-X", "Filter SA-X", "Spectral SAX", "Filter SAX"], "value": 154662, "wiki": "https://galaxyonfire.fandom.com/wiki/Spectral_Filter_ST-X", "builtIn":False},
+                        "Spectral Filter Omega": {"type": "spectral filter", "name": "Spectral Filter Omega", "aliases": ["Spectral Omega", "Filter Omega", "Omega"], "value": 485406, "wiki": "https://galaxyonfire.fandom.com/wiki/Spectral_Filter_Omega", "builtIn":False},
 
                         # thrusters
-                        "Static Thrust": {"name": "Static Thrust", "aliases": [], "handlingMultiplier":1.2, "value": 1398, "wiki": "https://galaxyonfire.fandom.com/wiki/Static_Thrust", "builtIn":False},
-                        "Pendular Thrust": {"name": "Pendular Thrust", "aliases": [], "handlingMultiplier":1.4, "value": 2957, "wiki": "https://galaxyonfire.fandom.com/wiki/Pendular_Thrust", "builtIn":False},
-                        "D'ozzt Thrust": {"name": "D'ozzt Thrust", "aliases": [], "handlingMultiplier":1.7, "value": 5762, "wiki": "https://galaxyonfire.fandom.com/wiki/D%27ozzt_Thrust", "builtIn":False},
-                        "Mp'zzzm Thrust": {"name": "Mp'zzzm Thrust", "aliases": [], "handlingMultiplier":2, "value": 18731, "wiki": "https://galaxyonfire.fandom.com/wiki/Mp%27zzzm_Thrust", "builtIn":False},
-                        "Pulsed Plasma Thrust": {"name": "Pulsed Plasma Thrust", "aliases": [], "handlingMultiplier":2.3, "value": 31015, "wiki": "https://galaxyonfire.fandom.com/wiki/Pulsed_Plasma_Thrust", "builtIn":False},
+                        "Static Thrust": {"type": "thruster", "name": "Static Thrust", "aliases": [], "handlingMultiplier":1.2, "value": 1398, "wiki": "https://galaxyonfire.fandom.com/wiki/Static_Thrust", "builtIn":False},
+                        "Pendular Thrust": {"type": "thruster", "name": "Pendular Thrust", "aliases": [], "handlingMultiplier":1.4, "value": 2957, "wiki": "https://galaxyonfire.fandom.com/wiki/Pendular_Thrust", "builtIn":False},
+                        "D'ozzt Thrust": {"type": "thruster", "name": "D'ozzt Thrust", "aliases": [], "handlingMultiplier":1.7, "value": 5762, "wiki": "https://galaxyonfire.fandom.com/wiki/D%27ozzt_Thrust", "builtIn":False},
+                        "Mp'zzzm Thrust": {"type": "thruster", "name": "Mp'zzzm Thrust", "aliases": [], "handlingMultiplier":2, "value": 18731, "wiki": "https://galaxyonfire.fandom.com/wiki/Mp%27zzzm_Thrust", "builtIn":False},
+                        "Pulsed Plasma Thrust": {"type": "thruster", "name": "Pulsed Plasma Thrust", "aliases": [], "handlingMultiplier":2.3, "value": 31015, "wiki": "https://galaxyonfire.fandom.com/wiki/Pulsed_Plasma_Thrust", "builtIn":False},
 
                         # tractor beams
-                        'AB-1 "Retractor"': {"name": 'AB-1 "Retractor"', "aliases": ["Retractor", '"Retractor"', "AB-1 Retractor"], "value": 8962, "wiki": 'https://galaxyonfire.fandom.com/wiki/AB-1_"Retractor"', "builtIn":False},
-                        'AB-2 "Glue Gun"': {"name": 'AB-2 "Glue Gun"', "aliases": ["Glue Gun", '"Glue Gun"', "AB-2 Glue Gun"], "value": 27464, "wiki": 'https://galaxyonfire.fandom.com/wiki/AB-2_"Glue Gun"', "builtIn":False},
-                        'AB-3 "Kingfisher"': {"name": 'AB-3 "Kingfisher"', "aliases": ["Kingfisher", '"Kingfisher"', "AB-3 Kingfisher"], "value": 61448, "wiki": 'https://galaxyonfire.fandom.com/wiki/AB-3_"Kingfisher"', "builtIn":False},
-                        'AB-4 "Octopus"': {"name": 'AB-4 "Octopus"', "aliases": ["Octopus", '"Octopus"', "AB-4 Octopus"], "value": 199026, "wiki": 'https://galaxyonfire.fandom.com/wiki/AB-4_"Octopus"', "builtIn":False},
+                        'AB-1 "Retractor"': {"type": "tractor beam", "name": 'AB-1 "Retractor"', "aliases": ["Retractor", '"Retractor"', "AB-1 Retractor"], "value": 8962, "wiki": 'https://galaxyonfire.fandom.com/wiki/AB-1_"Retractor"', "builtIn":False},
+                        'AB-2 "Glue Gun"': {"type": "tractor beam", "name": 'AB-2 "Glue Gun"', "aliases": ["Glue Gun", '"Glue Gun"', "AB-2 Glue Gun"], "value": 27464, "wiki": 'https://galaxyonfire.fandom.com/wiki/AB-2_"Glue Gun"', "builtIn":False},
+                        'AB-3 "Kingfisher"': {"type": "tractor beam", "name": 'AB-3 "Kingfisher"', "aliases": ["Kingfisher", '"Kingfisher"', "AB-3 Kingfisher"], "value": 61448, "wiki": 'https://galaxyonfire.fandom.com/wiki/AB-3_"Kingfisher"', "builtIn":False},
+                        'AB-4 "Octopus"': {"type": "tractor beam", "name": 'AB-4 "Octopus"', "aliases": ["Octopus", '"Octopus"', "AB-4 Octopus"], "value": 199026, "wiki": 'https://galaxyonfire.fandom.com/wiki/AB-4_"Octopus"', "builtIn":False},
 
                         # transfusion beams
-                        "Crimson Drain": {"name": "Crimson Drain", "aliases": ["Crimson", "Drain"], "value": 8735, "wiki": "https://galaxyonfire.fandom.com/wiki/Crimson_Drain", "builtIn":False},
-                        "Pandora Leech": {"name": "Pandora Leech", "aliases": ["Pandora", "Leech"], "value": 80537, "wiki": "https://galaxyonfire.fandom.com/wiki/Pandora_Leech", "builtIn":False},
+                        "Crimson Drain": {"type": "transfusion beam", "name": "Crimson Drain", "aliases": ["Crimson", "Drain"], "value": 8735, "wiki": "https://galaxyonfire.fandom.com/wiki/Crimson_Drain", "builtIn":False},
+                        "Pandora Leech": {"type": "transfusion beam", "name": "Pandora Leech", "aliases": ["Pandora", "Leech"], "value": 80537, "wiki": "https://galaxyonfire.fandom.com/wiki/Pandora_Leech", "builtIn":False},
                         
                         # weapon mods
-                        "Nirai Overcharge": {"name": "Nirai Overcharge", "aliases": ["Overcharge"], "dpsMultiplier":1.1, "value": 29224, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_Overcharge", "builtIn":False},
-                        "Nirai Overdrive": {"name": "Nirai Overdrive", "aliases": ["Overdrive"], "dpsMultiplier":1.1, "value": 30143, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_Overdrive", "builtIn":False},
+                        "Nirai Overcharge": {"type": "weapon mod", "name": "Nirai Overcharge", "aliases": ["Overcharge"], "dpsMultiplier":1.1, "value": 29224, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_Overcharge", "builtIn":False},
+                        "Nirai Overdrive": {"type": "weapon mod", "name": "Nirai Overdrive", "aliases": ["Overdrive"], "dpsMultiplier":1.1, "value": 30143, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_Overdrive", "builtIn":False},
 
                         # hyperdrives
-                        "Khador Drive": {"name": "Khador Drive", "aliases": ["Khador"], "value": 310037, "wiki": "https://galaxyonfire.fandom.com/wiki/Khador_Drive", "builtIn":False},
+                        "Khador Drive": {"type": "hyperdrive", "name": "Khador Drive", "aliases": ["Khador"], "value": 310037, "wiki": "https://galaxyonfire.fandom.com/wiki/Khador_Drive", "builtIn":False},
                         
                         # misc
-                        "Emergency System": {"name": "Emergency System", "aliases": ["Emergency"], "value": 6860, "wiki": "https://galaxyonfire.fandom.com/wiki/Emergency_System", "builtIn":False}}
+                        "Emergency System": {"type": "emergency system", "name": "Emergency System", "aliases": ["Emergency"], "value": 6860, "wiki": "https://galaxyonfire.fandom.com/wiki/Emergency_System", "builtIn":False}}
                         
 builtInWeaponData = {   # Lasers
                         "Nirai Impulse EX 1": {"name": "Nirai Impulse EX 1", "aliases": ["Impulse EX 1", "Nirai EX 1", "EX 1", "Impulse 1", "Impulse EX1", "EX1", "Nirai Impulse EX1", "Nirai Impulse EX I", "Impulse EX I", "Nirai EX I", "EX I", "Impulse I", "Impulse EXI", "EXI", "Nirai Impulse EXI"], "dps":7.5, "value":2500, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_Impulse_EX_1", "builtIn":False},
