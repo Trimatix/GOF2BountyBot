@@ -2223,7 +2223,7 @@ async def cmd_total_value(message, args):
     if args == "":
         if not usersDB.userIDExists(message.author.id):
             usersDB.addUser(message.author.id)
-        await message.channel.send(":moneybag: **" + message.author.name + "**, your items and balance are worth a total of **" + str(usersDB.getUser(message.author.id).getValue()) + " Credits**.")
+        await message.channel.send(":moneybag: **" + message.author.name + "**, your items and balance are worth a total of **" + str(usersDB.getUser(message.author.id).getStatByName("value")) + " Credits**.")
     
     # If a user is specified
     else:
@@ -2243,7 +2243,7 @@ async def cmd_total_value(message, args):
         if not usersDB.userIDExists(requestedUser.id):
             usersDB.addUser(requestedUser.id)
         # send the user's balance
-        await message.channel.send(":moneybag: **" + requestedUser.name + "**'s items and balance have a total value of **" + str(usersDB.getUser(requestedUser.id).getValue()) + " Credits**.")
+        await message.channel.send(":moneybag: **" + requestedUser.name + "**'s items and balance have a total value of **" + str(usersDB.getUser(requestedUser.id).getStatByName("value")) + " Credits**.")
     
 bbCommands.register("total-value", cmd_total_value)
 # dmCommands.register("value", cmd_value)
