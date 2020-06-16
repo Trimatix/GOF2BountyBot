@@ -224,9 +224,9 @@ builtInModuleData = {   # armour
                         "Large Cabin": {"name": "Large Cabin", "aliases": [], "value": 14190, "wiki": "https://galaxyonfire.fandom.com/wiki/Large_Cabin", "builtIn":False},
 
                         # cloaks
-                        "U'tool": {"name": "U'tool", "aliases": ["Utool"], "value": 47367, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
-                        "Sight Suppressor II": {"name": "Sight Suppressor II", "aliases": ["Sight Suppressor 2", "Sight 2", "Suppressor II", "Suppressor II"], "value": 29599, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
-                        "Yin Co. Shadow Ninja": {"name": "Yin Co. Shadow Ninja", "aliases": ["Shadow Ninja", "Yin", "Yin Co Shadow Ninja"], "value": 69183, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
+                        "U'tool": {"name": "U'tool", "aliases": ["Utool"], "duration":10, "value": 47367, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
+                        "Sight Suppressor II": {"name": "Sight Suppressor II", "aliases": ["Sight Suppressor 2", "Sight 2", "Suppressor II", "duration":20, "Suppressor II"], "value": 29599, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
+                        "Yin Co. Shadow Ninja": {"name": "Yin Co. Shadow Ninja", "aliases": ["Shadow Ninja", "Yin", "Yin Co Shadow Ninja"], "duration":40, "value": 69183, "wiki": "https://galaxyonfire.fandom.com/wiki/", "builtIn":False},
 
                         # compressors
                         "ZMI Optistore": {"name": "ZMI Optistore", "aliases": ["Optistore"], "cargoMultiplier":1.15, "value": 2576, "wiki": "https://galaxyonfire.fandom.com/wiki/ZMI_Optistore", "builtIn":False},
