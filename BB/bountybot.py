@@ -2349,9 +2349,9 @@ async def cmd_duel(message, args):
         targetBBUser.removeDuelChallengeTarget(sourceBBUser)
         await message.channel.send(":white_check_mark: You have rejected **" + str(requestedUser) + "**'s duel challenge.")
         if message.guild.get_member(targetBBUser.id) is None:
-            targerDCGuild = findBBUserDCGuild(targetBBUser)
-            if targerDCGuild is not None:
-                targetBBGuild = guildsDB.getGuild(targerDCGuild.id)
+            targetDCGuild = findBBUserDCGuild(targetBBUser)
+            if targetDCGuild is not None:
+                targetBBGuild = guildsDB.getGuild(targetDCGuild.id)
                 if targetBBGuild.hasPlayChannel():
                     client.get_channel(targetBBGuild.getPlayChannelId()).send(":-1: <@" + targetBBUser.id + ">, **" + str(message.author) + "** has rejected your duel request!")
     
@@ -2369,7 +2369,8 @@ async def cmd_duel(message, args):
             await message.channel.send(":x:" + str(requestedUser) + " does not have enough credits to fight this duel! (" + str(requestedDuel.stakes) + ")")
             return
         
-        winningShip = bbUtil.fightShips(sourceBBUser.activeShip, targetBBUser.activeShip, bbConfig.duelVariancePercent)
+        duelResults = bbUtil.fightShips(sourceBBUser.activeShip, targetBBUser.activeShip, bbConfig.duelVariancePercent)
+        winningShip = duelResults["winningShip"]
 
         if winningShip is sourceBBUser.activeShip:
             winningBBUser = sourceBBUser
@@ -2387,11 +2388,11 @@ async def cmd_duel(message, args):
         if winningBBUser is None:
             await message.channel.send(":crossed_swords: **Stalemate!** " + str(requestedUser) + " and " + message.author.mention + " drew in a duel!")
             if message.guild.get_member(requestedUser.id) is None:
-                targerDCGuild = findBBUserDCGuild(targetBBUser)
-                if targerDCGuild is not None:
-                    targetBBGuild = guildsDB.getGuild(targerDCGuild.id)
+                targetDCGuild = findBBUserDCGuild(targetBBUser)
+                if targetDCGuild is not None:
+                    targetBBGuild = guildsDB.getGuild(targetDCGuild.id)
                     if targetBBGuild.hasPlayChannel():
-                        client.get_channel(targetBBGuild.getPlayChannelId()).send(":crossed_swords: **Stalemate!** " + targerDCGuild.get_member(requestedUser.id).mention + " and " + str(message.author) + " drew in a duel!")
+                        client.get_channel(targetBBGuild.getPlayChannelId()).send(":crossed_swords: **Stalemate!** " + targetDCGuild.get_member(requestedUser.id).mention + " and " + str(message.author) + " drew in a duel!")
             else:
                 await message.channel.send(":crossed_swords: **Stalemate!** " + requestedUser.mention + " and " + message.author.mention + " drew in a duel!")
         else:
