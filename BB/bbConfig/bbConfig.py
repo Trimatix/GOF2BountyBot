@@ -6,7 +6,7 @@ duelReqExpiryTimeStr = "1 day"
 duelVariancePercent = 0.05
 
 # Amount of time to wait between refreshing stock of all shops
-shopRefreshStockPeriod = {"days":1, "hours":0, "minutes":0, "seconds":0}
+shopRefreshStockPeriod = {"days":0, "hours":12, "minutes":0, "seconds":0}
 
 maxBountiesPerFaction = 5
 
