@@ -35,7 +35,7 @@ class bbModule(bbAliasable.Aliasable):
         self.shield = shield
         self.shieldMultiplier = shieldMultiplier
         self.dps = dps
-        self.dpsMultiplier
+        self.dpsMultiplier = dpsMultiplier
         self.cargo = cargo
         self.cargoMultiplier = cargoMultiplier
         self.handling = handling
