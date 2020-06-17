@@ -478,7 +478,7 @@ async def cmd_balance(message, args):
         else:
             requestedUser = client.get_user(int(args))
         if requestedUser is None:
-            await message.channel.send(":x: Uknown user!")
+            await message.channel.send(":x: Unknown user!")
             return
         # ensure that the user is in the users database
         if not usersDB.userIDExists(requestedUser.id):
