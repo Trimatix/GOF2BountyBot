@@ -112,3 +112,9 @@ maxShipNickLength = 30
 # Do not touch these!
 newBountyDelayReset = False
 newBountyFixedDeltaChanged = False
+
+# Max number of entries that can be printed for a duel log
+duelLogMaxLength = 10
+
+# Percentage probability of a user envoking a cloak module in a given timeStep, should they have one equipped
+duelCloakChance = 20
