@@ -2445,6 +2445,11 @@ async def cmd_duel(message, args):
             else:
                 await message.channel.send(":crossed_swords: **Stalemate!** " + requestedUser.mention + " and " + message.author.mention + " drew in a duel!")
         else:
+            winningBBUser.duelWins += 1
+            losingBBUser.duelLosses += 1
+            winningBBUser.duelCreditsWins += requestedDuel.stakes
+            losingBBUser.duelCreditsLosses += requestedDuel.stakes
+
             if message.guild.get_member(winningBBUser.id) is None:
                 await message.channel.send(":crossed_swords: **Fight!** " + str(client.get_user(winningBBUser.id)) + " beat " + client.get_user(losingBBUser.id).mention + " in a duel!")
                 winnerDCGuild = findBBUserDCGuild(winningBBUser)
@@ -3326,9 +3331,13 @@ Currently handles:
 """
 @client.event
 async def on_message(message):
+    
     # ignore messages sent by BountyBot and DMs
     if message.author == client.user:
         return
+
+    # x = await message.channel.fetch_message(723205500887498784)
+    # await x.delete()
 
     if message.channel.type == discord.ChannelType.private:
         return
