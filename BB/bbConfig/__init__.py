@@ -1,3 +1,10 @@
+"""
+⚠ WARNING: MARKED FOR CHANGE ⚠
+The following function is provisional and marked as planned for overhaul.
+Details: Item rarities are to be overhauled, from a linear scale to exponential. In layman's terms, mid price-range items are to become more common.
+
+"""
+
 import operator
 
 from . import bbData
