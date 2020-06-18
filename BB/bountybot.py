@@ -17,6 +17,7 @@ import operator
 from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .bbObjects import bbBounty, bbBountyConfig, bbUser, DuelRequest
 from .bbObjects.items import bbShip
+from .bbObjects.items.battles import ShipFight
 from .bbObjects.tasks import TimedTask, TimedTaskAsync
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from .bbDatabases.tasks import TimedTaskAsyncHeap
@@ -582,6 +583,11 @@ bbCommands.register("map", cmd_map)
 
 
 """
+⚠ WARNING: MARKED FOR CHANGE ⚠
+The following function is provisional and marked as planned for overhaul.
+Details: Criminal fights are to switch algorithm, using bbObjects.items.battles as a base. Criminals are to be assigned
+         Procedurally generated ships based on a difficulty rating (by direct extension of the items' rarity rankings from bbConfig.__init__)
+
 Check a system for bounties and handle rewards
 
 @param message -- the discord message calling the command
@@ -2196,6 +2202,10 @@ bbCommands.register("pay", cmd_pay)
 
 
 """
+⚠ WARNING: MARKED FOR CHANGE ⚠
+The following function is provisional and marked as planned for overhaul.
+Details: Notifications for shop items have yet to be implemented.
+
 Allow a user to subscribe and unsubscribe from pings when certain events occur.
 Currently only new bounty notifications are implemented, but more are planned.
 For example, a ping when a requested item is in stock in the guild's shop.
@@ -2237,6 +2247,11 @@ bbCommands.register("notify", cmd_notify)
 
 
 """
+⚠ WARNING: MARKED FOR CHANGE ⚠
+The following function is provisional and marked as planned for overhaul.
+Details: The command output is finalised. However, the inner workings of the command are to be replaced with attribute getters.
+         It is inefficient to calculate total value measurements on every call, so current totals should be cached in class attributes whenever modified.
+
 print the total value of the specified user, use the calling user if no user is specified.
 
 @param message -- the discord message calling the command
@@ -2274,6 +2289,12 @@ bbCommands.register("total-value", cmd_total_value)
 
 
 """
+⚠ WARNING: MARKED FOR CHANGE ⚠
+The following function is provisional and marked as planned for overhaul.
+Details: Overhaul is part-way complete, with a few fighting algorithm provided in bbObjects.items.battles. However, printing the fight details is yet to be implemented.
+         This is planned to be done using simple message editing-based animation of player ships and progress bars for health etc.
+         This command is functional for now, but the output is subject to change.
+
 Challenge another player to a duel, with an amount of credits as the stakes.
 The winning user is given stakes credits, the loser has stakes credits taken away.
 give 'challenge' to create a new duel request.
@@ -2393,7 +2414,9 @@ async def cmd_duel(message, args):
             await message.channel.send(":x:" + str(requestedUser) + " does not have enough credits to fight this duel! (" + str(requestedDuel.stakes) + ")")
             return
         
-        duelResults = bbUtil.fightShips(sourceBBUser.activeShip, targetBBUser.activeShip, bbConfig.duelVariancePercent)
+        fight = ShipFight.ShipFight(sourceBBUser.activeShip, targetBBUser.activeShip)
+        duelResults = fight.fightShips(bbConfig.duelVariancePercent)
+        # duelResults = bbUtil.fightShips(sourceBBUser.activeShip, targetBBUser.activeShip, bbConfig.duelVariancePercent)
         winningShip = duelResults["winningShip"]
 
         if winningShip is sourceBBUser.activeShip:
@@ -2405,6 +2428,8 @@ async def cmd_duel(message, args):
         else:
             winningBBUser = None
             losingBBUser = None
+
+        # battleMsg = 
 
         # winningBBUser = sourceBBUser if winningShip is sourceBBUser.activeShip else (targetBBUser if winningShip is targetBBUser.activeShip else None)
         # losingBBUser = None if winningBBUser is None else (sourceBBUser if winningBBUser is targetBBUser else targetBBUser)
@@ -2443,6 +2468,10 @@ async def cmd_duel(message, args):
 
         await targetBBUser.duelRequests[sourceBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
         targetBBUser.removeDuelChallengeObj(requestedDuel)
+        # logStr = ""
+        # for s in duelResults["battleLog"]:
+        #     logStr += s.replace("{PILOT1NAME}",message.author.name).replace("{PILOT2NAME}",requestedUser.name) + "\n"
+        # await message.channel.send(logStr)
 
 bbCommands.register("duel", cmd_duel)
 
