@@ -346,11 +346,11 @@ builtInWeaponData = {   # Lasers
                         "Dia EMP Mk III": {"name": "Dia EMP Mk III", "aliases": ["Dia Mk III", "Dia EMP", "Dia", "EMP Mk III", "EMP III"], "dps":17.77, "value":40736, "wiki": "https://galaxyonfire.fandom.com/wiki/Dia_EMP_Mk_III", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476855465705482/dia_emp_mk_iii.png"},
                         
                         # Auto Cannons
-                        "Micro Gun MK I": {"name": "Micro Gun MK I", "aliases": ["Micro MK I", "Micro I"], "dps":9.09, "value":2577, "wiki": "https://galaxyonfire.fandom.com/wiki/Micro_Gun_MK_I", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476716516802617/micro_gun_mki.png"},
-                        "Micro Gun MK II": {"name": "Micro Gun MK II", "aliases": ["Micro MK II", "Micro II"], "dps":11.76, "value":5538, "wiki": "https://galaxyonfire.fandom.com/wiki/Micro_Gun_MK_II", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476726222684210/micro_gun_mkii.png"},
+                        "Micro Gun MK I": {"name": "Micro Gun MK I", "aliases": ["Micro MK I", "Micro I", "Micro Gun Mk 1", "Micro MK 1", "Micro 1"], "dps":9.09, "value":2577, "wiki": "https://galaxyonfire.fandom.com/wiki/Micro_Gun_MK_I", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476716516802617/micro_gun_mki.png"},
+                        "Micro Gun MK II": {"name": "Micro Gun MK II", "aliases": ["Micro MK II", "Micro II", "Micro Gun Mk 2", "Micro MK 2", "Micro 2"], "dps":11.76, "value":5538, "wiki": "https://galaxyonfire.fandom.com/wiki/Micro_Gun_MK_II", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476726222684210/micro_gun_mkii.png"},
                         "64MJ Railgun": {"name": "64MJ Railgun", "aliases": ["64MJ", "64MJ Railgun", "64 Rail"], "dps":14.28, "value":15343, "wiki": "https://galaxyonfire.fandom.com/wiki/64MJ_Railgun", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476666151600138/64mj_railgun.png"},
                         "Scram Cannon": {"name": "Scram Cannon", "aliases": ["scram"], "dps":20.00, "value":47203, "wiki": "https://galaxyonfire.fandom.com/wiki/Scram_Cannon", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476735357616199/scram_cannon.png"},
-                        "128MJ Railgun": {"name": "128MJ Railgun", "aliases": ["128MJ Railgun", "128 Rail"], "dps":25.00, "value":24675, "wiki": "https://galaxyonfire.fandom.com/wiki/128MJ_Railgun", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476675119153162/128mj_railgun.png"},
+                        "128MJ Railgun": {"name": "128MJ Railgun", "aliases": ["128MJ", "128MJ Railgun", "128 Rail"], "dps":25.00, "value":24675, "wiki": "https://galaxyonfire.fandom.com/wiki/128MJ_Railgun", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476675119153162/128mj_railgun.png"},
                         "Mass Driver MD 10": {"name": "Mass Driver MD 10", "aliases": ["MD 10", "MD10", "Mass Driver 10", "Mass Driver MD10"], "dps":44.44, "value":114314, "wiki": "https://galaxyonfire.fandom.com/wiki/Mass_Driver_MD_10", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476698498203678/mass_driver_md_10.png"},
                         "Mass Driver MD 12": {"name": "Mass Driver MD 12", "aliases": ["MD 12", "MD12", "Mass Driver 12", "Mass Driver MD12"], "dps":70.00, "value":423181, "wiki": "https://galaxyonfire.fandom.com/wiki/Mass_Driver_MD_12", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476708367269969/mass_driver_md_12.png"},
                         
@@ -472,7 +472,55 @@ builtInCommodityData = {
 }
 
 # TO BE COMPLETED
-builtInSecondariesData = {}
+builtInSecondariesData = {
+            # rockets
+            "G'liissk": {"type": "rocket", "name": "G'liissk", "aliases": ["G'liissk"], "damage": 60, "loading speed": 1.2, "value": 23, "wiki": "", "builtIn": False, "icon": ""},
+            "Jet Rocket": {"type": "rocket", "name": "Jet Rocket", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Armour Rocket": {"type": "rocket", "name": "Armour Rocket", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "EMP Rocket Mk I": {"type": "rocket", "name": "EMP Rocket Mk I", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "EMP Rocket Mk II": {"type": "rocket", "name": "EMP Rocket Mk II", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+
+            # missiles
+            "Edo": {"type": "missile", "name": "Edo", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "S'koon": {"type": "missile", "name": "S'koon", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Intelli Jet": {"type": "missile", "name": "Intelli Jet", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Mamba EMP": {"type": "missile", "name": "Mamba EMP", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Dephase EMP": {"type": "missile", "name": "Dephase EMP", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+
+            # cluster missiles
+            "Sheesha": {"type": "cluster missile", "name": "Sheesha", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Garuda-IV": {"type": "cluster missile", "name": "Garuda-IV", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Patala": {"type": "cluster missile", "name": "Patala", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+
+            # emp bombs
+            "EMP GL I": {"type": "emp bomb", "name": "EMP GL I", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "EMP GL II": {"type": "emp bomb", "name": "EMP GL II", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "EMP GL DX": {"type": "emp bomb", "name": "EMP GL DX", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+
+            # nukes
+            "AMR Tormentor": {"type": "nuke", "name": "AMR Tormentor", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "AMR Oppressor": {"type": "nuke", "name": "AMR Oppressor", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "AMR Extinctor": {"type": "nuke", "name": "AMR Extinctor", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Liberator": {"type": "nuke", "name": "Liberator", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Fireworks": {"type": "nuke", "name": "Fireworks", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+
+            # mines
+            "AMR Saber": {"type": "mine", "name": "AMR Saber", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Ksann'k": {"type": "mine", "name": "Ksann'k", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Neétha EMP": {"type": "mine", "name": "Neétha EMP", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+
+            # sentry guns
+            "Berger SG-100": {"type": "sentry gun", "name": "Berger SG-100", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Berger SG-400": {"type": "sentry gun", "name": "Berger SG-400", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "T'Suum": {"type": "sentry gun", "name": "T'Suum", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+
+            # ionizing missiles
+            "Ion Lambda MK1": {"type": "ionizing missile", "name": "Ion Lambda MK1", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+            "Ion Lambda MK2": {"type": "ionizing missile", "name": "Ion Lambda MK2", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""},
+
+            # shock blast
+            "Shock Blast": {"type": "shock blast", "name": "Shock Blast", "aliases": [], "damage": 0, "loading speed": 0, "value": 0, "wiki": "", "builtIn": False, "icon": ""}
+}
 
 # To be populated during package init
 builtInSystemObjs = {}
