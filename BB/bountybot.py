@@ -443,6 +443,56 @@ bbCommands.register("help", cmd_help)
 
 
 """
+Print a short guide, teaching users how to play bounties.
+
+@param message -- the discord message calling the command
+@param args -- ignored
+"""
+async def cmd_how_to_play(message, args):
+    sendChannel = None
+    sendDM = False
+
+    if message.author.dm_channel is None:
+        await message.author.create_dm()
+    if message.author.dm_channel is None:
+        sendChannel = message.channel
+    else:
+        sendChannel = message.author.dm_channel
+        sendDM = True
+
+    try:
+        if guildsDB.guildIdExists(message.guild.id):
+            requestedBBGuild = guildsDB.getGuild(message.guild.id)
+        else:
+            requestedBBGuild = guildsDB.addGuildID(message.guild.id)
+        howToPlayString = "```ini\n[ How To Play Bounties ]```Here is a short intro to playing bounties!\n" \
+                            + "This game is based on the 'Most Wanted' system from Galaxy on Fire 2. If you have played the Supernova addon, this should be fairly familiar!\n" \
+                            + "If at any time you would like information about a command, use the `" + bbConfig.commandPrefix + "help [command]` command. To see all commands, just use `" + bbConfig.commandPrefix + "help`." \
+                            + "\n\n1) Every so often, new bounties will be announced" \
+                            + ((" in <#" + str(requestedBBGuild.getAnnounceChannelId()) + ">.") if requestedBBGuild.hasAnnounceChannel() else ".") \
+                            + "\nTo check what bounties are currently active, use the `" + bbConfig.commandPrefix + "bounties` command." \
+                            + "\n\n2) Criminals spawn in a system somewhere on the `" + bbConfig.commandPrefix + "map`. To view a criminal's current **route** (possible systems), use the `" + bbConfig.commandPrefix + "route [criminal]` command. For example: `" + bbConfig.commandPrefix + "route Ganfor Kant`." \
+                            + "\n\n3) Now that we know where our criminal could be, try checking a system using the `" + bbConfig.commandPrefix + "check [system]` command. For example, `" + bbConfig.commandPrefix + "check Pescal Inartu`." \
+                            + "\n\n4) Now that you've checked a system, that system will be crossed out when looking at the criminal's `" + bbConfig.commandPrefix + "route` - now we know not to check there again." \
+                            + "\n\n5) Once a criminal is located in the correct system, rewards will be distributed. Didn't win the bounty? No worries! You will be awarded credits for helping **narrow down the search**." \
+                            + "\n\n6) Now that you've got some credits, try customising your `" + bbConfig.commandPrefix + "loadout`! You can see your inventory of inactive items in the `" + bbConfig.commandPrefix + "hangar`. You can `" + bbConfig.commandPrefix + "buy` more items from the `" + bbConfig.commandPrefix + "shop`." \
+                            + "\n\n\n**Extra notes/tips:**\n- Bounties are shared across all servers. That means that *everyone on discord* is competing to find the same bounties!" \
+                            + "\n- However, each discord server has its own `" + bbConfig.commandPrefix + "shop`. The shop stock refreshes every 12 hours." \
+                            + "\n- Sometimes, it can be tedious to write out a criminal, item or system's full name. All of these things have **aliases** which you can use instead. To see something's aliases, use the `" + bbConfig.commandPrefix + "info` command. E.g: `" + bbConfig.commandPrefix + "info criminal Ganfor Kant`." \
+                            + "\n- Now that you've got a sweet loadout, try challenging another player to a `" + bbConfig.commandPrefix + "duel`!" \
+                            + ("\n- Having trouble getting to new bounties in time? Try out the new `" + bbConfig.commandPrefix + "notify bounties` command!")
+        await sendChannel.send(howToPlayString)
+    except discord.Forbidden:
+        await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
+        return
+
+    if sendDM:
+        await message.add_reaction(bbConfig.dmSentEmoji)
+
+bbCommands.register("how-to-play", cmd_how_to_play)
+
+
+"""
 say hello!
 
 @param message -- the discord message calling the command

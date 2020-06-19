@@ -65,7 +65,8 @@ helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX
 **[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
 
 # help strings for bb commands
-helpDict = {"Miscellaneous":{"help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently six pages, and six sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Loadout`, `Shopping` and `Credits`."),
+helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short introduction on how to play bounties!"),
+                            "help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently six pages, and six sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Loadout`, `Shopping` and `Credits`."),
                             "stats": ("**stats** *[userTag]*", "Get various credits and bounty statistics about yourself, or a tagged user."),
                             "leaderboard": ("**leaderboard** *[-g|-c|-s|-w]*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
                             "notify": ("**notify <type>** *[item]*", "Subscribe to pings when events take place. Currently, only `$notify bounties` is implemented, which will notify you when new bounties are available.")},
