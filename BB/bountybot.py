@@ -2508,7 +2508,7 @@ async def cmd_duel(message, args):
                         + "**" + message.author.name + "** had " + str(duelResults["ship1"]["TTK"]) + "s time to kill." \
                         + "**" + requestedUser.name + "** had " + str(duelResults["ship2"]["TTK"]) + "s time to kill."
             statsEmbed = makeEmbed(authorName="**Duel Stats**")
-            statsEmbed.add_field(name="DPS (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)",value=message.author.mention + ": " + str(round(duelResults["ship1"]["health"]["varied"], 2)) + "\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["health"]["varied"], 2)))
+            statsEmbed.add_field(name="DPS (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)",value=message.author.mention + ": " + str(round(duelResults["ship1"]["DPS"]["varied"], 2)) + "\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["DPS"]["varied"], 2)))
             statsEmbed.add_field(name="Health (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)",value=message.author.mention + ": " + str(round(duelResults["ship1"]["health"]["varied"])) + "\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["health"]["varied"], 2)))
             statsEmbed.add_field(name="Time To Kill",value=message.author.mention + ": " + str(round(duelResults["ship1"]["TTK"], 2)) + "s\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["TTK"], 2)) + "s")
 
