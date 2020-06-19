@@ -247,7 +247,7 @@ TODO: Correct these descriptions for images, can't remember which is which right
 def makeEmbed(titleTxt="",desc="",col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon=""):
     embed = discord.Embed(title=titleTxt, description=desc, colour=col)
     if footerTxt != "": embed.set_footer(text=footerTxt)
-    # embed.set_image(url=img)
+    embed.set_image(url=img)
     if thumb != "": embed.set_thumbnail(url=thumb)
     if icon != "": embed.set_author(name=authorName, icon_url=icon)
     return embed
@@ -465,27 +465,14 @@ async def cmd_how_to_play(message, args):
             requestedBBGuild = guildsDB.getGuild(message.guild.id)
         else:
             requestedBBGuild = guildsDB.addGuildID(message.guild.id)
-        howToPlayString = "```ini\n[ How To Play Bounties ]```Here is a short intro to playing bounties!\n" \
-                            + "This game is based on the 'Most Wanted' system from Galaxy on Fire 2. If you have played the Supernova addon, this should be fairly familiar!\n" \
-                            + "If at any time you would like information about a command, use the `" + bbConfig.commandPrefix + "help [command]` command. To see all commands, just use `" + bbConfig.commandPrefix + "help`." \
-                            + "\n\n1) Every so often, new bounties will be announced" \
-                            + ((" in <#" + str(requestedBBGuild.getAnnounceChannelId()) + ">.") if requestedBBGuild.hasAnnounceChannel() else ".") \
-                            + "\nTo check what bounties are currently active, use the `" + bbConfig.commandPrefix + "bounties` command." \
-                            + "\n\n2) Criminals spawn in a system somewhere on the `" + bbConfig.commandPrefix + "map`. To view a criminal's current **route** (possible systems), use the `" + bbConfig.commandPrefix + "route [criminal]` command. For example: `" + bbConfig.commandPrefix + "route Ganfor Kant`." \
-                            + "\n\n3) Now that we know where our criminal could be, try checking a system using the `" + bbConfig.commandPrefix + "check [system]` command. For example, `" + bbConfig.commandPrefix + "check Pescal Inartu`." \
-                            + "\n\n4) Now that you've checked a system, that system will be crossed out when looking at the criminal's `" + bbConfig.commandPrefix + "route` - now we know not to check there again." \
-                            + "\n\n5) Once a criminal is located in the correct system, rewards will be distributed. Didn't win the bounty? No worries! You will be awarded credits for helping **narrow down the search**." \
-                            + "\n\n6) Now that you've got some credits, try customising your `" + bbConfig.commandPrefix + "loadout`! You can see your inventory of inactive items in the `" + bbConfig.commandPrefix + "hangar`. You can `" + bbConfig.commandPrefix + "buy` more items from the `" + bbConfig.commandPrefix + "shop`."
-                            
-        await sendChannel.send(howToPlayString)
 
-        howToPlayString = + "** **\n\n\n**Extra notes/tips:**\n- Bounties are shared across all servers. That means that *everyone on discord* is competing to find the same bounties!" \
-                            + "\n- However, each discord server has its own `" + bbConfig.commandPrefix + "shop`. The shop stock refreshes every 12 hours." \
-                            + "\n- Sometimes, it can be tedious to write out a criminal, item or system's full name. All of these things have **aliases** which you can use instead. To see something's aliases, use the `" + bbConfig.commandPrefix + "info` command. E.g: `" + bbConfig.commandPrefix + "info criminal Ganfor Kant`." \
-                            + "\n- Now that you've got a sweet loadout, try challenging another player to a `" + bbConfig.commandPrefix + "duel`!" \
-                            + ("\n- Having trouble getting to new bounties in time? Try out the new `" + bbConfig.commandPrefix + "notify bounties` command!")
+        howToPlayEmbed = makeEmbed(titleTxt='**How To Play**', desc="This game is based on the *'Most Wanted'* system from Galaxy on Fire 2. If you have played the Supernova addon, this should be familiar!\n\nIf at any time you would like information about a command, use the `" + bbConfig.commandPrefix + "help [command]` command. To see all commands, just use `" + bbConfig.commandPrefix + "help`.\n‎', footerTxt='Have fun! 🚀", thumb='https://cdn.discordapp.com/avatars/699740424025407570/1bfc728f46646fa964c6a77fc0cf2335.webp')
+        howToPlayEmbed.add_field(name="1. New Bounties", value="Every 30m - 1h (randomly), bounties are announced" + ((" in <#" + str(requestedBBGuild.getAnnounceChannelId()) + ">.") if requestedBBGuild.hasAnnounceChannel() else ".") + "\n• Use `" + bbConfig.commandPrefix + "bounties` to see the currently active bounties.\n• Criminals spawn in a system somewhere on the `" + bbConfig.commandPrefix + "map`.\n• To view a criminal's current route *(possible systems)*, use `" + bbConfig.commandPrefix + "route [criminal]`.\n‎", inline=False)
+        howToPlayEmbed.add_field(name="2. System Checking", value="Now that we know where our criminal could be, we can check a system with `" + bbConfig.commandPrefix + "check [system]`.\nThis system will now be crossed out in the criminal's `" + bbConfig.commandPrefix + "route`, so we know not to check there.\n\n> Didn't win the bounty? No worries!\nYou will be awarded credits for helping *narrow down the search*.\n‎", inline=False)
+        howToPlayEmbed.add_field(name="3. Items", value="Now that you've got some credits, try customising your `" + bbConfig.commandPrefix + "loadout`!\n• You can see your inventory of inactive items in the `" + bbConfig.commandPrefix + "hangar`.\n• You can `" + bbConfig.commandPrefix + "buy` more items from the `" + bbConfig.commandPrefix + "shop`.\n‎", inline=False)
+        howToPlayEmbed.add_field(name="Extra Notes/Tips", value="• Bounties are shared across all servers, everyone is competing to find them!\n• Each server has its own `" + bbConfig.commandPrefix + "shop`. The shops refresh every *12 hours.*\n• Is a criminal, item or system name too long? Use an alias instead! You can see aliases with `" + bbConfig.commandPrefix + "info`.\n• Having trouble getting to new bounties in time? Try out the new `" + bbConfig.commandPrefix + "notify bounties` command!", inline=False)
 
-        await sendChannel.send(howToPlayString)
+        await sendChannel.send(embed=howToPlayEmbed)
     except discord.Forbidden:
         await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
         return
@@ -2398,7 +2385,7 @@ async def cmd_duel(message, args):
     if action == "challenge":
         stakes = int(argsSplit[2])
         if sourceBBUser.hasDuelChallengeFor(targetBBUser):
-            await message.channel.send(":x: You already have a duel challenge pending for " + requestedUser.name + "! To make a new one, cancel it first. (see `$help duel`)")
+            await message.channel.send(":x: You already have a duel challenge pending for " + requestedUser.name + "! To make a new one, cancel it first. (see `" + bbConfig.commandPrefix + "help duel`)")
             return
 
         try:
@@ -2959,6 +2946,9 @@ async def dev_cmd_broadcast(message, args):
             desc=""
             footerTxt=""
             thumb=""
+            img=""
+            authorName=""
+            icon=""
 
             try:
                 startIndex=msg.index("titleTxt='")+len("titleTxt=")+1
@@ -2992,7 +2982,31 @@ async def dev_cmd_broadcast(message, args):
             except ValueError:
                 pass
 
-            broadcastEmbed = makeEmbed(titleTxt=titleTxt, desc=desc, footerTxt=footerTxt, thumb=thumb)
+            try:
+                startIndex=msg.index("img='")+len("img=")+1
+                endIndex=startIndex + msg[msg.index("img='")+len("img='"):].index("'")
+                img=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("authorName='")+len("authorName=")+1
+                endIndex=startIndex + msg[msg.index("authorName='")+len("authorName='"):].index("'")
+                authorName=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("icon='")+len("icon=")+1
+                endIndex=startIndex + msg[msg.index("icon='")+len("icon='"):].index("'")
+                icon=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            broadcastEmbed = makeEmbed(titleTxt=titleTxt, desc=desc, footerTxt=footerTxt, thumb=thumb, img=img, authorName=authorName, icon=icon)
             
             try:
                 msg.index('\n')
@@ -3022,6 +3036,125 @@ async def dev_cmd_broadcast(message, args):
                     await client.get_channel(guild.getPlayChannelId()).send(msgText, embed=broadcastEmbed)
 
 bbCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
+# dmCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
+
+
+"""
+developer command sending a message to the same channel as the command is called in
+
+@param message -- the discord message calling the command
+@param args -- string containing the message to broadcast
+"""
+async def dev_cmd_say(message, args):
+    if args == "":
+        await message.channel.send("provide a message!")
+    else:
+        useAnnounceChannel = False
+        broadcastEmbed = None
+        msg = args
+        if args.split(" ")[0].lower() == "announce-channel":
+            useAnnounceChannel = True
+            msg = args[17:]
+
+        try:
+            embedIndex = msg.index("embed=")
+        except ValueError:
+            embedIndex = -1
+        
+        if embedIndex != -1:
+            msgText = msg[:embedIndex]
+        else:
+            msgText = msg
+
+        if embedIndex != -1:
+            msg = msg[embedIndex:]
+            titleTxt=""
+            desc=""
+            footerTxt=""
+            thumb=""
+            img=""
+            authorName=""
+            icon=""
+
+            try:
+                startIndex=msg.index("titleTxt='")+len("titleTxt=")+1
+                endIndex=startIndex + msg[msg.index("titleTxt='")+len("titleTxt='"):].index("'")
+                titleTxt=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("desc='")+len("desc=")+1
+                endIndex=startIndex + msg[msg.index("desc='")+len("desc='"):].index("'")
+                desc=msg[startIndex:endIndex].replace("{NL}","\n")
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("footerTxt='")+len("footerTxt=")+1
+                endIndex=startIndex + msg[msg.index("footerTxt='")+len("footerTxt='"):].index("'")
+                footerTxt=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("thumb='")+len("thumb=")+1
+                endIndex=startIndex + msg[msg.index("thumb='")+len("thumb='"):].index("'")
+                thumb=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("img='")+len("img=")+1
+                endIndex=startIndex + msg[msg.index("img='")+len("img='"):].index("'")
+                img=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("authorName='")+len("authorName=")+1
+                endIndex=startIndex + msg[msg.index("authorName='")+len("authorName='"):].index("'")
+                authorName=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            try:
+                startIndex=msg.index("icon='")+len("icon=")+1
+                endIndex=startIndex + msg[msg.index("icon='")+len("icon='"):].index("'")
+                icon=msg[startIndex:endIndex]
+                msg=msg[endIndex+2:]
+            except ValueError:
+                pass
+
+            broadcastEmbed = makeEmbed(titleTxt=titleTxt, desc=desc, footerTxt=footerTxt, thumb=thumb, img=img, authorName=authorName, icon=icon)
+            
+            try:
+                msg.index('\n')
+                fieldsExist = True
+            except ValueError:
+                fieldsExist = False
+            while fieldsExist:
+                nextNL = msg.index('\n')
+                try:
+                    closingNL = nextNL + msg[nextNL+1:].index('\n')
+                except ValueError:
+                    fieldsExist = False
+                
+                if fieldsExist:
+                    broadcastEmbed.add_field(name=msg[:nextNL].replace("{NL}", "\n"), value=msg[nextNL+1:closingNL+1].replace("{NL}", "\n"), inline=False)
+                    msg = msg[closingNL+2:]
+                else:
+                    broadcastEmbed.add_field(name=msg[:nextNL].replace("{NL}", "\n"), value=msg[nextNL+1:].replace("{NL}", "\n"), inline=False)
+
+        await message.channel.send(msgText, embed=broadcastEmbed)
+
+bbCommands.register("say", dev_cmd_say, isDev=True, forceKeepArgsCasing=True)
 # dmCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
 
 
