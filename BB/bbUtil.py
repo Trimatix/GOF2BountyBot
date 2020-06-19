@@ -103,3 +103,59 @@ def isMention(mention):
 
 def isRoleMention(mention):
     return mention.endswith(">") and mention.startswith("<@&") and isInt(mention[3:-1])
+
+
+def fightShips(ship1, ship2, variancePercent):
+    # Fetch ship total healths
+    ship1HP = ship1.getArmour() + ship1.getShield()
+    ship2HP = ship2.getArmour() + ship2.getShield()
+
+    # Vary healths by +=variancePercent
+    ship1HPVariance = ship1HP * variancePercent
+    ship2HPVariance = ship2HP * variancePercent
+    ship1HPVaried = random.randint(int(ship1HP - ship1HPVariance), int(ship1HP + ship1HPVariance))
+    ship2HPVaried = random.randint(int(ship2HP - ship2HPVariance), int(ship2HP + ship2HPVariance))
+
+    # Fetch ship total DPSs
+    ship1DPS = ship1.getDPS()
+    ship2DPS = ship2.getDPS()
+
+    if ship1DPS == 0:
+        if ship2DPS == 0:
+            return {"winningShip": None}
+        return {"winningShip": ship2}
+    if ship2DPS == 0:
+        if ship1DPS == 0:
+            return {"winningShip": None}
+        return {"winningShip": ship1}
+
+    # Vary DPSs by +=variancePercent
+    ship1DPSVariance = ship1DPS * variancePercent
+    ship2DPSVariance = ship2DPS * variancePercent
+    ship1DPSVaried = random.randint(int(ship1DPS - ship1DPSVariance), int(ship1DPS + ship1DPSVariance))
+    ship2DPSVaried = random.randint(int(ship2DPS - ship2DPSVariance), int(ship2DPS + ship2DPSVariance))
+
+    # Handling to be implemented
+    # ship1Handling = ship1.getHandling()
+    # ship2Handling = ship2.getHandling()
+    # ship1HandlingPenalty = 
+
+    # Calculate ship TTKs
+    ship1TTK = ship1HPVaried / ship2DPSVaried
+    ship2TTK = ship2HPVaried / ship1DPSVaried
+
+    # Return the ship with the longest TTK as the winner
+    if ship1TTK > ship2TTK:
+        winningShip = ship1
+    elif ship2TTK > ship1TTK:
+        winningShip = ship2
+    else:
+        winningShip = None
+    
+    return {"winningShip":winningShip,
+            "ship1":{"health":{"stock":ship1HP, "varied":ship1HPVaried},
+                    "DPS": {"stock":ship1DPS, "varied":ship1DPSVaried},
+                    "TTK": ship1TTK},
+            "ship2":{"health":{"stock":ship2HP, "varied":ship2HPVaried},
+                    "DPS": {"stock":ship2DPS, "varied":ship2DPSVaried},
+                    "TTK": ship2TTK}}

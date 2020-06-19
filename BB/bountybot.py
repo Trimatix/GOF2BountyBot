@@ -2464,9 +2464,9 @@ async def cmd_duel(message, args):
             await message.channel.send(":x:" + str(requestedUser) + " does not have enough credits to fight this duel! (" + str(requestedDuel.stakes) + ")")
             return
         
-        fight = ShipFight.ShipFight(sourceBBUser.activeShip, targetBBUser.activeShip)
-        duelResults = fight.fightShips(bbConfig.duelVariancePercent)
-        # duelResults = bbUtil.fightShips(sourceBBUser.activeShip, targetBBUser.activeShip, bbConfig.duelVariancePercent)
+        # fight = ShipFight.ShipFight(sourceBBUser.activeShip, targetBBUser.activeShip)
+        # duelResults = fight.fightShips(bbConfig.duelVariancePercent)
+        duelResults = bbUtil.fightShips(sourceBBUser.activeShip, targetBBUser.activeShip, bbConfig.duelVariancePercent)
         winningShip = duelResults["winningShip"]
 
         if winningShip is sourceBBUser.activeShip:
@@ -2500,26 +2500,35 @@ async def cmd_duel(message, args):
             winningBBUser.duelCreditsWins += requestedDuel.stakes
             losingBBUser.duelCreditsLosses += requestedDuel.stakes
 
+            winningBBUser.credits += requestedDuel.stakes
+            losingBBUser.credits -= requestedDuel.stakes
+            creditsMsg = "The stakes were **" + str(requestedDuel.stakes) + "** credit" + ("s" if requestedDuel.stakes != 1 else "") + ".\n**" + client.get_user(winningBBUser.id).name + "** now has **" + str(winningBBUser.credits) + " credits**.\n**" +  client.get_user(losingBBUser.id).name + "** now has **" + str(losingBBUser.credits) + " credits**."
+            statsMsg = "**" + message.author.name + "** had " + str(duelResults["ship1"]["DPS"]["varied"]) + " DPS and " + str(duelResults["ship1"]["health"]["varied"]) + " health." \
+                        + "**" + requestedUser.name + "** had " + str(duelResults["ship2"]["DPS"]["varied"]) + " DPS and " + str(duelResults["ship2"]["health"]["varied"]) + " health." \
+                        + "**" + message.author.name + "** had " + str(duelResults["ship1"]["TTK"]) + "s time to kill." \
+                        + "**" + requestedUser.name + "** had " + str(duelResults["ship2"]["TTK"]) + "s time to kill."
+            statsEmbed = makeEmbed(authorName="**Duel Stats**")
+            statsEmbed.add_field(name="DPS (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)",value=message.author.mention + ": " + str(round(duelResults["ship1"]["health"]["varied"], 2)) + "\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["health"]["varied"], 2)))
+            statsEmbed.add_field(name="Health (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)",value=message.author.mention + ": " + str(round(duelResults["ship1"]["health"]["varied"])) + "\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["health"]["varied"], 2)))
+            statsEmbed.add_field(name="Time To Kill",value=message.author.mention + ": " + str(round(duelResults["ship1"]["TTK"], 2)) + "s\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["TTK"], 2)) + "s")
+
             if message.guild.get_member(winningBBUser.id) is None:
-                await message.channel.send(":crossed_swords: **Fight!** " + str(client.get_user(winningBBUser.id)) + " beat " + client.get_user(losingBBUser.id).mention + " in a duel!")
+                await message.channel.send(":crossed_swords: **Fight!** " + str(client.get_user(winningBBUser.id)) + " beat " + client.get_user(losingBBUser.id).mention + " in a duel!\n" + creditsMsg,embed=statsEmbed)
                 winnerDCGuild = findBBUserDCGuild(winningBBUser)
                 if winnerDCGuild is not None:
                     winnerBBGuild = guildsDB.getGuild(winnerDCGuild.id)
                     if winnerBBGuild.hasPlayChannel():
-                        await client.get_channel(winnerBBGuild.getPlayChannelId()).send(":crossed_swords: **Fight!** " + winnerDCGuild.get_member(winningBBUser.id).mention + " beat " + str(client.get_user(losingBBUser.id)) + " in a duel!")
+                        await client.get_channel(winnerBBGuild.getPlayChannelId()).send(":crossed_swords: **Fight!** " + winnerDCGuild.get_member(winningBBUser.id).mention + " beat " + str(client.get_user(losingBBUser.id)) + " in a duel!\n" + creditsMsg,embed=statsEmbed)
             else:
-                winningBBUser.credits += requestedDuel.stakes
-                losingBBUser.credits -= requestedDuel.stakes
-                creditsMsg = "The stakes were **" + str(requestedDuel.stakes) + "** credit" + ("s" if requestedDuel.stakes != 1 else "") + ".\n**" + client.get_user(winningBBUser.id).name + "** now has **" + str(winningBBUser.credits) + " credits**.\n**" +  client.get_user(losingBBUser.id).name + "** now has **" + str(losingBBUser.credits) + " credits**."
                 if message.guild.get_member(losingBBUser.id) is None:
-                    await message.channel.send(":crossed_swords: **Fight!** " + client.get_user(winningBBUser.id).mention + " beat " + str(client.get_user(losingBBUser.id)) + " in a duel!\n" + creditsMsg)
+                    await message.channel.send(":crossed_swords: **Fight!** " + client.get_user(winningBBUser.id).mention + " beat " + str(client.get_user(losingBBUser.id)) + " in a duel!\n" + creditsMsg,embed=statsEmbed)
                     loserDCGuild = findBBUserDCGuild(losingBBUser)
                     if loserDCGuild is not None:
                         loserBBGuild = guildsDB.getGuild(loserDCGuild.id)
                         if loserBBGuild.hasPlayChannel():
-                            await client.get_channel(loserBBGuild.getPlayChannelId()).send(":crossed_swords: **Fight!** " + str(client.get_user(winningBBUser.id)) + " beat " + loserDCGuild.get_member(losingBBUser.id).mention + " in a duel!\n" + creditsMsg)
+                            await client.get_channel(loserBBGuild.getPlayChannelId()).send(":crossed_swords: **Fight!** " + str(client.get_user(winningBBUser.id)) + " beat " + loserDCGuild.get_member(losingBBUser.id).mention + " in a duel!\n" + creditsMsg,embed=statsEmbed)
                 else:
-                    await message.channel.send(":crossed_swords: **Fight!** " + client.get_user(winningBBUser.id).mention + " beat " + client.get_user(losingBBUser.id).mention + " in a duel!\n" + creditsMsg)
+                    await message.channel.send(":crossed_swords: **Fight!** " + client.get_user(winningBBUser.id).mention + " beat " + client.get_user(losingBBUser.id).mention + " in a duel!\n" + creditsMsg,embed=statsEmbed)
 
         await targetBBUser.duelRequests[sourceBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
         targetBBUser.removeDuelChallengeObj(requestedDuel)
