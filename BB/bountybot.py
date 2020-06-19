@@ -2398,7 +2398,7 @@ async def cmd_duel(message, args):
             if targetDCGuild is not None:
                 targetBBGuild = guildsDB.getGuild(targetDCGuild.id)
                 if targetBBGuild.hasPlayChannel():
-                    await client.get_channel(targetBBGuild.getPlayChannelId()).send(":-1: <@" + targetBBUser.id + ">, **" + str(message.author) + "** has rejected your duel request!")
+                    await client.get_channel(targetBBGuild.getPlayChannelId()).send(":-1: <@" + str(targetBBUser.id) + ">, **" + str(message.author) + "** has rejected your duel request!")
     
     elif action == "accept":
         if not targetBBUser.hasDuelChallengeFor(sourceBBUser):
