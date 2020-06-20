@@ -3030,7 +3030,7 @@ async def dev_cmd_broadcast(message, args):
 
         if useAnnounceChannel:
             for guild in guildsDB.guilds.values():
-                if guild.hasPlayChannel:
+                if guild.hasAnnounceChannel:
                     await client.get_channel(guild.getAnnounceChannelId()).send(msgText, embed=broadcastEmbed)
         else:
             for guild in guildsDB.guilds.values():
