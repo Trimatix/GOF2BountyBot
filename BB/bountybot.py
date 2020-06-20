@@ -529,6 +529,8 @@ async def cmd_balance(message, args):
         await message.channel.send(":moneybag: **" + requestedUser.name + "** has **" + str(usersDB.getUser(requestedUser.id).credits) + " Credits**.")
     
 bbCommands.register("balance", cmd_balance)
+bbCommands.register("bal", cmd_balance)
+bbCommands.register("credits", cmd_balance)
 # dmCommands.register("balance", cmd_balance)
 
 
