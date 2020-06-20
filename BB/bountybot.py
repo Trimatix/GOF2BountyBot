@@ -3540,8 +3540,8 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if not guildsDB.guildIdExists(message.guild.id):
-        guildsDB.addGuildID(message.guild.id)
+    # if not guildsDB.guildIdExists(message.guild.id):
+    #     guildsDB.addGuildID(message.guild.id)
 
     # x = await message.channel.fetch_message(723205500887498784)
     # await x.delete()
@@ -3549,55 +3549,57 @@ async def on_message(message):
     if message.channel.type == discord.ChannelType.private:
         return
 
-    """
-    # randomly send '!drink' to the same channel
-    bbConfig.randomDrinkNum -= 1
-    if bbConfig.randomDrinkNum == 0:
-        await message.channel.send("!drink")
-        bbConfig.randomDrinkNum = random.randint(bbConfig.randomDrinkFactor / 10, bbConfig.randomDrinkFactor)
-    """
+    if message.author.id in bbConfig.developers or not message.guild.id in bbConfig.disabledServers:
 
-    # For any messages beginning with bbConfig.commandPrefix
-    # New method without space-splitting to allow for prefixes that dont end in a space
-    if len(message.content) >= len(bbConfig.commandPrefix) and message.content[0:len(bbConfig.commandPrefix)].lower() == bbConfig.commandPrefix.lower():
-    # Old method with space-splitting
-    # if message.content.split(" ")[0].lower() == (bbConfig.commandPrefix.rstrip(" ")):
-        # replace special apostraphe characters with the universal '
-        msgContent = message.content.replace("‘", "'").replace("’","'")
+        """
+        # randomly send '!drink' to the same channel
+        bbConfig.randomDrinkNum -= 1
+        if bbConfig.randomDrinkNum == 0:
+            await message.channel.send("!drink")
+            bbConfig.randomDrinkNum = random.randint(bbConfig.randomDrinkFactor / 10, bbConfig.randomDrinkFactor)
+        """
 
-        # split the message into command and arguments
-        if len(msgContent[len(bbConfig.commandPrefix):]) > 0:
-            command = msgContent[len(bbConfig.commandPrefix):].split(" ")[0]
-            args = msgContent[len(bbConfig.commandPrefix) + len(command) + 1:]
+        # For any messages beginning with bbConfig.commandPrefix
+        # New method without space-splitting to allow for prefixes that dont end in a space
+        if len(message.content) >= len(bbConfig.commandPrefix) and message.content[0:len(bbConfig.commandPrefix)].lower() == bbConfig.commandPrefix.lower():
+        # Old method with space-splitting
+        # if message.content.split(" ")[0].lower() == (bbConfig.commandPrefix.rstrip(" ")):
+            # replace special apostraphe characters with the universal '
+            msgContent = message.content.replace("‘", "'").replace("’","'")
 
-        # if no command is given, call help with no arguments
-        else:
-            args = ""
-            command = "help"
+            # split the message into command and arguments
+            if len(msgContent[len(bbConfig.commandPrefix):]) > 0:
+                command = msgContent[len(bbConfig.commandPrefix):].split(" ")[0]
+                args = msgContent[len(bbConfig.commandPrefix) + len(command) + 1:]
 
-        # Debug: Print the recognised command args strings
-        # print("COMMAND '" + command + "'")
-        # print("ARGS '" + args + "'")
-        
-        # infer the message author's permissions
-        userIsDev = message.author.id in bbConfig.developers
-        # if message.channel.type == discord.ChannelType.text:
+            # if no command is given, call help with no arguments
+            else:
+                args = ""
+                command = "help"
 
-        # infer the message author's permissions
-        userIsAdmin = message.author.permissions_in(message.channel).administrator
+            # Debug: Print the recognised command args strings
+            # print("COMMAND '" + command + "'")
+            # print("ARGS '" + args + "'")
+            
+            # infer the message author's permissions
+            userIsDev = message.author.id in bbConfig.developers
+            # if message.channel.type == discord.ChannelType.text:
 
-        # Call the requested command
-        commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
+            # infer the message author's permissions
+            userIsAdmin = message.author.permissions_in(message.channel).administrator
 
-        # elif message.channel.type == discord.ChannelType.private:
-        #     # Call the requested command
-        #     commandFound = await dmCommands.call(command, message, args, isAdmin=False, isDev=userIsDev)
-        
+            # Call the requested command
+            commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
 
-        # Command not found, send an error message.
-        if not commandFound:
-            userTitle = bbConfig.devTitle if userIsDev else (bbConfig.adminTitle if userIsAdmin else bbConfig.userTitle)
-            await message.channel.send(""":question: Can't do that, """ + userTitle + """. Type `""" + bbConfig.commandPrefix + """help` for a list of commands! **o7**""")
+            # elif message.channel.type == discord.ChannelType.private:
+            #     # Call the requested command
+            #     commandFound = await dmCommands.call(command, message, args, isAdmin=False, isDev=userIsDev)
+            
+
+            # Command not found, send an error message.
+            if not commandFound:
+                userTitle = bbConfig.devTitle if userIsDev else (bbConfig.adminTitle if userIsAdmin else bbConfig.userTitle)
+                await message.channel.send(""":question: Can't do that, """ + userTitle + """. Type `""" + bbConfig.commandPrefix + """help` for a list of commands! **o7**""")
 
 
 client.run(bbPRIVATE.botToken)
