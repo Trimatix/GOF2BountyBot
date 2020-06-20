@@ -23,12 +23,13 @@ class bbModule(bbAliasable.Aliasable):
 
     icon = ""
     hasIcon = False
+    emoji = ""
 
     value = 0
     shopSpawnRate = 0
 
     def __init__(self, name, aliases, armour=0, armourMultiplier=1.0, shield=0, shieldMultiplier=1.0, dps=0,
-                    dpsMultiplier=1.0, cargo=0, cargoMultiplier=1.0, handling=0, handlingMultiplier=1.0, value=0, wiki="", manufacturer="", icon=""):
+                    dpsMultiplier=1.0, cargo=0, cargoMultiplier=1.0, handling=0, handlingMultiplier=1.0, value=0, wiki="", manufacturer="", icon="", emoji=""):
         super(bbModule, self).__init__(name, aliases)
         self.armour = armour
         self.armourMultiplier = armourMultiplier
@@ -46,6 +47,7 @@ class bbModule(bbAliasable.Aliasable):
         self.manufacturer = manufacturer
         self.icon = icon
         self.hasIcon = icon != ""
+        self.emoji = emoji
 
     
     def getValue(self):
@@ -92,9 +94,9 @@ class CloakModule(bbModule):
     value = 0
     shopSpawnRate = 0
 
-    def __init__(self, name, aliases, duration=0, value=0, wiki="", manufacturer="", icon=""):
+    def __init__(self, name, aliases, duration=0, value=0, wiki="", manufacturer="", icon="", emoji=""):
         super(CloakModule, self).__init__(name, aliases, armour=0, armourMultiplier=1.0, shield=0, shieldMultiplier=1.0, dps=0,
-                    dpsMultiplier=1.0, cargo=0, cargoMultiplier=1.0, handling=0, handlingMultiplier=1.0, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon)
+                    dpsMultiplier=1.0, cargo=0, cargoMultiplier=1.0, handling=0, handlingMultiplier=1.0, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji)
         self.duration = duration
 
     
@@ -120,7 +122,7 @@ def cloakFromDict(moduleDict):
     else:
         return CloakModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], value=moduleDict["value"] if "value" in moduleDict else 0,
                             wiki=moduleDict["wiki"] if "wiki" in moduleDict else "", manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
-                            duration=moduleDict["duration"] if "duration" in moduleDict else 0)
+                            duration=moduleDict["duration"] if "duration" in moduleDict else 0, emoji=moduleDict["emoji"] if "emoji" in moduleDict else "")
 
 
 typeConstructors = {"cloak":cloakFromDict}
@@ -139,4 +141,5 @@ def fromDict(moduleDict):
                             dpsMultiplier=moduleDict["dpsMultiplier"] if "dpsMultiplier" in moduleDict else 1, cargo=moduleDict["cargo"] if "cargo" in moduleDict else 0,
                             cargoMultiplier=moduleDict["cargoMultiplier"] if "cargoMultiplier" in moduleDict else 1, handling=moduleDict["handling"] if "handling" in moduleDict else 0,
                             handlingMultiplier=moduleDict["handlingMultiplier"] if "handlingMultiplier" in moduleDict else 1, value=moduleDict["value"] if "value" in moduleDict else 0,
-                            wiki=moduleDict["wiki"] if "wiki" in moduleDict else "", manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon)
+                            wiki=moduleDict["wiki"] if "wiki" in moduleDict else "", manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
+                            emoji=moduleDict["emoji"] if "emoji" in moduleDict else "")

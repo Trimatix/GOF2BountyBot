@@ -1555,25 +1555,25 @@ async def cmd_shop(message, args):
         for shipNum in range(1, len(requestedShop.shipsStock) + 1):
             if shipNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Ships**__", inline=False)
-            shopEmbed.add_field(value=commaSplitNum(str(requestedShop.shipsStock[shipNum - 1].getValue())) + " Credits\n" + requestedShop.shipsStock[shipNum - 1].statsStringShort(), name=str(shipNum) + ". " + "**" + requestedShop.shipsStock[shipNum - 1].getNameAndNick() + "**", inline=True)
+            shopEmbed.add_field(value=requestedShop.shipsStock[shipNum - 1].emoji + " " + commaSplitNum(str(requestedShop.shipsStock[shipNum - 1].getValue())) + " Credits\n" + requestedShop.shipsStock[shipNum - 1].statsStringShort(), name=str(shipNum) + ". " + "**" + requestedShop.shipsStock[shipNum - 1].getNameAndNick() + "**", inline=True)
 
     if item in ["all", "weapon"]:
         for weaponNum in range(1, len(requestedShop.weaponsStock) + 1):
             if weaponNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Weapons**__", inline=False)
-            shopEmbed.add_field(value=commaSplitNum(str(requestedShop.weaponsStock[weaponNum - 1].value)) + " Credits\n" + requestedShop.weaponsStock[weaponNum - 1].statsStringShort(), name=str(weaponNum) + ". " + "**" + requestedShop.weaponsStock[weaponNum - 1].name + "**", inline=True)
+            shopEmbed.add_field(value=requestedShop.weaponsStock[weaponNum - 1].emoji + " " + commaSplitNum(str(requestedShop.weaponsStock[weaponNum - 1].value)) + " Credits\n" + requestedShop.weaponsStock[weaponNum - 1].statsStringShort(), name=str(weaponNum) + ". " + "**" + requestedShop.weaponsStock[weaponNum - 1].name + "**", inline=True)
 
     if item in ["all", "module"]:
         for moduleNum in range(1, len(requestedShop.modulesStock) + 1):
             if moduleNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Modules**__", inline=False)
-            shopEmbed.add_field(value=commaSplitNum(str(requestedShop.modulesStock[moduleNum - 1].value)) + " Credits\n" + requestedShop.modulesStock[moduleNum - 1].statsStringShort(), name=str(moduleNum) + ". " + "**" + requestedShop.modulesStock[moduleNum - 1].name + "**", inline=True)
+            shopEmbed.add_field(value=requestedShop.modulesStock[moduleNum - 1].emoji + " " + commaSplitNum(str(requestedShop.modulesStock[moduleNum - 1].value)) + " Credits\n" + requestedShop.modulesStock[moduleNum - 1].statsStringShort(), name=str(moduleNum) + ". " + "**" + requestedShop.modulesStock[moduleNum - 1].name + "**", inline=True)
 
     if item in ["all", "turret"]:
         for turretNum in range(1, len(requestedShop.turretsStock) + 1):
             if turretNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Turrets**__", inline=False)
-            shopEmbed.add_field(value=commaSplitNum(str(requestedShop.turretsStock[turretNum - 1].value)) + " Credits\n" + requestedShop.turretsStock[turretNum - 1].statsStringShort(), name=str(turretNum) + ". " + "**" + requestedShop.turretsStock[turretNum - 1].name + "**", inline=True)
+            shopEmbed.add_field(value=requestedShop.turretsStock[turretNum - 1].emoji + " " + commaSplitNum(str(requestedShop.turretsStock[turretNum - 1].value)) + " Credits\n" + requestedShop.turretsStock[turretNum - 1].statsStringShort(), name=str(turretNum) + ". " + "**" + requestedShop.turretsStock[turretNum - 1].name + "**", inline=True)
 
     try:
         await sendChannel.send(embed=shopEmbed)
@@ -3531,6 +3531,9 @@ async def on_message(message):
     # ignore messages sent by BountyBot and DMs
     if message.author == client.user:
         return
+
+    if not guildsDB.guildIdExists(message.guild.id):
+        guildsDB.addGuildID(message.guild.id)
 
     # x = await message.channel.fetch_message(723205500887498784)
     # await x.delete()
