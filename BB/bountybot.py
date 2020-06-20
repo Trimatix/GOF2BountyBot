@@ -3445,8 +3445,11 @@ TODO: Once deprecation databases are implemented, if guilds now store important 
 """
 @client.event
 async def on_guild_join(guild):
+    print(datetime.now().strftime("[%H:%M:%S]") +  " I joined a new guild! '" + guild.name + "' [" + str(guild.id) + "]",end="")
     if not guildsDB.guildIdExists(guild.id):
         guildsDB.addGuildID(guild.id)
+        print(" -- The guild was added to guildsDB.",end="")
+    print()
 
 
 """
@@ -3457,8 +3460,11 @@ TODO: Once deprecation databases are implemented, if guilds now store important 
 """
 @client.event
 async def on_guild_remove(guild):
+    print(datetime.now().strftime("[%H:%M:%S]") +  " I left a guild! '" + guild.name + "' [" + str(guild.id) + "]",end="")
     if guildsDB.guildIdExists(guild.id):
         guildsDB.removeGuildId(guild.id)
+        print(" -- The guild was removed from guildsDB.",end="")
+    print()
 
 
 """
