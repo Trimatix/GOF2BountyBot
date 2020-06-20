@@ -11,6 +11,7 @@ class bbTurret(bbAliasable.Aliasable):
     hasIcon = False
     shopSpawnRate = 0
     emoji = ""
+    hasEmoji = False
 
     def __init__(self, name, aliases, dps=0.0, value=0, wiki="", manufacturer="", icon="", emoji=""):
         super(bbTurret, self).__init__(name, aliases)
@@ -22,6 +23,8 @@ class bbTurret(bbAliasable.Aliasable):
         self.manufacturer = manufacturer
         self.icon = ""
         self.hasIcon = icon != ""
+        self.emoji = emoji
+        self.hasEmoji = emoji != ""
 
     
     def getValue(self):

@@ -24,6 +24,7 @@ class bbModule(bbAliasable.Aliasable):
     icon = ""
     hasIcon = False
     emoji = ""
+    hasEmoji = False
 
     value = 0
     shopSpawnRate = 0
@@ -48,6 +49,7 @@ class bbModule(bbAliasable.Aliasable):
         self.icon = icon
         self.hasIcon = icon != ""
         self.emoji = emoji
+        self.hasEmoji = emoji != ""
 
     
     def getValue(self):

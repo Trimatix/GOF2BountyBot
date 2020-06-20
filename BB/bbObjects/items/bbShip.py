@@ -12,6 +12,7 @@ class bbShip(bbAliasable.Aliasable):
     hasNickname = False
     nickname = ""
     emoji = ""
+    hasEmoji = False
 
     armour = 0.0
     cargo = 0
@@ -46,6 +47,7 @@ class bbShip(bbAliasable.Aliasable):
         self.icon = icon
         self.hasIcon = icon != ""
         self.emoji = emoji
+        self.hasEmoji = emoji != ""
 
         self.name = name
         if self.name in bbData.builtInShipData:
