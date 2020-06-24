@@ -3566,7 +3566,7 @@ async def on_message(message):
     # if message.channel.type == discord.ChannelType.private:
     #     return
 
-    if message.author.id in bbConfig.developers or not message.guild.id in bbConfig.disabledServers:
+    if message.author.id in bbConfig.developers or message.guild is None or not message.guild.id in bbConfig.disabledServers:
 
         """
         # randomly send '!drink' to the same channel
