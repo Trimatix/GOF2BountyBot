@@ -253,11 +253,22 @@ class bbUser:
         if item == "turret":
             return self.inactiveTurrets
         else:
-            raise NotImplementedError("Valid, not unrecognised item type: " + item)
+            raise NotImplementedError("Valid, but unrecognised item type: " + item)
 
-
+    
+    """
+    TODO: ⚠ TEMPORARY FIX
+    This is an awful workaround. Currently, whenever a new duel request is created, it is somehow added to **all users**! Even though only the correct addDuelRequest method is called! so where is it getting added to the other bbUsers? not sure yet, here's a temporary fix while i figure it out.
+    """
     def hasDuelChallengeFor(self, targetBBUser):
-        return targetBBUser in self.duelRequests
+        if targetBBUser in self.duelRequests:
+            if self.duelRequests[targetBBUser].sourceBBUser is not self:
+                del self.duelRequests[targetBBUser]
+                print(str(self.id) + " deleted an erroneous duel reqest for " + str(targetBBUser.id))
+                return False
+            return True
+        return False
+        # return targetBBUser in self.duelRequests
 
 
     def addDuelChallenge(self, duelReq):
@@ -268,6 +279,7 @@ class bbUser:
         if duelReq.targetBBUser is self:
             raise ValueError("Attempted to add a DuelRequest for self: " + str(duelReq.sourceBBUser.id))
         self.duelRequests[duelReq.targetBBUser] = duelReq
+        print("user " + str(self.id) + " stored a new duel request, from " + str(duelReq.sourceBBUser.id) + " to " + str(duelReq.targetBBUser.id))
 
 
     def removeDuelChallengeObj(self, duelReq):
