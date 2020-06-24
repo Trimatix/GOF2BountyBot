@@ -3047,11 +3047,11 @@ async def dev_cmd_broadcast(message, args):
 
         if useAnnounceChannel:
             for guild in guildsDB.guilds.values():
-                if guild.hasAnnounceChannel:
+                if guild.hasAnnounceChannel():
                     await client.get_channel(guild.getAnnounceChannelId()).send(msgText, embed=broadcastEmbed)
         else:
             for guild in guildsDB.guilds.values():
-                if guild.hasPlayChannel:
+                if guild.hasPlayChannel():
                     await client.get_channel(guild.getPlayChannelId()).send(msgText, embed=broadcastEmbed)
 
 bbCommands.register("broadcast", dev_cmd_broadcast, isDev=True, forceKeepArgsCasing=True)
