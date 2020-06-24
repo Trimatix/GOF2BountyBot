@@ -12,6 +12,7 @@ class TimedTaskAsyncHeap:
 
     def __init__(self, expiryFunction=None, expiryFunctionArgs={}, asyncExpiryFunction=False):
         # self.taskType = taskType
+        self.tasksHeap = []
         self.expiryFunction = expiryFunction
         self.hasExpiryFunction = expiryFunction is not None
         self.expiryFunctionArgs = expiryFunctionArgs

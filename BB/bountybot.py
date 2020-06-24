@@ -2395,6 +2395,7 @@ async def cmd_duel(message, args):
             newDuelReq.duelTimeoutTask = duelTT
             ActiveTimedTasks.duelRequestTTDB.scheduleTask(duelTT)
             sourceBBUser.addDuelChallenge(newDuelReq)
+            # print("Duelreq added to " + str(sourceBBUser.id) + " from " + str(newDuelReq.sourceBBGuild.id) + " to " + str(newDuelReq.targetBBUser.id))
         except KeyError:
             await message.channel.send(":x: User not found! Did they leave the server?")
             return
@@ -2434,6 +2435,7 @@ async def cmd_duel(message, args):
         
         await targetBBUser.duelRequests[sourceBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
         targetBBUser.removeDuelChallengeTarget(sourceBBUser)
+
         await message.channel.send(":white_check_mark: You have rejected **" + str(requestedUser) + "**'s duel challenge.")
         if message.guild.get_member(targetBBUser.id) is None:
             targetDCGuild = findBBUserDCGuild(targetBBUser)
@@ -3501,7 +3503,7 @@ async def on_ready():
     if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" + bbConfig.timedTaskCheckingType + "'")
 
-    # TODO: find next closest task and delay by that amount
+    # TODO: find next closest task with min over heap[0] for all task DBs and delay by that amount
     # newTaskAdded = False
     # nextTask
     

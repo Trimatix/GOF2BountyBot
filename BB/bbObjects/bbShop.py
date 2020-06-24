@@ -21,6 +21,10 @@ class bbShop:
         self.maxTurrets = maxTurrets
 
         if shipsStock == [] and weaponsStock == [] and modulesStock == [] and turretsStock == []:
+            self.shipsStock = []
+            self.weaponsStock = []
+            self.modulesStock = []
+            self.turretsStock = []
             self.refreshStock()
         else:
             self.shipsStock = shipsStock

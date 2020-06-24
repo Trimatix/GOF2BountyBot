@@ -4,6 +4,10 @@ class bbGuildDB:
     guilds = {}
 
 
+    def __init__(self):
+        self.guilds = {}
+
+
     def getIDs(self):
         return self.guilds.keys()
 

@@ -5,6 +5,10 @@ class bbUserDB:
     users = {}
 
 
+    def __init__(self):
+        self.users = {}
+
+
     def userIDExists(self, id):
         return id in self.users.keys()
 

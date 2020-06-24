@@ -1,10 +1,18 @@
 """
 Class that stores, categorises, and calls commands based on a text name and caller permissions.
+TODO: Change to a single dict of {accessLevel: {}} where the internal {} is as userCommands etc currently are, and accessLevel is int
 """
 class HeirarchicalCommandsDB:
     userCommands = {}
     adminCommands = {}
     devCommands = {}
+
+
+    def __init__(self):
+        self.userCommands = {}
+        self.adminCommands = {}
+        self.devCommands = {}
+
 
     """
     Register a command in the database.

@@ -9,6 +9,7 @@ class bbBountyDB:
 
 
     def __init__(self, factions, maxBountiesPerFaction):
+        self.bounties = {}
         self.factions = factions
         for fac in factions:
             self.bounties[fac] = []

@@ -25,6 +25,7 @@ class bbTurret(bbAliasable.Aliasable):
         self.hasIcon = icon != ""
         self.emoji = emoji
         self.hasEmoji = emoji != ""
+        self.shopSpawnRate = 0
 
     
     def getValue(self):

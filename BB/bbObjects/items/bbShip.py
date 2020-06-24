@@ -52,6 +52,8 @@ class bbShip(bbAliasable.Aliasable):
         self.name = name
         if self.name in bbData.builtInShipData:
             self.shopSpawnRate = bbData.shipKeySpawnRates[self.name]
+        else:
+            self.shopSpawnRate = 0
         self.armour = armour
         self.cargo = cargo
         self.numSecondaries = numSecondaries
@@ -66,9 +68,13 @@ class bbShip(bbAliasable.Aliasable):
         self.modules = modules
         self.turrets = turrets
 
+        self.nickname = ""
+        self.hasNickname = False
         if nickname != "":
             self.changeNickname(nickname)
         self.manufacturer = manufacturer
+
+        self.upgradesApplied = []
 
 
     def getNumWeaponsEquipped(self):

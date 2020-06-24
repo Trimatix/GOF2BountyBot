@@ -51,6 +51,8 @@ class bbModule(bbAliasable.Aliasable):
         self.emoji = emoji
         self.hasEmoji = emoji != ""
 
+        self.shopSpawnRate = 0
+
     
     def getValue(self):
         return self.value
@@ -92,9 +94,6 @@ class bbModule(bbAliasable.Aliasable):
 
 class CloakModule(bbModule):
     duration = 0
-
-    value = 0
-    shopSpawnRate = 0
 
     def __init__(self, name, aliases, duration=0, value=0, wiki="", manufacturer="", icon="", emoji=""):
         super(CloakModule, self).__init__(name, aliases, armour=0, armourMultiplier=1.0, shield=0, shieldMultiplier=1.0, dps=0,

@@ -6,7 +6,6 @@ class bbShipUpgrade:
     name = ""
     value = 0
     shipToUpgradeValueMult = 1.0
-    applied = False
     vendor = ""
     hasVendor = False
 

@@ -11,6 +11,7 @@ class TimedTaskHeap:
 
     def __init__(self, expiryFunction=None, expiryFunctionArgs={}):
         # self.taskType = taskType
+        self.tasksHeap = []
         self.expiryFunction = expiryFunction
         self.hasExpiryFunction = expiryFunction is not None
         self.expiryFunctionArgs = expiryFunctionArgs
