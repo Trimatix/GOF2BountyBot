@@ -2513,14 +2513,14 @@ async def cmd_duel(message, args):
             winningBBUser.credits += requestedDuel.stakes
             losingBBUser.credits -= requestedDuel.stakes
             creditsMsg = "The stakes were **" + str(requestedDuel.stakes) + "** credit" + ("s" if requestedDuel.stakes != 1 else "") + ".\n**" + client.get_user(winningBBUser.id).name + "** now has **" + str(winningBBUser.credits) + " credits**.\n**" +  client.get_user(losingBBUser.id).name + "** now has **" + str(losingBBUser.credits) + " credits**."
-            statsMsg = "**" + message.author.name + "** had " + str(duelResults["ship1"]["DPS"]["varied"]) + " DPS and " + str(duelResults["ship1"]["health"]["varied"]) + " health." \
-                        + "**" + requestedUser.name + "** had " + str(duelResults["ship2"]["DPS"]["varied"]) + " DPS and " + str(duelResults["ship2"]["health"]["varied"]) + " health." \
-                        + "**" + message.author.name + "** had " + str(duelResults["ship1"]["TTK"]) + "s time to kill." \
-                        + "**" + requestedUser.name + "** had " + str(duelResults["ship2"]["TTK"]) + "s time to kill."
+            # statsMsg = "**" + message.author.name + "** had " + (str(duelResults["ship1"]["DPS"]["varied"]) if duelResults["ship1"]["DPS"]["varied"] != -1 else "inf.") + " DPS and " + (str(duelResults["ship1"]["health"]["varied"]) if duelResults["ship1"]["health"]["varied"] != -1 else "inf.") + " health." \
+            #             + "**" + requestedUser.name + "** had " + (str(duelResults["ship2"]["DPS"]["varied"]) if duelResults["ship2"]["DPS"]["varied"] != -1 else "inf.") + " DPS and " + (str(duelResults["ship2"]["health"]["varied"]) if duelResults["ship2"]["health"]["varied"] != -1 else "inf.") + " health." \
+            #             + "**" + message.author.name + "** had " + (str(duelResults["ship1"]["TTK"]) if duelResults["ship1"]["TTK"] != -1 else "inf.") + "s time to kill." \
+            #             + "**" + requestedUser.name + "** had " + (str(duelResults["ship2"]["TTK"]) if duelResults["ship2"]["TTK"] != -1 else "inf.") + "s time to kill."
             statsEmbed = makeEmbed(authorName="**Duel Stats**")
             statsEmbed.add_field(name="DPS (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)",value=message.author.mention + ": " + str(round(duelResults["ship1"]["DPS"]["varied"], 2)) + "\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["DPS"]["varied"], 2)))
             statsEmbed.add_field(name="Health (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)",value=message.author.mention + ": " + str(round(duelResults["ship1"]["health"]["varied"])) + "\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["health"]["varied"], 2)))
-            statsEmbed.add_field(name="Time To Kill",value=message.author.mention + ": " + str(round(duelResults["ship1"]["TTK"], 2)) + "s\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["TTK"], 2)) + "s")
+            statsEmbed.add_field(name="Time To Kill",value=message.author.mention + ": " + (str(round(duelResults["ship1"]["TTK"], 2)) if duelResults["ship1"]["TTK"] != -1 else "inf.") + "s\n" + requestedUser.mention + ": " + (str(round(duelResults["ship2"]["TTK"], 2)) if duelResults["ship2"]["TTK"] != -1 else "inf.") + "s")
 
             if message.guild.get_member(winningBBUser.id) is None:
                 await message.channel.send(":crossed_swords: **Fight!** " + str(client.get_user(winningBBUser.id)) + " beat " + client.get_user(losingBBUser.id).mention + " in a duel!\n" + creditsMsg,embed=statsEmbed)
