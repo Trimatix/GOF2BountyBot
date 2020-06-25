@@ -32,7 +32,7 @@ class bbCommodity(bbAliasable.Aliasable):
 
 def fromDict(commodityDict):
     if commodityDict["builtIn"]:
-        return bbData.builtInTurretObjs[commodityDict["name"]]
+        return bbData.builtInCommodityObjs[commodityDict["name"]]
     else:
         return bbCommodity(commodityDict["name"], commodityDict["aliases"],
                            value=commodityDict["value"],
