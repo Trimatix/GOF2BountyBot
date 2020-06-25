@@ -10,9 +10,10 @@ import operator
 from . import bbData
 from . import bbConfig
 from ..bbObjects.bounties import bbCriminal, bbSystem
-from ..bbObjects.items import bbShip, bbModule, bbWeapon, bbShipUpgrade, bbTurret
+from ..bbObjects.items import bbShip, bbModule, bbWeapon, bbShipUpgrade, bbTurret, bbCommodity
 
 # generate bbCriminal objects from data in bbData
+
 for criminalDict in bbData.builtInCriminalData.values():
     bbData.builtInCriminalObjs[criminalDict["name"]] = bbCriminal.fromDict(criminalDict)
     bbData.builtInCriminalObjs[criminalDict["name"]].builtIn = True
@@ -54,6 +55,11 @@ for turretDict in bbData.builtInTurretData.values():
     bbData.builtInTurretData[turretDict["name"]]["builtIn"] = True
     bbData.builtInTurretObjs[turretDict["name"]].builtIn = True
 
+# generate bbCommodity objects fromdata in bbData
+for commodityDict in bbData.builtInCommodityData.values():
+    bbData.builtInCommodityObjs[commodityDict["name"]] = bbCommodity.fromDict(commodityDict)
+    bbData.builtInCommodityData[commodityDict["name"]]["builtIn"] = True
+    bbData.builtInCommodityObjs[commodityDict["name"]].builtIn = True
 
 # Sort ships by value
 unsortedShipKeys = {}

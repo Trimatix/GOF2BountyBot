@@ -555,7 +555,7 @@ builtInModuleObjs = {}
 builtInWeaponObjs = {}
 builtInUpgradeObjs = {}
 builtInTurretObjs = {}
-# builtInCommodityObjs = {}
+builtInCommodityObjs = {}
 
 rankedShipKeys = []
 shipKeySpawnRates = {}
