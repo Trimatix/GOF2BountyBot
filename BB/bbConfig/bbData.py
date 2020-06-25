@@ -350,7 +350,7 @@ builtInWeaponData = {   # Lasers
                         "Micro Gun MK I": {"name": "Micro Gun MK I", "aliases": ["Micro MK I", "Micro I", "Micro Gun Mk 1", "Micro MK 1", "Micro 1"], "dps":9.09, "value":2577, "wiki": "https://galaxyonfire.fandom.com/wiki/Micro_Gun_MK_I", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476716516802617/micro_gun_mki.png", "emoji": "<:microgunmki:723709599269519400>"},
                         "Micro Gun MK II": {"name": "Micro Gun MK II", "aliases": ["Micro MK II", "Micro II", "Micro Gun Mk 2", "Micro MK 2", "Micro 2"], "dps":11.76, "value":5538, "wiki": "https://galaxyonfire.fandom.com/wiki/Micro_Gun_MK_II", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476726222684210/micro_gun_mkii.png", "emoji": "<:microgunmkii:723709599244353606>"},
                         "64MJ Railgun": {"name": "64MJ Railgun", "aliases": ["64MJ", "64MJ Railgun", "64 Rail"], "dps":14.28, "value":15343, "wiki": "https://galaxyonfire.fandom.com/wiki/64MJ_Railgun", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476666151600138/64mj_railgun.png", "emoji": "<:64mjrailgun:723709599051677756>"},
-                        "Scram Cannon": {"name": "Scram Cannon", "aliases": ["scram", "scam cannon"], "dps":20.00, "value":47203, "wiki": "https://galaxyonfire.fandom.com/wiki/Scram_Cannon", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476735357616199/scram_cannon.png", "emoji": "<:scramcannon:723709599223382046>"},
+                        "Scram Cannon": {"name": "Scram Cannon", "aliases": ["scram", "scam cannon", "scam"], "dps":20.00, "value":47203, "wiki": "https://galaxyonfire.fandom.com/wiki/Scram_Cannon", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476735357616199/scram_cannon.png", "emoji": "<:scramcannon:723709599223382046>"},
                         "128MJ Railgun": {"name": "128MJ Railgun", "aliases": ["128MJ", "128MJ Railgun", "128 Rail"], "dps":25.00, "value":24675, "wiki": "https://galaxyonfire.fandom.com/wiki/128MJ_Railgun", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476675119153162/128mj_railgun.png", "emoji": "<:128mjrailgun:723709598938300496>"},
                         "Mass Driver MD 10": {"name": "Mass Driver MD 10", "aliases": ["MD 10", "MD10", "Mass Driver 10", "Mass Driver MD10"], "dps":44.44, "value":114314, "wiki": "https://galaxyonfire.fandom.com/wiki/Mass_Driver_MD_10", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476698498203678/mass_driver_md_10.png", "emoji": "<:massdrivermd10:723709599101747231>"},
                         "Mass Driver MD 12": {"name": "Mass Driver MD 12", "aliases": ["MD 12", "MD12", "Mass Driver 12", "Mass Driver MD12"], "dps":70.00, "value":423181, "wiki": "https://galaxyonfire.fandom.com/wiki/Mass_Driver_MD_12", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476708367269969/mass_driver_md_12.png", "emoji": "<:massdrivermd12:723709599278170123>"},
@@ -469,7 +469,31 @@ builtInTurretData = { # Manual
 
 # TO BE COMPLETED
 builtInCommodityData = {
-            # 
+    "Ore Core": { "Iron Core": {"name": "Iron Core", "aliases": [], "value": 144, "wiki": "https://galaxyonfire.fandom.com/wiki/Iron_Core", "icon": "", "emoji": ""},
+                  "Doxtrite Core": {"name": "Doxtrite Core", "aliases": ["Doxtrit Core"], "value": 272, "wiki": "https://galaxyonfire.fandom.com/wiki/Doxtrit_Core", "icon": "", "emoji": ""},
+                  "Perrius Core": {"name": "Perrius Core", "aliases": [], "value": 329, "wiki": "https://galaxyonfire.fandom.com/wiki/Perrius_Core", "icon": "", "emoji": ""},
+                  "Cesogen Core": {"name": "Cesogen Core", "aliases": [], "value": 357, "wiki": "https://galaxyonfire.fandom.com/wiki/Cesogen_Core", "icon": "", "emoji": ""},
+                  "Hypanium Core": {"name": "Hypanium Core", "aliases": [], "value": 430, "wiki": "https://galaxyonfire.fandom.com/wiki/Hypanium_Core", "icon": "", "emoji": ""},
+                  "Golden Core": {"name": "Golden Core", "aliases": ["Gold Core"], "value": 518, "wiki": "https://galaxyonfire.fandom.com/wiki/Golden_Core", "icon": "", "emoji": ""},
+                  "Sodil Core": {"name": "Sodil Core", "aliases": [], "value": 520, "wiki": "https://galaxyonfire.fandom.com/wiki/Sodil_Core", "icon": "", "emoji": ""},
+                  "Pyresium Core": {"name": "Pyresium Core", "aliases": [], "value": 576, "wiki": "https://galaxyonfire.fandom.com/wiki/Pyresium_Core", "icon": "", "emoji": ""},
+                  "Orichalzin Core": {"name": "Orichalzin Core", "aliases": ["Orichalzine Core"], "value": 824, "wiki": "https://galaxyonfire.fandom.com/wiki/Orichalzin_Core", "icon": "", "emoji": ""},
+                  "Titanium Core": {"name": "Titanium Core", "aliases": [], "value": 1007, "wiki": "https://galaxyonfire.fandom.com/wiki/Titanium_Core", "icon": "", "emoji": ""},
+                  "Void Essence": {"name": "Void Essence", "aliases": ["Void Core"], "value": 4999, "wiki": "https://galaxyonfire.fandom.com/wiki/Void_Essence", "icon": "", "emoji": ""},
+                  "Novanium Core": {"name": "Novanium Core", "aliases": [], "value": 5088, "wiki": "https://galaxyonfire.fandom.com/wiki/Novanium_Core", "icon": "", "emoji": ""}},
+
+    "Ore": {"Iron Ore": {"name": "Iron Ore", "aliases": ["Iron"], "value": 26, "wiki": "https://galaxyonfire.fandom.com/wiki/Iron", "icon": "", "emoji": ""},
+            "Doxtrite Ore": {"name": "Doxtrite Ore", "aliases": ["Doxtrite"], "value": 48, "wiki": "https://galaxyonfire.fandom.com/wiki/Doxtrite", "icon": "", "emoji": ""},
+            "Perrius Ore": {"name": "Perrius Ore", "aliases": ["Perrius"], "value": 57, "wiki": "https://galaxyonfire.fandom.com/wiki/Perrius", "icon": "", "emoji": ""},
+            "Cesogen Ore": {"name": "Cesogen Ore", "aliases": ["Cesogen"], "value": 63, "wiki": "https://galaxyonfire.fandom.com/wiki/Cesogen", "icon": "", "emoji": ""},
+            "Hypanium Ore": {"name": "Hypanium Ore", "aliases": ["Hypanium"], "value": 85, "wiki": "https://galaxyonfire.fandom.com/wiki/Hypanium", "icon": "", "emoji": ""},
+            "Gold Ore": {"name": "Gold Ore", "aliases": ["Gold"], "value": 91, "wiki": "https://galaxyonfire.fandom.com/wiki/Gold", "icon": "", "emoji": ""},
+            "Sodil Ore": {"name": "Sodil Ore", "aliases": ["Sodil"], "value": 91, "wiki": "https://galaxyonfire.fandom.com/wiki/Sodil", "icon": "", "emoji": ""},
+            "Pyresium Ore": {"name": "Pyresium Ore", "aliases": ["Pyresium"], "value": 102, "wiki": "https://galaxyonfire.fandom.com/wiki/Pyresium", "icon": "", "emoji": ""},
+            "Orichalzine Ore": {"name": "Orichalzine Ore", "aliases": ["Orichalzine"], "value": 146, "wiki": "https://galaxyonfire.fandom.com/wiki/Orichalzine", "icon": "", "emoji": ""},
+            "Titanium Ore": {"name": "Titanium Ore", "aliases": ["Titanium"], "value": 176, "wiki": "https://galaxyonfire.fandom.com/wiki/Titanium", "icon": "", "emoji": ""},
+            "Void Crystal": {"name": "Void Crystal", "aliases": ["Void"], "value": 400, "wiki": "https://galaxyonfire.fandom.com/wiki/Void_Crystals", "icon": "", "emoji": ""},
+            "Novanium Ore": {"name": "Novanium Ore", "aliases": ["Novanium"], "value": 419, "wiki": "https://galaxyonfire.fandom.com/wiki/Novanium", "icon": "", "emoji": ""}}
 }
 
 # TO BE COMPLETED
@@ -531,6 +555,7 @@ builtInModuleObjs = {}
 builtInWeaponObjs = {}
 builtInUpgradeObjs = {}
 builtInTurretObjs = {}
+# builtInOreObjs = {}
 
 rankedShipKeys = []
 shipKeySpawnRates = {}
