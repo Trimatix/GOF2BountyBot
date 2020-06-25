@@ -19,8 +19,9 @@ class BountyConfig:
     icon = ""
     builtIn = False
     generated = False
+    ship = None
 
-    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki=""):
+    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki="", ship=None):
         self.faction = faction.lower()
         self.name = name.title()
         self.isPlayer = False if isPlayer is None else isPlayer
@@ -44,8 +45,7 @@ class BountyConfig:
         self.aliases = aliases
         self.wiki = wiki
 
-        # if isPlayer and client is None:
-        #     raise ValueError("BOUCONF_CONS_NOCLIENT: Attempted to make player bounty but didn't provide client '" + name + "'")
+        self.ship = ship
         
     
     def generate(self, bountyDB, noCriminal=True, forceKeepChecked=False, forceNoDBCheck=False):

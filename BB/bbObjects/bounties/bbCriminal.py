@@ -12,8 +12,9 @@ class Criminal (bbAliasable.Aliasable):
     builtIn = False
 
     ship = None
+    hasShip = False
 
-    def __init__(self, name, faction, icon, builtIn=False, isPlayer=False, aliases=[], wiki=""):
+    def __init__(self, name, faction, icon, builtIn=False, isPlayer=False, aliases=[], wiki="", ship=None):
         super(Criminal, self).__init__(name, aliases)
         if name == "":
             raise RuntimeError("CRIM_CONS_NONAM: Attempted to create a Criminal with an empty name")
@@ -30,6 +31,40 @@ class Criminal (bbAliasable.Aliasable):
         self.isPlayer = isPlayer
         self.builtIn = builtIn
 
+        if ship is not None:
+            self.ship = bbShip.fromDict(ship.toDict())
+            self.hasShip = True
+        else:
+            self.hasShip = False
+
+    
+    def clearShip(self):
+        if not self.hasShip:
+            raise RuntimeError("CRIM_CLEARSH_NOSHIP: Attempted to clearShip on a Criminal with no active ship")
+        del self.ship
+        self.hasShip = False
+
+
+    def unequipShip(self):
+        if not self.hasShip:
+            raise RuntimeError("CRIM_UNEQSH_NOSHIP: Attempted to unequipShip on a Criminal with no active ship")
+        self.ship = None
+        self.hasShip = False
+
+
+    def equipShip(self, ship):
+        if self.hasShip:
+            raise RuntimeError("CRIM_EQUIPSH_HASSH: Attempted to equipShip on a Criminal that already has an active ship")
+        self.ship = ship
+        self.hasShip = True
+
+    
+    def copyShip(self, ship):
+        if self.hasShip:
+            raise RuntimeError("CRIM_COPYSH_HASSH: Attempted to copyShip on a Criminal that already has an active ship")
+        self.ship = bbShip.fromDict(ship.toDict())
+        self.hasShip = True
+        
 
     def getType(self):
         return Criminal
