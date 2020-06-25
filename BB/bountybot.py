@@ -16,9 +16,9 @@ import operator
 # may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .bbObjects import bbUser
-from .bbObjects.bounties import bbBounty, bbBountyConfig, DuelRequest
+from .bbObjects.bounties import bbBounty, bbBountyConfig
 from .bbObjects.items import bbShip
-from .bbObjects.items.battles import ShipFight
+from .bbObjects.battles import ShipFight, DuelRequest
 from .bbObjects.tasks import TimedTask, TimedTaskAsync
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from .bbDatabases.tasks import TimedTaskAsyncHeap

@@ -1,5 +1,5 @@
 from ...bbConfig import bbData
-from . import bbAliasable
+from .. import bbAliasable
 from ..items import bbShip
 
 class Criminal (bbAliasable.Aliasable):

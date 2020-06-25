@@ -122,12 +122,36 @@ def fightShips(ship1, ship2, variancePercent):
 
     if ship1DPS == 0:
         if ship2DPS == 0:
-            return {"winningShip": None}
-        return {"winningShip": ship2}
+            return {"winningShip": None,
+            "ship1":{"health":{"stock":ship1HP, "varied":ship1HP},
+                    "DPS": {"stock":ship1DPS, "varied":ship1DPS},
+                    "TTK": round(ship1HP / ship2DPS, 2)},
+            "ship2":{"health":{"stock":ship2HP, "varied":ship2HP},
+                    "DPS": {"stock":ship2DPS, "varied":ship2DPS},
+                    "TTK": round(ship2HP / ship1DPS, 2)}}
+        return {"winningShip": ship2,
+            "ship1":{"health":{"stock":ship1HP, "varied":ship1HP},
+                    "DPS": {"stock":ship1DPS, "varied":ship1DPS},
+                    "TTK": round(ship1HP / ship2DPS, 2)},
+            "ship2":{"health":{"stock":ship2HP, "varied":ship2HP},
+                    "DPS": {"stock":ship2DPS, "varied":ship2DPS},
+                    "TTK": round(ship2HP / ship1DPS, 2)}}
     if ship2DPS == 0:
         if ship1DPS == 0:
-            return {"winningShip": None}
-        return {"winningShip": ship1}
+            return {"winningShip": None,
+            "ship1":{"health":{"stock":ship1HP, "varied":ship1HP},
+                    "DPS": {"stock":ship1DPS, "varied":ship1DPS},
+                    "TTK": round(ship1HP / ship2DPS, 2)},
+            "ship2":{"health":{"stock":ship2HP, "varied":ship2HP},
+                    "DPS": {"stock":ship2DPS, "varied":ship2DPS},
+                    "TTK": round(ship2HP / ship1DPS, 2)}}
+        return {"winningShip": ship1,
+            "ship1":{"health":{"stock":ship1HP, "varied":ship1HP},
+                    "DPS": {"stock":ship1DPS, "varied":ship1DPS},
+                    "TTK": round(ship1HP / ship2DPS, 2)},
+            "ship2":{"health":{"stock":ship2HP, "varied":ship2HP},
+                    "DPS": {"stock":ship2DPS, "varied":ship2DPS},
+                    "TTK": round(ship2HP / ship1DPS, 2)}}
 
     # Vary DPSs by +=variancePercent
     ship1DPSVariance = ship1DPS * variancePercent
