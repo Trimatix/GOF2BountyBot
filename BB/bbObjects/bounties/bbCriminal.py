@@ -1,5 +1,6 @@
-from ..bbConfig import bbData
+from ...bbConfig import bbData
 from . import bbAliasable
+from ..items import bbShip
 
 class Criminal (bbAliasable.Aliasable):
     name = ""
@@ -9,6 +10,8 @@ class Criminal (bbAliasable.Aliasable):
     hasWiki = False
     isPlayer = False
     builtIn = False
+
+    ship = None
 
     def __init__(self, name, faction, icon, builtIn=False, isPlayer=False, aliases=[], wiki=""):
         super(Criminal, self).__init__(name, aliases)
@@ -27,8 +30,10 @@ class Criminal (bbAliasable.Aliasable):
         self.isPlayer = isPlayer
         self.builtIn = builtIn
 
+
     def getType(self):
         return Criminal
+
 
     def toDict(self):
         if self.builtIn:

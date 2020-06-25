@@ -1,7 +1,7 @@
 from .BattleShip import BattleShip
 from .BattleShipState import BattleShipState
 import random
-from ....bbConfig import bbConfig
+from ...bbConfig import bbConfig
 
 class ShipFight:
     ship1 = None
@@ -12,6 +12,8 @@ class ShipFight:
     def __init__(self, bbShip1, bbShip2):
         self.ship1 = BattleShip(bbShip1)
         self.ship2 = BattleShip(bbShip2)
+        self.battleLog = []
+        self.battleState = []
 
 
     def fightShips(self, variancePercent):
@@ -44,6 +46,9 @@ class ShipFight:
             extraSteps = shortestEstimatedTTK % bbConfig.duelLogMaxLength
 
         currentTime = 0
+
+        currentShip1Damage = 0
+        currentShip2Damage = 0
         while self.ship1.hasHull() and self.ship2.hasHull():
             # print("SHIP1",self.ship1.hull,self.ship1.armour,self.ship1.shield)
             # print("SHIP2",self.ship2.hull,self.ship2.armour,self.ship2.shield)

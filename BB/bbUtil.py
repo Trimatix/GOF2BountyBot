@@ -1,4 +1,4 @@
-from .bbObjects import bbSystem
+from .bbObjects.bounties import bbSystem
 
 import json
 import math

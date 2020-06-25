@@ -1,7 +1,7 @@
 import random
 from datetime import datetime, timedelta
 
-from ..bbConfig import bbData, bbConfig
+from ...bbConfig import bbData, bbConfig
 from .. import bbUtil
 
 class BountyConfig:

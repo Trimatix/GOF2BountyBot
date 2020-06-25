@@ -1,4 +1,4 @@
-from . import bbAliasable
+from .. import bbAliasable
 import math
 
 class System (bbAliasable.Aliasable):

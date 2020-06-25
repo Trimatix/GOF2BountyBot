@@ -70,7 +70,7 @@ bountyDBPath = "saveData/bounties.json"
 commandPrefix = "$"
 
 # discord user IDs of all developers
-developers = [188618589102669826]
+developers = [188618589102669826, 448491245296418817]
 
 # number of bounties ahead of a checked system in a route to report a recent criminal spotting (+1)
 closeBountyThreshold = 4

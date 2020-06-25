@@ -1,4 +1,4 @@
-from ..bbObjects import bbBounty
+from ..bbObjects.bounties import bbBounty
 
 class bbBountyDB:
     # Dictionary of faction name : list of bounties

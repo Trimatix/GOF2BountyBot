@@ -1,6 +1,6 @@
 from . import bbBountyConfig
-from ..bbConfig import bbData
-from ..bbObjects import bbCriminal
+from ...bbConfig import bbData
+from . import bbCriminal
 
 class Bounty:
     criminal = None

@@ -9,7 +9,7 @@ import operator
 
 from . import bbData
 from . import bbConfig
-from ..bbObjects import bbCriminal, bbSystem
+from ..bbObjects.bounties import bbCriminal, bbSystem
 from ..bbObjects.items import bbShip, bbModule, bbWeapon, bbShipUpgrade, bbTurret
 
 # generate bbCriminal objects from data in bbData
