@@ -22,23 +22,23 @@ class bbModule(bbItem):
         if self.armour != 0:
             stats += "Armour: " + ("+" if self.armourMultiplier > 0 else "-") + str(self.armour) + ", "
         if self.armourMultiplier != 1:
-            stats += "Armour: " + ("+" if self.armourMultiplier > 1 else "-") + str(round(((self.armourMultiplier - 1) * 100) if self.armourMultiplier > 1 else (self.armourMultiplier * 100))) + "%, "
+            stats += "Armour: " + ("+" if self.armourMultiplier >= 1 else "-") + str(round(((self.armourMultiplier - 1) * 100) if self.armourMultiplier > 1 else (self.armourMultiplier * 100))) + "%, "
         if self.shield != 0:
             stats += "Shield: " + ("+" if self.shield > 0 else "-") + str(self.shield) + ", "
         if self.shieldMultiplier != 1:
-            stats += "Shield: " + ("+" if self.shieldMultiplier > 1 else "-") + str(round(((self.shieldMultiplier - 1) * 100) if self.shieldMultiplier > 1 else (self.shieldMultiplier * 100))) + "%, "
+            stats += "Shield: " + ("+" if self.shieldMultiplier >= 1 else "-") + str(round(((self.shieldMultiplier - 1) * 100) if self.shieldMultiplier > 1 else (self.shieldMultiplier * 100))) + "%, "
         if self.dps != 0:
             stats += "Dps: " + ("+" if self.dps > 0 else "-") + str(self.dps) + ", "
         if self.dpsMultiplier != 1:
-            stats += "Dps: " + ("+" if self.dpsMultiplier > 1 else "-") + str(round(((self.dpsMultiplier - 1) * 100) if self.dpsMultiplier > 1 else (self.dpsMultiplier * 100))) + "%, "
+            stats += "Dps: " + ("+" if self.dpsMultiplier >= 1 else "-") + str(round(((self.dpsMultiplier - 1) * 100) if self.dpsMultiplier > 1 else (self.dpsMultiplier * 100))) + "%, "
         if self.cargo != 0:
             stats += "Cargo: " + ("+" if self.cargo > 0 else "-") + str(self.cargo) + ", "
         if self.cargoMultiplier != 1:
-            stats += "Cargo: " + ("+" if self.cargoMultiplier > 1 else "-") + str(round(((self.cargoMultiplier - 1) * 100) if self.cargoMultiplier > 1 else (self.cargoMultiplier * 100))) + "%, "
+            stats += "Cargo: " + ("+" if self.cargoMultiplier >= 1 else "-") + str(round(((self.cargoMultiplier - 1) * 100) if self.cargoMultiplier > 1 else (self.cargoMultiplier * 100))) + "%, "
         if self.handling != 0:
-            stats += "Handling: " + ("+" if self.handling > 1 else "-") + str(((1 - self.handling) * 100) if self.handling > 1 else (self.handling * 100)) + ", "
+            stats += "Handling: " + ("+" if self.handling > 0 else "-") + str(((1 - self.handling) * 100) if self.handling > 1 else (self.handling * 100)) + ", "
         if self.handlingMultiplier != 1:
-            stats += "Handling: " + ("+" if self.handlingMultiplier > 1 else "-") + str(round(((self.handlingMultiplier - 1) * 100) if self.handlingMultiplier > 1 else (self.handlingMultiplier * 100))) + "%, "
+            stats += "Handling: " + ("+" if self.handlingMultiplier >= 1 else "-") + str(round(((self.handlingMultiplier - 1) * 100) if self.handlingMultiplier > 1 else (self.handlingMultiplier * 100))) + "%, "
 
         return (stats[:-2] + "*") if stats != "*" else "*No effect*"
 

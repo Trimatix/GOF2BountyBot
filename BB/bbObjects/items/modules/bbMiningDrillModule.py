@@ -10,7 +10,7 @@ class bbMiningDrillModule(bbModule.bbModule):
 
     
     def statsStringShort(self):
-        return "*Yield: " + ("+" if self.oreYield > 1 else "-") + str(round(((self.oreYield - 1) * 100) if self.oreYield > 1 else (self.oreYield * 100))) + \
+        return "*Yield: " + ("+" if self.oreYield >= 1 else "-") + str(round(((self.oreYield - 1) * 100) if self.oreYield > 1 else (self.oreYield * 100))) + \
                 "%, Handling: " + str(round(((self.handling - 1) * 100) if self.handling > 1 else (self.handling * 100))) + "%*"
 
 

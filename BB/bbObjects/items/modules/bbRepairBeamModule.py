@@ -10,7 +10,7 @@ class bbRepairBeamModule(bbModule.bbModule):
 
     
     def statsStringShort(self):
-        return "*Effect: " + ("+" if self.effect > 1 else "-") + str(round(((self.effect - 1) * 100) if self.effect > 1 else (self.effect * 100))) + \
+        return "*Effect: " + ("+" if self.effect >= 1 else "-") + str(round(((self.effect - 1) * 100) if self.effect > 1 else (self.effect * 100))) + \
                 "%, Count: " + str(self.count) + "*"
 
 

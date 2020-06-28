@@ -10,6 +10,10 @@ class bbScannerModule(bbModule.bbModule):
         self.showCargo = showCargo
 
 
+    def statsStringShort(self):
+        return "*Time To Lock: " + str(self.timeToLock) + "s, Show Class A Asteroids: " + ("Yes" if self.showClassAAsteroids else "No") + ", Show Cargo: " + ("Yes" if self.showCargo else "No") + "*"
+
+
     def getType(self):
         return bbScannerModule
 

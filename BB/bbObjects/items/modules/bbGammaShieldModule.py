@@ -9,7 +9,7 @@ class bbGammaShieldModule(bbModule.bbModule):
 
     
     def statsStringShort(self):
-        return "*Gamma Shielding: " + ("+" if self.effect > 1 else "-") + str(round(((self.effect - 1) * 100) if self.effect > 1 else (self.effect * 100))) + "%*"
+        return "*Gamma Shielding: " + ("+" if self.effect >= 1 else "-") + str(round(((self.effect - 1) * 100) if self.effect > 1 else (self.effect * 100))) + "%*"
 
 
     def getType(self):
