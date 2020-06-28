@@ -10,7 +10,7 @@ class bbSignatureModule(bbModule.bbModule):
 
     
     def statsStringShort(self):
-        return "*Faction:" + self.manufacturer + "*"
+        return "*Faction: " + self.manufacturer + "*"
 
 
     def getType(self):
