@@ -168,6 +168,26 @@ class bbUser:
         ship.turrets = []
 
 
+    def validateLoadout(self):
+        incompatibleModules = []
+        allModulesChecked = False
+
+        for currentModule in self.activeShip.modules:
+            if not self.activeShip.canEquipModuleType(currentModule.getType()):
+                incompatibleModules.append(currentModule)
+                self.activeShip.unequipModuleObj(currentModule)
+
+        finalModules = []
+        for currentModule in incompatibleModules:
+            if self.activeShip.canEquipModuleType(currentModule.getType()):
+                self.activeShip.equipModule(currentModule)
+            else:
+                finalModules.append(currentModule)
+        
+        for currentModule in finalModules:
+            self.inactiveModules.append(currentModule)
+
+
     def equipShipObj(self, ship, noSaveActive=False):
         if not (self.activeShip == ship or ship in self.inactiveShips):
             raise RuntimeError("Attempted to equip a ship that isnt owned by this bbUser")

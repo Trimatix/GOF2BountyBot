@@ -2022,7 +2022,7 @@ async def cmd_equip(message, args):
             return
 
         requestedItem = requestedBBUser.inactiveModules[itemNum - 1]
-        
+
         if not requestedBBUser.activeShip.canEquipModuleType(requestedItem.getType()):
             await message.channel.send(":x: You already have the max of this type of module equipped!")
             return
@@ -3505,6 +3505,9 @@ TODO: Implement dynamic timedtask checking period
 """
 @client.event
 async def on_ready():
+    for currentUser in usersDB.users.values():
+        currentUser.validateLoadout()
+
     print('We have logged in as {0.user}'.format(client))
     await client.change_presence(activity=discord.Game("Galaxy on Fire 2™ Full HD"))
     # bot is now logged in
