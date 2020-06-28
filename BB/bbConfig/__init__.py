@@ -10,7 +10,7 @@ import operator
 from . import bbData
 from . import bbConfig
 from ..bbObjects.bounties import bbCriminal, bbSystem
-from ..bbObjects.items import bbShip, bbModule, bbWeapon, bbShipUpgrade, bbTurret
+from ..bbObjects.items import bbShip, bbModuleFactory, bbWeapon, bbShipUpgrade, bbTurret
 
 # generate bbCriminal objects from data in bbData
 for criminalDict in bbData.builtInCriminalData.values():
@@ -32,7 +32,7 @@ for systemDict in bbData.builtInSystemData.values():
 
 # generate bbModule objects from data in bbData
 for moduleDict in bbData.builtInModuleData.values():
-    bbData.builtInModuleObjs[moduleDict["name"]] = bbModule.fromDict(moduleDict)
+    bbData.builtInModuleObjs[moduleDict["name"]] = bbModuleFactory.fromDict(moduleDict)
     bbData.builtInModuleData[moduleDict["name"]]["builtIn"] = True
     bbData.builtInModuleObjs[moduleDict["name"]].builtIn = True
 

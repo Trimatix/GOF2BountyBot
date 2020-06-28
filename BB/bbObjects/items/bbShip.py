@@ -1,5 +1,5 @@
 from .. import bbAliasable
-from . import bbModule, bbTurret, bbWeapon, bbShipUpgrade
+from . import bbTurret, bbWeapon, bbShipUpgrade, bbModuleFactory
 from ...bbConfig import bbConfig, bbData
 
 class bbShip(bbAliasable.Aliasable):
@@ -422,7 +422,7 @@ def fromDict(shipDict):
     modules = []
     if "modules" in shipDict:
         for module in shipDict["modules"]:
-            modules.append(bbModule.fromDict(module))
+            modules.append(bbModuleFactory.fromDict(module))
 
     turrets = []
     if "turrets" in shipDict:
@@ -445,7 +445,7 @@ def fromDict(shipDict):
         builtInModules = []
         if "modules" in shipDict:
             for module in shipDict["modules"]:
-                builtInModules.append(bbModule.fromDict(module))
+                builtInModules.append(bbModuleFactory.fromDict(module))
 
         builtInTurrets = []
         if "turrets" in shipDict:
