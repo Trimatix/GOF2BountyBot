@@ -145,12 +145,12 @@ Messages will be sent to the announceChannels of all guilds in the guildsDB, if 
 """
 async def announceNewBounty(newBounty):
     # Create the announcement embed
-    bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__", col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
+    bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(newBounty.criminal), desc="<:documents:723709178589347921> __New Bounty Available__", col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
     bountyEmbed.add_field(name="Reward:", value=str(newBounty.reward) + " Credits")
     bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
     bountyEmbed.add_field(name="See the culprit's route with:", value="`" + bbConfig.commandPrefix + "route " + criminalNameOrDiscrim(newBounty.criminal) + "`", inline=False)
     # Create the announcement text
-    msg = "A new bounty is now available from **" + newBounty.faction.title() + "** central command:"
+    msg = " A new bounty is now available from **" + newBounty.faction.title() + "** central command:"
 
     # Loop over all guilds in the database
     for currentGuild in guildsDB.getGuilds():
@@ -2955,13 +2955,11 @@ async def dev_cmd_broadcast(message, args):
         except ValueError:
             embedIndex = -1
         
-        if embedIndex != -1:
-            msgText = msg[:embedIndex]
-        else:
+        if embedIndex == -1:
             msgText = msg
-
-        if embedIndex != -1:
-            msg = msg[embedIndex:]
+        else:
+            msgText = msg[:embedIndex]
+            msg = msg[embedIndex+len("embed="):]
             titleTxt=""
             desc=""
             footerTxt=""

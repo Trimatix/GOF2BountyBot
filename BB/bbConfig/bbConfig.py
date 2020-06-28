@@ -1,3 +1,7 @@
+# Coefficient used when calculating the rarity of item spawns in the shop.
+# At the time of writing, the algorithm is rarity = itemRarityCoefficient ^ item cost
+itemRarityCoefficient = 2
+
 # Amount of time before a duel request expires
 duelReqExpiryTime = {"days":1}
 # duelReqExpiryTime as a user-friendly string for printing
@@ -26,21 +30,10 @@ newBountyDelayMin = 15 * 60
 # when using random delay generation, use this as the maximum wait time in seconds
 newBountyDelayMax = 1 * 60 * 60
 
-"""
-# DEPRECATED
-# the number of seconds to wait in between each save
-saveDelay = 30 * 60
-"""
 
 # The time to wait inbetween database autosaves.
 savePeriod = {"hours":1}
 
-
-"""
-# DEPRACATED
-# the number of seconds to wait before checking if a delay time is passed. should be a factor all delays given.
-delayFactor = 5
-"""
 
 # Whether to execute timedtask checks every timedTaskLatenessThresholdSeconds ("fixed"), or to calculate the delay to wait until the next TimedTask is schedule to expire ("dynamic")
 timedTaskCheckingType = "fixed"

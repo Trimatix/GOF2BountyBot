@@ -533,7 +533,12 @@ builtInUpgradeObjs = {}
 builtInTurretObjs = {}
 
 rankedShipKeys = []
-shipKeySpawnRates = {}
+shipRankIndexFreqs = {}
 rankedModuleObjs = []
+moduleRankIndexFreqs = {}
 rankedWeaponObjs = []
+weaponRankIndexFreqs = {}
 rankedTurretObjs = []
+turretRankIndexFreqs = {}
+
+shipKeySpawnRates = {}
