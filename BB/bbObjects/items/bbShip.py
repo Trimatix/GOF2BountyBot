@@ -85,8 +85,10 @@ class bbShip(bbItem):
     def hasWeaponsEquipped(self):
         return self.getNumWeaponsEquipped() > 0
 
+
     def hasModulesEquipped(self):
         return self.getNumModulesEquipped() > 0
+
 
     def hasTurretsEquipped(self):
         return self.getNumTurretsEquipped() > 0
@@ -108,11 +110,25 @@ class bbShip(bbItem):
 
     def getWeaponAtIndex(self, index):
         return self.weapons[index]
+    
+
+    def canEquipModuleType(self, moduleType):
+        if moduleType in bbModuleFactory.maxModuleTypeEquips and bbModuleFactory.maxModuleTypeEquips[moduleType] != -1:
+            numFound = 1
+            for equippedModule in self.modules:
+                if equippedModule.getType() == moduleType:
+                    numFound += 1
+                    if numFound > bbModuleFactory.maxModuleTypeEquips[moduleType]:
+                        return False
+        return True
 
 
     def equipModule(self, module):
         if not self.canEquipMoreModules():
             raise OverflowError("Attempted to equip a module but all module slots are full")
+        if not self.canEquipModuleType(module.getType()):
+            raise ValueError("Attempted to equip a module of a type that is already at its maximum capacity: " + str(module))
+
         self.modules.append(module)
     
 
@@ -307,8 +323,15 @@ class bbShip(bbItem):
         while self.hasWeaponsEquipped() and other.canEquipMoreWeapons():
             other.equipWeapon(self.weapons.pop(0))
 
+        leftoverModules = []
         while self.hasModulesEquipped() and other.canEquipMoreModules():
-            other.equipModule(self.modules.pop(0))
+            if other.canEquipModuleType(self.modules[0].getType()):
+                other.equipModule(self.modules.pop(0))
+            else:
+                leftoverModules.append(self.modules.pop(0))
+                
+        for leftoverModule in leftoverModules:
+            self.modules.append(leftoverModule)
 
         while self.hasTurretsEquipped() and other.canEquipMoreTurrets():
             other.equipTurret(self.turrets.pop(0))

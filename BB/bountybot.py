@@ -2020,7 +2020,13 @@ async def cmd_equip(message, args):
         if not requestedBBUser.activeShip.canEquipMoreModules():
             await message.channel.send(":x: Your active ship does not have any free module slots!")
             return
+
         requestedItem = requestedBBUser.inactiveModules[itemNum - 1]
+        
+        if not requestedBBUser.activeShip.canEquipModuleType(requestedItem.getType()):
+            await message.channel.send(":x: You already have the max of this type of module equipped!")
+            return
+
         requestedBBUser.activeShip.equipModule(requestedItem)
         requestedBBUser.inactiveModules.pop(itemNum - 1)
 
