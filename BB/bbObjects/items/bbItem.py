@@ -2,7 +2,7 @@ from .. import bbAliasable
 from abc import abstractmethod
 
 class bbItem(bbAliasable.Aliasable):
-    def __init__(self, name, aliases, armour=0, value=0, wiki="", manufacturer="", icon="", emoji=""):
+    def __init__(self, name, aliases, value=0, wiki="", manufacturer="", icon="", emoji=""):
         super(bbItem, self).__init__(name, aliases)
         self.wiki = wiki
         self.hasWiki = wiki != ""
