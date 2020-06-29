@@ -307,15 +307,21 @@ def getRandomDelaySeconds(minmaxDict):
     return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))
 
 
+def getEscapedBountyRescheduleDelay(escapedBountyData):
+    return timeDeltaFromDict({"minutes": len(escapedBountyData["escapedBounty"].route)})
+
+
 async def refreshAndAnnounceAllShopStocks():
     guildsDB.refreshAllShopStocks()
     await announceNewShopStock()
 
 
-async def spawnAndAnnounceRandomBounty():
+async def spawnAndAnnounceBounty(newBountyData):
     # ensure a new bounty can be created
     if bountiesDB.canMakeBounty():
-        newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
+        newBounty = newBountyData["newBounty"]
+        if newBounty is None:
+            newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
         # activate and announce the bounty
         bountiesDB.addBounty(newBounty)
         await announceNewBounty(newBounty)
@@ -687,6 +693,13 @@ async def cmd_check(message, args):
                 # If current bounty resides in the requested system
                 if bounty.check(requestedSystem, message.author.id) == 3:
                     bountyWon = True
+
+                    ActiveTimedTasks.escapedBountiesRespawnTTDB.scheduleTask(TimedTaskAsync.DynamicRescheduleTaskAsync(getEscapedBountyRescheduleDelay, delayTimeGeneratorArgs={"escapedBounty": bounty}, expiryFunction=spawnAndAnnounceBounty, expiryFunctionArgs={}))
+
+                    # criminal ship unequip is delayed until now rather than handled in bounty.check
+                    # to allow for duel info printing. this could instead be replaced by bounty.check returning the ShipFight info.
+                    bounty.criminal.clearShip()
+
                     # reward all contributing users
                     rewards = bounty.calcRewards()
                     for userID in rewards:
@@ -3503,27 +3516,39 @@ TODO: Implement dynamic timedtask checking period
 """
 @client.event
 async def on_ready():
-    for currentUser in usersDB.users.values():
-        currentUser.validateLoadout()
+    # Ensure that all users have valid loadouts. Currently, this just means no module stacking.
+    # for currentUser in usersDB.users.values():
+    #     currentUser.validateLoadout()
 
+    # Announce bot login to console and set game activity
     print('We have logged in as {0.user}'.format(client))
     await client.change_presence(activity=discord.Game("Galaxy on Fire 2™ Full HD"))
     # bot is now logged in
     botLoggedIn = True
 
+    # Args to pass to the DynamicRescheduleTaskAsync constructor below.
     bountyDelayGenerators = {"fixed":getFixedDelay, "random":getRandomDelaySeconds}
     bountyDelayGeneratorArgs = {"fixed":bbConfig.newBountyFixedDelta, "random":{"min": bbConfig.newBountyDelayMin, "max": bbConfig.newBountyDelayMax}}
 
+    # Create the new bounties TimedTask, to periodically spawn new bounties.
     try:
-        ActiveTimedTasks.newBountyTT = TimedTaskAsync.DynamicRescheduleTaskAsync(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty, asyncExpiryFunction=True)
+        # Use the behaviour and delay period defined in bbConfig.
+        ActiveTimedTasks.newBountyTT = TimedTaskAsync.DynamicRescheduleTaskAsync(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None}, asyncExpiryFunction=True)
     except KeyError:
         raise ValueError("bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
+    # Create the escaped bounties rescheduler. If a player locatesa criminal but is unable to beat them in a duel, the bounty reappears later.
+    ActiveTimedTasks.escapedBountiesRespawnTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()
+    # Create the shop stock refresh TimedTask, refresh the stock of all shops according to the period in bbConfig.
     ActiveTimedTasks.shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
+    # Create the database saving TimedTask, to save all data to JSON periodically as defined in bbConfig.
     ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
-
+    # Create the duel requests timeout database. To save memory, duels should not last forever. This database will be used to remove duel requests older than the period defined in bbConfig. 
     ActiveTimedTasks.duelRequestTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()
 
+    # Validate the TimedTask scheduling method.
+    # 'fixed' mode waits a set amount of time before checking if any timedtasks are due to expire.
+    # 'dynamic' mode [UNIMPLEMENTED] waits the amount of time given in the soonest expiring TimedTask, avoiding busy-waiting.
     if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" + bbConfig.timedTaskCheckingType + "'")
 
@@ -3537,17 +3562,21 @@ async def on_ready():
             await asyncio.sleep(bbConfig.timedTaskLatenessThresholdSeconds)
         # elif bbConfig.timedTaskCheckingType == "dynamic":
 
+        # Refresh shop stocks
         await ActiveTimedTasks.shopRefreshTT.doExpiryCheck()
-
+        # Spawn new bounties
         if bbConfig.newBountyDelayReset:
             await ActiveTimedTasks.newBountyTT.forceExpire()
             bbConfig.newBountyDelayReset = False
         else:
             await ActiveTimedTasks.newBountyTT.doExpiryCheck()
-        
-        ActiveTimedTasks.dbSaveTT.doExpiryCheck()
 
+        # Save data to file
+        ActiveTimedTasks.dbSaveTT.doExpiryCheck()
+        # Expire old duel requests
         await ActiveTimedTasks.duelRequestTTDB.doTaskChecking()
+        # Respawn escaped bounties
+        await ActiveTimedTasks.escapedBountiesRespawnTTDB.doTaskChecking()
 
 
 """
