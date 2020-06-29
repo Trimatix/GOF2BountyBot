@@ -1994,7 +1994,7 @@ async def cmd_shop_sell(message, args):
         elif result == 1:
             await message.channel.send(":x: insufficient quantity! you have " + requestedCommodity.count + "in your inventory:!:")
         elif result == 2:
-            # This should be unreachable due to try statement
+            # This should be unreachable due to previous itemNum validation
             await message.channel.send(":x: commodity not found in inventory:!:")
 
     else:
@@ -2024,6 +2024,9 @@ async def cmd_equip(message, args):
     item = argsSplit[0].rstrip("s")
     if item == "all" or item not in bbConfig.validItemNames:
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
+        return
+    elif item == "commodity":
+        await message.channel.send(":x: You can't equip a commodity!")
         return
 
     if usersDB.userIDExists(message.author.id):
@@ -2147,6 +2150,9 @@ async def cmd_unequip(message, args):
         return
     if item == "ship":
         await message.channel.send(":x: You can't go without a ship! Instead, switch to another one.")
+        return
+    elif item == "commodity":
+        await message.channel.send(":x: You can't equip a commodity!")
         return
 
     unequipAll = argsSplit[1] == "all"
