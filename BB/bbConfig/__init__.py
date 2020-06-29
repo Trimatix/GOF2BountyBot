@@ -33,7 +33,7 @@ for systemDict in bbData.builtInSystemData.values():
 
 # generate bbModule objects from data in bbData
 for moduleDict in bbData.builtInModuleData.values():
-    bbData.builtInModuleObjs[moduleDict["name"]] = bbModule.fromDict(moduleDict)
+    bbData.builtInModuleObjs[moduleDict["name"]] = bbModuleFactory.fromDict(moduleDict)
     bbData.builtInModuleData[moduleDict["name"]]["builtIn"] = True
     bbData.builtInModuleObjs[moduleDict["name"]].builtIn = True
 
