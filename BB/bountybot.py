@@ -381,8 +381,7 @@ async def cmd_setRisk(message, args):
         for aliasesSet in [Mining.risky_aliases, Mining.safe_aliases]:
             for alias in aliasesSet:
                 errorStr += alias + ", "
-            errorStr = errorStr[:-2]
-        await message.channel.send(errorStr)
+        await message.channel.send(errorStr[:-2])
         return
 
     elif args in Mining.risky_aliases:
@@ -3605,7 +3604,7 @@ async def on_ready():
     
     ActiveTimedTasks.shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
     ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
-    ActiveTimedTasks.inventoryOffloadTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shipOffloadPeriod, autoReschedule=True, expiryFunction=dev_cmd_reset_num_commodities())
+    ActiveTimedTasks.inventoryOffloadTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shipOffloadPeriod, autoReschedule=True, expiryFunction=dev_cmd_reset_num_commodities, asyncExpiryFunction=True)
 
     ActiveTimedTasks.duelRequestTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()
 
