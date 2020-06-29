@@ -8,6 +8,7 @@ from BB.bountybot import usersDB, bbCommands
 ORE_TYPES = ["Iron", "Doxtrite", "Perrius", "Cesogen", "Hypanium", "Golden", "Sodil", "Pyresium", "Orichalzine", "Titanium"]
 asteroid_tiers = ["D", "C", "B", "A"]
 risky_aliases = ["risk", "risky", "danger", "dangerous"]
+risky_mining_failure_chance = 5
 
 
 def pickOre(oreList=ORE_TYPES):
@@ -36,11 +37,10 @@ gets result of mining attempt
 @return -- returns ore type, amount, and if a core was obtained
 """
 def mineResult(drill, isRisky, tier):
-    if isRisky:
-        if 5 > (random.random() % 100) > drill.handling:
+    if isRisky and risky_mining_failure_chance > random.randint(1,100) > drill.handling:
             return 0, 0
     tierValue = [62, 47, 34, 23]
-    minedOre = tierValue[tier] * drill.oreYield
+    minedOre = tierValue[tier-1] * drill.oreYield
     if isRisky:
         if tier == 4:
             return minedOre, True
