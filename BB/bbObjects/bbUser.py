@@ -190,7 +190,6 @@ class bbUser:
                 self.activeShip.equipModule(currentModule)
             else:
                 finalModules.append(currentModule)
-
         for currentModule in finalModules:
             self.inactiveModules.append(currentModule)
 
