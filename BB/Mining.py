@@ -79,47 +79,4 @@ def mineAsteroid(user, tier, oreType, isRisky):
 
 
 def setRisky(message, isRisky):
-    usersDB.getUser(message.author.id).defaultMineIsRisky = isRisky
-    return
-
-
-async def cmd_setRisk(message, args):
-    user = usersDB.getOrAddID(message.author.id)
-
-    if args not in risky_aliases and args not in safe_aliases:
-        errorStr = "Please enter valid option\nvalid options are: "
-        for aliasesSet in [risky_aliases, safe_aliases]:
-            for alias in aliasesSet:
-                errorStr.append(alias) + ", "
-            errorStr = errorStr[:-2]
-        message.channel.send(errorStr)
-
-    elif args in risky_aliases:
-        user.defaultMineIsRisky = True
-    else:
-        user.defaultMineIsRisky = False
-
-bbCommands.register("setMineRisk", cmd_setRisk)
-bbCommands.register("setRisk", cmd_setRisk)
-
-
-async def cmd_mining(message, args):
-    user = usersDB.getOrAddID(message.author.id)
-
-    if user.commoditiesCollected >= user.activeShip.cargo:
-        message.channel.send("Your cargo hold is full!")
-        return
-    tier = pickTier()
-    oreType = pickOre()
-    if args is not None:
-        risk = args
-        if args == "risk" or "risky":
-            isRisky = True
-        else:
-            isRisky = False
-    else:
-        isRisky = user.defaultMineIsRisky
-    sendMessage = mineAsteroid(user, tier, oreType, isRisky)
-    message.channel.send(sendMessage)
-
-bbCommands.register("mine", cmd_mining)
+    usersDB.getOrAddID(message.author.id).defaultMineIsRisky = isRisky

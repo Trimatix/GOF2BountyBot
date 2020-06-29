@@ -374,13 +374,17 @@ async def err_nodm(message, args):
 changes default risk value for users
 """
 async def cmd_setRisk(message, args):
-    user = usersDB.getUser(message.author.id)
-    argsSplit = args.split(" ")
-    arg = argsSplit[0]
-    if arg.lower() is not "risky" or "dangerous" or "safe" or "cautious":
-        message.channel.send("Please enter valid option")
-        message.channel.send("valid options are \"risky\" \"dangerous\" \"safe\" or \"cautious\"")
-    elif arg.lower() == "risky" or "dangerous":
+    user = usersDB.getOrAddID(message.author.id)
+
+    if args not in Mining.risky_aliases and args not in Mining.safe_aliases:
+        errorStr = "Please enter valid option\nvalid options are: "
+        for aliasesSet in [Mining.risky_aliases, Mining.safe_aliases]:
+            for alias in aliasesSet:
+                errorStr.append(alias) + ", "
+            errorStr = errorStr[:-2]
+        message.channel.send(errorStr)
+
+    elif args in Mining.risky_aliases:
         user.defaultMineIsRisky = True
     else:
         user.defaultMineIsRisky = False
@@ -392,20 +396,14 @@ bbCommands.register("setRisk", cmd_setRisk)
 initiates mining command
 """
 async def cmd_mining(message, args):
-    argsSplit = args.split(" ")
-    user = usersDB.getUser(message.author.id)
+    user = usersDB.getOrAddID(message.author.id)
+
     if user.commoditiesCollected >= user.activeShip.cargo:
-        message.channel.send("You have exceeded your ship's cargo capacity")
+        message.channel.send("Your cargo hold is full!")
+        return
     tier = Mining.pickTier()
     oreType = Mining.pickOre()
-    if argsSplit[0] is not None:
-        risk = argsSplit[0]
-        if risk.lower() == "risk" or "risky":
-            isRisky = True
-        else:
-            isRisky = False
-    else:
-        isRisky = user.defaultMineIsRisky
+    isRisky = user.defaultMineIsRisky if args == "" else args in Mining.risky_aliases
     sendMessage = Mining.mineAsteroid(user, tier, oreType, isRisky)
     message.channel.send(sendMessage)
 
