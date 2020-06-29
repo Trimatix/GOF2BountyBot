@@ -8,6 +8,7 @@ from BB.bountybot import usersDB, bbCommands
 ORE_TYPES = ["Iron", "Doxtrite", "Perrius", "Cesogen", "Hypanium", "Golden", "Sodil", "Pyresium", "Orichalzine", "Titanium"]
 asteroid_tiers = ["D", "C", "B", "A"]
 risky_aliases = ["risk", "risky", "danger", "dangerous"]
+safe_aliases = ["safe", "cautious"]
 risky_mining_failure_chance = 5
 max_ore_per_asteroid_tier = [62, 47, 34, 23]
 
@@ -27,7 +28,7 @@ def tierToLetter(tier):
 
 
 def boolRiskArg(arg):
-    return arg.lower() in risky_aliases
+    return arg in risky_aliases
 
 
 """
@@ -88,10 +89,16 @@ async def cmd_setRisk(message, args):
     user = usersDB.getUser(message.author.id)
     argsSplit = args.split(" ")
     arg = argsSplit[0]
-    if arg.lower() is not "risky" or "dangerous" or "safe" or "cautious":
-        message.channel.send("Please enter valid option")
-        message.channel.send("valid options are \"risky\" \"dangerous\" \"safe\" or \"cautious\"")
-    elif arg.lower() == "risky" or "dangerous":
+
+    if arg not in risky_aliases and arg not in safe_aliases:
+        errorStr = "Please enter valid option\nvalid options are: "
+        for aliasesSet in [risky_aliases, safe_aliases]:
+            for alias in aliasesSet:
+                errorStr.append(alias) + ", "
+            errorStr = errorStr[:-2]
+        message.channel.send(errorStr)
+
+    elif arg in risky_aliases:
         user.defaultMineIsRisky = True
     else:
         user.defaultMineIsRisky = False
