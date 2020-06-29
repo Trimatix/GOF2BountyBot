@@ -14,9 +14,7 @@ max_ore_per_asteroid_tier = [62, 47, 34, 23]
 
 
 def pickOre(oreList=ORE_TYPES):
-    numAsteroids = len(oreList)
-    choice = random.random() % numAsteroids
-    return oreList[int(choice)]
+    return random.choice(oreList)
 
 
 def pickTier():
