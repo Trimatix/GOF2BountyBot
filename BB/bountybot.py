@@ -380,14 +380,17 @@ async def cmd_setRisk(message, args):
         errorStr = "Please enter valid option\nvalid options are: "
         for aliasesSet in [Mining.risky_aliases, Mining.safe_aliases]:
             for alias in aliasesSet:
-                errorStr.append(alias) + ", "
+                errorStr += alias + ", "
             errorStr = errorStr[:-2]
-        message.channel.send(errorStr)
+        await message.channel.send(errorStr)
+        return
 
     elif args in Mining.risky_aliases:
         user.defaultMineIsRisky = True
     else:
         user.defaultMineIsRisky = False
+
+    await message.channel.send(":white_check_mark: Mining risk set!")
 
 bbCommands.register("setMineRisk", cmd_setRisk)
 bbCommands.register("setRisk", cmd_setRisk)
@@ -405,7 +408,7 @@ async def cmd_mining(message, args):
     oreType = Mining.pickOre()
     isRisky = user.defaultMineIsRisky if args == "" else args in Mining.risky_aliases
     sendMessage = Mining.mineAsteroid(user, tier, oreType, isRisky)
-    message.channel.send(sendMessage)
+    await message.channel.send(sendMessage)
 
 bbCommands.register("mine", cmd_mining)
 
