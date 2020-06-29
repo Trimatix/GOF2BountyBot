@@ -1,4 +1,4 @@
-from ..items.bbModule import CloakModule
+from ..items.modules import bbCloakModule
 
 class BattleShip:
     bbShip = None
@@ -24,7 +24,7 @@ class BattleShip:
         self.cloaking = False
         self.EMPCooldown = 0
         for module in bbShip.modules:
-            if module.getType() == CloakModule:
+            if module.getType() == bbCloakModule:
                 self.cloaks += module
     
 

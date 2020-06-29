@@ -1,24 +1,15 @@
-from .. import bbAliasable
-from . import bbModule, bbTurret, bbWeapon, bbShipUpgrade
+from .bbItem import bbItem
+from . import bbTurret, bbWeapon, bbShipUpgrade, bbModuleFactory
 from ...bbConfig import bbConfig, bbData
 
-class bbShip(bbAliasable.Aliasable):
-    hasWiki = False
-    wiki = ""
-    manufacturer = ""
-    icon = ""
-    hasIcon = False
-
+class bbShip(bbItem):
     hasNickname = False
     nickname = ""
-    emoji = ""
-    hasEmoji = False
 
     armour = 0.0
     cargo = 0
     numSecondaries = 0
     handling = 0
-    value = 0
 
     maxPrimaries = 0
     maxTurrets = 0
@@ -29,11 +20,10 @@ class bbShip(bbAliasable.Aliasable):
     turrets = []
 
     upgradesApplied = []
-    shopSpawnRate = 0
 
 
     def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon="", emoji=""):
-        super(bbShip, self).__init__(name, aliases)
+        super(bbShip, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji)
 
         if len(weapons) > maxPrimaries:
             ValueError("passed more weapons than can be stored on this ship - maxPrimaries")
@@ -42,23 +32,15 @@ class bbShip(bbAliasable.Aliasable):
         if len(turrets) > maxTurrets:
             ValueError("passed more turrets than can be stored on this ship - maxTurrets")
 
-        self.hasWiki = wiki != ""
-        self.wiki = wiki
-        self.icon = icon
-        self.hasIcon = icon != ""
-        self.emoji = emoji
-        self.hasEmoji = emoji != ""
-
-        self.name = name
         if self.name in bbData.builtInShipData:
             self.shopSpawnRate = bbData.shipKeySpawnRates[self.name]
         else:
             self.shopSpawnRate = 0
+
         self.armour = armour
         self.cargo = cargo
         self.numSecondaries = numSecondaries
         self.handling = handling
-        self.value = value
         
         self.maxPrimaries = maxPrimaries
         self.maxTurrets = maxTurrets
@@ -72,7 +54,6 @@ class bbShip(bbAliasable.Aliasable):
         self.hasNickname = False
         if nickname != "":
             self.changeNickname(nickname)
-        self.manufacturer = manufacturer
 
         self.upgradesApplied = []
 
@@ -104,8 +85,10 @@ class bbShip(bbAliasable.Aliasable):
     def hasWeaponsEquipped(self):
         return self.getNumWeaponsEquipped() > 0
 
+
     def hasModulesEquipped(self):
         return self.getNumModulesEquipped() > 0
+
 
     def hasTurretsEquipped(self):
         return self.getNumTurretsEquipped() > 0
@@ -127,11 +110,25 @@ class bbShip(bbAliasable.Aliasable):
 
     def getWeaponAtIndex(self, index):
         return self.weapons[index]
+    
+
+    def canEquipModuleType(self, moduleType):
+        if moduleType in bbModuleFactory.maxModuleTypeEquips and bbModuleFactory.maxModuleTypeEquips[moduleType] != -1:
+            numFound = 1
+            for equippedModule in self.modules:
+                if equippedModule.getType() == moduleType:
+                    numFound += 1
+                    if numFound > bbModuleFactory.maxModuleTypeEquips[moduleType]:
+                        return False
+        return True
 
 
     def equipModule(self, module):
         if not self.canEquipMoreModules():
             raise OverflowError("Attempted to equip a module but all module slots are full")
+        if not self.canEquipModuleType(module.getType()):
+            raise ValueError("Attempted to equip a module of a type that is already at its maximum capacity: " + str(module))
+
         self.modules.append(module)
     
 
@@ -284,13 +281,13 @@ class bbShip(bbAliasable.Aliasable):
 
         if not shipUpgradesOnly:
             for module in self.modules:
-                total += module.value
+                total += module.getValue()
             for weapon in self.weapons:
-                total += weapon.value
+                total += weapon.getValue()
             for turret in self.turrets:
-                total += turret.value
+                total += turret.getValue()
         for upgrade in self.upgradesApplied:
-            total += upgrade.value
+            total += upgrade.valueForShip(self)
 
         return total
 
@@ -326,8 +323,15 @@ class bbShip(bbAliasable.Aliasable):
         while self.hasWeaponsEquipped() and other.canEquipMoreWeapons():
             other.equipWeapon(self.weapons.pop(0))
 
+        leftoverModules = []
         while self.hasModulesEquipped() and other.canEquipMoreModules():
-            other.equipModule(self.modules.pop(0))
+            if other.canEquipModuleType(self.modules[0].getType()):
+                other.equipModule(self.modules.pop(0))
+            else:
+                leftoverModules.append(self.modules.pop(0))
+                
+        for leftoverModule in leftoverModules:
+            self.modules.append(leftoverModule)
 
         while self.hasTurretsEquipped() and other.canEquipMoreTurrets():
             other.equipTurret(self.turrets.pop(0))
@@ -422,7 +426,7 @@ def fromDict(shipDict):
     modules = []
     if "modules" in shipDict:
         for module in shipDict["modules"]:
-            modules.append(bbModule.fromDict(module))
+            modules.append(bbModuleFactory.fromDict(module))
 
     turrets = []
     if "turrets" in shipDict:
@@ -445,7 +449,7 @@ def fromDict(shipDict):
         builtInModules = []
         if "modules" in shipDict:
             for module in shipDict["modules"]:
-                builtInModules.append(bbModule.fromDict(module))
+                builtInModules.append(bbModuleFactory.fromDict(module))
 
         builtInTurrets = []
         if "turrets" in shipDict:

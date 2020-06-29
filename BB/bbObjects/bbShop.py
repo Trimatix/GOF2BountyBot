@@ -1,5 +1,5 @@
 from ..bbConfig import bbData, bbConfig
-from .items import bbModule, bbShip, bbWeapon, bbTurret
+from .items import bbModuleFactory, bbShip, bbWeapon, bbTurret
 import random
 
 class bbShop:
@@ -231,7 +231,7 @@ def fromDict(shopDict):
 
     modulesStock = []
     for moduleDict in shopDict["modulesStock"]:
-        modulesStock.append(bbModule.fromDict(moduleDict))
+        modulesStock.append(bbModuleFactory.fromDict(moduleDict))
 
     turretsStock = []
     for turret in shopDict["turretsStock"]:
