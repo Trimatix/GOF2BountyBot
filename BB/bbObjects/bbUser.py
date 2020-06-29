@@ -335,6 +335,7 @@ class bbUser:
             self.storedCommodities[commodity].increaseCommodity(quantity)
         else:
             self.storedCommodities.append(bbInventoryListing.bbInventoryListing(commodity, quantity))
+        self.commoditiesCollected += quantity
 
 
     def sellCommodity(self, commodity, quantity):
@@ -346,6 +347,7 @@ class bbUser:
             commodityListing.decreaseCommodity(quantity)
             if commodityListing.count == 0:
                 self.storedCommodities.remove(commodityListing)
+            self.commoditiesCollected -= quantity
             return 0
         return 2
 
