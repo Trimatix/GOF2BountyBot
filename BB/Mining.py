@@ -1,7 +1,6 @@
 import random
 
 from BB.bbConfig import bbData
-from BB.bountybot import usersDB, bbCommands
 
 # TODO: add delay between mining attempts
 
@@ -76,7 +75,3 @@ def mineAsteroid(user, tier, oreType, isRisky):
         else:
             returnMessage = "Asteroid mining failed"
         return returnMessage
-
-
-def setRisky(message, isRisky):
-    usersDB.getOrAddID(message.author.id).defaultMineIsRisky = isRisky
