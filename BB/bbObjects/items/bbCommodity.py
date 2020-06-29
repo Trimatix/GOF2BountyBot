@@ -10,6 +10,10 @@ class bbCommodity(bbItem.bbItem):
     def getType(self):
         return bbCommodity
 
+    
+    def statsStringShort(self):
+        return super().statsStringShort()
+
 
 def fromDict(commodityDict):
     if commodityDict["builtIn"]:
