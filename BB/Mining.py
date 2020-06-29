@@ -67,7 +67,7 @@ def mineAsteroid(user, tier, oreType, isRisky):
         if oreQuantity > 0:
             returnMessage += ("You mined a class " + tierToLetter(tier) + " " + str(oreType) + " asteroid yielding " + str(oreQuantity) + " ore")
             if gotCore:
-                user.Commodity(str(oreType) + " Core", 1)
+                user.commodity(str(oreType) + " Core", 1)
                 returnMessage += " and 1 core"
         else:
             returnMessage = "Asteroid mining failed"

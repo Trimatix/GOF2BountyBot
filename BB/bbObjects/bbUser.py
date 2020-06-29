@@ -86,6 +86,7 @@ class bbUser:
 
         self.defaultMineIsRisky = False
         self.commoditiesCollected = 0
+        self.storedCommodities = []
 
         self.lastSeenGuildId = lastSeenGuildId
         self.haslastSeenGuildId = lastSeenGuildId != -1
@@ -112,6 +113,7 @@ class bbUser:
         self.inactiveTurrets = []
         self.storedCommodities = []
         self.defaultMineIsRisky = False
+        self.commoditiesCollected = 0
 
 
     def numInventoryPages(self, item, maxPerPage):
@@ -290,6 +292,8 @@ class bbUser:
             return self.inactiveModules
         if item == "turret":
             return self.inactiveTurrets
+        if item == "commodity":
+            return self.storedCommodities
         else:
             raise NotImplementedError("Valid, but unrecognised item type: " + item)
 

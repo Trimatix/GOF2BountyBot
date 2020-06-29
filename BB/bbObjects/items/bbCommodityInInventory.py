@@ -1,11 +1,11 @@
 from .bbCommodity import bbCommodity
 
 class bbCommodityInInventory():
-    Commodity = bbCommodity()
+    commodity = bbCommodity()
     count = int()
 
     def __init__(self, commodity, count=0):
-        self.Commodity = commodity
+        self.commodity = commodity
         self.count = count
 
     def increaseCommodity(self, numIncrease):
@@ -17,7 +17,7 @@ class bbCommodityInInventory():
         self.count -= numDecrease
 
     def getCommodity(self):
-        return self.Commodity
+        return self.commodity
 
     def compareCommodity(self, compCommodity):
-        return self.Commodity == compCommodity
+        return self.commodity == compCommodity
