@@ -1,4 +1,4 @@
-from .items import bbShip, bbModule, bbWeapon, bbTurret
+from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from .items.bbCommodityInInventory import bbCommodityInInventory
 from ..bbConfig import bbConfig
 
