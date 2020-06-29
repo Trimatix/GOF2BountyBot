@@ -124,3 +124,6 @@ disabledServers = [723704980246233219, 723702782640783361, 723708988830515231, 7
 
 # the max number of each module type that can be equipped on a ship. This variable is now located in bbObjects.items.bbModuleFactory
 # maxModuleTypeEquips = {...}
+
+# amount of time between ship offloads of commodities
+shipOffloadPeriod = {"days":0, "hours":0, "minutes":1, "seconds":0}

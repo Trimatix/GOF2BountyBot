@@ -5,15 +5,15 @@ from BB.bountybot import usersDB, bbCommands
 
 # TODO: add delay between mining attempts
 
-ORE_TYPES = {"Iron", "Doxtrite", "Perrius", "Cesogen", "Hypanium", "Golden", "Sodil", "Pyresium", "Orichalzine", "Titanium"}
+ORE_TYPES = ["Iron", "Doxtrite", "Perrius", "Cesogen", "Hypanium", "Golden", "Sodil", "Pyresium", "Orichalzine", "Titanium"]
 
-def pickOre():
-    numAsteroids = len(ORE_TYPES)
+def pickOre(oreList=ORE_TYPES):
+    numAsteroids = len(oreList)
     choice = random.random() % numAsteroids
-    return ORE_TYPES[int(choice)]
+    return oreList[int(choice)]
 
 def pickTier():
-    return int(random.random() % 4) + 1
+    return random.randint(1,4)
 
 def tierToLetter(tier):
     if tier == 1:
@@ -59,6 +59,11 @@ def mineAsteroid(user, tier, oreType, isRisky):
         oreQuantity = results[0]
         gotCore = results[1]
         user.addCommodity(oreType, oreQuantity)
+        remainingSpace = user.activeShip.cargo - user.commoditiesCollected
+        if oreQuantity > remainingSpace:
+            oreQuantity = remainingSpace
+            if gotCore:
+                oreQuantity -= 1
         if oreQuantity > 0:
             returnMessage += ("You mined a class " + tierToLetter(tier) + " " + str(oreType) + " asteroid yielding " + str(oreQuantity) + " ore")
             if gotCore:
@@ -92,6 +97,8 @@ bbCommands.register("setRisk", cmd_setRisk)
 async def cmd_mining(message, args):
     argsSplit = args.split(" ")
     user = usersDB.getUser(message.author.id)
+    if user.commoditiesCollected >= user.activeShip.cargo:
+        message.channel.send("You have exceeded your ship's cargo capacity")
     tier = pickTier()
     oreType = pickOre()
     if argsSplit[0] is not None:

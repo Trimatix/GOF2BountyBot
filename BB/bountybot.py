@@ -3457,6 +3457,15 @@ async def dev_cmd_setbalance(message, args):
 bbCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 dmCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 
+"""
+developer command setting numCommoditiesCollected to 0
+"""
+async def dev_cmd_reset_num_commodities():
+    for user in usersDB.users:
+        user.commoditiesCollected = 0
+
+bbCommands.register("stash", dev_cmd_reset_num_commodities, isDev=True)
+dmCommands.register("stash", dev_cmd_reset_num_commodities, isDev=True)
 
 
 ####### MAIN FUNCTIONS #######
@@ -3523,6 +3532,7 @@ async def on_ready():
     
     ActiveTimedTasks.shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
     ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
+    ActiveTimedTasks.inventoryOffloadTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shipOffloadPeriod, autoReschedule=True, expiryFunction=dev_cmd_reset_num_commodities())
 
     ActiveTimedTasks.duelRequestTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()
 

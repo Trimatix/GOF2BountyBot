@@ -22,6 +22,7 @@ class bbUser:
     hasLastSeenGuildId = False
 
     defaultMineIsRisky = False
+    commoditiesCollected = 0
 
     activeShip = None
     inactiveShips = []
@@ -82,6 +83,9 @@ class bbUser:
         self.inactiveModules = inactiveModules
         self.inactiveWeapons = inactiveWeapons
         self.inactiveTurrets = inactiveTurrets
+
+        self.defaultMineIsRisky = False
+        self.commoditiesCollected = 0
 
         self.lastSeenGuildId = lastSeenGuildId
         self.haslastSeenGuildId = lastSeenGuildId != -1
