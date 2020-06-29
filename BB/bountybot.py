@@ -1899,12 +1899,16 @@ async def cmd_shop_sell(message, args):
         await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret/commodity) and an item number from `" + bbConfig.commandPrefix + "hangar`")
         return
     if len(argsSplit) > 3:
-        await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret/commodity), an item number, and optionally `clear` when selling a ship.")
+        await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret/commodity), an item number, and optionally `clear` when selling a ship, or a quantity when selling a commodity.")
         return
 
     item = argsSplit[0].rstrip("s")
     if item == "all" or item not in bbConfig.validItemNames:
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module, turret or commodity.")
+        return
+
+    if item == "commodity" and len(argsSplit) < 3:
+        await message.channel.send(":x: Not enough arguments! Please provide both an item number from `" + bbConfig.commandPrefix + "hangar`, and a quantity when selling commodities.")
         return
 
     if usersDB.userIDExists(message.author.id):
@@ -1933,8 +1937,9 @@ async def cmd_shop_sell(message, args):
                 return
             clearItems = True
         elif item == "commodity":
-            if not bbUtil.isInt(argsSplit[2]):
-                await message.channel.send(":x: No quantity given! Please provide amount you desire to sell.")
+            if not bbUtil.isInt(argsSplit[2]) or int(argsSplit[2]) < 0:
+                await message.channel.send(":x: Invalid quantity! You must sell at least 1.")
+                return
         else:
             await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret/commodity), an item number, and optionally `clear` when selling a ship.")
             return
