@@ -121,3 +121,6 @@ duelCloakChance = 20
 
 # Servers where bountyBot commands are disabled. Currently this is just the emoji servers:
 disabledServers = [723704980246233219, 723702782640783361, 723708988830515231, 723704665560055848, 723705817764986900, 723703454635393056, 723708655031156742, 723706906517962814, 723704087962583131, 723704350131748935]
+
+# the max number of each module type that can be equipped on a ship. This variable is now located in bbObjects.items.bbModuleFactory
+# maxModuleTypeEquips = {...}
