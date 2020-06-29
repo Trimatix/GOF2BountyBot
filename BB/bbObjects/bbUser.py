@@ -327,11 +327,9 @@ class bbUser:
         return "<bbUser #" + str(self.id) + ">"
 
     def getDrill(self):
-        numModulesequipped = self.activeShip.getNumModulesEquipped()
-        potentialDrill = []
-        for i in range(numModulesequipped):
-            if self.activeShip.getModuleAtIndex(i) is bbMiningDrillModule.bbMiningDrillModule:
-                return self.activeShip.getModuleAtIndex(i)
+        for currentModule in self.activeShip.modules:
+            if currentModule.getType() == bbMiningDrillModule.bbMiningDrillModule:
+                return currentModule
         return None
 
     def addCommodity(self, commodity, quantity):
