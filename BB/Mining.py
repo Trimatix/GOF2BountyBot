@@ -1,9 +1,8 @@
 import random
 
-from BB.bbConfig import bbData
-
 # TODO: add delay between mining attempts
 
+# TODO: Would it be possible to import this ore data from bbData rather than hard coding it?
 ORE_TYPES = ["Iron", "Doxtrite", "Perrius", "Cesogen", "Hypanium", "Golden", "Sodil", "Pyresium", "Orichalzine", "Titanium"]
 asteroid_tiers = ["D", "C", "B", "A"]
 risky_aliases = ["risk", "risky", "danger", "dangerous"]
