@@ -86,11 +86,9 @@ def setRisky(message, isRisky):
 
 
 async def cmd_setRisk(message, args):
-    user = usersDB.getUser(message.author.id)
-    argsSplit = args.split(" ")
-    arg = argsSplit[0]
+    user = usersDB.getOrAddID(message.author.id)
 
-    if arg not in risky_aliases and arg not in safe_aliases:
+    if args not in risky_aliases and args not in safe_aliases:
         errorStr = "Please enter valid option\nvalid options are: "
         for aliasesSet in [risky_aliases, safe_aliases]:
             for alias in aliasesSet:
@@ -98,7 +96,7 @@ async def cmd_setRisk(message, args):
             errorStr = errorStr[:-2]
         message.channel.send(errorStr)
 
-    elif arg in risky_aliases:
+    elif args in risky_aliases:
         user.defaultMineIsRisky = True
     else:
         user.defaultMineIsRisky = False
