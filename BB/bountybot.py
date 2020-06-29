@@ -1853,15 +1853,15 @@ if "clear" is specified, the ship's items are unequipped before selling.
 async def cmd_shop_sell(message, args):
     argsSplit = args.split(" ")
     if len(argsSplit) < 2:
-        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `" + bbConfig.commandPrefix + "hangar`")
+        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret/commodity) and an item number from `" + bbConfig.commandPrefix + "hangar`")
         return
     if len(argsSplit) > 3:
-        await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `clear` when selling a ship.")
+        await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret/commodity), an item number, and optionally `clear` when selling a ship.")
         return
 
     item = argsSplit[0].rstrip("s")
     if item == "all" or item not in bbConfig.validItemNames:
-        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
+        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module, turret or commodity.")
         return
 
     if usersDB.userIDExists(message.author.id):
@@ -1889,8 +1889,11 @@ async def cmd_shop_sell(message, args):
                 await message.channel.send(":x: `clear` can only be used when selling a ship!")
                 return
             clearItems = True
+        elif item == "commodity":
+            if not bbUtil.isInt(argsSplit[2]):
+                await message.channel.send(":x: No quantity given! Please provide amount you desire to sell.")
         else:
-            await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `clear` when selling a ship.")
+            await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret/commodity), an item number, and optionally `clear` when selling a ship.")
             return
 
     requestedShop = guildsDB.getGuild(message.guild.id).shop
@@ -1932,6 +1935,23 @@ async def cmd_shop_sell(message, args):
         requestedShop.turretsStock.append(requestedTurret)
 
         await message.channel.send(":moneybag: You sold your **" + requestedTurret.name + "** for **" + str(requestedTurret.value) + " credits**!")
+
+    elif item == "commodity":
+        commodityQuantity = argsSplit[2]
+        try:
+            requestedCommodity = requestedBBUser.storedCommodities[itemNum - 1]
+        except ValueError:
+            await message.channel.send(":x: commodity not found in inventory:!:")
+            return
+        result = requestedBBUser.sellCommodity(requestedCommodity.commodity, commodityQuantity)
+        # TODO: add shop inventory stocking when shop commodities added
+        if result == 0:
+            await message.channel.send(":moneybag: you sold **" + commodityQuantity + " " + requestedCommodity.name + "** for **" + str(requestedCommodity.value*commodityQuantity) + " credits**!")
+        elif result == 1:
+            await message.channel.send(":x: insufficient quantity! you have " + requestedCommodity.count + "in your inventory:!:")
+        elif result == 2:
+            # This should be unreachable due to try statement
+            await message.channel.send(":x: commodity not found in inventory:!:")
 
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)

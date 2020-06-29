@@ -38,13 +38,18 @@ gets result of mining attempt
 @return -- returns ore type, amount, and if a core was obtained
 """
 def mineResult(drill, isRisky, tier):
+    # TODO: move max_ore_per_asteroid_tier to bbConfig
+    # fails if exceeds drill handling or doesn't meet minimum requirement
     if isRisky and risky_mining_failure_chance > random.randint(1,100) > drill.handling:
         return 0, 0
+
     minedOre = max_ore_per_asteroid_tier[tier-1] * drill.oreYield
+
     if isRisky:
         if tier == 4:
             return minedOre, True
         return minedOre, False
+
     minedOre = minedOre * drill.handling
     variance = random.randint(-5, 5)
     return minedOre + variance, False
@@ -65,7 +70,7 @@ def mineAsteroid(user, tier, oreType, isRisky):
         if oreQuantity > 0:
             returnMessage += ("You mined a class " + tierToLetter(tier) + " " + str(oreType) + " asteroid yielding " + str(oreQuantity) + " ore")
             if gotCore:
-                user.Commodity(str(oreType) + " Core", 1)
+                user.commodity(str(oreType) + " Core", 1)
                 returnMessage += " and 1 core"
         else:
             returnMessage = "Asteroid mining failed"
