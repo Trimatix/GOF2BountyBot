@@ -1413,7 +1413,7 @@ async def cmd_hangar(message, args):
                         
                 elif arg in bbConfig.validItemNames:
                     if foundItem:
-                        await message.channel.send(":x: I can only take one item type (ship/weapon/module/turret)!")
+                        await message.channel.send(":x: I can only take one item type (ship/weapon/module/turret/commodity)!")
                         return
                     else:
                         item = arg.rstrip("s")
@@ -1518,6 +1518,12 @@ async def cmd_hangar(message, args):
                 if turretNum == firstPlace:
                     hangarEmbed.add_field(name="‎", value="__**Stored Turrets**__", inline=False)
                 hangarEmbed.add_field(name=str(turretNum) + ". " + requestedBBUser.inactiveTurrets[turretNum - 1].name, value=(requestedBBUser.inactiveTurrets[turretNum - 1].emoji if requestedBBUser.inactiveTurrets[turretNum - 1].hasEmoji else "") + requestedBBUser.inactiveTurrets[turretNum - 1].statsStringShort(), inline=False)
+
+        if item in ["all", "commodity"]:
+            for commodityNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("commodity", page, maxPerPage) + 1):
+                if commodityNum == firstPlace:
+                    hangarEmbed.add_field(name="‎", value="__**Stored Commodities**__", inline=False)
+                hangarEmbed.add_field(name=str(commodityNum) + ". " + requestedBBUser.storedCommodities[commodityNum - 1].commodity.name, value=(requestedBBUser.storedCommodities[commodityNum - 1].commodity.emoji if requestedBBUser.storedCommodities[commodityNum - 1].commodity.hasEmoji else "") + requestedBBUser.storedCommodities[commodityNum - 1].statsStringShort(), inline=False)
 
         try:
             await sendChannel.send(embed=hangarEmbed)

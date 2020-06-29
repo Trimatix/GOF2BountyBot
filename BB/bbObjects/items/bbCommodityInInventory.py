@@ -21,3 +21,6 @@ class bbCommodityInInventory():
 
     def compareCommodity(self, compCommodity):
         return self.commodity == compCommodity
+
+    def statsStringShort(self):
+        return str(self.count) + " in inventory"
