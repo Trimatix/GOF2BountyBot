@@ -40,7 +40,9 @@ gets result of mining attempt
 
 def mineResult(drill, isRisky, tier):
     if isRisky:
-        if 5 > (random.random() % 100) > drill.handling:
+        # TODO: remove magic 5 with value in bbConfig
+        # fails if exceeds drill handling or doesn't meet minimum requirement
+        if 5 > random.randint(0,100) > (drill.handling*100):
             return 0, 0
     tierValue = [62, 47, 34, 23]
     minedOre = tierValue[tier] * drill.oreYield
