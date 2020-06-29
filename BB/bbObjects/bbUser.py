@@ -175,6 +175,7 @@ class bbUser:
             # ship.unequipTurretObj(turret)
         ship.turrets = []
 
+
     def validateLoadout(self):
         incompatibleModules = []
         allModulesChecked = False
