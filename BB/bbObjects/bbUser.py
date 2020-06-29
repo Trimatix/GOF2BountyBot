@@ -1,5 +1,4 @@
-from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
-from .items.bbCommodityInInventory import bbCommodityInInventory
+from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret, bbInventoryListing
 from .items.modules import bbMiningDrillModule
 from ..bbConfig import bbConfig
 
@@ -30,7 +29,8 @@ class bbUser:
     inactiveWeapons = []
     inactiveTurrets = []
 
-    storedCommodities = []
+    # Dict of commodity: bbInventoryListing
+    storedCommodities = {}
 
     # dict of targetBBUser:DuelRequest
     duelRequests = {}
@@ -111,7 +111,7 @@ class bbUser:
         self.inactiveShips = []
         self.inactiveWeapons = []
         self.inactiveTurrets = []
-        self.storedCommodities = []
+        self.storedCommodities = {}
         self.defaultMineIsRisky = False
         self.commoditiesCollected = 0
 
@@ -323,33 +323,36 @@ class bbUser:
         self.removeDuelChallengeObj(self.duelRequests[duelTarget])
 
 
-    def __str__(self):
-        return "<bbUser #" + str(self.id) + ">"
-
     def getDrill(self):
         for currentModule in self.activeShip.modules:
             if currentModule.getType() == bbMiningDrillModule.bbMiningDrillModule:
                 return currentModule
         return None
 
+
     def addCommodity(self, commodity, quantity):
-        try:
-            commodityIndex = self.storedCommodities.index(commodity)
-            self.storedCommodities[commodityIndex].increaseCommodity(quantity)
-        except ValueError:
-            self.storedCommodities.append(bbCommodityInInventory(commodity, quantity))
+        if commodity in self.storedCommodities:
+            self.storedCommodities[commodity].increaseCommodity(quantity)
+        else:
+            self.storedCommodities.append(bbInventoryListing.bbInventoryListing(commodity, quantity))
+
 
     def sellCommodity(self, commodity, quantity):
-        for i in self.storedCommodities:
-            if i.compareCommodity(commodity):
-                if i.count < quantity:
-                    return 1
-                self.credits += (commodity.value * quantity)
-                i.decreaseCommodity(quantity)
-                if i.count == 0:
-                    self.storedCommodities.remove(i)
-                return 0
+        if commodity in self.storedCommodities:
+            commodityListing = self.storedCommodities[commodity]
+            if commodityListing.count < commodity:
+                return 1
+            self.credits += commodity.value * quantity
+            commodityListing.decreaseCommodity(quantity)
+            if commodityListing.count == 0:
+                self.storedCommodities.remove(commodityListing)
+            return 0
         return 2
+
+
+    def __str__(self):
+        return "<bbUser #" + str(self.id) + ">"
+
 
 def fromDict(id, userDict):
     activeShip = bbShip.fromDict(userDict["activeShip"])
