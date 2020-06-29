@@ -55,7 +55,7 @@ for turretDict in bbData.builtInTurretData.values():
     bbData.builtInTurretData[turretDict["name"]]["builtIn"] = True
     bbData.builtInTurretObjs[turretDict["name"]].builtIn = True
 
-# generate bbCommodity objects fromdata in bbData
+# generate bbCommodity objects from data in bbData
 for commodityDict in bbData.builtInCommodityData.values():
     bbData.builtInCommodityObjs[commodityDict["name"]] = bbCommodity.fromDict(commodityDict)
     bbData.builtInCommodityData[commodityDict["name"]]["builtIn"] = True
