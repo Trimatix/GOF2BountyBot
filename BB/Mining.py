@@ -6,29 +6,27 @@ from BB.bountybot import usersDB, bbCommands
 # TODO: add delay between mining attempts
 
 ORE_TYPES = ["Iron", "Doxtrite", "Perrius", "Cesogen", "Hypanium", "Golden", "Sodil", "Pyresium", "Orichalzine", "Titanium"]
+asteroid_tiers = ["D", "C", "B", "A"]
+risky_aliases = ["risk", "risky", "danger", "dangerous"]
+
 
 def pickOre(oreList=ORE_TYPES):
     numAsteroids = len(oreList)
     choice = random.random() % numAsteroids
     return oreList[int(choice)]
 
+
 def pickTier():
     return random.randint(1,4)
 
+
 def tierToLetter(tier):
-    if tier == 1:
-        return "D"
-    if tier == 2:
-        return "C"
-    if tier == 3:
-        return "B"
-    if tier == 4:
-        return "A"
+    return asteroid_tiers[tier-1]
+
 
 def boolRiskArg(arg):
-    if arg.lower() == "risk" or "risky" or "danger" or "dangerous":
-        return True
-    return False
+    return arg.lower() in risky_aliases
+
 
 """
 gets result of mining attempt
@@ -37,7 +35,6 @@ gets result of mining attempt
 @param isRisky -- Choice of taking risk or not
 @return -- returns ore type, amount, and if a core was obtained
 """
-
 def mineResult(drill, isRisky, tier):
     if isRisky:
         if 5 > (random.random() % 100) > drill.handling:
@@ -51,6 +48,7 @@ def mineResult(drill, isRisky, tier):
     minedOre = minedOre * drill.handling
     variance = (random.random() % 10) - 5
     return minedOre + variance, False
+
 
 def mineAsteroid(user, tier, oreType, isRisky):
     returnMessage = ""
@@ -75,9 +73,11 @@ def mineAsteroid(user, tier, oreType, isRisky):
         returnMessage = "No drill equipped"
     return returnMessage
 
+
 def setRisky(message, isRisky):
     usersDB.getUser(message.author.id).defaultMineIsRisky = isRisky
     return
+
 
 async def cmd_setRisk(message, args):
     user = usersDB.getUser(message.author.id)
@@ -93,6 +93,7 @@ async def cmd_setRisk(message, args):
 
 bbCommands.register("setMineRisk", cmd_setRisk)
 bbCommands.register("setRisk", cmd_setRisk)
+
 
 async def cmd_mining(message, args):
     argsSplit = args.split(" ")
