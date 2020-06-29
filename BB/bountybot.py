@@ -1986,11 +1986,7 @@ async def cmd_shop_sell(message, args):
 
     elif item == "commodity":
         commodityQuantity = argsSplit[2]
-        try:
-            requestedCommodity = requestedBBUser.storedCommodities[itemNum - 1]
-        except ValueError:
-            await message.channel.send(":x: commodity not found in inventory:!:")
-            return
+        requestedCommodity = requestedBBUser.storedCommodities[itemNum - 1]
         result = requestedBBUser.sellCommodity(requestedCommodity.commodity, commodityQuantity)
         # TODO: add shop inventory stocking when shop commodities added
         if result == 0:
