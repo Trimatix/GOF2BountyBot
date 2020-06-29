@@ -1,5 +1,6 @@
 from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from .items.bbCommodityInInventory import bbCommodityInInventory
+from .items.modules import bbMiningDrillModule
 from ..bbConfig import bbConfig
 
 
@@ -340,7 +341,7 @@ def fromDict(id, userDict):
     inactiveModules = []
     if "inactiveModules" in userDict:
         for module in userDict["inactiveModules"]:
-            inactiveModules.append(bbModule.fromDict(module))
+            inactiveModules.append(bbModuleFactory.fromDict(module))
 
     inactiveTurrets = []
     if "inactiveTurrets" in userDict:
