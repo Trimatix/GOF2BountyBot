@@ -56,10 +56,10 @@ for turretDict in bbData.builtInTurretData.values():
     bbData.builtInTurretObjs[turretDict["name"]].builtIn = True
 
 # generate bbCommodity objects from data in bbData
-for commodityType in bbData.builtInCommodityData.values():
-    for commodityDict in commodityType.values():
+for commodityType in bbData.builtInCommodityData:
+    for commodityDict in bbData.builtInCommodityData[commodityType].values():
         bbData.builtInCommodityObjs[commodityDict["name"]] = bbCommodity.fromDict(commodityDict)
-        bbData.builtInCommodityData[commodityDict["name"]]["builtIn"] = True
+        bbData.builtInCommodityData[commodityType][commodityDict["name"]]["builtIn"] = True
         bbData.builtInCommodityObjs[commodityDict["name"]].builtIn = True
 
 # Sort ships by value
