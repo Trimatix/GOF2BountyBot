@@ -184,14 +184,12 @@ class bbUser:
             if not self.activeShip.canEquipModuleType(currentModule.getType()):
                 incompatibleModules.append(currentModule)
                 self.activeShip.unequipModuleObj(currentModule)
-
         finalModules = []
         for currentModule in incompatibleModules:
             if self.activeShip.canEquipModuleType(currentModule.getType()):
                 self.activeShip.equipModule(currentModule)
             else:
                 finalModules.append(currentModule)
-
         for currentModule in finalModules:
             self.inactiveModules.append(currentModule)
 
