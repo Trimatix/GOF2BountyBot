@@ -22,9 +22,7 @@ from .bbObjects.battles import ShipFight, DuelRequest
 from .bbObjects.tasks import TimedTask, TimedTaskAsync
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from .bbDatabases.tasks import TimedTaskAsyncHeap
-from . import bbUtil, ActiveTimedTasks
-
-
+from . import bbUtil, ActiveTimedTasks, Mining
 
 ####### DATABASE METHODS #######
 
@@ -371,6 +369,47 @@ async def err_nodm(message, args):
 
 ####### USER COMMANDS #######
 
+
+"""
+changes default risk value for users
+"""
+async def cmd_setRisk(message, args):
+    user = usersDB.getUser(message.author.id)
+    argsSplit = args.split(" ")
+    arg = argsSplit[0]
+    if arg.lower() is not "risky" or "dangerous" or "safe" or "cautious":
+        message.channel.send("Please enter valid option")
+        message.channel.send("valid options are \"risky\" \"dangerous\" \"safe\" or \"cautious\"")
+    elif arg.lower() == "risky" or "dangerous":
+        user.defaultMineIsRisky = True
+    else:
+        user.defaultMineIsRisky = False
+
+bbCommands.register("setMineRisk", cmd_setRisk)
+bbCommands.register("setRisk", cmd_setRisk)
+
+"""
+initiates mining command
+"""
+async def cmd_mining(message, args):
+    argsSplit = args.split(" ")
+    user = usersDB.getUser(message.author.id)
+    if user.commoditiesCollected >= user.activeShip.cargo:
+        message.channel.send("You have exceeded your ship's cargo capacity")
+    tier = Mining.pickTier()
+    oreType = Mining.pickOre()
+    if argsSplit[0] is not None:
+        risk = argsSplit[0]
+        if risk.lower() == "risk" or "risky":
+            isRisky = True
+        else:
+            isRisky = False
+    else:
+        isRisky = user.defaultMineIsRisky
+    sendMessage = Mining.mineAsteroid(user, tier, oreType, isRisky)
+    message.channel.send(sendMessage)
+
+bbCommands.register("mine", cmd_mining)
 
 
 """
