@@ -56,8 +56,10 @@ def mineResult(drill, isRisky, tier):
 
 
 def mineAsteroid(user, tier, oreType, isRisky):
-    returnMessage = ""
-    if user.getDrill() is not None:
+    if user.getDrill() is None:
+        return "No drill equipped"
+    else:
+        returnMessage = ""
         results = mineResult(user.getDrill(), isRisky, tier)
         oreQuantity = results[0]
         gotCore = results[1]
@@ -74,9 +76,7 @@ def mineAsteroid(user, tier, oreType, isRisky):
                 returnMessage += " and 1 core"
         else:
             returnMessage = "Asteroid mining failed"
-    else:
-        returnMessage = "No drill equipped"
-    return returnMessage
+        return returnMessage
 
 
 def setRisky(message, isRisky):
