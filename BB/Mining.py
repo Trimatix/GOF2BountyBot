@@ -106,15 +106,16 @@ bbCommands.register("setRisk", cmd_setRisk)
 
 
 async def cmd_mining(message, args):
-    argsSplit = args.split(" ")
-    user = usersDB.getUser(message.author.id)
+    user = usersDB.getOrAddID(message.author.id)
+
     if user.commoditiesCollected >= user.activeShip.cargo:
-        message.channel.send("You have exceeded your ship's cargo capacity")
+        message.channel.send("Your cargo hold is full!")
+        return
     tier = pickTier()
     oreType = pickOre()
-    if argsSplit[0] is not None:
-        risk = argsSplit[0]
-        if risk.lower() == "risk" or "risky":
+    if args is not None:
+        risk = args
+        if args == "risk" or "risky":
             isRisky = True
         else:
             isRisky = False
