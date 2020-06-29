@@ -191,9 +191,9 @@ class bbUser:
                 self.activeShip.equipModule(currentModule)
             else:
                 finalModules.append(currentModule)
-
         for currentModule in finalModules:
             self.inactiveModules.append(currentModule)
+
 
     def equipShipObj(self, ship, noSaveActive=False):
         if not (self.activeShip == ship or ship in self.inactiveShips):
