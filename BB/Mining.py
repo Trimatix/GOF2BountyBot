@@ -4,8 +4,6 @@ from BB.bbConfig import bbData
 from BB.bountybot import usersDB, bbCommands
 
 # TODO: add delay between mining attempts
-# TODO: add functions to users: getDrill, addCommodity
-# TODO: add data to user: defaultMineRisky, Commodities
 
 ORE_TYPES = {"Iron", "Doxtrite", "Perrius", "Cesogen", "Hypanium", "Golden", "Sodil", "Pyresium", "Orichalzine", "Titanium"}
 
@@ -45,12 +43,12 @@ def mineResult(drill, isRisky, tier):
         if 5 > (random.random() % 100) > drill.handling:
             return 0, 0
     tierValue = [62, 47, 34, 23]
-    minedOre = tierValue[tier] * drill.efficiency / 100
+    minedOre = tierValue[tier] * drill.oreYield
     if isRisky:
         if tier == 4:
             return minedOre, True
         return minedOre, False
-    minedOre = minedOre * drill.handling / 100
+    minedOre = minedOre * drill.handling
     variance = (random.random() % 10) - 5
     return minedOre + variance, False
 
@@ -73,35 +71,37 @@ def mineAsteroid(user, tier, oreType, isRisky):
     return returnMessage
 
 def setRisky(message, isRisky):
-    usersDB.getUser(message.author.id).defaultMineRisky = isRisky
+    usersDB.getUser(message.author.id).defaultMineIsRisky = isRisky
     return
 
 async def cmd_setRisk(message, args):
     user = usersDB.getUser(message.author.id)
-    arg = args[0]
+    argsSplit = args.split(" ")
+    arg = argsSplit[0]
     if arg.lower() is not "risky" or "dangerous" or "safe" or "cautious":
         message.channel.send("Please enter valid option")
         message.channel.send("valid options are \"risky\" \"dangerous\" \"safe\" or \"cautious\"")
     elif arg.lower() == "risky" or "dangerous":
-        user.defaultMineRisky = True
+        user.defaultMineIsRisky = True
     else:
-        user.defaultMineRisky = False
+        user.defaultMineIsRisky = False
 
 bbCommands.register("setMineRisk", cmd_setRisk)
 bbCommands.register("setRisk", cmd_setRisk)
 
 async def cmd_mining(message, args):
+    argsSplit = args.split(" ")
     user = usersDB.getUser(message.author.id)
     tier = pickTier()
     oreType = pickOre()
-    if args[0] is not None:
-        risk = args[0]
+    if argsSplit[0] is not None:
+        risk = argsSplit[0]
         if risk.lower() == "risk" or "risky":
             isRisky = True
         else:
             isRisky = False
     else:
-        isRisky = user.defaultMineRisky
+        isRisky = user.defaultMineIsRisky
     sendMessage = mineAsteroid(user, tier, oreType, isRisky)
     message.channel.send(sendMessage)
 

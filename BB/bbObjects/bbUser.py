@@ -1,4 +1,5 @@
 from .items import bbShip, bbModule, bbWeapon, bbTurret
+from .items.bbCommodityInInventory import bbCommodityInInventory
 from ..bbConfig import bbConfig
 
 
@@ -19,11 +20,15 @@ class bbUser:
     lastSeenGuildId = -1
     hasLastSeenGuildId = False
 
+    defaultMineIsRisky = False
+
     activeShip = None
     inactiveShips = []
     inactiveModules = []
     inactiveWeapons = []
     inactiveTurrets = []
+
+    storedCommodities = []
 
     # dict of targetBBUser:DuelRequest
     duelRequests = {}
@@ -100,6 +105,8 @@ class bbUser:
         self.inactiveShips = []
         self.inactiveWeapons = []
         self.inactiveTurrets = []
+        self.storedCommodities = []
+        self.defaultMineIsRisky = False
 
 
     def numInventoryPages(self, item, maxPerPage):
@@ -290,6 +297,32 @@ class bbUser:
     def __str__(self):
         return "<bbUser #" + str(self.id) + ">"
 
+    def getDrill(self):
+        numModulesequipped = self.activeShip.getNumModulesEquipped()
+        potentialDrill = []
+        for i in range(numModulesequipped):
+            if self.activeShip.getModuleAtIndex(i) is bbMiningDrillModule.bbMiningDrillModule:
+                return self.activeShip.getModuleAtIndex(i)
+        return None
+
+    def addCommodity(self, commodity, quantity):
+        try:
+            commodityIndex = self.storedCommodities.index(commodity)
+            self.storedCommodities[commodityIndex].increaseCommodity(quantity)
+        except ValueError:
+            self.storedCommodities.append(bbCommodityInInventory(commodity, quantity))
+
+    def sellCommodity(self, commodity, quantity):
+        for i in self.storedCommodities:
+            if i.compareCommodity(commodity):
+                if i.count < quantity:
+                    return 1
+                self.credits += (commodity.value * quantity)
+                i.decreaseCommodity(quantity)
+                if i.count == 0:
+                    self.storedCommodities.remove(i)
+                return 0
+        return 2
 
 def fromDict(id, userDict):
     activeShip = bbShip.fromDict(userDict["activeShip"])
