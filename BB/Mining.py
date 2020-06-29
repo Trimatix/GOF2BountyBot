@@ -9,6 +9,7 @@ ORE_TYPES = ["Iron", "Doxtrite", "Perrius", "Cesogen", "Hypanium", "Golden", "So
 asteroid_tiers = ["D", "C", "B", "A"]
 risky_aliases = ["risk", "risky", "danger", "dangerous"]
 risky_mining_failure_chance = 5
+max_ore_per_asteroid_tier = [62, 47, 34, 23]
 
 
 def pickOre(oreList=ORE_TYPES):
@@ -38,15 +39,14 @@ gets result of mining attempt
 """
 def mineResult(drill, isRisky, tier):
     if isRisky and risky_mining_failure_chance > random.randint(1,100) > drill.handling:
-            return 0, 0
-    tierValue = [62, 47, 34, 23]
-    minedOre = tierValue[tier-1] * drill.oreYield
+        return 0, 0
+    minedOre = max_ore_per_asteroid_tier[tier-1] * drill.oreYield
     if isRisky:
         if tier == 4:
             return minedOre, True
         return minedOre, False
     minedOre = minedOre * drill.handling
-    variance = (random.random() % 10) - 5
+    variance = random.randint(-5, 5)
     return minedOre + variance, False
 
 
