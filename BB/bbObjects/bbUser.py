@@ -344,7 +344,7 @@ class bbUser:
         if commodity in self.storedCommodities:
             self.storedCommodities[commodity].increaseCommodity(quantity)
         else:
-            self.storedCommodities.append(bbInventoryListing.bbInventoryListing(commodity, quantity))
+            self.storedCommodities[commodity] = bbInventoryListing.bbInventoryListing(commodity, quantity)
         self.commoditiesCollected += quantity
 
 
