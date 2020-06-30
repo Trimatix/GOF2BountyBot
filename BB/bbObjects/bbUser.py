@@ -1,4 +1,4 @@
-from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret, bbInventoryListing
+from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret, bbInventoryListing, bbCommodity
 from .items.modules import bbMiningDrillModule
 from ..bbConfig import bbConfig
 
@@ -40,7 +40,10 @@ class bbUser:
     duelCreditsLosses = 0
     
 
-    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0):
+    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None,
+            inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0,
+            duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0, defaultMineIsRisky=False, storedCommodities={}):
+        
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -84,9 +87,11 @@ class bbUser:
         self.inactiveWeapons = inactiveWeapons
         self.inactiveTurrets = inactiveTurrets
 
-        self.defaultMineIsRisky = False
+        self.defaultMineIsRisky = defaultMineIsRisky
+        self.storedCommodities = storedCommodities
         self.commoditiesCollected = 0
-        self.storedCommodities = []
+        for invListing in storedCommodities:
+            self.commoditiesCollected += invListing.quantity
 
         self.lastSeenGuildId = lastSeenGuildId
         self.haslastSeenGuildId = lastSeenGuildId != -1
@@ -237,11 +242,16 @@ class bbUser:
         for turret in self.inactiveTurrets:
             inactiveTurretsDict.append(turret.toDict())
 
+        storedCommoditiesDict = []
+        for invListing in self.storedCommodities:
+            storedCommoditiesDict.append(invListing.toDict())
+
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "lastSeenGuildId":self.lastSeenGuildId,
-                "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses}
+                "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses,
+                "defaultMineIsRisky": self.defaultMineIsRisky, "storedCommodities": storedCommoditiesDict}
 
 
     def userDump(self):
@@ -379,8 +389,17 @@ def fromDict(id, userDict):
         for turret in userDict["inactiveTurrets"]:
             inactiveTurrets.append(bbTurret.fromDict(turret))
 
+    storedCommodities = {}
+    if "storedCommodities" in userDict:
+        for invListing in userDict["storedCommodities"]:
+            # TODO: This assumes builtIn. All toDicts and fromDicts are to be rewritten to allow for complete item spawning without reliance on builtIn.
+            newCommodity = bbCommodity.fromDict(invListing["name"])
+            storedCommodities[newCommodity] = bbInventoryListing(newCommodity, count=invListing["count"])
+
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
                     bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
                     inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
-                    duelWins=userDict["duelWins"] if "duelWins" in userDict else 0, duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0, duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0, duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0)
+                    duelWins=userDict["duelWins"] if "duelWins" in userDict else 0, duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0,
+                    duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0, duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0,
+                    storedCommodities=storedCommodities)
