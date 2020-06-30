@@ -2425,8 +2425,8 @@ async def cmd_duel(message, args):
             await message.channel.send(":woozy_face: An unexpected error occurred! Tri, what did you do...")
             return
 
-        expiryTimesSplit = duelTT.expiryTime.strftime("%e %B %H %M").split(" ")
-        duelExpiryTimeString = "This duel request will expire on the **" + expiryTimesSplit[0] + getNumExtension(int(expiryTimesSplit[0])) + "** of **" + expiryTimesSplit[1] + "**, at **" + expiryTimesSplit[2] + ":" + expiryTimesSplit[3] + "** CST."
+        expiryTimesSplit = duelTT.expiryTime.strftime("%d %B %H %M").split(" ")
+        duelExpiryTimeString = "This duel request will expire on the **" + expiryTimesSplit[0].lstrip('0') + getNumExtension(int(expiryTimesSplit[0])) + "** of **" + expiryTimesSplit[1] + "**, at **" + expiryTimesSplit[2] + ":" + expiryTimesSplit[3] + "** CST."
 
         if message.guild.get_member(requestedUser.id) is None:
             targetUserDCGuild = findBBUserDCGuild(targetBBUser)
