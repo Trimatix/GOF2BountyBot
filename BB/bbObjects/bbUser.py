@@ -90,8 +90,8 @@ class bbUser:
         self.defaultMineIsRisky = defaultMineIsRisky
         self.storedCommodities = storedCommodities
         self.commoditiesCollected = 0
-        for invListing in storedCommodities:
-            self.commoditiesCollected += invListing.quantity
+        for invListing in storedCommodities.values():
+            self.commoditiesCollected += invListing.count
 
         self.lastSeenGuildId = lastSeenGuildId
         self.haslastSeenGuildId = lastSeenGuildId != -1
