@@ -401,7 +401,7 @@ async def cmd_mining(message, args):
     user = usersDB.getOrAddID(message.author.id)
 
     if user.commoditiesCollected >= user.activeShip.cargo:
-        message.channel.send("Your cargo hold is full!")
+        await message.channel.send("Your cargo hold is full!")
         return
     tier = Mining.pickTier()
     oreType = Mining.pickOre()
