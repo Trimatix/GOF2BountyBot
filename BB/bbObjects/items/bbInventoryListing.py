@@ -19,3 +19,6 @@ class bbInventoryListing():
 
     def statsStringShort(self):
         return str(self.count) + " in inventory"
+
+    def toDict(self):
+        return {"item": self.item.toDict(), "count": self.count}

@@ -129,11 +129,12 @@ class bbUser:
         numModules = len(self.inactiveModules)
         numTurrets = len(self.inactiveTurrets)
         numShips = len(self.inactiveShips)
+        numCommodities = len(self.storedCommodities)
 
         itemsNum = 0
 
         if item == "all":
-            itemsNum = max(numWeapons, numModules, numTurrets, numShips)
+            itemsNum = max(numWeapons, numModules, numTurrets, numShips, numCommodities)
         elif item == "module":
             itemsNum = numModules
         elif item == "weapon":
@@ -142,6 +143,8 @@ class bbUser:
             itemsNum = numTurrets
         elif item == "ship":
             itemsNum = numShips
+        elif item in ["commodity", "commoditie"]:
+            itemsNum = numCommodities
         else:
             raise NotImplementedError("Valid but unsupported item name: " + item)
         
@@ -162,6 +165,8 @@ class bbUser:
             return len(self.inactiveModules)
         elif item == "turret":
             return len(self.inactiveTurrets)
+        elif item in ["commodity","commoditie"]:
+            return len(self.storedCommodities)
         else:
             raise NotImplementedError("Valid but unsupported item name: " + item)
 
@@ -243,7 +248,7 @@ class bbUser:
             inactiveTurretsDict.append(turret.toDict())
 
         storedCommoditiesDict = []
-        for invListing in self.storedCommodities:
+        for invListing in self.storedCommodities.values():
             storedCommoditiesDict.append(invListing.toDict())
 
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
@@ -302,7 +307,7 @@ class bbUser:
             return self.inactiveModules
         if item == "turret":
             return self.inactiveTurrets
-        if item == "commodity":
+        if item in ["commodity", "commoditie"]:
             return self.storedCommodities
         else:
             raise NotImplementedError("Valid, but unrecognised item type: " + item)
