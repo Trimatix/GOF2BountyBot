@@ -470,7 +470,7 @@ builtInTurretData = { # Manual
 # TO BE COMPLETED
 builtInCommodityData = {
         "Ore Core": {   "Iron Core": {"name": "Iron Core", "aliases": [], "value": 144, "wiki": "https://galaxyonfire.fandom.com/wiki/Iron_Core", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472660465582080/iron_core.png", "emoji": "<:iron:723708759817584642>"},
-                        "Doxtrite Core": {"name": "Doxtrite Core", "aliases": ["Doxtrit Core"], "value": 272, "wiki": "https://galaxyonfire.fandom.com/wiki/Doxtrit_Core", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472435424395284/doxtrit_core.png", "emoji": "<:doxtrite:723708759536566353>"},
+                        "Doxtrit Core": {"name": "Doxtrit Core", "aliases": ["Doxtrite Core"], "value": 272, "wiki": "https://galaxyonfire.fandom.com/wiki/Doxtrit_Core", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472435424395284/doxtrit_core.png", "emoji": "<:doxtrite:723708759536566353>"},
                         "Perrius Core": {"name": "Perrius Core", "aliases": [], "value": 329, "wiki": "https://galaxyonfire.fandom.com/wiki/Perrius_Core", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472764534652968/perrius_core.png", "emoji": "<:perrius:723708760165711872>"},
                         "Cesogen Core": {"name": "Cesogen Core", "aliases": [], "value": 357, "wiki": "https://galaxyonfire.fandom.com/wiki/Cesogen_Core", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472408215945226/cesogen_core.png", "emoji": "<:cesogen:723708758353772554>"},
                         "Hypanium Core": {"name": "Hypanium Core", "aliases": [], "value": 430, "wiki": "https://galaxyonfire.fandom.com/wiki/Hypanium_Core", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472591464955985/hypanium_core.png", "emoji": "<:hypanium:723708759695949975>"},
@@ -495,6 +495,10 @@ builtInCommodityData = {
                         "Void Crystal": {"name": "Void Crystal", "aliases": ["Void"], "value": 400, "wiki": "https://galaxyonfire.fandom.com/wiki/Void_Crystals", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472872752021534/void_crystals.png", "emoji": "<:voidessence:723708759817584672>"},
                         "Novanium Ore": {"name": "Novanium Ore", "aliases": ["Novanium"], "value": 419, "wiki": "https://galaxyonfire.fandom.com/wiki/Novanium", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472714257399848/novanium.png", "emoji": "<:novaniumcore:723708759788224544>"}}
 }
+
+oreNameToCoreName = {"Iron Ore": "Iron Core", "Doxtrite Ore": "Doxtrit Core", "Perrius Ore": "Perrius Core", "Cesogen Ore": "Cesogen Core",
+                    "Hypanium Ore": "Hypanium Core", "Gold Ore": "Golden Core", "Sodil Ore": "Sodil Core", "Pyresium Ore": "Pyresium Core",
+                    "Orichalzine Ore": "Orichalzin Core", "Titanium Ore": "Titanium Core", "Void Crystals": "Void Essence"}
 
 # TO BE COMPLETED
 builtInSecondariesData = {

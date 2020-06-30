@@ -3,7 +3,7 @@ import random
 # TODO: add delay between mining attempts
 
 # TODO: Would it be possible to import this ore data from bbData rather than hard coding it?
-ORE_TYPES = ["Iron", "Doxtrite", "Perrius", "Cesogen", "Hypanium", "Golden", "Sodil", "Pyresium", "Orichalzine", "Titanium"]
+ORE_TYPES = ["Iron Ore", "Doxtrite Ore", "Perrius Ore", "Cesogen Ore", "Hypanium Ore", "Golden Ore", "Sodil Ore", "Pyresium Ore", "Orichalzine Ore", "Titanium Ore", "Void Crystals"]
 asteroid_tiers = ["D", "C", "B", "A"]
 risky_aliases = ["risk", "risky", "danger", "dangerous"]
 safe_aliases = ["safe", "cautious"]
@@ -52,7 +52,7 @@ def mineResult(drill, isRisky, tier):
     return minedOre + variance, False
 
 
-def mineAsteroid(user, tier, oreType, isRisky):
+def mineAsteroid(user, tier, oreType, isRisky, oreObj, coreObj):
     if user.getDrill() is None:
         return "No drill equipped"
     else:
@@ -60,16 +60,16 @@ def mineAsteroid(user, tier, oreType, isRisky):
         results = mineResult(user.getDrill(), isRisky, tier)
         oreQuantity = results[0]
         gotCore = results[1]
-        user.addCommodity(oreType, oreQuantity)
+        user.addCommodity(oreObj, oreQuantity)
         remainingSpace = user.activeShip.cargo - user.commoditiesCollected
         if oreQuantity > remainingSpace:
             oreQuantity = remainingSpace
             if gotCore:
                 oreQuantity -= 1
         if oreQuantity > 0:
-            returnMessage += ("You mined a class " + tierToLetter(tier) + " " + str(oreType) + " asteroid yielding " + str(oreQuantity) + " ore")
+            returnMessage += ("You mined a class " + tierToLetter(tier) + " " + oreType + " asteroid yielding " + str(oreQuantity) + " ore")
             if gotCore:
-                user.commodity(str(oreType) + " Core", 1)
+                user.addCommodity(coreObj, 1)
                 returnMessage += " and 1 core"
         else:
             returnMessage = "Asteroid mining failed"

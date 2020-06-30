@@ -14,6 +14,10 @@ class bbCommodity(bbItem.bbItem):
     def statsStringShort(self):
         return super().statsStringShort()
 
+    
+    def __hash__(self):
+        return hash(self.name)
+
 
 def fromDict(commodityDict):
     if commodityDict["builtIn"]:

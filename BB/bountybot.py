@@ -405,8 +405,10 @@ async def cmd_mining(message, args):
         return
     tier = Mining.pickTier()
     oreType = Mining.pickOre()
+    oreObj = bbData.builtInCommodityObjs[oreType]
+    oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
     isRisky = user.defaultMineIsRisky if args == "" else args in Mining.risky_aliases
-    sendMessage = Mining.mineAsteroid(user, tier, oreType, isRisky)
+    sendMessage = Mining.mineAsteroid(user, tier, oreType, isRisky, oreObj, oreCoreObj)
     await message.channel.send(sendMessage)
 
 bbCommands.register("mine", cmd_mining)

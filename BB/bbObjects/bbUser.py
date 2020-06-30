@@ -347,7 +347,7 @@ class bbUser:
 
     def addCommodity(self, commodity, quantity):
         if commodity in self.storedCommodities:
-            self.storedCommodities[commodity].increaseCommodity(quantity)
+            self.storedCommodities[commodity].increaseCount(quantity)
         else:
             self.storedCommodities[commodity] = bbInventoryListing.bbInventoryListing(commodity, quantity)
         self.commoditiesCollected += quantity
@@ -359,7 +359,7 @@ class bbUser:
             if commodityListing.count < commodity:
                 return 1
             self.credits += commodity.value * quantity
-            commodityListing.decreaseCommodity(quantity)
+            commodityListing.decreaseCount(quantity)
             if commodityListing.count == 0:
                 self.storedCommodities.remove(commodityListing)
             self.commoditiesCollected -= quantity
@@ -398,8 +398,8 @@ def fromDict(id, userDict):
     if "storedCommodities" in userDict:
         for invListing in userDict["storedCommodities"]:
             # TODO: This assumes builtIn. All toDicts and fromDicts are to be rewritten to allow for complete item spawning without reliance on builtIn.
-            newCommodity = bbCommodity.fromDict(invListing["name"])
-            storedCommodities[newCommodity] = bbInventoryListing(newCommodity, count=invListing["count"])
+            newCommodity = bbCommodity.fromDict(invListing["item"])
+            storedCommodities[newCommodity] = bbInventoryListing.bbInventoryListing(newCommodity, count=invListing["count"])
 
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
