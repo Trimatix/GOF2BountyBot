@@ -5,6 +5,7 @@ A fairly generic class that, at its core, tracks when a requested amount of time
 Using an expiryFunction, a function call may be delayed by a given amount of time.
 Using autoRescheduling, this class can also be used to easily schedule reoccurring tasks.
 At least one of expiryTime or expiryDelta must be given.
+If the task is set to autoReschedule, issueTime is updated to show the task's current rescheduling time.
 
 @param issueTime -- The datetime when this task was created. Default: now
 @param expiryTime -- The datetime when this task should expire. Default: None
@@ -15,17 +16,25 @@ At least one of expiryTime or expiryDelta must be given.
 """
 class TimedTask:
     def __init__(self, issueTime=None, expiryTime=None, expiryDelta=None, expiryFunction=None, expiryFunctionArgs={}, autoReschedule=False):
-        if expiryTime is None:
-            if expiryDelta is None:
-                raise ValueError("No expiry time given, both expiryTime and expiryDelta are None")
+        # Ensure that at least one of expiryTime or expiryDelta is specified
+        if expiryTime is None and expiryDelta is None:
+            raise ValueError("No expiry time given, both expiryTime and expiryDelta are None")
+        
+        # Calculate issueTime as now if none is given
         self.issueTime = datetime.utcnow() if issueTime is None else issueTime
+        # Calculate expiryTime as issueTime + expiryDelta if none is given
         self.expiryTime = self.issueTime + expiryDelta if expiryTime is None else expiryTime
+        # Calculate expiryDelta as expiryTime - issueTime if none is given. This is needed for rescheduling.
         self.expiryDelta = self.expiryTime - self.issueTime if expiryDelta is None else expiryDelta
+
         self.expiryFunction = expiryFunction
         self.hasExpiryFunction = expiryFunction is not None
         self.expiryFunctionArgs = expiryFunctionArgs
         self.hasExpiryFunctionArgs = expiryFunctionArgs != {}
         self.autoReschedule = autoReschedule
+
+        # A task's 'gravestone' is marked as True when the TimedTask will no longer execute and can be removed from any TimedTask heap.
+        # I.e, it is expired (whether manually or through timeout) and does not auto-reschedule.
         self.gravestone = False
 
 
@@ -126,7 +135,7 @@ class TimedTask:
     
     """
     Reschedule this task, with the timedelta given/calculated on the task's creation, or to a given expiryTime/Delta.
-    Rescheduling does not update the task's issueTime. TODO: A currentReissueTime tracker may be useful in the future.
+    Rescheduling will update the task's issueTime to now. TODO: A firstIssueTime may be useful in the future to represent creation time.
     Giving an expiryTime or expiryDelta will not update the task's stored expiryDelta. I.e, if the task is rescheduled again without giving an expiryDelta,
     The expiryDelta given/calculated on the task's creation will be used.
     If both an expiryTime and an expiryDelta is given, the expiryTime takes precedence.
@@ -135,8 +144,11 @@ class TimedTask:
     @param expiryDelta -- The amount of time to wait until the task's next expiry. Default: now + self.expiryTime
     """
     def reschedule(self, expiryTime=None, expiryDelta=None):
+        # Update the task's issueTime to now
         self.issueTime = datetime.utcnow()
-        self.expiryTime = datetime.utcnow() + (self.expiryDelta if expiryDelta is None else expiryDelta) if expiryTime is None else expiryTime
+        # Create the new expiryTime from now + expirydelta
+        self.expiryTime = self.issueTime + (self.expiryDelta if expiryDelta is None else expiryDelta) if expiryTime is None else expiryTime
+        # reset the gravestone to False, in case the task had been expired and marked for removal
         self.gravestone = False
 
 
@@ -163,27 +175,49 @@ class TimedTask:
             return expiryFuncResults
 
 
-class DynamicRescheduleTask(TimedTask):
-    delayTimeGenerator = None
-    delayTimeGeneratorArgs = {}
-    hasDelayTimeGeneratorArgs = False
+"""
+A TimedTask which fetches the expiryDELTA (not time!) from a function, rather than actual arguments.
+This allows for dynamically choosing the reschedule time.
+If an expiryTime is specified, then this will be used for the first scheduling period. After this time is reached, the scheduler will switch to calling the delayTimeGenerator.
 
+@param delayTimeGenerator -- Reference (not call!) to the function which generates the expiryDelta. Must return a timedelta.
+@param delayTimeGeneratorArgs -- The data to pass to the delayTimeGenerator. There is no type requirement, but a dictionary is recommended as a close representation of KWArgs. Default: {}
+@param issueTime -- The datetime when this task was created. Default: now
+@param expiryTime -- The datetime when this task should expire. Default: None
+@param expiryFunction -- The function to call once expiryTime has been reached/surpassed. Default: None
+@param expiryFunctionArgs -- The data to pass to the expiryFunction. There is no type requirement, but a dictionary is recommended as a close representation of KWArgs. Default: {}
+@param autoReschedule -- Whether or not this task should automatically reschedule itself. You probably want this to be True, otherwise you may as well use a TimedTask. Default: False
+"""
+class DynamicRescheduleTask(TimedTask):
     def __init__(self, delayTimeGenerator, delayTimeGeneratorArgs={}, issueTime=None, expiryTime=None, expiryFunction=None, expiryFunctionArgs={}, autoReschedule=False):
+        # Initialise TimedTask-inherited attributes
         super(DynamicRescheduleTask, self).__init__(expiryDelta=delayTimeGenerator(delayTimeGeneratorArgs), issueTime=issueTime, expiryTime=expiryTime, expiryFunction=expiryFunction, expiryFunctionArgs=expiryFunctionArgs, autoReschedule=autoReschedule)
         self.delayTimeGenerator = delayTimeGenerator
         self.delayTimeGeneratorArgs = delayTimeGeneratorArgs
         self.hasDelayTimeGeneratorArgs = delayTimeGeneratorArgs != {}
 
     
+    """
+    Generate the next expiryTime using the delayTimeGenerator.
+
+    """
     def callDelayTimeGenerator(self):
+        # Pass args to delayTimeGenerator if specified
         if self.hasDelayTimeGeneratorArgs:
             return self.delayTimeGenerator(self.delayTimeGeneratorArgs)
         else:
             return self.delayTimeGenerator()
 
 
-    # @Override
+    """
+    @Override
+    Start a new scheduling period for this task using the timedelta produced by delayTimeGenerator.
+    
+    """
     def reschedule(self):
+        # Update the task's issueTime to now
         self.issueTime = datetime.utcnow()
+        # Create the new expiryTime from now + delayTimeGenerator result
         self.expiryTime = self.issueTime + self.callDelayTimeGenerator()
+        # reset the gravestone to False, in case the task had been expired and marked for removal
         self.gravestone = False
