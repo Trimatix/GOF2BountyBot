@@ -21,7 +21,7 @@ from .bbObjects.items import bbShip
 from .bbObjects.battles import ShipFight, DuelRequest
 from .bbObjects.tasks import TimedTask
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
-from .bbDatabases.tasks import TimedTaskAsyncHeap
+from .bbDatabases.tasks import TimedTaskHeap
 from . import bbUtil, ActiveTimedTasks
 
 
@@ -3524,7 +3524,7 @@ async def on_ready():
     ActiveTimedTasks.shopRefreshTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
     ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
 
-    ActiveTimedTasks.duelRequestTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()
+    ActiveTimedTasks.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
 
     if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" + bbConfig.timedTaskCheckingType + "'")
@@ -3547,7 +3547,7 @@ async def on_ready():
         else:
             await ActiveTimedTasks.newBountyTT.doExpiryCheck()
         
-        ActiveTimedTasks.dbSaveTT.doExpiryCheck()
+        await ActiveTimedTasks.dbSaveTT.doExpiryCheck()
 
         await ActiveTimedTasks.duelRequestTTDB.doTaskChecking()
 
