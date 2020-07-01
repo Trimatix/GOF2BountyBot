@@ -19,9 +19,9 @@ from .bbObjects import bbUser
 from .bbObjects.bounties import bbBounty, bbBountyConfig
 from .bbObjects.items import bbShip
 from .bbObjects.battles import ShipFight, DuelRequest
-from .bbObjects.tasks import TimedTask
+from .scheduling import TimedTask
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
-from .bbDatabases.tasks import TimedTaskHeap
+from .scheduling import TimedTaskHeap
 from . import bbUtil, ActiveTimedTasks
 
 
