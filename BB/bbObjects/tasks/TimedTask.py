@@ -37,7 +37,7 @@ class TimedTask:
     @return -- True if this TimedTask's expiryTime is < other's expiryTime, False otherwise. 
     """
     def __lt__(self, other):
-        if type(other) != TimedTask:
+        if not isinstance(other, TimedTask):
             raise TypeError("< error: TimedTask can only be compared to other TimedTasks")
         return self.expiryTime < other.expiryTime
 
@@ -50,7 +50,7 @@ class TimedTask:
     @return -- True if this TimedTask's expiryTime is > other's expiryTime, False otherwise. 
     """
     def __gt__(self, other):
-        if type(other) != TimedTask:
+        if not isinstance(other, TimedTask):
             raise TypeError("> error: TimedTask can only be compared to other TimedTasks")
         return self.expiryTime > other.expiryTime
 
@@ -63,7 +63,7 @@ class TimedTask:
     @return -- True if this TimedTask's expiryTime is <= other's expiryTime, False otherwise. 
     """
     def __lte__(self, other):
-        if type(other) != TimedTask:
+        if not isinstance(other, TimedTask):
             raise TypeError("<= error: TimedTask can only be compared to other TimedTasks")
         return self.expiryTime <= other.expiryTime
 
@@ -76,7 +76,7 @@ class TimedTask:
     @return -- True if this TimedTask's expiryTime is >= other's expiryTime, False otherwise. 
     """
     def __gte__(self, other):
-        if type(other) != TimedTask:
+        if not isinstance(other, TimedTask):
             raise TypeError(">= error: TimedTask can only be compared to other TimedTasks")
         return self.expiryTime >= other.expiryTime
 
