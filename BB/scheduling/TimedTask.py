@@ -238,9 +238,6 @@ class DynamicRescheduleTask(TimedTask):
         # Update the task's issueTime to now
         self.issueTime = datetime.utcnow()
         # Create the new expiryTime from now + delayTimeGenerator result
-        if self.asyncDelayTimeGenerator:
-            self.expiryTime = self.issueTime + await self.callDelayTimeGenerator()
-        else:
-            self.expiryTime = self.issueTime + self.callDelayTimeGenerator()
+        self.expiryTime = self.issueTime + await self.callDelayTimeGenerator()
         # reset the gravestone to False, in case the task had been expired and marked for removal
         self.gravestone = False
