@@ -1,8 +1,7 @@
 import random
 
-# TODO: add delay between mining attempts
-
 # TODO: Would it be possible to import this ore data from bbData rather than hard coding it?
+#       the only issue is that void and novanium would be in the data, even though mining those would have prereqs
 ORE_TYPES = ["Iron Ore", "Doxtrite Ore", "Perrius Ore", "Cesogen Ore", "Hypanium Ore", "Golden Ore", "Sodil Ore", "Pyresium Ore", "Orichalzine Ore", "Titanium Ore", "Void Crystals"]
 asteroid_tiers = ["D", "C", "B", "A"]
 risky_aliases = ["risk", "risky", "danger", "dangerous"]
@@ -44,12 +43,12 @@ def mineResult(drill, isRisky, tier):
 
     if isRisky:
         if tier == 4:
-            return minedOre, True
-        return minedOre, False
+            return int(minedOre), True
+        return int(minedOre), False
 
     minedOre = minedOre * drill.handling
     variance = random.randint(-5, 5)
-    return minedOre + variance, False
+    return int(minedOre + variance), False
 
 
 def mineAsteroid(user, tier, oreType, isRisky, oreObj, coreObj):
