@@ -46,9 +46,10 @@ def mineResult(drill, isRisky, tier):
             return minedOre, True
         return minedOre, False
 
-    minedOre = minedOre * drill.handling
+    minedOre = int(minedOre * drill.handling)
+    # TODO: Variance should be percentage based
     variance = random.randint(-5, 5)
-    return int(minedOre + variance), False
+    return minedOre + variance, False
 
 
 def mineAsteroid(user, tier, oreType, isRisky, oreObj, coreObj):
