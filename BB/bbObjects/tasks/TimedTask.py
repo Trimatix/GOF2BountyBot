@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+from . import TimedTask
+import inspect
 
 """
 A fairly generic class that, at its core, tracks when a requested amount of time has passed.
@@ -36,6 +38,9 @@ class TimedTask:
         # A task's 'gravestone' is marked as True when the TimedTask will no longer execute and can be removed from any TimedTask heap.
         # I.e, it is expired (whether manually or through timeout) and does not auto-reschedule.
         self.gravestone = False
+
+        # Track whether or not the expiryFunction is a coroutine and needs to be awaited
+        self.asyncExpiryFunction = inspect.iscoroutinefunction(expiryFunction)
 
 
     """
@@ -107,12 +112,17 @@ class TimedTask:
 
     @return -- the results of the expiryFunction
     """
-    def callExpiryFunction(self):
-        # Pass args to expiryFunction if specified
-        if self.hasExpiryFunctionArgs:
-            return self.expiryFunction(self.expiryFunctionArgs)
+    async def callExpiryFunction(self):
+        if self.asyncExpiryFunction:
+            if self.hasExpiryFunctionArgs:
+                return await self.expiryFunction(self.expiryFunctionArgs)
+            else:
+                return await self.expiryFunction()
         else:
-            return self.expiryFunction()
+            if self.hasExpiryFunctionArgs:
+                return self.expiryFunction(self.expiryFunctionArgs)
+            else:
+                return self.expiryFunction()
 
 
     """
@@ -122,14 +132,14 @@ class TimedTask:
     @param callExpiryFunc -- Whether or not to call this task's expiryFunction if it is expired. Default: True
     @return -- True if this task is expired in this check, False otherwise. Regardless of autorescheduling.
     """
-    def doExpiryCheck(self, callExpiryFunc=True):
+    async def doExpiryCheck(self, callExpiryFunc=True):
         expired = self.isExpired()
         # If the task has expired, call expiry function and reschedule if specified
         if expired:
             if callExpiryFunc and self.hasExpiryFunction:
-                self.callExpiryFunction()
+                await self.callExpiryFunction()
             if self.autoReschedule:
-                self.reschedule()
+                await self.reschedule()
         return expired
 
     
@@ -159,14 +169,14 @@ class TimedTask:
     @param callExpiryFunction -- Whether or not to call the task's expiryFunction if the task expires. Default: True
     @return -- The result of the expiry function, if it is called
     """
-    def forceExpire(self, callExpiryFunc=True):
+    async def forceExpire(self, callExpiryFunc=True):
         # Update expiryTime
         self.expiryTime = datetime.utcnow()
         # Call expiryFunction and reschedule if specified
         if callExpiryFunc and self.hasExpiryFunction:
-            expiryFuncResults = self.callExpiryFunction()
+            expiryFuncResults = await self.callExpiryFunction()
         if self.autoReschedule:
-            self.reschedule()
+            await self.reschedule()
         # Mark for removal if not rescheduled
         else:
             self.gravestone = True
@@ -195,18 +205,29 @@ class DynamicRescheduleTask(TimedTask):
         self.delayTimeGenerator = delayTimeGenerator
         self.delayTimeGeneratorArgs = delayTimeGeneratorArgs
         self.hasDelayTimeGeneratorArgs = delayTimeGeneratorArgs != {}
+        self.asyncDelayTimeGenerator = inspect.iscoroutinefunction(delayTimeGenerator)
 
     
     """
     Generate the next expiryTime using the delayTimeGenerator.
 
+    @return -- The results of delayTimeGenerator. Should be a timedelta.
     """
-    def callDelayTimeGenerator(self):
-        # Pass args to delayTimeGenerator if specified
-        if self.hasDelayTimeGeneratorArgs:
-            return self.delayTimeGenerator(self.delayTimeGeneratorArgs)
+    async def callDelayTimeGenerator(self):
+        # await asynchronous delayTimeGenerators
+        if self.asyncDelayTimeGenerator:
+            # Pass args to delayTimeGenerator if specified
+            if self.hasDelayTimeGeneratorArgs:
+                return await self.delayTimeGenerator(self.delayTimeGeneratorArgs)
+            else:
+                return await self.delayTimeGenerator()
+        # do not await synchronous delayTimeGenerators
         else:
-            return self.delayTimeGenerator()
+            # Pass args to delayTimeGenerator if specified
+            if self.hasDelayTimeGeneratorArgs:
+                return self.delayTimeGenerator(self.delayTimeGeneratorArgs)
+            else:
+                return self.delayTimeGenerator()
 
 
     """
