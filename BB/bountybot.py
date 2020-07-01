@@ -229,6 +229,22 @@ async def announceNewShopStock():
                 await playCh.send(":arrows_counterclockwise: The shop stock has been refreshed!")
 
 
+
+"""
+Announce the stashing of commodities.
+Messages will be sent to the playChannels of all guilds in the guildsDB, if they have one
+"""
+async def announceCommodityStash():
+    # loop over all guilds
+    for guild in guildsDB.guilds.values():
+        # ensure guild has a valid playChannel
+        if guild.hasPlayChannel():
+            playCh = client.get_channel(guild.getPlayChannelId())
+            if playCh is not None:
+                # send the announcement
+                await playCh.send(":arrows_counterclockwise: Your commodities have been stashed at the station!")
+
+
 """
 Build a simple discord embed.
 
@@ -308,6 +324,12 @@ def getRandomDelaySeconds(minmaxDict):
 async def refreshAndAnnounceAllShopStocks():
     guildsDB.refreshAllShopStocks()
     await announceNewShopStock()
+
+
+async def stashAllUserCommodities():
+    for user in usersDB.getUsers():
+        user.commoditiesCollected = 0
+    await announceCommodityStash()
 
 
 async def spawnAndAnnounceRandomBounty():
@@ -3534,12 +3556,15 @@ dmCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 """
 developer command setting numCommoditiesCollected to 0
 """
-async def dev_cmd_reset_num_commodities():
-    for user in usersDB.users:
-        user.commoditiesCollected = 0
+async def dev_cmd_stash_commodities(message, args):
+    await stashAllUserCommodities()
 
-bbCommands.register("stash", dev_cmd_reset_num_commodities, isDev=True)
-dmCommands.register("stash", dev_cmd_reset_num_commodities, isDev=True)
+bbCommands.register("stash", dev_cmd_stash_commodities, isDev=True)
+dmCommands.register("stash", dev_cmd_stash_commodities, isDev=True)
+
+
+
+
 
 
 ####### MAIN FUNCTIONS #######
@@ -3606,7 +3631,7 @@ async def on_ready():
     
     ActiveTimedTasks.shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
     ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
-    ActiveTimedTasks.inventoryOffloadTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shipOffloadPeriod, autoReschedule=True, expiryFunction=dev_cmd_reset_num_commodities, asyncExpiryFunction=True)
+    ActiveTimedTasks.inventoryOffloadTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shipOffloadPeriod, autoReschedule=True, expiryFunction=stashAllUserCommodities, asyncExpiryFunction=True)
 
     ActiveTimedTasks.duelRequestTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()
 
@@ -3624,6 +3649,8 @@ async def on_ready():
         # elif bbConfig.timedTaskCheckingType == "dynamic":
 
         await ActiveTimedTasks.shopRefreshTT.doExpiryCheck()
+
+        await ActiveTimedTasks.inventoryOffloadTT.doExpiryCheck()
 
         if bbConfig.newBountyDelayReset:
             await ActiveTimedTasks.newBountyTT.forceExpire()
