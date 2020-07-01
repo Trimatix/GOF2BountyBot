@@ -1,17 +1,6 @@
 from datetime import datetime, timedelta
 
 class TimedTaskAsync:
-    issueTime = None
-    expiryTime = None
-    expiryDelta = None
-    expiryFunction = None
-    expiryFunctionArgs = {}
-    hasExpiryFunction = False
-    hasExpiryFunctionArgs = False
-    asyncExpiryFunction = False
-    autoReschedule = False
-    gravestone = False
-
     def __init__(self, issueTime=None, expiryTime=None, expiryDelta=None, expiryFunction=None, expiryFunctionArgs={}, autoReschedule=False, asyncExpiryFunction=False):
         if expiryTime is None:
             if expiryDelta is None:
@@ -25,6 +14,7 @@ class TimedTaskAsync:
         self.hasExpiryFunctionArgs = expiryFunctionArgs != {}
         self.asyncExpiryFunction = asyncExpiryFunction
         self.autoReschedule = autoReschedule
+        self.gravestone = False
 
 
     def __lt__(self, other):
