@@ -4,8 +4,8 @@ from heapq import heappop, heappush
 """
 A min-heap of TimedTasks, sorted by task expiration time.
 
-@param expiryFunction -- function reference to call upon the expiry of any TimedTask managed by this heap.
-@param expiryFunctionArgs -- the data to pass to expiryFunction when calling. There is no type requirement, but a dictionary is recommended as a close representation of KWArgs.
+@param expiryFunction -- function reference to call upon the expiry of any TimedTask managed by this heap. Default: None
+@param expiryFunctionArgs -- the data to pass to expiryFunction when calling. There is no type requirement, but a dictionary is recommended as a close representation of KWArgs. Default: {}
 """
 class TimedTaskHeap:
     def __init__(self, expiryFunction=None, expiryFunctionArgs={}):
@@ -40,7 +40,7 @@ class TimedTaskHeap:
     """
     Forcebly remove a task from the heap without 'expiring' it - no expiry functions or auto-rescheduling are called. 
 
-    @param task - the task to remove from the heap
+    @param task -- the task to remove from the heap
     """
     def unscheduleTask(self, task):
         task.gravestone = True
