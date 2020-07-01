@@ -487,7 +487,7 @@ builtInCommodityData = {
                         "Perrius Ore": {"name": "Perrius Ore", "aliases": ["Perrius"], "value": 57, "wiki": "https://galaxyonfire.fandom.com/wiki/Perrius", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472777277079552/perrius.png", "emoji": "<:perriuscore:723708760044077167>"},
                         "Cesogen Ore": {"name": "Cesogen Ore", "aliases": ["Cesogen"], "value": 63, "wiki": "https://galaxyonfire.fandom.com/wiki/Cesogen", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472422032113664/cesogen.png", "emoji": "<:cesogencore:723708757942730825>"},
                         "Hypanium Ore": {"name": "Hypanium Ore", "aliases": ["Hypanium"], "value": 85, "wiki": "https://galaxyonfire.fandom.com/wiki/Hypanium", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472645320081469/hypanium.png", "emoji": "<:hypaniumcore:723708759410737163>"},
-                        "Gold Ore": {"name": "Gold Ore", "aliases": ["Gold"], "value": 91, "wiki": "https://galaxyonfire.fandom.com/wiki/Gold", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472469742059580/gold.png", "emoji": "<:goldencore:723708759733436426>"},
+                        "Gold Ore": {"name": "Gold Ore", "aliases": ["Gold", "Golden Ore"], "value": 91, "wiki": "https://galaxyonfire.fandom.com/wiki/Gold", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472469742059580/gold.png", "emoji": "<:goldencore:723708759733436426>"},
                         "Sodil Ore": {"name": "Sodil Ore", "aliases": ["Sodil"], "value": 91, "wiki": "https://galaxyonfire.fandom.com/wiki/Sodil", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472822592340028/sodil.png", "emoji": "<:sodilcore:723708759981162506>"},
                         "Pyresium Ore": {"name": "Pyresium Ore", "aliases": ["Pyresium"], "value": 102, "wiki": "https://galaxyonfire.fandom.com/wiki/Pyresium", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472801310310521/pyresium.png", "emoji": "<:pyresiumcore:723708759834099815>"},
                         "Orichalzine Ore": {"name": "Orichalzine Ore", "aliases": ["Orichalzine"], "value": 146, "wiki": "https://galaxyonfire.fandom.com/wiki/Orichalzine", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472752610115624/orichalzine.png", "emoji": "<:orichalzincore:723708759649681429>"},
@@ -497,8 +497,8 @@ builtInCommodityData = {
 }
 
 oreNameToCoreName = {"Iron Ore": "Iron Core", "Doxtrite Ore": "Doxtrit Core", "Perrius Ore": "Perrius Core", "Cesogen Ore": "Cesogen Core",
-                    "Hypanium Ore": "Hypanium Core", "Gold Ore": "Golden Core", "Sodil Ore": "Sodil Core", "Pyresium Ore": "Pyresium Core",
-                    "Orichalzine Ore": "Orichalzin Core", "Titanium Ore": "Titanium Core", "Void Crystals": "Void Essence"}
+                     "Hypanium Ore": "Hypanium Core", "Gold Ore": "Golden Core", "Sodil Ore": "Sodil Core", "Pyresium Ore": "Pyresium Core",
+                     "Orichalzine Ore": "Orichalzin Core", "Titanium Ore": "Titanium Core", "Void Crystals": "Void Essence"}
 
 # TO BE COMPLETED
 builtInSecondariesData = {
