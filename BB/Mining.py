@@ -39,12 +39,12 @@ def mineResult(drill, isRisky, tier):
     if isRisky and (risky_mining_failure_chance > random.randint(1,100) or random.randint(1,100) > drill.handling*100):
         return 0, 0
 
-    minedOre = max_ore_per_asteroid_tier[tier-1] * drill.oreYield
+    minedOre = int(max_ore_per_asteroid_tier[tier-1] * drill.oreYield)
 
     if isRisky:
         if tier == 4:
-            return int(minedOre), True
-        return int(minedOre), False
+            return minedOre, True
+        return minedOre, False
 
     minedOre = minedOre * drill.handling
     variance = random.randint(-5, 5)

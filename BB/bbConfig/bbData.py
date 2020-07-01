@@ -496,9 +496,9 @@ builtInCommodityData = {
                         "Novanium Ore": {"name": "Novanium Ore", "aliases": ["Novanium"], "value": 419, "wiki": "https://galaxyonfire.fandom.com/wiki/Novanium", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472714257399848/novanium.png", "emoji": "<:novaniumcore:723708759788224544>"}}
 }
 
-oreNameToCoreName = {"Iron Ore": "Iron Core", "Doxtrite Ore": "Doxtrit Core", "Perrius Ore": "Perrius Core", "Cesogen Ore": "Cesogen Core",
-                     "Hypanium Ore": "Hypanium Core", "Gold Ore": "Golden Core", "Sodil Ore": "Sodil Core", "Pyresium Ore": "Pyresium Core",
-                     "Orichalzine Ore": "Orichalzin Core", "Titanium Ore": "Titanium Core", "Void Crystals": "Void Essence"}
+oreNameToCoreName = {   "Iron Ore": "Iron Core", "Doxtrite Ore": "Doxtrit Core", "Perrius Ore": "Perrius Core", "Cesogen Ore": "Cesogen Core",
+                        "Hypanium Ore": "Hypanium Core", "Gold Ore": "Golden Core", "Sodil Ore": "Sodil Core", "Pyresium Ore": "Pyresium Core",
+                        "Orichalzine Ore": "Orichalzin Core", "Titanium Ore": "Titanium Core", "Void Crystals": "Void Essence"}
 
 # TO BE COMPLETED
 builtInSecondariesData = {
