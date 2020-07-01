@@ -115,6 +115,7 @@ class TimedTask:
     """
     def doExpiryCheck(self, callExpiryFunc=True):
         expired = self.isExpired()
+        # If the task has expired, call expiry function and reschedule if specified
         if expired:
             if callExpiryFunc and self.hasExpiryFunction:
                 self.callExpiryFunction()
@@ -141,19 +142,25 @@ class TimedTask:
 
     """
     Force the expiry of this task.
-    Handles calling of this task's expiryFunction, and rescheduling if specified.
-    TODO: Return the results of the expiry function
+    Handles calling of this task's expiryFunction, and rescheduling if specified. Set's the task's expiryTime to now.
 
     @param callExpiryFunction -- Whether or not to call the task's expiryFunction if the task expires. Default: True
+    @return -- The result of the expiry function, if it is called
     """
     def forceExpire(self, callExpiryFunc=True):
+        # Update expiryTime
         self.expiryTime = datetime.utcnow()
+        # Call expiryFunction and reschedule if specified
         if callExpiryFunc and self.hasExpiryFunction:
-            self.callExpiryFunction()
+            expiryFuncResults = self.callExpiryFunction()
         if self.autoReschedule:
             self.reschedule()
+        # Mark for removal if not rescheduled
         else:
             self.gravestone = True
+        # Return expiry function results
+        if callExpiryFunc and self.hasExpiryFunction:
+            return expiryFuncResults
 
 
 class DynamicRescheduleTask(TimedTask):
