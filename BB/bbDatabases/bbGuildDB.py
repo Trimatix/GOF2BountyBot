@@ -126,6 +126,7 @@ class bbGuildDB:
     """
     Serialise this bbGuildDB into dictionary format
 
+    @return -- A dictionary containing all data needed to recreate this bbGuildDB
     """
     def toDict(self):
         data = {}
@@ -141,6 +142,7 @@ class bbGuildDB:
     Fetch summarising information about the database, as a string
     Currently only the number of guilds stored
 
+    @return -- A string summarising this db
     """
     def __str__(self):
         return "<bbGuildDB: " + str(len(self.guilds)) + " guilds>"

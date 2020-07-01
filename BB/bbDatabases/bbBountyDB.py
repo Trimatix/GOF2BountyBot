@@ -222,7 +222,7 @@ class bbBountyDB:
             raise OverflowError("Requested faction's bounty DB is full")
 
         # ensure the given bounty does not already exist
-        if self.bountyNameExists(bounty.name):
+        if self.bountyNameExists(bounty.criminal.name):
             raise ValueError("Attempted to add a bounty whose name already exists: " + bounty.name)
 
         # Add the bounty to the database
@@ -252,6 +252,7 @@ class bbBountyDB:
     """
     Serialise the bbBountyDB and all of its bbBounties into dictionary format.
 
+    @return -- A dictionary containing all data needed to recreate this bbBountyDB.
     """
     def toDict(self):
         data = {}
@@ -289,6 +290,7 @@ class bbBountyDB:
     Return summarising info about this bbBountyDB in string format.
     Currently: The number of factions in the DB.
 
+    @return -- a string summarising this db
     """
     def __str__(self):
         return "<bbBountyDB: " + str(len(self.bounties)) + " factions>"
