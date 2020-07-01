@@ -8,7 +8,7 @@ A min-heap of TimedTasks, sorted by task expiration time.
 @param expiryFunction -- function reference to call upon the expiry of any TimedTask managed by this heap. Default: None
 @param expiryFunctionArgs -- the data to pass to expiryFunction when calling. There is no type requirement, but a dictionary is recommended as a close representation of KWArgs. Default: {}
 """
-class TimedTaskAsyncHeap:
+class TimedTaskHeap:
     def __init__(self, expiryFunction=None, expiryFunctionArgs={}):
         # self.taskType = taskType
         self.tasksHeap = []
