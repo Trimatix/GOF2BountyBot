@@ -2,12 +2,12 @@ import random
 
 # TODO: Would it be possible to import this ore data from bbData rather than hard coding it?
 #       the only issue is that void and novanium would be in the data, even though mining those would have prereqs
-ORE_TYPES = ["Iron Ore", "Doxtrite Ore", "Perrius Ore", "Cesogen Ore", "Hypanium Ore", "Golden Ore", "Sodil Ore", "Pyresium Ore", "Orichalzine Ore", "Titanium Ore", "Void Crystals"]
+ORE_TYPES = ["Iron Ore", "Doxtrite Ore", "Perrius Ore", "Cesogen Ore", "Hypanium Ore", "Gold Ore", "Sodil Ore", "Pyresium Ore", "Orichalzine Ore", "Titanium Ore",]
 asteroid_tiers = ["D", "C", "B", "A"]
 risky_aliases = ["risk", "risky", "danger", "dangerous"]
 safe_aliases = ["safe", "cautious"]
 risky_mining_failure_chance = 5
-max_ore_per_asteroid_tier = [62, 47, 34, 23]
+max_ore_per_asteroid_tier = [23, 34, 47, 62]
 
 
 def pickOre(oreList=ORE_TYPES):
@@ -36,7 +36,7 @@ gets result of mining attempt
 def mineResult(drill, isRisky, tier):
     # TODO: move max_ore_per_asteroid_tier to bbConfig
     # fails if exceeds drill handling or doesn't meet minimum requirement
-    if isRisky and risky_mining_failure_chance > random.randint(1,100) > drill.handling:
+    if isRisky and (risky_mining_failure_chance > random.randint(1,100) or random.randint(1,100) > drill.handling*100):
         return 0, 0
 
     minedOre = max_ore_per_asteroid_tier[tier-1] * drill.oreYield
