@@ -152,7 +152,7 @@ class TimedTask:
     @param expiryTime -- The new expiry time for the task. Default: now + expiryTime if expiryTime is specified, now + self.expiryTime otherwise
     @param expiryDelta -- The amount of time to wait until the task's next expiry. Default: now + self.expiryTime
     """
-    def reschedule(self, expiryTime=None, expiryDelta=None):
+    async def reschedule(self, expiryTime=None, expiryDelta=None):
         # Update the task's issueTime to now
         self.issueTime = datetime.utcnow()
         # Create the new expiryTime from now + expirydelta
@@ -234,10 +234,10 @@ class DynamicRescheduleTask(TimedTask):
     Start a new scheduling period for this task using the timedelta produced by delayTimeGenerator.
     
     """
-    def reschedule(self):
+    async def reschedule(self):
         # Update the task's issueTime to now
         self.issueTime = datetime.utcnow()
         # Create the new expiryTime from now + delayTimeGenerator result
-        self.expiryTime = self.issueTime + self.callDelayTimeGenerator()
+        self.expiryTime = self.issueTime + (await self.callDelayTimeGenerator() if self.asyncDelayTimeGenerator else self.callDelayTimeGenerator())
         # reset the gravestone to False, in case the task had been expired and marked for removal
         self.gravestone = False
