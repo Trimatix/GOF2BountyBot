@@ -300,6 +300,7 @@ Build a bbBountyDB object from a serialised dictionary format - the reverse of b
 @param bountyDBDict -- a dictionary representation of the bbBountyDB, to convert to an object
 @param maxBountiesPerFaction -- The maximum number of bounties each faction may store
 @param dbReload -- Whether or not this bbBountyDB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
+@return -- The new bbBountyDB object
 """
 def fromDict(bountyDBDict, maxBountiesPerFaction, dbReload=False):
     # Instanciate a new bbBountyDB
