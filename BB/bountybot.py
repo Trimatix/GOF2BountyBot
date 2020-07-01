@@ -19,7 +19,7 @@ from .bbObjects import bbUser
 from .bbObjects.bounties import bbBounty, bbBountyConfig
 from .bbObjects.items import bbShip
 from .bbObjects.battles import ShipFight, DuelRequest
-from .bbObjects.tasks import TimedTask, TimedTaskAsync
+from .bbObjects.tasks import TimedTask
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from .bbDatabases.tasks import TimedTaskAsyncHeap
 from . import bbUtil, ActiveTimedTasks
@@ -2413,7 +2413,7 @@ async def cmd_duel(message, args):
 
         try:
             newDuelReq = DuelRequest.DuelRequest(sourceBBUser, targetBBUser, stakes, None, guildsDB.getGuild(message.guild.id))
-            duelTT = TimedTaskAsync.TimedTaskAsync(expiryDelta=timeDeltaFromDict(bbConfig.duelReqExpiryTime), expiryFunction=expireAndAnnounceDuelReq, expiryFunctionArgs={"duelReq":newDuelReq}, asyncExpiryFunction=True)
+            duelTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.duelReqExpiryTime), expiryFunction=expireAndAnnounceDuelReq, expiryFunctionArgs={"duelReq":newDuelReq})
             newDuelReq.duelTimeoutTask = duelTT
             ActiveTimedTasks.duelRequestTTDB.scheduleTask(duelTT)
             sourceBBUser.addDuelChallenge(newDuelReq)
@@ -3517,11 +3517,11 @@ async def on_ready():
     bountyDelayGeneratorArgs = {"fixed":bbConfig.newBountyFixedDelta, "random":{"min": bbConfig.newBountyDelayMin, "max": bbConfig.newBountyDelayMax}}
 
     try:
-        ActiveTimedTasks.newBountyTT = TimedTaskAsync.DynamicRescheduleTaskAsync(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty, asyncExpiryFunction=True)
+        ActiveTimedTasks.newBountyTT = TimedTask.DynamicRescheduleTask(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
     except KeyError:
         raise ValueError("bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
-    ActiveTimedTasks.shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
+    ActiveTimedTasks.shopRefreshTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
     ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
 
     ActiveTimedTasks.duelRequestTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()

@@ -1,22 +1,22 @@
-from ...bbObjects.tasks import TimedTaskAsync
+from ...bbObjects.tasks import TimedTask
 from heapq import heappop, heappush
+import inspect
 
 """
-A min-heap of TimedTaskAsyncs, sorted by task expiration time.
+A min-heap of TimedTasks, sorted by task expiration time.
 
 @param expiryFunction -- function reference to call upon the expiry of any TimedTask managed by this heap. Default: None
 @param expiryFunctionArgs -- the data to pass to expiryFunction when calling. There is no type requirement, but a dictionary is recommended as a close representation of KWArgs. Default: {}
-@param asyncExpiryFunction -- Whether or not expiryFunction is a coroutine. Default: False
 """
 class TimedTaskAsyncHeap:
-    def __init__(self, expiryFunction=None, expiryFunctionArgs={}, asyncExpiryFunction=False):
+    def __init__(self, expiryFunction=None, expiryFunctionArgs={}):
         # self.taskType = taskType
         self.tasksHeap = []
         self.expiryFunction = expiryFunction
         self.hasExpiryFunction = expiryFunction is not None
         self.expiryFunctionArgs = expiryFunctionArgs
         self.hasExpiryFunctionArgs = expiryFunctionArgs != {}
-        self.asyncExpiryFunction = asyncExpiryFunction
+        self.asyncExpiryFunction = inspect.iscoroutinefunction(expiryFunction)
 
 
     """
@@ -52,7 +52,7 @@ class TimedTaskAsyncHeap:
     
     """
     Call the HEAP's expiry function - not a task expiry function.
-    Accounts for expiry function arguments (if specified) and asynchronous expiry functions (if specified)
+    Accounts for expiry function arguments (if specified) and asynchronous expiry functions
 
     """
     async def callExpiryFunction(self):
