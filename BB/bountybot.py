@@ -242,7 +242,7 @@ async def announceCommodityStash():
             playCh = client.get_channel(guild.getPlayChannelId())
             if playCh is not None:
                 # send the announcement
-                await playCh.send(":arrows_counterclockwise: Your commodities have been stashed at the station!")
+                await playCh.send(":arrows_counterclockwise: Your drill cooldown has completed!")
 
 
 """
@@ -426,14 +426,18 @@ async def cmd_mining(message, args):
         await message.channel.send("Your drill is cooling down!")
         return
     isRisky = True
+    if user.getDrill() is None:
+        await message.channel.send("Please equip a drill")
+        return
     while user.commoditiesCollected < user.activeShip.getCargo():
         tier = Mining.pickTier(user.getScanner())
         oreType = Mining.pickOre()
         oreObj = bbData.builtInCommodityObjs[oreType]
         oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
         sendMessage = Mining.mineAsteroid(user, tier, oreType, isRisky, oreObj, oreCoreObj)
-        await message.channel.send(sendMessage)
-    await message.channel.send("You're cargo is full. Please wait till your drill cools before mining again")
+        #TODO: turn this into embed
+        #await message.channel.send(sendMessage)
+    await message.channel.send("Mining Complete. Please wait till your drill cools before mining again")
 
 bbCommands.register("mine", cmd_mining)
 dmCommands.register("mine", cmd_mining)
@@ -2035,8 +2039,9 @@ async def cmd_shop_sell(message, args):
                 quantity = requestedBBUser.storedCommodities[commodity].count
                 totalValue += commodity.value*quantity
                 requestedBBUser.sellCommodity(commodity, quantity)
-                await message.channel.send(":moneybag: you sold **" + str(quantity) + " " + commodity.name + "** for **" + str(commodity.value*quantity) + " credits**!")
-            await message.channel.send(":moneybag::moneybag::moneybag:You sold them all!:moneybag::moneybag::moneybag:")
+                # TODO: add message into embed
+                #await message.channel.send(":moneybag: you sold **" + str(quantity) + " " + commodity.name + "** for **" + str(commodity.value*quantity) + " credits**!")
+            await message.channel.send(":moneybag::moneybag::moneybag:You sold them all for **" + str(totalValue) +  "credits**!:moneybag::moneybag::moneybag:")
             return
 
         commodityQuantity = int(argsSplit[2])
