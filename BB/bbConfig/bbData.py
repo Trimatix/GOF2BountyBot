@@ -64,22 +64,21 @@ mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594
 helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
 **[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
 
-# help strings for bb commands
 helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short introduction on how to play bounties!"),
-                            "help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently six pages, and six sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Loadout`, `Shopping` and `Credits`."),
+                            "help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently seven pages, and seven sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Loadout`, `Mining`, `Shopping` and `Credits`."),
                             "stats": ("**stats** *[userTag]*", "Get various credits and bounty statistics about yourself, or a tagged user."),
                             "leaderboard": ("**leaderboard** *[-g|-c|-s|-w]*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
                             "notify": ("**notify <type>** *[item]*", "Subscribe to pings when events take place. Currently, only `$notify bounties` is implemented, which will notify you when new bounties are available.")},
-            
+
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
                             "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
                             "make-route": ("**make-route <startSystem>, <endSystem>**", "Find the shortest route from startSystem to endSystem.")},
-            
+
             "Bounties":{    "bounties": ("**bounties** *[faction]*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
                             "route": ("**route <criminal name>**", "Get the named criminal's current route."),
                             "check": ("**check <system>**", "Check if any criminals are in the given system, arrest them, and get paid! 💰"),
                             "duel": ("**duel [action] [user]** *<stakes>*", "Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`. When challenging another user to a duel, you must give the amount of credits you will win - the 'stakes'.")},
-            
+
             "Loadout":{     "hangar": ("**hangar** *[item-type]*", "Display the items in your hangar. Give an item type (ship/weapon/turret/module) to only list items of that type."),
                             "loadout": ("**loadout**", "Display your current ship and the items equipped onto it."),
                             "equip": ("**equip <item-type> <item-num>** *[transfer]*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When equipping a ship, specify `transfer` to move all items to the new ship."),
@@ -93,7 +92,11 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
 
             "Credits":{     "total-value":("**total-value** *[userTag]*", "Get the total value of all of your items, including your credits balance. Give a user mention to check someone else's total inventory value."),
                             "balance": ("**balance** *[userTag]*", "Get the credits balance of yourself, or a tagged user if one is given."),
-                            "pay": ("**pay <user> <amount>**", "Pay the mentioned user an amount of credits from your balance.")}}
+                            "pay": ("**pay <user> <amount>**", "Pay the mentioned user an amount of credits from your balance.")},
+
+            "Mining":{      "mine":("**mine** *[risk]*", "attempt to mine an asteroid.\nYou must have a drill and scanner equipped to be able to mine asteroids.\nAdding `risky` or `safe` to the command will change method of mining for that attempt.\nIf none is given, default value will be used."),
+                            "setrisk":("**setrisk** *[risk]*", "sets personal default risk for mining asteroids.\n`Safe` will always mine an asteroid, but at a penalty to the amount of ore mined.\n`Risky` has a change to fail mining, but will give more ore, and if it is a class A asteroid, will also award a core.")}}
+# help strings for bb commands
 
 # intro for admin help commands
 adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
@@ -498,7 +501,7 @@ builtInCommodityData = {
 
 oreNameToCoreName = {   "Iron Ore": "Iron Core", "Doxtrite Ore": "Doxtrit Core", "Perrius Ore": "Perrius Core", "Cesogen Ore": "Cesogen Core",
                         "Hypanium Ore": "Hypanium Core", "Gold Ore": "Golden Core", "Sodil Ore": "Sodil Core", "Pyresium Ore": "Pyresium Core",
-                        "Orichalzine Ore": "Orichalzin Core", "Titanium Ore": "Titanium Core", "Void Crystals": "Void Essence"}
+                        "Orichalzine Ore": "Orichalzin Core", "Titanium Ore": "Titanium Core", "Void Crystal": "Void Essence"}
 
 # TO BE COMPLETED
 builtInSecondariesData = {
