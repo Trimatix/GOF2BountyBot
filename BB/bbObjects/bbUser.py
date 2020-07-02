@@ -356,13 +356,12 @@ class bbUser:
     def sellCommodity(self, commodity, quantity):
         if commodity in self.storedCommodities:
             commodityListing = self.storedCommodities[commodity]
-            if commodityListing.count < commodity:
+            if commodityListing.count < quantity:
                 return 1
             self.credits += commodity.value * quantity
             commodityListing.decreaseCount(quantity)
             if commodityListing.count == 0:
-                self.storedCommodities.remove(commodityListing)
-            self.commoditiesCollected -= quantity
+                del self.storedCommodities[commodity]
             return 0
         return 2
 

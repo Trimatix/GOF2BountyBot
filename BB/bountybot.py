@@ -434,6 +434,7 @@ async def cmd_mining(message, args):
     await message.channel.send(sendMessage)
 
 bbCommands.register("mine", cmd_mining)
+dmCommands.register("mine", cmd_mining)
 
 
 """
@@ -1583,10 +1584,13 @@ async def cmd_hangar(message, args):
                 hangarEmbed.add_field(name=str(turretNum) + ". " + requestedBBUser.inactiveTurrets[turretNum - 1].name, value=(requestedBBUser.inactiveTurrets[turretNum - 1].emoji if requestedBBUser.inactiveTurrets[turretNum - 1].hasEmoji else "") + requestedBBUser.inactiveTurrets[turretNum - 1].statsStringShort(), inline=False)
 
         if item in ["all", "commodity"]:
+            commodityList = []
+            for listing in requestedBBUser.storedCommodities:
+                commodityList.append(listing)
             for commodityNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("commodity", page, maxPerPage) + 1):
                 if commodityNum == firstPlace:
                     hangarEmbed.add_field(name="‎", value="__**Stored Commodities**__", inline=False)
-                hangarEmbed.add_field(name=str(commodityNum) + ". " + requestedBBUser.storedCommodities[commodityNum - 1].commodity.name, value=(requestedBBUser.storedCommodities[commodityNum - 1].commodity.emoji if requestedBBUser.storedCommodities[commodityNum - 1].commodity.hasEmoji else "") + requestedBBUser.storedCommodities[commodityNum - 1].statsStringShort(), inline=False)
+                hangarEmbed.add_field(name=str(commodityNum) + ". " + requestedBBUser.storedCommodities[commodityList[commodityNum - 1]].item.name, value=(requestedBBUser.storedCommodities[commodityList[commodityNum - 1]].item.emoji if requestedBBUser.storedCommodities[commodityList[commodityNum - 1]].item.hasEmoji else "") + requestedBBUser.storedCommodities[commodityList[commodityNum - 1]].statsStringShort(), inline=False)
 
         try:
             await sendChannel.send(embed=hangarEmbed)
@@ -2011,14 +2015,22 @@ async def cmd_shop_sell(message, args):
         await message.channel.send(":moneybag: You sold your **" + requestedTurret.name + "** for **" + str(requestedTurret.value) + " credits**!")
 
     elif item == "commodity":
-        commodityQuantity = argsSplit[2]
-        requestedCommodity = requestedBBUser.storedCommodities[itemNum - 1]
-        result = requestedBBUser.sellCommodity(requestedCommodity.commodity, commodityQuantity)
+
+        commodityList = []
+        for listing in requestedBBUser.storedCommodities:
+            commodityList.append(listing)
+
+        commodityQuantity = int(argsSplit[2])
+        requestedCommodity = requestedBBUser.storedCommodities[commodityList[itemNum - 1]]
+        commodityName = requestedCommodity.item.name
+        commodityValue = requestedCommodity.item.value
+
+        result = requestedBBUser.sellCommodity(requestedCommodity.item, commodityQuantity)
         # TODO: add shop inventory stocking when shop commodities added
         if result == 0:
-            await message.channel.send(":moneybag: you sold **" + commodityQuantity + " " + requestedCommodity.name + "** for **" + str(requestedCommodity.value*commodityQuantity) + " credits**!")
+            await message.channel.send(":moneybag: you sold **" + str(commodityQuantity) + " " + commodityName + "** for **" + str(commodityValue*commodityQuantity) + " credits**!")
         elif result == 1:
-            await message.channel.send(":x: insufficient quantity! you have " + requestedCommodity.count + "in your inventory:!:")
+            await message.channel.send(":x: insufficient quantity! you have " + str(requestedCommodity.count) + " in your inventory:!:")
         elif result == 2:
             # This should be unreachable due to previous itemNum validation
             await message.channel.send(":x: commodity not found in inventory:!:")
@@ -2797,6 +2809,9 @@ async def dev_cmd_sleep(message, args):
     
 bbCommands.register("sleep", dev_cmd_sleep, isDev=True)
 dmCommands.register("sleep", dev_cmd_sleep, isDev=True)
+
+bbCommands.register("slepp", dev_cmd_sleep, isDev=True)
+dmCommands.register("slepp", dev_cmd_sleep, isDev=True)
 
 
 """

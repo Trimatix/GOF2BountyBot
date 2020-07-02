@@ -126,4 +126,4 @@ disabledServers = [723704980246233219, 723702782640783361, 723708988830515231, 7
 # maxModuleTypeEquips = {...}
 
 # amount of time between ship offloads of commodities
-shipOffloadPeriod = {"days":0, "hours":0, "minutes":1, "seconds":0}
+shipOffloadPeriod = {"days":0, "hours":0, "minutes":15, "seconds":0}

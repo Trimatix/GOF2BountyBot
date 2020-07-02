@@ -15,7 +15,7 @@ class bbInventoryListing():
         return self.item
 
     def storesItem(self, otherItem):
-        return self.commodity is otherItem
+        return self.item is otherItem
 
     def statsStringShort(self):
         return str(self.count) + " in inventory"
