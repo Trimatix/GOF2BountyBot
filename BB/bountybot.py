@@ -234,7 +234,7 @@ async def announceNewShopStock():
 Announce the stashing of commodities.
 Messages will be sent to the playChannels of all guilds in the guildsDB, if they have one
 """
-async def announceCommodityStash():
+async def announceCoolantRefill():
     # loop over all guilds
     for guild in guildsDB.guilds.values():
         # ensure guild has a valid playChannel
@@ -329,7 +329,7 @@ async def refreshAndAnnounceAllShopStocks():
 async def stashAllUserCommodities():
     for user in usersDB.getUsers():
         user.commoditiesCollected = 0
-    await announceCommodityStash()
+    await announceCoolantRefill()
 
 
 async def spawnAndAnnounceRandomBounty():
@@ -392,29 +392,6 @@ async def err_nodm(message, args):
 ####### USER COMMANDS #######
 
 
-"""
-changes default risk value for users
-"""
-async def cmd_setRisk(message, args):
-    user = usersDB.getOrAddID(message.author.id)
-
-    if args not in Mining.risky_aliases and args not in Mining.safe_aliases:
-        errorStr = "Please enter valid option\nvalid options are: "
-        for aliasesSet in [Mining.risky_aliases, Mining.safe_aliases]:
-            for alias in aliasesSet:
-                errorStr += alias + ", "
-        await message.channel.send(errorStr[:-2])
-        return
-
-    elif args in Mining.risky_aliases:
-        user.defaultMineIsRisky = True
-    else:
-        user.defaultMineIsRisky = False
-
-    await message.channel.send(":white_check_mark: Mining risk set!")
-
-bbCommands.register("setMineRisk", cmd_setRisk)
-bbCommands.register("setRisk", cmd_setRisk)
 
 """
 initiates mining command
@@ -3595,11 +3572,11 @@ dmCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 """
 developer command setting numCommoditiesCollected to 0
 """
-async def dev_cmd_stash_commodities(message, args):
+async def dev_cmd_refill_coolant(message, args):
     await stashAllUserCommodities()
 
-bbCommands.register("stash", dev_cmd_stash_commodities, isDev=True)
-dmCommands.register("stash", dev_cmd_stash_commodities, isDev=True)
+bbCommands.register("refill", dev_cmd_refill_coolant, isDev=True)
+dmCommands.register("refill", dev_cmd_refill_coolant, isDev=True)
 
 
 
