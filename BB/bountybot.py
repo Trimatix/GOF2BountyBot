@@ -398,9 +398,10 @@ initiates mining command
 """
 async def cmd_mining(message, args):
     user = usersDB.getOrAddID(message.author.id)
-
-    if user.commoditiesCollected >= user.activeShip.getCargo():
-        await message.channel.send(":x: Your drill is still cooling down!")
+    coolantCapacity = user.activeShip.getCargo() * user.getDrill().oreYield
+    sendMessage = ""
+    if user.commoditiesCollected >= coolantCapacity:
+        await message.channel.send("Your drill is cooling down!")
         return
     if user.getDrill() is None:
         await message.channel.send(":x: You have no mining drill equipped!")
@@ -408,7 +409,7 @@ async def cmd_mining(message, args):
 
     minedOre = {}
 
-    while user.commoditiesCollected < user.activeShip.getCargo():
+    while user.commoditiesCollected < coolantCapacity:
         tier = Mining.pickTier(user.getScanner())
         oreType = Mining.pickOre()
         oreObj = bbData.builtInCommodityObjs[oreType]
@@ -428,7 +429,7 @@ async def cmd_mining(message, args):
         if ore.name in bbData.builtInCommodityData["Ore"]:
             coreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[ore.name]]
             resultsEmbed.add_field(name=(ore.emoji + ' ' if ore.hasEmoji else '') + ore.name, value=str(minedOre[ore]) + " ore" + ((" and " + str(minedOre[coreObj]) + " core" + ("s" if minedOre[coreObj] > 1 else "")) if coreObj in minedOre else ""))
-            
+
     await message.channel.send(":pick: **Mining Complete!**\nPlease wait until your drill has cooled down before mining again.", embed=resultsEmbed)
 
 bbCommands.register("mine", cmd_mining)
@@ -1932,7 +1933,7 @@ async def cmd_shop_sell(message, args):
 
     item = argsSplit[0].rstrip("s")
     if item == "all" or item not in bbConfig.validItemNames:
-        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module, turret or commodity/cmmodities.")
+        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module, turret or commodity/commodities.")
         return
 
     if item == "commodity" or item == "commoditie":
@@ -2024,7 +2025,7 @@ async def cmd_shop_sell(message, args):
         commodityList = []
         for listing in requestedBBUser.storedCommodities:
             commodityList.append(listing)
-
+        sendMessage = ""
         if argsSplit[1]=="all":
             totalValue = 0
             for commodity in commodityList:
@@ -2032,8 +2033,8 @@ async def cmd_shop_sell(message, args):
                 totalValue += commodity.value*quantity
                 requestedBBUser.sellCommodity(commodity, quantity)
                 # TODO: add message into embed
-                #await message.channel.send(":moneybag: you sold **" + str(quantity) + " " + commodity.name + "** for **" + str(commodity.value*quantity) + " credits**!")
-            await message.channel.send(":moneybag::moneybag::moneybag:You sold them all for **" + str(totalValue) +  "credits**!:moneybag::moneybag::moneybag:")
+                sendMessage += ":moneybag: you sold **" + str(quantity) + " " + commodity.name + "** for **" + str(commodity.value*quantity) + " credits**!\n"
+            await message.channel.send(sendMessage + ":moneybag::moneybag::moneybag:You sold all of them for **" + str(totalValue) +  "credits**!:moneybag::moneybag::moneybag:")
             return
 
         commodityQuantity = int(argsSplit[2])
