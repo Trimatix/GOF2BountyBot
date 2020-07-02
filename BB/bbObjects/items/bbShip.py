@@ -219,7 +219,7 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             total += upgrade.cargo
             multiplier *= upgrade.cargoMultiplier
-        return total * multiplier
+        return int(total * multiplier)
 
 
     def getHandling(self, shipUpgradesOnly=False):
