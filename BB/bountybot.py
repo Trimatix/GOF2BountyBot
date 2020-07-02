@@ -242,7 +242,7 @@ async def announceCommodityStash():
             playCh = client.get_channel(guild.getPlayChannelId())
             if playCh is not None:
                 # send the announcement
-                await playCh.send(":arrows_counterclockwise: Your drill cooldown has completed!")
+                await playCh.send(":arrows_counterclockwise: Your ships coolant has refilled. Happy mining!")
 
 
 """
@@ -3670,7 +3670,7 @@ async def on_ready():
     
     ActiveTimedTasks.shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
     ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
-    ActiveTimedTasks.inventoryOffloadTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shipOffloadPeriod, autoReschedule=True, expiryFunction=stashAllUserCommodities, asyncExpiryFunction=True)
+    ActiveTimedTasks.inventoryOffloadTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.drillCooldownPeriod, autoReschedule=True, expiryFunction=stashAllUserCommodities, asyncExpiryFunction=True)
 
     ActiveTimedTasks.duelRequestTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()
 
