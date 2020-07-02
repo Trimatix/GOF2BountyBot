@@ -18,7 +18,7 @@ class bbInventoryListing():
         return self.item is otherItem
 
     def statsStringShort(self):
-        return str(self.count) + " in inventory"
+        return str(self.count) + " in inventory. " + str(self.item.value) + " credits each"
 
     def toDict(self):
         return {"item": self.item.toDict(), "count": self.count}
