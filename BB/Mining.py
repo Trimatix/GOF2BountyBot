@@ -7,7 +7,7 @@ SCANNER_TIERS = {"Telta Quickscan": 1, "Telta Ecoscan": 2, "Hiroto Proscan": 3, 
 asteroid_tiers = ["D", "C", "B", "A", "S"]
 risky_aliases = ["risk", "risky", "danger", "dangerous"]
 safe_aliases = ["safe", "cautious"]
-risky_mining_failure_chance = 5
+base_mining_failure_chance = 5
 max_ore_per_asteroid_tier = [23, 34, 47, 62]
 
 
@@ -41,11 +41,11 @@ gets result of mining attempt
 @param isRisky -- Choice of taking risk or not
 @return -- returns ore type, amount, and if a core was obtained
 """
-def mineResult(drill, isRisky, tier):
+def mineResult(drill, tier):
     # TODO: move max_ore_per_asteroid_tier to bbConfig
     # fails if exceeds drill handling or doesn't meet minimum requirement
     miningFailed = False
-    if isRisky and (risky_mining_failure_chance > random.randint(1,100) or random.randint(1,100) > drill.handling*100):
+    if base_mining_failure_chance > random.randint(1, 100) or random.randint(1, 100) > drill.handling*100:
         miningFailed = True
 
     if tier < len(max_ore_per_asteroid_tier):
@@ -64,12 +64,12 @@ def mineResult(drill, isRisky, tier):
     return minedOre + variance, 0
 
 
-def mineAsteroid(user, tier, oreType, isRisky, oreObj, coreObj):
+def mineAsteroid(user, tier, oreType, oreObj, coreObj):
     if user.getDrill() is None:
         return "No drill equipped"
     else:
         returnMessage = ""
-        results = mineResult(user.getDrill(), isRisky, tier)
+        results = mineResult(user.getDrill(), tier)
         oreQuantity = results[0]
         coreQuantity = int(results[1])
 

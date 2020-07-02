@@ -94,8 +94,9 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "balance": ("**balance** *[userTag]*", "Get the credits balance of yourself, or a tagged user if one is given."),
                             "pay": ("**pay <user> <amount>**", "Pay the mentioned user an amount of credits from your balance.")},
 
-            "Mining":{      "mine":("**mine** *[risk]*", "attempt to mine an asteroid.\nYou must have a drill and scanner equipped to be able to mine asteroids.\nAdding `risky` or `safe` to the command will change method of mining for that attempt.\nIf none is given, default value will be used."),
-                            "setrisk":("**setrisk** *[risk]*", "sets personal default risk for mining asteroids.\n`Safe` will always mine an asteroid, but at a penalty to the amount of ore mined.\n`Risky` has a change to fail mining, but will give more ore, and if it is a class A asteroid, will also award a core.")}}
+            "Mining":{      "mine":("**mine** *[risk]*", "attempt to mine an asteroid.\nYou must have a drill equipped to be able to mine asteroids.\nYour drill relies on coolant, determined by your ships capacity.\nWhen you run out of coolant you must either wait for a coolant refill or switch to a ship with higher coolant capacity.\nHaving a scanner equipped improves the tier of asteroid you find.")}
+            }
+
 # help strings for bb commands
 
 # intro for admin help commands

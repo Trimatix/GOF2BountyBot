@@ -402,7 +402,6 @@ async def cmd_mining(message, args):
     if user.commoditiesCollected >= user.activeShip.getCargo():
         await message.channel.send("Your drill is cooling down!")
         return
-    isRisky = True
     if user.getDrill() is None:
         await message.channel.send("Please equip a drill")
         return
@@ -411,7 +410,7 @@ async def cmd_mining(message, args):
         oreType = Mining.pickOre()
         oreObj = bbData.builtInCommodityObjs[oreType]
         oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
-        sendMessage = Mining.mineAsteroid(user, tier, oreType, isRisky, oreObj, oreCoreObj)
+        sendMessage = Mining.mineAsteroid(user, tier, oreType, oreObj, oreCoreObj)
         #TODO: turn this into embed
         #await message.channel.send(sendMessage)
     await message.channel.send("Mining Complete. Please wait till your drill cools before mining again")
@@ -465,7 +464,7 @@ async def cmd_help(message, args):
     if page == 0:
         helpEmbed.set_footer(text="All Pages")
         for section in bbData.helpDict.keys():
-        # section = list(bbData.helpDict.keys())[page - 1]
+            # section = list(bbData.helpDict.keys())[page - 1]
             helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
             for currentCommand in bbData.helpDict[section].values():
                 helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
