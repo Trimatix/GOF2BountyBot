@@ -20,7 +20,6 @@ class bbUser:
     lastSeenGuildId = -1
     hasLastSeenGuildId = False
 
-    defaultMineIsRisky = False
     commoditiesCollected = 0
 
     activeShip = None
@@ -87,7 +86,6 @@ class bbUser:
         self.inactiveWeapons = inactiveWeapons
         self.inactiveTurrets = inactiveTurrets
 
-        self.defaultMineIsRisky = defaultMineIsRisky
         self.storedCommodities = storedCommodities
         self.commoditiesCollected = 0
         for invListing in storedCommodities.values():
@@ -117,7 +115,6 @@ class bbUser:
         self.inactiveWeapons = []
         self.inactiveTurrets = []
         self.storedCommodities = {}
-        self.defaultMineIsRisky = False
         self.commoditiesCollected = 0
 
 
@@ -256,7 +253,7 @@ class bbUser:
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "lastSeenGuildId":self.lastSeenGuildId,
                 "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses,
-                "defaultMineIsRisky": self.defaultMineIsRisky, "storedCommodities": storedCommoditiesDict}
+                "storedCommodities": storedCommoditiesDict}
 
 
     def userDump(self):
