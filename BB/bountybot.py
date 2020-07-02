@@ -423,15 +423,17 @@ async def cmd_mining(message, args):
     user = usersDB.getOrAddID(message.author.id)
 
     if user.commoditiesCollected >= user.activeShip.getCargo():
-        await message.channel.send("Your cargo hold is full!")
+        await message.channel.send("Your drill is cooling down!")
         return
-    tier = Mining.pickTier(user.getScanner())
-    oreType = Mining.pickOre()
-    oreObj = bbData.builtInCommodityObjs[oreType]
-    oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
-    isRisky = user.defaultMineIsRisky if args == "" else args in Mining.risky_aliases
-    sendMessage = Mining.mineAsteroid(user, tier, oreType, isRisky, oreObj, oreCoreObj)
-    await message.channel.send(sendMessage)
+    isRisky = True
+    while user.commoditiesCollected < user.activeShip.getCargo():
+        tier = Mining.pickTier(user.getScanner())
+        oreType = Mining.pickOre()
+        oreObj = bbData.builtInCommodityObjs[oreType]
+        oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
+        sendMessage = Mining.mineAsteroid(user, tier, oreType, isRisky, oreObj, oreCoreObj)
+        await message.channel.send(sendMessage)
+    await message.channel.send("You're cargo is full. Please wait till your drill cools before mining again")
 
 bbCommands.register("mine", cmd_mining)
 dmCommands.register("mine", cmd_mining)
@@ -1934,10 +1936,10 @@ async def cmd_shop_sell(message, args):
 
     item = argsSplit[0].rstrip("s")
     if item == "all" or item not in bbConfig.validItemNames:
-        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module, turret or commodity.")
+        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module, turret or commodity/cmmodities.")
         return
 
-    if item == "commodity":
+    if item == "commodity" or item == "commoditie":
         if len(argsSplit) == 2:
             if argsSplit[1] != "all":
                 await message.channel.send(":x: Not enough arguments! Please provide both an item number from `" + bbConfig.commandPrefix + "hangar`, and a quantity when selling commodities.")
@@ -1953,7 +1955,7 @@ async def cmd_shop_sell(message, args):
 
     itemNum = argsSplit[1]
     #TODO: create list in bbData of supported "sell all" options
-    if item != "commodity" or itemNum != "all":
+    if (item != "commodity" and item != "commoditie") or itemNum != "all":
         if not bbUtil.isInt(itemNum):
             await message.channel.send(":x: Invalid item number!")
             return
@@ -1973,7 +1975,7 @@ async def cmd_shop_sell(message, args):
                 await message.channel.send(":x: `clear` can only be used when selling a ship!")
                 return
             clearItems = True
-        elif item == "commodity":
+        elif item == "commodity" or item == "commoditie":
             if not bbUtil.isInt(argsSplit[2]) or int(argsSplit[2]) < 0:
                 await message.channel.send(":x: Invalid quantity! You must sell at least 1.")
                 return
@@ -2021,7 +2023,7 @@ async def cmd_shop_sell(message, args):
 
         await message.channel.send(":moneybag: You sold your **" + requestedTurret.name + "** for **" + str(requestedTurret.value) + " credits**!")
 
-    elif item == "commodity":
+    elif item == "commodity" or item == "commoditie":
 
         commodityList = []
         for listing in requestedBBUser.storedCommodities:
@@ -2034,6 +2036,7 @@ async def cmd_shop_sell(message, args):
                 totalValue += commodity.value*quantity
                 requestedBBUser.sellCommodity(commodity, quantity)
                 await message.channel.send(":moneybag: you sold **" + str(quantity) + " " + commodity.name + "** for **" + str(commodity.value*quantity) + " credits**!")
+            await message.channel.send(":moneybag::moneybag::moneybag:You sold them all!:moneybag::moneybag::moneybag:")
             return
 
         commodityQuantity = int(argsSplit[2])

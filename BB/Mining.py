@@ -44,15 +44,16 @@ gets result of mining attempt
 def mineResult(drill, isRisky, tier):
     # TODO: move max_ore_per_asteroid_tier to bbConfig
     # fails if exceeds drill handling or doesn't meet minimum requirement
+    miningFailed = False
     if isRisky and (risky_mining_failure_chance > random.randint(1,100) or random.randint(1,100) > drill.handling*100):
-        return 0, 0
+        miningFailed = True
 
     if tier < len(max_ore_per_asteroid_tier):
         minedOre = int(max_ore_per_asteroid_tier[tier-1] * drill.oreYield)
     else:
         minedOre = int(max_ore_per_asteroid_tier[len(max_ore_per_asteroid_tier)-1] * drill.oreYield)
 
-    if isRisky:
+    if not miningFailed:
         if tier > 3:
             return minedOre, tier - 3
         return minedOre, 0
@@ -82,14 +83,12 @@ def mineAsteroid(user, tier, oreType, isRisky, oreObj, coreObj):
                     coreQuantity = oreQuantity
                     oreQuantity = 0
 
-        if oreQuantity > 0 or coreQuantity > 0:
-            user.addCommodity(oreObj, oreQuantity)
-            returnMessage += ("You mined a class " + tierToLetter(tier) + " " + oreType + " asteroid yielding " + str(oreQuantity) + " ore")
-            if coreQuantity > 0:
-                user.addCommodity(coreObj, coreQuantity)
-                returnMessage += " and " + str(coreQuantity) + " core"
-                if coreQuantity > 1:
-                    returnMessage += "s"
-        else:
-            returnMessage = "Asteroid mining failed"
+        user.addCommodity(oreObj, oreQuantity)
+        returnMessage += ("You mined a class " + tierToLetter(tier) + " " + oreType + " asteroid yielding " + str(oreQuantity) + " ore")
+        if coreQuantity > 0:
+            user.addCommodity(coreObj, coreQuantity)
+            returnMessage += " and " + str(coreQuantity) + " core"
+            if coreQuantity > 1:
+                returnMessage += "s"
+
         return returnMessage
