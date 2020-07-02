@@ -2,8 +2,9 @@ import random
 
 # TODO: Would it be possible to import this ore data from bbData rather than hard coding it?
 #       the only issue is that void and novanium would be in the data, even though mining those would have prereqs
-ORE_TYPES = ["Iron Ore", "Doxtrite Ore", "Perrius Ore", "Cesogen Ore", "Hypanium Ore", "Gold Ore", "Sodil Ore", "Pyresium Ore", "Orichalzine Ore", "Titanium Ore",]
-asteroid_tiers = ["D", "C", "B", "A"]
+ORE_TYPES = ["Iron Ore", "Doxtrite Ore", "Perrius Ore", "Cesogen Ore", "Hypanium Ore", "Gold Ore", "Sodil Ore", "Pyresium Ore", "Orichalzine Ore", "Titanium Ore", "Void Crystal"]
+SCANNER_TIERS = {"Telta Quickscan": 1, "Telta Ecoscan": 2, "Hiroto Proscan": 3, "Hiroto Ultrascan": 4}
+asteroid_tiers = ["D", "C", "B", "A", "S"]
 risky_aliases = ["risk", "risky", "danger", "dangerous"]
 safe_aliases = ["safe", "cautious"]
 risky_mining_failure_chance = 5
@@ -14,12 +15,19 @@ def pickOre(oreList=ORE_TYPES):
     return random.choice(oreList)
 
 
-def pickTier():
-    return random.randint(1,4)
+def pickTier(scanner):
+    baseTier = random.randint(1,3)
+    if scanner is not None:
+        baseTier += int(SCANNER_TIERS[scanner.name])
+    return int(baseTier)
+
 
 
 def tierToLetter(tier):
-    return asteroid_tiers[tier-1]
+    if tier < len(asteroid_tiers):
+        return asteroid_tiers[tier-1]
+    else:
+        return asteroid_tiers[len(asteroid_tiers)-1]
 
 
 def boolRiskArg(arg):
@@ -39,17 +47,20 @@ def mineResult(drill, isRisky, tier):
     if isRisky and (risky_mining_failure_chance > random.randint(1,100) or random.randint(1,100) > drill.handling*100):
         return 0, 0
 
-    minedOre = int(max_ore_per_asteroid_tier[tier-1] * drill.oreYield)
+    if tier < len(max_ore_per_asteroid_tier):
+        minedOre = int(max_ore_per_asteroid_tier[tier-1] * drill.oreYield)
+    else:
+        minedOre = int(max_ore_per_asteroid_tier[len(max_ore_per_asteroid_tier)-1] * drill.oreYield)
 
     if isRisky:
-        if tier == 4:
-            return minedOre, True
-        return minedOre, False
+        if tier > 3:
+            return minedOre, tier - 3
+        return minedOre, 0
 
     minedOre = int(minedOre * drill.handling)
     # TODO: Variance should be percentage based
     variance = random.randint(-5, 5)
-    return minedOre + variance, False
+    return minedOre + variance, 0
 
 
 def mineAsteroid(user, tier, oreType, isRisky, oreObj, coreObj):
@@ -59,18 +70,26 @@ def mineAsteroid(user, tier, oreType, isRisky, oreObj, coreObj):
         returnMessage = ""
         results = mineResult(user.getDrill(), isRisky, tier)
         oreQuantity = results[0]
-        gotCore = results[1]
-        user.addCommodity(oreObj, oreQuantity)
-        remainingSpace = user.activeShip.cargo - user.commoditiesCollected
+        coreQuantity = int(results[1])
+
+        remainingSpace = user.activeShip.getCargo() - user.commoditiesCollected
         if oreQuantity > remainingSpace:
             oreQuantity = remainingSpace
-            if gotCore:
-                oreQuantity -= 1
-        if oreQuantity > 0:
+            if coreQuantity > 0:
+                if oreQuantity >= coreQuantity:
+                    oreQuantity -= coreQuantity
+                else:
+                    coreQuantity = oreQuantity
+                    oreQuantity = 0
+
+        if oreQuantity > 0 or coreQuantity > 0:
+            user.addCommodity(oreObj, oreQuantity)
             returnMessage += ("You mined a class " + tierToLetter(tier) + " " + oreType + " asteroid yielding " + str(oreQuantity) + " ore")
-            if gotCore:
-                user.addCommodity(coreObj, 1)
-                returnMessage += " and 1 core"
+            if coreQuantity > 0:
+                user.addCommodity(coreObj, coreQuantity)
+                returnMessage += " and " + str(coreQuantity) + " core"
+                if coreQuantity > 1:
+                    returnMessage += "s"
         else:
             returnMessage = "Asteroid mining failed"
         return returnMessage
