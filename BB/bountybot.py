@@ -422,10 +422,10 @@ initiates mining command
 async def cmd_mining(message, args):
     user = usersDB.getOrAddID(message.author.id)
 
-    if user.commoditiesCollected >= user.activeShip.cargo:
+    if user.commoditiesCollected >= user.activeShip.getCargo():
         await message.channel.send("Your cargo hold is full!")
         return
-    tier = Mining.pickTier()
+    tier = Mining.pickTier(user.getScanner())
     oreType = Mining.pickOre()
     oreObj = bbData.builtInCommodityObjs[oreType]
     oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
@@ -1937,9 +1937,14 @@ async def cmd_shop_sell(message, args):
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module, turret or commodity.")
         return
 
-    if item == "commodity" and len(argsSplit) < 3:
-        await message.channel.send(":x: Not enough arguments! Please provide both an item number from `" + bbConfig.commandPrefix + "hangar`, and a quantity when selling commodities.")
-        return
+    if item == "commodity":
+        if len(argsSplit) == 2:
+            if argsSplit[1] != "all":
+                await message.channel.send(":x: Not enough arguments! Please provide both an item number from `" + bbConfig.commandPrefix + "hangar`, and a quantity when selling commodities.")
+                return
+        elif len(argsSplit) < 3:
+            await message.channel.send(":x: Not enough arguments! Please provide both an item number from `" + bbConfig.commandPrefix + "hangar`, and a quantity when selling commodities.")
+            return
 
     if usersDB.userIDExists(message.author.id):
         requestedBBUser = usersDB.getUser(message.author.id)
@@ -1947,17 +1952,19 @@ async def cmd_shop_sell(message, args):
         requestedBBUser = usersDB.addUser(message.author.id)
 
     itemNum = argsSplit[1]
-    if not bbUtil.isInt(itemNum):
-        await message.channel.send(":x: Invalid item number!")
-        return
-    itemNum = int(itemNum)
-    if itemNum > len(requestedBBUser.getInactivesByName(item)):
-        await message.channel.send(":x: Invalid item number! You have " + str(len(requestedBBUser.getInactivesByName(item))) + " " + item + "s.")
-        return
-    if itemNum < 1:
-        await message.channel.send(":x: Invalid item number! Must be at least 1.")
-        return
-    
+    #TODO: create list in bbData of supported "sell all" options
+    if item != "commodity" or itemNum != "all":
+        if not bbUtil.isInt(itemNum):
+            await message.channel.send(":x: Invalid item number!")
+            return
+        itemNum = int(itemNum)
+        if itemNum > len(requestedBBUser.getInactivesByName(item)):
+            await message.channel.send(":x: Invalid item number! You have " + str(len(requestedBBUser.getInactivesByName(item))) + " " + item + "s.")
+            return
+        if itemNum < 1:
+            await message.channel.send(":x: Invalid item number! Must be at least 1.")
+            return
+
 
     clearItems = False
     if len(argsSplit) == 3:
@@ -1980,7 +1987,7 @@ async def cmd_shop_sell(message, args):
         requestedShip = requestedBBUser.inactiveShips[itemNum - 1]
         if clearItems:
             requestedBBUser.unequipAll(requestedShip)
-        
+
         requestedBBUser.credits += requestedShip.getValue()
         requestedBBUser.inactiveShips.remove(requestedShip)
         requestedShop.shipsStock.append(requestedShip)
@@ -1989,7 +1996,7 @@ async def cmd_shop_sell(message, args):
         if clearItems:
             outStr += "\nItems removed from the ship can be found in the hangar."
         await message.channel.send(outStr)
-    
+
     elif item == "weapon":
         requestedWeapon = requestedBBUser.inactiveWeapons[itemNum - 1]
         requestedBBUser.credits += requestedWeapon.value
@@ -2019,6 +2026,15 @@ async def cmd_shop_sell(message, args):
         commodityList = []
         for listing in requestedBBUser.storedCommodities:
             commodityList.append(listing)
+
+        if argsSplit[1]=="all":
+            totalValue = 0
+            for commodity in commodityList:
+                quantity = requestedBBUser.storedCommodities[commodity].count
+                totalValue += commodity.value*quantity
+                requestedBBUser.sellCommodity(commodity, quantity)
+                await message.channel.send(":moneybag: you sold **" + str(quantity) + " " + commodity.name + "** for **" + str(commodity.value*quantity) + " credits**!")
+            return
 
         commodityQuantity = int(argsSplit[2])
         requestedCommodity = requestedBBUser.storedCommodities[commodityList[itemNum - 1]]
