@@ -1,5 +1,5 @@
 from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret, bbInventoryListing, bbCommodity
-from .items.modules import bbMiningDrillModule
+from .items.modules import bbMiningDrillModule, bbScannerModule
 from ..bbConfig import bbConfig
 
 
@@ -343,6 +343,11 @@ class bbUser:
             if currentModule.getType() == bbMiningDrillModule.bbMiningDrillModule:
                 return currentModule
         return None
+
+    def getScanner(self):
+        for currentModule in self.activeShip.modules:
+            if currentModule.getType() == bbScannerModule.bbScannerModule:
+                return currentModule
 
 
     def addCommodity(self, commodity, quantity):
