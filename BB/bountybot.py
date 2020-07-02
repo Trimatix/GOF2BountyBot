@@ -400,20 +400,36 @@ async def cmd_mining(message, args):
     user = usersDB.getOrAddID(message.author.id)
 
     if user.commoditiesCollected >= user.activeShip.getCargo():
-        await message.channel.send("Your drill is cooling down!")
+        await message.channel.send(":x: Your drill is still cooling down!")
         return
     if user.getDrill() is None:
-        await message.channel.send("Please equip a drill")
+        await message.channel.send(":x: You have no mining drill equipped!")
         return
+
+    minedOre = {}
+
     while user.commoditiesCollected < user.activeShip.getCargo():
         tier = Mining.pickTier(user.getScanner())
         oreType = Mining.pickOre()
         oreObj = bbData.builtInCommodityObjs[oreType]
         oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
-        sendMessage = Mining.mineAsteroid(user, tier, oreType, oreObj, oreCoreObj)
+        # sendMessage = Mining.mineAsteroid(user, tier, oreType, oreObj, oreCoreObj)
         #TODO: turn this into embed
-        #await message.channel.send(sendMessage)
-    await message.channel.send("Mining Complete. Please wait till your drill cools before mining again")
+        # await message.channel.send(sendMessage)
+        currentMiningResults = Mining.mineAsteroid(user, tier, oreType, oreObj, oreCoreObj)
+        for ore in currentMiningResults:
+            if ore in minedOre:
+                minedOre[ore] += currentMiningResults[ore]
+            else:
+                minedOre[ore] = currentMiningResults[ore]
+
+    resultsEmbed = makeEmbed(titleTxt='__Mining Results__', footerTxt=message.author.name)
+    for ore in minedOre:
+        if ore.name in bbData.builtInCommodityData["Ore"]:
+            coreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[ore.name]]
+            resultsEmbed.add_field(name=(ore.emoji + ' ' if ore.hasEmoji else '') + ore.name, value=str(minedOre[ore]) + " ore" + ((" and " + str(minedOre[coreObj]) + " core" + ("s" if minedOre[coreObj] > 1 else "")) if coreObj in minedOre else ""))
+            
+    await message.channel.send(":pick: **Mining Complete!**\nPlease wait until your drill has cooled down before mining again.", embed=resultsEmbed)
 
 bbCommands.register("mine", cmd_mining)
 dmCommands.register("mine", cmd_mining)

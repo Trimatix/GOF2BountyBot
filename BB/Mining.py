@@ -1,4 +1,5 @@
 import random
+from .bbObjects.items import bbInventoryListing
 
 # TODO: Would it be possible to import this ore data from bbData rather than hard coding it?
 #       the only issue is that void and novanium would be in the data, even though mining those would have prereqs
@@ -68,7 +69,7 @@ def mineAsteroid(user, tier, oreType, oreObj, coreObj):
     if user.getDrill() is None:
         return "No drill equipped"
     else:
-        returnMessage = ""
+        # returnMessage = ""
         results = mineResult(user.getDrill(), tier)
         oreQuantity = results[0]
         coreQuantity = int(results[1])
@@ -83,12 +84,16 @@ def mineAsteroid(user, tier, oreType, oreObj, coreObj):
                     coreQuantity = oreQuantity
                     oreQuantity = 0
 
+        minedOre = {oreObj: oreQuantity}
+
         user.addCommodity(oreObj, oreQuantity)
-        returnMessage += ("You mined a class " + tierToLetter(tier) + " " + oreType + " asteroid yielding " + str(oreQuantity) + " ore")
+        # returnMessage += ("You mined a class " + tierToLetter(tier) + " " + oreType + " asteroid yielding " + str(oreQuantity) + " ore")
         if coreQuantity > 0:
             user.addCommodity(coreObj, coreQuantity)
-            returnMessage += " and " + str(coreQuantity) + " core"
-            if coreQuantity > 1:
-                returnMessage += "s"
+            minedOre[coreObj] = coreQuantity
+            # returnMessage += " and " + str(coreQuantity) + " core"
+            # if coreQuantity > 1:
+                # returnMessage += "s"
 
-        return returnMessage
+        # return returnMessage
+        return minedOre
