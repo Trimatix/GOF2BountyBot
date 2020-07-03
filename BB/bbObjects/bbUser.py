@@ -88,8 +88,6 @@ class bbUser:
 
         self.storedCommodities = storedCommodities
         self.commoditiesCollected = 0
-        for invListing in storedCommodities.values():
-            self.commoditiesCollected += invListing.count
 
         self.lastSeenGuildId = lastSeenGuildId
         self.haslastSeenGuildId = lastSeenGuildId != -1

@@ -214,7 +214,7 @@ class bbShip(bbItem):
         if not shipUpgradesOnly:
             for module in self.modules:
                 total += module.cargo
-                multiplier *= module.cargoMultiplier
+                multiplier += module.cargoMultiplier - 1
         
         for upgrade in self.upgradesApplied:
             total += upgrade.cargo

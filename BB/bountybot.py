@@ -398,13 +398,13 @@ initiates mining command
 """
 async def cmd_mining(message, args):
     user = usersDB.getOrAddID(message.author.id)
-    coolantCapacity = user.activeShip.getCargo() * user.getDrill().oreYield
     sendMessage = ""
-    if user.commoditiesCollected >= coolantCapacity:
-        await message.channel.send("Your drill is cooling down!")
-        return
     if user.getDrill() is None:
         await message.channel.send(":x: You have no mining drill equipped!")
+        return
+    coolantCapacity = user.activeShip.getCargo() * user.getDrill().oreYield
+    if user.commoditiesCollected >= coolantCapacity:
+        await message.channel.send("Your drill is cooling down!")
         return
 
     minedOre = {}
@@ -1936,7 +1936,7 @@ async def cmd_shop_sell(message, args):
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module, turret or commodity/commodities.")
         return
 
-    if item == "commodity" or item == "commoditie":
+    if item in bbConfig.commodityAlias:
         if len(argsSplit) == 2:
             if argsSplit[1] != "all":
                 await message.channel.send(":x: Not enough arguments! Please provide both an item number from `" + bbConfig.commandPrefix + "hangar`, and a quantity when selling commodities.")
@@ -1952,7 +1952,7 @@ async def cmd_shop_sell(message, args):
 
     itemNum = argsSplit[1]
     #TODO: create list in bbData of supported "sell all" options
-    if (item != "commodity" and item != "commoditie") or itemNum != "all":
+    if item not in bbConfig.commodityAlias or itemNum != "all":
         if not bbUtil.isInt(itemNum):
             await message.channel.send(":x: Invalid item number!")
             return
@@ -1972,7 +1972,7 @@ async def cmd_shop_sell(message, args):
                 await message.channel.send(":x: `clear` can only be used when selling a ship!")
                 return
             clearItems = True
-        elif item == "commodity" or item == "commoditie":
+        elif item in bbConfig.commodityAlias:
             if not bbUtil.isInt(argsSplit[2]) or int(argsSplit[2]) < 0:
                 await message.channel.send(":x: Invalid quantity! You must sell at least 1.")
                 return
@@ -2020,7 +2020,7 @@ async def cmd_shop_sell(message, args):
 
         await message.channel.send(":moneybag: You sold your **" + requestedTurret.name + "** for **" + str(requestedTurret.value) + " credits**!")
 
-    elif item == "commodity" or item == "commoditie":
+    elif item in bbConfig.commodityAlias:
 
         commodityList = []
         for listing in requestedBBUser.storedCommodities:
