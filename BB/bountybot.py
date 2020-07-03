@@ -3273,7 +3273,7 @@ async def dev_cmd_make_bounty(message, args):
         newEndTime = float(newEndTime)
 
         # parse the given icon
-        newIcon = bData[8].rstrip(" ").lower()
+        newIcon = bData[8].rstrip(" ")
         if newIcon == "auto":
             newIcon = "" if not builtIn else builtInCrimObj.icon
 
@@ -3292,8 +3292,8 @@ async def dev_cmd_make_bounty(message, args):
     bountiesDB.addBounty(newBounty)
     await announceNewBounty(newBounty)
     
-bbCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True)
-dmCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True)
+bbCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True, forceKeepArgsCasing=True)
+dmCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True, forceKeepArgsCasing=True)
 
 
 """
@@ -3390,7 +3390,7 @@ async def dev_cmd_make_player_bounty(message, args):
         newEndTime = float(newEndTime)
 
         # parse the requested icon URL
-        newIcon = bData[8].rstrip(" ").lower()
+        newIcon = bData[8].rstrip(" ")
         if newIcon == "auto":
             newIcon = str(client.get_user(int(newName.lstrip("<@!").rstrip(">"))).avatar_url_as(size=64))
 
@@ -3405,8 +3405,8 @@ async def dev_cmd_make_player_bounty(message, args):
     bountiesDB.addBounty(newBounty)
     await announceNewBounty(newBounty)
     
-bbCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True)
-dmCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True)
+bbCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True, forceKeepArgsCasing=True)
+dmCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True, forceKeepArgsCasing=True)
 
 
 """
