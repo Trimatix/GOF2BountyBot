@@ -674,7 +674,7 @@ async def cmd_check(message, args):
     if not usersDB.userIDExists(message.author.id):
         usersDB.addUser(message.author.id)
     
-    if not usersDB.getUser(message.author.id).hasWeaponsEquipped():
+    if not usersDB.getUser(message.author.id).activeShip.hasWeaponsEquipped():
         await message.channel.send(":x: Your ship has no weapons equipped!")
         return
 
