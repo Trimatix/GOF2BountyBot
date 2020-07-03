@@ -1307,6 +1307,7 @@ async def cmd_leaderboard(message, args):
     # units for the stat
     boardUnit = "Credit"
     boardUnits = "Credits"
+    boardDesc = "*The total value of player inventory, loadout and credits balance"
 
     # change leaderboard arguments based on the what is provided in args
     if args != "":
@@ -1322,24 +1323,30 @@ async def cmd_leaderboard(message, args):
             if arg not in "gcsw":
                 await message.channel.send(":x: Unknown argument: '**" + arg + "**'. Please refer to `" + bbConfig.commandPrefix + "help leaderboard`")
                 return
-        if "g" in args:
-            globalBoard = True
-            boardScope = "Global Leaderboard"
         if "c" in args:
             stat = "credits"
             boardTitle = "Current Balance"
             boardUnit = "Credit"
             boardUnits = "Credits"
+            boardDesc = "*Current player credits balance"
         elif "s" in args:
             stat = "systemsChecked"
             boardTitle = "Systems Checked"
             boardUnit = "System"
             boardUnits = "Systems"
+            boardDesc = "*Total number of systems `" + bbConfig.commandPrefix + "check`ed"
         elif "w" in args:
             stat = "bountyWins"
             boardTitle = "Bounties Won"
             boardUnit = "Bounty"
             boardUnits = "Bounties"
+            boardDesc = "*Total number of bounties won"
+        if "g" in args:
+            globalBoard = True
+            boardScope = "Global Leaderboard"
+            boardDesc += " across all servers"
+            
+        boardDesc += ".*"
 
     # get the requested stats and sort users by the stat
     inputDict = {}
@@ -1349,7 +1356,7 @@ async def cmd_leaderboard(message, args):
     sortedUsers = sorted(inputDict.items(), key=operator.itemgetter(1))[::-1]
 
     # build the leaderboard embed
-    leaderboardEmbed = makeEmbed(titleTxt=boardTitle, authorName=boardScope, icon=bbData.winIcon, col = bbData.factionColours["neutral"])
+    leaderboardEmbed = makeEmbed(titleTxt=boardTitle, authorName=boardScope, icon=bbData.winIcon, col = bbData.factionColours["neutral"], desc=boardDesc)
 
     # add all users to the leaderboard embed with places and values
     externalUser = False
