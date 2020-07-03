@@ -673,6 +673,10 @@ async def cmd_check(message, args):
     # ensure the calling user is in the users database
     if not usersDB.userIDExists(message.author.id):
         usersDB.addUser(message.author.id)
+    
+    if not usersDB.getUser(message.author.id).hasWeaponsEquipped():
+        await message.channel.send(":x: Your ship has no weapons equipped!")
+        return
 
     # ensure the calling user is not on checking cooldown
     if datetime.utcfromtimestamp(usersDB.getUser(message.author.id).bountyCooldownEnd) < datetime.utcnow():
