@@ -1,4 +1,5 @@
 import inspect
+from discord import Embed
 
 
 class ReactionMenuOption:
@@ -13,10 +14,11 @@ class ReactionMenuOption:
 
 
 class ReactionMenu:
-    def __init__(self, msgID, options={}):
-        msgID = msgID
+    def __init__(self, msg, options={}):
+        # discord.message
+        self.msg = msg
         # Dict of discord.emoji: ReactionMenuOption
-        options = options
+        self.options = options
 
     
     def emojiRegistered(self, emoji):
@@ -25,3 +27,6 @@ class ReactionMenu:
 
     async def reactionAdded(self, emoji):
         return await self.options[emoji].call()
+
+    
+    def getMenuEmbed(self):
