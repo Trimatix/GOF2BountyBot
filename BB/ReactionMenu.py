@@ -28,5 +28,10 @@ class ReactionMenu:
     async def reactionAdded(self, emoji):
         return await self.options[emoji].call()
 
-    
+
     def getMenuEmbed(self):
+        menuEmbed = Embed()
+
+    
+    def updateMessage(self):
+        msg.edit(embed=Embed())
