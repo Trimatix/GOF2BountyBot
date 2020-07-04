@@ -96,6 +96,20 @@ botLoggedIn = False
 
 
 """
+Get the proper name of a system from a an argument passed by a user
+
+@param arg -- arg passed from user
+"""
+def getSystemProperName(arg):
+    for system in bbData.builtInSystemData:
+        systemData = bbData.builtInSystemData[system]
+        if arg in systemData["aliases"] or arg == systemData["name"].lower():
+            return systemData["name"]
+    return ":x:System not found:x:"
+
+
+
+"""
 Find the shortest route between two systems.
 
 @param start -- string name of the starting system. Must exist in bbData.builtInSystemObjs
@@ -711,7 +725,7 @@ async def cmd_check(message, args):
             await message.channel.send(":moneybag: **" + message.author.name + "**, you now have **" + str(usersDB.getUser(message.author.id).credits) + " Credits!**")
         # If no bounty was won, print an error message
         else:
-            outmsg = ":telescope: **" + message.author.name + "**, you did not find any criminals!"
+            outmsg = ":telescope: **" + message.author.name + "**, you did not find any criminals in **" + getSystemProperName(args) + "**!"
             # Check if any bounties are close to the requested system in their route, defined by bbConfig.closeBountyThreshold
             for fac in bountiesDB.getFactions():
                 for bounty in bountiesDB.getFactionBounties(fac):
@@ -719,7 +733,8 @@ async def cmd_check(message, args):
                         if 0 < bounty.route.index(bounty.answer) - bounty.route.index(requestedSystem) < bbConfig.closeBountyThreshold:
                             # Print any close bounty names
                             outmsg += "\n       • Local security forces spotted **" + criminalNameOrDiscrim(bounty.criminal) + "** here recently. "
-            await message.channel.send(outmsg)
+            for currentGuild in guildsDB.getGuilds():
+                await client.get_channel(currentGuild.getPlayChannelId()).send(outmsg)
 
         # Increment the calling user's systemsChecked statistic
         usersDB.getUser(message.author.id).systemsChecked += 1
