@@ -398,7 +398,7 @@ initiates mining command
 """
 async def cmd_mining(message, args):
     user = usersDB.getOrAddID(message.author.id)
-    sendMessage = ""
+
     if user.getDrill() is None:
         await message.channel.send(":x: You have no mining drill equipped!")
         return
@@ -409,20 +409,34 @@ async def cmd_mining(message, args):
 
     minedOre = {}
 
-    while user.commoditiesCollected < coolantCapacity:
-        tier = Mining.pickTier(user.getScanner())
-        oreType = Mining.pickOre()
-        oreObj = bbData.builtInCommodityObjs[oreType]
-        oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
-        # sendMessage = Mining.mineAsteroid(user, tier, oreType, oreObj, oreCoreObj)
-        #TODO: turn this into embed
-        # await message.channel.send(sendMessage)
-        currentMiningResults = Mining.mineAsteroid(user, tier, oreType, oreObj, oreCoreObj)
-        for ore in currentMiningResults:
-            if ore in minedOre:
-                minedOre[ore] += currentMiningResults[ore]
-            else:
-                minedOre[ore] = currentMiningResults[ore]
+    if bbUtil.isInt(args):
+        intArg = int(args)
+        for i in range(intArg):
+            if user.commoditiesCollected >= coolantCapacity:
+                break
+            tier = Mining.pickTier(user.getScanner())
+            oreType = Mining.pickOre()
+            oreObj = bbData.builtInCommodityObjs[oreType]
+            oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
+            currentMiningResults = Mining.mineAsteroid(user, tier, oreObj, oreCoreObj)
+            for ore in currentMiningResults:
+                if ore in minedOre:
+                    minedOre[ore] += currentMiningResults[ore]
+                else:
+                    minedOre[ore] = currentMiningResults[ore]
+
+    else:
+        while user.commoditiesCollected < coolantCapacity:
+            tier = Mining.pickTier(user.getScanner())
+            oreType = Mining.pickOre()
+            oreObj = bbData.builtInCommodityObjs[oreType]
+            oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
+            currentMiningResults = Mining.mineAsteroid(user, tier, oreObj, oreCoreObj)
+            for ore in currentMiningResults:
+                if ore in minedOre:
+                    minedOre[ore] += currentMiningResults[ore]
+                else:
+                    minedOre[ore] = currentMiningResults[ore]
 
     resultsEmbed = makeEmbed(titleTxt='__Mining Results__', footerTxt=message.author.name)
     for ore in minedOre:
@@ -430,7 +444,11 @@ async def cmd_mining(message, args):
             coreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[ore.name]]
             resultsEmbed.add_field(name=(ore.emoji + ' ' if ore.hasEmoji else '') + ore.name, value=str(minedOre[ore]) + " ore" + ((" and " + str(minedOre[coreObj]) + " core" + ("s" if minedOre[coreObj] > 1 else "")) if coreObj in minedOre else ""))
 
-    await message.channel.send(":pick: **Mining Complete!**\nPlease wait until your drill has cooled down before mining again.", embed=resultsEmbed)
+
+    if user.commoditiesCollected >= coolantCapacity:
+        await message.channel.send(":pick: **Mining Complete!**\nPlease wait until your drill has cooled down before mining again.", embed=resultsEmbed)
+    else: await message.channel.send(":pick: **Mining Complete!**", embed=resultsEmbed)
+
 
 bbCommands.register("mine", cmd_mining)
 dmCommands.register("mine", cmd_mining)

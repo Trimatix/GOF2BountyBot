@@ -2,7 +2,6 @@ import random
 from .bbObjects.items import bbInventoryListing
 
 # TODO: Would it be possible to import this ore data from bbData rather than hard coding it?
-#       the only issue is that void and novanium would be in the data, even though mining those would have prereqs
 ORE_TYPES = ["Iron Ore", "Doxtrite Ore", "Perrius Ore", "Cesogen Ore", "Hypanium Ore", "Gold Ore", "Sodil Ore", "Pyresium Ore", "Orichalzine Ore", "Titanium Ore", "Void Crystal"]
 SCANNER_TIERS = {"Telta Quickscan": 1, "Telta Ecoscan": 2, "Hiroto Proscan": 3, "Hiroto Ultrascan": 4}
 asteroid_tiers = ["D", "C", "B", "A", "S"]
@@ -65,11 +64,10 @@ def mineResult(drill, tier):
     return minedOre + variance, 0
 
 
-def mineAsteroid(user, tier, oreType, oreObj, coreObj):
+def mineAsteroid(user, tier, oreObj, coreObj):
     if user.getDrill() is None:
         return "No drill equipped"
     else:
-        # returnMessage = ""
         results = mineResult(user.getDrill(), tier)
         oreQuantity = results[0]
         coreQuantity = int(results[1])
@@ -87,13 +85,8 @@ def mineAsteroid(user, tier, oreType, oreObj, coreObj):
         minedOre = {oreObj: oreQuantity}
 
         user.addCommodity(oreObj, oreQuantity)
-        # returnMessage += ("You mined a class " + tierToLetter(tier) + " " + oreType + " asteroid yielding " + str(oreQuantity) + " ore")
         if coreQuantity > 0:
             user.addCommodity(coreObj, coreQuantity)
             minedOre[coreObj] = coreQuantity
-            # returnMessage += " and " + str(coreQuantity) + " core"
-            # if coreQuantity > 1:
-                # returnMessage += "s"
 
-        # return returnMessage
         return minedOre
