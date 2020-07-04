@@ -101,10 +101,9 @@ Get the proper name of a system from a an argument passed by a user
 @param arg -- arg passed from user
 """
 def getSystemProperName(arg):
-    for system in bbData.builtInSystemData:
-        systemData = bbData.builtInSystemData[system]
-        if arg in systemData["aliases"] or arg == systemData["name"].lower():
-            return systemData["name"]
+    for system in bbData.builtInSystemObjs:
+        if arg in system.aliases or arg == system.name.lower():
+            return system.name.title()
     return ":x:System not found:x:"
 
 
