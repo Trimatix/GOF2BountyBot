@@ -705,21 +705,32 @@ async def cmd_check(message, args):
             for bounty in toPop:
                 bountiesDB.removeBountyObj(bounty)
 
+        sightedCriminalsStr = ""
+        # Check if any bounties are close to the requested system in their route, defined by bbConfig.closeBountyThreshold
+        for fac in bountiesDB.getFactions():
+            for bounty in bountiesDB.getFactionBounties(fac):
+                if requestedSystem in bounty.route:
+                    if 0 < bounty.route.index(bounty.answer) - bounty.route.index(requestedSystem) < bbConfig.closeBountyThreshold:
+                        # Print any close bounty names
+                        sightedCriminalsStr += "**       **• Local security forces spotted **" + criminalNameOrDiscrim(bounty.criminal) + "** here recently.\n"
+        sightedCriminalsStr = sightedCriminalsStr[:-1]
+
         # If a bounty was won, print a congratulatory message
         if bountyWon:
             usersDB.getUser(message.author.id).bountyWins += 1
-            await message.channel.send(":moneybag: **" + message.author.name + "**, you now have **" + str(usersDB.getUser(message.author.id).credits) + " Credits!**")
+            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.name + "**, you now have **" + str(usersDB.getUser(message.author.id).credits) + " Credits!**")
+
+            if sightedCriminalsStr != "":
+                for currentGuild in guildsDB.getGuilds():
+                    if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
+                        await client.get_channel(currentGuild.getPlayChannelId()).send(sightedCriminalsStr)
         # If no bounty was won, print an error message
         else:
-            outmsg = ":telescope: **" + message.author.name + "**, you did not find any criminals!"
-            # Check if any bounties are close to the requested system in their route, defined by bbConfig.closeBountyThreshold
-            for fac in bountiesDB.getFactions():
-                for bounty in bountiesDB.getFactionBounties(fac):
-                    if requestedSystem in bounty.route:
-                        if 0 < bounty.route.index(bounty.answer) - bounty.route.index(requestedSystem) < bbConfig.closeBountyThreshold:
-                            # Print any close bounty names
-                            outmsg += "\n       • Local security forces spotted **" + criminalNameOrDiscrim(bounty.criminal) + "** here recently. "
-            await message.channel.send(outmsg)
+            await message.channel.send(":telescope: **" + message.author.name + "**, you did not find any criminals in **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
+
+            for currentGuild in guildsDB.getGuilds():
+                if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
+                    await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + message.author.name + "**, checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
         # Increment the calling user's systemsChecked statistic
         usersDB.getUser(message.author.id).systemsChecked += 1
