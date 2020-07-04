@@ -86,12 +86,14 @@ class bbInventory:
     @return -- A list containing the bbInventoryListings contained in the requested inventory page
     """
     def getPage(self, pageNum, itemsPerPage):
+        # Validate the requested pageNum
         if pageNum < 1 or pageNum > self.numPages(itemsPerPage):
             raise IndexError("pageNum out of range. min=1 max=" + str(self.numPages(itemsPerPage)))
         
-        pageIndex = pageNum - 1
         page = []
-        for item in self.keys[pageIndex * itemsPerPage: min(pageNum * itemsPerPage, self.numKeys)]:
+        # Splice self.keys around the first and last indices in the requested page
+        for item in self.keys[(pageNum - 1) * itemsPerPage: min(pageNum * itemsPerPage, self.numKeys)]:
+            # Add the bbItemListings for each of the page's keys to the results list
             page.append(self.items[item])
 
         return page
