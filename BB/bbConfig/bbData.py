@@ -94,7 +94,7 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "balance": ("**balance** *[userTag]*", "Get the credits balance of yourself, or a tagged user if one is given."),
                             "pay": ("**pay <user> <amount>**", "Pay the mentioned user an amount of credits from your balance.")},
 
-            "Mining":{      "mine":("**mine** *[risk]*", "attempt to mine an asteroid.\nYou must have a drill equipped to be able to mine asteroids.\nYour drill relies on coolant, determined by your ships capacity.\nWhen you run out of coolant you must either wait for a coolant refill or switch to a ship with higher coolant capacity.\nHaving a scanner equipped improves the tier of asteroid you find.")}
+            "Mining":{      "mine":("**mine** *[Number]*", "Attempt to mine the number of asteroids given. if no number is given, it will mine until ship is full.\nYou must have a drill equipped to be able to mine asteroids.\nYour drill relies on coolant, determined by your ships capacity.\nWhen you run out of coolant you must either wait for a coolant refill or switch to a ship with higher coolant capacity.\nHaving a scanner equipped improves the tier of asteroid you find.")}
             }
 
 # help strings for bb commands
