@@ -11,10 +11,10 @@ class Criminal (bbAliasable.Aliasable):
     isPlayer = False
     builtIn = False
 
-    ship = None
+    activeShip = None
     hasShip = False
 
-    def __init__(self, name, faction, icon, builtIn=False, isPlayer=False, aliases=[], wiki="", ship=None):
+    def __init__(self, name, faction, icon, builtIn=False, isPlayer=False, aliases=[], wiki="", activeShip=None):
         super(Criminal, self).__init__(name, aliases)
         if name == "":
             raise RuntimeError("CRIM_CONS_NONAM: Attempted to create a Criminal with an empty name")
@@ -31,8 +31,8 @@ class Criminal (bbAliasable.Aliasable):
         self.isPlayer = isPlayer
         self.builtIn = builtIn
 
-        if ship is not None:
-            self.ship = bbShip.fromDict(ship.toDict())
+        if activeShip is not None:
+            self.activeShip = bbShip.fromDict(activeShip.toDict())
             self.hasShip = True
         else:
             self.hasShip = False
@@ -41,28 +41,28 @@ class Criminal (bbAliasable.Aliasable):
     def clearShip(self):
         if not self.hasShip:
             raise RuntimeError("CRIM_CLEARSH_NOSHIP: Attempted to clearShip on a Criminal with no active ship")
-        del self.ship
+        del self.activeShip
         self.hasShip = False
 
 
     def unequipShip(self):
         if not self.hasShip:
             raise RuntimeError("CRIM_UNEQSH_NOSHIP: Attempted to unequipShip on a Criminal with no active ship")
-        self.ship = None
+        self.activeShip = None
         self.hasShip = False
 
 
-    def equipShip(self, ship):
+    def equipShip(self, newShip):
         if self.hasShip:
             raise RuntimeError("CRIM_EQUIPSH_HASSH: Attempted to equipShip on a Criminal that already has an active ship")
-        self.ship = ship
+        self.activeShip = newShip
         self.hasShip = True
 
     
-    def copyShip(self, ship):
+    def copyShip(self, newShip):
         if self.hasShip:
             raise RuntimeError("CRIM_COPYSH_HASSH: Attempted to copyShip on a Criminal that already has an active ship")
-        self.ship = bbShip.fromDict(ship.toDict())
+        self.activeShip = bbShip.fromDict(newShip.toDict())
         self.hasShip = True
         
 
