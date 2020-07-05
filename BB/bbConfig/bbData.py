@@ -80,7 +80,7 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "check": ("**check <system>**", "Check if any criminals are in the given system, arrest them, and get paid! 💰"),
                             "duel": ("**duel [action] [user]** *<stakes>*", "Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`. When challenging another user to a duel, you must give the amount of credits you will win - the 'stakes'.")},
             
-            "Loadout":{     "hangar": ("**hangar** *[item-type]*", "Display the items in your hangar. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+            "Loadout":{     "hangar": ("**hangar** *[user]* *[item-type]*", "Display the items in your hangar, or in the hangar of a tagged user. Give an item type (ship/weapon/turret/module) to only list items of that type."),
                             "loadout": ("**loadout**", "Display your current ship and the items equipped onto it."),
                             "equip": ("**equip <item-type> <item-num>** *[transfer]*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When equipping a ship, specify `transfer` to move all items to the new ship."),
                             "unequip": ("**unequip <item-type> <item-num>**", "Unequip the requested item from your active ship, into your hangar. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),

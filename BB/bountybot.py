@@ -1443,7 +1443,7 @@ async def cmd_hangar(message, args):
 
                 elif bbUtil.isInt(arg):
                     if client.get_user(int(arg)) is not None and not foundUser:
-                        requestedUser = client.get_user(int(args))
+                        requestedUser = client.get_user(int(arg))
                         continue
                     if foundPage:
                         await message.channel.send(":x: I can only take one page number!")
