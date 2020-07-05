@@ -36,7 +36,3 @@ class bbItem(bbAliasable.Aliasable):
 
     def toDict(self):
         return {"name": self.name, "builtIn": True}
-
-    
-    def __hash__(self):
-        return hash(self.name)
