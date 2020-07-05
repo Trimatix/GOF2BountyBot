@@ -114,20 +114,26 @@ class TimedTask:
     """
     async def callExpiryFunction(self):
         try:
+            # Await async expiry Functions
             if self.asyncExpiryFunction:
+                # Pass args to expiry function if specified
                 if self.hasExpiryFunctionArgs:
                     return await self.expiryFunction(self.expiryFunctionArgs)
                 else:
                     return await self.expiryFunction()
+            # Do not await sync expiry functions
             else:
+                # Pass args to expiry function if specified
                 if self.hasExpiryFunctionArgs:
                     return self.expiryFunction(self.expiryFunctionArgs)
                 else:
                     return self.expiryFunction()
         except Exception as e:
+            # If the task is marked to reschedule on expiry func failure, reschedule the task
             if self.rescheduleOnExpiryFuncFailure:
-                print("Exception occured in callExpiryFunction, rescheduling: " + str(self))
+                print("Exception occured in callExpiryFunction, rescheduling: " + str(self) + ". Exception: " + str(e))
                 await self.reschedule()
+            # Otherwise, pass up the exception
             else:
                 raise e
 
