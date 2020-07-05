@@ -3563,7 +3563,7 @@ async def on_ready():
     # Create the new bounties TimedTask, to periodically spawn new bounties.
     try:
         # Use the behaviour and delay period defined in bbConfig.
-        ActiveTimedTasks.newBountyTT = TimedTask.DynamicRescheduleTask(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+        ActiveTimedTasks.newBountyTT = TimedTask.DynamicRescheduleTask(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceBounty, expiryFunctionArgs={})
     except KeyError:
         raise ValueError("bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
