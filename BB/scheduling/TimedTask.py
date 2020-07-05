@@ -16,7 +16,7 @@ If the task is set to autoReschedule, issueTime is updated to show the task's cu
 @param autoReschedule -- Whether or not this task should automatically reschedule itself by the same timedelta. Default: False
 """
 class TimedTask:
-    def __init__(self, issueTime=None, expiryTime=None, expiryDelta=None, expiryFunction=None, expiryFunctionArgs={}, autoReschedule=False):
+    def __init__(self, issueTime=None, expiryTime=None, expiryDelta=None, expiryFunction=None, expiryFunctionArgs={}, autoReschedule=False, rescheduleOnExpiryFuncFailure=False):
         # Ensure that at least one of expiryTime or expiryDelta is specified
         if expiryTime is None and expiryDelta is None:
             raise ValueError("No expiry time given, both expiryTime and expiryDelta are None")
@@ -33,6 +33,7 @@ class TimedTask:
         self.expiryFunctionArgs = expiryFunctionArgs
         self.hasExpiryFunctionArgs = expiryFunctionArgs != {}
         self.autoReschedule = autoReschedule
+        self.rescheduleOnExpiryFuncFailure = rescheduleOnExpiryFuncFailure
 
         # A task's 'gravestone' is marked as True when the TimedTask will no longer execute and can be removed from any TimedTask heap.
         # I.e, it is expired (whether manually or through timeout) and does not auto-reschedule.
@@ -112,16 +113,23 @@ class TimedTask:
     @return -- the results of the expiryFunction
     """
     async def callExpiryFunction(self):
-        if self.asyncExpiryFunction:
-            if self.hasExpiryFunctionArgs:
-                return await self.expiryFunction(self.expiryFunctionArgs)
+        try:
+            if self.asyncExpiryFunction:
+                if self.hasExpiryFunctionArgs:
+                    return await self.expiryFunction(self.expiryFunctionArgs)
+                else:
+                    return await self.expiryFunction()
             else:
-                return await self.expiryFunction()
-        else:
-            if self.hasExpiryFunctionArgs:
-                return self.expiryFunction(self.expiryFunctionArgs)
+                if self.hasExpiryFunctionArgs:
+                    return self.expiryFunction(self.expiryFunctionArgs)
+                else:
+                    return self.expiryFunction()
+        except Exception as e:
+            if self.rescheduleOnExpiryFuncFailure:
+                print("Exception occured in callExpiryFunction, rescheduling: " + str(self))
+                await self.reschedule()
             else:
-                return self.expiryFunction()
+                raise e
 
 
     """
@@ -198,9 +206,9 @@ If an expiryTime is specified, then this will be used for the first scheduling p
 @param autoReschedule -- Whether or not this task should automatically reschedule itself. You probably want this to be True, otherwise you may as well use a TimedTask. Default: False
 """
 class DynamicRescheduleTask(TimedTask):
-    def __init__(self, delayTimeGenerator, delayTimeGeneratorArgs={}, issueTime=None, expiryTime=None, expiryFunction=None, expiryFunctionArgs={}, autoReschedule=False):
+    def __init__(self, delayTimeGenerator, delayTimeGeneratorArgs={}, issueTime=None, expiryTime=None, expiryFunction=None, expiryFunctionArgs={}, autoReschedule=False, rescheduleOnExpiryFuncFailure=False):
         # Initialise TimedTask-inherited attributes
-        super(DynamicRescheduleTask, self).__init__(expiryDelta=delayTimeGenerator(delayTimeGeneratorArgs), issueTime=issueTime, expiryTime=expiryTime, expiryFunction=expiryFunction, expiryFunctionArgs=expiryFunctionArgs, autoReschedule=autoReschedule)
+        super(DynamicRescheduleTask, self).__init__(expiryDelta=delayTimeGenerator(delayTimeGeneratorArgs), issueTime=issueTime, expiryTime=expiryTime, expiryFunction=expiryFunction, expiryFunctionArgs=expiryFunctionArgs, autoReschedule=autoReschedule, rescheduleOnExpiryFuncFailure=rescheduleOnExpiryFuncFailure)
         self.delayTimeGenerator = delayTimeGenerator
         self.delayTimeGeneratorArgs = delayTimeGeneratorArgs
         self.hasDelayTimeGeneratorArgs = delayTimeGeneratorArgs != {}
