@@ -15,14 +15,19 @@ import operator
 
 # may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
+
 from .bbObjects import bbUser
 from .bbObjects.bounties import bbBounty, bbBountyConfig
 from .bbObjects.items import bbShip
 from .bbObjects.battles import ShipFight, DuelRequest
-from .scheduling import TimedTask
+
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
-from .scheduling import TimedTaskHeap
+
+from .scheduling import TimedTask, TimedTaskHeap
 from . import bbUtil, ActiveTimedTasks
+
+from . import ReactionItemPicker
+from .bbObjects import bbInventory
 
 
 
@@ -3527,8 +3532,8 @@ TODO: Implement dynamic timedtask checking period
 """
 @client.event
 async def on_ready():
-    for currentUser in usersDB.users.values():
-        currentUser.validateLoadout()
+    # for currentUser in usersDB.users.values():
+    #     currentUser.validateLoadout()
 
     print('We have logged in as {0.user}'.format(client))
     await client.change_presence(activity=discord.Game("Galaxy on Fire 2™ Full HD"))
@@ -3598,6 +3603,15 @@ async def on_message(message):
     # if message.channel.type == discord.ChannelType.private:
     #     return
 
+    """if message.content == "!trade <@!212542588643835905>":
+        inv = bbInventory.bbInventory()
+        inv.addItem(bbData.builtInModuleObjs["E2 Exoclad"])
+        inv.addItem(bbData.builtInModuleObjs["Medium Cabin"])
+        menuMsg = await message.channel.send("‎")
+        menu = ReactionItemPicker.ReactionItemPicker(menuMsg, inv, 5, titleTxt="**Niker107's Hangar**", footerTxt="React for your desired item", thumb="https://cdn.discordapp.com/avatars/212542588643835905/a20a7a46f7e3e4889363b14f485a3075.png?size=128")
+        await menu.updateMessage()
+        ActiveTimedTasks.reactionMenus[menuMsg.id] = menu"""
+
     if message.author.id in bbConfig.developers or message.guild is None or not message.guild.id in bbConfig.disabledServers:
 
         """
@@ -3652,6 +3666,14 @@ async def on_message(message):
             if not commandFound:
                 userTitle = bbConfig.devTitle if userIsDev else (bbConfig.adminTitle if userIsAdmin else bbConfig.userTitle)
                 await message.channel.send(""":question: Can't do that, """ + userTitle + """. Type `""" + bbConfig.commandPrefix + """help` for a list of commands! **o7**""")
+
+
+@client.event
+async def on_reaction_add(reaction, user):
+    if user != client.user and \
+            reaction.message.id in ActiveTimedTasks.reactionMenus and \
+            ActiveTimedTasks.reactionMenus[reaction.message.id].hasEmojiRegistered(reaction.emoji):
+        await ActiveTimedTasks.reactionMenus[reaction.message.id].reactionAdded(reaction.emoji)
 
 
 client.run(bbPRIVATE.botToken)
