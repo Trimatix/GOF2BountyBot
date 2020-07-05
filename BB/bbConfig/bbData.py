@@ -46,7 +46,7 @@ bountyIcons = { # Terran
                 "Merson Surr": "https://cdn.discordapp.com/attachments/700683544103747594/711226769327521872/merson_surr.png",
                 "Ganfor Kant": "https://cdn.discordapp.com/attachments/700683544103747594/711226766630584370/ganfor_kant.png"}
 
-# find the length of the longest criminal name, to be used in padding during $COMMANDPREFIX$bounties
+# find the length of the longest criminal name, to be used in padding during cmd_bounties
 longestBountyNameLength = 0
 for fac in bountyNames:
     for name in bountyNames[fac]:
@@ -56,7 +56,7 @@ for fac in bountyNames:
 # levels of security in bbSystems (bbSystem security is stored as an index in this list)
 securityLevels = ["secure", "average", "risky", "dangerous"]
 
-# map image URLS for $COMMANDPREFIX$map
+# map image URLS for cmd_map
 mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/700683544103747594/700683693215318076/gof2_coords.png"
 mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png'
 
@@ -124,8 +124,9 @@ rocketIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/
 factionIcons = {"terran":terranIcon, "vossk":vosskIcon, "midorian":midorianIcon, "nivelian":nivelianIcon, "neutral":neutralIcon}
 
 # colours to use in faction-related embed strips
-factionColours = {"terran":Colour.gold(), "vossk":Colour.dark_green(), "midorian":Colour.dark_red(), "nivelian":Colour.teal(), "neutral":Colour.purple()}
+factionColours = {"terran":Colour.gold(), "vossk":Colour.dark_green(), "midorian":Colour.dark_red(), "nivelian":Colour.dark_blue(), "neutral":Colour.purple()}
 
+# Data representing all ship items in the game. These are used to create bbShip objects, which are stored in builtInShipObjs in a similar dict format.
 builtInShipData = {# Terran
                     "Inflict": {"name": "Inflict", "manufacturer": "terran", "maxPrimaries": 2, "maxTurrets": 0, "maxModules": 4, "armour": 150, "cargo": 45, "numSecondaries": 1, "handling": 125, "value": 30900, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Inflict", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694046057824296/inflict.png", "emoji":"<:inflict:723705238091202650>"},
                     "Furious": {"name": "Furious", "manufacturer": "terran", "maxPrimaries": 1, "maxTurrets": 1, "maxModules": 6, "armour": 176, "cargo": 108, "numSecondaries": 2, "handling": 112, "value": 75800, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Furious", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694028752126162/furious.png", "emoji":"<:furious:723705236958609520>"},
@@ -205,6 +206,7 @@ builtInShipData = {# Terran
                     "Teneta R.E.D.": {"name": "Teneta R.E.D.", "manufacturer": "kaamo club", "maxPrimaries": 4, "maxTurrets": 1, "maxModules": 13, "armour": 545, "cargo": 70, "numSecondaries": 2, "handling": 117, "value": 7610000, "aliases": ["Teneta RED", "Teneta R.E.D"], "wiki": "https://galaxyonfire.fandom.com/wiki/Teneta_R.E.D.", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720787774328012840/teneta_r.e.d..png", "emoji":"<:tenetared:723705999277686814>"},
                     "Kinzer RS": {"name": "Kinzer RS", "manufacturer": "kaamo club", "maxPrimaries": 4, "maxTurrets": 0, "maxModules": 15, "armour": 420, "cargo": 65, "numSecondaries": 4, "handling": 125, "value": 8930000, "aliases": ["KinzerRS"], "wiki": "https://galaxyonfire.fandom.com/wiki/Kinzer_RS", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/720787863171629056/kinzer_rs.png", "emoji":"<:kinzerrs:723705998723907615>"}}
                     
+# Data representing all module items in the game. These are used to create bbModule objects, which are stored in builtInModuleObjs in a similar dict format.
 builtInModuleData = {   # armour
                         "E2 Exoclad": {"type": "armour", "name": "E2 Exoclad", "aliases": ["E2", "Exoclad", "Exoclad E2"], "armour": 40, "value": 1070, "wiki": "https://galaxyonfire.fandom.com/wiki/E2_Exoclad", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723474328687214612/e2_exoclad.png", "emoji": "<:e2exoclad:723706394716536842>"},
                         "E4 Ultra Lamina": {"type": "armour", "name": "E4 Ultra Lamina", "aliases": ["E4", "Lamina", "E4 Ultra", "E4 Lamina", "Ultra Lamina"], "armour": 80, "value": 4705, "wiki": "https://galaxyonfire.fandom.com/wiki/E4_Ultra_Lamina", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723474339860840468/e4_ultra_lamina.png", "emoji": "<:e4ultralamina:723706394485719121>"},
@@ -313,6 +315,7 @@ builtInModuleData = {   # armour
                         # time extenders
                         "Rhoda Vortex": {"type": "time extender", "name": "Rhoda Vortex", "aliases": ["Vortex"], "effect": 0.5, "duration": 15, "value": 370064, "wiki": "https://galaxyonfire.fandom.com/wiki/Rhoda_Vortex", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723482042918109204/rhoda_vortex.png", "emoji": "<:rhodavortex:723707119328690196>"}}
                         
+# Data representing all primary weapon items in the game. These are used to create bbWeapon objects, which are stored in builtInWeaponObjs in a similar dict format.
 builtInWeaponData = {   # Lasers
                         "Nirai Impulse EX 1": {"name": "Nirai Impulse EX 1", "aliases": ["Impulse EX 1", "Nirai EX 1", "EX 1", "Impulse 1", "Impulse EX1", "EX1", "Nirai Impulse EX1", "Nirai Impulse EX I", "Impulse EX I", "Nirai EX I", "EX I", "Impulse I", "Impulse EXI", "EXI", "Nirai Impulse EXI"], "dps":7.5, "value":2500, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_Impulse_EX_1", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476980837777408/nirai_impulse_ex_1.png", "emoji": "<:niraiimpulseex1:723709564217982997>"},
                         "Nirai Impulse EX 2": {"name": "Nirai Impulse EX 2", "aliases": ["Impulse EX 2", "Nirai EX 2", "EX 2", "Impulse 2", "Impulse EX2", "EX2", "Nirai Impulse EX2", "Nirai Impulse EX II", "Impulse EX II", "Nirai EX II", "EX II", "Impulse II", "Impulse EXII", "EXII", "Nirai Impulse EXII"], "dps":12.5, "value":6727, "wiki": "https://galaxyonfire.fandom.com/wiki/Nirai_Impulse_EX_2", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476989083910194/nirai_impulse_ex_2.png", "emoji": "<:niraiimpulseex2:723709564217851974>"},
@@ -366,6 +369,7 @@ builtInWeaponData = {   # Lasers
                         "Berger FlaK 9-9": {"name": "Berger FlaK 9-9", "aliases": ["Berger FlaK 9-9", "Berger FlaK", "Berger 9-9", "Flak 9-9", "9-9"], "dps":25.33, "value":135058, "wiki": "https://galaxyonfire.fandom.com/wiki/Berger_FlaK_9-9", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723477061800427560/berger_flak_9-9.png", "emoji": "<:bergerflak99:723709663610273843>"},
                         "Icarus Heavy AS": {"name": "Icarus Heavy AS", "aliases": ["Icarus Heavy AS", "Icarus Heavy", "Icarus AS", "Heavy AS", "Icarus"], "dps":33.33, "value":356787, "wiki": "https://galaxyonfire.fandom.com/wiki/Icarus_Heavy_AS", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723477069610352681/icarus_heavy_as.png", "emoji": "<:icarusheavyas:723709663723388949>"}}
 
+# Data representing all ship upgrades in the game. These are used to create bbShipUpgrade objects, which are stored in builtInUpgradeObjs in a similar dict format.
 builtInUpgradeData = {  "+30 Cargo Space": {"name": "+30 Cargo Space", "shipToUpgradeValueMult":0.3, "cargo": 30, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"},
                         "+20 Handling": {"name": "+20 Handling", "shipToUpgradeValueMult":0.2, "handling": 20, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"},
                         "Extra Equipment Slot": {"name": "Extra Equipment Slot", "shipToUpgradeValueMult":0.4, "maxModules": 1, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"},
@@ -451,6 +455,7 @@ builtInSystemData = { #Terran
             "Skor Terpa": {"name":"Skor Terpa", "faction":"neutral", "neighbours":[], "security":3, "coordinates":(7, 1), "aliases":[], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Skor_Terpa"}
         }
 
+# data for builtIn Turrets to be used in bbTurret.fromDict
 builtInTurretData = { # Manual
                         "Hammerhead D1": {"name": "Hammerhead D1", "aliases": ["D1"], "dps": 20, "value": 24174, "wiki": "https://galaxyonfire.fandom.com/wiki/Hammerhead_D1", "builtIn":False, "emoji": "<:hammerheadd1:723707422065033277>", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476535276863508/hammerhead_d1.png"},
                         "Hammerhead D2A2": {"name": "Hammerhead D2A2", "aliases": ["D2A2", "D2", "Hammerhead D2"], "dps": 35.71, "value": 77097, "wiki": "https://galaxyonfire.fandom.com/wiki/Hammerhead_D2A2", "builtIn":False, "emoji": "<:hammerheadd2a2:723707422136598568>", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476545703772210/hammerhead_d2a2.png"},
@@ -524,14 +529,19 @@ builtInSecondariesData = {
 }
 
 # To be populated during package init
+# These dicts contain item name: item object for the object described in the variable name.
+# This is primarily for use in their relevent fromDict functions.
 builtInSystemObjs = {}
 builtInCriminalObjs = {}
+# Ships are now stored as keys (names) rather than objects, as ships are no longer shared - every user has a unique ship object to allow for customisation
 # builtInShipObjs = {}
 builtInModuleObjs = {}
 builtInWeaponObjs = {}
 builtInUpgradeObjs = {}
 builtInTurretObjs = {}
 
+# References to the above item objects, duplated to form ranks.
+# For ranking and list population, see the bbConfig package init.
 rankedShipKeys = []
 shipRankIndexFreqs = {}
 rankedModuleObjs = []
