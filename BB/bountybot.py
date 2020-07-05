@@ -15,14 +15,19 @@ import operator
 
 # may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
+
 from .bbObjects import bbUser
 from .bbObjects.bounties import bbBounty, bbBountyConfig
 from .bbObjects.items import bbShip
 from .bbObjects.battles import ShipFight, DuelRequest
-from .scheduling import TimedTask
+
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
-from .scheduling import TimedTaskHeap
-from . import bbUtil, ActiveTimedTasks
+
+from .scheduling import TimedTask, TimedTaskHeap
+from . import bbUtil, ActiveTimedTasks, Mining
+
+from . import ReactionItemPicker
+from .bbObjects import bbInventory
 
 
 
@@ -231,6 +236,22 @@ async def announceNewShopStock():
                 await playCh.send(":arrows_counterclockwise: The shop stock has been refreshed!")
 
 
+
+"""
+Announce the stashing of commodities.
+Messages will be sent to the playChannels of all guilds in the guildsDB, if they have one
+"""
+async def announceCoolantRefill():
+    # loop over all guilds
+    for guild in guildsDB.guilds.values():
+        # ensure guild has a valid playChannel
+        if guild.hasPlayChannel():
+            playCh = client.get_channel(guild.getPlayChannelId())
+            if playCh is not None:
+                # send the announcement
+                await playCh.send(":arrows_counterclockwise: Your ships coolant has refilled. Happy mining!")
+
+
 """
 Build a simple discord embed.
 
@@ -312,6 +333,12 @@ async def refreshAndAnnounceAllShopStocks():
     await announceNewShopStock()
 
 
+async def stashAllUserCommodities():
+    for user in usersDB.getUsers():
+        user.commoditiesCollected = 0
+    await announceCoolantRefill()
+
+
 async def spawnAndAnnounceRandomBounty():
     # ensure a new bounty can be created
     if bountiesDB.canMakeBounty():
@@ -374,6 +401,67 @@ async def err_nodm(message, args):
 
 
 """
+initiates mining command
+"""
+async def cmd_mining(message, args):
+    user = usersDB.getOrAddID(message.author.id)
+
+    if user.getDrill() is None:
+        await message.channel.send(":x: You have no mining drill equipped!")
+        return
+    coolantCapacity = user.activeShip.getCargo() * user.getDrill().oreYield
+    if user.commoditiesCollected >= coolantCapacity:
+        await message.channel.send("Your drill is cooling down!")
+        return
+
+    minedOre = {}
+
+    if bbUtil.isInt(args):
+        intArg = int(args)
+        for i in range(intArg):
+            if user.commoditiesCollected >= coolantCapacity:
+                break
+            tier = Mining.pickTier(user.getScanner())
+            oreType = Mining.pickOre()
+            oreObj = bbData.builtInCommodityObjs[oreType]
+            oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
+            currentMiningResults = Mining.mineAsteroid(user, tier, oreObj, oreCoreObj)
+            for ore in currentMiningResults:
+                if ore in minedOre:
+                    minedOre[ore] += currentMiningResults[ore]
+                else:
+                    minedOre[ore] = currentMiningResults[ore]
+
+    else:
+        while user.commoditiesCollected < coolantCapacity:
+            tier = Mining.pickTier(user.getScanner())
+            oreType = Mining.pickOre()
+            oreObj = bbData.builtInCommodityObjs[oreType]
+            oreCoreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[oreType]]
+            currentMiningResults = Mining.mineAsteroid(user, tier, oreObj, oreCoreObj)
+            for ore in currentMiningResults:
+                if ore in minedOre:
+                    minedOre[ore] += currentMiningResults[ore]
+                else:
+                    minedOre[ore] = currentMiningResults[ore]
+
+    resultsEmbed = makeEmbed(titleTxt='__Mining Results__', footerTxt=message.author.name)
+    for ore in minedOre:
+        if ore.name in bbData.builtInCommodityData["Ore"]:
+            coreObj = bbData.builtInCommodityObjs[bbData.oreNameToCoreName[ore.name]]
+            resultsEmbed.add_field(name=(ore.emoji + ' ' if ore.hasEmoji else '') + ore.name, value=str(minedOre[ore]) + " ore" + ((" and " + str(minedOre[coreObj]) + " core" + ("s" if minedOre[coreObj] > 1 else "")) if coreObj in minedOre else ""))
+
+
+    if user.commoditiesCollected >= coolantCapacity:
+        await message.channel.send(":pick: **Mining Complete!**\nPlease wait until your drill has cooled down before mining again.", embed=resultsEmbed)
+    else: await message.channel.send(":pick: **Mining Complete!**", embed=resultsEmbed)
+
+
+bbCommands.register("mine", cmd_mining)
+dmCommands.register("mine", cmd_mining)
+
+
+"""
 Print the help strings defined in bbData as an embed.
 If a command is provided in args, the associated help string for just that command is printed.
 
@@ -418,7 +506,7 @@ async def cmd_help(message, args):
     if page == 0:
         helpEmbed.set_footer(text="All Pages")
         for section in bbData.helpDict.keys():
-        # section = list(bbData.helpDict.keys())[page - 1]
+            # section = list(bbData.helpDict.keys())[page - 1]
             helpEmbed.add_field(name="‎",value="__" + section + "__", inline=False)
             for currentCommand in bbData.helpDict[section].values():
                 helpEmbed.add_field(name=currentCommand[0],value=currentCommand[1].replace("$COMMANDPREFIX$",bbConfig.commandPrefix), inline=False)
@@ -1435,7 +1523,7 @@ async def cmd_hangar(message, args):
                         
                 elif arg in bbConfig.validItemNames:
                     if foundItem:
-                        await message.channel.send(":x: I can only take one item type (ship/weapon/module/turret)!")
+                        await message.channel.send(":x: I can only take one item type (ship/weapon/module/turret/commodity)!")
                         return
                     else:
                         item = arg.rstrip("s")
@@ -1540,6 +1628,15 @@ async def cmd_hangar(message, args):
                 if turretNum == firstPlace:
                     hangarEmbed.add_field(name="‎", value="__**Stored Turrets**__", inline=False)
                 hangarEmbed.add_field(name=str(turretNum) + ". " + requestedBBUser.inactiveTurrets[turretNum - 1].name, value=(requestedBBUser.inactiveTurrets[turretNum - 1].emoji if requestedBBUser.inactiveTurrets[turretNum - 1].hasEmoji else "") + requestedBBUser.inactiveTurrets[turretNum - 1].statsStringShort(), inline=False)
+
+        if item in ["all", "commodity"]:
+            commodityList = []
+            for listing in requestedBBUser.storedCommodities:
+                commodityList.append(listing)
+            for commodityNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("commodity", page, maxPerPage) + 1):
+                if commodityNum == firstPlace:
+                    hangarEmbed.add_field(name="‎", value="__**Stored Commodities**__", inline=False)
+                hangarEmbed.add_field(name=str(commodityNum) + ". " + requestedBBUser.storedCommodities[commodityList[commodityNum - 1]].item.name, value=(requestedBBUser.storedCommodities[commodityList[commodityNum - 1]].item.emoji if requestedBBUser.storedCommodities[commodityList[commodityNum - 1]].item.hasEmoji else "") + requestedBBUser.storedCommodities[commodityList[commodityNum - 1]].statsStringShort(), inline=False)
 
         try:
             await sendChannel.send(embed=hangarEmbed)
@@ -1875,16 +1972,25 @@ if "clear" is specified, the ship's items are unequipped before selling.
 async def cmd_shop_sell(message, args):
     argsSplit = args.split(" ")
     if len(argsSplit) < 2:
-        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `" + bbConfig.commandPrefix + "hangar`")
+        await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret/commodity) and an item number from `" + bbConfig.commandPrefix + "hangar`")
         return
     if len(argsSplit) > 3:
-        await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `clear` when selling a ship.")
+        await message.channel.send(":x: Too many arguments! Please only give an item type (ship/weapon/module/turret/commodity), an item number, and optionally `clear` when selling a ship, or a quantity when selling a commodity.")
         return
 
     item = argsSplit[0].rstrip("s")
     if item == "all" or item not in bbConfig.validItemNames:
-        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
+        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module, turret or commodity/commodities.")
         return
+
+    if item in bbConfig.commodityAlias:
+        if len(argsSplit) == 2:
+            if argsSplit[1] != "all":
+                await message.channel.send(":x: Not enough arguments! Please provide both an item number from `" + bbConfig.commandPrefix + "hangar`, and a quantity when selling commodities.")
+                return
+        elif len(argsSplit) < 3:
+            await message.channel.send(":x: Not enough arguments! Please provide both an item number from `" + bbConfig.commandPrefix + "hangar`, and a quantity when selling commodities.")
+            return
 
     if usersDB.userIDExists(message.author.id):
         requestedBBUser = usersDB.getUser(message.author.id)
@@ -1892,17 +1998,19 @@ async def cmd_shop_sell(message, args):
         requestedBBUser = usersDB.addUser(message.author.id)
 
     itemNum = argsSplit[1]
-    if not bbUtil.isInt(itemNum):
-        await message.channel.send(":x: Invalid item number!")
-        return
-    itemNum = int(itemNum)
-    if itemNum > len(requestedBBUser.getInactivesByName(item)):
-        await message.channel.send(":x: Invalid item number! You have " + str(len(requestedBBUser.getInactivesByName(item))) + " " + item + "s.")
-        return
-    if itemNum < 1:
-        await message.channel.send(":x: Invalid item number! Must be at least 1.")
-        return
-    
+    #TODO: create list in bbData of supported "sell all" options
+    if item not in bbConfig.commodityAlias or itemNum != "all":
+        if not bbUtil.isInt(itemNum):
+            await message.channel.send(":x: Invalid item number!")
+            return
+        itemNum = int(itemNum)
+        if itemNum > len(requestedBBUser.getInactivesByName(item)):
+            await message.channel.send(":x: Invalid item number! You have " + str(len(requestedBBUser.getInactivesByName(item))) + " " + item + "s.")
+            return
+        if itemNum < 1:
+            await message.channel.send(":x: Invalid item number! Must be at least 1.")
+            return
+
 
     clearItems = False
     if len(argsSplit) == 3:
@@ -1911,8 +2019,12 @@ async def cmd_shop_sell(message, args):
                 await message.channel.send(":x: `clear` can only be used when selling a ship!")
                 return
             clearItems = True
+        elif item in bbConfig.commodityAlias:
+            if not bbUtil.isInt(argsSplit[2]) or int(argsSplit[2]) < 0:
+                await message.channel.send(":x: Invalid quantity! You must sell at least 1.")
+                return
         else:
-            await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `clear` when selling a ship.")
+            await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret/commodity), an item number, and optionally `clear` when selling a ship.")
             return
 
     requestedShop = guildsDB.getGuild(message.guild.id).shop
@@ -1921,7 +2033,7 @@ async def cmd_shop_sell(message, args):
         requestedShip = requestedBBUser.inactiveShips[itemNum - 1]
         if clearItems:
             requestedBBUser.unequipAll(requestedShip)
-        
+
         requestedBBUser.credits += requestedShip.getValue()
         requestedBBUser.inactiveShips.remove(requestedShip)
         requestedShop.shipsStock.append(requestedShip)
@@ -1930,7 +2042,7 @@ async def cmd_shop_sell(message, args):
         if clearItems:
             outStr += "\nItems removed from the ship can be found in the hangar."
         await message.channel.send(outStr)
-    
+
     elif item == "weapon":
         requestedWeapon = requestedBBUser.inactiveWeapons[itemNum - 1]
         requestedBBUser.credits += requestedWeapon.value
@@ -1954,6 +2066,38 @@ async def cmd_shop_sell(message, args):
         requestedShop.turretsStock.append(requestedTurret)
 
         await message.channel.send(":moneybag: You sold your **" + requestedTurret.name + "** for **" + str(requestedTurret.value) + " credits**!")
+
+    elif item in bbConfig.commodityAlias:
+
+        commodityList = []
+        for listing in requestedBBUser.storedCommodities:
+            commodityList.append(listing)
+        sendMessage = ""
+        if argsSplit[1]=="all":
+            totalValue = 0
+            for commodity in commodityList:
+                quantity = requestedBBUser.storedCommodities[commodity].count
+                totalValue += commodity.value*quantity
+                requestedBBUser.sellCommodity(commodity, quantity)
+                # TODO: add message into embed
+                sendMessage += ":moneybag: you sold **" + str(quantity) + " " + commodity.name + "** for **" + str(commodity.value*quantity) + " credits**!\n"
+            await message.channel.send(sendMessage + ":moneybag::moneybag::moneybag:You sold all of them for **" + str(totalValue) +  "credits**!:moneybag::moneybag::moneybag:")
+            return
+
+        commodityQuantity = int(argsSplit[2])
+        requestedCommodity = requestedBBUser.storedCommodities[commodityList[itemNum - 1]]
+        commodityName = requestedCommodity.item.name
+        commodityValue = requestedCommodity.item.value
+
+        result = requestedBBUser.sellCommodity(requestedCommodity.item, commodityQuantity)
+        # TODO: add shop inventory stocking when shop commodities added
+        if result == 0:
+            await message.channel.send(":moneybag: you sold **" + str(commodityQuantity) + " " + commodityName + "** for **" + str(commodityValue*commodityQuantity) + " credits**!")
+        elif result == 1:
+            await message.channel.send(":x: insufficient quantity! you have " + str(requestedCommodity.count) + " in your inventory:!:")
+        elif result == 2:
+            # This should be unreachable due to previous itemNum validation
+            await message.channel.send(":x: commodity not found in inventory:!:")
 
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
@@ -1982,6 +2126,9 @@ async def cmd_equip(message, args):
     item = argsSplit[0].rstrip("s")
     if item == "all" or item not in bbConfig.validItemNames:
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
+        return
+    elif item == "commodity":
+        await message.channel.send(":x: You can't equip a commodity!")
         return
 
     if usersDB.userIDExists(message.author.id):
@@ -2105,6 +2252,9 @@ async def cmd_unequip(message, args):
         return
     if item == "ship":
         await message.channel.send(":x: You can't go without a ship! Instead, switch to another one.")
+        return
+    elif item == "commodity":
+        await message.channel.send(":x: You can't equip a commodity!")
         return
 
     unequipAll = argsSplit[1] == "all"
@@ -2723,6 +2873,9 @@ async def dev_cmd_sleep(message, args):
     
 bbCommands.register("sleep", dev_cmd_sleep, isDev=True)
 dmCommands.register("sleep", dev_cmd_sleep, isDev=True)
+
+bbCommands.register("slepp", dev_cmd_sleep, isDev=True)
+dmCommands.register("slepp", dev_cmd_sleep, isDev=True)
 
 
 """
@@ -3479,6 +3632,18 @@ async def dev_cmd_setbalance(message, args):
 bbCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 dmCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 
+"""
+developer command setting numCommoditiesCollected to 0
+"""
+async def dev_cmd_refill_coolant(message, args):
+    await stashAllUserCommodities()
+
+bbCommands.register("refill", dev_cmd_refill_coolant, isDev=True)
+dmCommands.register("refill", dev_cmd_refill_coolant, isDev=True)
+
+
+
+
 
 
 ####### MAIN FUNCTIONS #######
@@ -3527,8 +3692,8 @@ TODO: Implement dynamic timedtask checking period
 """
 @client.event
 async def on_ready():
-    for currentUser in usersDB.users.values():
-        currentUser.validateLoadout()
+    # for currentUser in usersDB.users.values():
+    #     currentUser.validateLoadout()
 
     print('We have logged in as {0.user}'.format(client))
     await client.change_presence(activity=discord.Game("Galaxy on Fire 2™ Full HD"))
@@ -3545,6 +3710,7 @@ async def on_ready():
     
     ActiveTimedTasks.shopRefreshTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
     ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
+    ActiveTimedTasks.inventoryOffloadTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.drillCooldownPeriod, autoReschedule=True, expiryFunction=stashAllUserCommodities)
 
     ActiveTimedTasks.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
 
@@ -3562,6 +3728,8 @@ async def on_ready():
         # elif bbConfig.timedTaskCheckingType == "dynamic":
 
         await ActiveTimedTasks.shopRefreshTT.doExpiryCheck()
+
+        await ActiveTimedTasks.inventoryOffloadTT.doExpiryCheck()
 
         if bbConfig.newBountyDelayReset:
             await ActiveTimedTasks.newBountyTT.forceExpire()
@@ -3597,6 +3765,15 @@ async def on_message(message):
 
     # if message.channel.type == discord.ChannelType.private:
     #     return
+
+    """if message.content == "!trade <@!212542588643835905>":
+        inv = bbInventory.bbInventory()
+        inv.addItem(bbData.builtInModuleObjs["E2 Exoclad"])
+        inv.addItem(bbData.builtInModuleObjs["Medium Cabin"])
+        menuMsg = await message.channel.send("‎")
+        menu = ReactionItemPicker.ReactionItemPicker(menuMsg, inv, 5, titleTxt="**Niker107's Hangar**", footerTxt="React for your desired item", thumb="https://cdn.discordapp.com/avatars/212542588643835905/a20a7a46f7e3e4889363b14f485a3075.png?size=128")
+        await menu.updateMessage()
+        ActiveTimedTasks.reactionMenus[menuMsg.id] = menu"""
 
     if message.author.id in bbConfig.developers or message.guild is None or not message.guild.id in bbConfig.disabledServers:
 
@@ -3652,6 +3829,14 @@ async def on_message(message):
             if not commandFound:
                 userTitle = bbConfig.devTitle if userIsDev else (bbConfig.adminTitle if userIsAdmin else bbConfig.userTitle)
                 await message.channel.send(""":question: Can't do that, """ + userTitle + """. Type `""" + bbConfig.commandPrefix + """help` for a list of commands! **o7**""")
+
+
+@client.event
+async def on_reaction_add(reaction, user):
+    if user != client.user and \
+            reaction.message.id in ActiveTimedTasks.reactionMenus and \
+            ActiveTimedTasks.reactionMenus[reaction.message.id].hasEmojiRegistered(reaction.emoji):
+        await ActiveTimedTasks.reactionMenus[reaction.message.id].reactionAdded(reaction.emoji)
 
 
 client.run(bbPRIVATE.botToken)

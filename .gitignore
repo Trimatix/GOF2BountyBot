@@ -2,3 +2,4 @@ BB/bbConfig/bbPrivate.py
 .vscode
 saveData
 __pycache__
+/BB/bbConfig/bbPRIVATE.py

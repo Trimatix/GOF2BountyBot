@@ -1,4 +1,5 @@
-from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
+from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret, bbInventoryListing, bbCommodity
+from .items.modules import bbMiningDrillModule, bbScannerModule
 from ..bbConfig import bbConfig
 
 
@@ -19,11 +20,16 @@ class bbUser:
     lastSeenGuildId = -1
     hasLastSeenGuildId = False
 
+    commoditiesCollected = 0
+
     activeShip = None
     inactiveShips = []
     inactiveModules = []
     inactiveWeapons = []
     inactiveTurrets = []
+
+    # Dict of commodity: bbInventoryListing
+    storedCommodities = {}
 
     # dict of targetBBUser:DuelRequest
     duelRequests = {}
@@ -33,7 +39,10 @@ class bbUser:
     duelCreditsLosses = 0
     
 
-    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0):
+    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None,
+            inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0,
+            duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0, defaultMineIsRisky=False, storedCommodities={}):
+        
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -77,6 +86,9 @@ class bbUser:
         self.inactiveWeapons = inactiveWeapons
         self.inactiveTurrets = inactiveTurrets
 
+        self.storedCommodities = storedCommodities
+        self.commoditiesCollected = 0
+
         self.lastSeenGuildId = lastSeenGuildId
         self.haslastSeenGuildId = lastSeenGuildId != -1
 
@@ -100,6 +112,8 @@ class bbUser:
         self.inactiveShips = []
         self.inactiveWeapons = []
         self.inactiveTurrets = []
+        self.storedCommodities = {}
+        self.commoditiesCollected = 0
 
 
     def numInventoryPages(self, item, maxPerPage):
@@ -110,11 +124,12 @@ class bbUser:
         numModules = len(self.inactiveModules)
         numTurrets = len(self.inactiveTurrets)
         numShips = len(self.inactiveShips)
+        numCommodities = len(self.storedCommodities)
 
         itemsNum = 0
 
         if item == "all":
-            itemsNum = max(numWeapons, numModules, numTurrets, numShips)
+            itemsNum = max(numWeapons, numModules, numTurrets, numShips, numCommodities)
         elif item == "module":
             itemsNum = numModules
         elif item == "weapon":
@@ -123,6 +138,8 @@ class bbUser:
             itemsNum = numTurrets
         elif item == "ship":
             itemsNum = numShips
+        elif item in ["commodity", "commoditie"]:
+            itemsNum = numCommodities
         else:
             raise NotImplementedError("Valid but unsupported item name: " + item)
         
@@ -143,6 +160,8 @@ class bbUser:
             return len(self.inactiveModules)
         elif item == "turret":
             return len(self.inactiveTurrets)
+        elif item in ["commodity","commoditie"]:
+            return len(self.storedCommodities)
         else:
             raise NotImplementedError("Valid but unsupported item name: " + item)
 
@@ -223,11 +242,16 @@ class bbUser:
         for turret in self.inactiveTurrets:
             inactiveTurretsDict.append(turret.toDict())
 
+        storedCommoditiesDict = []
+        for invListing in self.storedCommodities.values():
+            storedCommoditiesDict.append(invListing.toDict())
+
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "lastSeenGuildId":self.lastSeenGuildId,
-                "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses}
+                "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses,
+                "storedCommodities": storedCommoditiesDict}
 
 
     def userDump(self):
@@ -278,6 +302,8 @@ class bbUser:
             return self.inactiveModules
         if item == "turret":
             return self.inactiveTurrets
+        if item in ["commodity", "commoditie"]:
+            return self.storedCommodities
         else:
             raise NotImplementedError("Valid, but unrecognised item type: " + item)
 
@@ -307,6 +333,39 @@ class bbUser:
         self.removeDuelChallengeObj(self.duelRequests[duelTarget])
 
 
+    def getDrill(self):
+        for currentModule in self.activeShip.modules:
+            if currentModule.getType() == bbMiningDrillModule.bbMiningDrillModule:
+                return currentModule
+        return None
+
+    def getScanner(self):
+        for currentModule in self.activeShip.modules:
+            if currentModule.getType() == bbScannerModule.bbScannerModule:
+                return currentModule
+
+
+    def addCommodity(self, commodity, quantity):
+        if commodity in self.storedCommodities:
+            self.storedCommodities[commodity].increaseCount(quantity)
+        else:
+            self.storedCommodities[commodity] = bbInventoryListing.bbInventoryListing(commodity, quantity)
+        self.commoditiesCollected += quantity
+
+
+    def sellCommodity(self, commodity, quantity):
+        if commodity in self.storedCommodities:
+            commodityListing = self.storedCommodities[commodity]
+            if commodityListing.count < quantity:
+                return 1
+            self.credits += commodity.value * quantity
+            commodityListing.decreaseCount(quantity)
+            if commodityListing.count == 0:
+                del self.storedCommodities[commodity]
+            return 0
+        return 2
+
+
     def __str__(self):
         return "<bbUser #" + str(self.id) + ">"
 
@@ -334,8 +393,17 @@ def fromDict(id, userDict):
         for turret in userDict["inactiveTurrets"]:
             inactiveTurrets.append(bbTurret.fromDict(turret))
 
+    storedCommodities = {}
+    if "storedCommodities" in userDict:
+        for invListing in userDict["storedCommodities"]:
+            # TODO: This assumes builtIn. All toDicts and fromDicts are to be rewritten to allow for complete item spawning without reliance on builtIn.
+            newCommodity = bbCommodity.fromDict(invListing["item"])
+            storedCommodities[newCommodity] = bbInventoryListing.bbInventoryListing(newCommodity, count=invListing["count"])
+
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
                     bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
                     inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
-                    duelWins=userDict["duelWins"] if "duelWins" in userDict else 0, duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0, duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0, duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0)
+                    duelWins=userDict["duelWins"] if "duelWins" in userDict else 0, duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0,
+                    duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0, duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0,
+                    storedCommodities=storedCommodities)

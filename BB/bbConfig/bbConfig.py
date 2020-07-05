@@ -131,7 +131,16 @@ maxItemsPerHangarPageAll = 3
 maxItemsPerHangarPageIndividual = 5
 
 # Names to be used when checking input to !bb hangar and bbUser.numInventoryPages
-validItemNames = ["ship", "weapon", "module", "turret", "all"]
+validItemNames = ["ship", "weapon", "module", "turret", "all", "commodity", "commoditie", "cargo"]
+
+commodityAlias = ["commodity", "commoditie", "cargo"]
+
+
+
+##### MINING #####
+
+# amount of time between ship offloads of commodities
+drillCooldownPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
 
 
 
