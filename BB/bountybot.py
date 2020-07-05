@@ -730,7 +730,7 @@ async def cmd_check(message, args):
 
             for currentGuild in guildsDB.getGuilds():
                 if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
-                    await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + message.author.name + "**, checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
+                    await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
         # Increment the calling user's systemsChecked statistic
         usersDB.getUser(message.author.id).systemsChecked += 1
