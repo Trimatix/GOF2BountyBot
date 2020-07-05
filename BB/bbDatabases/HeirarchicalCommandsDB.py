@@ -1,6 +1,6 @@
 """
 Class that stores, categorises, and calls commands based on a text name and caller permissions.
-TODO: Change to a single dict of {accessLevel: {}} where the internal {} is as userCommands etc currently are, and accessLevel is int
+TODO: Change to a single list of [{}] where the internal {} is as userCommands etc currently are, and its index in the outer list corresponds to command access level
 """
 class HeirarchicalCommandsDB:
     userCommands = {}

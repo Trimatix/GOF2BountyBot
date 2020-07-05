@@ -1,3 +1,5 @@
+##### DUELS #####
+
 # Amount of time before a duel request expires
 duelReqExpiryTime = {"days":1}
 # duelReqExpiryTime as a user-friendly string for printing
@@ -5,8 +7,37 @@ duelReqExpiryTimeStr = "1 day"
 # The amount to vary ship stats (+-) by before executing a duel
 duelVariancePercent = 0.05
 
+# Max number of entries that can be printed for a duel log
+duelLogMaxLength = 10
+
+# Percentage probability of a user envoking a cloak module in a given timeStep, should they have one equipped
+duelCloakChance = 20
+
+
+
+##### SHOPS #####
+
 # Amount of time to wait between refreshing stock of all shops
 shopRefreshStockPeriod = {"days":0, "hours":12, "minutes":0, "seconds":0}
+
+# The number of ranks to use when randomly picking shop stock
+numShipRanks = 10
+numWeaponRanks = 10
+numModuleRanks = 7
+numTurretRanks = 3
+
+# The default number of items shops should generate every shopRefreshStockPeriod
+shopDefaultShipsNum = 5
+shopDefaultWeaponsNum = 5
+shopDefaultModulesNum = 5
+shopDefaultTurretsNum = 2
+
+# bbTurret is the only item that has a probability not to be spawned. This metric indicates the percentage chance of turrets being stocked on a given day
+turretSpawnProbability = 45
+
+
+
+##### BOUNTIES #####
 
 maxBountiesPerFaction = 5
 
@@ -26,21 +57,30 @@ newBountyDelayMin = 15 * 60
 # when using random delay generation, use this as the maximum wait time in seconds
 newBountyDelayMax = 1 * 60 * 60
 
-"""
-# DEPRECATED
-# the number of seconds to wait in between each save
-saveDelay = 30 * 60
-"""
+# The number of credits to award for each bPoint (each system in a criminal route)
+bPointsToCreditsRatio = 1000
+
+# time to put users on cooldown between using !bb check
+checkCooldown = {"minutes":3}
+
+# number of bounties ahead of a checked system in a route to report a recent criminal spotting (+1)
+closeBountyThreshold = 4
+
+
+
+##### SAVING #####
 
 # The time to wait inbetween database autosaves.
 savePeriod = {"hours":1}
 
+# path to JSON files for database saves
+userDBPath = "saveData/users.json"
+guildDBPath = "saveData/guilds.json"
+bountyDBPath = "saveData/bounties.json"
 
-"""
-# DEPRACATED
-# the number of seconds to wait before checking if a delay time is passed. should be a factor all delays given.
-delayFactor = 5
-"""
+
+
+##### SCHEDULING #####
 
 # Whether to execute timedtask checks every timedTaskLatenessThresholdSeconds ("fixed"), or to calculate the delay to wait until the next TimedTask is schedule to expire ("dynamic")
 timedTaskCheckingType = "fixed"
@@ -50,50 +90,40 @@ timedTaskCheckingType = "fixed"
 # replaces the depracated 'delayFactor' variable
 timedTaskLatenessThresholdSeconds = 10
 
-# The number of credits to award for each bPoint (each system in a criminal route)
-bPointsToCreditsRatio = 1000
 
-# max number of messages to wait before sending random !drink
-randomDrinkFactor = 500
-# wait time for initial period
-randomDrinkNum = int(randomDrinkFactor / 3)
 
-# time to put users on cooldown between using !bb check
-checkCooldown = {"minutes":3}
+##### MISC #####
 
-# path to JSON files for database saves
-userDBPath = "saveData/users.json"
-guildDBPath = "saveData/guilds.json"
-bountyDBPath = "saveData/bounties.json"
-
-# prefix for bot commands. dont forget a space!
+# prefix for bot commands. dont forget a space if you want one!
 commandPrefix = "$"
+
+# When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
+dmSentEmoji = "📬"
+
+# max number of characters accepted by nameShip
+maxShipNickLength = 30
+
+# The default emojis to list in a reaction menu
+defaultMenuEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+
+
+
+##### ADMINISTRATION #####
 
 # discord user IDs of all developers
 developers = [188618589102669826, 448491245296418817]
-
-# number of bounties ahead of a checked system in a route to report a recent criminal spotting (+1)
-closeBountyThreshold = 4
 
 # titles to give each type of user when reporting error messages etc
 devTitle = "officer"
 adminTitle = "commander"
 userTitle = "pilot"
 
-# The number of ranks to use when randomly picking shop stock
-numShipRanks = 10
-numWeaponRanks = 10
-numModuleRanks = 7
-numTurretRanks = 3
+# Servers where bountyBot commands are disabled. Currently this is just the emoji servers:
+disabledServers = [723704980246233219, 723702782640783361, 723708988830515231, 723704665560055848, 723705817764986900, 723703454635393056, 723708655031156742, 723706906517962814, 723704087962583131, 723704350131748935]
 
-# The default number of items shops should generate every shopRefreshStockPeriod
-shopDefaultShipsNum = 5
-shopDefaultWeaponsNum = 5
-shopDefaultModulesNum = 5
-shopDefaultTurretsNum = 2
 
-# bbTurret is the only item that has a probability not to be spawned. This metric indicates the percentage chance of turrets being stocked on a given day
-turretSpawnProbability = 45
+
+##### HANGARS #####
 
 # The maximum number of items that will be displayed per page of a user's hangar, when all item types are requested
 maxItemsPerHangarPageAll = 3
@@ -105,27 +135,16 @@ validItemNames = ["ship", "weapon", "module", "turret", "all", "commodity", "com
 
 commodityAlias = ["commodity", "commoditie", "cargo"]
 
-# When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
-dmSentEmoji = "📬"
 
-# max number of characters accepted by nameShip
-maxShipNickLength = 30
 
-# Do not touch these!
-newBountyDelayReset = False
-newBountyFixedDeltaChanged = False
-
-# Max number of entries that can be printed for a duel log
-duelLogMaxLength = 10
-
-# Percentage probability of a user envoking a cloak module in a given timeStep, should they have one equipped
-duelCloakChance = 20
-
-# Servers where bountyBot commands are disabled. Currently this is just the emoji servers:
-disabledServers = [723704980246233219, 723702782640783361, 723708988830515231, 723704665560055848, 723705817764986900, 723703454635393056, 723708655031156742, 723706906517962814, 723704087962583131, 723704350131748935]
-
-# the max number of each module type that can be equipped on a ship. This variable is now located in bbObjects.items.bbModuleFactory
-# maxModuleTypeEquips = {...}
+##### MINING #####
 
 # amount of time between ship offloads of commodities
 drillCooldownPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
+
+
+
+##### INTERNAL #####
+# Do not touch these!
+newBountyDelayReset = False
+newBountyFixedDeltaChanged = False

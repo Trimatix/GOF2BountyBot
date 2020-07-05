@@ -15,14 +15,21 @@ import operator
 
 # may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
+
 from .bbObjects import bbUser
 from .bbObjects.bounties import bbBounty, bbBountyConfig
 from .bbObjects.items import bbShip
 from .bbObjects.battles import ShipFight, DuelRequest
-from .bbObjects.tasks import TimedTask, TimedTaskAsync
+
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
-from .bbDatabases.tasks import TimedTaskAsyncHeap
+
+from .scheduling import TimedTask, TimedTaskHeap
 from . import bbUtil, ActiveTimedTasks, Mining
+
+from . import ReactionItemPicker
+from .bbObjects import bbInventory
+
+
 
 ####### DATABASE METHODS #######
 
@@ -754,6 +761,10 @@ async def cmd_check(message, args):
     # ensure the calling user is in the users database
     if not usersDB.userIDExists(message.author.id):
         usersDB.addUser(message.author.id)
+    
+    if not usersDB.getUser(message.author.id).activeShip.hasWeaponsEquipped() and not usersDB.getUser(message.author.id).activeShip.hasTurretsEquipped():
+        await message.channel.send(":x: Your ship has no weapons equipped!")
+        return
 
     # ensure the calling user is not on checking cooldown
     if datetime.utcfromtimestamp(usersDB.getUser(message.author.id).bountyCooldownEnd) < datetime.utcnow():
@@ -782,21 +793,32 @@ async def cmd_check(message, args):
             for bounty in toPop:
                 bountiesDB.removeBountyObj(bounty)
 
+        sightedCriminalsStr = ""
+        # Check if any bounties are close to the requested system in their route, defined by bbConfig.closeBountyThreshold
+        for fac in bountiesDB.getFactions():
+            for bounty in bountiesDB.getFactionBounties(fac):
+                if requestedSystem in bounty.route:
+                    if 0 < bounty.route.index(bounty.answer) - bounty.route.index(requestedSystem) < bbConfig.closeBountyThreshold:
+                        # Print any close bounty names
+                        sightedCriminalsStr += "**       **• Local security forces spotted **" + criminalNameOrDiscrim(bounty.criminal) + "** here recently.\n"
+        sightedCriminalsStr = sightedCriminalsStr[:-1]
+
         # If a bounty was won, print a congratulatory message
         if bountyWon:
             usersDB.getUser(message.author.id).bountyWins += 1
-            await message.channel.send(":moneybag: **" + message.author.name + "**, you now have **" + str(usersDB.getUser(message.author.id).credits) + " Credits!**")
+            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.name + "**, you now have **" + str(usersDB.getUser(message.author.id).credits) + " Credits!**")
+
+            if sightedCriminalsStr != "":
+                for currentGuild in guildsDB.getGuilds():
+                    if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
+                        await client.get_channel(currentGuild.getPlayChannelId()).send(sightedCriminalsStr)
         # If no bounty was won, print an error message
         else:
-            outmsg = ":telescope: **" + message.author.name + "**, you did not find any criminals!"
-            # Check if any bounties are close to the requested system in their route, defined by bbConfig.closeBountyThreshold
-            for fac in bountiesDB.getFactions():
-                for bounty in bountiesDB.getFactionBounties(fac):
-                    if requestedSystem in bounty.route:
-                        if 0 < bounty.route.index(bounty.answer) - bounty.route.index(requestedSystem) < bbConfig.closeBountyThreshold:
-                            # Print any close bounty names
-                            outmsg += "\n       • Local security forces spotted **" + criminalNameOrDiscrim(bounty.criminal) + "** here recently. "
-            await message.channel.send(outmsg)
+            await message.channel.send(":telescope: **" + message.author.name + "**, you did not find any criminals in **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
+
+            for currentGuild in guildsDB.getGuilds():
+                if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
+                    await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + message.author.name + "**, checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
         # Increment the calling user's systemsChecked statistic
         usersDB.getUser(message.author.id).systemsChecked += 1
@@ -1384,6 +1406,7 @@ async def cmd_leaderboard(message, args):
     # units for the stat
     boardUnit = "Credit"
     boardUnits = "Credits"
+    boardDesc = "*The total value of player inventory, loadout and credits balance"
 
     # change leaderboard arguments based on the what is provided in args
     if args != "":
@@ -1399,24 +1422,30 @@ async def cmd_leaderboard(message, args):
             if arg not in "gcsw":
                 await message.channel.send(":x: Unknown argument: '**" + arg + "**'. Please refer to `" + bbConfig.commandPrefix + "help leaderboard`")
                 return
-        if "g" in args:
-            globalBoard = True
-            boardScope = "Global Leaderboard"
         if "c" in args:
             stat = "credits"
             boardTitle = "Current Balance"
             boardUnit = "Credit"
             boardUnits = "Credits"
+            boardDesc = "*Current player credits balance"
         elif "s" in args:
             stat = "systemsChecked"
             boardTitle = "Systems Checked"
             boardUnit = "System"
             boardUnits = "Systems"
+            boardDesc = "*Total number of systems `" + bbConfig.commandPrefix + "check`ed"
         elif "w" in args:
             stat = "bountyWins"
             boardTitle = "Bounties Won"
             boardUnit = "Bounty"
             boardUnits = "Bounties"
+            boardDesc = "*Total number of bounties won"
+        if "g" in args:
+            globalBoard = True
+            boardScope = "Global Leaderboard"
+            boardDesc += " across all servers"
+            
+        boardDesc += ".*"
 
     # get the requested stats and sort users by the stat
     inputDict = {}
@@ -1426,7 +1455,7 @@ async def cmd_leaderboard(message, args):
     sortedUsers = sorted(inputDict.items(), key=operator.itemgetter(1))[::-1]
 
     # build the leaderboard embed
-    leaderboardEmbed = makeEmbed(titleTxt=boardTitle, authorName=boardScope, icon=bbData.winIcon, col = bbData.factionColours["neutral"])
+    leaderboardEmbed = makeEmbed(titleTxt=boardTitle, authorName=boardScope, icon=bbData.winIcon, col = bbData.factionColours["neutral"], desc=boardDesc)
 
     # add all users to the leaderboard embed with places and values
     externalUser = False
@@ -2556,7 +2585,7 @@ async def cmd_duel(message, args):
 
         try:
             newDuelReq = DuelRequest.DuelRequest(sourceBBUser, targetBBUser, stakes, None, guildsDB.getGuild(message.guild.id))
-            duelTT = TimedTaskAsync.TimedTaskAsync(expiryDelta=timeDeltaFromDict(bbConfig.duelReqExpiryTime), expiryFunction=expireAndAnnounceDuelReq, expiryFunctionArgs={"duelReq":newDuelReq}, asyncExpiryFunction=True)
+            duelTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.duelReqExpiryTime), expiryFunction=expireAndAnnounceDuelReq, expiryFunctionArgs={"duelReq":newDuelReq})
             newDuelReq.duelTimeoutTask = duelTT
             ActiveTimedTasks.duelRequestTTDB.scheduleTask(duelTT)
             sourceBBUser.addDuelChallenge(newDuelReq)
@@ -2568,8 +2597,8 @@ async def cmd_duel(message, args):
             await message.channel.send(":woozy_face: An unexpected error occurred! Tri, what did you do...")
             return
 
-        expiryTimesSplit = duelTT.expiryTime.strftime("%e %B %H %M").split(" ")
-        duelExpiryTimeString = "This duel request will expire on the **" + expiryTimesSplit[0] + getNumExtension(int(expiryTimesSplit[0])) + "** of **" + expiryTimesSplit[1] + "**, at **" + expiryTimesSplit[2] + ":" + expiryTimesSplit[3] + "** CST."
+        expiryTimesSplit = duelTT.expiryTime.strftime("%d %B %H %M").split(" ")
+        duelExpiryTimeString = "This duel request will expire on the **" + expiryTimesSplit[0].lstrip('0') + getNumExtension(int(expiryTimesSplit[0])) + "** of **" + expiryTimesSplit[1] + "**, at **" + expiryTimesSplit[2] + ":" + expiryTimesSplit[3] + "** CST."
 
         if message.guild.get_member(requestedUser.id) is None:
             targetUserDCGuild = findBBUserDCGuild(targetBBUser)
@@ -3419,7 +3448,7 @@ async def dev_cmd_make_bounty(message, args):
         newEndTime = float(newEndTime)
 
         # parse the given icon
-        newIcon = bData[8].rstrip(" ").lower()
+        newIcon = bData[8].rstrip(" ")
         if newIcon == "auto":
             newIcon = "" if not builtIn else builtInCrimObj.icon
 
@@ -3438,8 +3467,8 @@ async def dev_cmd_make_bounty(message, args):
     bountiesDB.addBounty(newBounty)
     await announceNewBounty(newBounty)
     
-bbCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True)
-dmCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True)
+bbCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True, forceKeepArgsCasing=True)
+dmCommands.register("make-bounty", dev_cmd_make_bounty, isDev=True, forceKeepArgsCasing=True)
 
 
 """
@@ -3536,7 +3565,7 @@ async def dev_cmd_make_player_bounty(message, args):
         newEndTime = float(newEndTime)
 
         # parse the requested icon URL
-        newIcon = bData[8].rstrip(" ").lower()
+        newIcon = bData[8].rstrip(" ")
         if newIcon == "auto":
             newIcon = str(client.get_user(int(newName.lstrip("<@!").rstrip(">"))).avatar_url_as(size=64))
 
@@ -3551,8 +3580,8 @@ async def dev_cmd_make_player_bounty(message, args):
     bountiesDB.addBounty(newBounty)
     await announceNewBounty(newBounty)
     
-bbCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True)
-dmCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True)
+bbCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True, forceKeepArgsCasing=True)
+dmCommands.register("make-player-bounty", dev_cmd_make_player_bounty, isDev=True, forceKeepArgsCasing=True)
 
 
 """
@@ -3663,8 +3692,8 @@ TODO: Implement dynamic timedtask checking period
 """
 @client.event
 async def on_ready():
-    for currentUser in usersDB.users.values():
-        currentUser.validateLoadout()
+    # for currentUser in usersDB.users.values():
+    #     currentUser.validateLoadout()
 
     print('We have logged in as {0.user}'.format(client))
     await client.change_presence(activity=discord.Game("Galaxy on Fire 2™ Full HD"))
@@ -3675,15 +3704,15 @@ async def on_ready():
     bountyDelayGeneratorArgs = {"fixed":bbConfig.newBountyFixedDelta, "random":{"min": bbConfig.newBountyDelayMin, "max": bbConfig.newBountyDelayMax}}
 
     try:
-        ActiveTimedTasks.newBountyTT = TimedTaskAsync.DynamicRescheduleTaskAsync(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty, asyncExpiryFunction=True)
+        ActiveTimedTasks.newBountyTT = TimedTask.DynamicRescheduleTask(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
     except KeyError:
         raise ValueError("bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
-    ActiveTimedTasks.shopRefreshTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks, asyncExpiryFunction=True)
+    ActiveTimedTasks.shopRefreshTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
     ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
-    ActiveTimedTasks.inventoryOffloadTT = TimedTaskAsync.DynamicRescheduleTaskAsync(getFixedDelay, delayTimeGeneratorArgs=bbConfig.drillCooldownPeriod, autoReschedule=True, expiryFunction=stashAllUserCommodities, asyncExpiryFunction=True)
+    ActiveTimedTasks.inventoryOffloadTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.drillCooldownPeriod, autoReschedule=True, expiryFunction=stashAllUserCommodities)
 
-    ActiveTimedTasks.duelRequestTTDB = TimedTaskAsyncHeap.TimedTaskAsyncHeap()
+    ActiveTimedTasks.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
 
     if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" + bbConfig.timedTaskCheckingType + "'")
@@ -3708,7 +3737,7 @@ async def on_ready():
         else:
             await ActiveTimedTasks.newBountyTT.doExpiryCheck()
         
-        ActiveTimedTasks.dbSaveTT.doExpiryCheck()
+        await ActiveTimedTasks.dbSaveTT.doExpiryCheck()
 
         await ActiveTimedTasks.duelRequestTTDB.doTaskChecking()
 
@@ -3736,6 +3765,15 @@ async def on_message(message):
 
     # if message.channel.type == discord.ChannelType.private:
     #     return
+
+    """if message.content == "!trade <@!212542588643835905>":
+        inv = bbInventory.bbInventory()
+        inv.addItem(bbData.builtInModuleObjs["E2 Exoclad"])
+        inv.addItem(bbData.builtInModuleObjs["Medium Cabin"])
+        menuMsg = await message.channel.send("‎")
+        menu = ReactionItemPicker.ReactionItemPicker(menuMsg, inv, 5, titleTxt="**Niker107's Hangar**", footerTxt="React for your desired item", thumb="https://cdn.discordapp.com/avatars/212542588643835905/a20a7a46f7e3e4889363b14f485a3075.png?size=128")
+        await menu.updateMessage()
+        ActiveTimedTasks.reactionMenus[menuMsg.id] = menu"""
 
     if message.author.id in bbConfig.developers or message.guild is None or not message.guild.id in bbConfig.disabledServers:
 
@@ -3791,6 +3829,14 @@ async def on_message(message):
             if not commandFound:
                 userTitle = bbConfig.devTitle if userIsDev else (bbConfig.adminTitle if userIsAdmin else bbConfig.userTitle)
                 await message.channel.send(""":question: Can't do that, """ + userTitle + """. Type `""" + bbConfig.commandPrefix + """help` for a list of commands! **o7**""")
+
+
+@client.event
+async def on_reaction_add(reaction, user):
+    if user != client.user and \
+            reaction.message.id in ActiveTimedTasks.reactionMenus and \
+            ActiveTimedTasks.reactionMenus[reaction.message.id].hasEmojiRegistered(reaction.emoji):
+        await ActiveTimedTasks.reactionMenus[reaction.message.id].reactionAdded(reaction.emoji)
 
 
 client.run(bbPRIVATE.botToken)

@@ -1,11 +1,10 @@
-class BattleShipState:
-    hull = 0
-    armour = 0
-    shield = 0
-    remainingCloak = 0
-    cloaking = False
-    EMPCooldown = 0
+"""
+Class representing the state of a BattleShip at a given moment in time.
+TODO: Move to BattleShip.py
 
+@param battleShip -- the BattleShip to record the stats of
+"""
+class BattleShipState:
     def __init__(self, battleShip):
         self.hull = battleShip.hull
         self.armour = battleShip.armour
