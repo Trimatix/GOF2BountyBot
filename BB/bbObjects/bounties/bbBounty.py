@@ -28,12 +28,12 @@ class Bounty:
             if config.builtIn:
                 self.criminal = bbData.builtInCriminalObjs[config.name]
                 # builtIn criminals cannot be players, so just equip the ship
-                self.criminal.equipShip(config.ship)
+                self.criminal.equipShip(config.activeShip)
             else:
                 self.criminal = bbCriminal.Criminal(config.name, config.faction, config.icon, isPlayer=config.isPlayer, aliases=config.aliases, wiki=config.wiki)
                 # Don't just claim player ships! players could unequip ship items. Take a deep copy of the ship
                 if config.isPlayer:
-                    self.criminal.copyShip(config.ship)
+                    self.criminal.copyShip(config.activeShip)
 
         else:
             self.criminal = criminalObj

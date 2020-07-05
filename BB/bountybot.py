@@ -26,7 +26,7 @@ from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from .scheduling import TimedTask, TimedTaskHeap
 from . import bbUtil, ActiveTimedTasks
 
-from . import ReactionItemPicker
+from . import ReactionInventoryPicker
 from .bbObjects import bbInventory
 
 
@@ -322,7 +322,20 @@ async def spawnAndAnnounceBounty(newBountyData):
     if bountiesDB.canMakeBounty():
         newBounty = newBountyData["newBounty"]
         if newBounty is None:
-            newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
+            newBounty = bbBounty.Bounty(bountyDB=bountiesDB, config=newBountyData["newConfig"] if "newConfig" in newBountyData else None)
+        elif "newConfig" in newBountyData:
+            newConfig = newBountyData["newConfig"]
+            if not newConfig.generated:
+                newConfig.generate(bountiesDB)
+            newBounty.route = newConfig.route
+            newBounty.start = newConfig.start
+            newBounty.end = newConfig.end
+            newBounty.answer = newConfig.answer
+            newBounty.checked = newConfig.checked
+            newBounty.reward = newConfig.reward
+            newBounty.issueTime = newConfig.issueTime
+            newBounty.endTime = newConfig.endTime
+
         # activate and announce the bounty
         bountiesDB.addBounty(newBounty)
         await announceNewBounty(newBounty)
@@ -364,6 +377,28 @@ def findBBUserDCGuild(user):
                 return lastSeenGuild
     
     return None
+
+
+def fillLoadoutEmbed(ship, baseEmbed, shipEmoji=False):
+    if ship is not None:
+        baseEmbed.add_field(name="Active Ship:", value=(ship.emoji if shipEmoji and ship.hasEmoji else "") + ship.getNameAndNick() + "\n" + ship.statsStringNoItems(), inline=False)
+
+        if ship.getMaxPrimaries() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(ship.weapons)) + "/" + str(ship.getMaxPrimaries()) + "*", inline=False)
+            for weaponNum in range(1, len(ship.weapons) + 1):
+                baseEmbed.add_field(name=str(weaponNum) + ". " + ship.weapons[weaponNum - 1].name, value=(ship.weapons[weaponNum - 1].emoji if ship.weapons[weaponNum - 1].hasEmoji else "") + ship.weapons[weaponNum - 1].statsStringShort(), inline=True)
+
+        if ship.getMaxModules() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(ship.modules)) + "/" + str(ship.getMaxModules()) + "*", inline=False)
+            for moduleNum in range(1, len(ship.modules) + 1):
+                baseEmbed.add_field(name=str(moduleNum) + ". " + ship.modules[moduleNum - 1].name, value=(ship.modules[moduleNum - 1].emoji if ship.modules[moduleNum - 1].hasEmoji else "") + ship.modules[moduleNum - 1].statsStringShort(), inline=True)
+        
+        if ship.getMaxTurrets() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(ship.turrets)) + "/" + str(ship.getMaxTurrets()) + "*", inline=False)
+            for turretNum in range(1, len(ship.turrets) + 1):
+                baseEmbed.add_field(name=str(turretNum) + ". " + ship.turrets[turretNum - 1].name, value=(ship.turrets[turretNum - 1].emoji if ship.turrets[turretNum - 1].hasEmoji else "") + ship.turrets[turretNum - 1].statsStringShort(), inline=True)
+
+    return baseEmbed
 
 
 ####### SYSTEM COMMANDS #######
@@ -689,6 +724,7 @@ async def cmd_check(message, args):
     # ensure the calling user is not on checking cooldown
     if datetime.utcfromtimestamp(requestedBBUser.bountyCooldownEnd) < datetime.utcnow():
         bountyWon = False
+        bountyLost = False
         # Loop over all bounties in the database
         for fac in bountiesDB.getFactions():
             # list of completed bounties to remove from the bounties database
@@ -699,28 +735,43 @@ async def cmd_check(message, args):
                 # If current bounty resides in the requested system
                 if bounty.check(requestedSystem, message.author.id) == 3:
 
-                    duelResults = bbUtil.fightShips(requestedBBUser.activeShip, bounty.criminal.activeShip)
+                    duelResults = bbUtil.fightShips(requestedBBUser.activeShip, bounty.criminal.activeShip, bbConfig.duelVariancePercent)
+                    statsEmbed = makeEmbed(authorName="**Duel Stats**")
+                    statsEmbed.add_field(name="DPS (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)",value=message.author.mention + ": " + str(round(duelResults["ship1"]["DPS"]["varied"], 2)) + "\n" + bounty.criminal.name + ": " + str(round(duelResults["ship2"]["DPS"]["varied"], 2)))
+                    statsEmbed.add_field(name="Health (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)",value=message.author.mention + ": " + str(round(duelResults["ship1"]["health"]["varied"])) + "\n" + bounty.criminal.name + ": " + str(round(duelResults["ship2"]["health"]["varied"], 2)))
+                    statsEmbed.add_field(name="Time To Kill",value=message.author.mention + ": " + (str(round(duelResults["ship1"]["TTK"], 2)) if duelResults["ship1"]["TTK"] != -1 else "inf.") + "s\n" + bounty.criminal.name + ": " + (str(round(duelResults["ship2"]["TTK"], 2)) if duelResults["ship2"]["TTK"] != -1 else "inf.") + "s")
 
-                    bountyWon = True
+                    if duelResults["winningShip"] is not requestedBBUser.activeShip:
+                        respawnTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict({"minutes": len(bounty.route)}), 
+                                                        expiryFunction=spawnAndAnnounceBounty,
+                                                        expiryFunctionArgs={"newBounty": bounty, "newConfig": bbBountyConfig.BountyConfig(faction=bounty.criminal.faction)},
+                                                        rescheduleOnExpiryFuncFailure=True)
+                        ActiveTimedTasks.escapedBountiesRespawnTTDB.scheduleTask(respawnTT)
 
-                    ActiveTimedTasks.escapedBountiesRespawnTTDB.scheduleTask(   TimedTask.TimedTask(expiryDelta=timeDeltaFromDict({"minutes": len(bounty.route)}), 
-                                                                                                    expiryFunction=spawnAndAnnounceBounty,
-                                                                                                    expiryFunctionArgs={"newBounty": bounty},
-                                                                                                    rescheduleOnExpiryFuncFailure=True))
+                        bountyLost = True
+                        bountiesDB.escapedCriminals[bounty.criminal.faction].append(bounty.criminal)
 
-                    # criminal ship unequip is delayed until now rather than handled in bounty.check
-                    # to allow for duel info printing. this could instead be replaced by bounty.check returning the ShipFight info.
-                    bounty.criminal.clearShip()
+                        await message.channel.send(bounty.criminal.name + " got away! " + respawnTT.expiryTime.strftime("%B %d %H %M %S"),embed=statsEmbed)
 
-                    # reward all contributing users
-                    rewards = bounty.calcRewards()
-                    for userID in rewards:
-                        usersDB.getUser(userID).credits += rewards[userID]["reward"]
-                        usersDB.getUser(userID).lifetimeCredits += rewards[userID]["reward"]
+                    else:
+                        bountyWon = True
+
+                        # criminal ship unequip is delayed until now rather than handled in bounty.check
+                        # to allow for duel info printing. this could instead be replaced by bounty.check returning the ShipFight info.
+                        bounty.criminal.clearShip()
+
+                        # reward all contributing users
+                        rewards = bounty.calcRewards()
+                        for userID in rewards:
+                            usersDB.getUser(userID).credits += rewards[userID]["reward"]
+                            usersDB.getUser(userID).lifetimeCredits += rewards[userID]["reward"]
+                        
+                        # Announce the bounty has ben completed
+                        await announceBountyWon(bounty, rewards, message.guild, message.author.id)
+                        message.channel.send("‎",embed=statsEmbed)
+                    
                     # add this bounty to the list of bounties to be removed
                     toPop += [bounty]
-                    # Announce the bounty has ben completed
-                    await announceBountyWon(bounty, rewards, message.guild, message.author.id)
 
             # remove all completed bounties
             for bounty in toPop:
@@ -745,8 +796,9 @@ async def cmd_check(message, args):
                 for currentGuild in guildsDB.getGuilds():
                     if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
                         await client.get_channel(currentGuild.getPlayChannelId()).send(sightedCriminalsStr)
+        # elif bountyLost:
         # If no bounty was won, print an error message
-        else:
+        elif not bountyLost:
             await message.channel.send(":telescope: **" + message.author.name + "**, you did not find any criminals in **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
             for currentGuild in guildsDB.getGuilds():
@@ -1658,8 +1710,41 @@ async def cmd_loadout(message, args):
     useDummyData = False
     userFound = False
 
-    if len(args.split(" ")) > 1:
+    if len(args.split(" ")) > 1 and args.split(" ")[0] != "criminal":
         await message.channel.send(":x: Too many arguments! I can only take a target user!")
+        return
+    elif len(args.split(" ")) > 2:
+        await message.channel.send(":x: Too many arguments! I can only take a target criminal!")
+        return
+    elif len(args.split(" ")) == 1 and args == "criminal":
+        await message.channel.send(":x: Not enough arguments! Please give the criminal name.")
+        return
+
+    if args.split(" ")[0] == "criminal":
+        # look up the criminal object
+        criminalName = args.split(" ")[1].title()
+        criminalObj = None
+        for crim in bbData.builtInCriminalObjs.keys():
+            if bbData.builtInCriminalObjs[crim].isCalled(criminalName):
+                criminalObj = bbData.builtInCriminalObjs[crim]
+
+        # report unrecognised criminal names
+        if criminalObj is None:
+            if len(criminalName) < 20:
+                await message.channel.send(":x: **" + criminalName + "** is not in my database! :detective:")
+            else:
+                await message.channel.send(":x: **" + criminalName[0:15] + "**... is not in my database! :detective:")
+            return
+
+        if not criminalObj.hasShip:
+            await message.channel.send(":x: **" + criminalObj.name + "** is not currently wanted!")
+            return
+        
+        activeShip = criminalObj.activeShip
+        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=criminalObj.name.title(), col=bbData.factionColours[criminalObj.faction] if criminalObj.faction in bbData.factionColours else bbData.factionColours["neutral"], thumb=criminalObj.icon)
+        loadoutEmbed = fillLoadoutEmbed(activeShip, loadoutEmbed, shipEmoji=True)
+        
+        await message.channel.send(embed=loadoutEmbed)
         return
     
     if bbUtil.isMention(args) or bbUtil.isInt(args):
@@ -1681,23 +1766,8 @@ async def cmd_loadout(message, args):
     if useDummyData:
         activeShip = bbShip.fromDict(bbUser.defaultShipLoadoutDict)
         loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours[activeShip.manufacturer] if activeShip.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], thumb=activeShip.icon if activeShip.hasIcon else requestedUser.avatar_url_as(size=64))
-        loadoutEmbed.add_field(name="Active Ship:", value=activeShip.name + "\n" + activeShip.statsStringNoItems(), inline=False)
         
-        loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
-        for weaponNum in range(1, len(activeShip.weapons) + 1):
-            loadoutEmbed.add_field(name=str(weaponNum) + ". " + activeShip.weapons[weaponNum - 1].name, value=(activeShip.weapons[weaponNum - 1].emoji if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
-
-
-        loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + "*", inline=False)
-        for moduleNum in range(1, len(activeShip.modules) + 1):
-            loadoutEmbed.add_field(name=str(moduleNum) + ". " + activeShip.modules[moduleNum - 1].name, value=(activeShip.modules[moduleNum - 1].emoji if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
-        
-        
-        loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + "*", inline=False)
-        for turretNum in range(1, len(activeShip.turrets) + 1):
-            loadoutEmbed.add_field(name=str(turretNum) + ". " + activeShip.turrets[turretNum - 1].name, value=(activeShip.turrets[turretNum - 1].emoji if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
-        
-        await message.channel.send(embed=loadoutEmbed)
+        await message.channel.send(embed=fillLoadoutEmbed(activeShip, loadoutEmbed))
         return
 
     else:
@@ -1708,22 +1778,7 @@ async def cmd_loadout(message, args):
         if activeShip is None:
             loadoutEmbed.add_field(name="Active Ship:", value="None", inline=False)
         else:
-            loadoutEmbed.add_field(name="Active Ship:", value=activeShip.getNameAndNick() + "\n" + activeShip.statsStringNoItems(), inline=False)
-
-            if activeShip.getMaxPrimaries() > 0:
-                loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
-                for weaponNum in range(1, len(activeShip.weapons) + 1):
-                    loadoutEmbed.add_field(name=str(weaponNum) + ". " + activeShip.weapons[weaponNum - 1].name, value=(activeShip.weapons[weaponNum - 1].emoji if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
-
-            if activeShip.getMaxModules() > 0:
-                loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + "*", inline=False)
-                for moduleNum in range(1, len(activeShip.modules) + 1):
-                    loadoutEmbed.add_field(name=str(moduleNum) + ". " + activeShip.modules[moduleNum - 1].name, value=(activeShip.modules[moduleNum - 1].emoji if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
-            
-            if activeShip.getMaxTurrets() > 0:
-                loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + "*", inline=False)
-                for turretNum in range(1, len(activeShip.turrets) + 1):
-                    loadoutEmbed.add_field(name=str(turretNum) + ". " + activeShip.turrets[turretNum - 1].name, value=(activeShip.turrets[turretNum - 1].emoji if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
+            loadoutEmbed = fillLoadoutEmbed(activeShip, loadoutEmbed)
         
         await message.channel.send(embed=loadoutEmbed)
 
@@ -3563,7 +3618,7 @@ async def on_ready():
     # Create the new bounties TimedTask, to periodically spawn new bounties.
     try:
         # Use the behaviour and delay period defined in bbConfig.
-        ActiveTimedTasks.newBountyTT = TimedTask.DynamicRescheduleTask(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceBounty, expiryFunctionArgs={})
+        ActiveTimedTasks.newBountyTT = TimedTask.DynamicRescheduleTask(bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
     except KeyError:
         raise ValueError("bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
@@ -3636,7 +3691,7 @@ async def on_message(message):
         inv.addItem(bbData.builtInModuleObjs["E2 Exoclad"])
         inv.addItem(bbData.builtInModuleObjs["Medium Cabin"])
         menuMsg = await message.channel.send("‎")
-        menu = ReactionItemPicker.ReactionItemPicker(menuMsg, inv, 5, titleTxt="**Niker107's Hangar**", footerTxt="React for your desired item", thumb="https://cdn.discordapp.com/avatars/212542588643835905/a20a7a46f7e3e4889363b14f485a3075.png?size=128")
+        menu = ReactionInventoryPicker.ReactionInventoryPicker(menuMsg, inv, 5, titleTxt="**Niker107's Hangar**", footerTxt="React for your desired item", thumb="https://cdn.discordapp.com/avatars/212542588643835905/a20a7a46f7e3e4889363b14f485a3075.png?size=128")
         await menu.updateMessage()
         ActiveTimedTasks.reactionMenus[menuMsg.id] = menu"""
 

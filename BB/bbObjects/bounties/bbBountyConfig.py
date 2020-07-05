@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from ...bbConfig import bbData, bbConfig
 from ... import bbUtil
+from ..items import bbShip
 
 class BountyConfig:
     faction = ""
@@ -21,7 +22,7 @@ class BountyConfig:
     generated = False
     ship = None
 
-    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki="", ship=None):
+    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki="", activeShip=None):
         self.faction = faction.lower()
         self.name = name.title()
         self.isPlayer = False if isPlayer is None else isPlayer
@@ -45,7 +46,7 @@ class BountyConfig:
         self.aliases = aliases
         self.wiki = wiki
 
-        self.ship = ship
+        self.activeShip = activeShip
         
     
     def generate(self, bountyDB, noCriminal=True, forceKeepChecked=False, forceNoDBCheck=False):
@@ -119,6 +120,11 @@ class BountyConfig:
         for station in self.route:
             if (not forceKeepChecked) or station not in self.checked or self.checked == {}:
                 self.checked[station] = -1
+
+        if self.activeShip is None:
+            self.activeShip = bbShip.fromDict(bbData.builtInShipData["Inflict"])
+            for i in range(self.activeShip.maxPrimaries):
+                self.activeShip.equipWeapon(random.choice(list(bbData.builtInWeaponObjs.values())))
 
         self.generated = True
         

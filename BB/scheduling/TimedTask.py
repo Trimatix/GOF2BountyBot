@@ -132,7 +132,7 @@ class TimedTask:
         except Exception as e:
             # If the task is marked to reschedule on expiry func failure, reschedule the task
             if self.rescheduleOnExpiryFuncFailure:
-                print("Exception occured in callExpiryFunction, rescheduling: " + str(self) + ". Exception: " + str(e))
+                print("Exception occured in callExpiryFunction + " + str(self.expiryFunction) + ", rescheduling: " + str(self) + ". Exception: " + str(e))
                 await self.reschedule()
             # Otherwise, pass up the exception
             else:

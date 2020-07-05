@@ -1,4 +1,4 @@
-from ..bbObjects.bounties import bbBounty
+from ..bbObjects.bounties import bbBounty, bbCriminal
 
 
 """
@@ -17,11 +17,15 @@ class bbBountyDB:
 
         # Useable faction names for this bbBountyDB
         self.factions = factions
-        for fac in factions:
-            self.bounties[fac] = []
-
         # the maximum length a faction's self.bounties dict can be
         self.maxBountiesPerFaction = maxBountiesPerFaction
+        # dictionary of faction: list of bbCriminals which should not be spawned.
+        # Currently used for escaped criminals
+        self.escapedCriminals = {}
+
+        for fac in factions:
+            self.bounties[fac] = []
+            self.escapedCriminals[fac] = []
 
 
     """
@@ -36,6 +40,7 @@ class bbBountyDB:
             raise KeyError("Attempted to add a faction that already exists: " + faction)
         # Initialise faction's database to empty
         self.bounties[faction] = []
+        self.escapedCriminals[faction] = []
 
 
     """
@@ -49,11 +54,13 @@ class bbBountyDB:
         if not self.factionExists(faction):
             raise KeyError("Unrecognised faction: " + faction)
         # Remove the faction name from the DB
-        self.bounties.pop(faction)
+        del self.bounties[faction]
+        del self.escapedCriminals[faction]
 
 
     """
     Clear all bounties stored under a faction, or under all factions if none is specified
+    Also clears the criminals in ignoredCriminals
 
     @param faction -- The faction whose bounties to clear. All factions' bounties are cleared if None is given. Default: None
     @throws KeyError -- When given a faction which does not exist in this DB
@@ -65,6 +72,7 @@ class bbBountyDB:
                 raise KeyError("Unrecognised faction: " + faction)
             # Empty the faction's bounties
             self.bounties[faction] = []
+            self.escapedCriminals[faction] = []
         # If no faction is given
         else:
             # clearBounties for each faction in the DB
@@ -140,6 +148,36 @@ class bbBountyDB:
         # The criminal was not recognised, raise an error
         raise KeyError("Bounty not found: " + name)
 
+    
+    """
+    Get the bbCriminal object for a given name or alias, from the list of escaped criminals.
+    This process is much more efficient when given the faction that the criminal is wanted by.
+
+    @param name -- A name or alias for the bbCriminal to be fetched.
+    @param faction -- The faction by which the bbCriminal is wanted. Give None if this is not known, to search all factions. Default: None
+    @return -- the the named bbCriminal
+    @throws KeyError -- If the requested criminal name does not exist in the escapedCriminals list
+    """
+    def getEscapedCriminal(self, name, faction=None):
+        # If the criminal's faction is known
+        if faction is not None:
+            # Search the given faction's bounties
+            for crim in self.escapedCriminals[faction]:
+                # Return the named criminal's bbBounty if the name is found
+                if crim.isCalled(name):
+                    return crim
+
+        # If the criminal's faction is not known, search all factions
+        else:
+            for fac in self.getFactions():
+                # Return the named criminal's bbBounty if the name is found
+                for crim in self.escapedCriminals[fac]:
+                    if crim.isCalled(name):
+                        return crim
+        
+        # The criminal was not recognised, raise an error
+        raise KeyError("Bounty not found: " + name)
+
 
     """
     Check whether this DB has space for more bounties
@@ -164,7 +202,7 @@ class bbBountyDB:
     @return -- True if the requested faction has space for more bounties, False otherwise
     """
     def factionCanMakeBounty(self, faction):
-        return self.getFactionNumBounties(faction) < self.maxBountiesPerFaction
+        return (self.getFactionNumBounties(faction) - len(self.escapedCriminals[faction])) < self.maxBountiesPerFaction
 
 
     """
@@ -181,7 +219,10 @@ class bbBountyDB:
             self.getBounty(name, faction)
         # Return False if the name was not found, True otherwise
         except KeyError:
-            return False
+            try:
+                self.getEscapedCriminal(name, faction)
+            except KeyError:
+                return False
         return True
 
     
@@ -223,7 +264,7 @@ class bbBountyDB:
 
         # ensure the given bounty does not already exist
         if self.bountyNameExists(bounty.criminal.name):
-            raise ValueError("Attempted to add a bounty whose name already exists: " + bounty.name)
+            raise ValueError("Attempted to add a bounty whose name already exists: " + bounty.criminal.name)
 
         # Add the bounty to the database
         self.bounties[bounty.faction].append(bounty)
@@ -255,13 +296,16 @@ class bbBountyDB:
     @return -- A dictionary containing all data needed to recreate this bbBountyDB.
     """
     def toDict(self):
-        data = {}
+        data = {"escapedCriminals": []}
         # Serialise all factions into name : list of serialised bbBounty
         for fac in self.getFactions():
             data[fac] = []
             # Serialise all of the current faction's bounties into dictionary
             for bounty in self.getFactionBounties(fac):
                 data[fac].append(bounty.toDict())
+
+            for crim in self.escapedCriminals[fac]:
+                data["escapedCriminals"].append(crim.toDict())
         return data
 
 
@@ -309,6 +353,9 @@ def fromDict(bountyDBDict, maxBountiesPerFaction, dbReload=False):
     newDB = bbBountyDB(bountyDBDict.keys(), maxBountiesPerFaction)
     # Iterate over all factions in the DB
     for fac in bountyDBDict.keys():
+        if fac == "escapedCriminals":
+            for crim in bountyDBDict[fac]:
+                newDB.escapedCriminals[fac].append(bbCriminal.fromDict(crim))
         # Convert each serialised bbBounty into a bbBounty object
         for bountyDict in bountyDBDict[fac]:
             newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
