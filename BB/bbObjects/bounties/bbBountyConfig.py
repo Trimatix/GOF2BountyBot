@@ -6,22 +6,6 @@ from ... import bbUtil
 from ..items import bbShip
 
 class BountyConfig:
-    faction = ""
-    name = ""
-    isPlayer = ""
-    route = []
-    start = ""
-    end = ""
-    answer = ""
-    checked = {}
-    reward = -1.0
-    issueTime = -1.0
-    endTime = -1.0
-    icon = ""
-    builtIn = False
-    generated = False
-    ship = None
-
     def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki="", activeShip=None):
         self.faction = faction.lower()
         self.name = name.title()
@@ -122,6 +106,8 @@ class BountyConfig:
                 self.checked[station] = -1
 
         if self.activeShip is None:
+            if self.isPlayer:
+                raise ValueError("Attempted to generate a player bounty without providing the activeShip")
             self.activeShip = bbShip.fromDict(bbData.builtInShipData["Inflict"])
             for i in range(self.activeShip.maxPrimaries):
                 self.activeShip.equipWeapon(random.choice(list(bbData.builtInWeaponObjs.values())))

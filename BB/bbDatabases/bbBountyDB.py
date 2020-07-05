@@ -213,15 +213,18 @@ class bbBountyDB:
     @param faction -- The faction whose bounties to check for the named criminal. Use None if the faction is not known. Default: None
     @return -- True if a bbBounty is found for a bbCriminal with the given name, False if the given name does not correspond to an active bounty in this DB
     """
-    def bountyNameExists(self, name, faction=None):
+    def bountyNameExists(self, name, faction=None, noEscapedCrim=False):
         # Search for a bbBounty object under the given name
         try:
             self.getBounty(name, faction)
         # Return False if the name was not found, True otherwise
         except KeyError:
-            try:
-                self.getEscapedCriminal(name, faction)
-            except KeyError:
+            if not noEscapedCrim:
+                try:
+                    self.getEscapedCriminal(name, faction)
+                except KeyError:
+                    return False
+            else:
                 return False
         return True
 
@@ -356,7 +359,8 @@ def fromDict(bountyDBDict, maxBountiesPerFaction, dbReload=False):
         if fac == "escapedCriminals":
             for crim in bountyDBDict[fac]:
                 newDB.escapedCriminals[fac].append(bbCriminal.fromDict(crim))
-        # Convert each serialised bbBounty into a bbBounty object
-        for bountyDict in bountyDBDict[fac]:
-            newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
+        else:
+            # Convert each serialised bbBounty into a bbBounty object
+            for bountyDict in bountyDBDict[fac]:
+                newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
     return newDB

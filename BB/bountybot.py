@@ -768,7 +768,7 @@ async def cmd_check(message, args):
                         
                         # Announce the bounty has ben completed
                         await announceBountyWon(bounty, rewards, message.guild, message.author.id)
-                        message.channel.send("‎",embed=statsEmbed)
+                        await message.channel.send("‎",embed=statsEmbed)
                     
                     # add this bounty to the list of bounties to be removed
                     toPop += [bounty]
@@ -895,7 +895,7 @@ async def cmd_route(message, args):
 
     requestedBountyName = args
     # if the named criminal is wanted
-    if bountiesDB.bountyNameExists(requestedBountyName.lower()):
+    if bountiesDB.bountyNameExists(requestedBountyName.lower(), noEscapedCrim=True):
         # display their route
         bounty = bountiesDB.getBounty(requestedBountyName.lower())
         outmessage = "**" + criminalNameOrDiscrim(bounty.criminal) + "**'s current route:\n> "
@@ -1723,22 +1723,18 @@ async def cmd_loadout(message, args):
     if args.split(" ")[0] == "criminal":
         # look up the criminal object
         criminalName = args.split(" ")[1].title()
-        criminalObj = None
-        for crim in bbData.builtInCriminalObjs.keys():
-            if bbData.builtInCriminalObjs[crim].isCalled(criminalName):
-                criminalObj = bbData.builtInCriminalObjs[crim]
 
         # report unrecognised criminal names
-        if criminalObj is None:
-            if len(criminalName) < 20:
-                await message.channel.send(":x: **" + criminalName + "** is not in my database! :detective:")
-            else:
-                await message.channel.send(":x: **" + criminalName[0:15] + "**... is not in my database! :detective:")
+        if not bountiesDB.bountyNameExists(criminalName, noEscapedCrim=True):
+            errmsg = ":x: That pilot is not currently wanted!"
+            
+            if bbUtil.isMention(criminalName):
+                errmsg += "\n:warning: **Don't tag users**, use their name and ID number like so: `" + bbConfig.commandPrefix + "route Trimatix#2244`"
+            
+            await message.channel.send(errmsg)
             return
 
-        if not criminalObj.hasShip:
-            await message.channel.send(":x: **" + criminalObj.name + "** is not currently wanted!")
-            return
+        criminalObj = bountiesDB.getBounty(criminalName).criminal
         
         activeShip = criminalObj.activeShip
         loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=criminalObj.name.title(), col=bbData.factionColours[criminalObj.faction] if criminalObj.faction in bbData.factionColours else bbData.factionColours["neutral"], thumb=criminalObj.icon)
@@ -3414,7 +3410,7 @@ async def dev_cmd_make_player_bounty(message, args):
             await message.channel.send(":x: Player not found!")
             return
         # create a new bounty at random for the specified user
-        newBounty = bbBounty.Bounty(bountyDB=bountiesDB, config=bbBountyConfig.BountyConfig(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), aliases=[userTagOrDiscrim(args)]))
+        newBounty = bbBounty.Bounty(bountyDB=bountiesDB, config=bbBountyConfig.BountyConfig(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), aliases=[userTagOrDiscrim(args)], activeShip=usersDB.getOrAddID(requestedID).activeShip))
     
     # if the faction is also given
     elif len(args.split("+")) == 2:
@@ -3425,7 +3421,7 @@ async def dev_cmd_make_player_bounty(message, args):
             return
         # create a bounty at random for the specified user and faction
         newFaction = args.split("+")[1]
-        newBounty = bbBounty.Bounty(bountyDB=bountiesDB, config=bbBountyConfig.BountyConfig(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), faction=newFaction, aliases=[userTagOrDiscrim(args.split(" ")[0])]))
+        newBounty = bbBounty.Bounty(bountyDB=bountiesDB, config=bbBountyConfig.BountyConfig(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(client.get_user(requestedID).avatar_url_as(size=64)), faction=newFaction, aliases=[userTagOrDiscrim(args.split(" ")[0])], activeShip=usersDB.getOrAddID(requestedID).activeShip))
     
     # if all arguments are given
     elif len(args.split("+")) == 10:
@@ -3491,7 +3487,7 @@ async def dev_cmd_make_player_bounty(message, args):
             newIcon = str(client.get_user(int(newName.lstrip("<@!").rstrip(">"))).avatar_url_as(size=64))
 
         # create the bounty object
-        newBounty = bbBounty.Bounty(bountyDB=bountiesDB, config=bbBountyConfig.BountyConfig(faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon, aliases=[userTagOrDiscrim(newName)]))
+        newBounty = bbBounty.Bounty(bountyDB=bountiesDB, config=bbBountyConfig.BountyConfig(faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon, aliases=[userTagOrDiscrim(newName)], activeShip=usersDB.getOrAddID(newName).activeShip))
     
     # print an error for incorrect syntax
     else:
