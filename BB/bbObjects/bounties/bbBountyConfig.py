@@ -93,9 +93,27 @@ class BountyConfig:
         if self.activeShip is None:
             if self.isPlayer:
                 raise ValueError("Attempted to generate a player bounty without providing the activeShip")
-            self.activeShip = bbShip.fromDict(bbData.builtInShipData["Inflict"])
+            self.activeShip = bbShip.fromDict(random.choice(list(bbData.builtInShipData.values())))
             for i in range(self.activeShip.maxPrimaries):
                 self.activeShip.equipWeapon(random.choice(list(bbData.builtInWeaponObjs.values())))
+            for i in range(random.randint(1, self.activeShip.maxModules)):
+                moduleNotFound = True
+                while moduleNotFound:
+                    try:
+                        self.activeShip.equipModule(random.choice(list(bbData.builtInModuleObjs.values())))
+                        moduleNotFound = False
+                    except ValueError:
+                        pass
+            for i in range(self.activeShip.maxTurrets):
+                equipTurret = random.randint(1,100)
+                if equipTurret <= 30:
+                    turretNotFound = True
+                    while turretNotFound:
+                        try:
+                            self.activeShip.equipTurret(random.choice(list(bbData.builtInTurretObjs.values())))
+                            turretNotFound = False
+                        except ValueError:
+                            pass
         
         if self.reward == -1:
             self.reward = int(len(self.route) * bbConfig.bPointsToCreditsRatio + self.activeShip.getValue() * bbConfig.shipValueRewardPercentage)

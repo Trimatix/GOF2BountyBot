@@ -33,11 +33,12 @@ class Bounty:
         else:
             self.criminal = criminalObj
 
-        # Don't just claim player ships! players could unequip ship items. Take a deep copy of the ship
-        if config.isPlayer:
-            self.criminal.copyShip(config.activeShip)
-        else:
-            self.criminal.equipShip(config.activeShip)
+        if not self.criminal.hasShip:
+            # Don't just claim player ships! players could unequip ship items. Take a deep copy of the ship
+            if config.isPlayer:
+                self.criminal.copyShip(config.activeShip)
+            else:
+                self.criminal.equipShip(config.activeShip)
 
         self.faction = self.criminal.faction
         self.issueTime = config.issueTime

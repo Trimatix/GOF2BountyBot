@@ -323,18 +323,22 @@ async def spawnAndAnnounceBounty(newBountyData):
         newBounty = newBountyData["newBounty"]
         if newBounty is None:
             newBounty = bbBounty.Bounty(bountyDB=bountiesDB, config=newBountyData["newConfig"] if "newConfig" in newBountyData else None)
-        elif "newConfig" in newBountyData:
-            newConfig = newBountyData["newConfig"]
-            if not newConfig.generated:
-                newConfig.generate(bountiesDB)
-            newBounty.route = newConfig.route
-            newBounty.start = newConfig.start
-            newBounty.end = newConfig.end
-            newBounty.answer = newConfig.answer
-            newBounty.checked = newConfig.checked
-            newBounty.reward = newConfig.reward
-            newBounty.issueTime = newConfig.issueTime
-            newBounty.endTime = newConfig.endTime
+        else:
+            if bountiesDB.escapedCriminalExists(newBounty.criminal):
+                bountiesDB.removeEscapedCriminal(newBounty.criminal)
+
+            if "newConfig" in newBountyData and newBountyData["newConfig"] is not None:
+                newConfig = newBountyData["newConfig"]
+                if not newConfig.generated:
+                    newConfig.generate(bountiesDB)
+                newBounty.route = newConfig.route
+                newBounty.start = newConfig.start
+                newBounty.end = newConfig.end
+                newBounty.answer = newConfig.answer
+                newBounty.checked = newConfig.checked
+                newBounty.reward = newConfig.reward
+                newBounty.issueTime = newConfig.issueTime
+                newBounty.endTime = newConfig.endTime
 
         # activate and announce the bounty
         bountiesDB.addBounty(newBounty)
@@ -749,7 +753,7 @@ async def cmd_check(message, args):
                         ActiveTimedTasks.escapedBountiesRespawnTTDB.scheduleTask(respawnTT)
 
                         bountyLost = True
-                        bountiesDB.escapedCriminals[bounty.criminal.faction].append(bounty.criminal)
+                        bountiesDB.addEscapedCriminal(bounty.criminal, len(bounty.route))
 
                         await message.channel.send(bounty.criminal.name + " got away! " + respawnTT.expiryTime.strftime("%B %d %H %M %S"),embed=statsEmbed)
 
@@ -3620,6 +3624,14 @@ async def on_ready():
     
     # Create the escaped bounties rescheduler. If a player locatesa criminal but is unable to beat them in a duel, the bounty reappears later.
     ActiveTimedTasks.escapedBountiesRespawnTTDB = TimedTaskHeap.TimedTaskHeap()
+
+    for crim in bountiesDB.escapedCriminalTimeouts:
+        respawnTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict({"minutes": bountiesDB.escapedCriminalTimeouts[crim]}), 
+                                        expiryFunction=spawnAndAnnounceBounty,
+                                        expiryFunctionArgs={"newBounty": bbBounty.Bounty(criminalObj=crim, config=bbBountyConfig.BountyConfig(faction=crim.faction), dbReload=True), "newConfig": None},
+                                        rescheduleOnExpiryFuncFailure=True)
+        ActiveTimedTasks.escapedBountiesRespawnTTDB.scheduleTask(respawnTT)
+
     # Create the shop stock refresh TimedTask, refresh the stock of all shops according to the period in bbConfig.
     ActiveTimedTasks.shopRefreshTT = TimedTask.DynamicRescheduleTask(getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
      # Create the database saving TimedTask, to save all data to JSON periodically as defined in bbConfig.

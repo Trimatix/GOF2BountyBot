@@ -72,9 +72,18 @@ class Criminal (bbAliasable.Aliasable):
 
     def toDict(self):
         if self.builtIn:
-            return {"builtIn":True, "name":self.name}
+            data = {"builtIn":True, "name":self.name}
         else:
-            return {"builtIn":False, "isPlayer": self.isPlayer, "name":self.name, "icon":self.icon, "faction":self.faction, "aliases":self.aliases, "wiki":self.wiki}
+            data = {"builtIn":False, "isPlayer": self.isPlayer, "name":self.name, "icon":self.icon, "faction":self.faction, "aliases":self.aliases, "wiki":self.wiki}
+
+        if self.hasShip:
+            data["activeShip"] = self.activeShip.toDict()
+        
+        return data
+
+    
+    def __hash__(self):
+        return hash(self.name)
 
 
 def fromDict(crimDict, builtIn=False):

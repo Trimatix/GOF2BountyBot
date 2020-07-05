@@ -22,10 +22,50 @@ class bbBountyDB:
         # dictionary of faction: list of bbCriminals which should not be spawned.
         # Currently used for escaped criminals
         self.escapedCriminals = {}
+        # dictionary of bbCriminal: number of minutes until the bounty should respawn.
+        # Currently used only for saving.
+        self.escapedCriminalTimeouts = {}
 
         for fac in factions:
             self.bounties[fac] = []
             self.escapedCriminals[fac] = []
+
+
+    """
+    Add a criminal to the record of escaped criminals.
+    crim must not yet be recorded in the escaped criminals database.
+
+    @param crim -- The criminal to record
+    @param time -- Integer number of minutes used for scheduling this criminal's respawn
+    """
+    def addEscapedCriminal(self, crim, time):
+        if crim in self.escapedCriminals[crim.faction]:
+            raise KeyError("criminal already on record: " + crim.name)
+        self.escapedCriminalTimeouts[crim] = time
+        self.escapedCriminals[crim.faction].append(crim)
+
+    
+    """
+    Remove a criminal from the record of escaped criminals.
+    crim must already be recorded in the escaped criminals database.
+
+    @param crim -- The criminal to remove from the record
+    """
+    def removeEscapedCriminal(self, crim):
+        if crim not in self.escapedCriminals[crim.faction]:
+            raise KeyError("criminal not found: " + crim.name)
+        self.escapedCriminals[crim.faction].remove(crim)
+        del self.escapedCriminalTimeouts[crim]
+
+
+    """
+    Decide whether a bbCriminal is recorded in the escaped criminals database.
+
+    @param crim -- The bbCriminal to check for existence
+    @return -- True if crim is in this database's escaped criminals record, False otherwise
+    """
+    def escapedCriminalExists(self, crim):
+        return crim in self.escapedCriminals[crim.faction]
 
 
     """
@@ -308,7 +348,7 @@ class bbBountyDB:
                 data[fac].append(bounty.toDict())
 
             for crim in self.escapedCriminals[fac]:
-                data["escapedCriminals"].append(crim.toDict())
+                data["escapedCriminals"].append([crim.toDict(), self.escapedCriminalTimeouts[crim]])
         return data
 
 
@@ -358,7 +398,7 @@ def fromDict(bountyDBDict, maxBountiesPerFaction, dbReload=False):
     for fac in bountyDBDict.keys():
         if fac == "escapedCriminals":
             for crim in bountyDBDict[fac]:
-                newDB.escapedCriminals[fac].append(bbCriminal.fromDict(crim))
+                newDB.addEscapedCriminal(bbCriminal.fromDict(crim[0]), crim[1])
         else:
             # Convert each serialised bbBounty into a bbBounty object
             for bountyDict in bountyDBDict[fac]:
