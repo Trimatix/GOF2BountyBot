@@ -312,10 +312,6 @@ def getRandomDelaySeconds(minmaxDict):
     return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))
 
 
-def getEscapedBountyRescheduleDelay(escapedBountyData):
-    return timeDeltaFromDict({"minutes": len(escapedBountyData["escapedBounty"].route)})
-
-
 async def refreshAndAnnounceAllShopStocks():
     guildsDB.refreshAllShopStocks()
     await announceNewShopStock()
@@ -330,6 +326,8 @@ async def spawnAndAnnounceBounty(newBountyData):
         # activate and announce the bounty
         bountiesDB.addBounty(newBounty)
         await announceNewBounty(newBounty)
+    else:
+        raise OverflowError("Attempted to spawnAndAnnounceBounty when no more space is available for bounties in the bountiesDB")
 
 
 def saveAllDBs():
@@ -682,15 +680,14 @@ async def cmd_check(message, args):
     requestedSystem = systObj.name
 
     # ensure the calling user is in the users database
-    if not usersDB.userIDExists(message.author.id):
-        usersDB.addUser(message.author.id)
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
     
-    if not usersDB.getUser(message.author.id).activeShip.hasWeaponsEquipped() and not usersDB.getUser(message.author.id).activeShip.hasTurretsEquipped():
+    if not requestedBBUser.activeShip.hasWeaponsEquipped() and not requestedBBUser.activeShip.hasTurretsEquipped():
         await message.channel.send(":x: Your ship has no weapons equipped!")
         return
 
     # ensure the calling user is not on checking cooldown
-    if datetime.utcfromtimestamp(usersDB.getUser(message.author.id).bountyCooldownEnd) < datetime.utcnow():
+    if datetime.utcfromtimestamp(requestedBBUser.bountyCooldownEnd) < datetime.utcnow():
         bountyWon = False
         # Loop over all bounties in the database
         for fac in bountiesDB.getFactions():
@@ -701,9 +698,15 @@ async def cmd_check(message, args):
                 # Check the passed system in current bounty
                 # If current bounty resides in the requested system
                 if bounty.check(requestedSystem, message.author.id) == 3:
+
+                    duelResults = bbUtil.fightShips(requestedBBUser.activeShip, bounty.criminal.activeShip)
+
                     bountyWon = True
 
-                    ActiveTimedTasks.escapedBountiesRespawnTTDB.scheduleTask(TimedTaskAsync.DynamicRescheduleTaskAsync(getEscapedBountyRescheduleDelay, delayTimeGeneratorArgs={"escapedBounty": bounty}, expiryFunction=spawnAndAnnounceBounty, expiryFunctionArgs={}))
+                    ActiveTimedTasks.escapedBountiesRespawnTTDB.scheduleTask(   TimedTask.TimedTask(expiryDelta=timeDeltaFromDict({"minutes": len(bounty.route)}), 
+                                                                                                    expiryFunction=spawnAndAnnounceBounty,
+                                                                                                    expiryFunctionArgs={"newBounty": bounty},
+                                                                                                    rescheduleOnExpiryFuncFailure=True))
 
                     # criminal ship unequip is delayed until now rather than handled in bounty.check
                     # to allow for duel info printing. this could instead be replaced by bounty.check returning the ShipFight info.
@@ -735,8 +738,8 @@ async def cmd_check(message, args):
 
         # If a bounty was won, print a congratulatory message
         if bountyWon:
-            usersDB.getUser(message.author.id).bountyWins += 1
-            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.name + "**, you now have **" + str(usersDB.getUser(message.author.id).credits) + " Credits!**")
+            requestedBBUser.bountyWins += 1
+            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.name + "**, you now have **" + str(requestedBBUser.credits) + " Credits!**")
 
             if sightedCriminalsStr != "":
                 for currentGuild in guildsDB.getGuilds():
@@ -751,14 +754,14 @@ async def cmd_check(message, args):
                     await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + message.author.name + "**, checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
         # Increment the calling user's systemsChecked statistic
-        usersDB.getUser(message.author.id).systemsChecked += 1
+        requestedBBUser.systemsChecked += 1
         # Put the calling user on checking cooldown
-        usersDB.getUser(message.author.id).bountyCooldownEnd = (datetime.utcnow() + timedelta(minutes=bbConfig.checkCooldown["minutes"])).timestamp()
+        requestedBBUser.bountyCooldownEnd = (datetime.utcnow() + timedelta(minutes=bbConfig.checkCooldown["minutes"])).timestamp()
     
     # If the calling user is on checking cooldown
     else:
         # Print an error message with the remaining time on the calling user's cooldown
-        diff = datetime.utcfromtimestamp(usersDB.getUser(message.author.id).bountyCooldownEnd) - datetime.utcnow()
+        diff = datetime.utcfromtimestamp(requestedBBUser.bountyCooldownEnd) - datetime.utcnow()
         minutes = int(diff.total_seconds() / 60)
         seconds = int(diff.total_seconds() % 60)
         await message.channel.send(":stopwatch: **" + message.author.name + "**, your *Khador Drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
@@ -3553,7 +3556,7 @@ async def on_ready():
     # bot is now logged in
     botLoggedIn = True
 
-    # Args to pass to the DynamicRescheduleTaskAsync constructor below.
+    # Args to pass to the DynamicRescheduleTask constructor below.
     bountyDelayGenerators = {"fixed":getFixedDelay, "random":getRandomDelaySeconds}
     bountyDelayGeneratorArgs = {"fixed":bbConfig.newBountyFixedDelta, "random":{"min": bbConfig.newBountyDelayMin, "max": bbConfig.newBountyDelayMax}}
 
@@ -3608,9 +3611,7 @@ async def on_ready():
 
 """
 Called every time a message is sent in a server that the bot has joined
-Currently handles:
-- random !drink
-- command calling
+Currently handles: command calling only.
 
 @paran message: The message that triggered this command on sending
 """
@@ -3640,15 +3641,6 @@ async def on_message(message):
         ActiveTimedTasks.reactionMenus[menuMsg.id] = menu"""
 
     if message.author.id in bbConfig.developers or message.guild is None or not message.guild.id in bbConfig.disabledServers:
-
-        """
-        # randomly send '!drink' to the same channel
-        bbConfig.randomDrinkNum -= 1
-        if bbConfig.randomDrinkNum == 0:
-            await message.channel.send("!drink")
-            bbConfig.randomDrinkNum = random.randint(bbConfig.randomDrinkFactor / 10, bbConfig.randomDrinkFactor)
-        """
-
         # For any messages beginning with bbConfig.commandPrefix
         # New method without space-splitting to allow for prefixes that dont end in a space
         if len(message.content) >= len(bbConfig.commandPrefix) and message.content[0:len(bbConfig.commandPrefix)].lower() == bbConfig.commandPrefix.lower():

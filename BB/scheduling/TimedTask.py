@@ -109,6 +109,7 @@ class TimedTask:
     """
     Call the task's expiryFunction, if one is specified.
     Handles passing of arguments to the expiryFunction, if specified.
+    If an exception occurs in the expiry function and rescheduleOnExpiryFuncFailure is specified, the exception is IGNORED and the timedtask rescheduled.
 
     @return -- the results of the expiryFunction
     """
