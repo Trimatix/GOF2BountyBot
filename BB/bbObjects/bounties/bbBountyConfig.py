@@ -89,9 +89,16 @@ class BountyConfig:
             self.answer = random.choice(self.route)
         elif self.answer not in bbData.builtInSystemObjs:
             raise KeyError("Bounty constructor: Invalid answer requested '" + self.answer + "'")
+
+        if self.activeShip is None:
+            if self.isPlayer:
+                raise ValueError("Attempted to generate a player bounty without providing the activeShip")
+            self.activeShip = bbShip.fromDict(bbData.builtInShipData["Inflict"])
+            for i in range(self.activeShip.maxPrimaries):
+                self.activeShip.equipWeapon(random.choice(list(bbData.builtInWeaponObjs.values())))
         
         if self.reward == -1:
-            self.reward = int(len(self.route) * bbConfig.bPointsToCreditsRatio)
+            self.reward = int(len(self.route) * bbConfig.bPointsToCreditsRatio + self.activeShip.getValue() * bbConfig.shipValueRewardPercentage)
         elif self.reward < 0:
             raise ValueError("Bounty constructor: Invalid reward requested '" + str(self.reward) + "'")
         if self.issueTime == -1.0:
@@ -104,13 +111,6 @@ class BountyConfig:
         for station in self.route:
             if (not forceKeepChecked) or station not in self.checked or self.checked == {}:
                 self.checked[station] = -1
-
-        if self.activeShip is None:
-            if self.isPlayer:
-                raise ValueError("Attempted to generate a player bounty without providing the activeShip")
-            self.activeShip = bbShip.fromDict(bbData.builtInShipData["Inflict"])
-            for i in range(self.activeShip.maxPrimaries):
-                self.activeShip.equipWeapon(random.choice(list(bbData.builtInWeaponObjs.values())))
 
         self.generated = True
         
