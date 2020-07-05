@@ -768,7 +768,7 @@ async def cmd_check(message, args):
                         
                         # Announce the bounty has ben completed
                         await announceBountyWon(bounty, rewards, message.guild, message.author.id)
-                        await message.channel.send("‎",embed=statsEmbed)
+                        await message.channel.send("__Duel Statistics__",embed=statsEmbed)
                     
                     # add this bounty to the list of bounties to be removed
                     toPop += [bounty]
@@ -3325,7 +3325,7 @@ async def dev_cmd_make_bounty(message, args):
                     break
             
             # if a criminal name was given, ensure it does not already exist as a bounty
-            if newName != "" and bountiesDB.bountyNameExists(newName):
+            if newName != "" and bountiesDB.bountyNameExists(newName, noEscapedCrim=False):
                 await message.channel.send(":x: That pilot is already wanted!")
                 return
 
@@ -3442,7 +3442,7 @@ async def dev_cmd_make_player_bounty(message, args):
             await message.channel.send(":x: Player not found!")
             return
         # ensure no bounty already exists for this user
-        if bountiesDB.bountyNameExists(newName):
+        if bountiesDB.bountyNameExists(newName, noEscapedCrim=False):
             await message.channel.send(":x: That pilot is already wanted!")
             return
 

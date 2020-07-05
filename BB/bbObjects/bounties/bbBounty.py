@@ -67,8 +67,10 @@ class Bounty:
         return self.checked[system] != -1
 
     def calcRewards(self):
-        rewards = {}
+        creditsPool = self.reward
+        
         checkedSystems = 0
+        rewards = {}
         for system in self.route:
             if self.systemChecked(system):
                 checkedSystems += 1
@@ -76,15 +78,18 @@ class Bounty:
                     rewards[self.checked[system]] = {"reward":0,"checked":0,"won":False}
 
         uncheckedSystems = len(self.route) - checkedSystems
+        winningUserID = self.checked[self.answer]
 
         for system in self.route:
             if self.systemChecked(system):
                 rewards[self.checked[system]]["checked"] += 1
-                if self.answer == system:
-                    rewards[self.checked[system]]["reward"] += int(self.reward / len(self.route)) * (uncheckedSystems + 1)
-                    rewards[self.checked[system]]["won"] = True
-                else:
-                    rewards[self.checked[system]]["reward"] += int(self.reward / len(self.route))
+                if self.checked[system] != winningUserID:
+                    currentReward = int(self.reward / len(self.route))
+                    rewards[self.checked[system]]["reward"] += currentReward
+                    creditsPool -= currentReward
+
+        rewards[self.checked[self.answer]]["reward"] = creditsPool
+        rewards[self.checked[self.answer]]["won"] = True
         return rewards
 
     def toDict(self):
