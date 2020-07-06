@@ -127,6 +127,7 @@ factionIcons = {"terran":terranIcon, "vossk":vosskIcon, "midorian":midorianIcon,
 factionColours = {"terran":Colour.gold(), "vossk":Colour.dark_green(), "midorian":Colour.dark_red(), "nivelian":Colour.dark_blue(), "neutral":Colour.purple()}
 
 # Data representing all ship items in the game. These are used to create bbShip objects, which are stored in builtInShipObjs in a similar dict format.
+# Ships to not have tech levels in GOF2, so tech levels will be automaticaly generated for the sake of the bot during bbConfig package init.
 builtInShipData = {# Terran
                     "Inflict": {"name": "Inflict", "manufacturer": "terran", "maxPrimaries": 2, "maxTurrets": 0, "maxModules": 4, "armour": 150, "cargo": 45, "numSecondaries": 1, "handling": 125, "value": 30900, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Inflict", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694046057824296/inflict.png", "emoji":"<:inflict:723705238091202650>"},
                     "Furious": {"name": "Furious", "manufacturer": "terran", "maxPrimaries": 1, "maxTurrets": 1, "maxModules": 6, "armour": 176, "cargo": 108, "numSecondaries": 2, "handling": 112, "value": 75800, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Furious", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694028752126162/furious.png", "emoji":"<:furious:723705236958609520>"},

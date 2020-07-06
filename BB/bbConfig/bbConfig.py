@@ -35,6 +35,13 @@ shopDefaultTurretsNum = 2
 # bbTurret is the only item that has a probability not to be spawned. This metric indicates the percentage chance of turrets being stocked on a given day
 turretSpawnProbability = 45
 
+# The range of valid tech levels a shop may spawn at
+minTechLevel = 1
+maxTechLevel = 10
+
+# Price ranges by which ships should be ranked into tech levels. 0th index = tech level 1
+shipMaxPriceTechLevels = [50000, 100000, 300000, 700000, 1000000, 2000000, 5000000, 8000000, 10000000, 999999999]
+
 
 
 ##### BOUNTIES #####
