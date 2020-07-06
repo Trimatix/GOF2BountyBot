@@ -44,7 +44,7 @@ maxTechLevel = 10
 # Price ranges by which ships should be ranked into tech levels. 0th index = tech level 1
 shipMaxPriceTechLevels = [50000, 100000, 300000, 700000, 1000000, 2000000, 5000000, 8000000, 10000000, 999999999]
 
-# Probabilities of items of a given tech level spawning in a shop of a given tech level
+# CUMULATIVE probabilities of items of a given tech level spawning in a shop of a given tech level
 # Outer dimension is shop tech level
 # Inner dimension is item tech level
 itemTLSpawnChanceForShopTL = []
@@ -83,6 +83,14 @@ for shopTL in range(minTechLevel, maxTechLevel + 1):
         currentChance = itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1]
         if currentChance != 0:
             itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentChance / itemChanceSum)
+
+    # Sum probabilities to give cumulative scale
+    currentSum = 0
+    for itemTL in range(minTechLevel, maxTechLevel + 1):
+        currentChance = itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1]
+        if currentChance != 0:
+            itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentSum + currentChance)
+            currentSum += currentChance
 
 
 
