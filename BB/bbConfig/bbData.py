@@ -542,10 +542,8 @@ builtInWeaponObjs = {}
 builtInUpgradeObjs = {}
 builtInTurretObjs = {}
 
-# References to the above item objects, duplated to form ranks.
-# For ranking and list population, see the bbConfig package init.
-rankedShipKeys = []
-shipKeySpawnRates = {}
-rankedModuleObjs = []
-rankedWeaponObjs = []
-rankedTurretObjs = []
+# References to the above item objects, sorted by techLevel.
+shipKeysByTL = []
+moduleObjsByTL = []
+weaponObjsByTL = []
+turretObjsByTL = []
