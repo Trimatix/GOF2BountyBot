@@ -1,3 +1,5 @@
+import math
+
 ##### DUELS #####
 
 # Amount of time before a duel request expires
@@ -41,6 +43,46 @@ maxTechLevel = 10
 
 # Price ranges by which ships should be ranked into tech levels. 0th index = tech level 1
 shipMaxPriceTechLevels = [50000, 100000, 300000, 700000, 1000000, 2000000, 5000000, 8000000, 10000000, 999999999]
+
+# Probabilities of items of a given tech level spawning in a shop of a given tech level
+# Outer dimension is shop tech level
+# Inner dimension is item tech level
+itemTLSpawnChanceForShopTL = []
+
+# Number of decimal places to calculate itemTLSpawnChanceForShopTL values to
+tl_resolution = 3
+
+# Parameters for itemTLSpawnChanceForShopTL values, using u function: https://www.desmos.com/calculator/nrshikfmxc
+tl_s = 7
+tl_leftShift = -0.5
+
+def truncToRes(num):
+    return math.trunc(num * math.pow(10, tl_resolution)) / math.pow(10, tl_resolution)
+
+def tl_u(x, t):
+    h = t - tl_s
+    inner = (x + tl_leftShift - h) / tl_s
+    mid = (0 - math.pow(inner, 5)) + inner
+    outer = tl_s * mid - (h / 2)
+    return truncToRes(outer if outer > 0 else 0)
+
+# Loop through shop TLs
+for shopTL in range(minTechLevel, maxTechLevel + 1):
+    tl_h = shopTL - tl_s
+    itemTLSpawnChanceForShopTL.append([0 for i in range(minTechLevel, maxTechLevel + 1)])
+    itemChanceSum = 0
+
+    # Calculate spawn chance for each item TL in this shop TL
+    for itemTL in range(minTechLevel, maxTechLevel + 1):
+        itemChance = tl_u(itemTL, shopTL)
+        itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = itemChance
+        itemChanceSum += itemChance
+    
+    # Scale item TLs so that they add up to 1
+    for itemTL in range(minTechLevel, maxTechLevel + 1):
+        currentChance = itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1]
+        if currentChance != 0:
+            itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentChance / itemChanceSum)
 
 
 
