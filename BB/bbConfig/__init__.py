@@ -5,7 +5,7 @@ Details: Item rarities are to be overhauled, from a linear scale to exponential.
 
 """
 
-import operator
+import operator, pprint
 
 from . import bbData
 from . import bbConfig
@@ -30,8 +30,9 @@ for systemDict in bbData.builtInSystemData.values():
 for shipDict in bbData.builtInShipData.values():
     # Assign each shipDict a techLevel, based on their value
     for tl in range(len(bbConfig.shipMaxPriceTechLevels)):
-        if bbConfig.shipMaxPriceTechLevels[tl] > shipDict["value"]:
+        if bbConfig.shipMaxPriceTechLevels[tl] >= shipDict["value"]:
             shipDict["techLevel"] = tl + 1
+            break
 #     bbData.builtInShipObjs[shipDict["name"]] = bbShip.fromDict(shipDict)
 
 # generate bbModule objects from data in bbData
