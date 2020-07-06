@@ -952,6 +952,9 @@ async def cmd_system(message, args):
         statsEmbed = makeEmbed(col=bbData.factionColours[systObj.faction], desc="__System Information__", titleTxt=systObj.name, footerTxt=systObj.faction.title(), thumb=bbData.factionIcons[systObj.faction])
         statsEmbed.add_field(name="Security Level:",value=bbData.securityLevels[systObj.security].title())
         statsEmbed.add_field(name="Neighbour Systems:", value=neighboursStr)
+        if systObj.hasTechLevel:
+            statsEmbed.add_field(name="Tech Level:", value=systObj.techLevel)
+
         # list the system's aliases as a string
         if len(systObj.aliases) > 1:
             aliasStr = ""
@@ -1041,6 +1044,8 @@ async def cmd_ship(message, args):
     else:
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Ship File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        if itemObj.hasTechLevel:
+            statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Ship Base Value",value=commaSplitNum(str(itemObj.getValue(shipUpgradesOnly=True))) + " Credits")
         statsEmbed.add_field(name="Armour",value=str(itemObj.getArmour()))
         statsEmbed.add_field(name="Cargo",value=str(itemObj.getCargo()))
@@ -1113,6 +1118,8 @@ async def cmd_weapon(message, args):
     else:
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Weapon File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        if itemObj.hasTechLevel:
+            statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
         statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
@@ -1159,6 +1166,8 @@ async def cmd_module(message, args):
     else:
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Module File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        if itemObj.hasTechLevel:
+            statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="Stats:",value=str(itemObj.statsStringShort()))
         statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
@@ -1205,6 +1214,8 @@ async def cmd_turret(message, args):
     else:
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], desc="__Turret File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        if itemObj.hasTechLevel:
+            statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
         statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
@@ -1254,6 +1265,8 @@ async def cmd_commodity(message, args):
     else:
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.faction], desc="__Item File__", titleTxt=itemObj.name, thumb=itemObj.icon)
+        if itemObj.hasTechLevel:
+            statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Wanted By:",value=itemObj.faction.title() + "s")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
