@@ -3,22 +3,12 @@ from .items import bbModuleFactory, bbShip, bbWeapon, bbTurret
 import random
 
 class bbShop:
-    shipsStock = []
-    weaponsStock = []
-    modulesStock = []
-    turretsStock = []
-
-    maxShips = 0
-    maxModules = 0
-    maxWeapons = 0
-    maxTurrets = 0
-
-    
-    def __init__(self, maxShips=bbConfig.shopDefaultShipsNum, maxModules=bbConfig.shopDefaultModulesNum, maxWeapons=bbConfig.shopDefaultWeaponsNum, maxTurrets=bbConfig.shopDefaultTurretsNum, shipsStock=[], weaponsStock=[], modulesStock=[], turretsStock=[]):
+    def __init__(self, maxShips=bbConfig.shopDefaultShipsNum, maxModules=bbConfig.shopDefaultModulesNum, maxWeapons=bbConfig.shopDefaultWeaponsNum, maxTurrets=bbConfig.shopDefaultTurretsNum, shipsStock=[], weaponsStock=[], modulesStock=[], turretsStock=[], currentTechLevel=bbConfig.minTechLevel):
         self.maxShips = maxShips
         self.maxModules = maxModules
         self.maxWeapons = maxWeapons
         self.maxTurrets = maxTurrets
+        self.currentTechLevel = currentTechLevel
 
         if shipsStock == [] and weaponsStock == [] and modulesStock == [] and turretsStock == []:
             self.shipsStock = []
@@ -38,6 +28,7 @@ class bbShop:
         self.weaponsStock = []
         self.modulesStock = []
         self.turretsStock = []
+        self.currentTechLevel = random.randint(bbConfig.minTechLevel, bbConfig.maxTechLevel)
 
         for i in range(self.maxShips):
             self.shipsStock.append(bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.rankedShipKeys)]))
