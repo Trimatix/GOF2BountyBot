@@ -27,7 +27,11 @@ for systemDict in bbData.builtInSystemData.values():
 # # generate bbShip objects from data in bbData
 # # NOTE: ONLY for use in shop listings - buying of ships should make a deep copy of the object, or 
 # # spawn a new one from the data dict
-# for shipDict in bbData.builtInShipData.values():
+for shipDict in bbData.builtInShipData.values():
+    # Assign each shipDict a techLevel, based on their value
+    for tl in range(len(bbConfig.shipMaxPriceTechLevels)):
+        if bbConfig.shipMaxPriceTechLevels[tl] > shipDict["value"]:
+            shipDict["techLevel"] = tl + 1
 #     bbData.builtInShipObjs[shipDict["name"]] = bbShip.fromDict(shipDict)
 
 # generate bbModule objects from data in bbData
