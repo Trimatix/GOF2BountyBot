@@ -76,5 +76,5 @@ for currentTurretObj in bbData.builtInTurretObjs.values():
     bbData.turretObjsByTL[currentTurretObj.techLevel - 1].append(currentTurretObj)
 
 
-for turret in bbData.builtInTurretObjs.values():
-    turret.shopSpawnRate = round(((turretKeysNum[turret.name] / numRankedTurretObjs) * 100) * (bbConfig.turretSpawnProbability / 100), 2)
+# for turret in bbData.builtInTurretObjs.values():
+#     turret.shopSpawnRate = round(((turretKeysNum[turret.name] / numRankedTurretObjs) * 100) * (bbConfig.turretSpawnProbability / 100), 2)
