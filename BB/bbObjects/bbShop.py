@@ -28,7 +28,8 @@ class bbShop:
         self.weaponsStock = []
         self.modulesStock = []
         self.turretsStock = []
-        self.currentTechLevel = random.randint(bbConfig.minTechLevel, bbConfig.maxTechLevel)
+        # self.currentTechLevel = random.randint(bbConfig.minTechLevel, bbConfig.maxTechLevel)
+        self.currentTechLevel = bbConfig.pickRandomShopTL()
 
         for i in range(self.maxShips):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)

@@ -233,7 +233,7 @@ async def announceNewShopStock():
             playCh = client.get_channel(guild.getPlayChannelId())
             if playCh is not None:
                 # send the announcement
-                await playCh.send(":arrows_counterclockwise: The shop stock has been refreshed!")
+                await playCh.send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
 
 
 """
@@ -1603,7 +1603,7 @@ async def cmd_shop(message, args):
         sendChannel = message.channel
 
     requestedShop = guildsDB.getGuild(message.guild.id).shop
-    shopEmbed = makeEmbed(titleTxt="Shop", desc=message.guild.name, footerTxt="All items" if item == "all" else (item + "s").title(), thumb="https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64")
+    shopEmbed = makeEmbed(titleTxt="Shop", desc="__" + message.guild.name + "__\n | `Current Tech Level:` " + bbConfig.numberEmojis[requestedShop.currentTechLevel], footerTxt="All items" if item == "all" else (item + "s").title(), thumb="https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64")
 
     if item in ["all", "ship"]:
         for shipNum in range(1, len(requestedShop.shipsStock) + 1):
@@ -3459,7 +3459,7 @@ async def dev_cmd_refreshshop(message, args):
     guild = guildsDB.getGuild(message.guild.id)
     guild.shop.refreshStock()
     if guild.hasPlayChannel():
-        await client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!")
+        await client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
 
 bbCommands.register("refreshshop",dev_cmd_refreshshop, isDev=True)
 dmCommands.register("refreshshop",err_nodm, isDev=True)

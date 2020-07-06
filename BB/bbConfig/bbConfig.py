@@ -1,5 +1,15 @@
 import math, random, pprint
 
+##### UTIL #####
+
+# Number of decimal places to calculate itemTLSpawnChanceForShopTL values to
+tl_resolution = 3
+
+def truncToRes(num):
+    return math.trunc(num * math.pow(10, tl_resolution)) / math.pow(10, tl_resolution)
+
+
+
 ##### DUELS #####
 
 # Amount of time before a duel request expires
@@ -20,7 +30,7 @@ duelCloakChance = 20
 ##### SHOPS #####
 
 # Amount of time to wait between refreshing stock of all shops
-shopRefreshStockPeriod = {"days":0, "hours":12, "minutes":0, "seconds":0}
+shopRefreshStockPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
 
 # The number of ranks to use when randomly picking shop stock
 numShipRanks = 10
@@ -41,6 +51,40 @@ turretSpawnProbability = 45
 minTechLevel = 1
 maxTechLevel = 10
 
+# The probability of a shop spawning with a given tech level. Tech level = index + 1
+shopTLChance = [0 for tl in range(minTechLevel, maxTechLevel + 1)]
+
+itemChanceSum = 0
+
+# Calculate spawn chance for each shop TL
+for shopTL in range(minTechLevel, maxTechLevel + 1):
+    itemChance = truncToRes(1 - math.exp((shopTL - 10.5) / 5))
+    shopTLChance[shopTL - 1] = itemChance
+    itemChanceSum += itemChance
+
+# Scale shop TL probabilities so that they add up to 1
+for shopTL in range(minTechLevel, maxTechLevel + 1):
+    currentChance = shopTLChance[shopTL - 1]
+    if currentChance != 0:
+        shopTLChance[shopTL - 1] = truncToRes(currentChance / itemChanceSum)
+
+# Sum probabilities to give cumulative scale
+currentSum = 0
+for shopTL in range(minTechLevel, maxTechLevel + 1):
+    currentChance = shopTLChance[shopTL - 1]
+    if currentChance != 0:
+        shopTLChance[shopTL - 1] = truncToRes(currentSum + currentChance)
+        currentSum += currentChance
+
+
+def pickRandomShopTL():
+    tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
+    print(tlChance)
+    for shopTL in range(len(shopTLChance)):
+        if shopTLChance[shopTL] >= tlChance:
+            return shopTL + 1
+    return maxTechLevel
+
 # Price ranges by which ships should be ranked into tech levels. 0th index = tech level 1
 shipMaxPriceTechLevels = [50000, 100000, 300000, 700000, 1000000, 2000000, 5000000, 8000000, 10000000, 999999999]
 
@@ -49,15 +93,9 @@ shipMaxPriceTechLevels = [50000, 100000, 300000, 700000, 1000000, 2000000, 50000
 # Inner dimension is item tech level
 itemTLSpawnChanceForShopTL = []
 
-# Number of decimal places to calculate itemTLSpawnChanceForShopTL values to
-tl_resolution = 3
-
 # Parameters for itemTLSpawnChanceForShopTL values, using u function: https://www.desmos.com/calculator/nrshikfmxc
 tl_s = 7
 tl_leftShift = -0.5
-
-def truncToRes(num):
-    return math.trunc(num * math.pow(10, tl_resolution)) / math.pow(10, tl_resolution)
 
 def tl_u(x, t):
     h = t - tl_s
@@ -92,7 +130,6 @@ for shopTL in range(minTechLevel, maxTechLevel + 1):
             itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentSum + currentChance)
             currentSum += currentChance
 
-pprint.pprint(itemTLSpawnChanceForShopTL)
 
 def pickRandomItemTL(shopTL):
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
@@ -170,7 +207,8 @@ dmSentEmoji = "📬"
 maxShipNickLength = 30
 
 # The default emojis to list in a reaction menu
-defaultMenuEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+numberEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+defaultMenuEmojis = numberEmojis
 
 
 
