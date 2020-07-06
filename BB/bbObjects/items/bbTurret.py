@@ -23,5 +23,6 @@ def fromDict(turretDict):
         return bbData.builtInTurretObjs[turretDict["name"]]
     else:
         return bbTurret(turretDict["name"], turretDict["aliases"], dps=turretDict["dps"], value=turretDict["value"],
-        wiki=turretDict["wiki"] if "wiki" in turretDict else "", manufacturer=turretDict["manufacturer"] if "manufacturer" in turretDict else "",
-        icon=turretDict["icon"] if "icon" in turretDict else bbData.rocketIcon, emoji=turretDict["emoji"] if "emoji" in turretDict else "")
+                        wiki=turretDict["wiki"] if "wiki" in turretDict else "", manufacturer=turretDict["manufacturer"] if "manufacturer" in turretDict else "",
+                        icon=turretDict["icon"] if "icon" in turretDict else bbData.rocketIcon, emoji=turretDict["emoji"] if "emoji" in turretDict else "",
+                        techLevel=turretDict["techLevel"] if "techLevel" in turretDict else -1)

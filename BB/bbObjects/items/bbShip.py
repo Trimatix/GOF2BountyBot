@@ -22,8 +22,8 @@ class bbShip(bbItem):
     upgradesApplied = []
 
 
-    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon="", emoji=""):
-        super(bbShip, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji)
+    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon="", emoji="", techLevel=-1):
+        super(bbShip, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel)
 
         if len(weapons) > maxPrimaries:
             ValueError("passed more weapons than can be stored on this ship - maxPrimaries")
@@ -466,7 +466,7 @@ def fromDict(shipDict):
                     numSecondaries=builtInDict["numSecondaries"] if "numSecondaries" in builtInDict else 0, handling=builtInDict["handling"] if "handling" in builtInDict else 0,
                     value=builtInDict["value"] if "value" in builtInDict else 0, aliases=builtInDict["aliases"] if "aliases" in builtInDict else [],
                     weapons=weapons if "weapons" in shipDict else builtInWeapons, modules=modules if "modules" in shipDict else builtInModules, turrets=turrets if "turrets" in shipDict else builtInTurrets, wiki=builtInDict["wiki"] if "wiki" in builtInDict else "0",
-                    upgradesApplied=shipUpgrades if "shipUpgrades" in shipDict else builtInShipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else (builtInDict["nickname"] if "nickname" in builtInDict else ""), icon=builtInDict["icon"] if "icon" in builtInDict else bbData.rocketIcon, emoji=builtInDict["emoji"] if "emoji" in builtInDict else "")
+                    upgradesApplied=shipUpgrades if "shipUpgrades" in shipDict else builtInShipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else (builtInDict["nickname"] if "nickname" in builtInDict else ""), icon=builtInDict["icon"] if "icon" in builtInDict else bbData.rocketIcon, emoji=builtInDict["emoji"] if "emoji" in builtInDict else "", techLevel=builtInDict["techLevel"] if "techLevel" in builtInDict else -1)
         return newShip
 
     else:
@@ -475,4 +475,4 @@ def fromDict(shipDict):
                         numSecondaries=shipDict["numSecondaries"] if "numSecondaries" in shipDict else 0, handling=shipDict["handling"] if "handling" in shipDict else 0,
                         value=shipDict["value"] if "value" in shipDict else 0, aliases=shipDict["aliases"] if "aliases" in shipDict else [],
                         weapons=weapons, modules=modules, turrets=turrets, wiki=shipDict["wiki"] if "wiki" in shipDict else "0",
-                        upgradesApplied=shipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else "", icon=shipDict["icon"] if "icon" in shipDict else bbData.rocketIcon, emoji=shipDict["emoji"] if "emoji" in shipDict else "")
+                        upgradesApplied=shipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else "", icon=shipDict["icon"] if "icon" in shipDict else bbData.rocketIcon, emoji=shipDict["emoji"] if "emoji" in shipDict else "", techLevel=shipDict["techLevel"] if "techLevel" in shipDict else -1)

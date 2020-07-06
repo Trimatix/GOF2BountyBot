@@ -24,4 +24,5 @@ def fromDict(weaponDict):
     else:
         return bbWeapon(weaponDict["name"], weaponDict["aliases"], dps=weaponDict["dps"], value=weaponDict["value"],
         wiki=weaponDict["wiki"] if "wiki" in weaponDict else "", manufacturer=weaponDict["manufacturer"] if "manufacturer" in weaponDict else "",
-        icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=weaponDict["emoji"] if "emoji" in weaponDict else "")
+        icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=weaponDict["emoji"] if "emoji" in weaponDict else "",
+                        techLevel=weaponDict["techLevel"] if "techLevel" in weaponDict else -1)
