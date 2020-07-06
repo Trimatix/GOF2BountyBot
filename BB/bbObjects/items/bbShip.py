@@ -32,10 +32,10 @@ class bbShip(bbItem):
         if len(turrets) > maxTurrets:
             ValueError("passed more turrets than can be stored on this ship - maxTurrets")
 
-        if self.name in bbData.builtInShipData:
-            self.shopSpawnRate = bbData.shipKeySpawnRates[self.name]
-        else:
-            self.shopSpawnRate = 0
+        # if self.name in bbData.builtInShipData:
+        #     self.shopSpawnRate = bbData.shipKeySpawnRates[self.name]
+        # else:
+        #     self.shopSpawnRate = 0
 
         self.armour = armour
         self.cargo = cargo
