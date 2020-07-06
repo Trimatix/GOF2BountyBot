@@ -4,8 +4,8 @@ from ...bbConfig import bbData
 class bbTurret(bbItem):
     dps = 0.0
 
-    def __init__(self, name, aliases, dps=0.0, value=0, wiki="", manufacturer="", icon="", emoji=""):
-        super(bbTurret, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji)
+    def __init__(self, name, aliases, dps=0.0, value=0, wiki="", manufacturer="", icon="", emoji="", techLevel=-1):
+        super(bbTurret, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel)
 
         self.dps = dps
 
