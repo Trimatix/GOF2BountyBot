@@ -97,3 +97,12 @@ class bbInventory:
             page.append(self.items[item])
 
         return page
+
+
+    """
+    Decide whether or not this bbInventory currently stores any items.
+
+    @return -- True if no items are stored, False if at least one item is stored currently
+    """
+    def isEmpty(self):
+        return self.totalItems == 0
