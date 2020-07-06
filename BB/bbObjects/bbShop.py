@@ -31,17 +31,21 @@ class bbShop:
         self.currentTechLevel = random.randint(bbConfig.minTechLevel, bbConfig.maxTechLevel)
 
         for i in range(self.maxShips):
-            self.shipsStock.append(bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.rankedShipKeys)]))
+            itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
+            self.shipsStock.append(bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL - 1])]))
 
         for i in range(self.maxModules):
-            self.modulesStock.append(random.choice(bbData.rankedModuleObjs))
+            itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
+            self.modulesStock.append(random.choice(bbData.moduleObjsByTL[itemTL - 1]))
 
         for i in range(self.maxWeapons):
-            self.weaponsStock.append(random.choice(bbData.rankedWeaponObjs))
+            itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
+            self.weaponsStock.append(random.choice(bbData.weaponObjsByTL[itemTL - 1]))
 
-        if random.randint(1, 100) <= bbConfig.turretSpawnProbability:
-            for i in range(self.maxTurrets):
-                self.turretsStock.append(random.choice(bbData.rankedTurretObjs))
+        # if random.randint(1, 100) <= bbConfig.turretSpawnProbability:
+        for i in range(self.maxTurrets):
+            itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
+            self.turretsStock.append(random.choice(bbData.turretObjsByTL[itemTL - 1]))
 
 
     def getStockByName(self, item):
