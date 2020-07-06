@@ -117,3 +117,25 @@ class bbInventory:
         self.keys = []
         self.totalItems = 0
         self.numKeys = 0
+
+
+    """
+    Override [subscript] operator for reading values.
+    Currently returns the bbInventoryListing for the item at position key in self.keys.
+
+    @param key -- The index of the key to dereference
+    @return -- The bbInventoryListing for the item at the requested index
+    """
+    def __getitem__(self, key):
+        return self.items[self.keys[key]]
+
+
+    """
+    Disallow assignment through the [subscript] operator.
+
+    @param key -- ignored
+    @param value -- ignored
+    """
+    def __setitem__(self, key, value):
+        raise NotImplementedError("Cannot use [subscript] assignment for class bbInventory. use addItem/removeItem instead.")
+        # self.items[self.keys[key]] = value
