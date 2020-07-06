@@ -1,4 +1,4 @@
-import math, random
+import math, random, pprint
 
 ##### DUELS #####
 
@@ -92,11 +92,14 @@ for shopTL in range(minTechLevel, maxTechLevel + 1):
             itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentSum + currentChance)
             currentSum += currentChance
 
+pprint.pprint(itemTLSpawnChanceForShopTL)
+
 def pickRandomItemTL(shopTL):
-    tlChance = random.randint(1, 10 ** tl_resolution) / tl_resolution
-    for itemTL in itemTLSpawnChanceForShopTL[shopTL - 1]:
-        if itemTL >= tlChance:
-            return itemTL
+    tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
+    for itemTL in range(len(itemTLSpawnChanceForShopTL[shopTL - 1])):
+        if itemTLSpawnChanceForShopTL[shopTL - 1][itemTL] >= tlChance:
+            return itemTL + 1
+    return maxTechLevel
 
 
 
