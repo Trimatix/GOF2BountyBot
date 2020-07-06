@@ -106,3 +106,14 @@ class bbInventory:
     """
     def isEmpty(self):
         return self.totalItems == 0
+
+
+    """
+    Remove all items from the inventory.
+
+    """
+    def clear(self):
+        self.items = {}
+        self.keys = []
+        self.totalItems = 0
+        self.numKeys = 0
