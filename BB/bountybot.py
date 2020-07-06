@@ -950,10 +950,10 @@ async def cmd_system(message, args):
         
         # build the statistics embed
         statsEmbed = makeEmbed(col=bbData.factionColours[systObj.faction], desc="__System Information__", titleTxt=systObj.name, footerTxt=systObj.faction.title(), thumb=bbData.factionIcons[systObj.faction])
-        statsEmbed.add_field(name="Security Level:",value=bbData.securityLevels[systObj.security].title())
-        statsEmbed.add_field(name="Neighbour Systems:", value=neighboursStr)
         if systObj.hasTechLevel:
             statsEmbed.add_field(name="Tech Level:", value=systObj.techLevel)
+        statsEmbed.add_field(name="Security Level:",value=bbData.securityLevels[systObj.security].title())
+        statsEmbed.add_field(name="Neighbour Systems:", value=neighboursStr)
 
         # list the system's aliases as a string
         if len(systObj.aliases) > 1:
