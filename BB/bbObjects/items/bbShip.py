@@ -350,6 +350,18 @@ class bbShip(bbItem):
             raise NotImplementedError("Valid, not unrecognised item type: " + item)
 
 
+    def clearWeapons(self):
+        self.weapons = []
+
+
+    def clearModules(self):
+        self.modules = []
+
+
+    def clearTurrets(self):
+        self.turrets = []
+
+
     def statsStringShort(self):
         stats = ""
         stats += "• *Armour: " + str(self.armour) + ("(+)" if self.armour < self.getArmour(shipUpgradesOnly=True) else "") + "*\n"
