@@ -1892,18 +1892,17 @@ async def cmd_shop_sell(message, args):
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
         return
 
-    if usersDB.userIDExists(message.author.id):
-        requestedBBUser = usersDB.getUser(message.author.id)
-    else:
-        requestedBBUser = usersDB.addUser(message.author.id)
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
 
     itemNum = argsSplit[1]
     if not bbUtil.isInt(itemNum):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
-    if itemNum > len(requestedBBUser.getInactivesByName(item)):
-        await message.channel.send(":x: Invalid item number! You have " + str(len(requestedBBUser.getInactivesByName(item))) + " " + item + "s.")
+
+    userItemInactives = requestedBBUser.getInactivesByName(item)
+    if itemNum > userItemInactives.numKeys:
+        await message.channel.send(":x: Invalid item number! You have " + str(userItemInactives.numKeys) + " " + item + "s.")
         return
     if itemNum < 1:
         await message.channel.send(":x: Invalid item number! Must be at least 1.")
@@ -1922,44 +1921,31 @@ async def cmd_shop_sell(message, args):
             return
 
     requestedShop = guildsDB.getGuild(message.guild.id).shop
+    shopItemStock = requestedShop.getStockByName(item)
+    requestedItem = userItemInactives[itemNum - 1].item
 
     if item == "ship":
-        requestedShip = requestedBBUser.inactiveShips[itemNum - 1]
         if clearItems:
-            requestedBBUser.unequipAll(requestedShip)
+            requestedBBUser.unequipAll(requestedItem)
         
-        requestedBBUser.credits += requestedShip.getValue()
-        requestedBBUser.inactiveShips.remove(requestedShip)
-        requestedShop.shipsStock.append(requestedShip)
+        requestedBBUser.credits += requestedItem.getValue()
+        userItemInactives.removeItem(requestedItem)
+        shopItemStock.addItem(requestedItem)
 
-        outStr = ":moneybag: You sold your **" + requestedShip.getNameOrNick() + "** for **" + str(requestedShip.getValue()) + " credits**!"
+        outStr = ":moneybag: You sold your **" + requestedItem.getNameOrNick() + "** for **" + str(requestedItem.getValue()) + " credits**!"
         if clearItems:
             outStr += "\nItems removed from the ship can be found in the hangar."
         await message.channel.send(outStr)
     
-    elif item == "weapon":
-        requestedWeapon = requestedBBUser.inactiveWeapons[itemNum - 1]
-        requestedBBUser.credits += requestedWeapon.value
-        requestedBBUser.inactiveWeapons.remove(requestedWeapon)
-        requestedShop.weaponsStock.append(requestedWeapon)
+    elif item in ["weapon", "module", "turret"]:
+        requestedBBUser.credits += requestedItem.getValue()
+        userItemInactives.removeItem(requestedItem)
 
-        await message.channel.send(":moneybag: You sold your **" + requestedWeapon.name + "** for **" + str(requestedWeapon.value) + " credits**!")
+        if requestedItem is None:
+            raise ValueError("selling NoneType Item")
+        shopItemStock.addItem(requestedItem)
 
-    elif item == "module":
-        requestedModule = requestedBBUser.inactiveModules[itemNum - 1]
-        requestedBBUser.credits += requestedModule.value
-        requestedBBUser.inactiveModules.remove(requestedModule)
-        requestedShop.modulesStock.append(requestedModule)
-
-        await message.channel.send(":moneybag: You sold your **" + requestedModule.name + "** for **" + str(requestedModule.value) + " credits**!")
-
-    elif item == "turret":
-        requestedTurret = requestedBBUser.inactiveTurrets[itemNum - 1]
-        requestedBBUser.credits += requestedTurret.value
-        requestedBBUser.inactiveTurrets.remove(requestedTurret)
-        requestedShop.turretsStock.append(requestedTurret)
-
-        await message.channel.send(":moneybag: You sold your **" + requestedTurret.name + "** for **" + str(requestedTurret.value) + " credits**!")
+        await message.channel.send(":moneybag: You sold your **" + requestedItem.name + "** for **" + str(requestedItem.getValue()) + " credits**!")
 
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
