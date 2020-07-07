@@ -139,3 +139,12 @@ class bbInventory:
     def __setitem__(self, key, value):
         raise NotImplementedError("Cannot use [subscript] assignment for class bbInventory. use addItem/removeItem instead.")
         # self.items[self.keys[key]] = value
+
+
+    """
+    Override the 'in' operator.
+
+    @param item -- The object to test for membership
+    """
+    def __contains__(self, item):
+        return item in self.keys
