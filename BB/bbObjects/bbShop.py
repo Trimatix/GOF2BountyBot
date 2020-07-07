@@ -11,13 +11,13 @@ class bbShop:
         self.maxTurrets = maxTurrets
         self.currentTechLevel = currentTechLevel
 
+        self.shipsStock = shipsStock
+        self.weaponsStock = weaponsStock
+        self.modulesStock = modulesStock
+        self.turretsStock = turretsStock
+
         if shipsStock.isEmpty() and weaponsStock.isEmpty() and modulesStock.isEmpty() and turretsStock.isEmpty():
             self.refreshStock()
-        else:
-            self.shipsStock = shipsStock
-            self.weaponsStock = weaponsStock
-            self.modulesStock = modulesStock
-            self.turretsStock = turretsStock
 
 
     def refreshStock(self):

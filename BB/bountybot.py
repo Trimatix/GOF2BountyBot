@@ -2324,7 +2324,7 @@ dmCommands.register("notify", err_nodm)
 ⚠ WARNING: MARKED FOR CHANGE ⚠
 The following function is provisional and marked as planned for overhaul.
 Details: The command output is finalised. However, the inner workings of the command are to be replaced with attribute getters.
-         It is inefficient to calculate total value measurements on every call, so current totals should be cached in class attributes whenever modified.
+         It is inefficient to calculate total value measurements on every call, so current totals should be cached in object attributes whenever modified.
 
 print the total value of the specified user, use the calling user if no user is specified.
 
