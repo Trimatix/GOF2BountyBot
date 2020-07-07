@@ -4,5 +4,3 @@ shopRefreshTT = None
 dbSaveTT = None
 
 duelRequestTTDB = None
-
-reactionMenus = {}
