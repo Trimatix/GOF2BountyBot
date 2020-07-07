@@ -761,6 +761,8 @@ async def cmd_check(message, args):
     # ensure the calling user is not on checking cooldown
     if datetime.utcfromtimestamp(usersDB.getUser(message.author.id).bountyCooldownEnd) < datetime.utcnow():
         bountyWon = False
+        systemInBountyRoute = False
+
         # Loop over all bounties in the database
         for fac in bountiesDB.getFactions():
             # list of completed bounties to remove from the bounties database
@@ -769,7 +771,8 @@ async def cmd_check(message, args):
 
                 # Check the passed system in current bounty
                 # If current bounty resides in the requested system
-                if bounty.check(requestedSystem, message.author.id) == 3:
+                checkResult = bounty.check(requestedSystem, message.author.id)
+                if checkResult == 3:
                     bountyWon = True
                     # reward all contributing users
                     rewards = bounty.calcRewards()
@@ -782,6 +785,9 @@ async def cmd_check(message, args):
                     toPop += [bounty]
                     # Announce the bounty has ben completed
                     await announceBountyWon(bounty, rewards, message.guild, message.author.id)
+                
+                if checkResult != 0:
+                    systemInBountyRoute = True
 
             # remove all completed bounties
             for bounty in toPop:
@@ -816,12 +822,12 @@ async def cmd_check(message, args):
                 if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
                     await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
-        # Increment the calling user's systemsChecked statistic if there are any bounties currently on the board.
-        if bountiesDB.hasBounties():
+        # Only put the calling user on checking cooldown and increment systemsChecked stat if the system checked is on an active bounty's route.
+        if systemInBountyRoute:
             usersDB.getUser(message.author.id).systemsChecked += 1
             # Put the calling user on checking cooldown
-            usersDB.getUser(message.author.id).bountyCooldownEnd = (datetime.utcnow(
-            ) + timedelta(minutes=bbConfig.checkCooldown["minutes"])).timestamp()
+            usersDB.getUser(message.author.id).bountyCooldownEnd = (datetime.utcnow() + \
+                                                                    timedelta(minutes=bbConfig.checkCooldown["minutes"])).timestamp()
 
     # If the calling user is on checking cooldown
     else:
