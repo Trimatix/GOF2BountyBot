@@ -217,19 +217,19 @@ class bbShop:
 def fromDict(shopDict):
     shipsStock = bbInventory.bbInventory()
     for shipListingDict in shopDict["shipsStock"]:
-        shipsStock.addItem(bbShip.fromDict(shipListingDict["item"]), count=shipListingDict["count"])
+        shipsStock.addItem(bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
     weaponsStock = bbInventory.bbInventory()
     for weaponListingDict in shopDict["weaponsStock"]:
-        weaponsStock.addItem(bbWeapon.fromDict(weaponListingDict["item"]), count=weaponListingDict["count"])
+        weaponsStock.addItem(bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
     modulesStock = bbInventory.bbInventory()
     for moduleListingDict in shopDict["modulesStock"]:
-        modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), count=moduleListingDict["count"])
+        modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
     turretsStock = bbInventory.bbInventory()
     for turretListingDict in shopDict["turretsStock"]:
-        turretsStock.addItem(bbTurret.fromDict(turretListingDict["item"]), count=turretListingDict["count"])
+        turretsStock.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
     return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"],
                     shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)

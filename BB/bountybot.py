@@ -1614,7 +1614,7 @@ async def cmd_shop(message, args):
     shopEmbed = makeEmbed(titleTxt="Shop", desc="__" + message.guild.name + "__\n | `Current Tech Level:` " + bbConfig.numberEmojis[requestedShop.currentTechLevel], footerTxt="All items" if item == "all" else (item + "s").title(), thumb="https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64")
 
     if item in ["all", "ship"]:
-        for shipNum in range(1, len(requestedShop.shipsStock) + 1):
+        for shipNum in range(1, requestedShop.shipsStock.numKeys):
             if shipNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Ships**__", inline=False)
             currentItem = requestedShop.shipsStock[shipNum - 1].item
@@ -1622,7 +1622,7 @@ async def cmd_shop(message, args):
             shopEmbed.add_field(name=str(shipNum) + ". " + (("`" + str(currentItemCount) + "x` ") if currentItemCount > 1 else "") + "**" + currentItem.getNameAndNick() + "**", value=(requestedShop.shipsStock[shipNum - 1].emoji if requestedShop.shipsStock[shipNum - 1].hasEmoji else "") + " " + commaSplitNum(str(requestedShop.shipsStock[shipNum - 1].getValue())) + " Credits\n" + requestedShop.shipsStock[shipNum - 1].statsStringShort(), inline=True)
 
     if item in ["all", "weapon"]:
-        for weaponNum in range(1, len(requestedShop.weaponsStock) + 1):
+        for weaponNum in range(1, requestedShop.weaponsStock.numKeys):
             if weaponNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Weapons**__", inline=False)
             currentItem = requestedShop.weaponsStock[weaponNum - 1].item
@@ -1630,7 +1630,7 @@ async def cmd_shop(message, args):
             shopEmbed.add_field(name=str(weaponNum) + ". " + (("`" + str(currentItemCount) + "x` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**", value=(requestedShop.weaponsStock[weaponNum - 1].emoji if requestedShop.weaponsStock[weaponNum - 1].hasEmoji else "") + " " + commaSplitNum(str(requestedShop.weaponsStock[weaponNum - 1].value)) + " Credits\n" + requestedShop.weaponsStock[weaponNum - 1].statsStringShort(), inline=True)
 
     if item in ["all", "module"]:
-        for moduleNum in range(1, len(requestedShop.modulesStock) + 1):
+        for moduleNum in range(1, requestedShop.modulesStock.numKeys):
             if moduleNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Modules**__", inline=False)
             currentItem = requestedShop.modulesStock[moduleNum - 1].item
@@ -1638,7 +1638,7 @@ async def cmd_shop(message, args):
             shopEmbed.add_field(name=str(moduleNum) + ". " + (("`" + str(currentItemCount) + "x` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**", value=(requestedShop.modulesStock[moduleNum - 1].emoji if requestedShop.modulesStock[moduleNum - 1].hasEmoji else "") + " " + commaSplitNum(str(requestedShop.modulesStock[moduleNum - 1].value)) + " Credits\n" + requestedShop.modulesStock[moduleNum - 1].statsStringShort(), inline=True)
 
     if item in ["all", "turret"]:
-        for turretNum in range(1, len(requestedShop.turretsStock) + 1):
+        for turretNum in range(1, requestedShop.turretsStock.numKeys):
             if turretNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Turrets**__", inline=False)
             currentItem = requestedShop.turretsStock[turretNum - 1].item

@@ -296,45 +296,45 @@ def fromDict(id, userDict):
     activeShip = bbShip.fromDict(userDict["activeShip"])
 
     # Convert old data format. once done, replace with commented out code below
-    inactiveShips = bbInventory.bbInventory()
-    if "inactiveShips" in userDict:
-        for shipListingDict in userDict["inactiveShips"]:
-            inactiveShips.addItem(bbShip.fromDict(shipListingDict))
-
-    inactiveWeapons = bbInventory.bbInventory()
-    if "inactiveWeapons" in userDict:
-        for weaponListingDict in userDict["inactiveWeapons"]:
-            inactiveWeapons.addItem(bbWeapon.fromDict(weaponListingDict))
-
-    inactiveModules = bbInventory.bbInventory()
-    if "inactiveModules" in userDict:
-        for moduleListingDict in userDict["inactiveModules"]:
-            inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict))
-
-    inactiveTurrets = bbInventory.bbInventory()
-    if "inactiveTurrets" in userDict:
-        for turretListingDict in userDict["inactiveTurrets"]:
-            inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict))
-
     # inactiveShips = bbInventory.bbInventory()
     # if "inactiveShips" in userDict:
     #     for shipListingDict in userDict["inactiveShips"]:
-    #         inactiveShips.addItem(bbShip.fromDict(shipListingDict["item"]), count=shipListingDict["count"])
+    #         inactiveShips.addItem(bbShip.fromDict(shipListingDict))
 
     # inactiveWeapons = bbInventory.bbInventory()
     # if "inactiveWeapons" in userDict:
     #     for weaponListingDict in userDict["inactiveWeapons"]:
-    #         inactiveWeapons.addItem(bbWeapon.fromDict(weaponListingDict["item"]), count=weaponListingDict["count"])
+    #         inactiveWeapons.addItem(bbWeapon.fromDict(weaponListingDict))
 
     # inactiveModules = bbInventory.bbInventory()
     # if "inactiveModules" in userDict:
     #     for moduleListingDict in userDict["inactiveModules"]:
-    #         inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), count=moduleListingDict["count"])
+    #         inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict))
 
     # inactiveTurrets = bbInventory.bbInventory()
     # if "inactiveTurrets" in userDict:
     #     for turretListingDict in userDict["inactiveTurrets"]:
-    #         inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict["item"]), count=turretListingDict["count"])
+    #         inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict))
+
+    inactiveShips = bbInventory.bbInventory()
+    if "inactiveShips" in userDict:
+        for shipListingDict in userDict["inactiveShips"]:
+            inactiveShips.addItem(bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
+
+    inactiveWeapons = bbInventory.bbInventory()
+    if "inactiveWeapons" in userDict:
+        for weaponListingDict in userDict["inactiveWeapons"]:
+            inactiveWeapons.addItem(bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
+
+    inactiveModules = bbInventory.bbInventory()
+    if "inactiveModules" in userDict:
+        for moduleListingDict in userDict["inactiveModules"]:
+            inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
+
+    inactiveTurrets = bbInventory.bbInventory()
+    if "inactiveTurrets" in userDict:
+        for turretListingDict in userDict["inactiveTurrets"]:
+            inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
