@@ -65,13 +65,13 @@ class bbShop:
             raise NotImplementedError("Valid, but unrecognised item type: " + item)
 
 
-    # SHIP MANAGEMENT
-    def userCanAffordShipObj(self, user, ship):
-        return user.credits >= ship.getValue()
+    def userCanAffordItemObj(self, user, item):
+        return user.credits >= item.getValue()
 
-    
+
+    # SHIP MANAGEMENT
     def userCanAffordShipIndex(self, user, index):
-        return self.userCanAffordShipObj(user, self.shipsStock[index].item)
+        return self.userCanAffordItemObj(user, self.shipsStock[index].item)
 
 
     def amountCanAffordShipObj(self, amount, ship):
@@ -87,7 +87,7 @@ class bbShop:
         
         
     def userBuyShipObj(self, user, requestedShip):
-        if self.userCanAffordShipObj(user, requestedShip):
+        if self.userCanAffordItemObj(user, requestedShip):
             self.shipsStock.removeItem(requestedShip)
             user.credits -= requestedShip.getValue()
             user.inactiveShips.addItem(requestedShip)
@@ -107,12 +107,8 @@ class bbShop:
 
     
     # WEAPON MANAGEMENT
-    def userCanAffordWeaponObj(self, user, weapon):
-        return user.credits >= weapon.getValue()
-
-    
     def userCanAffordWeaponIndex(self, user, index):
-        return self.userCanAffordWeaponObj(user, self.weaponsStock[index].item)
+        return self.userCanAffordItemObj(user, self.weaponsStock[index].item)
 
 
     def userBuyWeaponIndex(self, user, index):
@@ -120,7 +116,7 @@ class bbShop:
         
 
     def userBuyWeaponObj(self, user, requestedWeapon):
-        if self.userCanAffordWeaponObj(user, requestedWeapon):
+        if self.userCanAffordItemObj(user, requestedWeapon):
             self.weaponsStock.removeItem(requestedWeapon)
             user.credits -= requestedWeapon.getValue()
             user.inactiveShips.addItem(requestedWeapon)
@@ -140,12 +136,8 @@ class bbShop:
 
     
     # MODULE MANAGEMENT
-    def userCanAffordModuleObj(self, user, module):
-        return user.credits >= module.getValue()
-
-    
     def userCanAffordModuleIndex(self, user, index):
-        return self.userCanAffordModuleObj(user, self.modulesStock[index].item)
+        return self.userCanAffordItemObj(user, self.modulesStock[index].item)
 
 
     def userBuyModuleIndex(self, user, index):
@@ -153,7 +145,7 @@ class bbShop:
         
 
     def userBuyModuleObj(self, user, requestedModule):
-        if self.userCanAffordModuleObj(user, requestedModule):
+        if self.userCanAffordItemObj(user, requestedModule):
             self.modulesStock.removeItem(requestedModule)
             user.credits -= requestedModule.getValue()
             user.inactiveShips.addItem(requestedModule)
@@ -173,12 +165,8 @@ class bbShop:
 
 
     # TURRET MANAGEMENT
-    def userCanAffordTurretObj(self, user, turret):
-        return user.credits >= turret.getValue()
-
-    
     def userCanAffordTurretIndex(self, user, index):
-        return self.userCanAffordTurretObj(user, self.turretsStock[index].item)
+        return self.userCanAffordItemObj(user, self.turretsStock[index].item)
 
 
     def userBuyTurretIndex(self, user, index):
@@ -186,7 +174,7 @@ class bbShop:
         
         
     def userBuyTurretObj(self, user, requestedTurret):
-        if self.userCanAffordTurretObj(user, requestedTurret):
+        if self.userCanAffordItemObj(user, requestedTurret):
             self.turretsStock.removeItem(requestedTurret)
             user.credits -= requestedTurret.getValue()
             user.inactiveShips.addItem(requestedTurret)
