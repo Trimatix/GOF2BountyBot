@@ -1,5 +1,6 @@
 from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from ..bbConfig import bbConfig
+from . import bbInventory, bbInventoryListing
 
 
 defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
@@ -10,29 +11,6 @@ defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "sys
 
 
 class bbUser:
-    id = 0
-    credits = 0
-    lifetimeCredits = 0
-    bountyCooldownEnd = -1
-    systemsChecked = 0
-    bountyWins = 0
-    lastSeenGuildId = -1
-    hasLastSeenGuildId = False
-
-    activeShip = None
-    inactiveShips = []
-    inactiveModules = []
-    inactiveWeapons = []
-    inactiveTurrets = []
-
-    # dict of targetBBUser:DuelRequest
-    duelRequests = {}
-    duelWins = 0
-    duelLosses = 0
-    duelCreditsWins = 0
-    duelCreditsLosses = 0
-    
-
     def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0):
         if type(id) == float:
             id = int(id)
@@ -80,10 +58,10 @@ class bbUser:
         self.lastSeenGuildId = lastSeenGuildId
         self.haslastSeenGuildId = lastSeenGuildId != -1
 
-        self.duelWins = duelWins
         self.duelRequests = {}
-
+        self.duelWins = duelWins
         self.duelLosses = duelLosses
+
         self.duelCreditsWins = duelCreditsWins
         self.duelCreditsLosses = duelCreditsLosses
 
@@ -100,6 +78,10 @@ class bbUser:
         self.inactiveShips = []
         self.inactiveWeapons = []
         self.inactiveTurrets = []
+        self.duelWins = 0
+        self.duelLosses = 0
+        self.duelCreditsWins = 0
+        self.duelCreditsLosses = 0
 
 
     def numInventoryPages(self, item, maxPerPage):
