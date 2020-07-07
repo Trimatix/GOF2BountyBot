@@ -79,7 +79,6 @@ for shopTL in range(minTechLevel, maxTechLevel + 1):
 
 def pickRandomShopTL():
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
-    print(tlChance)
     for shopTL in range(len(shopTLChance)):
         if shopTLChance[shopTL] >= tlChance:
             return shopTL + 1
