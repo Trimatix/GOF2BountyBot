@@ -4,7 +4,7 @@ from . import bbInventory, bbInventoryListing
 import random
 
 class bbShop:
-    def __init__(self, maxShips=bbConfig.shopDefaultShipsNum, maxModules=bbConfig.shopDefaultModulesNum, maxWeapons=bbConfig.shopDefaultWeaponsNum, maxTurrets=bbConfig.shopDefaultTurretsNum, shipsStock=[], weaponsStock=[], modulesStock=[], turretsStock=[], currentTechLevel=bbConfig.minTechLevel):
+    def __init__(self, maxShips=bbConfig.shopDefaultShipsNum, maxModules=bbConfig.shopDefaultModulesNum, maxWeapons=bbConfig.shopDefaultWeaponsNum, maxTurrets=bbConfig.shopDefaultTurretsNum, shipsStock=bbInventory.bbInventory(), weaponsStock=bbInventory.bbInventory(), modulesStock=bbInventory.bbInventory(), turretsStock=bbInventory.bbInventory(), currentTechLevel=bbConfig.minTechLevel):
         self.maxShips = maxShips
         self.maxModules = maxModules
         self.maxWeapons = maxWeapons
@@ -12,10 +12,6 @@ class bbShop:
         self.currentTechLevel = currentTechLevel
 
         if shipsStock.isEmpty() and weaponsStock.isEmpty() and modulesStock.isEmpty() and turretsStock.isEmpty():
-            self.shipsStock = bbInventory.bbInventory()
-            self.weaponsStock = bbInventory.bbInventory()
-            self.modulesStock = bbInventory.bbInventory()
-            self.turretsStock = bbInventory.bbInventory()
             self.refreshStock()
         else:
             self.shipsStock = shipsStock
