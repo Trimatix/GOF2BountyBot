@@ -90,7 +90,7 @@ class bbShop:
         if self.userCanAffordShipObj(user, requestedShip):
             self.shipsStock.removeItem(requestedShip)
             user.credits -= requestedShip.getValue()
-            user.inactiveShips.append(requestedShip)
+            user.inactiveShips.addItem(requestedShip)
         else:
             raise RuntimeError("user " + str(user.id) + " attempted to buy ship " + requestedShip.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedShip.getValue()))
 
@@ -98,7 +98,7 @@ class bbShop:
     def userSellShipObj(self, user, ship):
         user.credits += ship.getValue()
         self.shipsStock.addItem(ship)
-        user.inactiveShips.remove(ship)
+        user.inactiveShips.removeItem(ship)
     
 
     def userSellShipIndex(self, user, index):
@@ -123,7 +123,7 @@ class bbShop:
         if self.userCanAffordWeaponObj(user, requestedWeapon):
             self.weaponsStock.removeItem(requestedWeapon)
             user.credits -= requestedWeapon.getValue()
-            user.inactiveShips.append(requestedWeapon)
+            user.inactiveShips.addItem(requestedWeapon)
         else:
             raise RuntimeError("user " + str(user.id) + " attempted to buy weapon " + requestedWeapon.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedWeapon.getValue()))
 
@@ -131,7 +131,7 @@ class bbShop:
     def userSellWeaponObj(self, user, weapon):
         user.credits += weapon.getValue()
         self.weaponsStock.addItem(weapon)
-        user.inactiveWeapons.remove(weapon)
+        user.inactiveWeapons.removeItem(weapon)
     
 
     def userSellWeaponIndex(self, user, index):
@@ -156,7 +156,7 @@ class bbShop:
         if self.userCanAffordModuleObj(user, requestedModule):
             self.modulesStock.removeItem(requestedModule)
             user.credits -= requestedModule.getValue()
-            user.inactiveShips.append(requestedModule)
+            user.inactiveShips.addItem(requestedModule)
         else:
             raise RuntimeError("user " + str(user.id) + " attempted to buy module " + requestedModule.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedModule.getValue()))
 
@@ -164,7 +164,7 @@ class bbShop:
     def userSellModuleObj(self, user, module):
         user.credits += module.getValue()
         self.modulesStock.addItem(module)
-        user.inactiveModules.remove(module)
+        user.inactiveModules.removeItem(module)
     
 
     def userSellModuleIndex(self, user, index):
@@ -189,7 +189,7 @@ class bbShop:
         if self.userCanAffordTurretObj(user, requestedTurret):
             self.turretsStock.removeItem(requestedTurret)
             user.credits -= requestedTurret.getValue()
-            user.inactiveShips.append(requestedTurret)
+            user.inactiveShips.addItem(requestedTurret)
         else:
             raise RuntimeError("user " + str(user.id) + " attempted to buy turret " + requestedTurret.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedTurret.getValue()))
 
@@ -197,7 +197,7 @@ class bbShop:
     def userSellTurretObj(self, user, turret):
         user.credits += turret.getValue()
         self.turretsStock.addItem(turret)
-        user.inactiveTurrets.remove(turret)
+        user.inactiveTurrets.removeItem(turret)
     
 
     def userSellTurretIndex(self, user, index):
