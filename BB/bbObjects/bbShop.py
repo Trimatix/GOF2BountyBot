@@ -83,9 +83,8 @@ class bbShop:
 
 
     def userBuyShipIndex(self, user, index):
-        self.userBuyShipIndex(user, self.shipsStock[index].item)
+        self.userBuyShipObj(user, self.shipsStock[index].item)
         
-
         
     def userBuyShipObj(self, user, requestedShip):
         if self.userCanAffordShipObj(user, requestedShip):
