@@ -1976,18 +1976,17 @@ async def cmd_equip(message, args):
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
         return
 
-    if usersDB.userIDExists(message.author.id):
-        requestedBBUser = usersDB.getUser(message.author.id)
-    else:
-        requestedBBUser = usersDB.addUser(message.author.id)
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
 
     itemNum = argsSplit[1]
     if not bbUtil.isInt(itemNum):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
-    if itemNum > len(requestedBBUser.getInactivesByName(item)):
-        await message.channel.send(":x: Invalid item number! You have " + str(len(requestedBBUser.getInactivesByName(item))) + " " + item + "s.")
+
+    userItemInactives = requestedBBUser.getInactivesByName(item)
+    if itemNum > userItemInactives.numKeys:
+        await message.channel.send(":x: Invalid item number! You have " + str(userItemInactives.numKeys) + " " + item + "s.")
         return
     if itemNum < 1:
         await message.channel.send(":x: Invalid item number! Must be at least 1.")
@@ -2005,28 +2004,30 @@ async def cmd_equip(message, args):
             await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` when equipping a ship.")
             return
 
+    requestedItem = userItemInactives.items[itemNum - 1].item
+    shipItemActives = requestedBBUser.activeShip.getActivesByName(item)
+
     if item == "ship":
-        requestedShip = requestedBBUser.inactiveShips[itemNum - 1]
         activeShip = requestedBBUser.activeShip
         if transferItems:
-            requestedBBUser.unequipAll(requestedShip)
-            requestedBBUser.activeShip.transferItemsTo(requestedShip)
+            requestedBBUser.unequipAll(requestedItem)
+            requestedBBUser.activeShip.transferItemsTo(requestedItem)
             requestedBBUser.unequipAll(activeShip)
         
-        requestedBBUser.equipShipObj(requestedShip)
+        requestedBBUser.equipShipObj(requestedItem)
 
-        outStr = ":rocket: You switched to the **" + requestedShip.getNameOrNick() + "**."
+        outStr = ":rocket: You switched to the **" + requestedItem.getNameOrNick() + "**."
         if transferItems:
             outStr += "\nItems thay could not fit in your new ship can be found in the hangar."
         await message.channel.send(outStr)
     
-    elif item == "weapon":
+    if item == "weapon":
         if not requestedBBUser.activeShip.canEquipMoreWeapons():
             await message.channel.send(":x: Your active ship does not have any free weapon slots!")
             return
-        requestedItem = requestedBBUser.inactiveWeapons[itemNum - 1]
+
         requestedBBUser.activeShip.equipWeapon(requestedItem)
-        requestedBBUser.inactiveWeapons.pop(itemNum - 1)
+        requestedBBUser.inactiveWeapons.removeItem(requestedItem)
 
         await message.channel.send(":wrench: You equipped the **" + requestedItem.name + "**.")
 
@@ -2035,14 +2036,12 @@ async def cmd_equip(message, args):
             await message.channel.send(":x: Your active ship does not have any free module slots!")
             return
 
-        requestedItem = requestedBBUser.inactiveModules[itemNum - 1]
-
         if not requestedBBUser.activeShip.canEquipModuleType(requestedItem.getType()):
             await message.channel.send(":x: You already have the max of this type of module equipped!")
             return
 
         requestedBBUser.activeShip.equipModule(requestedItem)
-        requestedBBUser.inactiveModules.pop(itemNum - 1)
+        requestedBBUser.inactiveModules.removeItem(requestedItem)
 
         await message.channel.send(":wrench: You equipped the **" + requestedItem.name + "**.")
 
@@ -2050,9 +2049,9 @@ async def cmd_equip(message, args):
         if not requestedBBUser.activeShip.canEquipMoreTurrets():
             await message.channel.send(":x: Your active ship does not have any free turret slots!")
             return
-        requestedItem = requestedBBUser.inactiveTurrets[itemNum - 1]
+
         requestedBBUser.activeShip.equipTurret(requestedItem)
-        requestedBBUser.inactiveTurrets.pop(itemNum - 1)
+        requestedBBUser.inactiveTurrets.removeItem(requestedItem)
 
         await message.channel.send(":wrench: You equipped the **" + requestedItem.name + "**.")
 
