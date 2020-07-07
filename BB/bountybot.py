@@ -1539,25 +1539,33 @@ async def cmd_hangar(message, args):
             for shipNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("ship", page, maxPerPage) + 1):
                 if shipNum == firstPlace:
                     hangarEmbed.add_field(name="‎", value="__**Stored Ships**__", inline=False)
-                hangarEmbed.add_field(name=str(shipNum) + ". " + requestedBBUser.inactiveShips[shipNum - 1].getNameAndNick(), value=(requestedBBUser.inactiveShips[shipNum - 1].emoji if requestedBBUser.inactiveShips[shipNum - 1].hasEmoji else "") + requestedBBUser.inactiveShips[shipNum - 1].statsStringShort(), inline=False)
+                currentItem = requestedBBUser.inactiveShips[shipNum - 1].item
+                currentItemCount = requestedBBUser.inactiveShips.items[currentItem].count
+                hangarEmbed.add_field(name=str(shipNum) + ". " + (("`" + str(currentItemCount) + "x`") if currentItemCount > 1 else "") + currentItem.getNameAndNick(), value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
         
         if item in ["all", "weapon"]:
             for weaponNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("weapon", page, maxPerPage) + 1):
                 if weaponNum == firstPlace:
                     hangarEmbed.add_field(name="‎", value="__**Stored Weapons**__", inline=False)
-                hangarEmbed.add_field(name=str(weaponNum) + ". " + requestedBBUser.inactiveWeapons[weaponNum - 1].name, value=(requestedBBUser.inactiveWeapons[weaponNum - 1].emoji if requestedBBUser.inactiveWeapons[weaponNum - 1].hasEmoji else "") + requestedBBUser.inactiveWeapons[weaponNum - 1].statsStringShort(), inline=False)
+                currentItem = requestedBBUser.inactiveWeapons[weaponNum - 1].item
+                currentItemCount = requestedBBUser.inactiveWeapons.items[currentItem].count
+                hangarEmbed.add_field(name=str(weaponNum) + ". " + (("`" + str(currentItemCount) + "x`") if currentItemCount > 1 else "") + currentItem.name, value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
 
         if item in ["all", "module"]:
             for moduleNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("module", page, maxPerPage) + 1):
                 if moduleNum == firstPlace:
                     hangarEmbed.add_field(name="‎", value="__**Stored Modules**__", inline=False)
-                hangarEmbed.add_field(name=str(moduleNum) + ". " + requestedBBUser.inactiveModules[moduleNum - 1].name, value=(requestedBBUser.inactiveModules[moduleNum - 1].emoji if requestedBBUser.inactiveModules[moduleNum - 1].hasEmoji else "") + requestedBBUser.inactiveModules[moduleNum - 1].statsStringShort(), inline=False)
+                currentItem = requestedBBUser.inactiveModules[moduleNum - 1].item
+                currentItemCount = requestedBBUser.inactiveModules.items[currentItem].count
+                hangarEmbed.add_field(name=str(moduleNum) + ". " + (("`" + str(currentItemCount) + "x`") if currentItemCount > 1 else "") + currentItem.name, value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
 
         if item in ["all", "turret"]:
             for turretNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("turret", page, maxPerPage) + 1):
                 if turretNum == firstPlace:
                     hangarEmbed.add_field(name="‎", value="__**Stored Turrets**__", inline=False)
-                hangarEmbed.add_field(name=str(turretNum) + ". " + requestedBBUser.inactiveTurrets[turretNum - 1].name, value=(requestedBBUser.inactiveTurrets[turretNum - 1].emoji if requestedBBUser.inactiveTurrets[turretNum - 1].hasEmoji else "") + requestedBBUser.inactiveTurrets[turretNum - 1].statsStringShort(), inline=False)
+                currentItem = requestedBBUser.inactiveTurrets[turretNum - 1].item
+                currentItemCount = requestedBBUser.inactiveTurrets.items[currentItem].count
+                hangarEmbed.add_field(name=str(turretNum) + ". " + (("`" + str(currentItemCount) + "x`") if currentItemCount > 1 else "") + currentItem.name, value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
 
         try:
             await sendChannel.send(embed=hangarEmbed)
