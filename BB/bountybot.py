@@ -1774,11 +1774,12 @@ async def cmd_shop_buy(message, args):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
-    if itemNum > len(requestedShop.getStockByName(item)):
-        if len(requestedShop.getStockByName(item)) == 0:
+    shopItemStock = requestedShop.getStockByName(item)
+    if itemNum > shopItemStock.numKeys:
+        if shopItemStock.numKeys == 0:
             await message.channel.send(":x: This shop has no " + item + "s in stock!")
         else:
-            await message.channel.send(":x: Invalid item number! This shop has " + str(len(requestedShop.getStockByName(item))) + " " + item + "(s).")
+            await message.channel.send(":x: Invalid item number! This shop has " + str(shopItemStock.numKeys) + " " + item + "(s).")
         return
         
     if itemNum < 1:
@@ -1810,27 +1811,24 @@ async def cmd_shop_buy(message, args):
                 await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` and/or `sell` when buying a ship.")
                 return
 
-    if usersDB.userIDExists(message.author.id):
-        requestedBBUser = usersDB.getUser(message.author.id)
-    else:
-        requestedBBUser = usersDB.addUser(message.author.id)
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
+    requestedItem = shopItemStock[itemNum - 1].item
 
     if item == "ship":
-        requestedShip = requestedShop.shipsStock[itemNum - 1]
-        newShipValue = requestedShip.getValue()
+        newShipValue = requestedItem.getValue()
         activeShip = requestedBBUser.activeShip
 
         # Check the item can be afforded
-        if (not sellOldShip and not requestedShop.userCanAffordShipObj(requestedBBUser, requestedShip)) or \
-                (sellOldShip and not requestedShop.amountCanAffordShipObj(requestedBBUser.credits + requestedBBUser.activeShip.getValue(shipUpgradesOnly=transferItems), requestedShip)):
-            await message.channel.send(":x: You can't afford that item! (" + str(requestedShip.getValue()) + ")")
+        if (not sellOldShip and not requestedShop.userCanAffordShipObj(requestedBBUser, requestedItem)) or \
+                (sellOldShip and not requestedShop.amountCanAffordShipObj(requestedBBUser.credits + requestedBBUser.activeShip.getValue(shipUpgradesOnly=transferItems), requestedItem)):
+            await message.channel.send(":x: You can't afford that item! (" + str(requestedItem.getValue()) + ")")
             return
 
-        requestedBBUser.inactiveShips.append(requestedShip)
+        requestedBBUser.inactiveShips.addItem(requestedItem)
         
         if transferItems:
-            requestedBBUser.unequipAll(requestedShip)
-            activeShip.transferItemsTo(requestedShip)
+            requestedBBUser.unequipAll(requestedItem)
+            activeShip.transferItemsTo(requestedItem)
             requestedBBUser.unequipAll(activeShip)
 
         if sellOldShip:
@@ -1838,13 +1836,13 @@ async def cmd_shop_buy(message, args):
             oldShipValue = activeShip.getValue(shipUpgradesOnly=transferItems)
             requestedBBUser.credits += oldShipValue
             requestedBBUser.unequipAll(activeShip)
-            requestedShop.shipsStock.append(activeShip)
+            shopItemStock.addItem(activeShip)
         
-        requestedBBUser.equipShipObj(requestedShip, noSaveActive=sellOldShip)
+        requestedBBUser.equipShipObj(requestedItem, noSaveActive=sellOldShip)
         requestedBBUser.credits -= newShipValue
-        requestedShop.shipsStock.remove(requestedShip)
+        shopItemStock.removeItem(requestedItem)
         
-        outStr = ":moneybag: Congratulations on your new **" + requestedShip.name + "**!"
+        outStr = ":moneybag: Congratulations on your new **" + requestedItem.name + "**!"
         if sellOldShip:
             outStr += "\nYou received **" + str(oldShipValue) + " credits** for your old **" + str(activeShip.name) + "**."
         else:
@@ -1855,42 +1853,16 @@ async def cmd_shop_buy(message, args):
 
         await message.channel.send(outStr)
 
-    elif item == "weapon":
-        requestedWeapon = requestedShop.weaponsStock[itemNum - 1]
-        if not requestedShop.userCanAffordWeaponObj(requestedBBUser, requestedWeapon):
-            await message.channel.send(":x: You can't afford that item! (" + str(requestedWeapon.value) + ")")
+    elif item in ["weapon", "module", "turret"]:
+        if not requestedShop.userCanAffordItemObj(requestedBBUser, requestedItem):
+            await message.channel.send(":x: You can't afford that item! (" + str(requestedItem.value) + ")")
             return
-        
-        requestedBBUser.credits -= requestedWeapon.value
-        requestedBBUser.inactiveWeapons.append(requestedWeapon)
-        requestedShop.weaponsStock.remove(requestedWeapon)
 
-        await message.channel.send(":moneybag: Congratulations on your new **" + requestedWeapon.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
+        requestedBBUser.credits -= requestedItem.value
+        requestedBBUser.getInactivesByName.addItem(requestedItem)
+        shopItemStock.removeItem(requestedItem)
 
-    elif item == "module":
-        requestedModule = requestedShop.modulesStock[itemNum - 1]
-        if not requestedShop.userCanAffordModuleObj(requestedBBUser, requestedModule):
-            await message.channel.send(":x: You can't afford that item! (" + str(requestedModule.value) + ")")
-            return
-        
-        requestedBBUser.credits -= requestedModule.value
-        requestedBBUser.inactiveModules.append(requestedModule)
-        requestedShop.modulesStock.remove(requestedModule)
-
-        await message.channel.send(":moneybag: Congratulations on your new **" + requestedModule.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
-
-    elif item == "turret":
-        requestedTurret = requestedShop.turretsStock[itemNum - 1]
-        if not requestedShop.userCanAffordTurretObj(requestedBBUser, requestedTurret):
-            await message.channel.send(":x: You can't afford that item! (" + str(requestedTurret.value) + ")")
-            return
-        
-        requestedBBUser.credits -= requestedTurret.value
-        requestedBBUser.inactiveTurrets.append(requestedTurret)
-        requestedShop.turretsStock.remove(requestedTurret)
-
-        await message.channel.send(":moneybag: Congratulations on your new **" + requestedTurret.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
-
+        await message.channel.send(":moneybag: Congratulations on your new **" + requestedItem.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
