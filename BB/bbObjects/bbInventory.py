@@ -100,6 +100,26 @@ class bbInventory:
 
 
     """
+    Decide whether a given item is stored in this inventory.
+
+    @param item -- The item to check for membership
+    @return -- True if at least one of item is in this inventory, False otherwise
+    """
+    def stores(self, item):
+        return item in self.keys
+
+    
+    """
+    Get the amount stored of a given item.
+
+    @param item -- The item to count
+    @return -- Integer count of number of items in this inventory. 0 if it is not stored in this inventory.
+    """
+    def numStored(self, item):
+        return self.items[item].count if self.stores(item) else 0
+
+
+    """
     Decide whether or not this bbInventory currently stores any items.
 
     @return -- True if no items are stored, False if at least one item is stored currently
