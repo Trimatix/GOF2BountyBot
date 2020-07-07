@@ -52,6 +52,7 @@ minTechLevel = 1
 maxTechLevel = 10
 
 # The probability of a shop spawning with a given tech level. Tech level = index + 1
+cumulativeShopTLChance = [0 for tl in range(minTechLevel, maxTechLevel + 1)]
 shopTLChance = [0 for tl in range(minTechLevel, maxTechLevel + 1)]
 
 itemChanceSum = 0
@@ -59,28 +60,32 @@ itemChanceSum = 0
 # Calculate spawn chance for each shop TL
 for shopTL in range(minTechLevel, maxTechLevel + 1):
     itemChance = truncToRes(1 - math.exp((shopTL - 10.5) / 5))
-    shopTLChance[shopTL - 1] = itemChance
+    cumulativeShopTLChance[shopTL - 1] = itemChance
     itemChanceSum += itemChance
 
 # Scale shop TL probabilities so that they add up to 1
 for shopTL in range(minTechLevel, maxTechLevel + 1):
-    currentChance = shopTLChance[shopTL - 1]
+    currentChance = cumulativeShopTLChance[shopTL - 1]
     if currentChance != 0:
-        shopTLChance[shopTL - 1] = truncToRes(currentChance / itemChanceSum)
+        cumulativeShopTLChance[shopTL - 1] = truncToRes(currentChance / itemChanceSum)
+
+# Save non-cumulative probabilities
+for i in range(len(cumulativeShopTLChance)):
+    shopTLChance[i] = cumulativeShopTLChance
 
 # Sum probabilities to give cumulative scale
 currentSum = 0
 for shopTL in range(minTechLevel, maxTechLevel + 1):
-    currentChance = shopTLChance[shopTL - 1]
+    currentChance = cumulativeShopTLChance[shopTL - 1]
     if currentChance != 0:
-        shopTLChance[shopTL - 1] = truncToRes(currentSum + currentChance)
+        cumulativeShopTLChance[shopTL - 1] = truncToRes(currentSum + currentChance)
         currentSum += currentChance
 
 
 def pickRandomShopTL():
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
-    for shopTL in range(len(shopTLChance)):
-        if shopTLChance[shopTL] >= tlChance:
+    for shopTL in range(len(cumulativeShopTLChance)):
+        if cumulativeShopTLChance[shopTL] >= tlChance:
             return shopTL + 1
     return maxTechLevel
 
@@ -90,7 +95,8 @@ shipMaxPriceTechLevels = [50000, 100000, 300000, 700000, 1000000, 2000000, 50000
 # CUMULATIVE probabilities of items of a given tech level spawning in a shop of a given tech level
 # Outer dimension is shop tech level
 # Inner dimension is item tech level
-itemTLSpawnChanceForShopTL = []
+itemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
+cumulativeItemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 
 # Parameters for itemTLSpawnChanceForShopTL values, using u function: https://www.desmos.com/calculator/nrshikfmxc
 tl_s = 7
@@ -106,34 +112,37 @@ def tl_u(x, t):
 # Loop through shop TLs
 for shopTL in range(minTechLevel, maxTechLevel + 1):
     tl_h = shopTL - tl_s
-    itemTLSpawnChanceForShopTL.append([0 for i in range(minTechLevel, maxTechLevel + 1)])
     itemChanceSum = 0
 
     # Calculate spawn chance for each item TL in this shop TL
     for itemTL in range(minTechLevel, maxTechLevel + 1):
         itemChance = tl_u(itemTL, shopTL)
-        itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = itemChance
+        cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = itemChance
         itemChanceSum += itemChance
     
     # Scale item TLs so that they add up to 1
     for itemTL in range(minTechLevel, maxTechLevel + 1):
-        currentChance = itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1]
+        currentChance = cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1]
         if currentChance != 0:
-            itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentChance / itemChanceSum)
+            cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentChance / itemChanceSum)
+
+    # Save non-cumulative probabilities
+    for i in range(len(cumulativeItemTLSpawnChanceForShopTL[shopTL - 1])):
+        itemTLSpawnChanceForShopTL[shopTL - 1][i] = cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][i]
 
     # Sum probabilities to give cumulative scale
     currentSum = 0
     for itemTL in range(minTechLevel, maxTechLevel + 1):
-        currentChance = itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1]
+        currentChance = cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1]
         if currentChance != 0:
-            itemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentSum + currentChance)
+            cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentSum + currentChance)
             currentSum += currentChance
 
 
 def pickRandomItemTL(shopTL):
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
-    for itemTL in range(len(itemTLSpawnChanceForShopTL[shopTL - 1])):
-        if itemTLSpawnChanceForShopTL[shopTL - 1][itemTL] >= tlChance:
+    for itemTL in range(len(cumulativeItemTLSpawnChanceForShopTL[shopTL - 1])):
+        if cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL] >= tlChance:
             return itemTL + 1
     return maxTechLevel
 

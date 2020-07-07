@@ -1194,8 +1194,8 @@ async def cmd_ship(message, args):
                 modulesStr += module.name + ", "
             statsEmbed.add_field(name="Equipped Modules:",
                                  value=modulesStr[:-2] + "]*")
-        statsEmbed.add_field(name="Shop Spawn Rate:",
-                             value=str(itemObj.shopSpawnRate) + "%")
+        statsEmbed.add_field(name="Max Shop Spawn Chance:",
+                             value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1248,7 +1248,8 @@ async def cmd_weapon(message, args):
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
-        statsEmbed.add_field(name="Shop Spawn Rate:",value=str(itemObj.shopSpawnRate) + "%")
+        statsEmbed.add_field(name="Max Shop Spawn Chance:",
+                            value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1301,7 +1302,8 @@ async def cmd_module(message, args):
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="Stats:",value=str(itemObj.statsStringShort()))
-        statsEmbed.add_field(name="Shop Spawn Rate:",value=str(itemObj.shopSpawnRate) + "%")
+        statsEmbed.add_field(name="Max Shop Spawn Chance:",
+                            value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1354,7 +1356,8 @@ async def cmd_turret(message, args):
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
-        statsEmbed.add_field(name="Shop Spawn Rate:",value=str(itemObj.shopSpawnRate) + "%")
+        statsEmbed.add_field(name="Max Shop Spawn Chance:",
+                            value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
