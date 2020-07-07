@@ -73,10 +73,10 @@ class bbUser:
         self.systemsChecked = 0
         self.bountyWins = 0
         self.activeShip = bbShip.fromDict(defaultShipLoadoutDict)
-        self.inactiveModules = []
-        self.inactiveShips = []
-        self.inactiveWeapons = []
-        self.inactiveTurrets = []
+        self.inactiveModules.clear()
+        self.inactiveShips.clear()
+        self.inactiveWeapons.clear()
+        self.inactiveTurrets.clear()
         self.duelWins = 0
         self.duelLosses = 0
         self.duelCreditsWins = 0
@@ -117,36 +117,35 @@ class bbUser:
             return pageNum * maxPerPage
             
         elif item == "ship":
-            return len(self.inactiveShips)
+            return self.inactiveShips.numKeys
         elif item == "weapon":
-            return len(self.inactiveWeapons)
+            return self.inactiveWeapons.numKeys
         elif item == "module":
-            return len(self.inactiveModules)
+            return self.inactiveModules.numKeys
         elif item == "turret":
-            return len(self.inactiveTurrets)
+            return self.inactiveTurrets.numKeys
         else:
             raise NotImplementedError("Valid but unsupported item name: " + item)
 
 
     def unequipAll(self, ship):
         if not type(ship) == bbShip.bbShip:
-            raise TypeError("Can only transfer items to another bbShip. Given " + str(type(ship)))
+            raise TypeError("Can only unequipAll from a bbShip. Given " + str(type(ship)))
 
         if not (self.activeShip == ship or ship in self.inactiveShips):
             raise RuntimeError("Attempted to unequipAll on a ship that isnt owned by this bbUser")
 
         for weapon in ship.weapons:
-            self.inactiveWeapons.append(weapon)
-            # ship.unequipWeaponObj(weapon)
-        ship.weapons = []
+            self.inactiveWeapons.addItem(weapon)
+        ship.clearWeapons()
+
         for module in ship.modules:
-            self.inactiveModules.append(module)
-            # ship.unequipModuleObj(module)
-        ship.modules = []
+            self.inactiveModules.addItem(module)
+        ship.clearModules()
+
         for turret in ship.turrets:
-            self.inactiveTurrets.append(turret)
-            # ship.unequipTurretObj(turret)
-        ship.turrets = []
+            self.inactiveTurrets.addItem(turret)
+        ship.clearTurrets()
 
 
     def validateLoadout(self):
@@ -173,36 +172,37 @@ class bbUser:
         if not (self.activeShip == ship or ship in self.inactiveShips):
             raise RuntimeError("Attempted to equip a ship that isnt owned by this bbUser")
         if not noSaveActive and self.activeShip is not None:
-            self.inactiveShips.append(self.activeShip)
+            self.inactiveShips.addItem(self.activeShip)
         if ship in self.inactiveShips:
-            self.inactiveShips.remove(ship)
+            self.inactiveShips.removeItem(ship)
         self.activeShip = ship
 
     
     def equipShipIndex(self, index):
-        if not (0 <= index <= len(self.inactiveShips) - 1):
+        if not (0 <= index <= self.inactiveShips.numKeys - 1):
             raise RuntimeError("Index out of range")
         if self.activeShip is not None:
-            self.inactiveShips.append(self.activeShip)
-        self.activeShip = self.inactiveShips.pop(index)
+            self.inactiveShips.addItem(self.activeShip)
+        self.activeShip = self.inactiveShips[index]
+        self.inactiveShips.removeItem(self.activeShip)
 
 
     def toDictNoId(self):
         inactiveShipsDict = []
-        for ship in self.inactiveShips:
-            inactiveShipsDict.append(ship.toDict())
+        for ship in self.inactiveShips.keys:
+            inactiveShipsDict.append(self.inactiveShips[ship].toDict())
 
         inactiveModulesDict = []
-        for module in self.inactiveModules:
-            inactiveModulesDict.append(module.toDict())
+        for module in self.inactiveModules.keys:
+            inactiveModulesDict.append(self.inactiveModules[module].toDict())
 
         inactiveWeaponsDict = []
-        for weapon in self.inactiveWeapons:
-            inactiveWeaponsDict.append(weapon.toDict())
+        for weapon in self.inactiveWeapons.keys:
+            inactiveWeaponsDict.append(self.inactiveWeapons[weapon].toDict())
 
         inactiveTurretsDict = []
-        for turret in self.inactiveTurrets:
-            inactiveTurretsDict.append(turret.toDict())
+        for turret in self.inactiveTurrets.keys:
+            inactiveTurretsDict.append(self.inactiveTurrets[turret].toDict())
 
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
@@ -233,17 +233,17 @@ class bbUser:
             return self.bountyWins
         elif stat == "value":
             modulesValue = 0
-            for module in self.inactiveModules:
-                modulesValue += module.getValue()
+            for module in self.inactiveModules.keys:
+                modulesValue += self.inactiveModules[module].count * module.getValue()
             turretsValue = 0
-            for turret in self.inactiveTurrets:
-                turretsValue += turret.getValue()
+            for turret in self.inactiveTurrets.keys:
+                turretsValue += self.inactiveTurrets[turret].count * turret.getValue()
             weaponsValue = 0
-            for weapon in self.inactiveWeapons:
-                weaponsValue += weapon.getValue()
+            for weapon in self.inactiveWeapons.keys:
+                weaponsValue += self.inactiveWeapons[weapon].count * weapon.getValue()
             shipsValue = 0
-            for ship in self.inactiveShips:
-                shipsValue += ship.getValue()
+            for ship in self.inactiveShips.keys:
+                shipsValue += self.inactiveShips[ship].count * ship.getValue()
 
             return modulesValue + turretsValue + weaponsValue + shipsValue + self.activeShip.getValue() + self.credits
 
@@ -297,23 +297,23 @@ def fromDict(id, userDict):
 
     inactiveShips = []
     if "inactiveShips" in userDict:
-        for ship in userDict["inactiveShips"]:
-            inactiveShips.append(bbShip.fromDict(ship))
+        for shipListingDict in userDict["inactiveShips"]:
+            inactiveShips.addItem(bbShip.fromDict(shipListingDict["item"]), count=shipListingDict["count"])
 
     inactiveWeapons = []
     if "inactiveWeapons" in userDict:
-        for weapon in userDict["inactiveWeapons"]:
-            inactiveWeapons.append(bbWeapon.fromDict(weapon))
+        for weaponListingDict in userDict["inactiveWeapons"]:
+            inactiveWeapons.addItem(bbWeapon.fromDict(weaponListingDict["item"]), count=weaponListingDict["count"])
 
     inactiveModules = []
     if "inactiveModules" in userDict:
-        for module in userDict["inactiveModules"]:
-            inactiveModules.append(bbModuleFactory.fromDict(module))
+        for moduleListingDict in userDict["inactiveModules"]:
+            inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), count=moduleListingDict["count"])
 
     inactiveTurrets = []
     if "inactiveTurrets" in userDict:
-        for turret in userDict["inactiveTurrets"]:
-            inactiveTurrets.append(bbTurret.fromDict(turret))
+        for turretListingDict in userDict["inactiveTurrets"]:
+            inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict["item"]), count=turretListingDict["count"])
 
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
