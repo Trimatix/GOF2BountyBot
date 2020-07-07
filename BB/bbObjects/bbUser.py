@@ -7,7 +7,7 @@ defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
                         "weapons":[{"name": "Micro Gun MK I", "builtIn": True}],
                         "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}, {"name": "IMT Extract 1.3", "builtIn": True}]}
 
-defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"name": "Nirai Impulse EX 1", "builtIn": True}]}
+defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"item": {"name": "Nirai Impulse EX 1", "builtIn": True}, "count": 1}]}
 
 
 class bbUser:
@@ -66,7 +66,6 @@ class bbUser:
         self.duelCreditsLosses = duelCreditsLosses
 
     
-
     def resetUser(self):
         self.credits = 0
         self.lifetimeCredits = 0
@@ -88,10 +87,10 @@ class bbUser:
         if item not in bbConfig.validItemNames:
             raise ValueError("Requested an invalid item name: " + item)
 
-        numWeapons = len(self.inactiveWeapons)
-        numModules = len(self.inactiveModules)
-        numTurrets = len(self.inactiveTurrets)
-        numShips = len(self.inactiveShips)
+        numWeapons = self.inactiveWeapons.numKeys
+        numModules = self.inactiveModules.numKeys
+        numTurrets = self.inactiveTurrets.numKeys
+        numShips = self.inactiveShips.numKeys
 
         itemsNum = 0
 
