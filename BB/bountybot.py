@@ -1158,43 +1158,43 @@ async def cmd_ship(message, args):
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
                                desc="__Ship File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
-        statsEmbed.add_field(name="Ship Base Value", value=commaSplitNum(
+        statsEmbed.add_field(name="Value:", value=commaSplitNum(
                                                             str(itemObj.getValue(shipUpgradesOnly=True))) + " Credits")
-        statsEmbed.add_field(name="Armour", value=str(itemObj.getArmour()))
-        statsEmbed.add_field(name="Cargo", value=str(itemObj.getCargo()))
-        statsEmbed.add_field(name="Handling", value=str(itemObj.getHandling()))
-        statsEmbed.add_field(name="Max Primaries",
+        statsEmbed.add_field(name="Armour:", value=str(itemObj.getArmour()))
+        statsEmbed.add_field(name="Cargo:", value=str(itemObj.getCargo()))
+        statsEmbed.add_field(name="Handling:", value=str(itemObj.getHandling()))
+        statsEmbed.add_field(name="Max Primaries:",
                              value=str(itemObj.getMaxPrimaries()))
         if len(itemObj.weapons) > 0:
             weaponStr = "*["
             for weapon in itemObj.weapons:
                 weaponStr += weapon.name + ", "
-            statsEmbed.add_field(name="Equipped Primaries",
+            statsEmbed.add_field(name="Equipped Primaries:",
                                  value=weaponStr[:-2] + "]*")
-        statsEmbed.add_field(name="Max Secondaries",
+        statsEmbed.add_field(name="Max Secondaries:",
                              value=str(itemObj.getNumSecondaries()))
         # if len(itemObj.secondaries) > 0:
         #     secondariesStr = "*["
         #     for secondary in itemObj.secondaries:
         #         secondariesStr += secondary.name + ", "
         #     statsEmbed.add_field(name="Equipped Secondaries",value=secondariesStr[:-2] + "]*")
-        statsEmbed.add_field(name="Turret Slots",
+        statsEmbed.add_field(name="Turret Slots:",
                              value=str(itemObj.getMaxTurrets()))
         if len(itemObj.turrets) > 0:
             turretsStr = "*["
             for turret in itemObj.turrets:
                 turretsStr += turret.name + ", "
-            statsEmbed.add_field(name="Equipped Turrets",
+            statsEmbed.add_field(name="Equipped Turrets:",
                                  value=turretsStr[:-2] + "]*")
-        statsEmbed.add_field(name="Modules Slots",
+        statsEmbed.add_field(name="Modules Slots:",
                              value=str(itemObj.getMaxModules()))
         if len(itemObj.modules) > 0:
             modulesStr = "*["
             for module in itemObj.modules:
                 modulesStr += module.name + ", "
-            statsEmbed.add_field(name="Equipped Modules",
+            statsEmbed.add_field(name="Equipped Modules:",
                                  value=modulesStr[:-2] + "]*")
-        statsEmbed.add_field(name="Shop Spawn Rate",
+        statsEmbed.add_field(name="Shop Spawn Rate:",
                              value=str(itemObj.shopSpawnRate) + "%")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
@@ -1248,7 +1248,7 @@ async def cmd_weapon(message, args):
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
-        statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
+        statsEmbed.add_field(name="Shop Spawn Rate:",value=str(itemObj.shopSpawnRate) + "%")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1301,7 +1301,7 @@ async def cmd_module(message, args):
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="Stats:",value=str(itemObj.statsStringShort()))
-        statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
+        statsEmbed.add_field(name="Shop Spawn Rate:",value=str(itemObj.shopSpawnRate) + "%")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1354,7 +1354,7 @@ async def cmd_turret(message, args):
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:",value=str(itemObj.value))
         statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
-        statsEmbed.add_field(name="Shop Spawn Rate",value=str(itemObj.shopSpawnRate) + "%")
+        statsEmbed.add_field(name="Shop Spawn Rate:",value=str(itemObj.shopSpawnRate) + "%")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
