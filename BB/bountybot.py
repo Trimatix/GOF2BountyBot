@@ -2079,10 +2079,7 @@ async def cmd_unequip(message, args):
         await message.channel.send(":x: Too many arguments! Please only give an item type (all/weapon/module/turret), an item number or `all`.")
         return
 
-    if usersDB.userIDExists(message.author.id):
-        requestedBBUser = usersDB.getUser(message.author.id)
-    else:
-        requestedBBUser = usersDB.addUser(message.author.id)
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
 
     if unequipAllItems:
         requestedBBUser.unequipAll(requestedBBUser.activeShip)
@@ -2118,13 +2115,13 @@ async def cmd_unequip(message, args):
             return
         if unequipAll:
             for weapon in requestedBBUser.activeShip.weapons:
-                requestedBBUser.inactiveWeapons.append(weapon)
+                requestedBBUser.inactiveWeapons.addItem(weapon)
                 requestedBBUser.activeShip.unequipWeaponObj(weapon)
 
             await message.channel.send(":wrench: You unequipped all **weapons**.")
         else:
             requestedItem = requestedBBUser.activeShip.weapons[itemNum - 1]
-            requestedBBUser.inactiveWeapons.append(requestedItem)
+            requestedBBUser.inactiveWeapons.addItem(requestedItem)
             requestedBBUser.activeShip.unequipWeaponIndex(itemNum - 1)
 
             await message.channel.send(":wrench: You unequipped the **" + requestedItem.name + "**.")
@@ -2135,13 +2132,13 @@ async def cmd_unequip(message, args):
             return
         if unequipAll:
             for module in requestedBBUser.activeShip.modules:
-                requestedBBUser.inactiveModules.append(module)
+                requestedBBUser.inactiveModules.addItem(module)
                 requestedBBUser.activeShip.unequipModuleObj(module)
 
             await message.channel.send(":wrench: You unequipped all **modules**.")
         else:
             requestedItem = requestedBBUser.activeShip.modules[itemNum - 1]
-            requestedBBUser.inactiveModules.append(requestedItem)
+            requestedBBUser.inactiveModules.addItem(requestedItem)
             requestedBBUser.activeShip.unequipModuleIndex(itemNum - 1)
 
             await message.channel.send(":wrench: You unequipped the **" + requestedItem.name + "**.")
@@ -2152,13 +2149,13 @@ async def cmd_unequip(message, args):
             return
         if unequipAll:
             for turret in requestedBBUser.activeShip.turrets:
-                requestedBBUser.inactiveTurrets.append(turret)
+                requestedBBUser.inactiveTurrets.addItem(turret)
                 requestedBBUser.activeShip.unequipTurretObj(turret)
 
             await message.channel.send(":wrench: You unequipped all **turrets**.")
         else:
             requestedItem = requestedBBUser.activeShip.turrets[itemNum - 1]
-            requestedBBUser.inactiveTurrets.append(requestedItem)
+            requestedBBUser.inactiveTurrets.addItem(requestedItem)
             requestedBBUser.activeShip.unequipTurretIndex(itemNum - 1)
 
             await message.channel.send(":wrench: You unequipped the **" + requestedItem.name + "**.")
