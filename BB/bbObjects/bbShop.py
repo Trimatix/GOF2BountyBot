@@ -103,7 +103,7 @@ class bbShop:
     
 
     def userSellShipIndex(self, user, index):
-        self.userSellShipObj(user, user.inactiveShips[index])
+        self.userSellShipObj(user, user.inactiveShips[index].item)
 
 
     
@@ -136,7 +136,7 @@ class bbShop:
     
 
     def userSellWeaponIndex(self, user, index):
-        self.userSellWeaponObj(user, user.inactiveWeapons[index])
+        self.userSellWeaponObj(user, user.inactiveWeapons[index].item)
 
 
     
@@ -169,7 +169,7 @@ class bbShop:
     
 
     def userSellModuleIndex(self, user, index):
-        self.userSellModuleObj(user, user.inactiveModules[index])
+        self.userSellModuleObj(user, user.inactiveModules[index].item)
 
 
 
@@ -202,7 +202,7 @@ class bbShop:
     
 
     def userSellTurretIndex(self, user, index):
-        self.userSellTurretObj(user, user.inactiveTurrets[index])
+        self.userSellTurretObj(user, user.inactiveTurrets[index].item)
 
 
 
