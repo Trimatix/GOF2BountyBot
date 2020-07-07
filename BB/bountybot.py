@@ -1859,7 +1859,7 @@ async def cmd_shop_buy(message, args):
             return
 
         requestedBBUser.credits -= requestedItem.value
-        requestedBBUser.getInactivesByName.addItem(requestedItem)
+        requestedBBUser.getInactivesByName(item).addItem(requestedItem)
         shopItemStock.removeItem(requestedItem)
 
         await message.channel.send(":moneybag: Congratulations on your new **" + requestedItem.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
