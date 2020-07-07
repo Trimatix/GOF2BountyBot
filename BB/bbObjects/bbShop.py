@@ -1,5 +1,6 @@
 from ..bbConfig import bbData, bbConfig
 from .items import bbModuleFactory, bbShip, bbWeapon, bbTurret
+from . import bbInventory, bbInventoryListing
 import random
 
 class bbShop:
@@ -10,11 +11,11 @@ class bbShop:
         self.maxTurrets = maxTurrets
         self.currentTechLevel = currentTechLevel
 
-        if shipsStock == [] and weaponsStock == [] and modulesStock == [] and turretsStock == []:
-            self.shipsStock = []
-            self.weaponsStock = []
-            self.modulesStock = []
-            self.turretsStock = []
+        if shipsStock.isEmpty() and weaponsStock.isEmpty() and modulesStock.isEmpty() and turretsStock.isEmpty():
+            self.shipsStock = bbInventory.bbInventory()
+            self.weaponsStock = bbInventory.bbInventory()
+            self.modulesStock = bbInventory.bbInventory()
+            self.turretsStock = bbInventory.bbInventory()
             self.refreshStock()
         else:
             self.shipsStock = shipsStock
@@ -24,33 +25,33 @@ class bbShop:
 
 
     def refreshStock(self):
-        self.shipsStock = []
-        self.weaponsStock = []
-        self.modulesStock = []
-        self.turretsStock = []
+        self.shipsStock.clear()
+        self.weaponsStock.clear()
+        self.modulesStock.clear()
+        self.turretsStock.clear()
         # self.currentTechLevel = random.randint(bbConfig.minTechLevel, bbConfig.maxTechLevel)
         self.currentTechLevel = bbConfig.pickRandomShopTL()
 
         for i in range(self.maxShips):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.shipKeysByTL[itemTL - 1]) != 0:
-                self.shipsStock.append(bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL - 1])]))
+                self.shipsStock.addItem(bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL - 1])]))
 
         for i in range(self.maxModules):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.moduleObjsByTL[itemTL - 1]) != 0:
-                self.modulesStock.append(random.choice(bbData.moduleObjsByTL[itemTL - 1]))
+                self.modulesStock.addItem(random.choice(bbData.moduleObjsByTL[itemTL - 1]))
 
         for i in range(self.maxWeapons):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.weaponObjsByTL[itemTL - 1]) != 0:
-                self.weaponsStock.append(random.choice(bbData.weaponObjsByTL[itemTL - 1]))
+                self.weaponsStock.addItem(random.choice(bbData.weaponObjsByTL[itemTL - 1]))
 
         # if random.randint(1, 100) <= bbConfig.turretSpawnProbability:
         for i in range(self.maxTurrets):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.turretObjsByTL[itemTL - 1]) != 0:
-                self.turretsStock.append(random.choice(bbData.turretObjsByTL[itemTL - 1]))
+                self.turretsStock.addItem(random.choice(bbData.turretObjsByTL[itemTL - 1]))
 
 
     def getStockByName(self, item):
@@ -65,7 +66,7 @@ class bbShop:
         if item == "turret":
             return self.turretsStock
         else:
-            raise NotImplementedError("Valid, not unrecognised item type: " + item)
+            raise NotImplementedError("Valid, but unrecognised item type: " + item)
 
 
     # SHIP MANAGEMENT
@@ -74,7 +75,7 @@ class bbShop:
 
     
     def userCanAffordShipIndex(self, user, index):
-        return self.userCanAffordShipObj(user, self.shipsStock[index])
+        return self.userCanAffordShipObj(user, self.shipsStock[index].item)
 
 
     def amountCanAffordShipObj(self, amount, ship):
@@ -82,160 +83,170 @@ class bbShop:
 
     
     def amountCanAffordShipIndex(self, amount, index):
-        return self.amountCanAffordShipObj(amount, self.shipsStock[index])
+        return self.amountCanAffordShipObj(amount, self.shipsStock[index].item)
 
 
     def userBuyShipIndex(self, user, index):
-        if self.userCanAffordShipIndex(user, index):
-            user.credits -= self.shipsStock[index].getValue()
-            user.inactiveShips.append(self.shipsStock.pop(index))
-        else:
-            raise RuntimeError("user " + str(user.id) + " attempted to buy ship " + self.shipsStock[index].name + " but can't afford it: " + str(user.credits) + " < " + str(self.shipsStock[index].getValue()))
+        self.userBuyShipIndex(user, self.shipsStock[index].item)
+        
 
         
-    def userBuyShipObj(self, user, ship):
-        self.userBuyShipIndex(user, self.shipsStock.index(ship))
+    def userBuyShipObj(self, user, requestedShip):
+        if self.userCanAffordShipObj(user, requestedShip):
+            self.shipsStock.removeItem(requestedShip)
+            user.credits -= requestedShip.getValue()
+            user.inactiveShips.append(requestedShip)
+        else:
+            raise RuntimeError("user " + str(user.id) + " attempted to buy ship " + requestedShip.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedShip.getValue()))
 
 
     def userSellShipObj(self, user, ship):
-        self.userSellShipIndex(user, user.inactiveShips.index(ship))
+        user.credits += ship.getValue()
+        self.shipsStock.addItem(ship)
+        user.inactiveShips.remove(ship)
     
 
     def userSellShipIndex(self, user, index):
-        user.credits += user.inactiveShips[index].getValue()
-        self.shipsStock.append(user.inactiveShips.pop(index))
+        self.userSellShipObj(user, user.inactiveShips[index])
 
 
     
     # WEAPON MANAGEMENT
     def userCanAffordWeaponObj(self, user, weapon):
-        return user.credits >= weapon.value
+        return user.credits >= weapon.getValue()
 
     
     def userCanAffordWeaponIndex(self, user, index):
-        return self.userCanAffordWeaponObj(user, self.weaponsStock[index])
+        return self.userCanAffordWeaponObj(user, self.weaponsStock[index].item)
 
 
     def userBuyWeaponIndex(self, user, index):
-        if self.userCanAffordWeaponIndex(user, index):
-            user.credits -= self.weaponsStock[index].getValue()
-            user.inactiveWeapons.append(self.weaponsStock.pop(index))
-        else:
-            raise RuntimeError("user " + str(user.id) + " attempted to buy weapon " + self.weaponsStock[index].name + " but can't afford it: " + str(user.credits) + " < " + str(self.weaponsStock[index].getValue()))
-
+        self.userBuyWeaponIndex(user, self.weaponsStock[index].item)
         
-    def userBuyWeaponObj(self, user, weapon):
-        self.userBuyWeaponIndex(user, self.weaponsStock.index(weapon))
+
+    def userBuyWeaponObj(self, user, requestedWeapon):
+        if self.userCanAffordWeaponObj(user, requestedWeapon):
+            self.weaponsStock.removeItem(requestedWeapon)
+            user.credits -= requestedWeapon.getValue()
+            user.inactiveShips.append(requestedWeapon)
+        else:
+            raise RuntimeError("user " + str(user.id) + " attempted to buy weapon " + requestedWeapon.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedWeapon.getValue()))
 
 
     def userSellWeaponObj(self, user, weapon):
-        self.userSellWeaponIndex(user, user.inactiveWeapons.index(weapon))
+        user.credits += weapon.getValue()
+        self.weaponsStock.addItem(weapon)
+        user.inactiveWeapons.remove(weapon)
     
 
     def userSellWeaponIndex(self, user, index):
-        user.credits += user.inactiveWeapons[index].getValue()
-        self.weaponsStock.append(user.inactiveWeapons.pop(index))
+        self.userSellWeaponObj(user, user.inactiveWeapons[index])
 
 
     
     # MODULE MANAGEMENT
     def userCanAffordModuleObj(self, user, module):
-        return user.credits >= module.value
+        return user.credits >= module.getValue()
 
     
     def userCanAffordModuleIndex(self, user, index):
-        return self.userCanAffordModuleObj(user, self.modulesStock[index])
+        return self.userCanAffordModuleObj(user, self.modulesStock[index].item)
 
 
     def userBuyModuleIndex(self, user, index):
-        if self.userCanAffordModuleIndex(user, index):
-            user.credits -= self.modulesStock[index].getValue()
-            user.inactiveModules.append(self.modulesStock.pop(index))
-        else:
-            raise RuntimeError("user " + str(user.id) + " attempted to buy module " + self.modulesStock[index].name + " but can't afford it: " + str(user.credits) + " < " + str(self.modulesStock[index].getValue()))
-
+        self.userBuyModuleIndex(user, self.modulesStock[index].item)
         
-    def userBuyModuleObj(self, user, module):
-        self.userBuyModuleIndex(user, self.modulesStock.index(module))
+
+    def userBuyModuleObj(self, user, requestedModule):
+        if self.userCanAffordModuleObj(user, requestedModule):
+            self.modulesStock.removeItem(requestedModule)
+            user.credits -= requestedModule.getValue()
+            user.inactiveShips.append(requestedModule)
+        else:
+            raise RuntimeError("user " + str(user.id) + " attempted to buy module " + requestedModule.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedModule.getValue()))
 
 
     def userSellModuleObj(self, user, module):
-        self.userSellModuleIndex(user, user.inactiveModules.index(module))
+        user.credits += module.getValue()
+        self.modulesStock.addItem(module)
+        user.inactiveModules.remove(module)
     
 
     def userSellModuleIndex(self, user, index):
-        user.credits += user.inactiveModules[index].getValue()
-        self.modulesStock.append(user.inactiveModules.pop(index))
+        self.userSellModuleObj(user, user.inactiveModules[index])
+
 
 
     # TURRET MANAGEMENT
     def userCanAffordTurretObj(self, user, turret):
-        return user.credits >= turret.value
+        return user.credits >= turret.getValue()
 
     
     def userCanAffordTurretIndex(self, user, index):
-        return self.userCanAffordTurretObj(user, self.turretsStock[index])
+        return self.userCanAffordTurretObj(user, self.turretsStock[index].item)
 
 
     def userBuyTurretIndex(self, user, index):
-        if self.userCanAffordTurretIndex(user, index):
-            user.credits -= self.turretsStock[index].getValue()
-            user.inactiveTurrets.append(self.turretsStock.pop(index))
-        else:
-            raise RuntimeError("user " + str(user.id) + " attempted to buy turret " + self.turretsStock[index].name + " but can't afford it: " + str(user.credits) + " < " + str(self.turretsStock[index].getValue()))
-
+        self.userBuyTurretIndex(user, self.turretsStock[index].item)
         
-    def userBuyTurretObj(self, user, turret):
-        self.userBuyTurretIndex(user, self.turretsStock.index(turret))
+        
+    def userBuyTurretObj(self, user, requestedTurret):
+        if self.userCanAffordTurretObj(user, requestedTurret):
+            self.turretsStock.removeItem(requestedTurret)
+            user.credits -= requestedTurret.getValue()
+            user.inactiveShips.append(requestedTurret)
+        else:
+            raise RuntimeError("user " + str(user.id) + " attempted to buy turret " + requestedTurret.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedTurret.getValue()))
 
 
     def userSellTurretObj(self, user, turret):
-        self.userSellTurretIndex(user, user.inactiveTurrets.index(turret))
+        user.credits += turret.getValue()
+        self.turretsStock.addItem(turret)
+        user.inactiveTurrets.remove(turret)
     
 
     def userSellTurretIndex(self, user, index):
-        user.credits += user.inactiveTurrets[index].getValue()
-        self.turretsStock.append(user.inactiveTurrets.pop(index))
+        self.userSellTurretObj(user, user.inactiveTurrets[index])
 
 
 
     def toDict(self):
         shipsStockDict = []
-        for ship in self.shipsStock:
-            shipsStockDict.append(ship.toDict())
+        for ship in self.shipsStock.keys:
+            shipsStockDict.append(shipsStock.items[ship].toDict())
 
         weaponsStockDict = []
-        for weapon in self.weaponsStock:
-            weaponsStockDict.append(weapon.toDict())
+        for weapon in self.weaponsStock.keys:
+            weaponsStockDict.append(weaponsStock.items[weapon].toDict())
 
         modulesStockDict = []
-        for module in self.modulesStock:
-            modulesStockDict.append(module.toDict())
+        for module in self.modulesStock.keys:
+            modulesStockDict.append(modulesStock.items[module].toDict())
 
         turretsStockDict = []
-        for turret in self.turretsStock:
-            turretsStockDict.append(turret.toDict())
+        for turret in self.turretsStock.keys:
+            turretsStockDict.append(turretsStock.items[turret].toDict())
 
         return {"maxShips":self.maxShips, "maxWeapons":self.maxWeapons, "maxModules":self.maxModules,
                     "shipsStock":shipsStockDict, "weaponsStock":weaponsStockDict, "modulesStock":modulesStockDict, "turretsStock":turretsStockDict}
 
 
 def fromDict(shopDict):
-    shipsStock = []
-    for shipDict in shopDict["shipsStock"]:
-        shipsStock.append(bbShip.fromDict(shipDict))
+    shipsStock = bbInventory.bbInventory()
+    for shipListingDict in shopDict["shipsStock"]:
+        shipsStock.addItem(bbShip.fromDict(shipListingDict["item"]), count=shipListingDict["count"])
 
-    weaponsStock = []
-    for weaponDict in shopDict["weaponsStock"]:
-        weaponsStock.append(bbWeapon.fromDict(weaponDict))
+    weaponsStock = bbInventory.bbInventory()
+    for weaponListingDict in shopDict["weaponsStock"]:
+        weaponsStock.addItem(bbWeapon.fromDict(weaponListingDict["item"]), count=weaponListingDict["count"])
 
-    modulesStock = []
-    for moduleDict in shopDict["modulesStock"]:
-        modulesStock.append(bbModuleFactory.fromDict(moduleDict))
+    modulesStock = bbInventory.bbInventory()
+    for moduleListingDict in shopDict["modulesStock"]:
+        modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), count=moduleListingDict["count"])
 
-    turretsStock = []
-    for turret in shopDict["turretsStock"]:
-        turretsStock.append(bbTurret.fromDict(turret))
+    turretsStock = bbInventory.bbInventory()
+    for turretListingDict in shopDict["turretsStock"]:
+        turretsStock.addItem(bbTurret.fromDict(turretListingDict["item"]), count=turretListingDict["count"])
 
     return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"],
                     shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)
