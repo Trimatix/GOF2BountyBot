@@ -208,19 +208,19 @@ class bbShop:
     def toDict(self):
         shipsStockDict = []
         for ship in self.shipsStock.keys:
-            shipsStockDict.append(shipsStock[ship].toDict())
+            shipsStockDict.append(shipsStock.items[ship].toDict())
 
         weaponsStockDict = []
         for weapon in self.weaponsStock.keys:
-            weaponsStockDict.append(weaponsStock[weapon].toDict())
+            weaponsStockDict.append(weaponsStock.items[weapon].toDict())
 
         modulesStockDict = []
         for module in self.modulesStock.keys:
-            modulesStockDict.append(modulesStock[module].toDict())
+            modulesStockDict.append(modulesStock.items[module].toDict())
 
         turretsStockDict = []
         for turret in self.turretsStock.keys:
-            turretsStockDict.append(turretsStock[turret].toDict())
+            turretsStockDict.append(turretsStock.items[turret].toDict())
 
         return {"maxShips":self.maxShips, "maxWeapons":self.maxWeapons, "maxModules":self.maxModules,
                     "shipsStock":shipsStockDict, "weaponsStock":weaponsStockDict, "modulesStock":modulesStockDict, "turretsStock":turretsStockDict}

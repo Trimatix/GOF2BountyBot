@@ -165,7 +165,7 @@ class bbUser:
                 finalModules.append(currentModule)
         
         for currentModule in finalModules:
-            self.inactiveModules.append(currentModule)
+            self.inactiveModules.addItem(currentModule)
 
 
     def equipShipObj(self, ship, noSaveActive=False):
@@ -190,19 +190,19 @@ class bbUser:
     def toDictNoId(self):
         inactiveShipsDict = []
         for ship in self.inactiveShips.keys:
-            inactiveShipsDict.append(self.inactiveShips[ship].toDict())
+            inactiveShipsDict.append(self.inactiveShips.items[ship].toDict())
 
         inactiveModulesDict = []
         for module in self.inactiveModules.keys:
-            inactiveModulesDict.append(self.inactiveModules[module].toDict())
+            inactiveModulesDict.append(self.inactiveModules.items[module].toDict())
 
         inactiveWeaponsDict = []
         for weapon in self.inactiveWeapons.keys:
-            inactiveWeaponsDict.append(self.inactiveWeapons[weapon].toDict())
+            inactiveWeaponsDict.append(self.inactiveWeapons.items[weapon].toDict())
 
         inactiveTurretsDict = []
         for turret in self.inactiveTurrets.keys:
-            inactiveTurretsDict.append(self.inactiveTurrets[turret].toDict())
+            inactiveTurretsDict.append(self.inactiveTurrets.items[turret].toDict())
 
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
@@ -234,16 +234,16 @@ class bbUser:
         elif stat == "value":
             modulesValue = 0
             for module in self.inactiveModules.keys:
-                modulesValue += self.inactiveModules[module].count * module.getValue()
+                modulesValue += self.inactiveModules.items[module].count * module.getValue()
             turretsValue = 0
             for turret in self.inactiveTurrets.keys:
-                turretsValue += self.inactiveTurrets[turret].count * turret.getValue()
+                turretsValue += self.inactiveTurrets.items[turret].count * turret.getValue()
             weaponsValue = 0
             for weapon in self.inactiveWeapons.keys:
-                weaponsValue += self.inactiveWeapons[weapon].count * weapon.getValue()
+                weaponsValue += self.inactiveWeapons.items[weapon].count * weapon.getValue()
             shipsValue = 0
             for ship in self.inactiveShips.keys:
-                shipsValue += self.inactiveShips[ship].count * ship.getValue()
+                shipsValue += self.inactiveShips.items[ship].count * ship.getValue()
 
             return modulesValue + turretsValue + weaponsValue + shipsValue + self.activeShip.getValue() + self.credits
 
