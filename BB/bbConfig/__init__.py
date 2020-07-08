@@ -86,13 +86,13 @@ for currentTurretObj in bbData.builtInTurretObjs.values():
 ##### MAX SPAWNRATE CALCULATION #####
 
 for ship in bbData.builtInShipData.values():
-    ship["shopSpawnRate"] = bbConfig.truncToRes(bbConfig.itemTLSpawnChanceForShopTL[ship["techLevel"] - 1][ship["techLevel"] - 1] / len(bbData.shipKeysByTL[ship["techLevel"] - 1]))
+    ship["shopSpawnRate"] = bbConfig.truncToRes(bbConfig.itemTLSpawnChanceForShopTL[ship["techLevel"] - 1][ship["techLevel"] - 1] / len(bbData.shipKeysByTL[ship["techLevel"] - 1])) * 100
 
 for weapon in bbData.builtInWeaponObjs.values():
-    weapon.shopSpawnRate = bbConfig.truncToRes(bbConfig.itemTLSpawnChanceForShopTL[weapon.techLevel - 1][weapon.techLevel - 1] / len(bbData.weaponObjsByTL[weapon.techLevel - 1]))
+    weapon.shopSpawnRate = bbConfig.truncToRes(bbConfig.itemTLSpawnChanceForShopTL[weapon.techLevel - 1][weapon.techLevel - 1] / len(bbData.weaponObjsByTL[weapon.techLevel - 1])) * 100
 
 for module in bbData.builtInModuleObjs.values():
-    module.shopSpawnRate = bbConfig.truncToRes(bbConfig.itemTLSpawnChanceForShopTL[module.techLevel - 1][module.techLevel - 1] / len(bbData.moduleObjsByTL[module.techLevel - 1]))
+    module.shopSpawnRate = bbConfig.truncToRes(bbConfig.itemTLSpawnChanceForShopTL[module.techLevel - 1][module.techLevel - 1] / len(bbData.moduleObjsByTL[module.techLevel - 1])) * 100
 
 for turret in bbData.builtInTurretObjs.values():
-    turret.shopSpawnRate = bbConfig.truncToRes(bbConfig.itemTLSpawnChanceForShopTL[turret.techLevel - 1][turret.techLevel - 1] / len(bbData.turretObjsByTL[turret.techLevel - 1]))
+    turret.shopSpawnRate = bbConfig.truncToRes(bbConfig.itemTLSpawnChanceForShopTL[turret.techLevel - 1][turret.techLevel - 1] / len(bbData.turretObjsByTL[turret.techLevel - 1])) * 100
