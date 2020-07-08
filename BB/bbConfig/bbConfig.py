@@ -138,6 +138,14 @@ for shopTL in range(minTechLevel, maxTechLevel + 1):
             cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentSum + currentChance)
             currentSum += currentChance
 
+print("[bbConfig] Item rarities generated:")
+for shopTL in range(len(itemTLSpawnChanceForShopTL)):
+    print("\t• shop TL" + str(shopTL+1) + ": itemTL",end="")
+    for itemTL in range(len((itemTLSpawnChanceForShopTL[shopTL]))):
+        print(" " + str(itemTL + 1) + "=" + str(itemTLSpawnChanceForShopTL[shopTL][itemTL]),end=" ")
+    print()
+# pprint.pprint(itemTLSpawnChanceForShopTL)
+
 
 def pickRandomItemTL(shopTL):
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
