@@ -142,7 +142,8 @@ print("[bbConfig] Item rarities generated:")
 for shopTL in range(len(itemTLSpawnChanceForShopTL)):
     print("\t• shop TL" + str(shopTL+1) + ": itemTL",end="")
     for itemTL in range(len((itemTLSpawnChanceForShopTL[shopTL]))):
-        print(" " + str(itemTL + 1) + "=" + str(itemTLSpawnChanceForShopTL[shopTL][itemTL]),end=" ")
+        if itemTLSpawnChanceForShopTL[shopTL][itemTL] != 0:
+            print(" " + str(itemTL + 1) + "=" + str(itemTLSpawnChanceForShopTL[shopTL][itemTL]),end=" ")
     print()
 # pprint.pprint(itemTLSpawnChanceForShopTL)
 
