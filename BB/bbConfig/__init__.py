@@ -82,6 +82,14 @@ for currentTurretObj in bbData.builtInTurretObjs.values():
     bbData.turretObjsByTL[currentTurretObj.techLevel - 1].append(currentTurretObj)
 
 
+print("[bbConfig.init] Ship tech levels generated:")
+for shipTL in range(len(bbData.shipKeysByTL)):
+    print("\t• <=" + str(bbConfig.shipMaxPriceTechLevels[shipTL]) + "=TL" + str(shipTL+1) + ":",end="")
+    for shipName in bbData.shipKeysByTL[shipTL]:
+        print(" " + shipName + ",",end="")
+    print()
+
+
 
 ##### MAX SPAWNRATE CALCULATION #####
 

@@ -90,7 +90,7 @@ def pickRandomShopTL():
     return maxTechLevel
 
 # Price ranges by which ships should be ranked into tech levels. 0th index = tech level 1
-shipMaxPriceTechLevels = [50000, 100000, 300000, 700000, 1000000, 2000000, 5000000, 8000000, 10000000, 999999999]
+shipMaxPriceTechLevels = [50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 7000000, 7500000, 999999999]
 
 # CUMULATIVE probabilities of items of a given tech level spawning in a shop of a given tech level
 # Outer dimension is shop tech level
@@ -98,14 +98,15 @@ shipMaxPriceTechLevels = [50000, 100000, 300000, 700000, 1000000, 2000000, 50000
 itemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 cumulativeItemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 
-# Parameters for itemTLSpawnChanceForShopTL values, using u function: https://www.desmos.com/calculator/nrshikfmxc
+# Parameters for itemTLSpawnChanceForShopTL values, using u function: https://www.desmos.com/calculator/tnldodey5u
+# Original function by Novahkiin22: https://www.desmos.com/calculator/nrshikfmxc
 tl_s = 7
-tl_leftShift = -0.5
+tl_o = 2.3
 
 def tl_u(x, t):
     h = t - tl_s
-    inner = (x + tl_leftShift - h) / tl_s
-    mid = (0 - math.pow(inner, 5)) + inner
+    tl_n = (x - tl_o - h) / tl_s
+    mid = tl_n * (1 - math.pow(tl_n, 4))
     outer = tl_s * mid - (h / 2)
     return truncToRes(outer if outer > 0 else 0)
 
@@ -145,7 +146,6 @@ for shopTL in range(len(itemTLSpawnChanceForShopTL)):
         if itemTLSpawnChanceForShopTL[shopTL][itemTL] != 0:
             print(" " + str(itemTL + 1) + "=" + str(truncToRes(itemTLSpawnChanceForShopTL[shopTL][itemTL]*100)),end="% ")
     print()
-# pprint.pprint(itemTLSpawnChanceForShopTL)
 
 
 def pickRandomItemTL(shopTL):
