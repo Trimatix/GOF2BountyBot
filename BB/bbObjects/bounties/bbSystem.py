@@ -2,15 +2,7 @@ from .. import bbAliasable
 import math
 
 class System (bbAliasable.Aliasable):
-    name = ""
-    faction = ""
-    neighbours = []
-    security = -1
-    coordinates = ()
-    wiki = ""
-    hasWiki = False
-
-    def __init__(self, name, faction, neighbours, security, coordinates, aliases=[], wiki=""):
+    def __init__(self, name, faction, neighbours, security, coordinates, aliases=[], wiki="", techLevel=-1):
         super(System, self).__init__(name, aliases)
         self.name = name
         self.faction = faction
@@ -19,6 +11,9 @@ class System (bbAliasable.Aliasable):
         self.coordinates = coordinates
         self.wiki = wiki
         self.hasWiki = wiki != ""
+
+        self.techLevel = techLevel
+        self.hasTechLevel = techLevel != -1
 
     def getNeighbours(self):
         return self.neighbours

@@ -94,8 +94,8 @@ class BountyConfig:
         if self.activeShip is None:
             if self.isPlayer:
                 raise ValueError("Attempted to generate a player bounty without providing the activeShip")
-            if self.techLevel == -1:
-                self.techLevel = bbConfig.pick
+            # if self.techLevel == -1:
+            #     self.techLevel = bbConfig.pick
 
             self.activeShip = bbShip.fromDict(random.choice(list(bbData.builtInShipData.values())))
             for i in range(self.activeShip.maxPrimaries):

@@ -34,7 +34,7 @@ class bbShipUpgrade:
     def __init__(self, name, shipToUpgradeValueMult,
                     armour=0.0, armourMultiplier=1.0, cargo=0, cargoMultiplier=1.0, numSecondaries=0, numSecondariesMultiplier=1.0,
                     handling=0, handlingMultiplier=1.0, maxPrimaries=0, maxPrimariesMultiplier=1.0, maxTurrets=0, maxTurretsMultiplier=1.0,
-                    maxModules=0, maxModulesMultiplier=1.0, vendor="", wiki=""):
+                    maxModules=0, maxModulesMultiplier=1.0, vendor="", wiki="", techLevel=-1):
         self.name = name
         self.shipToUpgradeValueMult = shipToUpgradeValueMult
         self.vendor = vendor
@@ -63,6 +63,9 @@ class bbShipUpgrade:
 
         self.wiki = wiki
         self.hasWiki = wiki != ""
+
+        self.techLevel = techLevel
+        self.hasTechLevel = techLevel != -1
 
 
 
@@ -137,4 +140,4 @@ def fromDict(upgradeDict):
                                 maxModules=upgradeDict["maxModules"] if "maxModules" in upgradeDict else 0,
                                 maxModulesMultiplier=upgradeDict["maxModulesMultiplier"] if "maxModulesMultiplier" in upgradeDict else 1.0,
                                 vendor=upgradeDict["vendor"] if "vendor" in upgradeDict else "",
-                                wiki=upgradeDict["wiki"] if "wiki" in upgradeDict else "")
+                                wiki=upgradeDict["wiki"] if "wiki" in upgradeDict else "", techLevel=upgradeDict["techLevel"] if "techLevel" in upgradeDict else -1)
