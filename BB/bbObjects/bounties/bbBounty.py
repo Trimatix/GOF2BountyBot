@@ -3,15 +3,6 @@ from ...bbConfig import bbData
 from . import bbCriminal
 
 class Bounty:
-    criminal = None
-    issueTime = -1
-    route = []
-    reward = 0.0
-    endTime = -1
-    faction = ""
-    checked = {}
-    answer = ""
-
     def __init__(self, criminalObj=None, config=None, bountyDB=None, dbReload=False):
         if not dbReload and bountyDB is None:
             raise ValueError("Bounty constructor: No bounty database given")

@@ -3,18 +3,7 @@ from .. import bbAliasable
 from ..items import bbShip
 
 class Criminal (bbAliasable.Aliasable):
-    name = ""
-    faction = ""
-    icon = ""
-    wiki = ""
-    hasWiki = False
-    isPlayer = False
-    builtIn = False
-
-    activeShip = None
-    hasShip = False
-
-    def __init__(self, name, faction, icon, builtIn=False, isPlayer=False, aliases=[], wiki="", activeShip=None):
+    def __init__(self, name, faction, icon, builtIn=False, isPlayer=False, aliases=[], wiki="", activeShip=None, techLevel=-1):
         super(Criminal, self).__init__(name, aliases)
         if name == "":
             raise RuntimeError("CRIM_CONS_NONAM: Attempted to create a Criminal with an empty name")
@@ -36,6 +25,8 @@ class Criminal (bbAliasable.Aliasable):
             self.hasShip = True
         else:
             self.hasShip = False
+
+        self.techLevel = techLevel
 
     
     def clearShip(self):

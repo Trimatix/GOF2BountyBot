@@ -6,7 +6,7 @@ from ... import bbUtil
 from ..items import bbShip
 
 class BountyConfig:
-    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki="", activeShip=None):
+    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki="", activeShip=None, techLevel=-1):
         self.faction = faction.lower()
         self.name = name.title()
         self.isPlayer = False if isPlayer is None else isPlayer
@@ -31,6 +31,7 @@ class BountyConfig:
         self.wiki = wiki
 
         self.activeShip = activeShip
+        self.techLevel = techLevel
         
     
     def generate(self, bountyDB, noCriminal=True, forceKeepChecked=False, forceNoDBCheck=False):
@@ -93,6 +94,9 @@ class BountyConfig:
         if self.activeShip is None:
             if self.isPlayer:
                 raise ValueError("Attempted to generate a player bounty without providing the activeShip")
+            if self.techLevel == -1:
+                self.techLevel = bbConfig.pick
+
             self.activeShip = bbShip.fromDict(random.choice(list(bbData.builtInShipData.values())))
             for i in range(self.activeShip.maxPrimaries):
                 self.activeShip.equipWeapon(random.choice(list(bbData.builtInWeaponObjs.values())))
