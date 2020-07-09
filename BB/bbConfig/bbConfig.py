@@ -30,7 +30,7 @@ duelCloakChance = 20
 ##### SHOPS #####
 
 # Amount of time to wait between refreshing stock of all shops
-shopRefreshStockPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
+shopRefreshStockPeriod = {"days":0, "hours":0, "minutes":30, "seconds":0}
 
 # The number of ranks to use when randomly picking shop stock
 numShipRanks = 10
@@ -103,12 +103,16 @@ cumulativeItemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechL
 tl_s = 7
 tl_o = 2.3
 
-def tl_u(x, t):
+"""def tl_u(x, t):
     h = t - tl_s
     tl_n = (x - tl_o - h) / tl_s
     mid = tl_n * (1 - math.pow(tl_n, 4))
     outer = tl_s * mid - (h / 2)
-    return truncToRes(outer if outer > 0 else 0)
+    return truncToRes(outer if outer > 0 else 0)"""
+
+def tl_u(x, t):
+    chance = truncToRes(1 - math.pow((x - t)/1.4,2))
+    return chance if chance > 0 else 0
 
 # Loop through shop TLs
 for shopTL in range(minTechLevel, maxTechLevel + 1):
