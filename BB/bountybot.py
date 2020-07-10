@@ -3734,7 +3734,7 @@ Refresh the shop stock of the current guild. Does not reset the shop stock coold
 
 
 async def dev_cmd_refreshshop(message, args):
-    glevel = -1
+    level = -1
     if args != "":
         if not bbUtil.isInt(args) or not int(args) in range(bbConfig.minTechLevel, bbConfig.maxTechLevel + 1):
             await message.channel.send("Invalid tech level!")
