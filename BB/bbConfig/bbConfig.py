@@ -30,7 +30,7 @@ duelCloakChance = 20
 ##### SHOPS #####
 
 # Amount of time to wait between refreshing stock of all shops
-shopRefreshStockPeriod = {"days":0, "hours":0, "minutes":30, "seconds":0}
+shopRefreshStockPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
 
 # The number of ranks to use when randomly picking shop stock
 numShipRanks = 10
