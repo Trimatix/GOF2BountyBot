@@ -215,6 +215,27 @@ class bbShop:
 
 
 def fromDict(shopDict):
+    # Convert old data format. once done, replace with commented out code below
+    # shipsStock = bbInventory.bbInventory()
+    # if "shipsStock" in shopDict:
+    #     for shipListingDict in shopDict["shipsStock"]:
+    #         shipsStock.addItem(bbShip.fromDict(shipListingDict))
+
+    # weaponsStock = bbInventory.bbInventory()
+    # if "weaponsStock" in shopDict:
+    #     for weaponListingDict in shopDict["weaponsStock"]:
+    #         weaponsStock.addItem(bbWeapon.fromDict(weaponListingDict))
+
+    # modulesStock = bbInventory.bbInventory()
+    # if "modulesStock" in shopDict:
+    #     for moduleListingDict in shopDict["modulesStock"]:
+    #         modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict))
+
+    # turretsStock = bbInventory.bbInventory()
+    # if "turretsStock" in shopDict:
+    #     for turretListingDict in shopDict["turretsStock"]:
+    #         turretsStock.addItem(bbTurret.fromDict(turretListingDict))
+
     shipsStock = bbInventory.bbInventory()
     for shipListingDict in shopDict["shipsStock"]:
         shipsStock.addItem(bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
