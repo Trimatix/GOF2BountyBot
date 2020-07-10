@@ -11,10 +11,16 @@ class bbShop:
         self.maxTurrets = maxTurrets
         self.currentTechLevel = currentTechLevel
 
-        self.shipsStock = shipsStock
-        self.weaponsStock = weaponsStock
-        self.modulesStock = modulesStock
-        self.turretsStock = turretsStock
+        # TODO: Somewhere, stocks are getting passed in and shared amongst all shops. Fix this. Temporary measure here to make sure each shop gets its own inventory objects.
+        # self.shipsStock = shipsStock
+        # self.weaponsStock = weaponsStock
+        # self.modulesStock = modulesStock
+        # self.turretsStock = turretsStock
+
+        self.shipsStock = bbInventory.bbInventory()
+        self.weaponsStock = bbInventory.bbInventory()
+        self.modulesStock = bbInventory.bbInventory()
+        self.turretsStock = bbInventory.bbInventory()
 
         if shipsStock.isEmpty() and weaponsStock.isEmpty() and modulesStock.isEmpty() and turretsStock.isEmpty():
             self.refreshStock()

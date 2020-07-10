@@ -33,8 +33,6 @@ Build a bbUserDB from the specified JSON file.
 
 @param filePath -- path to the JSON file to load. Theoretically, this can be absolute or relative.
 """
-
-
 def loadUsersDB(filePath):
     return bbUserDB.fromDict(bbUtil.readJSON(filePath))
 
@@ -44,8 +42,6 @@ Build a bbGuildDB from the specified JSON file.
 
 @param filePath -- path to the JSON file to load. Theoretically, this can be absolute or relative.
 """
-
-
 def loadGuildsDB(filePath):
     return bbGuildDB.fromDict(bbUtil.readJSON(filePath))
 
@@ -55,8 +51,6 @@ Build a bbBountyDB from the specified JSON file.
 
 @param filePath -- path to the JSON file to load. Theoretically, this can be absolute or relative.
 """
-
-
 def loadBountiesDB(filePath):
     return bbBountyDB.fromDict(bbUtil.readJSON(filePath), bbConfig.maxBountiesPerFaction, dbReload=True)
 
@@ -68,8 +62,6 @@ TODO: child database classes to a single ABC, and type check to that ABC here be
 @param dbPath -- path to the JSON file to save to. Theoretically, this can be absolute or relative.
 @param db -- the database object to save
 """
-
-
 def saveDB(dbPath, db):
     bbUtil.writeJSON(dbPath, db.toDict())
 
@@ -105,8 +97,6 @@ Find the shortest route between two systems.
 @param end -- string name of the target system. Must exist in bbData.builtInSystemObjs
 @return -- list of string system names where the first element is start, the last element is end, and all intermediary systems are adjacent
 """
-
-
 def makeRoute(start, end):
     return bbUtil.bbAStar(start, end, bbData.builtInSystemObjs)
 
@@ -119,8 +109,6 @@ Otherwise, return the passed userID.
 @param userID -- ID to attempt to convert to name and discrim
 @return -- The user's name and discriminator if the user is reachable, userID otherwise
 """
-
-
 def userTagOrDiscrim(userID):
     userObj = client.get_user(int(userID.lstrip("<@!").rstrip(">")))
     if userObj is not None:
@@ -138,8 +126,6 @@ Otherwise, return the passed criminal's name.
 @return -- The user's name and discriminator if the criminal is a player, criminal.name otherwise
 
 """
-
-
 def criminalNameOrDiscrim(criminal):
     if not criminal.isPlayer:
         return criminal.name
@@ -152,8 +138,6 @@ Messages will be sent to the announceChannels of all guilds in the guildsDB, if 
 
 @param newBounty -- the bounty to announce
 """
-
-
 async def announceNewBounty(newBounty):
     # Create the announcement embed
     bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
@@ -197,8 +181,6 @@ Messages will be sent to the playChannels of all guilds in the guildsDB, if they
 @param winningGuildObj -- the discord Guild object of the guild containing the winning user
 @param winningUserId -- the user ID of the discord user that won the bounty
 """
-
-
 async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
     # Loop over all guilds in the database that have playChannels
     for currentGuild in guildsDB.getGuilds():
@@ -3838,6 +3820,7 @@ TODO: Implement dynamic timedtask checking period
 
 @client.event
 async def on_ready():
+    print("shop stocks are shared." if guildsDB.getGuild(699744305274945650).shop.shipsStock is guildsDB.getGuild(711548456019296289).shop.shipsStock else "shop stocks are not shared.")
     for currentUser in usersDB.users.values():
         currentUser.validateLoadout()
 

@@ -1,15 +1,6 @@
 from . import bbShop
 
 class bbGuild:
-    id = 0
-    announceChannel = -1
-    playChannel = -1
-    shop = None
-    bountyNotifyRoleId = -1
-    bountyBoardChannel = -1
-    hasBountyBoardChannel = False
-
-
     def __init__(self, id, announceChannel=-1, playChannel=-1, shop=None, bountyNotifyRoleId=-1, bountyBoardChannel=-1):
         if type(id) == float:
             id = int(id)
