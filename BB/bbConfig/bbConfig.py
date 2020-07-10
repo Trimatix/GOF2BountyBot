@@ -89,6 +89,13 @@ def pickRandomShopTL():
             return shopTL + 1
     return maxTechLevel
 
+def pickRandomCriminalTL():
+    tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
+    for shopTL in range(len(cumulativeShopTLChance)):
+        if cumulativeShopTLChance[shopTL] >= tlChance:
+            return shopTL + 1
+    return maxTechLevel
+
 # Price ranges by which ships should be ranked into tech levels. 0th index = tech level 1
 shipMaxPriceTechLevels = [50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 7000000, 7500000, 999999999]
 
@@ -192,6 +199,9 @@ checkCooldown = {"minutes":3}
 
 # number of bounties ahead of a checked system in a route to report a recent criminal spotting (+1)
 closeBountyThreshold = 4
+
+# The probability of a criminal equipping a turret, should their ship have space for one
+criminalEquipTurretChance = 30
 
 
 
