@@ -2212,7 +2212,7 @@ async def cmd_equip(message, args):
             outStr += "\nItems thay could not fit in your new ship can be found in the hangar."
         await message.channel.send(outStr)
     
-    if item == "weapon":
+    elif item == "weapon":
         if not requestedBBUser.activeShip.canEquipMoreWeapons():
             await message.channel.send(":x: Your active ship does not have any free weapon slots!")
             return
