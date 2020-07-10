@@ -87,7 +87,7 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "nameShip": ("**nameShip <nickname>**", "Give your active ship a nickname!"),
                             "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")},
 
-            "Shopping":{    "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed daily. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+            "Shopping":{    "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
                             "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
                             "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.")},
 
