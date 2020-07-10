@@ -254,7 +254,7 @@ async def announceNewShopStock():
             playCh = client.get_channel(guild.getPlayChannelId())
             if playCh is not None:
                 # send the announcement
-                await playCh.send(":arrows_counterclockwise: The shop stock has been refreshed!")
+                await playCh.send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
 
 
 """
@@ -527,7 +527,7 @@ async def cmd_how_to_play(message, args):
         howToPlayEmbed.add_field(name="3. Items", value="Now that you've got some credits, try customising your `" + bbConfig.commandPrefix + "loadout`!\n• You can see your inventory of inactive items in the `" +
                                  bbConfig.commandPrefix + "hangar`.\n• You can `" + bbConfig.commandPrefix + "buy` more items from the `" + bbConfig.commandPrefix + "shop`.\n‎", inline=False)
         howToPlayEmbed.add_field(name="Extra Notes/Tips", value="• Bounties are shared across all servers, everyone is competing to find them!\n• Each server has its own `" + bbConfig.commandPrefix +
-                                 "shop`. The shops refresh every *12 hours.*\n• Is a criminal, item or system name too long? Use an alias instead! You can see aliases with `" + bbConfig.commandPrefix + "info`.\n• Having trouble getting to new bounties in time? Try out the new `" + bbConfig.commandPrefix + "notify bounties` command!", inline=False)
+                                 "shop`. The shops refresh every *6 hours.*\n• Is a criminal, item or system name too long? Use an alias instead! You can see aliases with `" + bbConfig.commandPrefix + "info`.\n• Having trouble getting to new bounties in time? Try out the new `" + bbConfig.commandPrefix + "notify bounties` command!", inline=False)
 
         await sendChannel.send(embed=howToPlayEmbed)
     except discord.Forbidden:
@@ -1055,9 +1055,9 @@ async def cmd_system(message, args):
         # build the statistics embed
         statsEmbed = makeEmbed(col=bbData.factionColours[systObj.faction], desc="__System Information__",
                                titleTxt=systObj.name, footerTxt=systObj.faction.title(), thumb=bbData.factionIcons[systObj.faction])
-        statsEmbed.add_field(
-            name="Security Level:", value=bbData.securityLevels[systObj.security].title())
+        statsEmbed.add_field(name="Security Level:", value=bbData.securityLevels[systObj.security].title())
         statsEmbed.add_field(name="Neighbour Systems:", value=neighboursStr)
+
         # list the system's aliases as a string
         if len(systObj.aliases) > 1:
             aliasStr = ""
@@ -1158,44 +1158,44 @@ async def cmd_ship(message, args):
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
                                desc="__Ship File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
-        statsEmbed.add_field(name="Ship Base Value", value=commaSplitNum(
-            str(itemObj.getValue(shipUpgradesOnly=True))) + " Credits")
-        statsEmbed.add_field(name="Armour", value=str(itemObj.getArmour()))
-        statsEmbed.add_field(name="Cargo", value=str(itemObj.getCargo()))
-        statsEmbed.add_field(name="Handling", value=str(itemObj.getHandling()))
-        statsEmbed.add_field(name="Max Primaries",
+        statsEmbed.add_field(name="Value:", value=commaSplitNum(
+                                                            str(itemObj.getValue(shipUpgradesOnly=True))) + " Credits")
+        statsEmbed.add_field(name="Armour:", value=str(itemObj.getArmour()))
+        statsEmbed.add_field(name="Cargo:", value=str(itemObj.getCargo()))
+        statsEmbed.add_field(name="Handling:", value=str(itemObj.getHandling()))
+        statsEmbed.add_field(name="Max Primaries:",
                              value=str(itemObj.getMaxPrimaries()))
         if len(itemObj.weapons) > 0:
             weaponStr = "*["
             for weapon in itemObj.weapons:
                 weaponStr += weapon.name + ", "
-            statsEmbed.add_field(name="Equipped Primaries",
+            statsEmbed.add_field(name="Equipped Primaries:",
                                  value=weaponStr[:-2] + "]*")
-        statsEmbed.add_field(name="Max Secondaries",
+        statsEmbed.add_field(name="Max Secondaries:",
                              value=str(itemObj.getNumSecondaries()))
         # if len(itemObj.secondaries) > 0:
         #     secondariesStr = "*["
         #     for secondary in itemObj.secondaries:
         #         secondariesStr += secondary.name + ", "
         #     statsEmbed.add_field(name="Equipped Secondaries",value=secondariesStr[:-2] + "]*")
-        statsEmbed.add_field(name="Turret Slots",
+        statsEmbed.add_field(name="Turret Slots:",
                              value=str(itemObj.getMaxTurrets()))
         if len(itemObj.turrets) > 0:
             turretsStr = "*["
             for turret in itemObj.turrets:
                 turretsStr += turret.name + ", "
-            statsEmbed.add_field(name="Equipped Turrets",
+            statsEmbed.add_field(name="Equipped Turrets:",
                                  value=turretsStr[:-2] + "]*")
-        statsEmbed.add_field(name="Modules Slots",
+        statsEmbed.add_field(name="Modules Slots:",
                              value=str(itemObj.getMaxModules()))
         if len(itemObj.modules) > 0:
             modulesStr = "*["
             for module in itemObj.modules:
                 modulesStr += module.name + ", "
-            statsEmbed.add_field(name="Equipped Modules",
+            statsEmbed.add_field(name="Equipped Modules:",
                                  value=modulesStr[:-2] + "]*")
-        statsEmbed.add_field(name="Shop Spawn Rate",
-                             value=str(itemObj.shopSpawnRate) + "%")
+        statsEmbed.add_field(name="Max Shop Spawn Chance:",
+                             value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1243,11 +1243,13 @@ async def cmd_weapon(message, args):
     else:
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
-                               desc="__Weapon File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
-        statsEmbed.add_field(name="Value:", value=str(itemObj.value))
-        statsEmbed.add_field(name="DPS:", value=str(itemObj.dps))
-        statsEmbed.add_field(name="Shop Spawn Rate",
-                             value=str(itemObj.shopSpawnRate) + "%")
+                                desc="__Weapon File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        if itemObj.hasTechLevel:
+            statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
+        statsEmbed.add_field(name="Value:",value=str(itemObj.value))
+        statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
+        statsEmbed.add_field(name="Max Shop Spawn Chance:",
+                            value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1295,12 +1297,13 @@ async def cmd_module(message, args):
     else:
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
-                               desc="__Module File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
-        statsEmbed.add_field(name="Value:", value=str(itemObj.value))
-        statsEmbed.add_field(name="Stats:", value=str(
-            itemObj.statsStringShort()))
-        statsEmbed.add_field(name="Shop Spawn Rate",
-                             value=str(itemObj.shopSpawnRate) + "%")
+                                desc="__Module File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        if itemObj.hasTechLevel:
+            statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
+        statsEmbed.add_field(name="Value:",value=str(itemObj.value))
+        statsEmbed.add_field(name="Stats:",value=str(itemObj.statsStringShort()))
+        statsEmbed.add_field(name="Max Shop Spawn Chance:",
+                            value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1348,11 +1351,13 @@ async def cmd_turret(message, args):
     else:
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
-                               desc="__Turret File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
-        statsEmbed.add_field(name="Value:", value=str(itemObj.value))
-        statsEmbed.add_field(name="DPS:", value=str(itemObj.dps))
-        statsEmbed.add_field(name="Shop Spawn Rate",
-                             value=str(itemObj.shopSpawnRate) + "%")
+                                desc="__Turret File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
+        if itemObj.hasTechLevel:
+            statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
+        statsEmbed.add_field(name="Value:",value=str(itemObj.value))
+        statsEmbed.add_field(name="DPS:",value=str(itemObj.dps))
+        statsEmbed.add_field(name="Max Shop Spawn Chance:",
+                            value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1402,10 +1407,10 @@ async def cmd_commodity(message, args):
 
     else:
         # build the stats embed
-        statsEmbed = makeEmbed(
-            col=bbData.factionColours[itemObj.faction], desc="__Item File__", titleTxt=itemObj.name, thumb=itemObj.icon)
-        statsEmbed.add_field(
-            name="Wanted By:", value=itemObj.faction.title() + "s")
+        statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.faction], desc="__Item File__", titleTxt=itemObj.name, thumb=itemObj.icon)
+        if itemObj.hasTechLevel:
+            statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
+        statsEmbed.add_field(name="Wanted By:",value=itemObj.faction.title() + "s")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -1602,7 +1607,7 @@ async def cmd_hangar(message, args):
                             int(arg.lstrip("<@!")[:-1]))
                         foundUser = True
 
-                elif arg in bbConfig.validItemNames:
+                elif arg.rstrip("s") in bbConfig.validItemNames:
                     if foundItem:
                         await message.channel.send(":x: I can only take one item type (ship/weapon/module/turret)!")
                         return
@@ -1681,7 +1686,7 @@ async def cmd_hangar(message, args):
                 await message.channel.send(":x: " + ("The requested pilot doesn't" if foundUser else "You don't") + " have any " + ("items" if item == "all" else "of that item") + "!")
                 return
             elif page > maxPage:
-                await message.channel.send(":x: " + ("The requested pilot" if foundUser else "You") + " only " + ("has" if foundUser else "have") + str(maxPage) + " page(s) of items. Showing page " + str(maxPage) + ":")
+                await message.channel.send(":x: " + ("The requested pilot" if foundUser else "You") + " only " + ("has " if foundUser else "have ") + str(maxPage) + " page(s) of items. Showing page " + str(maxPage) + ":")
                 page = maxPage
 
         hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt=("All item" if item == "all" else item.rstrip(
@@ -1691,34 +1696,36 @@ async def cmd_hangar(message, args):
         if item in ["all", "ship"]:
             for shipNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("ship", page, maxPerPage) + 1):
                 if shipNum == firstPlace:
-                    hangarEmbed.add_field(
-                        name="‎", value="__**Stored Ships**__", inline=False)
-                hangarEmbed.add_field(name=str(shipNum) + ". " + requestedBBUser.inactiveShips[shipNum - 1].getNameAndNick(), value=(
-                    requestedBBUser.inactiveShips[shipNum - 1].emoji if requestedBBUser.inactiveShips[shipNum - 1].hasEmoji else "") + requestedBBUser.inactiveShips[shipNum - 1].statsStringShort(), inline=False)
-
+                    hangarEmbed.add_field(name="‎", value="__**Stored Ships**__", inline=False)
+                currentItem = requestedBBUser.inactiveShips[shipNum - 1].item
+                currentItemCount = requestedBBUser.inactiveShips.items[currentItem].count
+                hangarEmbed.add_field(name=str(shipNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.getNameAndNick(), value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
+        
         if item in ["all", "weapon"]:
             for weaponNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("weapon", page, maxPerPage) + 1):
                 if weaponNum == firstPlace:
-                    hangarEmbed.add_field(
-                        name="‎", value="__**Stored Weapons**__", inline=False)
-                hangarEmbed.add_field(name=str(weaponNum) + ". " + requestedBBUser.inactiveWeapons[weaponNum - 1].name, value=(
-                    requestedBBUser.inactiveWeapons[weaponNum - 1].emoji if requestedBBUser.inactiveWeapons[weaponNum - 1].hasEmoji else "") + requestedBBUser.inactiveWeapons[weaponNum - 1].statsStringShort(), inline=False)
+                    hangarEmbed.add_field(name="‎", value="__**Stored Weapons**__", inline=False)
+                currentItem = requestedBBUser.inactiveWeapons[weaponNum - 1].item
+                currentItemCount = requestedBBUser.inactiveWeapons.items[currentItem].count
+                hangarEmbed.add_field(name=str(weaponNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name, value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
 
         if item in ["all", "module"]:
             for moduleNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("module", page, maxPerPage) + 1):
                 if moduleNum == firstPlace:
-                    hangarEmbed.add_field(
-                        name="‎", value="__**Stored Modules**__", inline=False)
-                hangarEmbed.add_field(name=str(moduleNum) + ". " + requestedBBUser.inactiveModules[moduleNum - 1].name, value=(
-                    requestedBBUser.inactiveModules[moduleNum - 1].emoji if requestedBBUser.inactiveModules[moduleNum - 1].hasEmoji else "") + requestedBBUser.inactiveModules[moduleNum - 1].statsStringShort(), inline=False)
+                    hangarEmbed.add_field(name="‎", value="__**Stored Modules**__", inline=False)
+                currentItem = requestedBBUser.inactiveModules[moduleNum - 1].item
+                currentItemCount = requestedBBUser.inactiveModules.items[currentItem].count
+                hangarEmbed.add_field(name=str(moduleNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name,
+                                        value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
 
         if item in ["all", "turret"]:
             for turretNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("turret", page, maxPerPage) + 1):
                 if turretNum == firstPlace:
-                    hangarEmbed.add_field(
-                        name="‎", value="__**Stored Turrets**__", inline=False)
-                hangarEmbed.add_field(name=str(turretNum) + ". " + requestedBBUser.inactiveTurrets[turretNum - 1].name, value=(
-                    requestedBBUser.inactiveTurrets[turretNum - 1].emoji if requestedBBUser.inactiveTurrets[turretNum - 1].hasEmoji else "") + requestedBBUser.inactiveTurrets[turretNum - 1].statsStringShort(), inline=False)
+                    hangarEmbed.add_field(name="‎", value="__**Stored Turrets**__", inline=False)
+                currentItem = requestedBBUser.inactiveTurrets[turretNum - 1].item
+                currentItemCount = requestedBBUser.inactiveTurrets.items[currentItem].count
+                hangarEmbed.add_field(name=str(turretNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name,
+                                        value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
 
         try:
             await sendChannel.send(embed=hangarEmbed)
@@ -1766,40 +1773,45 @@ async def cmd_shop(message, args):
         sendChannel = message.channel
 
     requestedShop = guildsDB.getGuild(message.guild.id).shop
-    shopEmbed = makeEmbed(titleTxt="Shop", desc=message.guild.name, footerTxt="All items" if item == "all" else (
-        item + "s").title(), thumb="https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64")
+    shopEmbed = makeEmbed(titleTxt="Shop", desc="__" + message.guild.name + "__\n`Current Tech Level: " + str(requestedShop.currentTechLevel) + "`",
+                            footerTxt="All items" if item == "all" else (item + "s").title(),
+                            thumb="https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64")
 
     if item in ["all", "ship"]:
-        for shipNum in range(1, len(requestedShop.shipsStock) + 1):
+        for shipNum in range(1, requestedShop.shipsStock.numKeys + 1):
             if shipNum == 1:
-                shopEmbed.add_field(
-                    name="‎", value="__**Ships**__", inline=False)
-            shopEmbed.add_field(value=(requestedShop.shipsStock[shipNum - 1].emoji if requestedShop.shipsStock[shipNum - 1].hasEmoji else "") + " " + commaSplitNum(str(requestedShop.shipsStock[shipNum - 1].getValue(
-            ))) + " Credits\n" + requestedShop.shipsStock[shipNum - 1].statsStringShort(), name=str(shipNum) + ". " + "**" + requestedShop.shipsStock[shipNum - 1].getNameAndNick() + "**", inline=True)
+                shopEmbed.add_field(name="‎", value="__**Ships**__", inline=False)
+            currentItem = requestedShop.shipsStock[shipNum - 1].item
+            currentItemCount = requestedShop.shipsStock.items[currentItem].count
+            shopEmbed.add_field(name=str(shipNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.getNameAndNick() + "**",
+                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.getValue())) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "weapon"]:
-        for weaponNum in range(1, len(requestedShop.weaponsStock) + 1):
+        for weaponNum in range(1, requestedShop.weaponsStock.numKeys + 1):
             if weaponNum == 1:
-                shopEmbed.add_field(
-                    name="‎", value="__**Weapons**__", inline=False)
-            shopEmbed.add_field(value=(requestedShop.weaponsStock[weaponNum - 1].emoji if requestedShop.weaponsStock[weaponNum - 1].hasEmoji else "") + " " + commaSplitNum(str(
-                requestedShop.weaponsStock[weaponNum - 1].value)) + " Credits\n" + requestedShop.weaponsStock[weaponNum - 1].statsStringShort(), name=str(weaponNum) + ". " + "**" + requestedShop.weaponsStock[weaponNum - 1].name + "**", inline=True)
+                shopEmbed.add_field(name="‎", value="__**Weapons**__", inline=False)
+            currentItem = requestedShop.weaponsStock[weaponNum - 1].item
+            currentItemCount = requestedShop.weaponsStock.items[currentItem].count
+            shopEmbed.add_field(name=str(weaponNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
+                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "module"]:
-        for moduleNum in range(1, len(requestedShop.modulesStock) + 1):
+        for moduleNum in range(1, requestedShop.modulesStock.numKeys + 1):
             if moduleNum == 1:
-                shopEmbed.add_field(
-                    name="‎", value="__**Modules**__", inline=False)
-            shopEmbed.add_field(value=(requestedShop.modulesStock[moduleNum - 1].emoji if requestedShop.modulesStock[moduleNum - 1].hasEmoji else "") + " " + commaSplitNum(str(
-                requestedShop.modulesStock[moduleNum - 1].value)) + " Credits\n" + requestedShop.modulesStock[moduleNum - 1].statsStringShort(), name=str(moduleNum) + ". " + "**" + requestedShop.modulesStock[moduleNum - 1].name + "**", inline=True)
+                shopEmbed.add_field(name="‎", value="__**Modules**__", inline=False)
+            currentItem = requestedShop.modulesStock[moduleNum - 1].item
+            currentItemCount = requestedShop.modulesStock.items[currentItem].count
+            shopEmbed.add_field(name=str(moduleNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
+                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "turret"]:
-        for turretNum in range(1, len(requestedShop.turretsStock) + 1):
+        for turretNum in range(1, requestedShop.turretsStock.numKeys + 1):
             if turretNum == 1:
-                shopEmbed.add_field(
-                    name="‎", value="__**Turrets**__", inline=False)
-            shopEmbed.add_field(value=(requestedShop.turretsStock[turretNum - 1].emoji if requestedShop.turretsStock[turretNum - 1].hasEmoji else "") + " " + commaSplitNum(str(
-                requestedShop.turretsStock[turretNum - 1].value)) + " Credits\n" + requestedShop.turretsStock[turretNum - 1].statsStringShort(), name=str(turretNum) + ". " + "**" + requestedShop.turretsStock[turretNum - 1].name + "**", inline=True)
+                shopEmbed.add_field(name="‎", value="__**Turrets**__", inline=False)
+            currentItem = requestedShop.turretsStock[turretNum - 1].item
+            currentItemCount = requestedShop.turretsStock.items[currentItem].count
+            shopEmbed.add_field(name=str(turretNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
+                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     try:
         await sendChannel.send(embed=shopEmbed)
@@ -1950,11 +1962,12 @@ async def cmd_shop_buy(message, args):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
-    if itemNum > len(requestedShop.getStockByName(item)):
-        if len(requestedShop.getStockByName(item)) == 0:
+    shopItemStock = requestedShop.getStockByName(item)
+    if itemNum > shopItemStock.numKeys:
+        if shopItemStock.numKeys == 0:
             await message.channel.send(":x: This shop has no " + item + "s in stock!")
         else:
-            await message.channel.send(":x: Invalid item number! This shop has " + str(len(requestedShop.getStockByName(item))) + " " + item + "(s).")
+            await message.channel.send(":x: Invalid item number! This shop has " + str(shopItemStock.numKeys) + " " + item + "(s).")
         return
 
     if itemNum < 1:
@@ -1985,27 +1998,24 @@ async def cmd_shop_buy(message, args):
                 await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` and/or `sell` when buying a ship.")
                 return
 
-    if usersDB.userIDExists(message.author.id):
-        requestedBBUser = usersDB.getUser(message.author.id)
-    else:
-        requestedBBUser = usersDB.addUser(message.author.id)
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
+    requestedItem = shopItemStock[itemNum - 1].item
 
     if item == "ship":
-        requestedShip = requestedShop.shipsStock[itemNum - 1]
-        newShipValue = requestedShip.getValue()
+        newShipValue = requestedItem.getValue()
         activeShip = requestedBBUser.activeShip
 
         # Check the item can be afforded
-        if (not sellOldShip and not requestedShop.userCanAffordShipObj(requestedBBUser, requestedShip)) or \
-                (sellOldShip and not requestedShop.amountCanAffordShipObj(requestedBBUser.credits + requestedBBUser.activeShip.getValue(shipUpgradesOnly=transferItems), requestedShip)):
-            await message.channel.send(":x: You can't afford that item! (" + str(requestedShip.getValue()) + ")")
+        if (not sellOldShip and not requestedShop.userCanAffordItemObj(requestedBBUser, requestedItem)) or \
+                (sellOldShip and not requestedShop.amountCanAffordShipObj(requestedBBUser.credits + requestedBBUser.activeShip.getValue(shipUpgradesOnly=transferItems), requestedItem)):
+            await message.channel.send(":x: You can't afford that item! (" + str(requestedItem.getValue()) + ")")
             return
 
-        requestedBBUser.inactiveShips.append(requestedShip)
-
+        requestedBBUser.inactiveShips.addItem(requestedItem)
+        
         if transferItems:
-            requestedBBUser.unequipAll(requestedShip)
-            activeShip.transferItemsTo(requestedShip)
+            requestedBBUser.unequipAll(requestedItem)
+            activeShip.transferItemsTo(requestedItem)
             requestedBBUser.unequipAll(activeShip)
 
         if sellOldShip:
@@ -2013,13 +2023,13 @@ async def cmd_shop_buy(message, args):
             oldShipValue = activeShip.getValue(shipUpgradesOnly=transferItems)
             requestedBBUser.credits += oldShipValue
             requestedBBUser.unequipAll(activeShip)
-            requestedShop.shipsStock.append(activeShip)
-
-        requestedBBUser.equipShipObj(requestedShip, noSaveActive=sellOldShip)
+            shopItemStock.addItem(activeShip)
+        
+        requestedBBUser.equipShipObj(requestedItem, noSaveActive=sellOldShip)
         requestedBBUser.credits -= newShipValue
-        requestedShop.shipsStock.remove(requestedShip)
-
-        outStr = ":moneybag: Congratulations on your new **" + requestedShip.name + "**!"
+        shopItemStock.removeItem(requestedItem)
+        
+        outStr = ":moneybag: Congratulations on your new **" + requestedItem.name + "**!"
         if sellOldShip:
             outStr += "\nYou received **" + \
                 str(oldShipValue) + " credits** for your old **" + \
@@ -2033,42 +2043,16 @@ async def cmd_shop_buy(message, args):
 
         await message.channel.send(outStr)
 
-    elif item == "weapon":
-        requestedWeapon = requestedShop.weaponsStock[itemNum - 1]
-        if not requestedShop.userCanAffordWeaponObj(requestedBBUser, requestedWeapon):
-            await message.channel.send(":x: You can't afford that item! (" + str(requestedWeapon.value) + ")")
+    elif item in ["weapon", "module", "turret"]:
+        if not requestedShop.userCanAffordItemObj(requestedBBUser, requestedItem):
+            await message.channel.send(":x: You can't afford that item! (" + str(requestedItem.value) + ")")
             return
 
-        requestedBBUser.credits -= requestedWeapon.value
-        requestedBBUser.inactiveWeapons.append(requestedWeapon)
-        requestedShop.weaponsStock.remove(requestedWeapon)
+        requestedBBUser.credits -= requestedItem.value
+        requestedBBUser.getInactivesByName(item).addItem(requestedItem)
+        shopItemStock.removeItem(requestedItem)
 
-        await message.channel.send(":moneybag: Congratulations on your new **" + requestedWeapon.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
-
-    elif item == "module":
-        requestedModule = requestedShop.modulesStock[itemNum - 1]
-        if not requestedShop.userCanAffordModuleObj(requestedBBUser, requestedModule):
-            await message.channel.send(":x: You can't afford that item! (" + str(requestedModule.value) + ")")
-            return
-
-        requestedBBUser.credits -= requestedModule.value
-        requestedBBUser.inactiveModules.append(requestedModule)
-        requestedShop.modulesStock.remove(requestedModule)
-
-        await message.channel.send(":moneybag: Congratulations on your new **" + requestedModule.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
-
-    elif item == "turret":
-        requestedTurret = requestedShop.turretsStock[itemNum - 1]
-        if not requestedShop.userCanAffordTurretObj(requestedBBUser, requestedTurret):
-            await message.channel.send(":x: You can't afford that item! (" + str(requestedTurret.value) + ")")
-            return
-
-        requestedBBUser.credits -= requestedTurret.value
-        requestedBBUser.inactiveTurrets.append(requestedTurret)
-        requestedShop.turretsStock.remove(requestedTurret)
-
-        await message.channel.send(":moneybag: Congratulations on your new **" + requestedTurret.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
-
+        await message.channel.send(":moneybag: Congratulations on your new **" + requestedItem.name + "**! \n\nYour balance is now: **" + str(requestedBBUser.credits) + " credits**.")
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
@@ -2100,18 +2084,17 @@ async def cmd_shop_sell(message, args):
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
         return
 
-    if usersDB.userIDExists(message.author.id):
-        requestedBBUser = usersDB.getUser(message.author.id)
-    else:
-        requestedBBUser = usersDB.addUser(message.author.id)
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
 
     itemNum = argsSplit[1]
     if not bbUtil.isInt(itemNum):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
-    if itemNum > len(requestedBBUser.getInactivesByName(item)):
-        await message.channel.send(":x: Invalid item number! You have " + str(len(requestedBBUser.getInactivesByName(item))) + " " + item + "s.")
+
+    userItemInactives = requestedBBUser.getInactivesByName(item)
+    if itemNum > userItemInactives.numKeys:
+        await message.channel.send(":x: Invalid item number! You have " + str(userItemInactives.numKeys) + " " + item + "s.")
         return
     if itemNum < 1:
         await message.channel.send(":x: Invalid item number! Must be at least 1.")
@@ -2129,45 +2112,31 @@ async def cmd_shop_sell(message, args):
             return
 
     requestedShop = guildsDB.getGuild(message.guild.id).shop
+    shopItemStock = requestedShop.getStockByName(item)
+    requestedItem = userItemInactives[itemNum - 1].item
 
     if item == "ship":
-        requestedShip = requestedBBUser.inactiveShips[itemNum - 1]
         if clearItems:
-            requestedBBUser.unequipAll(requestedShip)
+            requestedBBUser.unequipAll(requestedItem)
+        
+        requestedBBUser.credits += requestedItem.getValue()
+        userItemInactives.removeItem(requestedItem)
+        shopItemStock.addItem(requestedItem)
 
-        requestedBBUser.credits += requestedShip.getValue()
-        requestedBBUser.inactiveShips.remove(requestedShip)
-        requestedShop.shipsStock.append(requestedShip)
-
-        outStr = ":moneybag: You sold your **" + requestedShip.getNameOrNick() + \
-            "** for **" + str(requestedShip.getValue()) + " credits**!"
+        outStr = ":moneybag: You sold your **" + requestedItem.getNameOrNick() + "** for **" + str(requestedItem.getValue()) + " credits**!"
         if clearItems:
             outStr += "\nItems removed from the ship can be found in the hangar."
         await message.channel.send(outStr)
+    
+    elif item in ["weapon", "module", "turret"]:
+        requestedBBUser.credits += requestedItem.getValue()
+        userItemInactives.removeItem(requestedItem)
 
-    elif item == "weapon":
-        requestedWeapon = requestedBBUser.inactiveWeapons[itemNum - 1]
-        requestedBBUser.credits += requestedWeapon.value
-        requestedBBUser.inactiveWeapons.remove(requestedWeapon)
-        requestedShop.weaponsStock.append(requestedWeapon)
+        if requestedItem is None:
+            raise ValueError("selling NoneType Item")
+        shopItemStock.addItem(requestedItem)
 
-        await message.channel.send(":moneybag: You sold your **" + requestedWeapon.name + "** for **" + str(requestedWeapon.value) + " credits**!")
-
-    elif item == "module":
-        requestedModule = requestedBBUser.inactiveModules[itemNum - 1]
-        requestedBBUser.credits += requestedModule.value
-        requestedBBUser.inactiveModules.remove(requestedModule)
-        requestedShop.modulesStock.append(requestedModule)
-
-        await message.channel.send(":moneybag: You sold your **" + requestedModule.name + "** for **" + str(requestedModule.value) + " credits**!")
-
-    elif item == "turret":
-        requestedTurret = requestedBBUser.inactiveTurrets[itemNum - 1]
-        requestedBBUser.credits += requestedTurret.value
-        requestedBBUser.inactiveTurrets.remove(requestedTurret)
-        requestedShop.turretsStock.append(requestedTurret)
-
-        await message.channel.send(":moneybag: You sold your **" + requestedTurret.name + "** for **" + str(requestedTurret.value) + " credits**!")
+        await message.channel.send(":moneybag: You sold your **" + requestedItem.name + "** for **" + str(requestedItem.getValue()) + " credits**!")
 
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
@@ -2200,18 +2169,17 @@ async def cmd_equip(message, args):
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
         return
 
-    if usersDB.userIDExists(message.author.id):
-        requestedBBUser = usersDB.getUser(message.author.id)
-    else:
-        requestedBBUser = usersDB.addUser(message.author.id)
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
 
     itemNum = argsSplit[1]
     if not bbUtil.isInt(itemNum):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
-    if itemNum > len(requestedBBUser.getInactivesByName(item)):
-        await message.channel.send(":x: Invalid item number! You have " + str(len(requestedBBUser.getInactivesByName(item))) + " " + item + "s.")
+
+    userItemInactives = requestedBBUser.getInactivesByName(item)
+    if itemNum > userItemInactives.numKeys:
+        await message.channel.send(":x: Invalid item number! You have " + str(userItemInactives.numKeys) + " " + item + "s.")
         return
     if itemNum < 1:
         await message.channel.send(":x: Invalid item number! Must be at least 1.")
@@ -2228,29 +2196,29 @@ async def cmd_equip(message, args):
             await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` when equipping a ship.")
             return
 
+    requestedItem = userItemInactives[itemNum - 1].item
+
     if item == "ship":
-        requestedShip = requestedBBUser.inactiveShips[itemNum - 1]
         activeShip = requestedBBUser.activeShip
         if transferItems:
-            requestedBBUser.unequipAll(requestedShip)
-            requestedBBUser.activeShip.transferItemsTo(requestedShip)
+            requestedBBUser.unequipAll(requestedItem)
+            requestedBBUser.activeShip.transferItemsTo(requestedItem)
             requestedBBUser.unequipAll(activeShip)
+        
+        requestedBBUser.equipShipObj(requestedItem)
 
-        requestedBBUser.equipShipObj(requestedShip)
-
-        outStr = ":rocket: You switched to the **" + requestedShip.getNameOrNick() + \
-            "**."
+        outStr = ":rocket: You switched to the **" + requestedItem.getNameOrNick() + "**."
         if transferItems:
             outStr += "\nItems thay could not fit in your new ship can be found in the hangar."
         await message.channel.send(outStr)
-
+    
     elif item == "weapon":
         if not requestedBBUser.activeShip.canEquipMoreWeapons():
             await message.channel.send(":x: Your active ship does not have any free weapon slots!")
             return
-        requestedItem = requestedBBUser.inactiveWeapons[itemNum - 1]
+
         requestedBBUser.activeShip.equipWeapon(requestedItem)
-        requestedBBUser.inactiveWeapons.pop(itemNum - 1)
+        requestedBBUser.inactiveWeapons.removeItem(requestedItem)
 
         await message.channel.send(":wrench: You equipped the **" + requestedItem.name + "**.")
 
@@ -2259,14 +2227,12 @@ async def cmd_equip(message, args):
             await message.channel.send(":x: Your active ship does not have any free module slots!")
             return
 
-        requestedItem = requestedBBUser.inactiveModules[itemNum - 1]
-
         if not requestedBBUser.activeShip.canEquipModuleType(requestedItem.getType()):
             await message.channel.send(":x: You already have the max of this type of module equipped!")
             return
 
         requestedBBUser.activeShip.equipModule(requestedItem)
-        requestedBBUser.inactiveModules.pop(itemNum - 1)
+        requestedBBUser.inactiveModules.removeItem(requestedItem)
 
         await message.channel.send(":wrench: You equipped the **" + requestedItem.name + "**.")
 
@@ -2274,9 +2240,9 @@ async def cmd_equip(message, args):
         if not requestedBBUser.activeShip.canEquipMoreTurrets():
             await message.channel.send(":x: Your active ship does not have any free turret slots!")
             return
-        requestedItem = requestedBBUser.inactiveTurrets[itemNum - 1]
+
         requestedBBUser.activeShip.equipTurret(requestedItem)
-        requestedBBUser.inactiveTurrets.pop(itemNum - 1)
+        requestedBBUser.inactiveTurrets.removeItem(requestedItem)
 
         await message.channel.send(":wrench: You equipped the **" + requestedItem.name + "**.")
 
@@ -2306,10 +2272,7 @@ async def cmd_unequip(message, args):
         await message.channel.send(":x: Too many arguments! Please only give an item type (all/weapon/module/turret), an item number or `all`.")
         return
 
-    if usersDB.userIDExists(message.author.id):
-        requestedBBUser = usersDB.getUser(message.author.id)
-    else:
-        requestedBBUser = usersDB.addUser(message.author.id)
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
 
     if unequipAllItems:
         requestedBBUser.unequipAll(requestedBBUser.activeShip)
@@ -2345,13 +2308,13 @@ async def cmd_unequip(message, args):
             return
         if unequipAll:
             for weapon in requestedBBUser.activeShip.weapons:
-                requestedBBUser.inactiveWeapons.append(weapon)
+                requestedBBUser.inactiveWeapons.addItem(weapon)
                 requestedBBUser.activeShip.unequipWeaponObj(weapon)
 
             await message.channel.send(":wrench: You unequipped all **weapons**.")
         else:
             requestedItem = requestedBBUser.activeShip.weapons[itemNum - 1]
-            requestedBBUser.inactiveWeapons.append(requestedItem)
+            requestedBBUser.inactiveWeapons.addItem(requestedItem)
             requestedBBUser.activeShip.unequipWeaponIndex(itemNum - 1)
 
             await message.channel.send(":wrench: You unequipped the **" + requestedItem.name + "**.")
@@ -2362,13 +2325,13 @@ async def cmd_unequip(message, args):
             return
         if unequipAll:
             for module in requestedBBUser.activeShip.modules:
-                requestedBBUser.inactiveModules.append(module)
+                requestedBBUser.inactiveModules.addItem(module)
                 requestedBBUser.activeShip.unequipModuleObj(module)
 
             await message.channel.send(":wrench: You unequipped all **modules**.")
         else:
             requestedItem = requestedBBUser.activeShip.modules[itemNum - 1]
-            requestedBBUser.inactiveModules.append(requestedItem)
+            requestedBBUser.inactiveModules.addItem(requestedItem)
             requestedBBUser.activeShip.unequipModuleIndex(itemNum - 1)
 
             await message.channel.send(":wrench: You unequipped the **" + requestedItem.name + "**.")
@@ -2379,13 +2342,13 @@ async def cmd_unequip(message, args):
             return
         if unequipAll:
             for turret in requestedBBUser.activeShip.turrets:
-                requestedBBUser.inactiveTurrets.append(turret)
+                requestedBBUser.inactiveTurrets.addItem(turret)
                 requestedBBUser.activeShip.unequipTurretObj(turret)
 
             await message.channel.send(":wrench: You unequipped all **turrets**.")
         else:
             requestedItem = requestedBBUser.activeShip.turrets[itemNum - 1]
-            requestedBBUser.inactiveTurrets.append(requestedItem)
+            requestedBBUser.inactiveTurrets.addItem(requestedItem)
             requestedBBUser.activeShip.unequipTurretIndex(itemNum - 1)
 
             await message.channel.send(":wrench: You unequipped the **" + requestedItem.name + "**.")
@@ -2562,7 +2525,7 @@ dmCommands.register("notify", err_nodm)
 ⚠ WARNING: MARKED FOR CHANGE ⚠
 The following function is provisional and marked as planned for overhaul.
 Details: The command output is finalised. However, the inner workings of the command are to be replaced with attribute getters.
-         It is inefficient to calculate total value measurements on every call, so current totals should be cached in class attributes whenever modified.
+         It is inefficient to calculate total value measurements on every call, so current totals should be cached in object attributes whenever modified.
 
 print the total value of the specified user, use the calling user if no user is specified.
 
@@ -3774,7 +3737,7 @@ async def dev_cmd_refreshshop(message, args):
     guild = guildsDB.getGuild(message.guild.id)
     guild.shop.refreshStock()
     if guild.hasPlayChannel():
-        await client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!")
+        await client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
 
 bbCommands.register("refreshshop", dev_cmd_refreshshop, isDev=True)
 dmCommands.register("refreshshop", err_nodm, isDev=True)

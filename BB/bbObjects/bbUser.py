@@ -1,38 +1,16 @@
 from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from ..bbConfig import bbConfig
+from . import bbInventory, bbInventoryListing
 
 
 defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
                         "weapons":[{"name": "Micro Gun MK I", "builtIn": True}],
                         "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}, {"name": "IMT Extract 1.3", "builtIn": True}]}
 
-defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"name": "Nirai Impulse EX 1", "builtIn": True}]}
+defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"item": {"name": "Nirai Impulse EX 1", "builtIn": True}, "count": 1}]}
 
 
 class bbUser:
-    id = 0
-    credits = 0
-    lifetimeCredits = 0
-    bountyCooldownEnd = -1
-    systemsChecked = 0
-    bountyWins = 0
-    lastSeenGuildId = -1
-    hasLastSeenGuildId = False
-
-    activeShip = None
-    inactiveShips = []
-    inactiveModules = []
-    inactiveWeapons = []
-    inactiveTurrets = []
-
-    # dict of targetBBUser:DuelRequest
-    duelRequests = {}
-    duelWins = 0
-    duelLosses = 0
-    duelCreditsWins = 0
-    duelCreditsLosses = 0
-    
-
     def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0):
         if type(id) == float:
             id = int(id)
@@ -80,15 +58,14 @@ class bbUser:
         self.lastSeenGuildId = lastSeenGuildId
         self.haslastSeenGuildId = lastSeenGuildId != -1
 
-        self.duelWins = duelWins
         self.duelRequests = {}
-
+        self.duelWins = duelWins
         self.duelLosses = duelLosses
+
         self.duelCreditsWins = duelCreditsWins
         self.duelCreditsLosses = duelCreditsLosses
 
     
-
     def resetUser(self):
         self.credits = 0
         self.lifetimeCredits = 0
@@ -96,20 +73,24 @@ class bbUser:
         self.systemsChecked = 0
         self.bountyWins = 0
         self.activeShip = bbShip.fromDict(defaultShipLoadoutDict)
-        self.inactiveModules = []
-        self.inactiveShips = []
-        self.inactiveWeapons = []
-        self.inactiveTurrets = []
+        self.inactiveModules.clear()
+        self.inactiveShips.clear()
+        self.inactiveWeapons.clear()
+        self.inactiveTurrets.clear()
+        self.duelWins = 0
+        self.duelLosses = 0
+        self.duelCreditsWins = 0
+        self.duelCreditsLosses = 0
 
 
     def numInventoryPages(self, item, maxPerPage):
         if item not in bbConfig.validItemNames:
             raise ValueError("Requested an invalid item name: " + item)
 
-        numWeapons = len(self.inactiveWeapons)
-        numModules = len(self.inactiveModules)
-        numTurrets = len(self.inactiveTurrets)
-        numShips = len(self.inactiveShips)
+        numWeapons = self.inactiveWeapons.numKeys
+        numModules = self.inactiveModules.numKeys
+        numTurrets = self.inactiveTurrets.numKeys
+        numShips = self.inactiveShips.numKeys
 
         itemsNum = 0
 
@@ -136,36 +117,35 @@ class bbUser:
             return pageNum * maxPerPage
             
         elif item == "ship":
-            return len(self.inactiveShips)
+            return self.inactiveShips.numKeys
         elif item == "weapon":
-            return len(self.inactiveWeapons)
+            return self.inactiveWeapons.numKeys
         elif item == "module":
-            return len(self.inactiveModules)
+            return self.inactiveModules.numKeys
         elif item == "turret":
-            return len(self.inactiveTurrets)
+            return self.inactiveTurrets.numKeys
         else:
             raise NotImplementedError("Valid but unsupported item name: " + item)
 
 
     def unequipAll(self, ship):
         if not type(ship) == bbShip.bbShip:
-            raise TypeError("Can only transfer items to another bbShip. Given " + str(type(ship)))
+            raise TypeError("Can only unequipAll from a bbShip. Given " + str(type(ship)))
 
         if not (self.activeShip == ship or ship in self.inactiveShips):
             raise RuntimeError("Attempted to unequipAll on a ship that isnt owned by this bbUser")
 
         for weapon in ship.weapons:
-            self.inactiveWeapons.append(weapon)
-            # ship.unequipWeaponObj(weapon)
-        ship.weapons = []
+            self.inactiveWeapons.addItem(weapon)
+        ship.clearWeapons()
+
         for module in ship.modules:
-            self.inactiveModules.append(module)
-            # ship.unequipModuleObj(module)
-        ship.modules = []
+            self.inactiveModules.addItem(module)
+        ship.clearModules()
+
         for turret in ship.turrets:
-            self.inactiveTurrets.append(turret)
-            # ship.unequipTurretObj(turret)
-        ship.turrets = []
+            self.inactiveTurrets.addItem(turret)
+        ship.clearTurrets()
 
 
     def validateLoadout(self):
@@ -185,43 +165,44 @@ class bbUser:
                 finalModules.append(currentModule)
         
         for currentModule in finalModules:
-            self.inactiveModules.append(currentModule)
+            self.inactiveModules.addItem(currentModule)
 
 
     def equipShipObj(self, ship, noSaveActive=False):
         if not (self.activeShip == ship or ship in self.inactiveShips):
             raise RuntimeError("Attempted to equip a ship that isnt owned by this bbUser")
         if not noSaveActive and self.activeShip is not None:
-            self.inactiveShips.append(self.activeShip)
+            self.inactiveShips.addItem(self.activeShip)
         if ship in self.inactiveShips:
-            self.inactiveShips.remove(ship)
+            self.inactiveShips.removeItem(ship)
         self.activeShip = ship
 
     
     def equipShipIndex(self, index):
-        if not (0 <= index <= len(self.inactiveShips) - 1):
+        if not (0 <= index <= self.inactiveShips.numKeys - 1):
             raise RuntimeError("Index out of range")
         if self.activeShip is not None:
-            self.inactiveShips.append(self.activeShip)
-        self.activeShip = self.inactiveShips.pop(index)
+            self.inactiveShips.addItem(self.activeShip)
+        self.activeShip = self.inactiveShips[index]
+        self.inactiveShips.removeItem(self.activeShip)
 
 
     def toDictNoId(self):
         inactiveShipsDict = []
-        for ship in self.inactiveShips:
-            inactiveShipsDict.append(ship.toDict())
+        for ship in self.inactiveShips.keys:
+            inactiveShipsDict.append(self.inactiveShips.items[ship].toDict())
 
         inactiveModulesDict = []
-        for module in self.inactiveModules:
-            inactiveModulesDict.append(module.toDict())
+        for module in self.inactiveModules.keys:
+            inactiveModulesDict.append(self.inactiveModules.items[module].toDict())
 
         inactiveWeaponsDict = []
-        for weapon in self.inactiveWeapons:
-            inactiveWeaponsDict.append(weapon.toDict())
+        for weapon in self.inactiveWeapons.keys:
+            inactiveWeaponsDict.append(self.inactiveWeapons.items[weapon].toDict())
 
         inactiveTurretsDict = []
-        for turret in self.inactiveTurrets:
-            inactiveTurretsDict.append(turret.toDict())
+        for turret in self.inactiveTurrets.keys:
+            inactiveTurretsDict.append(self.inactiveTurrets.items[turret].toDict())
 
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
@@ -252,17 +233,17 @@ class bbUser:
             return self.bountyWins
         elif stat == "value":
             modulesValue = 0
-            for module in self.inactiveModules:
-                modulesValue += module.getValue()
+            for module in self.inactiveModules.keys:
+                modulesValue += self.inactiveModules.items[module].count * module.getValue()
             turretsValue = 0
-            for turret in self.inactiveTurrets:
-                turretsValue += turret.getValue()
+            for turret in self.inactiveTurrets.keys:
+                turretsValue += self.inactiveTurrets.items[turret].count * turret.getValue()
             weaponsValue = 0
-            for weapon in self.inactiveWeapons:
-                weaponsValue += weapon.getValue()
+            for weapon in self.inactiveWeapons.keys:
+                weaponsValue += self.inactiveWeapons.items[weapon].count * weapon.getValue()
             shipsValue = 0
-            for ship in self.inactiveShips:
-                shipsValue += ship.getValue()
+            for ship in self.inactiveShips.keys:
+                shipsValue += self.inactiveShips.items[ship].count * ship.getValue()
 
             return modulesValue + turretsValue + weaponsValue + shipsValue + self.activeShip.getValue() + self.credits
 
@@ -314,25 +295,46 @@ class bbUser:
 def fromDict(id, userDict):
     activeShip = bbShip.fromDict(userDict["activeShip"])
 
-    inactiveShips = []
+    # Convert old data format. once done, replace with commented out code below
+    # inactiveShips = bbInventory.bbInventory()
+    # if "inactiveShips" in userDict:
+    #     for shipListingDict in userDict["inactiveShips"]:
+    #         inactiveShips.addItem(bbShip.fromDict(shipListingDict))
+
+    # inactiveWeapons = bbInventory.bbInventory()
+    # if "inactiveWeapons" in userDict:
+    #     for weaponListingDict in userDict["inactiveWeapons"]:
+    #         inactiveWeapons.addItem(bbWeapon.fromDict(weaponListingDict))
+
+    # inactiveModules = bbInventory.bbInventory()
+    # if "inactiveModules" in userDict:
+    #     for moduleListingDict in userDict["inactiveModules"]:
+    #         inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict))
+
+    # inactiveTurrets = bbInventory.bbInventory()
+    # if "inactiveTurrets" in userDict:
+    #     for turretListingDict in userDict["inactiveTurrets"]:
+    #         inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict))
+
+    inactiveShips = bbInventory.bbInventory()
     if "inactiveShips" in userDict:
-        for ship in userDict["inactiveShips"]:
-            inactiveShips.append(bbShip.fromDict(ship))
+        for shipListingDict in userDict["inactiveShips"]:
+            inactiveShips.addItem(bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-    inactiveWeapons = []
+    inactiveWeapons = bbInventory.bbInventory()
     if "inactiveWeapons" in userDict:
-        for weapon in userDict["inactiveWeapons"]:
-            inactiveWeapons.append(bbWeapon.fromDict(weapon))
+        for weaponListingDict in userDict["inactiveWeapons"]:
+            inactiveWeapons.addItem(bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-    inactiveModules = []
+    inactiveModules = bbInventory.bbInventory()
     if "inactiveModules" in userDict:
-        for module in userDict["inactiveModules"]:
-            inactiveModules.append(bbModuleFactory.fromDict(module))
+        for moduleListingDict in userDict["inactiveModules"]:
+            inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
-    inactiveTurrets = []
+    inactiveTurrets = bbInventory.bbInventory()
     if "inactiveTurrets" in userDict:
-        for turret in userDict["inactiveTurrets"]:
-            inactiveTurrets.append(bbTurret.fromDict(turret))
+        for turretListingDict in userDict["inactiveTurrets"]:
+            inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],

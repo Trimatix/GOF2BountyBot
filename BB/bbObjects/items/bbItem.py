@@ -2,7 +2,7 @@ from .. import bbAliasable
 from abc import abstractmethod
 
 class bbItem(bbAliasable.Aliasable):
-    def __init__(self, name, aliases, value=0, wiki="", manufacturer="", icon="", emoji=""):
+    def __init__(self, name, aliases, value=0, wiki="", manufacturer="", icon="", emoji="", techLevel=-1):
         super(bbItem, self).__init__(name, aliases)
         self.wiki = wiki
         self.hasWiki = wiki != ""
@@ -18,6 +18,9 @@ class bbItem(bbAliasable.Aliasable):
 
         self.value = value
         self.shopSpawnRate = 0
+
+        self.techLevel = techLevel
+        self.hasTechLevel = techLevel != -1
 
 
     @abstractmethod
@@ -36,3 +39,7 @@ class bbItem(bbAliasable.Aliasable):
 
     def toDict(self):
         return {"name": self.name, "builtIn": True}
+
+    
+    def __hash__(self):
+        return hash(str(self))

@@ -97,3 +97,74 @@ class bbInventory:
             page.append(self.items[item])
 
         return page
+
+
+    """
+    Decide whether a given item is stored in this inventory.
+
+    @param item -- The item to check for membership
+    @return -- True if at least one of item is in this inventory, False otherwise
+    """
+    def stores(self, item):
+        return item in self.keys
+
+    
+    """
+    Get the amount stored of a given item.
+
+    @param item -- The item to count
+    @return -- Integer count of number of items in this inventory. 0 if it is not stored in this inventory.
+    """
+    def numStored(self, item):
+        return self.items[item].count if self.stores(item) else 0
+
+
+    """
+    Decide whether or not this bbInventory currently stores any items.
+
+    @return -- True if no items are stored, False if at least one item is stored currently
+    """
+    def isEmpty(self):
+        return self.totalItems == 0
+
+
+    """
+    Remove all items from the inventory.
+
+    """
+    def clear(self):
+        self.items = {}
+        self.keys = []
+        self.totalItems = 0
+        self.numKeys = 0
+
+
+    """
+    Override [subscript] operator for reading values.
+    Currently returns the bbInventoryListing for the item at position key in self.keys.
+
+    @param key -- The index of the key to dereference
+    @return -- The bbInventoryListing for the item at the requested index
+    """
+    def __getitem__(self, key):
+        return self.items[self.keys[key]]
+
+
+    """
+    Disallow assignment through the [subscript] operator.
+
+    @param key -- ignored
+    @param value -- ignored
+    """
+    def __setitem__(self, key, value):
+        raise NotImplementedError("Cannot use [subscript] assignment for class bbInventory. use addItem/removeItem instead.")
+        # self.items[self.keys[key]] = value
+
+
+    """
+    Override the 'in' operator.
+
+    @param item -- The object to test for membership
+    """
+    def __contains__(self, item):
+        return item in self.keys
