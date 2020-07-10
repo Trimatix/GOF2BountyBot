@@ -1607,7 +1607,7 @@ async def cmd_hangar(message, args):
                             int(arg.lstrip("<@!")[:-1]))
                         foundUser = True
 
-                elif arg in bbConfig.validItemNames:
+                elif arg.rstrip("s") in bbConfig.validItemNames:
                     if foundItem:
                         await message.channel.send(":x: I can only take one item type (ship/weapon/module/turret)!")
                         return
