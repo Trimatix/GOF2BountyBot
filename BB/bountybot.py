@@ -161,6 +161,7 @@ Messages will be sent to the announceChannels of all guilds in the guildsDB, if 
 async def announceNewBounty(newBounty):
     # Create the announcement embed
     bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(newBounty.criminal), desc="<:documents:723709178589347921> __New Bounty Available__", col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
+    bountyEmbed.add_field(name="Difficulty:", value=str(newBounty.criminal.techLevel))
     bountyEmbed.add_field(name="Reward:", value=str(newBounty.reward) + " Credits")
     bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
     bountyEmbed.add_field(name="See the culprit's route with:", value="`" + bbConfig.commandPrefix +
@@ -2255,7 +2256,7 @@ async def cmd_equip(message, args):
             return
 
     requestedItem = userItemInactives[itemNum - 1].item
-    shipItemActives = requestedBBUser.activeShip.getActivesByName(item)
+    # shipItemActives = requestedBBUser.activeShip.getActivesByName(item)
 
     if item == "ship":
         activeShip = requestedBBUser.activeShip
@@ -3788,8 +3789,14 @@ Refresh the shop stock of the current guild. Does not reset the shop stock coold
 
 
 async def dev_cmd_refreshshop(message, args):
+    level = -1
+    if args != "":
+        if not bbUtil.isInt(args) or not int(args) in range(bbConfig.minTechLevel, bbConfig.maxTechLevel + 1):
+            await message.channel.send("Invalid tech level!")
+            return
+        level = int(args)
     guild = guildsDB.getGuild(message.guild.id)
-    guild.shop.refreshStock()
+    guild.shop.refreshStock(level=level)
     if guild.hasPlayChannel():
         await client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
 
