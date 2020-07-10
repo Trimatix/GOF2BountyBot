@@ -1686,7 +1686,7 @@ async def cmd_hangar(message, args):
                 await message.channel.send(":x: " + ("The requested pilot doesn't" if foundUser else "You don't") + " have any " + ("items" if item == "all" else "of that item") + "!")
                 return
             elif page > maxPage:
-                await message.channel.send(":x: " + ("The requested pilot" if foundUser else "You") + " only " + ("has" if foundUser else "have") + str(maxPage) + " page(s) of items. Showing page " + str(maxPage) + ":")
+                await message.channel.send(":x: " + ("The requested pilot" if foundUser else "You") + " only " + ("has " if foundUser else "have ") + str(maxPage) + " page(s) of items. Showing page " + str(maxPage) + ":")
                 page = maxPage
 
         hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt=("All item" if item == "all" else item.rstrip(
@@ -2006,7 +2006,7 @@ async def cmd_shop_buy(message, args):
         activeShip = requestedBBUser.activeShip
 
         # Check the item can be afforded
-        if (not sellOldShip and not requestedShop.userCanAffordShipObj(requestedBBUser, requestedItem)) or \
+        if (not sellOldShip and not requestedShop.userCanAffordItemObj(requestedBBUser, requestedItem)) or \
                 (sellOldShip and not requestedShop.amountCanAffordShipObj(requestedBBUser.credits + requestedBBUser.activeShip.getValue(shipUpgradesOnly=transferItems), requestedItem)):
             await message.channel.send(":x: You can't afford that item! (" + str(requestedItem.getValue()) + ")")
             return
@@ -2197,7 +2197,6 @@ async def cmd_equip(message, args):
             return
 
     requestedItem = userItemInactives[itemNum - 1].item
-    shipItemActives = requestedBBUser.activeShip.getActivesByName(item)
 
     if item == "ship":
         activeShip = requestedBBUser.activeShip
