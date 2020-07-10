@@ -20,14 +20,18 @@ class bbShop:
             self.refreshStock()
 
 
-    def refreshStock(self):
+    def refreshStock(self, level=-1):
         self.shipsStock.clear()
         self.weaponsStock.clear()
         self.modulesStock.clear()
         self.turretsStock.clear()
         # self.currentTechLevel = random.randint(bbConfig.minTechLevel, bbConfig.maxTechLevel)
-        self.currentTechLevel = bbConfig.pickRandomShopTL()
-
+        if level == -1:
+            self.currentTechLevel = bbConfig.pickRandomShopTL()
+        else:
+            if level not in range(bbConfig.minTechLevel, bbConfig.maxTechLevel + 1):
+                raise ValueError("Attempted to refresh a shop at tech level " + str(level) + ". must be within the range " + str(bbConfig.minTechLevel) + " to " + str(bbConfig.maxTechLevel))
+            self.currentTechLevel = level
         for i in range(self.maxShips):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.shipKeysByTL[itemTL - 1]) != 0:
