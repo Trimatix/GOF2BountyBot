@@ -65,6 +65,9 @@ class bbUser:
         self.duelCreditsWins = duelCreditsWins
         self.duelCreditsLosses = duelCreditsLosses
 
+        self.currentTotalValue = self.getStatByName("value")
+        
+
     
     def resetUser(self):
         self.credits = 0

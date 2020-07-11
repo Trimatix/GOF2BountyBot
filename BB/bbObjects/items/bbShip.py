@@ -3,25 +3,6 @@ from . import bbTurret, bbWeapon, bbShipUpgrade, bbModuleFactory
 from ...bbConfig import bbConfig, bbData
 
 class bbShip(bbItem):
-    hasNickname = False
-    nickname = ""
-
-    armour = 0.0
-    cargo = 0
-    numSecondaries = 0
-    handling = 0
-
-    maxPrimaries = 0
-    maxTurrets = 0
-    maxModules = 0
-
-    weapons = []
-    modules = []
-    turrets = []
-
-    upgradesApplied = []
-
-
     def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon="", emoji="", techLevel=-1, shopSpawnRate=0):
         super(bbShip, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel)
 
@@ -56,8 +37,12 @@ class bbShip(bbItem):
             self.changeNickname(nickname)
 
         self.upgradesApplied = []
-
         self.shopSpawnRate = shopSpawnRate
+
+        self.currentTotalHP = self.getArmour()
+        self.currentTotalCargo = self.getCargo()
+        self.currentTotalHandling = self.getHandling()
+        self.currentTotalDPS = self.getDPS()
 
 
     def getNumWeaponsEquipped(self):
@@ -100,13 +85,16 @@ class bbShip(bbItem):
         if not self.canEquipMoreWeapons():
             raise OverflowError("Attempted to equip a weapon but all weapon slots are full")
         self.weapons.append(weapon)
+        self.currentTotalDPS += weapon.getDPS()
     
 
     def unequipWeaponObj(self, weapon):
         self.weapons.remove(weapon)
+        self.currentTotalDPS -= weapon.getDPS()
 
 
     def unequipWeaponIndex(self, index):
+        self.currentTotalDPS -= self.weapons[index].getDPS()
         self.weapons.pop(index)
 
 
@@ -132,6 +120,7 @@ class bbShip(bbItem):
             raise ValueError("Attempted to equip a module of a type that is already at its maximum capacity: " + str(module))
 
         self.modules.append(module)
+        self.
     
 
     def unequipModuleObj(self, module):
