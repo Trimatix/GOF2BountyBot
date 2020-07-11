@@ -1948,7 +1948,6 @@ async def cmd_shop_buy(message, args):
             # TODO: move to a separate sellActiveShip function
             oldShipValue = activeShip.getValue(shipUpgradesOnly=transferItems)
             requestedBBUser.credits += oldShipValue
-            requestedBBUser.unequipAll(activeShip)
             shopItemStock.addItem(activeShip)
         
         requestedBBUser.equipShipObj(requestedItem, noSaveActive=sellOldShip)
