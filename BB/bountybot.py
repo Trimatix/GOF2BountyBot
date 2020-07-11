@@ -1711,7 +1711,32 @@ async def cmd_shop(message, args):
         for shipNum in range(1, requestedShop.shipsStock.numKeys + 1):
             if shipNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Ships**__", inline=False)
-            currentItem = requestedShop.shipsStock[shipNum - 1].item
+            
+            try:
+                currentItem = requestedShop.shipsStock[shipNum - 1].item
+            except KeyError:
+                try:
+                    print("Attempted to get item " + requestedShop.keys[shipNum-1].name + ", which was not found in the shop stock.")
+                except IndexError:
+                    break
+                except AttributeError as e:
+                    print("[cmd_shop: ship] Type getting ship at index.")
+                    print(e)
+                    print("shipNum-1:",shipNum-1,"\nkey:",requestedShop.shipsStock.keys[shipNum-1],"\nKeys:",end="")
+                    for ship in requestedShop.shipsStock.items:
+                        print(", " + ship,end="")
+                    print()
+                    shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[shipNum-1] + "'",
+                                        value="Do not attempt to buy. Could cause issues.", inline=True)
+                    continue
+                print("shipNum-1:",shipNum-1,"\nkey:",requestedShop.shipsStock.keys[shipNum-1].name,"\nKeys:",end="")
+                for ship in requestedShop.shipsStock.items:
+                    print(", " + ship.name,end="")
+                print()
+                shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[shipNum-1].name + "'",
+                                    value="Do not attempt to buy. Could cause issues.", inline=True)
+                continue
+
             currentItemCount = requestedShop.shipsStock.items[currentItem].count
             shopEmbed.add_field(name=str(shipNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.getNameAndNick() + "**",
                                 value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.getValue())) + " Credits\n" + currentItem.statsStringShort(), inline=True)
@@ -1720,7 +1745,32 @@ async def cmd_shop(message, args):
         for weaponNum in range(1, requestedShop.weaponsStock.numKeys + 1):
             if weaponNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Weapons**__", inline=False)
-            currentItem = requestedShop.weaponsStock[weaponNum - 1].item
+
+            try:
+                currentItem = requestedShop.weaponsStock[weaponNum - 1].item
+            except KeyError:
+                try:
+                    print("Attempted to get item " + requestedShop.keys[weaponNum-1].name + ", which was not found in the shop stock.")
+                except IndexError:
+                    break
+                except AttributeError as e:
+                    print("[cmd_shop: weapon] Type getting weapon at index.")
+                    print(e)
+                    print("weaponNum-1:",weaponNum-1,"\nkey:",requestedShop.shipsStock.keys[weaponNum-1],"\nKeys:",end="")
+                    for ship in requestedShop.shipsStock.items:
+                        print(", " + ship,end="")
+                    print()
+                    shopEmbed.add_field(name=str(weaponNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[weaponNum-1] + "'",
+                                        value="Do not attempt to buy. Could cause issues.", inline=True)
+                    continue
+                print("weaponNum-1:",weaponNum-1,"\nkey:",requestedShop.shipsStock.keys[weaponNum-1].name,"\nKeys:",end="")
+                for ship in requestedShop.shipsStock.items:
+                    print(", " + ship.name,end="")
+                print()
+                shopEmbed.add_field(name=str(weaponNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[weaponNum-1].name + "'",
+                                    value="Do not attempt to buy. Could cause issues.", inline=True)
+                continue
+
             currentItemCount = requestedShop.weaponsStock.items[currentItem].count
             shopEmbed.add_field(name=str(weaponNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
                                 value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
@@ -1729,7 +1779,32 @@ async def cmd_shop(message, args):
         for moduleNum in range(1, requestedShop.modulesStock.numKeys + 1):
             if moduleNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Modules**__", inline=False)
-            currentItem = requestedShop.modulesStock[moduleNum - 1].item
+            
+            try:
+                currentItem = requestedShop.modulesStock[moduleNum - 1].item
+            except KeyError:
+                try:
+                    print("Attempted to get item " + requestedShop.keys[moduleNum-1].name + ", which was not found in the shop stock.")
+                except IndexError:
+                    break
+                except AttributeError as e:
+                    print("[cmd_shop: module] Type getting module at index.")
+                    print(e)
+                    print("moduleNum-1:",moduleNum-1,"\nkey:",requestedShop.shipsStock.keys[moduleNum-1],"\nKeys:",end="")
+                    for ship in requestedShop.shipsStock.items:
+                        print(", " + ship,end="")
+                    print()
+                    shopEmbed.add_field(name=str(moduleNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[moduleNum-1] + "'",
+                                        value="Do not attempt to buy. Could cause issues.", inline=True)
+                    continue
+                print("moduleNum-1:",moduleNum-1,"\nkey:",requestedShop.shipsStock.keys[moduleNum-1].name,"\nKeys:",end="")
+                for ship in requestedShop.shipsStock.items:
+                    print(", " + ship.name,end="")
+                print()
+                shopEmbed.add_field(name=str(moduleNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[moduleNum-1].name + "'",
+                                    value="Do not attempt to buy. Could cause issues.", inline=True)
+                continue
+
             currentItemCount = requestedShop.modulesStock.items[currentItem].count
             shopEmbed.add_field(name=str(moduleNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
                                 value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
@@ -1738,7 +1813,32 @@ async def cmd_shop(message, args):
         for turretNum in range(1, requestedShop.turretsStock.numKeys + 1):
             if turretNum == 1:
                 shopEmbed.add_field(name="‎", value="__**Turrets**__", inline=False)
-            currentItem = requestedShop.turretsStock[turretNum - 1].item
+
+            try:
+                currentItem = requestedShop.turretsStock[turretNum - 1].item
+            except KeyError:
+                try:
+                    print("Attempted to get item " + requestedShop.keys[turretNum-1].name + ", which was not found in the shop stock.")
+                except IndexError:
+                    break
+                except AttributeError as e:
+                    print("[cmd_shop: turret] Type getting turret at index.")
+                    print(e)
+                    print("turretNum-1:",turretNum-1,"\nkey:",requestedShop.shipsStock.keys[turretNum-1],"\nKeys:",end="")
+                    for ship in requestedShop.shipsStock.items:
+                        print(", " + ship,end="")
+                    print()
+                    shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[turretNum-1] + "'",
+                                        value="Do not attempt to buy. Could cause issues.", inline=True)
+                    continue
+                print("turretNum-1:",turretNum-1,"\nkey:",requestedShop.shipsStock.keys[turretNum-1].name,"\nKeys:",end="")
+                for ship in requestedShop.shipsStock.items:
+                    print(", " + ship.name,end="")
+                print()
+                shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[turretNum-1].name + "'",
+                                    value="Do not attempt to buy. Could cause issues.", inline=True)
+                continue
+            
             currentItemCount = requestedShop.turretsStock.items[currentItem].count
             shopEmbed.add_field(name=str(turretNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
                                 value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
