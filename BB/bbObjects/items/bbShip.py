@@ -431,6 +431,9 @@ class bbShip(bbItem):
         return {"name": self.name, "builtIn":True, "nickname": self.nickname, "weapons":weaponsList, "modules":modulesList, "turrets":turretsList, "upgradesApplied":upgradesList}
 
 
+    def __str__(self):
+        return "<bbShip: " + self.name + ">"
+
 
 def fromDict(shipDict):
     weapons = []

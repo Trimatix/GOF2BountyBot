@@ -42,4 +42,4 @@ class bbItem(bbAliasable.Aliasable):
 
     
     def __hash__(self):
-        return hash(str(self))
+        return hash(repr(self))
