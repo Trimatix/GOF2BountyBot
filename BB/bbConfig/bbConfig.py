@@ -260,6 +260,19 @@ validItemNames = ["ship", "weapon", "module", "turret", "all"]
 
 
 
+##### USERS #####
+
+userAlertsIDsDefaults = {   #"shop_refresh": False,
+
+                            "duels_challenge_incoming_new": True,
+                            "duels_challenge_incoming_cancel": False,
+                            
+                            "system_updates_major": False,
+                            "system_updates_minor": False,
+                            "system_misc": False}
+
+
+
 ##### INTERNAL #####
 # Do not touch these!
 newBountyDelayReset = False

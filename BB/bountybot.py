@@ -23,6 +23,7 @@ from .scheduling import TimedTask
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from .scheduling import TimedTaskHeap
 from . import bbUtil, ActiveTimedTasks
+from .userAlerts import UserAlerts
 
 
 ####### DATABASE METHODS #######
@@ -226,15 +227,41 @@ async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
 Announce the refreshing of shop stocks to all guilds.
 Messages will be sent to the playChannels of all guilds in the guildsDB, if they have one
 """
-async def announceNewShopStock():
-    # loop over all guilds
-    for guild in guildsDB.guilds.values():
+async def announceNewShopStock(guildID=-1):
+    if guildID == -1:
+        # loop over all guilds
+        for guild in guildsDB.guilds.values():
+            # ensure guild has a valid playChannel
+            if guild.hasPlayChannel():
+                playCh = client.get_channel(guild.getPlayChannelId())
+                if playCh is not None:
+                    msg = "The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**"
+                    try:
+                        if guild.hasShopRefreshRoleId():
+                            # announce to the given channel
+                            await playCh.send(":arrows_counterclockwise: <@&" + str(guild.getShopRefreshRoleId()) + "> " + msg)
+                        else:
+                            await playCh.send(":arrows_counterclockwise: " + msg)
+                    except discord.Forbidden:
+                        print("FAILED TO ANNOUNCE SHOP REFRESH TO GUILD " + client.get_guild(
+                            guild.id).name + " IN CHANNEL " + playCh.name)
+    
+    else:
+        guild = guildsDB.getGuild(guildID)
         # ensure guild has a valid playChannel
         if guild.hasPlayChannel():
             playCh = client.get_channel(guild.getPlayChannelId())
             if playCh is not None:
-                # send the announcement
-                await playCh.send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
+                msg = "The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**"
+                try:
+                    if guild.hasShopRefreshRoleId():
+                        # announce to the given channel
+                        await playCh.send(":arrows_counterclockwise: <@&" + str(guild.getShopRefreshRoleId()) + "> " + msg)
+                    else:
+                        await playCh.send(":arrows_counterclockwise: " + msg)
+                except discord.Forbidden:
+                    print("FAILED TO ANNOUNCE SHOP REFRESH TO GUILD " + client.get_guild(
+                        guild.id).name + " IN CHANNEL " + playCh.name)
 
 
 """
@@ -2506,9 +2533,12 @@ async def cmd_notify(message, args):
     if args == "":
         await message.channel.send(":x: Please name what you would like to be notified for! E.g `" + bbConfig.commandPrefix + "notify bounties`")
         return
+
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
+    requestedBBGuild = guildsDB.getGuild(message.guild.id)
+
     argsSplit = args.split(" ")
     if argsSplit[0] in ["bounty", "bounties"]:
-        requestedBBGuild = guildsDB.getGuild(message.guild.id)
         if requestedBBGuild.hasBountyNotifyRoleId():
             notifyRole = discord.utils.get(
                 message.guild.roles, id=requestedBBGuild.getBountyNotifyRoleId())
@@ -2525,10 +2555,89 @@ async def cmd_notify(message, args):
                 await message.channel.send(":woozy_face: Something went wrong! Please contact an admin or try again later.")
         else:
             await message.channel.send(":x: This server does not have a role for new bounty notifications. :robot:")
+    
+    elif argsSplit[0] in ["duel", "duels", "fight", "fights"]:
+        if len(argsSplit) < 2:
+            await message.channel.send(":x: Please provide the type of duel notification you would like to toggle. E.g: `" + bbConfig.commandPrefix + "notify duels new`")
+            return
+        if argsSplit[1] in ["new","challenge","me","incoming"]:
+            alertID = "duels_challenge_incoming_new"
+        elif argsSplit[1] in ["cancel","cancelled","expire","expired","end","ended"]:
+            alertID = "duels_challenge_incoming_cancel"
+        else:
+            await message.channel.send(":x: Unknown duel notification type! Valid types include `new` or `cancel`.")
+            return
+
+        alertType = UserAlerts.userAlertsIDsTypes[alertID]
+        alertNewState = requestedBBUser.toggleAlertType(alertType)
+        await message.channel.send(":white_check_mark: You have " + ("subscribed to" if alertNewState else "unsubscribed from") + " " + UserAlerts.userAlertsTypesNames[alertType] + " notifications.")
+
+    elif argsSplit[0] in ["shop", "shops"]:
+        if len(argsSplit) < 2:
+            await message.channel.send(":x: Please provide the type of shop notification you would like to toggle. E.g: `" + bbConfig.commandPrefix + "notify shop refresh`")
+            return
+        if argsSplit[1] in ["refresh", "new", "reset", "stock"]:
+            if requestedBBGuild.hasShopRefreshRoleId():
+                notifyRole = discord.utils.get(
+                    message.guild.roles, id=requestedBBGuild.getShopRefreshRoleId())
+                try:
+                    if notifyRole in message.author.roles:
+                        await message.author.remove_roles(notifyRole, reason="User has unsubscribed from shop refresh notifications.")
+                        await message.channel.send(":white_check_mark: You have unsubscribed from shop refresh notifications!")
+                    else:
+                        await message.author.add_roles(notifyRole, reason="User has subscribed to shop refresh notifications.")
+                        await message.channel.send(":white_check_mark: You have subscribed to shop refresh notifications!")
+                except discord.Forbidden:
+                    await message.channel.send(":woozy_face: I don't have permission to do that! Please ensure the requested role is beneath the BountyBot role.")
+                except discord.HTTPException:
+                    await message.channel.send(":woozy_face: Something went wrong! Please contact an admin or try again later.")
+            else:
+                await message.channel.send(":x: This server does not have a role for shop refresh notifications. :robot:")
+            return
+        else:
+            await message.channel.send(":x: Unknown shop notification type! Valid types include `refresh`.")
+            return
+
+        alertType = UserAlerts.userAlertsIDsTypes[alertID]
+        alertNewState = requestedBBUser.toggleAlertType(alertType)
+        await message.channel.send(":white_check_mark: You have " + ("subscribed to" if alertNewState else "unsubscribed from") + " " + UserAlerts.userAlertsTypesNames[alertType] + " notifications.")
+    
+    elif argsSplit[0] in ["bot", "system", "sys"]:
+        if len(argsSplit) < 2:
+            await message.channel.send(":x: Please provide the type of system notification you would like to toggle. E.g: `" + bbConfig.commandPrefix + "notify bot updates all`")
+            return
+        if argsSplit[1] in ["update","updates","patch","patches","version","versions"]:
+            if len(argsSplit) < 3 or argsSplit[2] in ["all","both", "every"]:
+                alertID = "system_updates_all"
+            elif argsSplit[1] in ["major","big","large"]:
+                alertID = "system_updates_major"
+            elif argsSplit[1] in ["minor","small","bug","fix"]:
+                alertID = "system_updates_minor"
+            else:
+                await message.channel.send(":x: Unknown system updates notification type! Valid types include `major`, `minor`, and `all`.")
+                return
+        elif argsSplit[1] in ["misc","misc.","announce","announcement","announcements","announces","miscellaneous"]:
+            alertID = "system_misc"
+        else:
+            await message.channel.send(":x: Unknown system notification type! Valid types include `updates` and `misc`.")
+            return
+
+        if alertType == "system_updates_all":
+            if requestedBBUser.isAlertedForID("system_updates_major") != requestedBBUser.isAlertedForID("system_updates_minor"):
+                alertState = requestedBBUser.setAlertID("system_updates_minor", requestedBBUser.isAlertedForID("system_updates_major"))
+            else:
+                alertState = requestedBBUser.toggleAlertID("system_updates_major")
+                requestedBBUser.toggleAlertID("system_updates_minor")
+            await message.channel.send(":white_check_mark: You have " + ("subscribed to" if alertNewState else "unsubscribed from") + " all bot update notifications.")
+        else:
+            alertType = UserAlerts.userAlertsIDsTypes[alertID]
+            alertNewState = requestedBBUser.toggleAlertType(alertType)
+            await message.channel.send(":white_check_mark: You have " + ("subscribed to" if alertNewState else "unsubscribed from") + " " + UserAlerts.userAlertsTypesNames[alertType] + " notifications.")
+    
     elif argsSplit[0] in bbConfig.validItemNames and argsSplit[0] != "all":
         await message.channel.send("Item notifications have not been implemented yet! \:(")
     else:
-        await message.channel.send(":x: Unknown notification type - only `bounties` is currently supported!")
+        await message.channel.send(":x: Unknown notification type! Please refer to `" + bbConfig.commandPrefix + "help notify`")
 
 bbCommands.register("notify", cmd_notify)
 dmCommands.register("notify", err_nodm)
@@ -2656,6 +2765,8 @@ async def cmd_duel(message, args):
         expiryTimesSplit = duelTT.expiryTime.strftime("%d %B %H %M").split(" ")
         duelExpiryTimeString = "This duel request will expire on the **" + expiryTimesSplit[0].lstrip('0') + getNumExtension(int(
             expiryTimesSplit[0])) + "** of **" + expiryTimesSplit[1] + "**, at **" + expiryTimesSplit[2] + ":" + expiryTimesSplit[3] + "** CST."
+        
+        targetUserNameOrTag = requestedUser.mention if targetBBUser.isAlertedForID("duels_challenge_incoming_new") else ("**" + requestedUser.name + "#" + str(requestedUser.discriminator) + "**")
 
         if message.guild.get_member(requestedUser.id) is None:
             targetUserDCGuild = findBBUserDCGuild(targetBBUser)
@@ -2668,7 +2779,7 @@ async def cmd_duel(message, args):
                     await client.get_channel(targetUserBBGuild.getPlayChannelId()).send(":crossed_swords: **" + str(message.author) + "** challenged " + requestedUser.mention + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
             await message.channel.send(":crossed_swords: " + message.author.mention + " challenged **" + str(requestedUser) + "** to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
         else:
-            await message.channel.send(":crossed_swords: " + message.author.mention + " challenged " + requestedUser.mention + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
+            await message.channel.send(":crossed_swords: " + message.author.mention + " challenged " + targetUserNameOrTag + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
 
     elif action == "cancel":
         if not sourceBBUser.hasDuelChallengeFor(targetBBUser):
@@ -2724,7 +2835,7 @@ async def cmd_duel(message, args):
         else:
             winningBBUser = None
             losingBBUser = None
-
+        
         # battleMsg =
 
         # winningBBUser = sourceBBUser if winningShip is sourceBBUser.activeShip else (targetBBUser if winningShip is targetBBUser.activeShip else None)
@@ -2894,6 +3005,102 @@ async def admin_cmd_set_bounty_notify_role(message, args):
 bbCommands.register("set-bounty-notify-role",
                     admin_cmd_set_bounty_notify_role, isAdmin=True)
 dmCommands.register("set-bounty-notify-role", err_nodm)
+
+
+"""
+For the current guild, set a role to mention when the shop is refreshed.
+can take either a role mention or ID.
+
+@param message -- the discord message calling the command
+@param args -- either a role mention or a role ID
+"""
+async def admin_cmd_set_shoprefresh_notify_role(message, args):
+    if args == "":
+        await message.channel.send(":x: Please provide either a role mention or ID!")
+        return
+    if not (bbUtil.isInt(args) or bbUtil.isRoleMention(args)):
+        await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
+        return
+
+    if bbUtil.isRoleMention(args):
+        requestedRole = message.guild.get_role(int(args[3:-1]))
+    else:
+        requestedRole = message.guild.get_role(int(args))
+
+    if requestedRole is None:
+        await message.channel.send(":x: Role not found!")
+        return
+
+    guildsDB.getGuild(message.guild.id).setShopRefreshRoleId(requestedRole.id)
+    await message.channel.send(":white_check_mark: Shop refresh notify role set!")
+
+bbCommands.register("set-shoprefresh-notify-role",
+                    admin_cmd_set_shoprefresh_notify_role, isAdmin=True)
+dmCommands.register("set-shoprefresh-notify-role", err_nodm)
+
+
+"""
+For the current guild, set a role to mention when major bot updates are released.
+can take either a role mention or ID.
+
+@param message -- the discord message calling the command
+@param args -- either a role mention or a role ID
+"""
+async def admin_cmd_set_majorupdates_notify_role(message, args):
+    if args == "":
+        await message.channel.send(":x: Please provide either a role mention or ID!")
+        return
+    if not (bbUtil.isInt(args) or bbUtil.isRoleMention(args)):
+        await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
+        return
+
+    if bbUtil.isRoleMention(args):
+        requestedRole = message.guild.get_role(int(args[3:-1]))
+    else:
+        requestedRole = message.guild.get_role(int(args))
+
+    if requestedRole is None:
+        await message.channel.send(":x: Role not found!")
+        return
+
+    guildsDB.getGuild(message.guild.id).setSystemUpdatesMajorRoleId(requestedRole.id)
+    await message.channel.send(":white_check_mark: Major system updates role set!")
+
+bbCommands.register("set-majorupdates-notify-role",
+                    admin_cmd_set_majorupdates_notify_role, isAdmin=True)
+dmCommands.register("set-majorupdates-notify-role", err_nodm)
+
+
+"""
+For the current guild, set a role to mention when minor system updates are released.
+can take either a role mention or ID.
+
+@param message -- the discord message calling the command
+@param args -- either a role mention or a role ID
+"""
+async def admin_cmd_set_minorupdates_notify_role(message, args):
+    if args == "":
+        await message.channel.send(":x: Please provide either a role mention or ID!")
+        return
+    if not (bbUtil.isInt(args) or bbUtil.isRoleMention(args)):
+        await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
+        return
+
+    if bbUtil.isRoleMention(args):
+        requestedRole = message.guild.get_role(int(args[3:-1]))
+    else:
+        requestedRole = message.guild.get_role(int(args))
+
+    if requestedRole is None:
+        await message.channel.send(":x: Role not found!")
+        return
+
+    guildsDB.getGuild(message.guild.id).setSystemUpdatesMinorRoleId(requestedRole.id)
+    await message.channel.send(":white_check_mark: Minor system updates role set!")
+
+bbCommands.register("set-minorupdates-notify-role",
+                    admin_cmd_set_minorupdates_notify_role, isAdmin=True)
+dmCommands.register("set-minorupdates-notify-role", err_nodm)
 
 
 """
@@ -3703,8 +3910,9 @@ async def dev_cmd_refreshshop(message, args):
         level = int(args)
     guild = guildsDB.getGuild(message.guild.id)
     guild.shop.refreshStock(level=level)
-    if guild.hasPlayChannel():
-        await client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
+    await announceNewShopStock(guild.id)
+    # if guild.hasPlayChannel():
+    #     await client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
 
 bbCommands.register("refreshshop", dev_cmd_refreshshop, isDev=True)
 dmCommands.register("refreshshop", err_nodm, isDev=True)
