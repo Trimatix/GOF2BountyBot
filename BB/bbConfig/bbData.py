@@ -104,6 +104,10 @@ adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display in
                                         "set-announce-channel": ("**set-announce-channel** *[off]*", "Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements."),
                                         "set-play-channel": ("**set-play-channel** *[off]*", "Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements."),
                                         "set-bounty-notify-role": ("**set-bounty-notify-role <role>**", "Set a role to ping when new bounties are created. **<role>** can be either a role mention, or a role ID."),
+                                        "set-shoprefresh-notify-role": ("**set-shoprefresh-notify-role <role>**", "Set a role to ping when the shop stock is refreshed. **<role>** can be either a role mention, or a role ID."),
+                                        "set-minorupdates-notify-role": ("**set-minorupdates-notify-role <role>**", "Set a role to minor bot updates are released. **<role>** can be either a role mention, or a role ID."),
+                                        "set-majorupdates-notify-role": ("**set-majorupdates-notify-role <role>**", "Set a role to ping when major bot updates are released. **<role>** can be either a role mention, or a role ID."),
+                                        "set-announcements-notify-role": ("**set-announcements-notify-role <role>**", "Set a role to ping when miscellaneous BountyBot announcements are broadcasted. **<role>** can be either a role mention, or a role ID."),
                                         "remove-bounty-notify-role": ("**remove-bounty-notify-role**", "Stop pinging the bounty notify role when new bounties are created.")}}
 
 # string extensions for numbers, e.g 11th, 1st, 23rd...
