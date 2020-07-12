@@ -1,7 +1,8 @@
 from . import bbShop
+from .bounties.bountyBoards import BountyBoardChannel
 
 class bbGuild:
-    def __init__(self, id, announceChannel=-1, playChannel=-1, shop=None, bountyNotifyRoleId=-1, shopRefreshRoleId=-1, systemUpdatesMajorRoleId=-1, systemUpdatesMinorRoleId=-1, systemMiscRoleId=-1, bountyBoardChannel=-1):
+    def __init__(self, id, announceChannel=-1, playChannel=-1, shop=None, bountyNotifyRoleId=-1, shopRefreshRoleId=-1, systemUpdatesMajorRoleId=-1, systemUpdatesMinorRoleId=-1, systemMiscRoleId=-1, bountyBoardChannel=None):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -32,12 +33,8 @@ class bbGuild:
         self.systemUpdatesMinorRoleId = systemUpdatesMinorRoleId
         self.systemMiscRoleId = systemMiscRoleId
         
-        if bountyBoardChannel == -1:
-            self.hasBountyBoardChannel = False
-            self.bountyBoardChannel = -1
-        else:
-            self.bountyBoardChannel = bountyBoardChannel
-            self.hasBountyBoardChannel = True
+        self.bountyBoardChannel = bountyBoardChannel
+        self.hasBountyBoardChannel = bountyBoardChannel is not None
 
 
     def getAnnounceChannelId(self):
@@ -155,17 +152,18 @@ class bbGuild:
 
 
     
-    def addBountyBoardChannel(self, msgID):
-        if self.hasBountyBoard:
+    async def addBountyBoardChannel(self, channel, client, factions):
+        if self.hasBountyBoardChannel:
             raise RuntimeError("Attempted to assign a bountyboard channel for guild " + str(self.id) + " but one is already assigned")
-        self.bountyBoardChannel = msgID
+        self.bountyBoardChannel = BountyBoardChannel.BountyBoardChannel(channel.id, {})
+        await self.bountyBoardChannel.init(client, factions)
         self.hasBountyBoardChannel = True
 
     
     def removeBountyBoardChannel(self):
-        if not self.hasBountyBoard:
+        if not self.hasBountyBoardChannel:
             raise RuntimeError("Attempted to remove a bountyboard channel for guild " + str(self.id) + " but none is assigned")
-        self.bountyBoardChannel = -1
+        self.bountyBoardChannel = None
         self.hasBountyBoardChannel = False
 
 
@@ -174,14 +172,18 @@ class bbGuild:
                 "shopRefreshRoleId": self.shopRefreshRoleId,
                 "systemUpdatesMajorRoleId": self.systemUpdatesMajorRoleId,
                 "systemUpdatesMinorRoleId": self.systemUpdatesMinorRoleId,
-                "systemMiscRoleId": self.systemMiscRoleId
+                "systemMiscRoleId": self.systemMiscRoleId,
+                "bountyBoardChannel": self.bountyBoardChannel.toDict() if self.hasBountyBoardChannel else None
         # Shop saving disabled for now, it's not super important.
                 # , "shop": self.shop.toDict()
                 }
 
 
 def fromDict(id, guildDict):
-    return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"], shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(), bountyNotifyRoleId=guildDict["bountyNotifyRoleId"] if "bountyNotifyRoleId" in guildDict else -1, bountyBoardChannel=guildDict["bountyBoardChannel"] if "bountyBoardChannel" in guildDict else -1,
+    return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
+                    shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
+                    bountyNotifyRoleId=guildDict["bountyNotifyRoleId"] if "bountyNotifyRoleId" in guildDict else -1,
+                    bountyBoardChannel=BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict else None,
                     shopRefreshRoleId=guildDict["shopRefreshRoleId"] if "shopRefreshRoleId" in guildDict else -1,
                     systemUpdatesMajorRoleId=guildDict["systemUpdatesMajorRoleId"] if "systemUpdatesMajorRoleId" in guildDict else -1,
                     systemUpdatesMinorRoleId=guildDict["systemUpdatesMinorRoleId"] if "systemUpdatesMinorRoleId" in guildDict else -1,

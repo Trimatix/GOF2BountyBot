@@ -26,6 +26,9 @@ from . import bbUtil, ActiveTimedTasks
 from .userAlerts import UserAlerts
 
 
+
+
+
 ####### DATABASE METHODS #######
 
 
@@ -76,8 +79,8 @@ client = commands.Bot(command_prefix=bbConfig.commandPrefix)
 
 # Databases
 usersDB = loadUsersDB(bbConfig.userDBPath)
-guildsDB = loadGuildsDB(bbConfig.guildDBPath)
 bountiesDB = loadBountiesDB(bbConfig.bountyDBPath)
+guildsDB = loadGuildsDB(bbConfig.guildDBPath)
 
 # BountyBot commands DB
 bbCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB()
@@ -133,6 +136,22 @@ def criminalNameOrDiscrim(criminal):
     return userTagOrDiscrim(criminal.name)
 
 
+async def makeBountyBoardChannelMessage(guild, bounty, msg="", embed=None):
+    if not guild.hasBountyBoardChannel:
+        raise KeyError("The requested bbGuild has no bountyBoardChannel")
+    bountyListing = await guild.bountyBoardChannel.channel.send(msg, embed=embed)
+    guild.bountyBoardChannel.addBounty(bounty, bountyListing)
+    await guild.bountyBoardChannel.updateBountyMessage(bounty)
+
+
+async def removeBountyBoardChannelMessage(guild, bounty):
+    if not guild.hasBountyBoardChannel:
+        raise KeyError("The requested bbGuild has no bountyBoardChannel")
+    if guild.bountyBoardChannel.hasMessageForBounty(bounty):
+        await guild.bountyBoardChannel.getMessageForBounty(bounty).delete()
+        guild.bountyBoardChannel.removeBounty(bounty)
+
+
 """
 Announce the creation of a new bounty across all joined servers
 Messages will be sent to the announceChannels of all guilds in the guildsDB, if they have one
@@ -154,8 +173,18 @@ async def announceNewBounty(newBounty):
 
     # Loop over all guilds in the database
     for currentGuild in guildsDB.getGuilds():
+        if currentGuild.hasBountyBoardChannel:
+            try:
+                if currentGuild.hasBountyNotifyRoleId():
+                    msg = "<@&" + str(currentGuild.getBountyNotifyRoleId()) + "> " + msg
+                # announce to the given channel
+                await makeBountyBoardChannelMessage(currentGuild, newBounty, msg)
+
+            except discord.Forbidden:
+                print("FAILED TO ANNOUNCE BOUNTY TO GUILD " + client.get_guild(
+                    currentGuild.id).name + " IN CHANNEL " + currentGuild.bountyBoardChannel.channel.name)
         # If the guild has an announceChannel
-        if currentGuild.hasAnnounceChannel():
+        elif currentGuild.hasAnnounceChannel():
             # ensure the announceChannel is valid
             currentChannel = client.get_channel(
                 currentGuild.getAnnounceChannelId())
@@ -185,42 +214,57 @@ Messages will be sent to the playChannels of all guilds in the guildsDB, if they
 async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
     # Loop over all guilds in the database that have playChannels
     for currentGuild in guildsDB.getGuilds():
-        if currentGuild.hasPlayChannel():
-            # Create the announcement embed
-            rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!", authorName=criminalNameOrDiscrim(bounty.criminal) + " Arrested",
-                                     icon=bounty.criminal.icon, col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
+        if client.get_guild(currentGuild.id) is not None:
+            if currentGuild.hasPlayChannel():
+                # Create the announcement embed
+                rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!", authorName=criminalNameOrDiscrim(bounty.criminal) + " Arrested",
+                                        icon=bounty.criminal.icon, col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
 
-            # Add the winning user to the embed
-            # If the winning user is not in the current guild, use the user's name and discriminator
-            if client.get_guild(currentGuild.id).get_member(winningUserId) is None:
-                rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUserId]["reward"]) + " credits:", value=str(client.get_user(winningUserId)) + " checked " + str(
-                    int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
-            # If the winning user is in the current guild, use the user's mention
+                # Add the winning user to the embed
+                # If the winning user is not in the current guild, use the user's name and discriminator
+                if client.get_guild(currentGuild.id).get_member(winningUserId) is None:
+                    rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUserId]["reward"]) + " credits:", value=str(client.get_user(winningUserId)) + " checked " + str(
+                        int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
+                # If the winning user is in the current guild, use the user's mention
+                else:
+                    rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUserId]["reward"]) + " credits:", value="<@" + str(winningUserId) + "> checked " + str(
+                        int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
+
+                # The index of the current user in the embed
+                place = 2
+                # Loop over all non-winning users in the rewards dictionary
+                for userID in rewards:
+                    if not rewards[userID]["won"]:
+                        # If the current user is not in the current guild, use the user's name and discriminator
+                        if client.get_guild(currentGuild.id).get_member(userID) is None:
+                            rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value=str(client.get_user(
+                                userID)) + " checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
+                        # Otherwise, use the user's mention
+                        else:
+                            rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value="<@" + str(userID) + "> checked " + str(
+                                int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
+                        place += 1
+
+                # Send the announcement to the current guild's playChannel
+                # If this is the winning guild, send a special message!
+                if currentGuild.id == winningGuildObj.id:
+                    await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuildObj.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+                else:
+                    await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
+
+
+async def updateAllBountyBoardChannels(bounty, bountyComplete=False):
+    newBountyMsg = "A new bounty is now available from **" + \
+        bounty.faction.title() + "** central command:"
+    for guild in guildsDB.getGuilds():
+        if guild.hasBountyBoardChannel:
+            if bountyComplete and guild.bountyBoardChannel.hasMessageForBounty(bounty):
+                await removeBountyBoardChannelMessage(guild, bounty)
             else:
-                rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUserId]["reward"]) + " credits:", value="<@" + str(winningUserId) + "> checked " + str(
-                    int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
-
-            # The index of the current user in the embed
-            place = 2
-            # Loop over all non-winning users in the rewards dictionary
-            for userID in rewards:
-                if not rewards[userID]["won"]:
-                    # If the current user is not in the current guild, use the user's name and discriminator
-                    if client.get_guild(currentGuild.id).get_member(userID) is None:
-                        rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value=str(client.get_user(
-                            userID)) + " checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
-                    # Otherwise, use the user's mention
-                    else:
-                        rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value="<@" + str(userID) + "> checked " + str(
-                            int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
-                    place += 1
-
-            # Send the announcement to the current guild's playChannel
-            # If this is the winning guild, send a special message!
-            if currentGuild.id == winningGuildObj.id:
-                await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuildObj.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
-            else:
-                await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
+                if not guild.bountyBoardChannel.hasMessageForBounty(bounty):
+                    await makeBountyBoardChannelMessage(guild, bounty, newBountyMsg)
+                else:
+                    await guild.bountyBoardChannel.updateBountyMessage(bounty)
 
 
 """
@@ -315,19 +359,6 @@ Return the string extension for an integer, e.g 'th' or 'rd'.
 """
 def getNumExtension(num):
     return bbData.numExtensions[int(str(num)[-1])] if not (num > 10 and num < 20) else "th"
-
-
-"""
-Insert commas into every third position in a string.
-
-@param num -- string to insert commas into. probably just containing digits
-@return outStr -- num, but split with commas at every third digit
-"""
-def commaSplitNum(num):
-    outStr = num
-    for i in range(len(num), 0, -3):
-        outStr = outStr[0:i] + "," + outStr[i:]
-    return outStr[:-1]
 
 
 def getFixedDelay(delayDict):
@@ -771,6 +802,7 @@ async def cmd_check(message, args):
                 
                 if checkResult != 0:
                     systemInBountyRoute = True
+                    await updateAllBountyBoardChannels(bounty, bountyComplete=checkResult == 3)
 
             # remove all completed bounties
             for bounty in toPop:
@@ -796,14 +828,20 @@ async def cmd_check(message, args):
             if sightedCriminalsStr != "":
                 for currentGuild in guildsDB.getGuilds():
                     if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
-                        await client.get_channel(currentGuild.getPlayChannelId()).send(sightedCriminalsStr)
+                        currentCh = client.get_channel(currentGuild.getPlayChannelId())
+                        if currentCh is not None:
+                            await currentCh.send(sightedCriminalsStr)
         # If no bounty was won, print an error message
         else:
             await message.channel.send(":telescope: **" + message.author.name + "**, you did not find any criminals in **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
             for currentGuild in guildsDB.getGuilds():
                 if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
-                    await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
+                    currentCh = client.get_channel(currentGuild.getPlayChannelId())
+                    if currentCh is not None:
+                        await currentCh.send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
+                    else:
+                        print("Failed global check announcement in guild",currentGuild.id)
 
         # Only put the calling user on checking cooldown and increment systemsChecked stat if the system checked is on an active bounty's route.
         if systemInBountyRoute:
@@ -1129,7 +1167,7 @@ async def cmd_ship(message, args):
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
                                desc="__Ship File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
-        statsEmbed.add_field(name="Value:", value=commaSplitNum(
+        statsEmbed.add_field(name="Value:", value=bbUtil.commaSplitNum(
                                                             str(itemObj.getValue(shipUpgradesOnly=True))) + " Credits")
         statsEmbed.add_field(name="Armour:", value=str(itemObj.getArmour()))
         statsEmbed.add_field(name="Cargo:", value=str(itemObj.getCargo()))
@@ -1766,7 +1804,7 @@ async def cmd_shop(message, args):
 
             currentItemCount = requestedShop.shipsStock.items[currentItem].count
             shopEmbed.add_field(name=str(shipNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.getNameAndNick() + "**",
-                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.getValue())) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + bbUtil.commaSplitNum(str(currentItem.getValue())) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "weapon"]:
         for weaponNum in range(1, requestedShop.weaponsStock.numKeys + 1):
@@ -1800,7 +1838,7 @@ async def cmd_shop(message, args):
 
             currentItemCount = requestedShop.weaponsStock.items[currentItem].count
             shopEmbed.add_field(name=str(weaponNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "module"]:
         for moduleNum in range(1, requestedShop.modulesStock.numKeys + 1):
@@ -1834,7 +1872,7 @@ async def cmd_shop(message, args):
 
             currentItemCount = requestedShop.modulesStock.items[currentItem].count
             shopEmbed.add_field(name=str(moduleNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "turret"]:
         for turretNum in range(1, requestedShop.turretsStock.numKeys + 1):
@@ -1868,7 +1906,7 @@ async def cmd_shop(message, args):
             
             currentItemCount = requestedShop.turretsStock.items[currentItem].count
             shopEmbed.add_field(name=str(turretNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     try:
         await sendChannel.send(embed=shopEmbed)
@@ -2922,6 +2960,44 @@ dmCommands.register("set-announce-channel", err_nodm, isAdmin=True)
 
 
 """
+admin command for setting the current guild's bounty board channel
+
+@param message -- the discord message calling the command
+@param args -- ignored
+"""
+async def admin_cmd_set_bounty_board_channel(message, args):
+    guild = guildsDB.getGuild(message.guild.id)
+    if guild.hasBountyBoardChannel:
+        await message.channel.send(":x: This server already has a bounty board channel! Use `" + bbConfig.commandPrefix + "remove-bounty-board-channel` to remove it.")
+        return
+    await guild.addBountyBoardChannel(message.channel, client, bbData.bountyFactions)
+    await message.channel.send(":ballot_box_with_check: Bounty board channel set!")
+
+bbCommands.register("set-bounty-board-channel",
+                    admin_cmd_set_bounty_board_channel, isAdmin=True)
+dmCommands.register("set-bounty-board-channel", err_nodm, isAdmin=True)
+
+
+"""
+admin command for removing the current guild's bounty board channel
+
+@param message -- the discord message calling the command
+@param args -- ignored
+"""
+async def admin_cmd_remove_bounty_board_channel(message, args):
+    guild = guildsDB.getGuild(message.guild.id)
+    if guild.hasBountyBoardChannel:
+        guild.removeBountyBoardChannel()
+        await message.channel.send(":ballot_box_with_check: Bounty board channel removed!")
+    else:
+        await message.channel.send(":x: This is not a bounty board channel!")
+
+bbCommands.register("remove-bounty-board-channel",
+                    admin_cmd_remove_bounty_board_channel, isAdmin=True)
+dmCommands.register("remove-bounty-board-channel", err_nodm, isAdmin=True)
+
+
+"""
 admin command for setting the current guild's play channel
 
 @param message -- the discord message calling the command
@@ -3256,6 +3332,11 @@ developer command clearing all active bounties
 @param args -- ignored
 """
 async def dev_cmd_clear_bounties(message, args):
+    for guild in guildsDB.getGuilds():
+        if guild.hasBountyBoardChannel:
+            for fac in bountiesDB.bounties:
+                for bounty in bountiesDB.bounties[fac]:
+                    await removeBountyBoardChannelMessage(guild, bounty)
     bountiesDB.clearBounties()
     await message.channel.send(":ballot_box_with_check: Active bounties cleared!")
 
@@ -4031,9 +4112,13 @@ TODO: Implement dynamic timedtask checking period
 """
 @client.event
 async def on_ready():
+    for guild in guildsDB.getGuilds():
+        if guild.hasBountyBoardChannel:
+            await guild.bountyBoardChannel.init(client, bbData.bountyFactions)
+
     print("shop stocks are shared." if guildsDB.getGuild(699744305274945650).shop.shipsStock is guildsDB.getGuild(711548456019296289).shop.shipsStock else "shop stocks are not shared.")
-    for currentUser in usersDB.users.values():
-        currentUser.validateLoadout()
+    # for currentUser in usersDB.users.values():
+    #     currentUser.validateLoadout()
 
     print('We have logged in as {0.user}'.format(client))
     await client.change_presence(activity=discord.Game("Galaxy on Fire 2™ Full HD"))
