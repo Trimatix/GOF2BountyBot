@@ -192,7 +192,7 @@ newBountyDelayMax = 1 * 60 * 60
 bPointsToCreditsRatio = 1000
 
 # The percentage of a criminal's ship value to award to the winner
-shipValueRewardPercentage = 0.1
+shipValueRewardPercentage = 0.05
 
 # time to put users on cooldown between using !bb check
 checkCooldown = {"minutes":3}
