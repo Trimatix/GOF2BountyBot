@@ -15,7 +15,7 @@ import operator
 
 # may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .bbObjects import bbUser
+from .bbObjects import bbUser, bbInventory
 from .bbObjects.bounties import bbBounty, bbBountyConfig
 from .bbObjects.items import bbShip
 from .bbObjects.battles import ShipFight, DuelRequest
@@ -24,6 +24,7 @@ from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from .scheduling import TimedTaskHeap
 from . import bbUtil, ActiveTimedTasks
 from .userAlerts import UserAlerts
+from .reactionMenus import ReactionInventoryPicker
 
 
 ####### DATABASE METHODS #######
@@ -4100,6 +4101,15 @@ async def on_message(message):
     # ignore messages sent by BountyBot and DMs
     if message.author == client.user:
         return
+
+    if message.content == "!trade <@!212542588643835905>":
+        inv = bbInventory.bbInventory()
+        inv.addItem(bbData.builtInModuleObjs["E2 Exoclad"])
+        inv.addItem(bbData.builtInModuleObjs["Medium Cabin"])
+        menuMsg = await message.channel.send("‎")
+        menu = ReactionInventoryPicker.ReactionInventoryPicker(menuMsg, inv, 5, titleTxt="**Niker107's Hangar**", footerTxt="React for your desired item", thumb="https://cdn.discordapp.com/avatars/212542588643835905/a20a7a46f7e3e4889363b14f485a3075.png?size=128")
+        await menu.updateMessage()
+        ActiveTimedTasks.reactionMenus[menuMsg.id] = menu
 
     # if not guildsDB.guildIdExists(message.guild.id):
     #     guildsDB.addGuildID(message.guild.id)
