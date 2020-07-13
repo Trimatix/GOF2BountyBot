@@ -1,5 +1,5 @@
 from . import bbBountyConfig
-from ...bbConfig import bbData
+from ...bbConfig import bbData, bbConfig
 from . import bbCriminal
 
 class Bounty:
@@ -77,7 +77,8 @@ class Bounty:
             if self.systemChecked(system):
                 rewards[self.checked[system]]["checked"] += 1
                 if self.checked[system] != winningUserID:
-                    currentReward = int(self.reward / len(self.route))
+                    # currentReward = int(self.reward / len(self.route))
+                    currentReward = bbConfig.bPointsToCreditsRatio
                     rewards[self.checked[system]]["reward"] += currentReward
                     creditsPool -= currentReward
 
