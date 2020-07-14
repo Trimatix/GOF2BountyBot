@@ -69,7 +69,7 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently six pages, and six sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Loadout`, `Shopping` and `Credits`."),
                             "stats": ("**stats** *[userTag]*", "Get various credits and bounty statistics about yourself, or a tagged user."),
                             "leaderboard": ("**leaderboard** *[-g|-c|-s|-w]*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
-                            "notify": ("**notify <type>** *[alert]*", "Subscribe to pings when events take place. Currently, **type** can be `bounties`, `shop`, or `duels`.\n> `shop` requires the `refresh` option.\n> `duels` requires the `new` option.")},
+                            "notify": ("**notify <type>** *[alert]*", "Subscribe to pings when events take place. Currently, **type** can be `bounties`, `shop`, `duels`, or `bot`.\n> `shop` requires the `refresh` option.\n> `duels` requires either `new` or `cancel`.\n> `bot` can take `updates` or `announcements`.\n> `bot updates` must be `major` or `minor`.")},
             
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
                             "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
@@ -103,12 +103,8 @@ adminHelpIntro = """:star: Here are my administrator commands! Prefix commands w
 adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display information about admin-only commands."),
                                         "set-announce-channel": ("**set-announce-channel** *[off]*", "Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements."),
                                         "set-play-channel": ("**set-play-channel** *[off]*", "Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements."),
-                                        "set-bounty-notify-role": ("**set-bounty-notify-role <role>**", "Set a role to ping when new bounties are created. **<role>** can be either a role mention, or a role ID."),
-                                        "set-shoprefresh-notify-role": ("**set-shoprefresh-notify-role <role>**", "Set a role to ping when the shop stock is refreshed. **<role>** can be either a role mention, or a role ID."),
-                                        "set-minorupdates-notify-role": ("**set-minorupdates-notify-role <role>**", "Set a role to minor bot updates are released. **<role>** can be either a role mention, or a role ID."),
-                                        "set-majorupdates-notify-role": ("**set-majorupdates-notify-role <role>**", "Set a role to ping when major bot updates are released. **<role>** can be either a role mention, or a role ID."),
-                                        "set-announcements-notify-role": ("**set-announcements-notify-role <role>**", "Set a role to ping when miscellaneous BountyBot announcements are broadcasted. **<role>** can be either a role mention, or a role ID."),
-                                        "remove-bounty-notify-role": ("**remove-bounty-notify-role**", "Stop pinging the bounty notify role when new bounties are created.")}}
+                                        "set-notify-role": ("**set-notify-role <type>** *[alert]* **<role>**", "Set a role to ping when various events occur. **<type>** and/or *[alert]]* must specify a type of notification. **<role>** can be either a role mention, or a role ID. For valid notification types, see `$COMMANDPREFIX$help notify`."),
+                                        "remove-notify-role": ("**remove-notify-role**", "Stop pinging the bounty notify role when new bounties are created.")}}
 
 # string extensions for numbers, e.g 11th, 1st, 23rd...
 numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
