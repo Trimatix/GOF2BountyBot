@@ -4038,10 +4038,9 @@ async def on_message(message):
                 args = msgContent[len(
                     bbConfig.commandPrefix) + len(command) + 1:]
 
-            # if no command is given, call help with no arguments
+            # if no command is given, ignore the message
             else:
-                args = ""
-                command = "help"
+                return
 
             # Debug: Print the recognised command args strings
             # print("COMMAND '" + command + "'")
