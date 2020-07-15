@@ -113,11 +113,17 @@ class bbGuild:
 def fromDict(id, guildDict):
     # old format conversion code
     if "bountyNotifyRoleId" in guildDict:
-        return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"], shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(), bountyNotifyRoleId=guildDict["bountyNotifyRoleId"] if "bountyNotifyRoleId" in guildDict else -1, bountyBoardChannel=guildDict["bountyBoardChannel"] if "bountyBoardChannel" in guildDict else -1,
-                        shopRefreshRoleId=guildDict["shopRefreshRoleId"] if "shopRefreshRoleId" in guildDict else -1,
-                        systemUpdatesMajorRoleId=guildDict["systemUpdatesMajorRoleId"] if "systemUpdatesMajorRoleId" in guildDict else -1,
-                        systemUpdatesMinorRoleId=guildDict["systemUpdatesMinorRoleId"] if "systemUpdatesMinorRoleId" in guildDict else -1,
-                        systemMiscRoleId=guildDict["systemMiscRoleId"] if "systemMiscRoleId" in guildDict else -1)
+        alertRoles = {"bounties_new": guildDict["bountyNotifyRoleId"]}
+        if "shopRefreshRoleId" in guildDict:
+            alertRoles["shop_refresh"] = guildDict["shopRefreshRoleId"]
+        if "systemUpdatesMajorRoleId" in guildDict:
+            alertRoles["system_updates_major"] = guildDict["systemUpdatesMajorRoleId"]
+        if "systemUpdatesMinorRoleId" in guildDict:
+            alertRoles["system_updates_minor"] = guildDict["systemUpdatesMinorRoleId"]
+        if "systemMiscRoleId" in guildDict:
+            alertRoles["system_misc"] = guildDict["systemMiscRoleId"]
+        return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"], shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(), bountyBoardChannel=guildDict["bountyBoardChannel"] if "bountyBoardChannel" in guildDict else -1,
+                        alertRoles=alertRoles)
     else:
         # new format code
         return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
