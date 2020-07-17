@@ -489,10 +489,10 @@ def getAlertIDFromHeirarchicalAliases(alertName):
     
     elif alertName[0] in ["bot", "system", "sys"]:
         if len(alertName) < 2:
-            return ["ERR", ":x: Please provide the type of system notification you would like. E.g: `bot updates all`"]
+            return ["ERR", ":x: Please provide the type of system notification you would like. E.g: `bot updates major`"]
         if alertName[1] in ["update","updates","patch","patches","version","versions"]:
-            if len(alertName) < 3 or alertName[2] in ["all","both", "every"]:
-                return ["system_updates_all"]
+            if len(alertName) < 3:
+                return ["ERR", ":x: Please provide the type of updates pings you would like! Valid types include `major` and `minor`."]
             elif alertName[2] in ["major","big","large"]:
                 return ["system_updates_major"]
             elif alertName[2] in ["minor","small","bug","fix"]:
