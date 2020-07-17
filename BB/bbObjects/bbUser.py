@@ -57,7 +57,7 @@ class bbUser:
         self.inactiveTurrets = inactiveTurrets
 
         self.lastSeenGuildId = lastSeenGuildId
-        self.haslastSeenGuildId = lastSeenGuildId != -1
+        self.hasLastSeenGuildId = lastSeenGuildId != -1
 
         self.duelRequests = {}
         self.duelWins = duelWins
@@ -206,6 +206,11 @@ class bbUser:
         for turret in self.inactiveTurrets.keys:
             inactiveTurretsDict.append(self.inactiveTurrets.items[turret].toDict())
 
+        alerts = {}
+        for alertID in self.userAlerts.keys():
+            if isinstance(self.userAlerts[alertID], UserAlerts.StateUserAlert):
+                alerts[alertID] = self.userAlerts[alertID].state
+
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
@@ -290,30 +295,29 @@ class bbUser:
         self.removeDuelChallengeObj(self.duelRequests[duelTarget])
 
 
-    def setAlertType(self, alertType, newState):
-        self.userAlerts[alertType].state = newState
+    async def setAlertByType(self, alertType, dcGuild, bbGuild, dcMember, newState):
+        await self.userAlerts[alertType].setState(dcGuild, bbGuild, dcMember, newState)
         return newState
 
 
-    def setAlertID(self, alertID, newState):
-        return self.setAlertType(UserAlerts.userAlertsIDsTypes[alertID], newState)
+    async def setAlertByID(self, alertID, dcGuild, bbGuild, dcMember, newState):
+        return await self.setAlertType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember, newState)
 
 
-    def toggleAlertType(self, alertType):
-        self.userAlerts[alertType].state = not self.userAlerts[alertType].state
-        return self.userAlerts[alertType].state
-
-    
-    def toggleAlertID(self, alertID):
-        return self.toggleAlertType(UserAlerts.userAlertsIDsTypes[alertID])
-
-
-    def isAlertedForType(self, alertType):
-        return self.userAlerts[alertType].state
+    async def toggleAlertType(self, alertType, dcGuild, bbGuild, dcMember):
+        return await self.userAlerts[alertType].toggle(dcGuild, bbGuild, dcMember)
 
     
-    def isAlertedForID(self, alertID):
-        return self.isAlertedForType(UserAlerts.userAlertsIDsTypes[alertID])
+    async def toggleAlertID(self, alertID, dcGuild, bbGuild, dcMember):
+        return await self.toggleAlertType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
+
+
+    def isAlertedForType(self, alertType, dcGuild, bbGuild, dcMember):
+        return self.userAlerts[alertType].getState(dcGuild, bbGuild, dcMember)
+
+    
+    def isAlertedForID(self, alertID, dcGuild, bbGuild, dcMember):
+        return self.isAlertedForType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
 
 
     def __str__(self):
@@ -348,7 +352,7 @@ def fromDict(id, userDict):
         for alertID in UserAlerts.userAlertsIDsTypes:
             alertType = UserAlerts.userAlertsIDsTypes[alertID]
             if alertID in userDict["alerts"]:
-                userAlerts[alertType] = alertType(UserAlerts[alertID]["state"])
+                userAlerts[alertType] = alertType(userDict[alertID])
             else:
                 userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
     else:

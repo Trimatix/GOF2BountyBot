@@ -113,11 +113,14 @@ Otherwise, return the passed userID.
 @param userID -- ID to attempt to convert to name and discrim
 @return -- The user's name and discriminator if the user is reachable, userID otherwise
 """
-def userTagOrDiscrim(userID):
-    userObj = client.get_user(int(userID.lstrip("<@!").rstrip(">")))
+def userTagOrDiscrim(userID, guild=None):
+    if guild is None:
+        userObj = client.get_user(int(userID.lstrip("<@!").rstrip(">")))
+    else:
+        userObj = guild.get_member(int(userID.lstrip("<@!").rstrip(">")))
     if userObj is not None:
         return userObj.name + "#" + userObj.discriminator
-    # Return criminal name as a fall back - might replace this with '#UNKNOWNUSER#' at some point.
+    # Return the given mention as a fall back - might replace this with '#UNKNOWNUSER#' at some point.
     print("USERIDNAMEORDISCRIM UNKNOWN USER")
     return userID
 
@@ -175,8 +178,8 @@ async def announceNewBounty(newBounty):
     for currentGuild in guildsDB.getGuilds():
         if currentGuild.hasBountyBoardChannel:
             try:
-                if currentGuild.hasBountyNotifyRoleId():
-                    msg = "<@&" + str(currentGuild.getBountyNotifyRoleId()) + "> " + msg
+                if currentGuild.hasUserAlertRoleID("bounties_new"):
+                    msg = "<@&" + str(currentGuild.getUserAlertRoleID("bounties_new")) + "> " + msg
                 # announce to the given channel
                 await makeBountyBoardChannelMessage(currentGuild, newBounty, msg)
 
@@ -190,9 +193,9 @@ async def announceNewBounty(newBounty):
                 currentGuild.getAnnounceChannelId())
             if currentChannel is not None:
                 try:
-                    if currentGuild.hasBountyNotifyRoleId():
+                    if currentGuild.hasUserAlertRoleID("bounties_new"):
                         # announce to the given channel
-                        await currentChannel.send("<@&" + str(currentGuild.getBountyNotifyRoleId()) + "> " + msg, embed=bountyEmbed)
+                        await currentChannel.send("<@&" + str(currentGuild.getUserAlertRoleID("bounties_new")) + "> " + msg, embed=bountyEmbed)
                     else:
                         await currentChannel.send(msg, embed=bountyEmbed)
                 except discord.Forbidden:
@@ -281,9 +284,9 @@ async def announceNewShopStock(guildID=-1):
                 if playCh is not None:
                     msg = "The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**"
                     try:
-                        if guild.hasShopRefreshRoleId():
+                        if guild.hasUserAlertRoleID("shop_refresh"):
                             # announce to the given channel
-                            await playCh.send(":arrows_counterclockwise: <@&" + str(guild.getShopRefreshRoleId()) + "> " + msg)
+                            await playCh.send(":arrows_counterclockwise: <@&" + str(guild.getUserAlertRoleID("shop_refresh")) + "> " + msg)
                         else:
                             await playCh.send(":arrows_counterclockwise: " + msg)
                     except discord.Forbidden:
@@ -298,9 +301,9 @@ async def announceNewShopStock(guildID=-1):
             if playCh is not None:
                 msg = "The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**"
                 try:
-                    if guild.hasShopRefreshRoleId():
+                    if guild.hasUserAlertRoleID("shop_refresh"):
                         # announce to the given channel
-                        await playCh.send(":arrows_counterclockwise: <@&" + str(guild.getShopRefreshRoleId()) + "> " + msg)
+                        await playCh.send(":arrows_counterclockwise: <@&" + str(guild.getUserAlertRoleID("shop_refresh")) + "> " + msg)
                     else:
                         await playCh.send(":arrows_counterclockwise: " + msg)
                 except discord.Forbidden:
@@ -361,10 +364,12 @@ def getNumExtension(num):
     return bbData.numExtensions[int(str(num)[-1])] if not (num > 10 and num < 20) else "th"
 
 
+# TODO: Remove calls of this in place of expiryDelta.
 def getFixedDelay(delayDict):
     return timeDeltaFromDict(delayDict)
 
 
+# TODO: Replace with getFixedTimeOnDay, adding delayDict to the given day
 def getFixedDailyTime(delayDict):
     return (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(delayDict)) - datetime.utcnow()
 
@@ -420,8 +425,90 @@ def findBBUserDCGuild(user):
                 user.lastSeenGuildId = guild.id
                 user.hasLastSeenGuildId = True
                 return lastSeenGuild
-
     return None
+
+
+def userOrMemberName(dcUser, dcGuild):
+    guildMember = dcGuild.get_member(dcUser.id)
+    if guildMember is None:
+        return dcUser.name
+    return guildMember.display_name
+
+
+def typeAlertedUserMentionOrName(alertType, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None):
+    if dcUser is None and bbUser is None:
+        raise ValueError("At least one of dcUser or bbUser must be given.")
+
+    if bbGuild is None and dcGuild is None:
+        dcGuild = findBBUserDCGuild(dcUser)
+        if dcGuild is None:
+            raise ValueError("user does not share an guilds with the bot")
+    if bbGuild is None:
+        bbGuild = guildsDB.getGuild(dcGuild.id)
+    elif dcGuild is None:
+        dcGuild = client.get_guild(bbGuild.id)
+    if bbUser is None:
+        bbUser = usersDB.getOrAddID(dcUser.id)
+    
+    guildMember = dcGuild.get_member(dcUser.id)
+    if guildMember is None:
+        return dcUser.name + "#" + str(dcUser.discriminator)
+    if bbUser.isAlertedForType(alertType, dcGuild, bbGuild, dcUser):
+        return guildMember.mention
+    return guildMember.display_name + "#" + str(guildMember.discriminator)
+
+
+def IDAlertedUserMentionOrName(alertID, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None):
+    return typeAlertedUserMentionOrName(UserAlerts.userAlertsIDsTypes[alertID], dcUser=dcUser, bbUser=bbUser, bbGuild=bbGuild, dcGuild=dcGuild)
+
+
+def getAlertIDFromHeirarchicalAliases(alertName):
+    if type(alertName) != list:
+        alertName = alertName.split(" ")
+
+    if alertName[0] in ["bounty", "bounties"]:
+        return ["bounties_new"]
+    
+    elif alertName[0] in ["duel", "duels", "fight", "fights"]:
+        if len(alertName) < 2:
+            return ["ERR", ":x: Please provide the type of duel notification you would like. E.g: `duels new`"]
+        if alertName[1] in ["new","challenge","me","incoming"]:
+            return ["duels_challenge_incoming_new"]
+        elif alertName[1] in ["cancel","cancelled","expire","expired","end","ended"]:
+            return ["duels_challenge_incoming_cancel"]
+        else:
+            return ["ERR", ":x: Unknown duel notification type! Valid types include `new` or `cancel`."]
+
+    elif alertName[0] in ["shop", "shops"]:
+        if len(alertName) < 2:
+            return ["ERR", ":x: Please provide the type of shop notification you would like. E.g: `shop refresh`"]
+        if alertName[1] in ["refresh", "new", "reset", "stock"]:
+            return ["shop_refresh"]
+        else:
+            return ["ERR", ":x: Unknown shop notification type! Valid types include `refresh`."]
+    
+    elif alertName[0] in ["bot", "system", "sys"]:
+        if len(alertName) < 2:
+            return ["ERR", ":x: Please provide the type of system notification you would like. E.g: `bot updates all`"]
+        if alertName[1] in ["update","updates","patch","patches","version","versions"]:
+            if len(alertName) < 3 or alertName[2] in ["all","both", "every"]:
+                return ["system_updates_all"]
+            elif alertName[2] in ["major","big","large"]:
+                return ["system_updates_major"]
+            elif alertName[2] in ["minor","small","bug","fix"]:
+                return ["system_updates_minor"]
+            else:
+                return ["ERR", ":x: Unknown system updates notification type! Valid types include `major` and `minor`."]
+
+        elif alertName[1] in ["misc","misc.","announce","announcement","announcements","announces","miscellaneous"]:
+            return ["system_misc"]
+        else:
+            return ["ERR", ":x: Unknown system notification type! Valid types include `updates` and `misc`."]
+    
+    # elif alertName[0] in bbConfig.validItemNames and alertName[0] != "all":
+    #     return ["ERR", "Item notifications have not been implemented yet! \:("]
+    else:
+        return ["ERR", ":x: Unknown notification type! Please refer to `" + bbConfig.commandPrefix + "help notify`"]
 
 
 ####### SYSTEM COMMANDS #######
@@ -450,6 +537,7 @@ async def cmd_help(message, args):
                           thumb=client.user.avatar_url_as(size=64))
     page = 0
     maxPage = len(bbData.helpDict)
+    sectionNames = list(bbData.helpDict.keys())
 
     if args != "":
         if bbUtil.isInt(args):
@@ -457,10 +545,10 @@ async def cmd_help(message, args):
             if page > maxPage:
                 await message.channel.send(":x: There are only " + str(maxPage) + " help pages! Showing page " + str(maxPage) + ":")
                 page = maxPage
-        elif args.title() in bbData.helpDict.keys():
-            page = list(bbData.helpDict.keys()).index(args.title()) + 1
+        elif args.title() in sectionNames:
+            page = sectionNames.index(args.title()) + 1
         elif args != "all":
-            for section in bbData.helpDict.keys():
+            for section in sectionNames:
                 if args in bbData.helpDict[section]:
                     helpEmbed.add_field(
                         name="‎", value="__" + section + "__", inline=False)
@@ -481,16 +569,34 @@ async def cmd_help(message, args):
     else:
         sendChannel = message.author.dm_channel
         sendDM = True
+    
+    # list of tuples, 0th element is message, 1st element is embed
+    messagesToSend = []
 
     if page == 0:
-        helpEmbed.set_footer(text="All Pages")
-        for section in bbData.helpDict.keys():
-            # section = list(bbData.helpDict.keys())[page - 1]
-            helpEmbed.add_field(name="‎", value="__" +
-                                section + "__", inline=False)
-            for currentCommand in bbData.helpDict[section].values():
-                helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
-                    "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
+        for sectionNum in range(maxPage):
+            if sectionNum == maxPage - 1:
+                helpEmbed = makeEmbed(titleTxt="BountyBot Commands",
+                            thumb=client.user.avatar_url_as(size=64))
+                helpEmbed.set_footer(text="Page " + str(maxPage))
+                helpEmbed.add_field(name="‎", value="__" +
+                                    section + "__", inline=False)
+                for currentCommand in bbData.helpDict[section].values():
+                    helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
+                        "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
+                messagesToSend.append(("‎", helpEmbed))
+            elif sectionNum % 2 == 0:
+                helpEmbed = makeEmbed(titleTxt="BountyBot Commands",
+                                thumb=client.user.avatar_url_as(size=64))
+                helpEmbed.set_footer(text="Pages " + str(sectionNum + 1) + " - " + str(sectionNum + 2))
+                for section in sectionNames[sectionNum:sectionNum + 2]:
+                    # section = sectionNames[page - 1]
+                    helpEmbed.add_field(name="‎", value="__" +
+                                        section + "__", inline=False)
+                    for currentCommand in bbData.helpDict[section].values():
+                        helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
+                            "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
+                messagesToSend.append(("‎", helpEmbed))
 
     else:
         helpEmbed.set_footer(text="Page " + str(page) + "/" + str(maxPage))
@@ -500,11 +606,15 @@ async def cmd_help(message, args):
         for currentCommand in bbData.helpDict[section].values():
             helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
                 "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
+        messagesToSend.append(("‎", helpEmbed))
 
     try:
-        await sendChannel.send(bbData.helpIntro.replace("$COMMANDPREFIX$", bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
+        if page in [0, 1]:
+            await sendChannel.send(bbData.helpIntro.replace("$COMMANDPREFIX$", bbConfig.commandPrefix))
+        for msg in messagesToSend:
+            await sendChannel.send(msg[0], embed=msg[1])
     except discord.Forbidden:
-        await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
+        await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
         return
 
     if sendDM:
@@ -555,7 +665,7 @@ async def cmd_how_to_play(message, args):
 
         await sendChannel.send(embed=howToPlayEmbed)
     except discord.Forbidden:
-        await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
+        await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
         return
 
     if sendDM:
@@ -589,7 +699,7 @@ async def cmd_balance(message, args):
     if args == "":
         if not usersDB.userIDExists(message.author.id):
             usersDB.addUser(message.author.id)
-        await message.channel.send(":moneybag: **" + message.author.name + "**, you have **" + str(usersDB.getUser(message.author.id).credits) + " Credits**.")
+        await message.channel.send(":moneybag: **" + message.author.display_name + "**, you have **" + str(usersDB.getUser(message.author.id).credits) + " Credits**.")
 
     # If a user is specified
     else:
@@ -610,7 +720,7 @@ async def cmd_balance(message, args):
         if not usersDB.userIDExists(requestedUser.id):
             usersDB.addUser(requestedUser.id)
         # send the user's balance
-        await message.channel.send(":moneybag: **" + requestedUser.name + "** has **" + str(usersDB.getUser(requestedUser.id).credits) + " Credits**.")
+        await message.channel.send(":moneybag: **" + userOrMemberName(requestedUser, message.guild) + "** has **" + str(usersDB.getUser(requestedUser.id).credits) + " Credits**.")
 
 bbCommands.register("balance", cmd_balance)
 bbCommands.register("bal", cmd_balance)
@@ -631,7 +741,7 @@ async def cmd_stats(message, args):
     # if no user is specified
     if args == "":
         # create the embed
-        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=message.author.name,
+        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=message.author.display_name,
                                footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url_as(size=64))
         # If the calling user is not in the database, don't bother adding them just print zeroes.
         if not usersDB.userIDExists(message.author.id):
@@ -679,7 +789,7 @@ async def cmd_stats(message, args):
             return
 
         # create the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=requestedUser.name,
+        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=userOrMemberName(requestedUser, message.guild),
                                footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
         # If the requested user is not in the database, don't bother adding them just print zeroes
         if not usersDB.userIDExists(requestedUser.id):
@@ -823,7 +933,7 @@ async def cmd_check(message, args):
         # If a bounty was won, print a congratulatory message
         if bountyWon:
             usersDB.getUser(message.author.id).bountyWins += 1
-            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.name + "**, you now have **" + str(usersDB.getUser(message.author.id).credits) + " Credits!**")
+            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.display_name + "**, you now have **" + str(usersDB.getUser(message.author.id).credits) + " Credits!**")
 
             if sightedCriminalsStr != "":
                 for currentGuild in guildsDB.getGuilds():
@@ -833,15 +943,16 @@ async def cmd_check(message, args):
                             await currentCh.send(sightedCriminalsStr)
         # If no bounty was won, print an error message
         else:
-            await message.channel.send(":telescope: **" + message.author.name + "**, you did not find any criminals in **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
+            await message.channel.send(":telescope: **" + message.author.display_name + "**, you did not find any criminals in **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
             for currentGuild in guildsDB.getGuilds():
-                if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
-                    currentCh = client.get_channel(currentGuild.getPlayChannelId())
-                    if currentCh is not None:
-                        await currentCh.send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
-                    else:
-                        print("Failed global check announcement in guild",currentGuild.id)
+                if client.get_guild(currentGuild.id) is not None:
+                    if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
+                        currentCh = client.get_channel(currentGuild.getPlayChannelId())
+                        if currentCh is not None:
+                            await currentCh.send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
+                        else:
+                            print("Failed global check announcement in guild",currentGuild.id)
 
         # Only put the calling user on checking cooldown and increment systemsChecked stat if the system checked is on an active bounty's route.
         if systemInBountyRoute:
@@ -857,7 +968,7 @@ async def cmd_check(message, args):
             message.author.id).bountyCooldownEnd) - datetime.utcnow()
         minutes = int(diff.total_seconds() / 60)
         seconds = int(diff.total_seconds() % 60)
-        await message.channel.send(":stopwatch: **" + message.author.name + "**, your *Khador Drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
+        await message.channel.send(":stopwatch: **" + message.author.display_name + "**, your *Khador Drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
 
 bbCommands.register("check", cmd_check)
 bbCommands.register("search", cmd_check)
@@ -1729,7 +1840,7 @@ async def cmd_hangar(message, args):
             if sendDM:
                 await message.add_reaction(bbConfig.dmSentEmoji)
         except discord.Forbidden:
-            await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
+            await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
 
 bbCommands.register("hangar", cmd_hangar)
 bbCommands.register("hanger", cmd_hangar)
@@ -1911,7 +2022,7 @@ async def cmd_shop(message, args):
     try:
         await sendChannel.send(embed=shopEmbed)
     except discord.Forbidden:
-        await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
+        await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
         return
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji)
@@ -2546,7 +2657,7 @@ async def cmd_pay(message, args):
     sourceBBUser.credits -= amount
     targetBBUser.credits += amount
 
-    await message.channel.send(":moneybag: You paid " + requestedUser.name + " **" + str(amount) + "** credits!")
+    await message.channel.send(":moneybag: You paid " + userOrMemberName(requestedUser, message.guild) + " **" + str(amount) + "** credits!")
 
 bbCommands.register("pay", cmd_pay)
 dmCommands.register("pay", cmd_pay)
@@ -2576,106 +2687,23 @@ async def cmd_notify(message, args):
     requestedBBGuild = guildsDB.getGuild(message.guild.id)
 
     argsSplit = args.split(" ")
-    if argsSplit[0] in ["bounty", "bounties"]:
-        if requestedBBGuild.hasBountyNotifyRoleId():
-            notifyRole = discord.utils.get(
-                message.guild.roles, id=requestedBBGuild.getBountyNotifyRoleId())
-            try:
-                if notifyRole in message.author.roles:
-                    await message.author.remove_roles(notifyRole, reason="User has unsubscribed from new bounty notifications.")
-                    await message.channel.send(":white_check_mark: You have unsubscribed from new bounty notifications!")
-                else:
-                    await message.author.add_roles(notifyRole, reason="User has subscribed to new bounty notifications.")
-                    await message.channel.send(":white_check_mark: You have subscribed to new bounty notifications!")
-            except discord.Forbidden:
-                await message.channel.send(":woozy_face: I don't have permission to do that! Please ensure the requested role is beneath the BountyBot role.")
-            except discord.HTTPException:
-                await message.channel.send(":woozy_face: Something went wrong! Please contact an admin or try again later.")
-        else:
-            await message.channel.send(":x: This server does not have a role for new bounty notifications. :robot:")
-    
-    elif argsSplit[0] in ["duel", "duels", "fight", "fights"]:
-        if len(argsSplit) < 2:
-            await message.channel.send(":x: Please provide the type of duel notification you would like to toggle. E.g: `" + bbConfig.commandPrefix + "notify duels new`")
-            return
-        if argsSplit[1] in ["new","challenge","me","incoming"]:
-            alertID = "duels_challenge_incoming_new"
-        elif argsSplit[1] in ["cancel","cancelled","expire","expired","end","ended"]:
-            alertID = "duels_challenge_incoming_cancel"
-        else:
-            await message.channel.send(":x: Unknown duel notification type! Valid types include `new` or `cancel`.")
-            return
+    alertsToToggle = getAlertIDFromHeirarchicalAliases(argsSplit)
 
+    if alertsToToggle[0] == "ERR":
+        await message.channel.send(alertsToToggle[1])
+        return
+
+    for alertID in alertsToToggle:
         alertType = UserAlerts.userAlertsIDsTypes[alertID]
-        alertNewState = requestedBBUser.toggleAlertType(alertType)
-        await message.channel.send(":white_check_mark: You have " + ("subscribed to" if alertNewState else "unsubscribed from") + " " + UserAlerts.userAlertsTypesNames[alertType] + " notifications.")
-
-    elif argsSplit[0] in ["shop", "shops"]:
-        if len(argsSplit) < 2:
-            await message.channel.send(":x: Please provide the type of shop notification you would like to toggle. E.g: `" + bbConfig.commandPrefix + "notify shop refresh`")
-            return
-        if argsSplit[1] in ["refresh", "new", "reset", "stock"]:
-            if requestedBBGuild.hasShopRefreshRoleId():
-                notifyRole = discord.utils.get(
-                    message.guild.roles, id=requestedBBGuild.getShopRefreshRoleId())
-                try:
-                    if notifyRole in message.author.roles:
-                        await message.author.remove_roles(notifyRole, reason="User has unsubscribed from shop refresh notifications.")
-                        await message.channel.send(":white_check_mark: You have unsubscribed from shop refresh notifications!")
-                    else:
-                        await message.author.add_roles(notifyRole, reason="User has subscribed to shop refresh notifications.")
-                        await message.channel.send(":white_check_mark: You have subscribed to shop refresh notifications!")
-                except discord.Forbidden:
-                    await message.channel.send(":woozy_face: I don't have permission to do that! Please ensure the requested role is beneath the BountyBot role.")
-                except discord.HTTPException:
-                    await message.channel.send(":woozy_face: Something went wrong! Please contact an admin or try again later.")
-            else:
-                await message.channel.send(":x: This server does not have a role for shop refresh notifications. :robot:")
-            return
-        else:
-            await message.channel.send(":x: Unknown shop notification type! Valid types include `refresh`.")
-            return
-
-        alertType = UserAlerts.userAlertsIDsTypes[alertID]
-        alertNewState = requestedBBUser.toggleAlertType(alertType)
-        await message.channel.send(":white_check_mark: You have " + ("subscribed to" if alertNewState else "unsubscribed from") + " " + UserAlerts.userAlertsTypesNames[alertType] + " notifications.")
-    
-    elif argsSplit[0] in ["bot", "system", "sys"]:
-        if len(argsSplit) < 2:
-            await message.channel.send(":x: Please provide the type of system notification you would like to toggle. E.g: `" + bbConfig.commandPrefix + "notify bot updates all`")
-            return
-        if argsSplit[1] in ["update","updates","patch","patches","version","versions"]:
-            if len(argsSplit) < 3 or argsSplit[2] in ["all","both", "every"]:
-                alertID = "system_updates_all"
-            elif argsSplit[1] in ["major","big","large"]:
-                alertID = "system_updates_major"
-            elif argsSplit[1] in ["minor","small","bug","fix"]:
-                alertID = "system_updates_minor"
-            else:
-                await message.channel.send(":x: Unknown system updates notification type! Valid types include `major`, `minor`, and `all`.")
-                return
-        elif argsSplit[1] in ["misc","misc.","announce","announcement","announcements","announces","miscellaneous"]:
-            alertID = "system_misc"
-        else:
-            await message.channel.send(":x: Unknown system notification type! Valid types include `updates` and `misc`.")
-            return
-
-        if alertType == "system_updates_all":
-            if requestedBBUser.isAlertedForID("system_updates_major") != requestedBBUser.isAlertedForID("system_updates_minor"):
-                alertState = requestedBBUser.setAlertID("system_updates_minor", requestedBBUser.isAlertedForID("system_updates_major"))
-            else:
-                alertState = requestedBBUser.toggleAlertID("system_updates_major")
-                requestedBBUser.toggleAlertID("system_updates_minor")
-            await message.channel.send(":white_check_mark: You have " + ("subscribed to" if alertNewState else "unsubscribed from") + " all bot update notifications.")
-        else:
-            alertType = UserAlerts.userAlertsIDsTypes[alertID]
-            alertNewState = requestedBBUser.toggleAlertType(alertType)
+        try:
+            alertNewState = await requestedBBUser.toggleAlertType(alertType, message.guild, requestedBBGuild, message.author)
             await message.channel.send(":white_check_mark: You have " + ("subscribed to" if alertNewState else "unsubscribed from") + " " + UserAlerts.userAlertsTypesNames[alertType] + " notifications.")
-    
-    elif argsSplit[0] in bbConfig.validItemNames and argsSplit[0] != "all":
-        await message.channel.send("Item notifications have not been implemented yet! \:(")
-    else:
-        await message.channel.send(":x: Unknown notification type! Please refer to `" + bbConfig.commandPrefix + "help notify`")
+        except discord.Forbidden:
+                await message.channel.send(":woozy_face: I don't have permission to do that! Please ensure the requested role is beneath the BountyBot role.")
+        except discord.HTTPException:
+            await message.channel.send(":woozy_face: Something went wrong! Please contact an admin or try again later.")
+        except ValueError:
+            await message.channel.send(":x: This server does not have a role for " + UserAlerts.userAlertsTypesNames[alertType] + " notifications. :robot:")
 
 bbCommands.register("notify", cmd_notify)
 dmCommands.register("notify", err_nodm)
@@ -2697,7 +2725,7 @@ async def cmd_total_value(message, args):
     if args == "":
         if not usersDB.userIDExists(message.author.id):
             usersDB.addUser(message.author.id)
-        await message.channel.send(":moneybag: **" + message.author.name + "**, your items and balance are worth a total of **" + str(usersDB.getUser(message.author.id).getStatByName("value")) + " Credits**.")
+        await message.channel.send(":moneybag: **" + message.author.display_name + "**, your items and balance are worth a total of **" + str(usersDB.getUser(message.author.id).getStatByName("value")) + " Credits**.")
 
     # If a user is specified
     else:
@@ -2718,7 +2746,7 @@ async def cmd_total_value(message, args):
         if not usersDB.userIDExists(requestedUser.id):
             usersDB.addUser(requestedUser.id)
         # send the user's balance
-        await message.channel.send(":moneybag: **" + requestedUser.name + "**'s items and balance have a total value of **" + str(usersDB.getUser(requestedUser.id).getStatByName("value")) + " Credits**.")
+        await message.channel.send(":moneybag: **" + userOrMemberName(requestedUser, message.guild) + "**'s items and balance have a total value of **" + str(usersDB.getUser(requestedUser.id).getStatByName("value")) + " Credits**.")
 
 bbCommands.register("total-value", cmd_total_value)
 dmCommands.register("total-value", cmd_total_value)
@@ -2781,7 +2809,7 @@ async def cmd_duel(message, args):
     if action == "challenge":
         stakes = int(argsSplit[2])
         if sourceBBUser.hasDuelChallengeFor(targetBBUser):
-            await message.channel.send(":x: You already have a duel challenge pending for " + requestedUser.name + "! To make a new one, cancel it first. (see `" + bbConfig.commandPrefix + "help duel`)")
+            await message.channel.send(":x: You already have a duel challenge pending for " + userOrMemberName(requestedUser, message.guild) + "! To make a new one, cancel it first. (see `" + bbConfig.commandPrefix + "help duel`)")
             return
 
         try:
@@ -2795,6 +2823,7 @@ async def cmd_duel(message, args):
             # print("Duelreq added to " + str(sourceBBUser.id) + " from " + str(newDuelReq.sourceBBGuild.id) + " to " + str(newDuelReq.targetBBUser.id))
         except KeyError:
             await message.channel.send(":x: User not found! Did they leave the server?")
+            print(1)
             return
         except Exception:
             await message.channel.send(":woozy_face: An unexpected error occurred! Tri, what did you do...")
@@ -2803,20 +2832,21 @@ async def cmd_duel(message, args):
         expiryTimesSplit = duelTT.expiryTime.strftime("%d %B %H %M").split(" ")
         duelExpiryTimeString = "This duel request will expire on the **" + expiryTimesSplit[0].lstrip('0') + getNumExtension(int(
             expiryTimesSplit[0])) + "** of **" + expiryTimesSplit[1] + "**, at **" + expiryTimesSplit[2] + ":" + expiryTimesSplit[3] + "** CST."
-        
-        targetUserNameOrTag = requestedUser.mention if targetBBUser.isAlertedForID("duels_challenge_incoming_new") else ("**" + requestedUser.name + "#" + str(requestedUser.discriminator) + "**")
 
         if message.guild.get_member(requestedUser.id) is None:
             targetUserDCGuild = findBBUserDCGuild(targetBBUser)
             if targetUserDCGuild is None:
                 await message.channel.send(":x: User not found! Did they leave the server?")
+                print(2)
                 return
             else:
                 targetUserBBGuild = guildsDB.getGuild(targetUserDCGuild.id)
                 if targetUserBBGuild.hasPlayChannel():
-                    await client.get_channel(targetUserBBGuild.getPlayChannelId()).send(":crossed_swords: **" + str(message.author) + "** challenged " + requestedUser.mention + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
+                    targetUserNameOrTag = IDAlertedUserMentionOrName("duels_challenge_incoming_new", dcGuild=targetUserDCGuild, bbGuild=targetUserBBGuild, dcUser=requestedUser, bbUser=targetBBUser)
+                    await client.get_channel(targetUserBBGuild.getPlayChannelId()).send(":crossed_swords: **" + str(message.author) + "** challenged " + targetUserNameOrTag + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
             await message.channel.send(":crossed_swords: " + message.author.mention + " challenged **" + str(requestedUser) + "** to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
         else:
+            targetUserNameOrTag = IDAlertedUserMentionOrName("duels_challenge_incoming_new", dcGuild=message.guild, dcUser=requestedUser, bbUser=targetBBUser)
             await message.channel.send(":crossed_swords: " + message.author.mention + " challenged " + targetUserNameOrTag + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
 
     elif action == "cancel":
@@ -2824,9 +2854,23 @@ async def cmd_duel(message, args):
             await message.channel.send(":x: You do not have an active duel challenge for this user! Did it already expire?")
             return
 
+        if message.guild.get_member(requestedUser.id) is None:
+            await message.channel.send(":white_check_mark: You have cancelled your duel challenge for **" + str(requestedUser) + "**.")
+            targetUserGuild = findBBUserDCGuild(targetBBUser)
+            if targetUserGuild is not None:
+                targetUserBBGuild = guildsDB.getGuild(targetUserGuild.id)
+                if targetUserBBGuild.hasPlayChannel() and \
+                        targetBBUser.isAlertedForID("duels_challenge_incoming_cancel", targetUserGuild, targetUserBBGuild, targetUserGuild.get_member(targetBBUser.id)):
+                    await client.get_channel(targetUserBBGuild.getPlayChannelId()).send(":shield: " + requestedUser.mention + ", " + str(message.author) + " has cancelled their duel challenge.")
+        else:
+            if targetBBUser.isAlertedForID("duels_challenge_incoming_cancel", message.guild, guildsDB.getGuild(message.guild.id), message.guild.get_member(targetBBUser.id)):
+                await message.channel.send(":white_check_mark: You have cancelled your duel challenge for " + requestedUser.mention + ".")
+            else:
+                await message.channel.send(":white_check_mark: You have cancelled your duel challenge for **" + str(requestedUser) + "**.")
+        
+        # IDAlertedUserMentionOrName(alertType, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None)
         await sourceBBUser.duelRequests[targetBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
         sourceBBUser.removeDuelChallengeTarget(targetBBUser)
-        await message.channel.send(":white_check_mark: You have cancelled your duel challenge for **" + str(requestedUser) + "**.")
 
     elif action == "reject":
         if not targetBBUser.hasDuelChallengeFor(sourceBBUser):
@@ -3042,7 +3086,7 @@ async def admin_cmd_admin_help(message, args):
     try:
         await sendChannel.send(bbData.adminHelpIntro.replace("$COMMANDPREFIX$", bbConfig.commandPrefix), embed=helpEmbed)
     except discord.Forbidden:
-        await message.channel.send(":x: I can't DM you, " + message.author.name + "! Please enable DMs from users who are not friends.")
+        await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
         return
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji)
@@ -3052,184 +3096,70 @@ dmCommands.register("admin-help", err_nodm, isAdmin=True)
 
 
 """
-For the current guild, set a role to mention when new bounties are spawned.
+For the current guild, set a role to mention when certain events occur.
+
 can take either a role mention or ID.
 
 @param message -- the discord message calling the command
-@param args -- either a role mention or a role ID
+@param args -- the notfy role type, and either a role mention or a role ID
 """
-async def admin_cmd_set_bounty_notify_role(message, args):
-    if args == "":
-        await message.channel.send(":x: Please provide either a role mention or ID!")
+async def admin_cmd_set_notify_role(message, args):
+    argsSplit = args.split(" ")
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Please provide both a notification type, and either a role mention or ID!")
         return
-    if not (bbUtil.isInt(args) or bbUtil.isRoleMention(args)):
+    if not (bbUtil.isInt(argsSplit[-1]) or bbUtil.isRoleMention(argsSplit[-1])):
         await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
         return
 
-    if bbUtil.isRoleMention(args):
-        requestedRole = message.guild.get_role(int(args[3:-1]))
+    alertsToSet = getAlertIDFromHeirarchicalAliases(argsSplit)
+    if alertsToSet[0] == "ERR":
+        await message.channel.send(alertsToSet[1])
+        return
+
+    requestedBBGuild = guildsDB.getGuild(message.guild.id)
+    if bbUtil.isRoleMention(argsSplit[-1]):
+        requestedRole = message.guild.get_role(int(argsSplit[-1][3:-1]))
     else:
-        requestedRole = message.guild.get_role(int(args))
+        requestedRole = message.guild.get_role(int(argsSplit[-1]))
 
     if requestedRole is None:
         await message.channel.send(":x: Role not found!")
         return
 
-    guildsDB.getGuild(message.guild.id).setBountyNotifyRoleId(requestedRole.id)
-    await message.channel.send(":white_check_mark: Bounty notify role set!")
+    for alertID in alertsToSet:
+        alertType = UserAlerts.userAlertsIDsTypes[alertID]
+        requestedBBGuild.setUserAlertRoleID(alertID, requestedRole.id)
+        await message.channel.send(":white_check_mark: Role set for " + UserAlerts.userAlertsTypesNames[alertType] + " notifications!")
 
-bbCommands.register("set-bounty-notify-role",
-                    admin_cmd_set_bounty_notify_role, isAdmin=True)
-dmCommands.register("set-bounty-notify-role", err_nodm)
+bbCommands.register("set-notify-role", admin_cmd_set_notify_role, isAdmin=True)
 
 
 """
-For the current guild, set a role to mention when the shop is refreshed.
-can take either a role mention or ID.
+For the current guild, remove role mentioning when certain events occur.
+Takes only a UserAlert ID.
 
 @param message -- the discord message calling the command
-@param args -- either a role mention or a role ID
+@param args -- the notfy role type, and either a role mention or a role ID
 """
-async def admin_cmd_set_shoprefresh_notify_role(message, args):
+async def admin_cmd_remove_notify_role(message, args):
     if args == "":
-        await message.channel.send(":x: Please provide either a role mention or ID!")
-        return
-    if not (bbUtil.isInt(args) or bbUtil.isRoleMention(args)):
-        await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
+        await message.channel.send(":x: Please provide both a notification type!")
         return
 
-    if bbUtil.isRoleMention(args):
-        requestedRole = message.guild.get_role(int(args[3:-1]))
-    else:
-        requestedRole = message.guild.get_role(int(args))
-
-    if requestedRole is None:
-        await message.channel.send(":x: Role not found!")
+    alertsToSet = getAlertIDFromHeirarchicalAliases(args)
+    if alertsToSet[0] == "ERR":
+        await message.channel.send(alertsToSet[1])
         return
 
-    guildsDB.getGuild(message.guild.id).setShopRefreshRoleId(requestedRole.id)
-    await message.channel.send(":white_check_mark: Shop refresh notify role set!")
-
-bbCommands.register("set-shoprefresh-notify-role",
-                    admin_cmd_set_shoprefresh_notify_role, isAdmin=True)
-dmCommands.register("set-shoprefresh-notify-role", err_nodm)
-
-
-"""
-For the current guild, set a role to mention when major bot updates are released.
-can take either a role mention or ID.
-
-@param message -- the discord message calling the command
-@param args -- either a role mention or a role ID
-"""
-async def admin_cmd_set_majorupdates_notify_role(message, args):
-    if args == "":
-        await message.channel.send(":x: Please provide either a role mention or ID!")
-        return
-    if not (bbUtil.isInt(args) or bbUtil.isRoleMention(args)):
-        await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
-        return
-
-    if bbUtil.isRoleMention(args):
-        requestedRole = message.guild.get_role(int(args[3:-1]))
-    else:
-        requestedRole = message.guild.get_role(int(args))
-
-    if requestedRole is None:
-        await message.channel.send(":x: Role not found!")
-        return
-
-    guildsDB.getGuild(message.guild.id).setSystemUpdatesMajorRoleId(requestedRole.id)
-    await message.channel.send(":white_check_mark: Major system updates role set!")
-
-bbCommands.register("set-majorupdates-notify-role",
-                    admin_cmd_set_majorupdates_notify_role, isAdmin=True)
-dmCommands.register("set-majorupdates-notify-role", err_nodm)
-
-
-"""
-For the current guild, set a role to mention when minor system updates are released.
-can take either a role mention or ID.
-
-@param message -- the discord message calling the command
-@param args -- either a role mention or a role ID
-"""
-async def admin_cmd_set_minorupdates_notify_role(message, args):
-    if args == "":
-        await message.channel.send(":x: Please provide either a role mention or ID!")
-        return
-    if not (bbUtil.isInt(args) or bbUtil.isRoleMention(args)):
-        await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
-        return
-
-    if bbUtil.isRoleMention(args):
-        requestedRole = message.guild.get_role(int(args[3:-1]))
-    else:
-        requestedRole = message.guild.get_role(int(args))
-
-    if requestedRole is None:
-        await message.channel.send(":x: Role not found!")
-        return
-
-    guildsDB.getGuild(message.guild.id).setSystemUpdatesMinorRoleId(requestedRole.id)
-    await message.channel.send(":white_check_mark: Minor system updates role set!")
-
-bbCommands.register("set-minorupdates-notify-role",
-                    admin_cmd_set_minorupdates_notify_role, isAdmin=True)
-dmCommands.register("set-minorupdates-notify-role", err_nodm)
-
-
-"""
-For the current guild, set a role to mention in miscellaneous BountyBot announcements.
-can take either a role mention or ID.
-
-@param message -- the discord message calling the command
-@param args -- either a role mention or a role ID
-"""
-async def admin_cmd_set_announcements_notify_role(message, args):
-    if args == "":
-        await message.channel.send(":x: Please provide either a role mention or ID!")
-        return
-    if not (bbUtil.isInt(args) or bbUtil.isRoleMention(args)):
-        await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
-        return
-
-    if bbUtil.isRoleMention(args):
-        requestedRole = message.guild.get_role(int(args[3:-1]))
-    else:
-        requestedRole = message.guild.get_role(int(args))
-
-    if requestedRole is None:
-        await message.channel.send(":x: Role not found!")
-        return
-
-    guildsDB.getGuild(message.guild.id).setSystemMiscRoleId(requestedRole.id)
-    await message.channel.send(":white_check_mark: Misc. announcements role set!")
-
-bbCommands.register("set-minorupdates-notify-role",
-                    admin_cmd_set_announcements_notify_role, isAdmin=True)
-dmCommands.register("set-minorupdates-notify-role", err_nodm)
-
-
-"""
-For the current guild, remove the role to mention when new bounties are spawned.
-
-@param message -- the discord message calling the command
-@param args -- ignored
-"""
-async def admin_cmd_remove_bounty_notify_role(message, args):
     requestedBBGuild = guildsDB.getGuild(message.guild.id)
 
-    if not requestedBBGuild.hasBountyNotifyRoleId():
-        await message.channel.send(":x: This server does not have a bounty notify role set!")
-        return
+    for alertID in alertsToSet:
+        alertType = UserAlerts.userAlertsIDsTypes[alertID]
+        requestedBBGuild.removeUserAlertRoleID(alertID)
+        await message.channel.send(":white_check_mark: Role pings disabled for " + UserAlerts.userAlertsTypesNames[alertType] + " notifications.")
 
-    requestedBBGuild.removeBountyNotifyRoleId()
-    await message.channel.send(":white_check_mark: Bounty notify role removed!")
-
-bbCommands.register("remove-bounty-notify-role",
-                    admin_cmd_remove_bounty_notify_role, isAdmin=True)
-dmCommands.register("remove-bounty-notify-role", err_nodm)
+bbCommands.register("remove-notify-role", admin_cmd_remove_notify_role, isAdmin=True)
 
 
 ####### DEVELOPER COMMANDS #######
@@ -4220,10 +4150,9 @@ async def on_message(message):
                 args = msgContent[len(
                     bbConfig.commandPrefix) + len(command) + 1:]
 
-            # if no command is given, call help with no arguments
+            # if no command is given, ignore the message
             else:
-                args = ""
-                command = "help"
+                return
 
             # Debug: Print the recognised command args strings
             # print("COMMAND '" + command + "'")

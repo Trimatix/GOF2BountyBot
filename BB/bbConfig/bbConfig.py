@@ -98,7 +98,8 @@ shipMaxPriceTechLevels = [50000, 100000, 200000, 500000, 1000000, 2000000, 50000
 itemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 cumulativeItemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 
-# Parameters for itemTLSpawnChanceForShopTL values, using u function: https://www.desmos.com/calculator/tnldodey5u
+# Parameters for itemTLSpawnChanceForShopTL values, using quadratic function: https://www.desmos.com/calculator/n2xfxf8taj
+# Original u function by Novahkiin22: https://www.desmos.com/calculator/tnldodey5u
 # Original function by Novahkiin22: https://www.desmos.com/calculator/nrshikfmxc
 tl_s = 7
 tl_o = 2.3
@@ -262,7 +263,9 @@ validItemNames = ["ship", "weapon", "module", "turret", "all"]
 
 ##### USERS #####
 
-userAlertsIDsDefaults = {   #"shop_refresh": False,
+userAlertsIDsDefaults = {   "bounties_new": False,
+    
+                            "shop_refresh": False,
 
                             "duels_challenge_incoming_new": True,
                             "duels_challenge_incoming_cancel": False,
