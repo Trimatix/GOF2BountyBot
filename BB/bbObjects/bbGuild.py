@@ -1,8 +1,9 @@
 from . import bbShop
+from .bounties.bountyBoards import BountyBoardChannel
 from ..userAlerts import UserAlerts
 
 class bbGuild:
-    def __init__(self, id, announceChannel=-1, playChannel=-1, shop=None, bountyBoardChannel=-1, alertRoles={}):
+    def __init__(self, id, announceChannel=-1, playChannel=-1, shop=None, bountyBoardChannel=None, alertRoles={}):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -32,12 +33,8 @@ class bbGuild:
             if issubclass(UserAlerts.userAlertsIDsTypes[alertID], UserAlerts.GuildRoleUserAlert):
                 self.alertRoles[alertID] = alertRoles[alertID] if alertID in alertRoles else -1
         
-        if bountyBoardChannel == -1:
-            self.hasBountyBoardChannel = False
-            self.bountyBoardChannel = -1
-        else:
-            self.bountyBoardChannel = bountyBoardChannel
-            self.hasBountyBoardChannel = True
+        self.bountyBoardChannel = bountyBoardChannel
+        self.hasBountyBoardChannel = bountyBoardChannel is not None
 
 
     def getAnnounceChannelId(self):
@@ -88,45 +85,46 @@ class bbGuild:
 
 
     
-    def addBountyBoardChannel(self, msgID):
-        if self.hasBountyBoard:
+    async def addBountyBoardChannel(self, channel, client, factions):
+        if self.hasBountyBoardChannel:
             raise RuntimeError("Attempted to assign a bountyboard channel for guild " + str(self.id) + " but one is already assigned")
-        self.bountyBoardChannel = msgID
+        self.bountyBoardChannel = BountyBoardChannel.BountyBoardChannel(channel.id, {})
+        await self.bountyBoardChannel.init(client, factions)
         self.hasBountyBoardChannel = True
 
     
     def removeBountyBoardChannel(self):
-        if not self.hasBountyBoard:
+        if not self.hasBountyBoardChannel:
             raise RuntimeError("Attempted to remove a bountyboard channel for guild " + str(self.id) + " but none is assigned")
-        self.bountyBoardChannel = -1
+        self.bountyBoardChannel = None
         self.hasBountyBoardChannel = False
 
 
     def toDictNoId(self):
-        return {"announceChannel":self.announceChannel, "playChannel":self.playChannel, "bountyBoardChannel": self.bountyBoardChannel,
-                "alertRoles": self.alertRoles
-        # Shop saving disabled for now, it's not super important.
-                , "shop": self.shop.toDict()
+        return {"announceChannel":self.announceChannel, "playChannel":self.playChannel, 
+                "bountyBoardChannel": self.bountyBoardChannel.toDict() if self.hasBountyBoardChannel else None,
+                "alertRoles": self.alertRoles,
+                "shop": self.shop.toDict()
                 }
 
 
 def fromDict(id, guildDict):
-    # old format conversion code
-    if "bountyNotifyRoleId" in guildDict:
-        alertRoles = {"bounties_new": guildDict["bountyNotifyRoleId"]}
-        if "shopRefreshRoleId" in guildDict:
-            alertRoles["shop_refresh"] = guildDict["shopRefreshRoleId"]
-        if "systemUpdatesMajorRoleId" in guildDict:
-            alertRoles["system_updates_major"] = guildDict["systemUpdatesMajorRoleId"]
-        if "systemUpdatesMinorRoleId" in guildDict:
-            alertRoles["system_updates_minor"] = guildDict["systemUpdatesMinorRoleId"]
-        if "systemMiscRoleId" in guildDict:
-            alertRoles["system_misc"] = guildDict["systemMiscRoleId"]
-        return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"], shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(), bountyBoardChannel=guildDict["bountyBoardChannel"] if "bountyBoardChannel" in guildDict else -1,
-                        alertRoles=alertRoles)
-    else:
-        # new format code
-        return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
-                        shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
-                        bountyBoardChannel=guildDict["bountyBoardChannel"] if "bountyBoardChannel" in guildDict else -1,
-                        alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {})
+    # # old format conversion code
+    # if "bountyNotifyRoleId" in guildDict:
+    #     alertRoles = {"bounties_new": guildDict["bountyNotifyRoleId"]}
+    #     if "shopRefreshRoleId" in guildDict:
+    #         alertRoles["shop_refresh"] = guildDict["shopRefreshRoleId"]
+    #     if "systemUpdatesMajorRoleId" in guildDict:
+    #         alertRoles["system_updates_major"] = guildDict["systemUpdatesMajorRoleId"]
+    #     if "systemUpdatesMinorRoleId" in guildDict:
+    #         alertRoles["system_updates_minor"] = guildDict["systemUpdatesMinorRoleId"]
+    #     if "systemMiscRoleId" in guildDict:
+    #         alertRoles["system_misc"] = guildDict["systemMiscRoleId"]
+    #     return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"], shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(), bountyBoardChannel=guildDict["bountyBoardChannel"] if "bountyBoardChannel" in guildDict else -1,
+    #                     alertRoles=alertRoles)
+    # else:
+    # new format code
+    return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
+                    shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
+                    bountyBoardChannel=BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
+                    alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {})

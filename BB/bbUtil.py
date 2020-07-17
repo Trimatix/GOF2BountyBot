@@ -183,3 +183,16 @@ def fightShips(ship1, ship2, variancePercent):
             "ship2":{"health":{"stock":ship2HP, "varied":ship2HPVaried},
                     "DPS": {"stock":ship2DPS, "varied":ship2DPSVaried},
                     "TTK": ship2TTK}}
+
+
+"""
+Insert commas into every third position in a string.
+
+@param num -- string to insert commas into. probably just containing digits
+@return outStr -- num, but split with commas at every third digit
+"""
+def commaSplitNum(num):
+    outStr = num
+    for i in range(len(num), 0, -3):
+        outStr = outStr[0:i] + "," + outStr[i:]
+    return outStr[:-1]
