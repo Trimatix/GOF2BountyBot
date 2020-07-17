@@ -188,42 +188,43 @@ Messages will be sent to the playChannels of all guilds in the guildsDB, if they
 async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
     # Loop over all guilds in the database that have playChannels
     for currentGuild in guildsDB.getGuilds():
-        if currentGuild.hasPlayChannel():
-            # Create the announcement embed
-            rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!", authorName=criminalNameOrDiscrim(bounty.criminal) + " Arrested",
-                                     icon=bounty.criminal.icon, col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
+        if client.get_guild(currentGuild.id) is not None:
+            if currentGuild.hasPlayChannel():
+                # Create the announcement embed
+                rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!", authorName=criminalNameOrDiscrim(bounty.criminal) + " Arrested",
+                                        icon=bounty.criminal.icon, col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
 
-            # Add the winning user to the embed
-            # If the winning user is not in the current guild, use the user's name and discriminator
-            if client.get_guild(currentGuild.id).get_member(winningUserId) is None:
-                rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUserId]["reward"]) + " credits:", value=str(client.get_user(winningUserId)) + " checked " + str(
-                    int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
-            # If the winning user is in the current guild, use the user's mention
-            else:
-                rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUserId]["reward"]) + " credits:", value="<@" + str(winningUserId) + "> checked " + str(
-                    int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
+                # Add the winning user to the embed
+                # If the winning user is not in the current guild, use the user's name and discriminator
+                if client.get_guild(currentGuild.id).get_member(winningUserId) is None:
+                    rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUserId]["reward"]) + " credits:", value=str(client.get_user(winningUserId)) + " checked " + str(
+                        int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
+                # If the winning user is in the current guild, use the user's mention
+                else:
+                    rewardsEmbed.add_field(name="1. Winner, " + str(rewards[winningUserId]["reward"]) + " credits:", value="<@" + str(winningUserId) + "> checked " + str(
+                        int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
 
-            # The index of the current user in the embed
-            place = 2
-            # Loop over all non-winning users in the rewards dictionary
-            for userID in rewards:
-                if not rewards[userID]["won"]:
-                    # If the current user is not in the current guild, use the user's name and discriminator
-                    if client.get_guild(currentGuild.id).get_member(userID) is None:
-                        rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value=str(client.get_user(
-                            userID)) + " checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
-                    # Otherwise, use the user's mention
-                    else:
-                        rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value="<@" + str(userID) + "> checked " + str(
-                            int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
-                    place += 1
+                # The index of the current user in the embed
+                place = 2
+                # Loop over all non-winning users in the rewards dictionary
+                for userID in rewards:
+                    if not rewards[userID]["won"]:
+                        # If the current user is not in the current guild, use the user's name and discriminator
+                        if client.get_guild(currentGuild.id).get_member(userID) is None:
+                            rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value=str(client.get_user(
+                                userID)) + " checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
+                        # Otherwise, use the user's mention
+                        else:
+                            rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value="<@" + str(userID) + "> checked " + str(
+                                int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
+                        place += 1
 
-            # Send the announcement to the current guild's playChannel
-            # If this is the winning guild, send a special message!
-            if currentGuild.id == winningGuildObj.id:
-                await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuildObj.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
-            else:
-                await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
+                # Send the announcement to the current guild's playChannel
+                # If this is the winning guild, send a special message!
+                if currentGuild.id == winningGuildObj.id:
+                    await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuildObj.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+                else:
+                    await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
 
 
 """
@@ -506,6 +507,7 @@ async def cmd_help(message, args):
                           thumb=client.user.avatar_url_as(size=64))
     page = 0
     maxPage = len(bbData.helpDict)
+    sectionNames = list(bbData.helpDict.keys())
 
     if args != "":
         if bbUtil.isInt(args):
@@ -513,10 +515,10 @@ async def cmd_help(message, args):
             if page > maxPage:
                 await message.channel.send(":x: There are only " + str(maxPage) + " help pages! Showing page " + str(maxPage) + ":")
                 page = maxPage
-        elif args.title() in bbData.helpDict.keys():
-            page = list(bbData.helpDict.keys()).index(args.title()) + 1
+        elif args.title() in sectionNames:
+            page = sectionNames.index(args.title()) + 1
         elif args != "all":
-            for section in bbData.helpDict.keys():
+            for section in sectionNames:
                 if args in bbData.helpDict[section]:
                     helpEmbed.add_field(
                         name="‎", value="__" + section + "__", inline=False)
@@ -537,16 +539,34 @@ async def cmd_help(message, args):
     else:
         sendChannel = message.author.dm_channel
         sendDM = True
+    
+    # list of tuples, 0th element is message, 1st element is embed
+    messagesToSend = []
 
     if page == 0:
-        helpEmbed.set_footer(text="All Pages")
-        for section in bbData.helpDict.keys():
-            # section = list(bbData.helpDict.keys())[page - 1]
-            helpEmbed.add_field(name="‎", value="__" +
-                                section + "__", inline=False)
-            for currentCommand in bbData.helpDict[section].values():
-                helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
-                    "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
+        for sectionNum in range(maxPage):
+            if sectionNum == maxPage - 1:
+                helpEmbed = makeEmbed(titleTxt="BountyBot Commands",
+                            thumb=client.user.avatar_url_as(size=64))
+                helpEmbed.set_footer(text="Page " + str(maxPage))
+                helpEmbed.add_field(name="‎", value="__" +
+                                    section + "__", inline=False)
+                for currentCommand in bbData.helpDict[section].values():
+                    helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
+                        "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
+                messagesToSend.append(("‎", helpEmbed))
+            elif sectionNum % 2 == 0:
+                helpEmbed = makeEmbed(titleTxt="BountyBot Commands",
+                                thumb=client.user.avatar_url_as(size=64))
+                helpEmbed.set_footer(text="Pages " + str(sectionNum + 1) + " - " + str(sectionNum + 2))
+                for section in sectionNames[sectionNum:sectionNum + 2]:
+                    # section = sectionNames[page - 1]
+                    helpEmbed.add_field(name="‎", value="__" +
+                                        section + "__", inline=False)
+                    for currentCommand in bbData.helpDict[section].values():
+                        helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
+                            "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
+                messagesToSend.append(("‎", helpEmbed))
 
     else:
         helpEmbed.set_footer(text="Page " + str(page) + "/" + str(maxPage))
@@ -556,9 +576,13 @@ async def cmd_help(message, args):
         for currentCommand in bbData.helpDict[section].values():
             helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
                 "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
+        messagesToSend.append(("‎", helpEmbed))
 
     try:
-        await sendChannel.send(bbData.helpIntro.replace("$COMMANDPREFIX$", bbConfig.commandPrefix) if page == 1 else "", embed=helpEmbed)
+        if page in [0, 1]:
+            await sendChannel.send(bbData.helpIntro.replace("$COMMANDPREFIX$", bbConfig.commandPrefix))
+        for msg in messagesToSend:
+            await sendChannel.send(msg[0], embed=msg[1])
     except discord.Forbidden:
         await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
         return
@@ -889,8 +913,9 @@ async def cmd_check(message, args):
             await message.channel.send(":telescope: **" + message.author.display_name + "**, you did not find any criminals in **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
             for currentGuild in guildsDB.getGuilds():
-                if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
-                    await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
+                if client.get_guild(currentGuild.id) is not None:
+                    if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
+                        await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
         # Only put the calling user on checking cooldown and increment systemsChecked stat if the system checked is on an active bounty's route.
         if systemInBountyRoute:
@@ -2761,6 +2786,7 @@ async def cmd_duel(message, args):
             # print("Duelreq added to " + str(sourceBBUser.id) + " from " + str(newDuelReq.sourceBBGuild.id) + " to " + str(newDuelReq.targetBBUser.id))
         except KeyError:
             await message.channel.send(":x: User not found! Did they leave the server?")
+            print(1)
             return
         except Exception:
             await message.channel.send(":woozy_face: An unexpected error occurred! Tri, what did you do...")
@@ -2774,6 +2800,7 @@ async def cmd_duel(message, args):
             targetUserDCGuild = findBBUserDCGuild(targetBBUser)
             if targetUserDCGuild is None:
                 await message.channel.send(":x: User not found! Did they leave the server?")
+                print(2)
                 return
             else:
                 targetUserBBGuild = guildsDB.getGuild(targetUserDCGuild.id)
@@ -2791,6 +2818,7 @@ async def cmd_duel(message, args):
             return
 
         if message.guild.get_member(requestedUser.id) is None:
+            await message.channel.send(":white_check_mark: You have cancelled your duel challenge for **" + str(requestedUser) + "**.")
             targetUserGuild = findBBUserDCGuild(targetBBUser)
             if targetUserGuild is not None:
                 targetUserBBGuild = guildsDB.getGuild(targetUserGuild.id)

@@ -57,7 +57,7 @@ class bbUser:
         self.inactiveTurrets = inactiveTurrets
 
         self.lastSeenGuildId = lastSeenGuildId
-        self.haslastSeenGuildId = lastSeenGuildId != -1
+        self.hasLastSeenGuildId = lastSeenGuildId != -1
 
         self.duelRequests = {}
         self.duelWins = duelWins

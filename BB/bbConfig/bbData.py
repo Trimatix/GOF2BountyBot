@@ -96,7 +96,7 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "pay": ("**pay <user> <amount>**", "Pay the mentioned user an amount of credits from your balance.")}}
 
 # intro for admin help commands
-adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
+adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help how-to-play`
 **[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
 
 # help strings for admin bb commands
