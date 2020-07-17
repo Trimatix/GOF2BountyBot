@@ -111,22 +111,22 @@ class bbGuild:
 
 
 def fromDict(id, guildDict):
-    # old format conversion code
-    if "bountyNotifyRoleId" in guildDict:
-        alertRoles = {"bounties_new": guildDict["bountyNotifyRoleId"]}
-        if "shopRefreshRoleId" in guildDict:
-            alertRoles["shop_refresh"] = guildDict["shopRefreshRoleId"]
-        if "systemUpdatesMajorRoleId" in guildDict:
-            alertRoles["system_updates_major"] = guildDict["systemUpdatesMajorRoleId"]
-        if "systemUpdatesMinorRoleId" in guildDict:
-            alertRoles["system_updates_minor"] = guildDict["systemUpdatesMinorRoleId"]
-        if "systemMiscRoleId" in guildDict:
-            alertRoles["system_misc"] = guildDict["systemMiscRoleId"]
-        return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"], shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(), bountyBoardChannel=guildDict["bountyBoardChannel"] if "bountyBoardChannel" in guildDict else -1,
-                        alertRoles=alertRoles)
-    else:
-        # new format code
-        return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
-                        shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
-                        bountyBoardChannel=guildDict["bountyBoardChannel"] if "bountyBoardChannel" in guildDict else -1,
-                        alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {})
+    # # old format conversion code
+    # if "bountyNotifyRoleId" in guildDict:
+    #     alertRoles = {"bounties_new": guildDict["bountyNotifyRoleId"]}
+    #     if "shopRefreshRoleId" in guildDict:
+    #         alertRoles["shop_refresh"] = guildDict["shopRefreshRoleId"]
+    #     if "systemUpdatesMajorRoleId" in guildDict:
+    #         alertRoles["system_updates_major"] = guildDict["systemUpdatesMajorRoleId"]
+    #     if "systemUpdatesMinorRoleId" in guildDict:
+    #         alertRoles["system_updates_minor"] = guildDict["systemUpdatesMinorRoleId"]
+    #     if "systemMiscRoleId" in guildDict:
+    #         alertRoles["system_misc"] = guildDict["systemMiscRoleId"]
+    #     return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"], shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(), bountyBoardChannel=guildDict["bountyBoardChannel"] if "bountyBoardChannel" in guildDict else -1,
+    #                     alertRoles=alertRoles)
+    # else:
+    # new format code
+    return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
+                    shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
+                    bountyBoardChannel=guildDict["bountyBoardChannel"] if "bountyBoardChannel" in guildDict else -1,
+                    alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {})
