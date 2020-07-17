@@ -143,7 +143,7 @@ async def makeBountyBoardChannelMessage(guild, bounty, msg="", embed=None):
     if not guild.hasBountyBoardChannel:
         raise KeyError("The requested bbGuild has no bountyBoardChannel")
     bountyListing = await guild.bountyBoardChannel.channel.send(msg, embed=embed)
-    guild.bountyBoardChannel.addBounty(bounty, bountyListing)
+    await guild.bountyBoardChannel.addBounty(bounty, bountyListing)
     await guild.bountyBoardChannel.updateBountyMessage(bounty)
 
 
@@ -152,7 +152,7 @@ async def removeBountyBoardChannelMessage(guild, bounty):
         raise KeyError("The requested bbGuild has no bountyBoardChannel")
     if guild.bountyBoardChannel.hasMessageForBounty(bounty):
         await guild.bountyBoardChannel.getMessageForBounty(bounty).delete()
-        guild.bountyBoardChannel.removeBounty(bounty)
+        await guild.bountyBoardChannel.removeBounty(bounty)
 
 
 """

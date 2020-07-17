@@ -32,6 +32,8 @@ class BountyBoardChannel:
 
         # dict of "faction": {criminal: int message ID}
         self.bountyMessages = {}
+        # discord message object to be filled when no bounties exist
+        self.noBountiesMessage = None
         # discord channel object
         self.channel = None
 
@@ -55,14 +57,24 @@ class BountyBoardChannel:
     def getMessageForBounty(self, bounty):
         return self.bountyMessages[bounty.criminal.faction][bounty.criminal]
 
+
+    def isEmpty(self):
+        return not bool(self.bountyMessages)
+
     
-    def addBounty(self, bounty, message):
+    async def addBounty(self, bounty, message):
+        # if len(self.bountyMessages) == 0:
+        #     await self.noBountiesMessage.delete()
+
         if self.hasMessageForBounty(bounty):
             raise KeyError("BNTY_BRD_CH-ADD-BNTY_EXSTS: Attempted to add a bounty to a bountyboardchannel, but the bounty is already listed")
         self.bountyMessages[bounty.criminal.faction][bounty.criminal] = message
     
 
-    def removeBounty(self, bounty):
+    async def removeBounty(self, bounty):
+        # if len(self.bountyMessages) == 1:
+        #     self.noBountiesMessage = await self.channel.send(bbConfig.bbcNoBountiesMsg)
+
         if not self.hasMessageForBounty(bounty):
             raise KeyError("BNTY_BRD_CH-REM-BNTY_NOT_EXST: Attempted to remove a bounty from a bountyboardchannel, but the bounty is not listed")
         del self.bountyMessages[bounty.criminal.faction][bounty.criminal]
