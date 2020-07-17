@@ -263,7 +263,9 @@ validItemNames = ["ship", "weapon", "module", "turret", "all"]
 
 ##### USERS #####
 
-userAlertsIDsDefaults = {   #"shop_refresh": False,
+userAlertsIDsDefaults = {   "bounties_new": False,
+    
+                            "shop_refresh": False,
 
                             "duels_challenge_incoming_new": True,
                             "duels_challenge_incoming_cancel": False,
