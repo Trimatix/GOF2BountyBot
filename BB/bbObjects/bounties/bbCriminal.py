@@ -61,6 +61,10 @@ class Criminal (bbAliasable.Aliasable):
         return Criminal
 
 
+    def __hash__(self):
+        return hash(repr(self))
+
+
     def toDict(self):
         if self.builtIn:
             data = {"builtIn":True, "name":self.name}

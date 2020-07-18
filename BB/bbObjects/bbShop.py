@@ -11,13 +11,28 @@ class bbShop:
         self.maxTurrets = maxTurrets
         self.currentTechLevel = currentTechLevel
 
-        self.shipsStock = shipsStock
-        self.weaponsStock = weaponsStock
-        self.modulesStock = modulesStock
-        self.turretsStock = turretsStock
+        # TODO: Somewhere, stocks are getting passed in and shared amongst all shops. Fix this. Temporary manual deep copy here to make sure each shop gets its own inventory objects.
+        # self.shipsStock = shipsStock
+        # self.weaponsStock = weaponsStock
+        # self.modulesStock = modulesStock
+        # self.turretsStock = turretsStock
+
+        self.shipsStock = bbInventory.bbInventory()
+        self.weaponsStock = bbInventory.bbInventory()
+        self.modulesStock = bbInventory.bbInventory()
+        self.turretsStock = bbInventory.bbInventory()
 
         if shipsStock.isEmpty() and weaponsStock.isEmpty() and modulesStock.isEmpty() and turretsStock.isEmpty():
             self.refreshStock()
+        else:
+            for itemListing in shipsStock.items.values():
+                self.shipsStock.addItem(itemListing.item, itemListing.count)
+            for itemListing in weaponsStock.items.values():
+                self.weaponsStock.addItem(itemListing.item, itemListing.count)
+            for itemListing in modulesStock.items.values():
+                self.modulesStock.addItem(itemListing.item, itemListing.count)
+            for itemListing in turretsStock.items.values():
+                self.turretsStock.addItem(itemListing.item, itemListing.count)
 
 
     def refreshStock(self, level=-1):
@@ -32,6 +47,7 @@ class bbShop:
             if level not in range(bbConfig.minTechLevel, bbConfig.maxTechLevel + 1):
                 raise ValueError("Attempted to refresh a shop at tech level " + str(level) + ". must be within the range " + str(bbConfig.minTechLevel) + " to " + str(bbConfig.maxTechLevel))
             self.currentTechLevel = level
+            
         for i in range(self.maxShips):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.shipKeysByTL[itemTL - 1]) != 0:
@@ -200,21 +216,21 @@ class bbShop:
     def toDict(self):
         shipsStockDict = []
         for ship in self.shipsStock.keys:
-            shipsStockDict.append(shipsStock.items[ship].toDict())
+            shipsStockDict.append(self.shipsStock.items[ship].toDict())
 
         weaponsStockDict = []
         for weapon in self.weaponsStock.keys:
-            weaponsStockDict.append(weaponsStock.items[weapon].toDict())
+            weaponsStockDict.append(self.weaponsStock.items[weapon].toDict())
 
         modulesStockDict = []
         for module in self.modulesStock.keys:
-            modulesStockDict.append(modulesStock.items[module].toDict())
+            modulesStockDict.append(self.modulesStock.items[module].toDict())
 
         turretsStockDict = []
         for turret in self.turretsStock.keys:
-            turretsStockDict.append(turretsStock.items[turret].toDict())
+            turretsStockDict.append(self.turretsStock.items[turret].toDict())
 
-        return {"maxShips":self.maxShips, "maxWeapons":self.maxWeapons, "maxModules":self.maxModules,
+        return {"maxShips":self.maxShips, "maxWeapons":self.maxWeapons, "maxModules":self.maxModules, "currentTechLevel":self.currentTechLevel,
                     "shipsStock":shipsStockDict, "weaponsStock":weaponsStockDict, "modulesStock":modulesStockDict, "turretsStock":turretsStockDict}
 
 
@@ -235,5 +251,5 @@ def fromDict(shopDict):
     for turretListingDict in shopDict["turretsStock"]:
         turretsStock.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-    return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"],
+    return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"], currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
                     shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)

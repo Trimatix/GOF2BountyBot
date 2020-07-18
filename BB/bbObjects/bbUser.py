@@ -1,6 +1,7 @@
 from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from ..bbConfig import bbConfig
 from . import bbInventory, bbInventoryListing
+from ..userAlerts import UserAlerts
 
 
 defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
@@ -11,7 +12,7 @@ defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "sys
 
 
 class bbUser:
-    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0):
+    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0, alerts=bbConfig.userAlertsIDsDefaults):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -56,7 +57,7 @@ class bbUser:
         self.inactiveTurrets = inactiveTurrets
 
         self.lastSeenGuildId = lastSeenGuildId
-        self.haslastSeenGuildId = lastSeenGuildId != -1
+        self.hasLastSeenGuildId = lastSeenGuildId != -1
 
         self.duelRequests = {}
         self.duelWins = duelWins
@@ -64,6 +65,7 @@ class bbUser:
 
         self.duelCreditsWins = duelCreditsWins
         self.duelCreditsLosses = duelCreditsLosses
+        self.userAlerts = alerts
 
     
     def resetUser(self):
@@ -204,6 +206,11 @@ class bbUser:
         for turret in self.inactiveTurrets.keys:
             inactiveTurretsDict.append(self.inactiveTurrets.items[turret].toDict())
 
+        alerts = {}
+        for alertID in self.userAlerts.keys():
+            if isinstance(self.userAlerts[alertID], UserAlerts.StateUserAlert):
+                alerts[alertID] = self.userAlerts[alertID].state
+
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
@@ -288,33 +295,37 @@ class bbUser:
         self.removeDuelChallengeObj(self.duelRequests[duelTarget])
 
 
+    async def setAlertByType(self, alertType, dcGuild, bbGuild, dcMember, newState):
+        await self.userAlerts[alertType].setState(dcGuild, bbGuild, dcMember, newState)
+        return newState
+
+
+    async def setAlertByID(self, alertID, dcGuild, bbGuild, dcMember, newState):
+        return await self.setAlertType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember, newState)
+
+
+    async def toggleAlertType(self, alertType, dcGuild, bbGuild, dcMember):
+        return await self.userAlerts[alertType].toggle(dcGuild, bbGuild, dcMember)
+
+    
+    async def toggleAlertID(self, alertID, dcGuild, bbGuild, dcMember):
+        return await self.toggleAlertType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
+
+
+    def isAlertedForType(self, alertType, dcGuild, bbGuild, dcMember):
+        return self.userAlerts[alertType].getState(dcGuild, bbGuild, dcMember)
+
+    
+    def isAlertedForID(self, alertID, dcGuild, bbGuild, dcMember):
+        return self.isAlertedForType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
+
+
     def __str__(self):
         return "<bbUser #" + str(self.id) + ">"
 
 
 def fromDict(id, userDict):
     activeShip = bbShip.fromDict(userDict["activeShip"])
-
-    # Convert old data format. once done, replace with commented out code below
-    # inactiveShips = bbInventory.bbInventory()
-    # if "inactiveShips" in userDict:
-    #     for shipListingDict in userDict["inactiveShips"]:
-    #         inactiveShips.addItem(bbShip.fromDict(shipListingDict))
-
-    # inactiveWeapons = bbInventory.bbInventory()
-    # if "inactiveWeapons" in userDict:
-    #     for weaponListingDict in userDict["inactiveWeapons"]:
-    #         inactiveWeapons.addItem(bbWeapon.fromDict(weaponListingDict))
-
-    # inactiveModules = bbInventory.bbInventory()
-    # if "inactiveModules" in userDict:
-    #     for moduleListingDict in userDict["inactiveModules"]:
-    #         inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict))
-
-    # inactiveTurrets = bbInventory.bbInventory()
-    # if "inactiveTurrets" in userDict:
-    #     for turretListingDict in userDict["inactiveTurrets"]:
-    #         inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict))
 
     inactiveShips = bbInventory.bbInventory()
     if "inactiveShips" in userDict:
@@ -336,8 +347,22 @@ def fromDict(id, userDict):
         for turretListingDict in userDict["inactiveTurrets"]:
             inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
+    userAlerts = {}
+    if "alerts" in userDict:
+        for alertID in UserAlerts.userAlertsIDsTypes:
+            alertType = UserAlerts.userAlertsIDsTypes[alertID]
+            if alertID in userDict["alerts"]:
+                userAlerts[alertType] = alertType(userDict[alertID])
+            else:
+                userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
+    else:
+        for alertID in UserAlerts.userAlertsIDsTypes:
+            alertType = UserAlerts.userAlertsIDsTypes[alertID]
+            userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
+
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
                     bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
                     inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
-                    duelWins=userDict["duelWins"] if "duelWins" in userDict else 0, duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0, duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0, duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0)
+                    duelWins=userDict["duelWins"] if "duelWins" in userDict else 0, duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0, duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0, duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0,
+                    alerts=userAlerts)

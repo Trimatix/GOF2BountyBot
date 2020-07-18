@@ -30,7 +30,7 @@ duelCloakChance = 20
 ##### SHOPS #####
 
 # Amount of time to wait between refreshing stock of all shops
-shopRefreshStockPeriod = {"days":0, "hours":0, "minutes":30, "seconds":0}
+shopRefreshStockPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
 
 # The number of ranks to use when randomly picking shop stock
 numShipRanks = 10
@@ -98,7 +98,9 @@ shipMaxPriceTechLevels = [50000, 100000, 200000, 500000, 1000000, 2000000, 50000
 itemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 cumulativeItemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 
-# Parameters for itemTLSpawnChanceForShopTL values, using u function: https://www.desmos.com/calculator/orct5tkn9x
+# Parameters for itemTLSpawnChanceForShopTL values, using quadratic function: https://www.desmos.com/calculator/n2xfxf8taj
+# u function: https://www.desmos.com/calculator/orct5tkn9x
+# Original u function by Novahkiin22: https://www.desmos.com/calculator/tnldodey5u
 # Original function by Novahkiin22: https://www.desmos.com/calculator/nrshikfmxc
 tl_s = 7
 tl_o = 2.3
@@ -238,6 +240,9 @@ def pickRandomCriminalTL():
         if cumulativeCriminalTLChance[criminalTL] >= tlChance:
             return criminalTL + 1
     return maxTechLevel
+    
+# Text to send to a BountyBoardChannel when no bounties are currently active
+bbcNoBountiesMsg = "```css\n[ NO ACTIVE BOUNTIES ]\n\nThere are currently no active bounty listings.\nPlease check back later, or use [ $notify bounties ] to be pinged when new ones become available!\n```"
 
 
 
@@ -306,6 +311,21 @@ maxItemsPerHangarPageIndividual = 5
 
 # Names to be used when checking input to !bb hangar and bbUser.numInventoryPages
 validItemNames = ["ship", "weapon", "module", "turret", "all"]
+
+
+
+##### USERS #####
+
+userAlertsIDsDefaults = {   "bounties_new": False,
+    
+                            "shop_refresh": False,
+
+                            "duels_challenge_incoming_new": True,
+                            "duels_challenge_incoming_cancel": False,
+                            
+                            "system_updates_major": False,
+                            "system_updates_minor": False,
+                            "system_misc": False}
 
 
 

@@ -69,7 +69,7 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently six pages, and six sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Loadout`, `Shopping` and `Credits`."),
                             "stats": ("**stats** *[userTag]*", "Get various credits and bounty statistics about yourself, or a tagged user."),
                             "leaderboard": ("**leaderboard** *[-g|-c|-s|-w]*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
-                            "notify": ("**notify <type>** *[item]*", "Subscribe to pings when events take place. Currently, only `$notify bounties` is implemented, which will notify you when new bounties are available.")},
+                            "notify": ("**notify <type>** *[alert]*", "Subscribe to pings when events take place. Currently, **type** can be `bounties`, `shop`, `duels`, or `bot`.\n> `shop` requires the `refresh` option.\n> `duels` requires either `new` or `cancel`.\n> `bot` can take `updates` or `announcements`.\n> `bot updates` must be `major` or `minor`.")},
             
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
                             "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
@@ -87,7 +87,7 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "nameShip": ("**nameShip <nickname>**", "Give your active ship a nickname!"),
                             "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")},
 
-            "Shopping":{    "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed daily. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+            "Shopping":{    "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
                             "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
                             "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.")},
 
@@ -96,15 +96,17 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "pay": ("**pay <user> <amount>**", "Pay the mentioned user an amount of credits from your balance.")}}
 
 # intro for admin help commands
-adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
+adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help how-to-play`
 **[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
 
 # help strings for admin bb commands
 adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display information about admin-only commands."),
                                         "set-announce-channel": ("**set-announce-channel** *[off]*", "Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements."),
                                         "set-play-channel": ("**set-play-channel** *[off]*", "Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements."),
-                                        "set-bounty-notify-role": ("**set-bounty-notify-role <role>**", "Set a role to ping when new bounties are created. **<role>** can be either a role mention, or a role ID."),
-                                        "remove-bounty-notify-role": ("**remove-bounty-notify-role**", "Stop pinging the bounty notify role when new bounties are created.")}}
+                                        "set-notify-role": ("**set-notify-role <type>** *[alert]* **<role>**", "Set a role to ping when various events occur. **<type>** and/or *[alert]]* must specify a type of notification. **<role>** can be either a role mention, or a role ID. For valid notification types, see `$COMMANDPREFIX$help notify`."),
+                                        "remove-notify-role": ("**remove-notify-role**", "Stop pinging the bounty notify role when new bounties are created."),
+                                        "set-bounty-board-channel": ("**set-bounty-board-channel**", "Send from within a channel to set that channel as a *bountyboard*.\nBountyBoard channels show *all* information about active bounties, continuously update their listings (e.g cross through checked systems), and only show *active* bounties (listings for located bounties are removed)."),
+                                        "remove-bounty-board-channel": ("**remove-bounty-board-channel**", "Send from any channel to remove the server's bountyboard channel, if one is set.")}}
 
 # string extensions for numbers, e.g 11th, 1st, 23rd...
 numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
@@ -344,7 +346,7 @@ builtInWeaponData = {   # Lasers
                         "Gram Blaster": {"name": "Gram Blaster", "aliases": ["Gram"], "techLevel": 7, "dps":40, "value":41703, "wiki": "https://galaxyonfire.fandom.com/wiki/Gram_Blaster", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476763291680779/gram_blaster.png", "emoji": "<:gramblaster:723709619624476795>"},
                         "Ridil Blaster": {"name": "Ridil Blaster", "aliases": ["Ridil"], "techLevel": 8, "dps":48, "value":67535, "wiki": "https://galaxyonfire.fandom.com/wiki/Ridil_Blaster", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476812814090300/ridil_blaster.png", "emoji": "<:ridilblaster:723709620446822420>"},
                         "Tyrfing Blaster": {"name": "Tyrfing Blaster", "aliases": ["Tyrfing"], "techLevel": 9, "dps":59.09, "value":97683, "wiki": "https://galaxyonfire.fandom.com/wiki/Tyrfing_Blaster", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723484968055079002/tyrfing_blaster.png", "emoji": "<:tyrfingblaster:723709620220198974>"},
-                        "Mimung Blaster": {"name": "Mimung Blaster", "aliases": ["Mimung"], "techLevel": 9, "dps":69.59, "value":369763, "wiki": "https://galaxyonfire.fandom.com/wiki/Mimung_Blaster", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476793658572800/mimung_blaster.png", "emoji": "<:mimungblaster:723709620169736204>"},
+                        "Mimung Blaster": {"name": "Mimung Blaster", "aliases": ["Mimung"], "techLevel": 9, "dps":69.56, "value":369763, "wiki": "https://galaxyonfire.fandom.com/wiki/Mimung_Blaster", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476793658572800/mimung_blaster.png", "emoji": "<:mimungblaster:723709620169736204>"},
                         
                         # EMP Blasters
                         "Luna EMP Mk I": {"name": "Luna EMP Mk I", "aliases": ["Luna Mk I", "Luna EMP", "Luna", "EMP Mk I", "EMP I"], "techLevel": 4, "dps":8.57, "value":5942, "wiki": "https://galaxyonfire.fandom.com/wiki/Luna_EMP_Mk_I", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476864126943232/luna_emp_mk_i.png", "emoji": "<:lunaempmki:723709689149390888>"},

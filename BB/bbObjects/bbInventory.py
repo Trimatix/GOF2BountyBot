@@ -57,10 +57,10 @@ class bbInventory:
             self.totalItems -= 1
             # remove the bbItemListing if it is now empty
             if self.items[item].count == 0:
-                del self.items[item]
                 # update the keys and numKeys trackers
                 self.keys.remove(item)
                 self.numKeys -= 1
+                del self.items[item]
         else:
             raise ValueError("Attempted to remove " + str(quantity) + " " + str(item) + "(s) when " + (str(self.items[item].count) if item in self.items else "0") + " are in inventory")
 
