@@ -38,7 +38,8 @@ class Bounty:
         self.reward = config.reward
         self.checked = config.checked
         self.answer = config.answer
-        self.criminal.techLevel = config.techLevel
+        if self.criminal.techLevel == -1:
+            self.criminal.techLevel = config.techLevel
 
         
     # return 0 => system not in route
