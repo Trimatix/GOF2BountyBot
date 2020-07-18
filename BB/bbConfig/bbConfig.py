@@ -89,13 +89,6 @@ def pickRandomShopTL():
             return shopTL + 1
     return maxTechLevel
 
-def pickRandomCriminalTL():
-    tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
-    for shopTL in range(len(cumulativeShopTLChance)):
-        if cumulativeShopTLChance[shopTL] >= tlChance:
-            return shopTL + 1
-    return maxTechLevel
-
 # Price ranges by which ships should be ranked into tech levels. 0th index = tech level 1
 shipMaxPriceTechLevels = [50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 7000000, 7500000, 999999999]
 
@@ -105,7 +98,7 @@ shipMaxPriceTechLevels = [50000, 100000, 200000, 500000, 1000000, 2000000, 50000
 itemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 cumulativeItemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 
-# Parameters for itemTLSpawnChanceForShopTL values, using u function: https://www.desmos.com/calculator/tnldodey5u
+# Parameters for itemTLSpawnChanceForShopTL values, using u function: https://www.desmos.com/calculator/orct5tkn9x
 # Original function by Novahkiin22: https://www.desmos.com/calculator/nrshikfmxc
 tl_s = 7
 tl_o = 2.3
@@ -184,9 +177,9 @@ newBountyFixedUseDailyTime = False
 newBountyFixedDelta = {"days":0, "hours":0, "minutes":40, "seconds":0}
 
 # when using random delay generation, use this as the minimum wait time in seconds
-newBountyDelayMin = 15 * 60
+newBountyDelayMin = 1 * 60
 # when using random delay generation, use this as the maximum wait time in seconds
-newBountyDelayMax = 1 * 60 * 60
+newBountyDelayMax = 5 * 60
 
 # The number of credits to award for each bPoint (each system in a criminal route)
 bPointsToCreditsRatio = 1000
@@ -202,6 +195,49 @@ closeBountyThreshold = 4
 
 # The probability of a criminal equipping a turret, should their ship have space for one
 criminalEquipTurretChance = 30
+
+# The maximum total-value a player may have before being disallowed from hunting a tech-level of bounty. 0th index = tech level 1
+# I.e, to hunt level 1 bounties, a player must be worth no more than bountyTLMaxPlayerValues[0] credits.
+bountyTLMaxPlayerValues = [75000, 100000, 200000, 450000, 600000, 800000, 1000000, 2000000, 3000000, 999999999]
+
+# The probability of a shop spawning with a given tech level. Tech level = index + 1
+cumulativeCriminalTLChance = [0 for tl in range(minTechLevel, maxTechLevel + 1)]
+criminalTLChance = [0 for tl in range(minTechLevel, maxTechLevel + 1)]
+
+itemChanceSum = 0
+
+
+
+# Calculate spawn chance for each criminal TL
+for criminalTL in range(minTechLevel, maxTechLevel + 1):
+    itemChance = truncToRes(1 - math.exp((criminalTL - 10.5) / 5))
+    cumulativeCriminalTLChance[criminalTL - 1] = itemChance
+    itemChanceSum += itemChance
+
+# Scale criminal TL probabilities so that they add up to 1
+for criminalTL in range(minTechLevel, maxTechLevel + 1):
+    currentChance = cumulativeCriminalTLChance[criminalTL - 1]
+    if currentChance != 0:
+        cumulativeCriminalTLChance[criminalTL - 1] = truncToRes(currentChance / itemChanceSum)
+
+# Save non-cumulative probabilities
+for i in range(len(cumulativeCriminalTLChance)):
+    criminalTLChance[i] = cumulativeCriminalTLChance
+
+# Sum probabilities to give cumulative scale
+currentSum = 0
+for criminalTL in range(minTechLevel, maxTechLevel + 1):
+    currentChance = cumulativeCriminalTLChance[criminalTL - 1]
+    if currentChance != 0:
+        cumulativeCriminalTLChance[criminalTL - 1] = truncToRes(currentSum + currentChance)
+        currentSum += currentChance
+
+def pickRandomCriminalTL():
+    tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
+    for criminalTL in range(len(cumulativeCriminalTLChance)):
+        if cumulativeCriminalTLChance[criminalTL] >= tlChance:
+            return criminalTL + 1
+    return maxTechLevel
 
 
 
