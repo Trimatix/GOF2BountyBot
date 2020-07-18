@@ -69,6 +69,7 @@ class Criminal (bbAliasable.Aliasable):
 
         if self.hasShip:
             data["activeShip"] = self.activeShip.toDict()
+            data["techLevel"] = self.techLevel
         
         return data
 
@@ -80,6 +81,14 @@ class Criminal (bbAliasable.Aliasable):
 def fromDict(crimDict, builtIn=False):
     if "builtIn" in crimDict:
         if crimDict["builtIn"]:
-            return bbData.builtInCriminalObjs[crimDict["name"]]
-        return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=crimDict["builtIn"] or builtIn)
-    return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)
+            crimObj = bbData.builtInCriminalObjs[crimDict["name"]]
+        else:
+            crimObj = Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=crimDict["builtIn"] or builtIn)
+    else:
+        crimObj = Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)
+
+    if "activeShip" in crimDict:
+        crimObj.equipShip(bbShip.fromDict(crimDict["activeShip"]))
+        crimObj.techLevel = crimDict["techLevel"] if "techLevel" in crimDict else crimObj.activeShip.techLevel
+    
+    return crimObj
