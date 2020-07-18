@@ -205,7 +205,7 @@ Messages will be sent to the playChannels of all guilds in the guildsDB, if they
 async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
     # Loop over all guilds in the database that have playChannels
     for currentGuild in guildsDB.getGuilds():
-        if currentGuild.hasPlayChannel():
+        if client.get_guild(currentGuild.id) is not None and currentGuild.hasPlayChannel():
             # Create the announcement embed
             rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!", authorName=criminalNameOrDiscrim(bounty.criminal) + " Arrested",
                                      icon=bounty.criminal.icon, col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
@@ -814,7 +814,13 @@ async def cmd_check(message, args):
             # list of completed bounties to remove from the bounties database
             toPop = []
             for bounty in bountiesDB.getFactionBounties(fac):
-
+                if bounty.answer == requestedSystem:
+                    print("answer correct")
+                print("totalVal",requestedBBUser.getStatByName("value"))
+                print("maxVal",bbConfig.bountyTLMaxPlayerValues[bounty.criminal.techLevel-1])
+                if bounty.answer == requestedSystem and requestedBBUser.getStatByName("value") >= bbConfig.bountyTLMaxPlayerValues[bounty.criminal.techLevel-1]:
+                    await message.channel.send(":space_invader: You located **" + bounty.criminal.name + "**, but you are too high level to fight them!")
+                    continue
                 # Check the passed system in current bounty
                 # If current bounty resides in the requested system
                 checkResult = bounty.check(requestedSystem, message.author.id)
@@ -829,7 +835,7 @@ async def cmd_check(message, args):
                     if duelResults["winningShip"] is not requestedBBUser.activeShip:
                         respawnTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict({"minutes": len(bounty.route)}), 
                                                         expiryFunction=spawnAndAnnounceBounty,
-                                                        expiryFunctionArgs={"newBounty": bounty, "newConfig": bbBountyConfig.BountyConfig(faction=bounty.criminal.faction)},
+                                                        expiryFunctionArgs={"newBounty": bounty, "newConfig": bbBountyConfig.BountyConfig(faction=bounty.criminal.faction, techLevel=bounty.criminal.techLevel)},
                                                         rescheduleOnExpiryFuncFailure=True)
                         ActiveTimedTasks.escapedBountiesRespawnTTDB.scheduleTask(respawnTT)
 
@@ -884,7 +890,7 @@ async def cmd_check(message, args):
 
             if sightedCriminalsStr != "":
                 for currentGuild in guildsDB.getGuilds():
-                    if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
+                    if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel() and client.get_channel(currentGuild.getPlayChannelId()) is not None:
                         await client.get_channel(currentGuild.getPlayChannelId()).send(sightedCriminalsStr)
         # elif bountyLost:
         # If no bounty was won, print an error message
@@ -893,7 +899,8 @@ async def cmd_check(message, args):
 
             for currentGuild in guildsDB.getGuilds():
                 if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
-                    await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
+                    if client.get_channel(currentGuild.getPlayChannelId()) is not None:
+                        await client.get_channel(currentGuild.getPlayChannelId()).send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
 
         # Only put the calling user on checking cooldown and increment systemsChecked stat if the system checked is on an active bounty's route.
         if systemInBountyRoute:
@@ -1941,7 +1948,7 @@ async def cmd_loadout(message, args):
         criminalObj = bountiesDB.getBounty(criminalName).criminal
         
         activeShip = criminalObj.activeShip
-        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=criminalObj.name.title(), col=bbData.factionColours[criminalObj.faction] if criminalObj.faction in bbData.factionColours else bbData.factionColours["neutral"], thumb=criminalObj.icon)
+        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=criminalObj.name.title() + "\n`Difficulty: " + str(criminalObj.techLevel) + "`", col=bbData.factionColours[criminalObj.faction] if criminalObj.faction in bbData.factionColours else bbData.factionColours["neutral"], thumb=criminalObj.icon)
         loadoutEmbed = fillLoadoutEmbed(activeShip, loadoutEmbed, shipEmoji=True)
         
         await message.channel.send(embed=loadoutEmbed)
@@ -3561,6 +3568,8 @@ async def dev_cmd_make_bounty(message, args):
     # if no args were given, generate a completely random bounty
     if args == "":
         newBounty = bbBounty.Bounty(bountyDB=bountiesDB)
+    elif bbUtil.isInt(args):
+        newBounty = bbBounty.Bounty(bountyDB=bountiesDB, config=bbBountyConfig.BountyConfig(techLevel=int(args)))
     # if only one argument was given, use it as a faction
     elif len(args.split("+")) == 2:
         newFaction = args.split("+")[1]
@@ -3651,6 +3660,7 @@ async def dev_cmd_make_bounty(message, args):
     # Report an error for invalid command syntax
     else:
         await message.channel.send("incorrect syntax. give +faction +name +route +start +end +answer +reward +endtime +icon")
+        return
 
     # activate and announce the new bounty
     bountiesDB.addBounty(newBounty)
@@ -3769,6 +3779,7 @@ async def dev_cmd_make_player_bounty(message, args):
     # print an error for incorrect syntax
     else:
         await message.channel.send("incorrect syntax. give +faction +userTag +route +start +end +answer +reward +endtime +icon")
+        return
 
     # activate and announce the bounty
     bountiesDB.addBounty(newBounty)
