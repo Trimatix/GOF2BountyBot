@@ -196,3 +196,32 @@ def commaSplitNum(num):
     for i in range(len(num), 0, -3):
         outStr = outStr[0:i] + "," + outStr[i:]
     return outStr[:-1]
+
+
+"""
+Populate a discord.embed with information describing a ship.
+
+@param ship -- The ship to add descriptive fields for
+@param baseEmbed -- The embed to add fields to
+@param shipEmoji -- whether or not to use the ship's emoji next to its name. You may wish to leave this as false and instead use the ship's icon in the embed icon
+"""
+def fillLoadoutEmbed(ship, baseEmbed, shipEmoji=False):
+    if ship is not None:
+        baseEmbed.add_field(name="Active Ship:", value=(ship.emoji if shipEmoji and ship.hasEmoji else "") + ship.getNameAndNick() + "\n" + ship.statsStringNoItems(), inline=False)
+
+        if ship.getMaxPrimaries() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(ship.weapons)) + "/" + str(ship.getMaxPrimaries()) + "*", inline=False)
+            for weaponNum in range(1, len(ship.weapons) + 1):
+                baseEmbed.add_field(name=str(weaponNum) + ". " + ship.weapons[weaponNum - 1].name, value=(ship.weapons[weaponNum - 1].emoji if ship.weapons[weaponNum - 1].hasEmoji else "") + ship.weapons[weaponNum - 1].statsStringShort(), inline=True)
+
+        if ship.getMaxModules() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(ship.modules)) + "/" + str(ship.getMaxModules()) + "*", inline=False)
+            for moduleNum in range(1, len(ship.modules) + 1):
+                baseEmbed.add_field(name=str(moduleNum) + ". " + ship.modules[moduleNum - 1].name, value=(ship.modules[moduleNum - 1].emoji if ship.modules[moduleNum - 1].hasEmoji else "") + ship.modules[moduleNum - 1].statsStringShort(), inline=True)
+        
+        if ship.getMaxTurrets() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(ship.turrets)) + "/" + str(ship.getMaxTurrets()) + "*", inline=False)
+            for turretNum in range(1, len(ship.turrets) + 1):
+                baseEmbed.add_field(name=str(turretNum) + ". " + ship.turrets[turretNum - 1].name, value=(ship.turrets[turretNum - 1].emoji if ship.turrets[turretNum - 1].hasEmoji else "") + ship.turrets[turretNum - 1].statsStringShort(), inline=True)
+
+    return baseEmbed
