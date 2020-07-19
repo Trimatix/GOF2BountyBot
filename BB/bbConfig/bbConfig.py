@@ -30,7 +30,7 @@ duelCloakChance = 20
 ##### SHOPS #####
 
 # Amount of time to wait between refreshing stock of all shops
-shopRefreshStockPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
+shopRefreshStockPeriod = {"days":0, "hours":0, "minutes":15, "seconds":0}
 
 # The number of ranks to use when randomly picking shop stock
 numShipRanks = 10
@@ -200,24 +200,24 @@ criminalEquipTurretChance = 30
 
 # The maximum total-value a player may have before being disallowed from hunting a tech-level of bounty. 0th index = tech level 1
 # I.e, to hunt level 1 bounties, a player must be worth no more than bountyTLMaxPlayerValues[0] credits.
-bountyTLMaxPlayerValues = [75000, 100000, 200000, 450000, 600000, 800000, 1000000, 2000000, 3000000, 999999999]
+bountyTLMaxPlayerValues = [50000, 75000, 100000, 200000, 450000, 600000, 800000, 1000000, 2000000, 3000000, 999999999]
 
 # The probability of a shop spawning with a given tech level. Tech level = index + 1
-cumulativeCriminalTLChance = [0 for tl in range(minTechLevel, maxTechLevel + 1)]
-criminalTLChance = [0 for tl in range(minTechLevel, maxTechLevel + 1)]
+cumulativeCriminalTLChance = [0 for tl in range(minTechLevel-1, maxTechLevel + 1)]
+criminalTLChance = [0 for tl in range(minTechLevel-1, maxTechLevel + 1)]
 
 itemChanceSum = 0
 
 
 
 # Calculate spawn chance for each criminal TL
-for criminalTL in range(minTechLevel, maxTechLevel + 1):
+for criminalTL in range(minTechLevel-1, maxTechLevel + 1):
     itemChance = truncToRes(1 - math.exp((criminalTL - 10.5) / 5))
     cumulativeCriminalTLChance[criminalTL - 1] = itemChance
     itemChanceSum += itemChance
 
 # Scale criminal TL probabilities so that they add up to 1
-for criminalTL in range(minTechLevel, maxTechLevel + 1):
+for criminalTL in range(minTechLevel-1, maxTechLevel + 1):
     currentChance = cumulativeCriminalTLChance[criminalTL - 1]
     if currentChance != 0:
         cumulativeCriminalTLChance[criminalTL - 1] = truncToRes(currentChance / itemChanceSum)
@@ -228,7 +228,7 @@ for i in range(len(cumulativeCriminalTLChance)):
 
 # Sum probabilities to give cumulative scale
 currentSum = 0
-for criminalTL in range(minTechLevel, maxTechLevel + 1):
+for criminalTL in range(minTechLevel-1, maxTechLevel + 1):
     currentChance = cumulativeCriminalTLChance[criminalTL - 1]
     if currentChance != 0:
         cumulativeCriminalTLChance[criminalTL - 1] = truncToRes(currentSum + currentChance)
@@ -238,11 +238,15 @@ def pickRandomCriminalTL():
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
     for criminalTL in range(len(cumulativeCriminalTLChance)):
         if cumulativeCriminalTLChance[criminalTL] >= tlChance:
-            return criminalTL + 1
+            return criminalTL
     return maxTechLevel
     
 # Text to send to a BountyBoardChannel when no bounties are currently active
 bbcNoBountiesMsg = "```css\n[ NO ACTIVE BOUNTIES ]\n\nThere are currently no active bounty listings.\nPlease check back later, or use [ $notify bounties ] to be pinged when new ones become available!\n```"
+
+level0CrimLoadout = {"name": "Betty", "builtIn":True,
+                    "weapons":[{"name": "Nirai Impulse EX 1", "builtIn": True}],
+                    "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "ZMI Optistore", "builtIn": True}, {"name": "IMT Extract 2.7", "builtIn": True}]}
 
 
 
