@@ -306,7 +306,7 @@ class bbBountyDB:
             raise OverflowError("Requested faction's bounty DB is full")
 
         # ensure the given bounty does not already exist
-        if self.bountyNameExists(bounty.criminal.name):
+        if self.bountyNameExists(bounty.criminal.name, noEscapedCrim=False):
             raise ValueError("Attempted to add a bounty whose name already exists: " + bounty.criminal.name)
 
         # Add the bounty to the database
