@@ -24,6 +24,7 @@ from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
 from .scheduling import TimedTaskHeap
 from . import bbUtil, ActiveTimedTasks
 from .userAlerts import UserAlerts
+from .logging import bbLogger
 
 
 
@@ -121,7 +122,7 @@ def userTagOrDiscrim(userID, guild=None):
     if userObj is not None:
         return userObj.name + "#" + userObj.discriminator
     # Return the given mention as a fall back - might replace this with '#UNKNOWNUSER#' at some point.
-    print("USERIDNAMEORDISCRIM UNKNOWN USER")
+    bbLogger.log("Main", "uTgOrDscrm", "Unknown user requested." + (("Guild:" + guild.name + "#" + str(str(guild.id))) if guild is not None else "Global/NoGuild") + ". uID:" + str(userID), eventType="UKNWN_USR")
     return userID
 
 
@@ -184,8 +185,9 @@ async def announceNewBounty(newBounty):
                 await makeBountyBoardChannelMessage(currentGuild, newBounty, msg)
 
             except discord.Forbidden:
-                print("FAILED TO ANNOUNCE BOUNTY TO GUILD " + client.get_guild(
-                    currentGuild.id).name + " IN CHANNEL " + currentGuild.bountyBoardChannel.channel.name)
+                bbLogger.log("Main", "anncBnty", "Failed to post BBCh listing to guild " + client.get_guild(
+                    currentGuild.id).name + "#" + str(currentGuild.id) + " in channel " + currentGuild.bountyBoardChannel.channel.name + "#" + str(currentGuild.bountyBoardChannel.channel.id), category="bountyBoards", eventType="BBC_NW_FRBDN")
+
         # If the guild has an announceChannel
         elif currentGuild.hasAnnounceChannel():
             # ensure the announceChannel is valid
@@ -199,8 +201,8 @@ async def announceNewBounty(newBounty):
                     else:
                         await currentChannel.send(msg, embed=bountyEmbed)
                 except discord.Forbidden:
-                    print("FAILED TO ANNOUNCE BOUNTY TO GUILD " + client.get_guild(
-                        currentGuild.id).name + " IN CHANNEL " + currentChannel.name)
+                    bbLogger.log("Main", "anncBnty", "Failed to post announce-channel bounty listing to guild " + client.get_guild(
+                                    currentGuild.id).name + "#" + str(currentGuild.id) + " in channel " + currentChannel.name + "#" + str(currentChannel.id), eventType="ANNCCH_SND_FRBDN")
 
             # TODO: may wish to add handling for invalid announceChannels - e.g remove them from the bbGuild object
 
@@ -290,9 +292,8 @@ async def announceNewShopStock(guildID=-1):
                         else:
                             await playCh.send(":arrows_counterclockwise: " + msg)
                     except discord.Forbidden:
-                        print("FAILED TO ANNOUNCE SHOP REFRESH TO GUILD " + client.get_guild(
-                            guild.id).name + " IN CHANNEL " + playCh.name)
-    
+                        bbLogger.log("Main", "anncNwShp", "Failed to post shop stock announcement to guild " + client.get_guild(
+                                        guild.id).name + "#" + str(guild.id) + " in channel " + playCh.name + "#" + str(playCh.id), category="shop", eventType="PLCH_SND_FRBDN")
     else:
         guild = guildsDB.getGuild(guildID)
         # ensure guild has a valid playChannel
@@ -307,8 +308,8 @@ async def announceNewShopStock(guildID=-1):
                     else:
                         await playCh.send(":arrows_counterclockwise: " + msg)
                 except discord.Forbidden:
-                    print("FAILED TO ANNOUNCE SHOP REFRESH TO GUILD " + client.get_guild(
-                        guild.id).name + " IN CHANNEL " + playCh.name)
+                    bbLogger.log("Main", "anncNwShp", "Failed to post shop stock announcement to guild " + client.get_guild(
+                                    guild.id).name + "#" + str(guild.id) + " in channel " + playCh.name + "#" + str(playCh.id), category="shop", eventType="PLCH_NONE")
 
 
 """
@@ -397,6 +398,7 @@ def saveAllDBs():
     saveDB(bbConfig.userDBPath, usersDB)
     saveDB(bbConfig.bountyDBPath, bountiesDB)
     saveDB(bbConfig.guildDBPath, guildsDB)
+    bbLogger.save()
     print(datetime.now().strftime("%H:%M:%S: Data saved!"))
 
 
@@ -952,7 +954,8 @@ async def cmd_check(message, args):
                         if currentCh is not None:
                             await currentCh.send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
                         else:
-                            print("Failed global check announcement in guild",currentGuild.id)
+                            bbLogger.log("Main", "cmd_chk", "None playchannel received when posting global failed check to guild " + client.get_guild(
+                                            currentGuild.id).name + "#" + str(currentGuild.id) + " in channel ?#" + str(currentGuild.getPlayChannelId()), eventType="PLCH_NONE")
 
         # Only put the calling user on checking cooldown and increment systemsChecked stat if the system checked is on an active bounty's route.
         if systemInBountyRoute:
@@ -1892,23 +1895,19 @@ async def cmd_shop(message, args):
                 currentItem = requestedShop.shipsStock[shipNum - 1].item
             except KeyError:
                 try:
-                    print("Attempted to get item " + requestedShop.shipsStock.keys[shipNum-1].name + ", which was not found in the shop stock.")
+                    bbLogger.log("Main", "cmd_shop", "Requested ship '" + requestedShop.shipsStock.keys[shipNum-1].name + "' (index " + str(shipNum-1) + "), which was not found in the shop stock",
+                                    category="shop", eventType="UNKWN_KEY")
                 except IndexError:
                     break
                 except AttributeError as e:
-                    print("[cmd_shop: ship] Type getting ship at index.")
-                    print(e)
-                    print("shipNum-1:",shipNum-1,"\nkey:",requestedShop.shipsStock.keys[shipNum-1],"\nKeys:",end="")
-                    for ship in requestedShop.shipsStock.items:
-                        print(", " + str(ship),end="")
-                    print()
+                    keysStr = ""
+                    for item in requestedShop.shipsStock.items:
+                        keysStr += str(item) + ", "
+                    bbLogger.log("Main", "cmd_shop", "Unexpected type in shipsstock KEYS, index " + str(shipNum-1) +  ". Expected bbShip, got " + type(requestedShop.shipsStock.keys[shipNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
+                                    category="shop", eventType="INVTY_KEY_TYPE")
                     shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[shipNum-1] + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)
                     continue
-                print("shipNum-1:",shipNum-1,"\nkey:",requestedShop.shipsStock.keys[shipNum-1].name,"\nKeys:",end="")
-                for ship in requestedShop.shipsStock.items:
-                    print(", " + ship.name,end="")
-                print()
                 shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[shipNum-1].name + "'",
                                     value="Do not attempt to buy. Could cause issues.", inline=True)
                 continue
@@ -1926,23 +1925,19 @@ async def cmd_shop(message, args):
                 currentItem = requestedShop.weaponsStock[weaponNum - 1].item
             except KeyError:
                 try:
-                    print("Attempted to get item " + requestedShop.keys[weaponNum-1].name + ", which was not found in the shop stock.")
+                    bbLogger.log("Main", "cmd_shop", "Requested weapon '" + requestedShop.weaponsStock.keys[weaponNum-1].name + "' (index " + str(weaponNum-1) + "), which was not found in the shop stock",
+                                    category="shop", eventType="UNKWN_KEY")
                 except IndexError:
                     break
                 except AttributeError as e:
-                    print("[cmd_shop: weapon] Type getting weapon at index.")
-                    print(e)
-                    print("weaponNum-1:",weaponNum-1,"\nkey:",requestedShop.shipsStock.keys[weaponNum-1],"\nKeys:",end="")
-                    for ship in requestedShop.shipsStock.items:
-                        print(", " + ship,end="")
-                    print()
+                    keysStr = ""
+                    for item in requestedShop.weaponsStock.items:
+                        keysStr += str(item) + ", "
+                    bbLogger.log("Main", "cmd_shop", "Unexpected type in weaponsstock KEYS, index " + str(shipNum-1) +  ". Expected bbWeapon, got " + type(requestedShop.weaponsStock.keys[weaponNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
+                                    category="shop", eventType="INVTY_KEY_TYPE")
                     shopEmbed.add_field(name=str(weaponNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[weaponNum-1] + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)
                     continue
-                print("weaponNum-1:",weaponNum-1,"\nkey:",requestedShop.shipsStock.keys[weaponNum-1].name,"\nKeys:",end="")
-                for ship in requestedShop.shipsStock.items:
-                    print(", " + ship.name,end="")
-                print()
                 shopEmbed.add_field(name=str(weaponNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[weaponNum-1].name + "'",
                                     value="Do not attempt to buy. Could cause issues.", inline=True)
                 continue
@@ -1960,23 +1955,19 @@ async def cmd_shop(message, args):
                 currentItem = requestedShop.modulesStock[moduleNum - 1].item
             except KeyError:
                 try:
-                    print("Attempted to get item " + requestedShop.keys[moduleNum-1].name + ", which was not found in the shop stock.")
+                    bbLogger.log("Main", "cmd_shop", "Requested module '" + requestedShop.modulesStock.keys[moduleNum-1].name + "' (index " + str(moduleNum-1) + "), which was not found in the shop stock",
+                                    category="shop", eventType="UNKWN_KEY")
                 except IndexError:
                     break
                 except AttributeError as e:
-                    print("[cmd_shop: module] Type getting module at index.")
-                    print(e)
-                    print("moduleNum-1:",moduleNum-1,"\nkey:",requestedShop.shipsStock.keys[moduleNum-1],"\nKeys:",end="")
-                    for ship in requestedShop.shipsStock.items:
-                        print(", " + ship,end="")
-                    print()
+                    keysStr = ""
+                    for item in requestedShop.modulesStock.items:
+                        keysStr += str(item) + ", "
+                    bbLogger.log("Main", "cmd_shop", "Unexpected type in modulesstock KEYS, index " + str(moduleNum-1) +  ". Expected bbModule, got " + type(requestedShop.modulesStock.keys[moduleNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
+                                    category="shop", eventType="INVTY_KEY_TYPE")
                     shopEmbed.add_field(name=str(moduleNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[moduleNum-1] + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)
                     continue
-                print("moduleNum-1:",moduleNum-1,"\nkey:",requestedShop.shipsStock.keys[moduleNum-1].name,"\nKeys:",end="")
-                for ship in requestedShop.shipsStock.items:
-                    print(", " + ship.name,end="")
-                print()
                 shopEmbed.add_field(name=str(moduleNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[moduleNum-1].name + "'",
                                     value="Do not attempt to buy. Could cause issues.", inline=True)
                 continue
@@ -1994,23 +1985,19 @@ async def cmd_shop(message, args):
                 currentItem = requestedShop.turretsStock[turretNum - 1].item
             except KeyError:
                 try:
-                    print("Attempted to get item " + requestedShop.keys[turretNum-1].name + ", which was not found in the shop stock.")
+                    bbLogger.log("Main", "cmd_shop", "Requested turret '" + requestedShop.turretsStock.keys[turretNum-1].name + "' (index " + str(turretNum-1) + "), which was not found in the shop stock",
+                                    category="shop", eventType="UNKWN_KEY")
                 except IndexError:
                     break
                 except AttributeError as e:
-                    print("[cmd_shop: turret] Type getting turret at index.")
-                    print(e)
-                    print("turretNum-1:",turretNum-1,"\nkey:",requestedShop.shipsStock.keys[turretNum-1],"\nKeys:",end="")
-                    for ship in requestedShop.shipsStock.items:
-                        print(", " + ship,end="")
-                    print()
+                    keysStr = ""
+                    for item in requestedShop.turretsStock.items:
+                        keysStr += str(item) + ", "
+                    bbLogger.log("Main", "cmd_shop", "Unexpected type in turretsstock KEYS, index " + str(turretNum-1) +  ". Expected bbTurret, got " + type(requestedShop.turretsStock.keys[turretNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
+                                    category="shop", eventType="INVTY_KEY_TYPE")
                     shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[turretNum-1] + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)
                     continue
-                print("turretNum-1:",turretNum-1,"\nkey:",requestedShop.shipsStock.keys[turretNum-1].name,"\nKeys:",end="")
-                for ship in requestedShop.shipsStock.items:
-                    print(", " + ship.name,end="")
-                print()
                 shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[turretNum-1].name + "'",
                                     value="Do not attempt to buy. Could cause issues.", inline=True)
                 continue
@@ -2820,10 +2807,8 @@ async def cmd_duel(message, args):
             newDuelReq.duelTimeoutTask = duelTT
             ActiveTimedTasks.duelRequestTTDB.scheduleTask(duelTT)
             sourceBBUser.addDuelChallenge(newDuelReq)
-            # print("Duelreq added to " + str(sourceBBUser.id) + " from " + str(newDuelReq.sourceBBGuild.id) + " to " + str(newDuelReq.targetBBUser.id))
         except KeyError:
             await message.channel.send(":x: User not found! Did they leave the server?")
-            print(1)
             return
         except Exception:
             await message.channel.send(":woozy_face: An unexpected error occurred! Tri, what did you do...")
@@ -2837,7 +2822,6 @@ async def cmd_duel(message, args):
             targetUserDCGuild = findBBUserDCGuild(targetBBUser)
             if targetUserDCGuild is None:
                 await message.channel.send(":x: User not found! Did they leave the server?")
-                print(2)
                 return
             else:
                 targetUserBBGuild = guildsDB.getGuild(targetUserDCGuild.id)
@@ -3175,9 +3159,7 @@ async def dev_cmd_sleep(message, args):
     await message.channel.send("zzzz....")
     botLoggedIn = False
     await client.logout()
-    saveDB(bbConfig.userDBPath, usersDB)
-    saveDB(bbConfig.bountyDBPath, bountiesDB)
-    saveDB(bbConfig.guildDBPath, guildsDB)
+    saveAllDBs()
     print(datetime.now().strftime("%H:%M:%S: Data saved!"))
 
 bbCommands.register("sleep", dev_cmd_sleep, isDev=True)
@@ -3191,9 +3173,7 @@ developer command saving all databases to JSON
 @param args -- ignored
 """
 async def dev_cmd_save(message, args):
-    saveDB(bbConfig.userDBPath, usersDB)
-    saveDB(bbConfig.bountyDBPath, bountiesDB)
-    saveDB(bbConfig.guildDBPath, guildsDB)
+    saveAllDBs()
     print(datetime.now().strftime("%H:%M:%S: Data saved manually!"))
     await message.channel.send("saved!")
 
@@ -4006,12 +3986,12 @@ TODO: Once deprecation databases are implemented, if guilds now store important 
 """
 @client.event
 async def on_guild_join(guild):
-    print(datetime.now().strftime(
-        "[%H:%M:%S]") + " I joined a new guild! '" + guild.name + "' [" + str(guild.id) + "]", end="")
+    guildExists = True
     if not guildsDB.guildIdExists(guild.id):
+        guildExists = False
         guildsDB.addGuildID(guild.id)
-        print(" -- The guild was added to guildsDB.", end="")
-    print()
+    bbLogger.log("Main", "guild_join", "I joined a new guild! " + guild.name + "#" + str(guild.id) + ("\n -- The guild was added to guildsDB" if not guildExists else ""),
+                    category="guildsDB", eventType="NW_GLD")
 
 
 """
@@ -4022,12 +4002,12 @@ TODO: Once deprecation databases are implemented, if guilds now store important 
 """
 @client.event
 async def on_guild_remove(guild):
-    print(datetime.now().strftime(
-        "[%H:%M:%S]") + " I left a guild! '" + guild.name + "' [" + str(guild.id) + "]", end="")
+    guildExists = False
     if guildsDB.guildIdExists(guild.id):
+        guildExists = True
         guildsDB.removeGuildId(guild.id)
-        print(" -- The guild was removed from guildsDB.", end="")
-    print()
+    bbLogger.log("Main", "guild_remove", "I left a guild! " + guild.name + "#" + str(guild.id) + ("\n -- The guild was removed from guildsDB" if guildExists else ""),
+                    category="guildsDB", eventType="NW_GLD")
 
 
 """

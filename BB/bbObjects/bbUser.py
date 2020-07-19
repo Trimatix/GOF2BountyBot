@@ -282,7 +282,6 @@ class bbUser:
         if duelReq.targetBBUser is self:
             raise ValueError("Attempted to add a DuelRequest for self: " + str(duelReq.sourceBBUser.id))
         self.duelRequests[duelReq.targetBBUser] = duelReq
-        # print("user " + str(self.id) + " stored a new duel request, from " + str(duelReq.sourceBBUser.id) + " to " + str(duelReq.targetBBUser.id))
 
 
     def removeDuelChallengeObj(self, duelReq):
