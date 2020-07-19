@@ -452,28 +452,6 @@ def findBBUserDCGuild(user):
     return None
 
 
-def fillLoadoutEmbed(ship, baseEmbed, shipEmoji=False):
-    if ship is not None:
-        baseEmbed.add_field(name="Active Ship:", value=(ship.emoji if shipEmoji and ship.hasEmoji else "") + ship.getNameAndNick() + "\n" + ship.statsStringNoItems(), inline=False)
-
-        if ship.getMaxPrimaries() > 0:
-            baseEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(ship.weapons)) + "/" + str(ship.getMaxPrimaries()) + "*", inline=False)
-            for weaponNum in range(1, len(ship.weapons) + 1):
-                baseEmbed.add_field(name=str(weaponNum) + ". " + ship.weapons[weaponNum - 1].name, value=(ship.weapons[weaponNum - 1].emoji if ship.weapons[weaponNum - 1].hasEmoji else "") + ship.weapons[weaponNum - 1].statsStringShort(), inline=True)
-
-        if ship.getMaxModules() > 0:
-            baseEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(ship.modules)) + "/" + str(ship.getMaxModules()) + "*", inline=False)
-            for moduleNum in range(1, len(ship.modules) + 1):
-                baseEmbed.add_field(name=str(moduleNum) + ". " + ship.modules[moduleNum - 1].name, value=(ship.modules[moduleNum - 1].emoji if ship.modules[moduleNum - 1].hasEmoji else "") + ship.modules[moduleNum - 1].statsStringShort(), inline=True)
-        
-        if ship.getMaxTurrets() > 0:
-            baseEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(ship.turrets)) + "/" + str(ship.getMaxTurrets()) + "*", inline=False)
-            for turretNum in range(1, len(ship.turrets) + 1):
-                baseEmbed.add_field(name=str(turretNum) + ". " + ship.turrets[turretNum - 1].name, value=(ship.turrets[turretNum - 1].emoji if ship.turrets[turretNum - 1].hasEmoji else "") + ship.turrets[turretNum - 1].statsStringShort(), inline=True)
-
-    return baseEmbed
-
-
 def userOrMemberName(dcUser, dcGuild):
     guildMember = dcGuild.get_member(dcUser.id)
     if guildMember is None:
@@ -938,11 +916,7 @@ async def cmd_check(message, args):
             # list of completed bounties to remove from the bounties database
             toPop = []
             for bounty in bountiesDB.getFactionBounties(fac):
-                if bounty.answer == requestedSystem:
-                    print("answer correct")
-                print("totalVal",requestedBBUser.getStatByName("value"))
-                print("maxVal",bbConfig.bountyTLMaxPlayerValues[bounty.criminal.techLevel-1])
-                if bounty.answer == requestedSystem and requestedBBUser.getStatByName("value") >= bbConfig.bountyTLMaxPlayerValues[bounty.criminal.techLevel-1]:
+                if bounty.answer == requestedSystem and requestedBBUser.getStatByName("value") >= bbConfig.bountyTLMaxPlayerValues[bounty.criminal.techLevel]:
                     await message.channel.send(":space_invader: You located **" + bounty.criminal.name + "**, but you are too high level to fight them!")
                     continue
                 # Check the passed system in current bounty
@@ -966,7 +940,7 @@ async def cmd_check(message, args):
                         bountyLost = True
                         bountiesDB.addEscapedCriminal(bounty.criminal, len(bounty.route))
 
-                        await message.channel.send(bounty.criminal.name + " got away! " + respawnTT.expiryTime.strftime("%B %d %H %M %S"),embed=statsEmbed)
+                        await message.channel.send(bounty.criminal.name + " got away! ",embed=statsEmbed) # + respawnTT.expiryTime.strftime("%B %d %H %M %S")
 
                     else:
                         bountyWon = True
@@ -2130,16 +2104,13 @@ async def cmd_loadout(message, args):
     if len(args.split(" ")) > 1 and args.split(" ")[0] != "criminal":
         await message.channel.send(":x: Too many arguments! I can only take a target user!")
         return
-    elif len(args.split(" ")) > 2:
-        await message.channel.send(":x: Too many arguments! I can only take a target criminal!")
-        return
     elif len(args.split(" ")) == 1 and args == "criminal":
         await message.channel.send(":x: Not enough arguments! Please give the criminal name.")
         return
 
     if args.split(" ")[0] == "criminal":
         # look up the criminal object
-        criminalName = args.split(" ")[1].title()
+        criminalName = args[9:].title()
 
         # report unrecognised criminal names
         if not bountiesDB.bountyNameExists(criminalName, noEscapedCrim=True):
@@ -2155,7 +2126,7 @@ async def cmd_loadout(message, args):
         
         activeShip = criminalObj.activeShip
         loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=criminalObj.name.title() + "\n`Difficulty: " + str(criminalObj.techLevel) + "`", col=bbData.factionColours[criminalObj.faction] if criminalObj.faction in bbData.factionColours else bbData.factionColours["neutral"], thumb=criminalObj.icon)
-        loadoutEmbed = fillLoadoutEmbed(activeShip, loadoutEmbed, shipEmoji=True)
+        loadoutEmbed = bbUtil.fillLoadoutEmbed(activeShip, loadoutEmbed, shipEmoji=True)
         
         await message.channel.send(embed=loadoutEmbed)
         return
@@ -2181,7 +2152,7 @@ async def cmd_loadout(message, args):
         activeShip = bbShip.fromDict(bbUser.defaultShipLoadoutDict)
         loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours[activeShip.manufacturer] if activeShip.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], thumb=activeShip.icon if activeShip.hasIcon else requestedUser.avatar_url_as(size=64))
         
-        await message.channel.send(embed=fillLoadoutEmbed(activeShip, loadoutEmbed))
+        await message.channel.send(embed=bbUtil.fillLoadoutEmbed(activeShip, loadoutEmbed))
         return
 
     else:
@@ -2194,7 +2165,7 @@ async def cmd_loadout(message, args):
             loadoutEmbed.add_field(name="Active Ship:",
                                    value="None", inline=False)
         else:
-            loadoutEmbed = fillLoadoutEmbed(activeShip, loadoutEmbed)
+            loadoutEmbed = bbUtil.fillLoadoutEmbed(activeShip, loadoutEmbed)
         
         await message.channel.send(embed=loadoutEmbed)
 
