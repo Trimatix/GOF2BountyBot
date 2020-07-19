@@ -1905,10 +1905,10 @@ async def cmd_shop(message, args):
                         keysStr += str(item) + ", "
                     bbLogger.log("Main", "cmd_shop", "Unexpected type in shipsstock KEYS, index " + str(shipNum-1) +  ". Expected bbShip, got " + type(requestedShop.shipsStock.keys[shipNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
                                     category="shop", eventType="INVTY_KEY_TYPE")
-                    shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[shipNum-1] + "'",
+                    shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.shipsStock.keys[shipNum-1] + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)
                     continue
-                shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[shipNum-1].name + "'",
+                shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.shipsStock.keys[shipNum-1].name + "'",
                                     value="Do not attempt to buy. Could cause issues.", inline=True)
                 continue
 
@@ -1935,10 +1935,10 @@ async def cmd_shop(message, args):
                         keysStr += str(item) + ", "
                     bbLogger.log("Main", "cmd_shop", "Unexpected type in weaponsstock KEYS, index " + str(shipNum-1) +  ". Expected bbWeapon, got " + type(requestedShop.weaponsStock.keys[weaponNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
                                     category="shop", eventType="INVTY_KEY_TYPE")
-                    shopEmbed.add_field(name=str(weaponNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[weaponNum-1] + "'",
+                    shopEmbed.add_field(name=str(weaponNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.weaponsStock.keys[weaponNum-1] + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)
                     continue
-                shopEmbed.add_field(name=str(weaponNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[weaponNum-1].name + "'",
+                shopEmbed.add_field(name=str(weaponNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.weaponsStock.keys[weaponNum-1].name + "'",
                                     value="Do not attempt to buy. Could cause issues.", inline=True)
                 continue
 
@@ -1965,10 +1965,10 @@ async def cmd_shop(message, args):
                         keysStr += str(item) + ", "
                     bbLogger.log("Main", "cmd_shop", "Unexpected type in modulesstock KEYS, index " + str(moduleNum-1) +  ". Expected bbModule, got " + type(requestedShop.modulesStock.keys[moduleNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
                                     category="shop", eventType="INVTY_KEY_TYPE")
-                    shopEmbed.add_field(name=str(moduleNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[moduleNum-1] + "'",
+                    shopEmbed.add_field(name=str(moduleNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.modulesStock.keys[moduleNum-1] + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)
                     continue
-                shopEmbed.add_field(name=str(moduleNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[moduleNum-1].name + "'",
+                shopEmbed.add_field(name=str(moduleNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.modulesStock.keys[moduleNum-1].name + "'",
                                     value="Do not attempt to buy. Could cause issues.", inline=True)
                 continue
 
@@ -1995,10 +1995,10 @@ async def cmd_shop(message, args):
                         keysStr += str(item) + ", "
                     bbLogger.log("Main", "cmd_shop", "Unexpected type in turretsstock KEYS, index " + str(turretNum-1) +  ". Expected bbTurret, got " + type(requestedShop.turretsStock.keys[turretNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
                                     category="shop", eventType="INVTY_KEY_TYPE")
-                    shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[turretNum-1] + "'",
+                    shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.turretsStock.keys[turretNum-1] + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)
                     continue
-                shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[turretNum-1].name + "'",
+                shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.turretsStock.keys[turretNum-1].name + "'",
                                     value="Do not attempt to buy. Could cause issues.", inline=True)
                 continue
             
