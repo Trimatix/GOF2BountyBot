@@ -1892,7 +1892,7 @@ async def cmd_shop(message, args):
                 currentItem = requestedShop.shipsStock[shipNum - 1].item
             except KeyError:
                 try:
-                    print("Attempted to get item " + requestedShop.keys[shipNum-1].name + ", which was not found in the shop stock.")
+                    print("Attempted to get item " + requestedShop.shipsStock.keys[shipNum-1].name + ", which was not found in the shop stock.")
                 except IndexError:
                     break
                 except AttributeError as e:
@@ -1900,7 +1900,7 @@ async def cmd_shop(message, args):
                     print(e)
                     print("shipNum-1:",shipNum-1,"\nkey:",requestedShop.shipsStock.keys[shipNum-1],"\nKeys:",end="")
                     for ship in requestedShop.shipsStock.items:
-                        print(", " + ship,end="")
+                        print(", " + str(ship),end="")
                     print()
                     shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.keys[shipNum-1] + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)
