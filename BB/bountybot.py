@@ -2562,7 +2562,7 @@ async def cmd_nameship(message, args):
         await message.channel.send(":x: Not enough arguments. Please give the new nickname!")
         return
 
-    if len(args) > bbConfig.maxShipNickLength:
+    if (message.author.id not in bbConfig.developers and len(args) > bbConfig.maxShipNickLength) or len(args) > bbConfig.maxDevShipNickLength:
         await message.channel.send(":x: Nicknames must be " + str(bbConfig.maxShipNickLength) + " characters or less!")
         return
 
