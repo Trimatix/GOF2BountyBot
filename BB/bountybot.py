@@ -1601,7 +1601,7 @@ async def cmd_leaderboard(message, args):
     # units for the stat
     boardUnit = "Credit"
     boardUnits = "Credits"
-    boardDesc = "*The total value of player inventory, loadout and credits balance"
+    boardDesc = "*The total value of player inventory, loadout and credits balance*"
 
     # change leaderboard arguments based on the what is provided in args
     if args != "":
