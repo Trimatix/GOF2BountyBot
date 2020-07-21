@@ -11,9 +11,12 @@ def makeBountyEmbed(bounty):
     routeStr = ""
     for system in bounty.route:
         if bounty.systemChecked(system):
-            routeStr += "~~" + system + "~~"
+            routeStr += "~~"
             if 0 < bounty.route.index(bounty.answer) - bounty.route.index(system) < bbConfig.closeBountyThreshold:
-                routeStr += "\*"
+                routeStr += "**" + system + "**"
+            else:
+                routeStr += system
+            routeStr += "~~"
         else:
             routeStr += system
         routeStr += ", "
