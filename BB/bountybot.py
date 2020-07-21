@@ -252,10 +252,15 @@ async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
 
                 # Send the announcement to the current guild's playChannel
                 # If this is the winning guild, send a special message!
-                if currentGuild.id == winningGuildObj.id:
-                    await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuildObj.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+                if client.get_channel(currentGuild.getPlayChannelId()) is not None:
+                    if currentGuild.id == winningGuildObj.id:
+                        await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuildObj.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+                    else:
+                        await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
+
                 else:
-                    await client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
+                    bbLogger.log("Main", "AnncBtyWn", "None playchannel received when posting bounty won to guild " + client.get_guild(
+                                    currentGuild.id).name + "#" + str(currentGuild.id) + " in channel ?#" + str(currentGuild.getPlayChannelId()), eventType="PLCH_NONE")
 
 
 async def updateAllBountyBoardChannels(bounty, bountyComplete=False):
@@ -2046,6 +2051,9 @@ async def cmd_loadout(message, args):
         if requestedUser is None:
             await message.channel.send(":x: Unrecognised user!")
             return
+    else:
+        await message.channel.send(":x: Invalid user requested! Please either ping them, or give their ID!")
+        return
 
     if not usersDB.userIDExists(requestedUser.id):
         if not userFound:
@@ -2978,9 +2986,18 @@ admin command for setting the current guild's announcements channel
 @param args -- ignored
 """
 async def admin_cmd_set_announce_channel(message, args):
-    guildsDB.getGuild(message.guild.id).setAnnounceChannelId(
-        message.channel.id)
-    await message.channel.send(":ballot_box_with_check: Announcements channel set!")
+    requestedBBGuild = guildsDB.getGuild(message.guild.id)
+    if args == "off":
+        if requestedBBGuild.hasAnnounceChannel():
+            requestedBBGuild.removeAnnounceChannel()
+            await message.channel.send(":ballot_box_with_check: Announcements channel removed!")
+        else:
+            await message.channel.send(":x: This server has no announce channel set!")
+    elif args != "":
+        await message.channel.send(":x: Invalid arguments! Can only be `off` to disable this server's announce channel, or no args to use this channel as the announce channel.")
+    else:
+        requestedBBGuild.setAnnounceChannelId(message.channel.id)
+        await message.channel.send(":ballot_box_with_check: Announcements channel set!")
 
 bbCommands.register("set-announce-channel",
                     admin_cmd_set_announce_channel, isAdmin=True)
@@ -3032,8 +3049,18 @@ admin command for setting the current guild's play channel
 @param args -- ignored
 """
 async def admin_cmd_set_play_channel(message, args):
-    guildsDB.getGuild(message.guild.id).setPlayChannelId(message.channel.id)
-    await message.channel.send(":ballot_box_with_check: Bounty play channel set!")
+    requestedBBGuild = guildsDB.getGuild(message.guild.id)
+    if args == "off":
+        if requestedBBGuild.hasPlayChannel():
+            requestedBBGuild.removePlayChannel()
+            await message.channel.send(":ballot_box_with_check: Bounty play channel removed!")
+        else:
+            await message.channel.send(":x: This server has no play channel set!")
+    elif args != "":
+        await message.channel.send(":x: Invalid arguments! Can only be `off` to disable this server's play channel, or no args to use this channel as the play channel.")
+    else:
+        requestedBBGuild.setPlayChannelId(message.channel.id)
+        await message.channel.send(":ballot_box_with_check: Bounty play channel set!")
 
 bbCommands.register("set-play-channel",
                     admin_cmd_set_play_channel, isAdmin=True)
