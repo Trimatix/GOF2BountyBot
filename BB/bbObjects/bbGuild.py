@@ -100,7 +100,7 @@ class bbGuild:
     async def addBountyBoardChannel(self, channel, client, factions):
         if self.hasBountyBoardChannel:
             raise RuntimeError("Attempted to assign a bountyboard channel for guild " + str(self.id) + " but one is already assigned")
-        self.bountyBoardChannel = BountyBoardChannel.BountyBoardChannel(channel.id, {})
+        self.bountyBoardChannel = BountyBoardChannel.BountyBoardChannel(channel.id, {}, -1)
         await self.bountyBoardChannel.init(client, factions)
         self.hasBountyBoardChannel = True
 
