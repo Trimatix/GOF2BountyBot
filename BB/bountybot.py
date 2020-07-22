@@ -2051,7 +2051,7 @@ async def cmd_loadout(message, args):
         if requestedUser is None:
             await message.channel.send(":x: Unrecognised user!")
             return
-    else:
+    elif args != "":
         await message.channel.send(":x: Invalid user requested! Please either ping them, or give their ID!")
         return
 
