@@ -4123,6 +4123,14 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    try:
+        if "bountybot" in message.content.lower() or client.user in message.mentions:
+            await message.add_reaction("👀")
+    except discord.Forbidden:
+        pass
+    except discord.HTTPException:
+        pass
+
     # if not guildsDB.guildIdExists(message.guild.id):
     #     guildsDB.addGuildID(message.guild.id)
 
