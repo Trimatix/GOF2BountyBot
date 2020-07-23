@@ -4181,11 +4181,16 @@ async def on_message(message):
             userIsAdmin = message.author.permissions_in(
                 message.channel).administrator
 
-            # Call the requested command
-            if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group]:
-                commandFound = await dmCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
-            else:
-                commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
+            try:
+                # Call the requested command
+                if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group]:
+                    commandFound = await dmCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
+                else:
+                    commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
+            except Exception as e:
+                await message.channel.send(":woozy_face: Uh oh, something went wrong! The error has been logged.\nThis command probably won't work until we've looked into it.")
+                bbLogger.log("Main", "on_message", "⚠ An unexpected error occured when calling command '" + command + "' with args '" + args + "':" + str(e))
+                commandFound = True
 
             # elif message.channel.type == discord.ChannelType.private:
             #     # Call the requested command
