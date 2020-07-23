@@ -802,8 +802,15 @@ async def cmd_stats(message, args):
         # If the calling user is in the database, print the stats stored in the user's database entry
         else:
             userObj = usersDB.getUser(message.author.id)
+            hunterLvl = bbConfig.calculateUserBountyHuntingLevel(userObj.bountyHuntingXP)
+            statsEmbed.add_field(name="Bounty Hunter Level:",
+                                value=str(hunterLvl))
+            statsEmbed.add_field(name="Bounty Hunter XP:",
+                                value=str(userObj.bountyHuntingXP))
+            statsEmbed.add_field(name="Bounty Hunter XP until next level:",
+                                value=str(bbConfig.bountyHuntingXPForLevel(hunterLvl+1)-userObj.bountyHuntingXP))
             statsEmbed.add_field(name="Credits balance:",
-                                 value=str(userObj.credits), inline=True)
+                                value=str(userObj.credits), inline=True)
             statsEmbed.add_field(name="Lifetime total credits earned:", value=str(
                 userObj.lifetimeCredits), inline=True)
             statsEmbed.add_field(name="‎", value="‎", inline=False)

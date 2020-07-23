@@ -10,6 +10,21 @@ def truncToRes(num):
 
 
 
+##### USER LEVELING #####
+
+# Amount of XP to award users per system check
+hunterXPPerSysCheck = 10
+
+
+def bountyHuntingXPForLevel(xp):
+    return int(1000 * math.exp((xp - 1)/3.74) - 1000)
+
+
+def calculateUserBountyHuntingLevel(level):
+    return int(1 + 3.74 * math.log((level/1000)+1))
+
+
+
 ##### DUELS #####
 
 # Amount of time before a duel request expires
