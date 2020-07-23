@@ -76,7 +76,7 @@ class BountyBoardChannel:
             except Forbidden:
                 bbLogger.log("BBC", "init", "Forbidden exception thrown when fetching no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-FORBIDDENERR")
             except NotFound:
-                bbLogger.log("BBC", "init", "No bounties message no longer exists: " + criminal.name, category='bountyBoards', eventType="NOBTYMSG_LOAD-NOT_FOUND")
+                bbLogger.log("BBC", "init", "No bounties message no longer exists", category='bountyBoards', eventType="NOBTYMSG_LOAD-NOT_FOUND")
                 self.noBountiesMessage = None
         # del self.messagesToBeLoaded
         # del self.channelIDToBeLoaded
@@ -141,7 +141,15 @@ class BountyBoardChannel:
             bbLogger.log("BBC", "remBty", "Attempted to update a BBC message for a criminal that is not listed: " + bounty.criminal.name, category='bountyBoards', eventType="LISTING_UPD-NO_EXST")
 
         content = self.bountyMessages[bounty.criminal.faction][bounty.criminal].content
-        await self.bountyMessages[bounty.criminal.faction][bounty.criminal].edit(content=content, embed=makeBountyEmbed(bounty))
+        try:
+            await self.bountyMessages[bounty.criminal.faction][bounty.criminal].edit(content=content, embed=makeBountyEmbed(bounty))
+        except HTTPException:
+            bbLogger.log("BBC", "updBtyMsg", "HTTPException thrown when updating bounty listing for criminal: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-HTTPERR")
+        except Forbidden:
+            bbLogger.log("BBC", "updBtyMsg", "Forbidden exception thrown when updating bounty listing for criminal: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-FORBIDDENERR")
+        except NotFound:
+            bbLogger.log("BBC", "updBtyMsg", "Bounty listing message no longer exists, BBC entry removed: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-NOT_FOUND")
+            self.removeBounty(bounty)
 
 
     def toDict(self):
