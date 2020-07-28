@@ -129,10 +129,13 @@ class BountyBoardChannel:
             try:
                 # self.noBountiesMessage = await self.channel.send(bbConfig.bbcNoBountiesMsg)
                 self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
+
             except HTTPException:
-                print("removeBounty HTTPException")
+                bbLogger.log("BBC", "remBty", "HTTPException thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
             except Forbidden:
-                print("removeBounty Forbidden")
+                bbLogger.log("BBC", "remBty", "Forbidden exception thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-FORBIDDENERR")
+            
+            self.noBountiesMessage = None
 
 
     async def updateBountyMessage(self, bounty):
@@ -149,7 +152,7 @@ class BountyBoardChannel:
             bbLogger.log("BBC", "updBtyMsg", "Forbidden exception thrown when updating bounty listing for criminal: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-FORBIDDENERR")
         except NotFound:
             bbLogger.log("BBC", "updBtyMsg", "Bounty listing message no longer exists, BBC entry removed: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-NOT_FOUND")
-            self.removeBounty(bounty)
+            await self.removeBounty(bounty)
 
 
     def toDict(self):
