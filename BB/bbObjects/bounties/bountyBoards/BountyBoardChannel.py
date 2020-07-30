@@ -132,10 +132,10 @@ class BountyBoardChannel:
 
             except HTTPException:
                 bbLogger.log("BBC", "remBty", "HTTPException thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
+                self.noBountiesMessage = None
             except Forbidden:
                 bbLogger.log("BBC", "remBty", "Forbidden exception thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-FORBIDDENERR")
-            
-            self.noBountiesMessage = None
+                self.noBountiesMessage = None
 
 
     async def updateBountyMessage(self, bounty):
