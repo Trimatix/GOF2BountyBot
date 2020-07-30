@@ -38,33 +38,34 @@ class HeirarchicalCommandsDB:
     @param args -- string containing arguments to pass to the command
     @param isAdmin -- whether the calling user has admin privilages. Default: False
     @param isDev -- whether the calling user has developer privilages. Default: False
+    @param isDM -- Whether the command was called from DMs or not
     @return -- True if the command call was successful, False otherwise
     """
-    async def call(self, command, message, args, isAdmin=False, isDev=False):
+    async def call(self, command, message, args, isAdmin=False, isDev=False, isDM=False):
         # First search user commands
         if command in self.userCommands and self.userCommands[command][2]:
-            await self.userCommands[command][0](message, args if self.userCommands[command][1] else args.lower())
+            await self.userCommands[command][0](message, args if self.userCommands[command][1] else args.lower(), isDM)
             return True
         elif command.lower() in self.userCommands and not self.userCommands[command.lower()][2]:
-            await self.userCommands[command.lower()][0](message, args if self.userCommands[command.lower()][1] else args.lower())
+            await self.userCommands[command.lower()][0](message, args if self.userCommands[command.lower()][1] else args.lower(), isDM)
             return True
         else:
             # Then search admin commands (if privilages are present)
             if isAdmin or isDev:
                 if command in self.adminCommands and self.adminCommands[command][2]:
-                    await self.adminCommands[command][0](message, args if self.adminCommands[command][1] else args.lower())
+                    await self.adminCommands[command][0](message, args if self.adminCommands[command][1] else args.lower(), isDM)
                     return True
                 elif command.lower() in self.adminCommands and not self.adminCommands[command.lower()][2]:
-                    await self.adminCommands[command.lower()][0](message, args if self.adminCommands[command.lower()][1] else args.lower())
+                    await self.adminCommands[command.lower()][0](message, args if self.adminCommands[command.lower()][1] else args.lower(), isDM)
                     return True
                 else:
                     # Finally, search developer commands (if privilages are present)
                     if isDev:
                         if command in self.devCommands and self.devCommands[command][2]:
-                            await self.devCommands[command][0](message, args if self.devCommands[command][1] else args.lower())
+                            await self.devCommands[command][0](message, args if self.devCommands[command][1] else args.lower(), isDM)
                             return True
                         elif command.lower() in self.devCommands and not self.devCommands[command.lower()][2]:
-                            await self.devCommands[command.lower()][0](message, args if self.devCommands[command.lower()][1] else args.lower())
+                            await self.devCommands[command.lower()][0](message, args if self.devCommands[command.lower()][1] else args.lower(), isDM)
                             return True
             # command not found
             return False
