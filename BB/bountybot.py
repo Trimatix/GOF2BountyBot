@@ -8,8 +8,10 @@ from discord.ext import commands
 from datetime import datetime, timedelta
 import asyncio
 import random
-# user for leaderboard sorting
+# used for leaderboard sorting
 import operator
+# used for spawning items from dict in dev_cmd_give
+import json
 
 # BountyBot Imports
 
@@ -17,7 +19,7 @@ import operator
 from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .bbObjects import bbUser
 from .bbObjects.bounties import bbBounty, bbBountyConfig
-from .bbObjects.items import bbShip
+from .bbObjects.items import bbShip, bbModuleFactory, bbShipUpgrade, bbTurret, bbWeapon
 from .bbObjects.battles import ShipFight, DuelRequest
 from .scheduling import TimedTask
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB
@@ -3336,6 +3338,48 @@ dmCommands.register("reset-cool", dev_cmd_reset_cooldown, isDev=True)
 
 
 """
+developer command giving the provided user the provided item of the provided type.
+user must be either a mention or an ID or empty (to give the item to the calling user).
+type must be in bbConfig.validItemNames (but not 'all')
+item must be a json format description in line with the item's to and fromDict functions.
+
+@param message -- the discord message calling the command
+@param args -- string, containing either a user ID or mention or nothing (to give item to caller), followed by a string from bbConfig.validItemNames (but not 'all'), followed by an item dictionary representation
+"""
+async def dev_cmd_give(message, args, isDM):
+    # reset the calling user's cooldown if no user is specified
+    if not bbUtil.isInt(args.split(" ")[0]) or bbUtil.isMention(args.split(" ")[0]):
+        requestedUser = usersDB.getOrAddID(message.author.id)
+        itemStr = args
+        
+    # otherwise get the specified user's bb object
+    # [!] no validation is done.
+    else:
+        requestedUser = usersDB.getOrAddID(int(args.split(" ")[0].lstrip("<@!").rstrip(">")))
+        itemStr = args[len(args.split(" ")[0]):]
+
+    itemType = itemStr.split(" ")[0].lower()
+
+    if itemType == "all" or itemType not in bbConfig.validItemNames:
+        await message.channel.send(":x: Invalid item type!")
+        return
+
+    itemDict = json.loads(itemStr[len(itemStr.split(" ")[0]):])
+    itemConstructors = {"ship": bbShip.fromDict,
+                        "weapon": bbWeapon.fromDict,
+                        "module": bbModuleFactory.fromDict,
+                        "turret": bbTurret.fromDict}
+    newItem = itemConstructors[itemType](itemDict)
+
+    requestedUser.getInactivesByName(itemType).addItem(newItem)
+
+    await message.channel.send(":white_check_mark: Given one '" + newItem.name + "' to **" + userOrMemberName(client.get_user(requestedUser.id), message.guild) + "**!")
+
+bbCommands.register("give", dev_cmd_give, isDev=True, forceKeepArgsCasing=True)
+dmCommands.register("give", dev_cmd_give, isDev=True, forceKeepArgsCasing=True)
+
+
+"""
 developer command setting the checking cooldown applied to users
 this does not update bbConfig and will be reverted on bot restart
 
@@ -4201,7 +4245,7 @@ async def on_message(message):
                     commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
             except Exception as e:
                 await message.channel.send(":woozy_face: Uh oh, something went wrong! The error has been logged.\nThis command probably won't work until we've looked into it.")
-                bbLogger.log("Main", "on_message", "⚠ An unexpected error occured when calling command '" + command + "' with args '" + args + "':" + str(e))
+                bbLogger.log("Main", "on_message", "⚠ An unexpected error occured when calling command '" + command + "' with args '" + args + "': " + str(e))
                 commandFound = True
 
             # elif message.channel.type == discord.ChannelType.private:
