@@ -1572,19 +1572,19 @@ async def cmd_info(message, args, isDM):
         return
 
     if argsSplit[0] == "system":
-        await cmd_system(message, args[7:])
+        await cmd_system(message, args[7:], isDM)
     elif argsSplit[0] == "criminal":
-        await cmd_criminal(message, args[9:])
+        await cmd_criminal(message, args[9:], isDM)
     elif argsSplit[0] == "ship":
-        await cmd_ship(message, args[5:])
+        await cmd_ship(message, args[5:], isDM)
     elif argsSplit[0] == "weapon":
-        await cmd_weapon(message, args[7:])
+        await cmd_weapon(message, args[7:], isDM)
     elif argsSplit[0] == "module":
-        await cmd_module(message, args[7:])
+        await cmd_module(message, args[7:], isDM)
     elif argsSplit[0] == "turret":
-        await cmd_turret(message, args[7:])
+        await cmd_turret(message, args[7:], isDM)
     elif argsSplit[0] == "commodity":
-        await cmd_commodity(message, args[10:])
+        await cmd_commodity(message, args[10:], isDM)
     else:
         await message.channel.send(":x: Unknown object type! (system/criminal/ship/weapon/module/turret/commodity)")
 
