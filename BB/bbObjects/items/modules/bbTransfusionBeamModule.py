@@ -16,6 +16,14 @@ class bbTransfusionBeamModule(bbModule.bbModule):
     def getType(self):
         return bbTransfusionBeamModule
 
+    
+    def toDict(self):
+        itemDict = super(bbTransfusionBeamModule, self).toDict()
+        if not self.builtIn:
+            itemDict["HPps"] = self.HPps
+            itemDict["count"] = self.count
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbTransfusionBeamModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], HPps=moduleDict["HPps"] if "HPps" in moduleDict else 0,

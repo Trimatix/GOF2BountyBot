@@ -9,6 +9,11 @@ class bbCompressorModule(bbModule.bbModule):
     def getType(self):
         return bbCompressorModule
 
+    
+    def toDict(self):
+        itemDict = super(bbCompressorModule, self).toDict()
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbCompressorModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], cargoMultiplier=moduleDict["cargoMultiplier"] if "cargoMultiplier" in moduleDict else 1,

@@ -15,6 +15,13 @@ class bbTractorBeamModule(bbModule.bbModule):
     def getType(self):
         return bbTractorBeamModule
 
+    
+    def toDict(self):
+        itemDict = super(bbTractorBeamModule, self).toDict()
+        if not self.builtIn:
+            itemDict["timeToLock"] = self.timeToLock
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbTractorBeamModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], timeToLock=moduleDict["timeToLock"] if "timeToLock" in moduleDict else 0,

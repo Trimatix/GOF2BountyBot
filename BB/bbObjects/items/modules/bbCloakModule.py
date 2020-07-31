@@ -15,6 +15,13 @@ class bbCloakModule(bbModule.bbModule):
     def getType(self):
         return bbCloakModule
 
+    
+    def toDict(self):
+        itemDict = super(bbCloakModule, self).toDict()
+        if not self.builtIn:
+            itemDict["duration"] = self.duration
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbCloakModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], duration=moduleDict["duration"] if "duration" in moduleDict else 0,

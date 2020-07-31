@@ -17,6 +17,14 @@ class bbBoosterModule(bbModule.bbModule):
         return "*Effect: " + ("+" if self.effect >= 1 else "-") + str(round(((self.effect - 1) * 100) if self.effect > 1 else (self.effect * 100))) + \
                 "%, Duration: " + ("+" if self.duration > 0 else "-") + str(self.duration) + "s*"
 
+    
+    def toDict(self):
+        itemDict = super(bbBoosterModule, self).toDict()
+        if not self.builtIn:
+            itemDict["effect"] = self.effect
+            itemDict["duration"] = self.duration
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbBoosterModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], effect=moduleDict["effect"] if "effect" in moduleDict else 0,

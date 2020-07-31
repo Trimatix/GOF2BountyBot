@@ -80,7 +80,57 @@ class bbShipUpgrade:
 
     
     def toDict(self):
-        return {"name": self.name, "builtIn": True}
+        itemDict = super(bbShipUpgrade, self).toDict()
+        if not self.builtIn:
+            if self.hasVendor:
+                itemDict["vendor"] = self.vendor
+
+            if self.shipToUpgradeValueMult != 1.0:
+                itemDict["shipToUpgradeValueMult"] = self.shipToUpgradeValueMult
+
+            if self.armour != 0.0:
+                itemDict["armour"] = self.armour
+
+            if self.armourMultiplier != 1.0:
+                itemDict["armourMultiplier"] = self.armourMultiplier
+
+            if self.cargo != 1.0:
+                itemDict["cargo"] = self.cargo
+
+            if self.cargoMultiplier != 1.0:
+                itemDict["cargoMultiplier"] = self.cargoMultiplier
+
+            if self.numSecondaries != 0:
+                itemDict["numSecondaries"] = self.numSecondaries
+
+            if self.numSecondariesMultiplier != 1.0:
+                itemDict["numSecondariesMultiplier"] = self.numSecondariesMultiplier
+
+            if self.handling != 0:
+                itemDict["handling"] = self.handling
+
+            if self.handlingMultiplier != 1.0:
+                itemDict["handlingMultiplier"] = self.handlingMultiplier
+
+            if self.maxPrimaries != 0:
+                itemDict["maxPrimaries"] = self.maxPrimaries
+
+            if self.maxPrimariesMultiplier != 1.0:
+                itemDict["maxPrimariesMultiplier"] = self.maxPrimariesMultiplier
+
+            if self.maxTurrets != 0:
+                itemDict["maxTurrets"] = self.maxTurrets
+
+            if self.maxTurretsMultiplier != 1.0:
+                itemDict["maxTurretsMultiplier"] = self.maxTurretsMultiplier
+
+            if self.maxModules != 0:
+                itemDict["maxModules"] = self.maxModules
+
+            if self.maxModulesMultiplier != 1.0:
+                itemDict["maxModulesMultiplier"] = self.maxModulesMultiplier
+
+        return itemDict
 
     
     def statsStringShort(self):

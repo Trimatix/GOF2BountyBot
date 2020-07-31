@@ -9,6 +9,11 @@ class bbJumpDriveModule(bbModule.bbModule):
     def getType(self):
         return bbJumpDriveModule
 
+    
+    def toDict(self):
+        itemDict = super(bbJumpDriveModule, self).toDict()
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbJumpDriveModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [],

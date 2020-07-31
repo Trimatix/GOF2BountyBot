@@ -15,6 +15,13 @@ class bbShieldInjectorModule(bbModule.bbModule):
     def getType(self):
         return bbShieldInjectorModule
 
+    
+    def toDict(self):
+        itemDict = super(bbShieldInjectorModule, self).toDict()
+        if not self.builtIn:
+            itemDict["plasmaConsumption"] = self.plasmaConsumption
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbShieldInjectorModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], plasmaConsumption=moduleDict["plasmaConsumption"] if "plasmaConsumption" in moduleDict else 1,

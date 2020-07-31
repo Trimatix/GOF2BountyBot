@@ -15,6 +15,13 @@ class bbRepairBotModule(bbModule.bbModule):
     def getType(self):
         return bbRepairBotModule
 
+    
+    def toDict(self):
+        itemDict = super(bbRepairBotModule, self).toDict()
+        if not self.builtIn:
+            itemDict["HPps"] = self.HPps
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbRepairBotModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], HPps=moduleDict["HPps"] if "HPps" in moduleDict else 0,

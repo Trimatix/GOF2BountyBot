@@ -17,6 +17,14 @@ class bbRepairBeamModule(bbModule.bbModule):
     def getType(self):
         return bbRepairBeamModule
 
+    
+    def toDict(self):
+        itemDict = super(bbRepairBeamModule, self).toDict()
+        if not self.builtIn:
+            itemDict["effect"] = self.effect
+            itemDict["count"] = self.count
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbRepairBeamModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], effect=moduleDict["effect"] if "effect" in moduleDict else 1,

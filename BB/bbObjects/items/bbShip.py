@@ -405,6 +405,8 @@ class bbShip(bbItem):
 
 
     def toDict(self):
+        itemDict = super(bbShip, self).toDict()
+
         weaponsList = []
         for weapon in self.weapons:
             weaponsList.append(weapon.toDict())
@@ -421,14 +423,21 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             upgradesList.append(upgrade.toDict())
 
-        if self.builtIn:
-            return {"builtIn": True, "name": self.name, "nickname": self.nickname, "weapons":weaponsList, "modules":modulesList, "turrets":turretsList, "upgradesApplied":upgradesList}
-        else:
-            return {"builtIn": False, "name":self.name, "aliases":self.aliases, "wiki":self.wiki, "manufacturer":self.manufacturer,
-                    "nickname":self.nickname, "armour":self.armour, "cargo": self.cargo, "numSecondaries":self.numSecondaries,
-                    "handling":self.handling, "value":self.value, "maxPrimaries":self.maxPrimaries, "maxTurrets":self.maxTurrets,
-                    "maxModules":self.maxModules, "weapons":weaponsList, "modules":modulesList, "turrets":turretsList, "upgradesApplied":upgradesList,
-                    "icon": self.icon if self.hasIcon else "", "emoji": self.emoji if self.hasEmoji else "", "techLevel": self.techLevel}
+        itemDict["weapons"] = weaponsList
+        itemDict["modules"] = modulesList
+        itemDict["turrets"] = turretsList
+        itemDict["upgradesApplied"] = upgradesList
+
+        if not self.builtIn:
+            itemDict["armour"] = self.armour
+            itemDict["cargo"] = self.cargo
+            itemDict["numSecondaries"] = self.numSecondaries
+            itemDict["handling"] = self.handling
+            itemDict["maxPrimaries"] = self.maxPrimaries
+            itemDict["maxTurrets"] = self.maxTurrets
+            itemDict["maxModules"] = self.maxModules
+        
+        return itemDict
 
 
     def __str__(self):

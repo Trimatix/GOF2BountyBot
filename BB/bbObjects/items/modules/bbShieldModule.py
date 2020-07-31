@@ -9,6 +9,11 @@ class bbShieldModule(bbModule.bbModule):
     def getType(self):
         return bbShieldModule
 
+    
+    def toDict(self):
+        itemDict = super(bbShieldModule, self).toDict()
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbShieldModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], shield=moduleDict["shield"] if "shield" in moduleDict else 0,

@@ -16,6 +16,14 @@ class bbSpectralFilterModule(bbModule.bbModule):
     def getType(self):
         return bbSpectralFilterModule
 
+    
+    def toDict(self):
+        itemDict = super(bbSpectralFilterModule, self).toDict()
+        if not self.builtIn:
+            itemDict["showOnRadar"] = self.showOnRadar
+            itemDict["showInfo"] = self.showInfo
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbSpectralFilterModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], showInfo=moduleDict["showInfo"] if "showInfo" in moduleDict else False,

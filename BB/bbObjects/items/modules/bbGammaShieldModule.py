@@ -15,6 +15,13 @@ class bbGammaShieldModule(bbModule.bbModule):
     def getType(self):
         return bbGammaShieldModule
 
+    
+    def toDict(self):
+        itemDict = super(bbGammaShieldModule, self).toDict()
+        if not self.builtIn:
+            itemDict["effect"] = self.effect
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbGammaShieldModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], effect=moduleDict["effect"] if "effect" in moduleDict else 1,

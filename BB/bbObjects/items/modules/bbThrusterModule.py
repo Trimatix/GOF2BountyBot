@@ -9,6 +9,11 @@ class bbThrusterModule(bbModule.bbModule):
     def getType(self):
         return bbThrusterModule
 
+    
+    def toDict(self):
+        itemDict = super(bbThrusterModule, self).toDict()
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbThrusterModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], handlingMultiplier=moduleDict["handlingMultiplier"] if "handlingMultiplier" in moduleDict else 1,

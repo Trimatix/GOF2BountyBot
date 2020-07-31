@@ -17,6 +17,14 @@ class bbMiningDrillModule(bbModule.bbModule):
     def getType(self):
         return bbMiningDrillModule
 
+    
+    def toDict(self):
+        itemDict = super(bbMiningDrillModule, self).toDict()
+        if not self.builtIn:
+            itemDict["oreYield"] = self.oreYield
+            itemDict["handling"] = self.handling
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbMiningDrillModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], oreYield=moduleDict["oreYield"] if "oreYield" in moduleDict else 1,

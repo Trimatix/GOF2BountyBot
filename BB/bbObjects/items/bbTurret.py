@@ -17,6 +17,12 @@ class bbTurret(bbItem):
     def getType(self):
         return bbTurret
 
+    def toDict(self):
+        itemDict = super(bbTurret, self).toDict()
+        if not self.builtIn:
+            itemDict["dps"] = self.dps
+        return itemDict
+
 
 def fromDict(turretDict):
     if turretDict["builtIn"]:

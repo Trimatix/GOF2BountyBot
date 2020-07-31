@@ -9,6 +9,11 @@ class bbWeaponModModule(bbModule.bbModule):
     def getType(self):
         return bbWeaponModModule
 
+    
+    def toDict(self):
+        itemDict = super(bbWeaponModModule, self).toDict()
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbWeaponModModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], dpsMultiplier=moduleDict["dpsMultiplier"] if "dpsMultiplier" in moduleDict else 1,

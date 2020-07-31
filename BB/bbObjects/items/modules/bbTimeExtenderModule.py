@@ -17,6 +17,14 @@ class bbTimeExtenderModule(bbModule.bbModule):
     def getType(self):
         return bbTimeExtenderModule
 
+    
+    def toDict(self):
+        itemDict = super(bbTimeExtenderModule, self).toDict()
+        if not self.builtIn:
+            itemDict["effect"] = self.effect
+            itemDict["duration"] = self.duration
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbTimeExtenderModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], effect=moduleDict["effect"] if "effect" in moduleDict else 1,

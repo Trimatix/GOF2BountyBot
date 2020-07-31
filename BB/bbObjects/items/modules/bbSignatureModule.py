@@ -16,6 +16,11 @@ class bbSignatureModule(bbModule.bbModule):
     def getType(self):
         return bbSignatureModule
 
+    
+    def toDict(self):
+        itemDict = super(bbSignatureModule, self).toDict()
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbSignatureModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], moduleDict["manufacturer"],

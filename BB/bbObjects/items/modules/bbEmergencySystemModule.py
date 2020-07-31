@@ -15,6 +15,13 @@ class bbEmergencySystemModule(bbModule.bbModule):
     def getType(self):
         return bbEmergencySystemModule
 
+    
+    def toDict(self):
+        itemDict = super(bbEmergencySystemModule, self).toDict()
+        if not self.builtIn:
+            itemDict["duration"] = self.duration
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbEmergencySystemModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], duration=moduleDict["duration"] if "duration" in moduleDict else 0,

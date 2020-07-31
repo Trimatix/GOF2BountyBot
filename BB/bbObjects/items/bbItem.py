@@ -39,8 +39,12 @@ class bbItem(bbAliasable.Aliasable):
         return self.value
 
 
+    @abstractmethod
     def toDict(self):
-        return {"name": self.name, "builtIn": True}
+        if self.builtIn:
+            return {"name": self.name, "builtIn": True}
+        else:
+            return {"name": self.name, "aliases": self.aliases, "value":self.value, "wiki":self.wiki, "manufacturer":self.manufacturer, "icon":self.icon, "emoji":self.emoji, "techLevel":self.techLevel, "builtIn":False}
 
     
     def __hash__(self):

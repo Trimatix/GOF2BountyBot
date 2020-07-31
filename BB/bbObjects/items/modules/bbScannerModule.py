@@ -17,6 +17,15 @@ class bbScannerModule(bbModule.bbModule):
     def getType(self):
         return bbScannerModule
 
+    
+    def toDict(self):
+        itemDict = super(bbScannerModule, self).toDict()
+        if not self.builtIn:
+            itemDict["timeToLock"] = self.timeToLock
+            itemDict["showClassAAsteroids"] = self.showClassAAsteroids
+            itemDict["showCargo"] = self.showCargo
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbScannerModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], timeToLock=moduleDict["timeToLock"] if "timeToLock" in moduleDict else 0,

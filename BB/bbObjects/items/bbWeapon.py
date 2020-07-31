@@ -15,6 +15,13 @@ class bbWeapon(bbItem):
     def getType(self):
         return bbWeapon
 
+    
+    def toDict(self):
+        itemDict = super(bbWeapon, self).toDict()
+        if not self.builtIn:
+            itemDict["dps"] = self.dps
+        return itemDict
+
 
 def fromDict(weaponDict):
     if weaponDict["builtIn"]:

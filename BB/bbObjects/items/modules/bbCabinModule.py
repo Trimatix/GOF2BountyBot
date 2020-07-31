@@ -15,6 +15,13 @@ class bbCabinModule(bbModule.bbModule):
     def statsStringShort(self):
         return "*Cabin Size: " + str(self.cabinSize) + "*"
 
+    
+    def toDict(self):
+        itemDict = super(bbCabinModule, self).toDict()
+        if not self.builtIn:
+            itemDict["cabinSize"] = self.cabinSize
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbCabinModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], cabinSize=moduleDict["cabinSize"] if "cabinSize" in moduleDict else 0,

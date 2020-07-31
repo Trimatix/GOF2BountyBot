@@ -46,6 +46,42 @@ class bbModule(bbItem):
     def getType(self):
         return bbModule
 
+    
+    def toDict(self):
+        itemDict = super(bbModule, self).toDict()
+        if not self.builtIn:
+            if self.armour != 0.0:
+                itemDict["armour"] = self.armour
+
+            if self.armourMultiplier != 1.0:
+                itemDict["armourMultiplier"] = self.armourMultiplier
+
+            if self.shield != 0.0:
+                itemDict["shield"] = self.shield
+
+            if self.shieldMultiplier != 1.0:
+                itemDict["shieldMultiplier"] = self.shieldMultiplier
+
+            if self.dps != 0.0:
+                itemDict["dps"] = self.dps
+
+            if self.dpsMultiplier != 1.0:
+                itemDict["dpsMultiplier"] = self.dpsMultiplier
+
+            if self.cargo != 1.0:
+                itemDict["cargo"] = self.cargo
+
+            if self.cargoMultiplier != 1.0:
+                itemDict["cargoMultiplier"] = self.cargoMultiplier
+
+            if self.handling != 0:
+                itemDict["handling"] = self.handling
+
+            if self.handlingMultiplier != 1.0:
+                itemDict["handlingMultiplier"] = self.handlingMultiplier
+
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], armour=moduleDict["armour"] if "armour" in moduleDict else 0,
