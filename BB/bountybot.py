@@ -3348,7 +3348,7 @@ item must be a json format description in line with the item's to and fromDict f
 """
 async def dev_cmd_give(message, args, isDM):
     # reset the calling user's cooldown if no user is specified
-    if not bbUtil.isInt(args.split(" ")[0]) or bbUtil.isMention(args.split(" ")[0]):
+    if not bbUtil.isInt(args.split(" ")[0]) and not bbUtil.isMention(args.split(" ")[0]):
         requestedUser = usersDB.getOrAddID(message.author.id)
         itemStr = args
         
@@ -3356,12 +3356,12 @@ async def dev_cmd_give(message, args, isDM):
     # [!] no validation is done.
     else:
         requestedUser = usersDB.getOrAddID(int(args.split(" ")[0].lstrip("<@!").rstrip(">")))
-        itemStr = args[len(args.split(" ")[0]):]
+        itemStr = args[len(args.split(" ")[0]) + 1:]
 
     itemType = itemStr.split(" ")[0].lower()
 
     if itemType == "all" or itemType not in bbConfig.validItemNames:
-        await message.channel.send(":x: Invalid item type!")
+        await message.channel.send(":x: Invalid item type - " + itemType)
         return
 
     itemDict = json.loads(itemStr[len(itemStr.split(" ")[0]):])
