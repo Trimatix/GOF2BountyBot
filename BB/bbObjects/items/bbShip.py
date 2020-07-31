@@ -22,8 +22,8 @@ class bbShip(bbItem):
     upgradesApplied = []
 
 
-    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon="", emoji="", techLevel=-1, shopSpawnRate=0):
-        super(bbShip, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel)
+    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon="", emoji="", techLevel=-1, shopSpawnRate=0, builtIn=False):
+        super(bbShip, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
         if len(weapons) > maxPrimaries:
             ValueError("passed more weapons than can be stored on this ship - maxPrimaries")
@@ -421,14 +421,14 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             upgradesList.append(upgrade.toDict())
 
-        # Old method with every ship explicit and non-builtIn to allow customisability
-        # return {"name":self.name, "aliases":self.aliases, "wiki":self.wiki, "manufacturer":self.manufacturer,
-        #             "nickname":self.nickname, "armour":self.armour, "cargo": self.cargo, "numSecondaries":self.numSecondaries,
-        #             "handling":self.handling, "value":self.value, "maxPrimaries":self.maxPrimaries, "maxTurrets":self.maxTurrets,
-        #             "maxModules":self.maxModules, "weapons":weaponsList, "modules":modulesList, "turrets":turretsList, "upgradesApplied":upgradesList}
-
-        # New method with everys ship builtIn, but overwriting inheriting attributes
-        return {"name": self.name, "builtIn":True, "nickname": self.nickname, "weapons":weaponsList, "modules":modulesList, "turrets":turretsList, "upgradesApplied":upgradesList}
+        if self.builtIn:
+            return {"builtIn": True, "name": self.name, "nickname": self.nickname, "weapons":weaponsList, "modules":modulesList, "turrets":turretsList, "upgradesApplied":upgradesList}
+        else:
+            return {"builtIn": False, "name":self.name, "aliases":self.aliases, "wiki":self.wiki, "manufacturer":self.manufacturer,
+                    "nickname":self.nickname, "armour":self.armour, "cargo": self.cargo, "numSecondaries":self.numSecondaries,
+                    "handling":self.handling, "value":self.value, "maxPrimaries":self.maxPrimaries, "maxTurrets":self.maxTurrets,
+                    "maxModules":self.maxModules, "weapons":weaponsList, "modules":modulesList, "turrets":turretsList, "upgradesApplied":upgradesList,
+                    "icon": self.icon if self.hasIcon else "", "emoji": self.emoji if self.hasEmoji else "", "techLevel": self.techLevel}
 
 
     def __str__(self):
@@ -484,7 +484,8 @@ def fromDict(shipDict):
                     numSecondaries=builtInDict["numSecondaries"] if "numSecondaries" in builtInDict else 0, handling=builtInDict["handling"] if "handling" in builtInDict else 0,
                     value=builtInDict["value"] if "value" in builtInDict else 0, aliases=builtInDict["aliases"] if "aliases" in builtInDict else [],
                     weapons=weapons if "weapons" in shipDict else builtInWeapons, modules=modules if "modules" in shipDict else builtInModules, turrets=turrets if "turrets" in shipDict else builtInTurrets, wiki=builtInDict["wiki"] if "wiki" in builtInDict else "0",
-                    upgradesApplied=shipUpgrades if "shipUpgrades" in shipDict else builtInShipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else (builtInDict["nickname"] if "nickname" in builtInDict else ""), icon=builtInDict["icon"] if "icon" in builtInDict else bbData.rocketIcon, emoji=builtInDict["emoji"] if "emoji" in builtInDict else "", techLevel=builtInDict["techLevel"] if "techLevel" in builtInDict else -1, shopSpawnRate=builtInDict["shopSpawnRate"] if "shopSpawnRate" in builtInDict else 0)
+                    upgradesApplied=shipUpgrades if "shipUpgrades" in shipDict else builtInShipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else (builtInDict["nickname"] if "nickname" in builtInDict else ""), icon=builtInDict["icon"] if "icon" in builtInDict else bbData.rocketIcon, emoji=builtInDict["emoji"] if "emoji" in builtInDict else "", techLevel=builtInDict["techLevel"] if "techLevel" in builtInDict else -1, shopSpawnRate=builtInDict["shopSpawnRate"] if "shopSpawnRate" in builtInDict else 0,
+                    builtIn=True)
         return newShip
 
     else:
@@ -493,4 +494,5 @@ def fromDict(shipDict):
                         numSecondaries=shipDict["numSecondaries"] if "numSecondaries" in shipDict else 0, handling=shipDict["handling"] if "handling" in shipDict else 0,
                         value=shipDict["value"] if "value" in shipDict else 0, aliases=shipDict["aliases"] if "aliases" in shipDict else [],
                         weapons=weapons, modules=modules, turrets=turrets, wiki=shipDict["wiki"] if "wiki" in shipDict else "0",
-                        upgradesApplied=shipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else "", icon=shipDict["icon"] if "icon" in shipDict else bbData.rocketIcon, emoji=shipDict["emoji"] if "emoji" in shipDict else "", techLevel=shipDict["techLevel"] if "techLevel" in shipDict else -1, shopSpawnRate=shipDict["shopSpawnRate"] if "shopSpawnRate" in shipDict else 0)
+                        upgradesApplied=shipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else "", icon=shipDict["icon"] if "icon" in shipDict else bbData.rocketIcon, emoji=shipDict["emoji"] if "emoji" in shipDict else "", techLevel=shipDict["techLevel"] if "techLevel" in shipDict else -1, shopSpawnRate=shipDict["shopSpawnRate"] if "shopSpawnRate" in shipDict else 0,
+                        builtIn=False)
