@@ -3395,6 +3395,29 @@ dmCommands.register("reset-cool", dev_cmd_reset_cooldown, isDev=True)
 
 
 """
+developer command resetting the max daily bounty wins of the calling user, or the specified user if one is given
+
+@param message -- the discord message calling the command
+@param args -- string, can be empty or contain a user mention
+"""
+async def dev_cmd_reset_daily_wins(message, args, isDM):
+    # reset the calling user's cooldown if no user is specified
+    if args == "":
+        requestedBBUser = usersDB.getUser(message.author.id)
+    else:
+        # [!] no validation is done.
+        requestedBBUser = usersDB.getUser(int(args.lstrip("<@!").rstrip(">")))
+    requestedBBUser.dailyBountyWinsReset = datetime.utcnow()
+    requestedBBUser.bountyWinsToday = 0
+    # otherwise get the specified user's discord object and reset their cooldown.
+
+    await message.channel.send("Done!")
+
+bbCommands.register("reset-daily-wins", dev_cmd_reset_daily_wins, isDev=True)
+dmCommands.register("reset-daily-wins", dev_cmd_reset_daily_wins, isDev=True)
+
+
+"""
 developer command giving the provided user the provided item of the provided type.
 user must be either a mention or an ID or empty (to give the item to the calling user).
 type must be in bbConfig.validItemNames (but not 'all')
