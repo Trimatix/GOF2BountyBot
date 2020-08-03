@@ -836,25 +836,43 @@ async def cmd_stats(message, args, isDM):
         # If the requested user is not in the database, don't bother adding them just print zeroes
         if not usersDB.userIDExists(requestedUser.id):
             statsEmbed.add_field(name="Credits balance:", value=0, inline=True)
-            statsEmbed.add_field(
-                name="Lifetime total credits earned:", value=0, inline=True)
-            statsEmbed.add_field(name="‎", value="‎", inline=False)
+            statsEmbed.add_field(name="Total value:",
+                                 value=str(bbUser.defaultUserValue), inline=True)
+            statsEmbed.add_field(name="‎", value="__Bounty Hunting__", inline=False)
             statsEmbed.add_field(
                 name="Total systems checked:", value=0, inline=True)
             statsEmbed.add_field(
                 name="Total bounties won:", value=0, inline=True)
+            statsEmbed.add_field(
+                name="Total earned from bounties:", value=0, inline=True)
+            statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
+            statsEmbed.add_field(name="Duels won:", value="0", inline=True)
+            statsEmbed.add_field(name="Duels lost:", value="0", inline=True)
+            statsEmbed.add_field(name="Total credits won:", value="0", inline=True)
+            statsEmbed.add_field(name="Total credits lost:", value="0", inline=True)
         # Otherwise, print the stats stored in the user's database entry
         else:
             userObj = usersDB.getUser(requestedUser.id)
             statsEmbed.add_field(name="Credits balance:",
                                  value=str(userObj.credits), inline=True)
-            statsEmbed.add_field(name="Lifetime total credits earned:", value=str(
-                userObj.lifetimeCredits), inline=True)
-            statsEmbed.add_field(name="‎", value="‎", inline=False)
+            statsEmbed.add_field(name="Total value:",
+                                 value=str(userObj.getStatByName("value")), inline=True)
+            statsEmbed.add_field(name="‎", value="__Bounty Hunting__", inline=False)
             statsEmbed.add_field(name="Total systems checked:", value=str(
                 userObj.systemsChecked), inline=True)
             statsEmbed.add_field(name="Total bounties won:", value=str(
                 userObj.bountyWins), inline=True)
+            statsEmbed.add_field(name="Total credits earned from bounties:", value=str(
+                userObj.lifetimeCredits), inline=True)
+            statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
+            statsEmbed.add_field(name="Duels won:", value=str(
+                userObj.duelWins), inline=True)
+            statsEmbed.add_field(name="Duels lost:", value=str(
+                userObj.duelLosses), inline=True)
+            statsEmbed.add_field(name="Total credits won:", value=str(
+                userObj.duelCreditsWins), inline=True)
+            statsEmbed.add_field(name="Total credits lost:", value=str(
+                userObj.duelCreditsLosses), inline=True)
 
         # send the stats embed
         await message.channel.send(embed=statsEmbed)
