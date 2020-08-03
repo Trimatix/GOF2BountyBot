@@ -1689,7 +1689,7 @@ async def cmd_leaderboard(message, args, isDM):
             boardScope = "Global Leaderboard"
             boardDesc += " across all servers"
 
-        boardDesc += ".*"
+    boardDesc += ".*"
 
     # get the requested stats and sort users by the stat
     inputDict = {}
