@@ -166,6 +166,9 @@ def pickRandomItemTL(shopTL):
 
 maxBountiesPerFaction = 5
 
+# The maximum number of bounties a player is allowed to win each day
+maxDailyBountyWins = 5
+
 # can be "fixed" or "random"
 newBountyDelayType = "random"
 

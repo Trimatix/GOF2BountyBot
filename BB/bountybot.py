@@ -355,7 +355,7 @@ def makeEmbed(titleTxt="", desc="", col=discord.Colour.blue(), footerTxt="", img
 
 """
 Construct a datetime.timedelta from a dictionary,
-transforming keys into keyword arguments fot the timedelta constructor.
+transforming keys into keyword arguments for the timedelta constructor.
 
 @param timeDict -- dictionary containing measurements for each time interval. i.e weeks, days, hours, minutes, seconds, microseconds and milliseconds. all are optional and case sensitive.
 @return -- a timedelta with all of the attributes requested in the dictionary.
@@ -899,17 +899,25 @@ async def cmd_check(message, args, isDM):
     requestedSystem = systObj.name
 
     # ensure the calling user is in the users database
-    if not usersDB.userIDExists(message.author.id):
-        usersDB.addUser(message.author.id)
+    requestedBBUser = usersDB.getOrAddID(message.author.id)
 
-    if not usersDB.getUser(message.author.id).activeShip.hasWeaponsEquipped() and not usersDB.getUser(message.author.id).activeShip.hasTurretsEquipped():
+    if not requestedBBUser.activeShip.hasWeaponsEquipped() and not requestedBBUser.activeShip.hasTurretsEquipped():
         await message.channel.send(":x: Your ship has no weapons equipped!")
         return
 
+    # Restrict the number of bounties a player may win in a single day
+    if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
+        if datetime.utcnow() >= requestedBBUser.dailyBountyWinsReset:
+            requestedBBUser.bountyWinsToday = 0
+        else:
+            await message.channel.send(":x: You have reached the maximum number of bounty wins allowed for today! Check back tomorrow.")
+            return
+
     # ensure the calling user is not on checking cooldown
-    if datetime.utcfromtimestamp(usersDB.getUser(message.author.id).bountyCooldownEnd) < datetime.utcnow():
+    if datetime.utcfromtimestamp(requestedBBUser.bountyCooldownEnd) < datetime.utcnow():
         bountyWon = False
         systemInBountyRoute = False
+        dailyBountiesMaxReached = False
 
         # Loop over all bounties in the database
         for fac in bountiesDB.getFactions():
@@ -921,6 +929,11 @@ async def cmd_check(message, args, isDM):
                 # If current bounty resides in the requested system
                 checkResult = bounty.check(requestedSystem, message.author.id)
                 if checkResult == 3:
+                    requestedBBUser.bountyWinsToday += 1
+                    if not dailyBountiesMaxReached and requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
+                        requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours":24})
+                        dailyBountiesMaxReached = True
+
                     bountyWon = True
                     # reward all contributing users
                     rewards = bounty.calcRewards()
@@ -956,8 +969,9 @@ async def cmd_check(message, args, isDM):
 
         # If a bounty was won, print a congratulatory message
         if bountyWon:
-            usersDB.getUser(message.author.id).bountyWins += 1
-            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.display_name + "**, you now have **" + str(usersDB.getUser(message.author.id).credits) + " Credits!**")
+            requestedBBUser.bountyWins += 1
+            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.display_name + "**, you now have **" + str(requestedBBUser.credits) + " Credits!**" + 
+                                        ("\nYou have now reached the maximum number of bounty wins allowed for today! Please check back tomorrow." if dailyBountiesMaxReached else ""))
 
             if sightedCriminalsStr != "":
                 for currentGuild in guildsDB.getGuilds():
@@ -981,9 +995,9 @@ async def cmd_check(message, args, isDM):
 
         # Only put the calling user on checking cooldown and increment systemsChecked stat if the system checked is on an active bounty's route.
         if systemInBountyRoute:
-            usersDB.getUser(message.author.id).systemsChecked += 1
+            requestedBBUser.systemsChecked += 1
             # Put the calling user on checking cooldown
-            usersDB.getUser(message.author.id).bountyCooldownEnd = (datetime.utcnow() + \
+            requestedBBUser.bountyCooldownEnd = (datetime.utcnow() + \
                                                                     timedelta(minutes=bbConfig.checkCooldown["minutes"])).timestamp()
 
     # If the calling user is on checking cooldown
@@ -1618,7 +1632,7 @@ async def cmd_leaderboard(message, args, isDM):
     # units for the stat
     boardUnit = "Credit"
     boardUnits = "Credits"
-    boardDesc = "*The total value of player inventory, loadout and credits balance*"
+    boardDesc = "*The total value of player inventory, loadout and credits balance"
 
     # change leaderboard arguments based on the what is provided in args
     if args != "":
@@ -4287,6 +4301,9 @@ async def dev_cmd_debug_hangar(message, args, isDM):
         return
 
     itemTypes = ("ship", "weapon", "module", "turret")
+    for itemType in itemTypes:
+        itemInv = requestedBBUser.getInactivesByName(itemType)
+        await message.channel.send(itemType.upper() + " KEYS: " + str(itemInv.keys) + "\n" + itemType.upper() + " LISTINGS: " + str(list(itemInv.items.keys())))
 
     for page in range(1, maxPage+1):
 
@@ -4296,7 +4313,6 @@ async def dev_cmd_debug_hangar(message, args, isDM):
         for itemType in itemTypes:
             itemInv = requestedBBUser.getInactivesByName(itemType)
             displayedItems = []
-            await message.channel.send(itemType.upper() + " KEYS: " + str(itemInv.keys) + "\n" + itemType.upper() + " LISTINGS: " + str(list(itemInv.items.keys())))
 
             for itemNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage(itemType, page, maxPerPage) + 1):
                 if itemNum == firstPlace:
