@@ -1,6 +1,7 @@
 from ..bbObjects import bbUser
 from .. import bbUtil
 from ..logging import bbLogger
+import traceback
 
 """
 A database of bbUser objects.
@@ -166,7 +167,7 @@ class bbUserDB:
             try:
                 data[str(id)] = self.users[id].toDictNoId()
             except Exception as e:
-                bbLogger.log("UserDB", "toDict", "Error serialising bbUser:\n" + str(e), eventType="USERERR")
+                bbLogger.log("UserDB", "toDict", "Error serialising bbUser:" + e.__name__, trace=traceback.format_exc(), eventType="USERERR")
         return data
 
 

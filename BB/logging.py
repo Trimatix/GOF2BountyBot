@@ -2,6 +2,7 @@ from .bbConfig import bbConfig
 import os.path
 from os import path
 from datetime import datetime
+import datetime
 
 class logger:
     def __init__(self):
@@ -65,11 +66,11 @@ class logger:
                             f.close()
                             logsSaved += "[+]"
                         except IOError as e:
-                            print(nowStr + "-[LOG::SAVE]>F_NEW_IOERR: ERROR CREATING LOG FILE: " + currentFName + "\n" + str(e))
+                            print(nowStr + "-[LOG::SAVE]>F_NEW_IOERR: ERROR CREATING LOG FILE: " + currentFName + ":" + e.__name__, trace=traceback.format_exc())
                     try:
                         files[category] = open(currentFName, 'a')
                     except IOError as e:
-                        print(nowStr + "-[LOG::SAVE]>F_OPN_IOERR: ERROR OPENING LOG FILE: " + currentFName + "\n" + str(e))
+                        print(nowStr + "-[LOG::SAVE]>F_OPN_IOERR: ERROR OPENING LOG FILE: " + currentFName + ":" + e.__name__, trace=traceback.format_exc())
                         files[category] = None
 
         while not self.isEmpty():
@@ -78,7 +79,7 @@ class logger:
                 try:
                     files[category].write(log)
                 except IOError as e:
-                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + currentFName + "\n" + str(e))
+                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + currentFName + ":" + e.__name__, trace=traceback.format_exc())
         
         for f in files.values():
             f.close()
