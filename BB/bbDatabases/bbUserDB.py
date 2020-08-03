@@ -167,7 +167,7 @@ class bbUserDB:
             try:
                 data[str(id)] = self.users[id].toDictNoId()
             except Exception as e:
-                bbLogger.log("UserDB", "toDict", "Error serialising bbUser:" + e.__name__, trace=traceback.format_exc(), eventType="USERERR")
+                bbLogger.log("UserDB", "toDict", "Error serialising bbUser: " + e.__class__.__name__, trace=traceback.format_exc(), eventType="USERERR")
         return data
 
 

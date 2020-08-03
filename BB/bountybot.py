@@ -3217,7 +3217,13 @@ developer command saving all databases to JSON
 @param args -- ignored
 """
 async def dev_cmd_save(message, args, isDM):
-    saveAllDBs()
+    try:
+        saveAllDBs()
+    except Exception as e:
+        print("SAVING ERROR",e.__class__.__name__)
+        print(traceback.format_exc())
+        await message.channel.send("failed!")
+        return
     print(datetime.now().strftime("%H:%M:%S: Data saved manually!"))
     await message.channel.send("saved!")
 
@@ -4398,7 +4404,7 @@ async def on_message(message):
                     commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
             except Exception as e:
                 await message.channel.send(":woozy_face: Uh oh, something went wrong! The error has been logged.\nThis command probably won't work until we've looked into it.")
-                bbLogger.log("Main", "on_message", "⚠ An unexpected error occured when calling command '" + command + "' with args '" + args + "': " + e.__name__, trace=traceback.format_exc())
+                bbLogger.log("Main", "on_message", "An unexpected error occured when calling command '" + command + "' with args '" + args + "': " + e.__class__.__name__, trace=traceback.format_exc())
                 commandFound = True
 
             # elif message.channel.type == discord.ChannelType.private:

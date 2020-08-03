@@ -147,7 +147,11 @@ class bbInventory:
     @return -- The bbInventoryListing for the item at the requested index
     """
     def __getitem__(self, key):
-        return self.items[self.keys[key]]
+        if key in range(len(self.keys)):
+            if self.keys[key] in self.items:
+                return self.items[self.keys[key]]
+            raise RuntimeError("Failed get of key number " + str(key) + " - " + str(self.keys[key]) + ". Key does not exist in inventory.")
+        raise KeyError("Key of incorrect type or out of range: "+ str(key) + "\nValid range: 0 - " + str(len(self.keys)-1))
 
 
     """
