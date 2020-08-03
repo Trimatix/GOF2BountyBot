@@ -12,6 +12,7 @@ import random
 import operator
 # used for spawning items from dict in dev_cmd_give
 import json
+import traceback
 
 # BountyBot Imports
 
@@ -3380,6 +3381,100 @@ dmCommands.register("give", dev_cmd_give, isDev=True, forceKeepArgsCasing=True)
 
 
 """
+Delete an item in a requested user's inventory.
+arg 1: user mention or ID
+arg 2: item type (ship/weapon/module/turret)
+arg 3: item number (from $hangar)
+
+@param message -- the discord message calling the command
+@param args -- string containing a user mention, an item type and an index number, separated by a single space
+"""
+async def dev_cmd_del_item(message, args, isDM):
+    argsSplit = args.split(" ")
+    if len(argsSplit) < 3:
+        await message.channel.send(":x: Not enough arguments! Please provide a user, an item type (ship/weapon/module/turret) and an item number from `" + bbConfig.commandPrefix + "hangar`")
+        return
+    if len(argsSplit) > 3:
+        await message.channel.send(":x: Too many arguments! Please only give a user, an item type (ship/weapon/module/turret), and an item number.")
+        return
+
+    item = argsSplit[1].rstrip("s")
+    if item == "all" or item not in bbConfig.validItemNames:
+        await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
+        return
+
+    if not (bbUtil.isInt(argsSplit[0]) or bbUtil.isMention(argsSplit[0])):
+        await message.channel.send(":x: Invalid user! ")
+        return
+    requestedBBUser = usersDB.getOrAddID(int(argsSplit[0].lstrip("<@!").rstrip(">")))
+
+    requestedUser = client.get_user(requestedBBUser.id)
+    if requestedUser is None:
+        await message.channel.send(":x: Unrecognised user!")
+        return
+
+    itemNum = argsSplit[2]
+    if not bbUtil.isInt(itemNum):
+        await message.channel.send(":x: Invalid item number!")
+        return
+    itemNum = int(itemNum)
+
+    userItemInactives = requestedBBUser.getInactivesByName(item)
+    if itemNum > userItemInactives.numKeys:
+        await message.channel.send(":x: Invalid item number! The user only has " + str(userItemInactives.numKeys) + " " + item + "s.")
+        return
+    if itemNum < 1:
+        await message.channel.send(":x: Invalid item number! Must be at least 1.")
+        return
+
+    requestedItem = userItemInactives[itemNum - 1].item
+    itemName = ""
+    itemEmbed = None
+    
+    if item == "ship":
+        itemName = requestedItem.getNameAndNick()
+        itemEmbed = makeEmbed(col=bbData.factionColours[requestedItem.manufacturer] if requestedItem.manufacturer in bbData.factionColours else bbData.factionColours[
+                                    "neutral"], thumb=requestedItem.icon if requestedItem.hasIcon else "")
+
+        if requestedItem is None:
+            itemEmbed.add_field(name="Item:",
+                                    value="None", inline=False)
+        else:
+            itemEmbed.add_field(name="Item:", value=requestedItem.getNameAndNick(
+            ) + "\n" + requestedItem.statsStringNoItems(), inline=False)
+
+            if requestedItem.getMaxPrimaries() > 0:
+                itemEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
+                    requestedItem.weapons)) + "/" + str(requestedItem.getMaxPrimaries()) + "*", inline=False)
+                for weaponNum in range(1, len(requestedItem.weapons) + 1):
+                    itemEmbed.add_field(name=str(weaponNum) + ". " + requestedItem.weapons[weaponNum - 1].name, value=(
+                        requestedItem.weapons[weaponNum - 1].emoji if requestedItem.weapons[weaponNum - 1].hasEmoji else "") + requestedItem.weapons[weaponNum - 1].statsStringShort(), inline=True)
+
+            if requestedItem.getMaxModules() > 0:
+                itemEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
+                    requestedItem.modules)) + "/" + str(requestedItem.getMaxModules()) + "*", inline=False)
+                for moduleNum in range(1, len(requestedItem.modules) + 1):
+                    itemEmbed.add_field(name=str(moduleNum) + ". " + requestedItem.modules[moduleNum - 1].name, value=(
+                        requestedItem.modules[moduleNum - 1].emoji if requestedItem.modules[moduleNum - 1].hasEmoji else "") + requestedItem.modules[moduleNum - 1].statsStringShort(), inline=True)
+
+            if requestedItem.getMaxTurrets() > 0:
+                itemEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
+                    requestedItem.turrets)) + "/" + str(requestedItem.getMaxTurrets()) + "*", inline=False)
+                for turretNum in range(1, len(requestedItem.turrets) + 1):
+                    itemEmbed.add_field(name=str(turretNum) + ". " + requestedItem.turrets[turretNum - 1].name, value=(
+                        requestedItem.turrets[turretNum - 1].emoji if requestedItem.turrets[turretNum - 1].hasEmoji else "") + requestedItem.turrets[turretNum - 1].statsStringShort(), inline=True)
+
+    else:
+        itemName = requestedItem.name + "\n" + requestedItem.statsStringShort()
+
+    await message.channel.send(":white_check_mark: One item deleted from " + userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
+    userItemInactives.removeItem(requestedItem)
+
+bbCommands.register("del-item", dev_cmd_del_item)
+dmCommands.register("del-item", dev_cmd_del_item)
+
+
+"""
 developer command setting the checking cooldown applied to users
 this does not update bbConfig and will be reverted on bot restart
 
@@ -4055,6 +4150,64 @@ bbCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 dmCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 
 
+"""
+developer command printing the requested user's hangar, including object memory addresses.
+
+@param message -- the discord message calling the command
+@param args -- string containing a user mention or ID
+"""
+async def dev_cmd_debug_hangar(message, args, isDM):
+    if not (bbUtil.isInt(args) or bbUtil.isMention(args)):
+        await message.channel.send(":x: Invalid user!")
+        return
+
+    requestedUser = client.get_user(int(args.lstrip("<@!").rstrip(">")))
+    if requestedUser is None:
+        await message.channel.send(":x: Unrecognised user!")
+        return
+
+    if not usersDB.userIDExists(requestedUser.id):
+        await message.channel.send("User has not played yet!")
+        return
+    
+    requestedBBUser = usersDB.getUser(requestedUser.id)
+    maxPerPage = bbConfig.maxItemsPerHangarPageAll
+
+    maxPage = requestedBBUser.numInventoryPages("all", maxPerPage)
+    if maxPage == 0:
+        await message.channel.send(":x: The requested pilot doesn't have any items!")
+        return
+
+    itemTypes = ("ship", "weapon", "module", "turret")
+
+    for page in range(1, maxPage+1):
+
+        hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items - page " + str(page) + "/" + str(requestedBBUser.numInventoryPages("all", maxPerPage)), thumb=requestedUser.avatar_url_as(size=64))
+        firstPlace = maxPerPage * (page - 1) + 1
+
+        for itemType in itemTypes:
+            itemInv = requestedBBUser.getInactivesByName(itemType)
+
+            for itemNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage(itemType, page, maxPerPage) + 1):
+                if itemNum == firstPlace:
+                    hangarEmbed.add_field(name="‎", value="__**Stored " + itemType.title() + "s**__", inline=False)
+                currentItem = itemInv[itemNum - 1].item
+                currentItemCount = itemInv.numStored(currentItem)
+                if itemType == "ship":
+                    currentItemName = currentItem.getNameAndNick()
+                else:
+                    currentItemName = currentItem.name
+                hangarEmbed.add_field(name=str(itemNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + repr(currentItem) + "\n" + currentItemName, 
+                                    value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
+
+        await message.channel.send(embed=hangarEmbed)
+
+
+bbCommands.register("debug-hangar", dev_cmd_debug_hangar, isDev=True)
+dmCommands.register("debug-hangar", dev_cmd_debug_hangar, isDev=True)
+
+
+
 ####### MAIN FUNCTIONS #######
 
 
@@ -4245,7 +4398,7 @@ async def on_message(message):
                     commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
             except Exception as e:
                 await message.channel.send(":woozy_face: Uh oh, something went wrong! The error has been logged.\nThis command probably won't work until we've looked into it.")
-                bbLogger.log("Main", "on_message", "⚠ An unexpected error occured when calling command '" + command + "' with args '" + args + "': " + str(e))
+                bbLogger.log("Main", "on_message", "⚠ An unexpected error occured when calling command '" + command + "' with args '" + args + "': " + e.__name__, trace=traceback.format_exc())
                 commandFound = True
 
             # elif message.channel.type == discord.ChannelType.private:
