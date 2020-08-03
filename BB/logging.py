@@ -2,7 +2,6 @@ from .bbConfig import bbConfig
 import os.path
 from os import path
 from datetime import datetime
-import datetime
 
 class logger:
     def __init__(self):
@@ -61,25 +60,27 @@ class logger:
                 if category not in files:
                     if not path.exists(currentFName):
                         try:
-                            f = open(currentFName, 'x')
-                            f.write('')
+                            f = open(currentFName, 'xb')
                             f.close()
                             logsSaved += "[+]"
                         except IOError as e:
-                            print(nowStr + "-[LOG::SAVE]>F_NEW_IOERR: ERROR CREATING LOG FILE: " + currentFName + ":" + e.__name__, trace=traceback.format_exc())
+                            print(nowStr + "-[LOG::SAVE]>F_NEW_IOERR: ERROR CREATING LOG FILE: " + currentFName + ":" + e.__class__.__name__, trace=traceback.format_exc())
                     try:
-                        files[category] = open(currentFName, 'a')
+                        files[category] = open(currentFName, 'ab')
                     except IOError as e:
-                        print(nowStr + "-[LOG::SAVE]>F_OPN_IOERR: ERROR OPENING LOG FILE: " + currentFName + ":" + e.__name__, trace=traceback.format_exc())
+                        print(nowStr + "-[LOG::SAVE]>F_OPN_IOERR: ERROR OPENING LOG FILE: " + currentFName + ":" + e.__class__.__name__, trace=traceback.format_exc())
                         files[category] = None
 
         while not self.isEmpty():
             log, category = self.popHeadLogAndCategory()
             if files[category] is not None:
                 try:
-                    files[category].write(log)
+                    # log strings first encoded to bytes (utf-8) to allow for unicode chars
+                    files[category].write(log.encode())
                 except IOError as e:
-                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + currentFName + ":" + e.__name__, trace=traceback.format_exc())
+                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + currentFName + ":" + e.__class__.__name__, trace=traceback.format_exc())
+                except UnicodeEncodeError as e:
+                    print(e.start)
         
         for f in files.values():
             f.close()
