@@ -996,6 +996,13 @@ async def cmd_check(message, args):
                     toPop += [bounty]
 
                 if checkResult != 0:
+                    oldLevel = bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP)
+                    requestedBBUser.bountyHuntingXP += bbConfig.hunterXPPerSysCheck
+                    if checkResult == 3:
+                        requestedBBUser.bountyHuntingXP += bbConfig.hunterXPPerWin
+                    newLevel = bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP)
+                    if newLevel > oldLevel:
+                        await message.channel.send(":arrow_up: **Level Up!**\n" + userOrMemberName(message.author, message.guild) + ":partying_face:")
                     systemInBountyRoute = True
                     await updateAllBountyBoardChannels(bounty, bountyComplete=checkResult == 3)
 
