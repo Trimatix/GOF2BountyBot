@@ -3,8 +3,8 @@ from ....bbConfig import bbData
 
 class bbModule(bbItem):
     def __init__(self, name, aliases, armour=0, armourMultiplier=1.0, shield=0, shieldMultiplier=1.0, dps=0,
-                    dpsMultiplier=1.0, cargo=0, cargoMultiplier=1.0, handling=0, handlingMultiplier=1.0, value=0, wiki="", manufacturer="", icon="", emoji="", techLevel=-1):
-        super(bbModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel)
+                    dpsMultiplier=1.0, cargo=0, cargoMultiplier=1.0, handling=0, handlingMultiplier=1.0, value=0, wiki="", manufacturer="", icon="", emoji="", techLevel=-1, builtIn=False):
+        super(bbModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
         self.armour = armour
         self.armourMultiplier = armourMultiplier
         self.shield = shield
@@ -46,6 +46,42 @@ class bbModule(bbItem):
     def getType(self):
         return bbModule
 
+    
+    def toDict(self):
+        itemDict = super(bbModule, self).toDict()
+        if not self.builtIn:
+            if self.armour != 0.0:
+                itemDict["armour"] = self.armour
+
+            if self.armourMultiplier != 1.0:
+                itemDict["armourMultiplier"] = self.armourMultiplier
+
+            if self.shield != 0.0:
+                itemDict["shield"] = self.shield
+
+            if self.shieldMultiplier != 1.0:
+                itemDict["shieldMultiplier"] = self.shieldMultiplier
+
+            if self.dps != 0.0:
+                itemDict["dps"] = self.dps
+
+            if self.dpsMultiplier != 1.0:
+                itemDict["dpsMultiplier"] = self.dpsMultiplier
+
+            if self.cargo != 1.0:
+                itemDict["cargo"] = self.cargo
+
+            if self.cargoMultiplier != 1.0:
+                itemDict["cargoMultiplier"] = self.cargoMultiplier
+
+            if self.handling != 0:
+                itemDict["handling"] = self.handling
+
+            if self.handlingMultiplier != 1.0:
+                itemDict["handlingMultiplier"] = self.handlingMultiplier
+
+        return itemDict
+
 
 def fromDict(moduleDict):
     return bbModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], armour=moduleDict["armour"] if "armour" in moduleDict else 0,
@@ -55,4 +91,4 @@ def fromDict(moduleDict):
                     cargoMultiplier=moduleDict["cargoMultiplier"] if "cargoMultiplier" in moduleDict else 1, handling=moduleDict["handling"] if "handling" in moduleDict else 0,
                     handlingMultiplier=moduleDict["handlingMultiplier"] if "handlingMultiplier" in moduleDict else 1, value=moduleDict["value"] if "value" in moduleDict else 0,
                     wiki=moduleDict["wiki"] if "wiki" in moduleDict else "", manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
-                    emoji=moduleDict["emoji"] if "emoji" in moduleDict else "", techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1)
+                    emoji=moduleDict["emoji"] if "emoji" in moduleDict else "", techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)

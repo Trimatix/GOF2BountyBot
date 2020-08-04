@@ -185,6 +185,9 @@ def pickRandomItemTL(shopTL):
 
 maxBountiesPerFaction = 5
 
+# The maximum number of bounties a player is allowed to win each day
+maxDailyBountyWins = 10
+
 # can be "fixed" or "random"
 newBountyDelayType = "random"
 
@@ -274,6 +277,9 @@ userDBPath = "saveData/users.json"
 guildDBPath = "saveData/guilds.json"
 bountyDBPath = "saveData/bounties.json"
 
+# path to folder to save log txts to
+loggingFolderPath = "saveData/logs"
+
 
 
 ##### SCHEDULING #####
@@ -298,6 +304,9 @@ dmSentEmoji = "📬"
 
 # max number of characters accepted by nameShip
 maxShipNickLength = 30
+
+# max number of characters accepted by nameShip, when called by a developer
+maxDevShipNickLength = 100
 
 # The default emojis to list in a reaction menu
 numberEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
