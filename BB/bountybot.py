@@ -259,11 +259,11 @@ async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
                 # Add the winning user to the embed
                 # If the winning user is not in the current guild, use the user's name and discriminator
                 if client.get_guild(currentGuild.id).get_member(winningUserId) is None:
-                    rewardsEmbed.add_field(name="1. :trophy: " + str(rewards[winningUserId]["reward"]) + " credits:", value=str(client.get_user(winningUserId)) + " checked " + str(
+                    rewardsEmbed.add_field(name="1. 🏆 " + str(rewards[winningUserId]["reward"]) + " credits:", value=str(client.get_user(winningUserId)) + " checked " + str(
                         int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
                 # If the winning user is in the current guild, use the user's mention
                 else:
-                    rewardsEmbed.add_field(name="1. :trophy: " + str(rewards[winningUserId]["reward"]) + " credits:", value="<@" + str(winningUserId) + "> checked " + str(
+                    rewardsEmbed.add_field(name="1. 🏆 " + str(rewards[winningUserId]["reward"]) + " credits:", value="<@" + str(winningUserId) + "> checked " + str(
                         int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
 
                 # The index of the current user in the embed
