@@ -3129,11 +3129,10 @@ async def cmd_duel(message, args, isDM):
             creditsMsg = "The stakes were **" + \
                 str(requestedDuel.stakes) + "** credit" + \
                 ("s" if requestedDuel.stakes != 1 else "") + \
-                (".\n**" if requestedDuel.stakes > 0 else "")
 
             # Only display the new player balances if the duel stakes are greater than zero.
             if requestedDuel.stakes > 0:
-                creditsMsg += client.get_user(winningBBUser.id).name + "** now has **" + str(winningBBUser.credits) + " credits**.\n**" + \
+                creditsMsg += ".\n**" + client.get_user(winningBBUser.id).name + "** now has **" + str(winningBBUser.credits) + " credits**.\n**" + \
                     client.get_user(losingBBUser.id).name + "** now has **" + \
                     str(losingBBUser.credits) + " credits**."
 
