@@ -1978,8 +1978,8 @@ async def cmd_hangar(message, args, isDM):
                         name="‎", value="__**Stored Ships**__", inline=False)
                 currentItem = requestedBBUser.inactiveShips[shipNum - 1].item
                 currentItemCount = requestedBBUser.inactiveShips.items[currentItem].count
-                hangarEmbed.add_field(name=str(shipNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") +
-                                      currentItem.getNameAndNick(), value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
+                hangarEmbed.add_field(name=str(shipNum) + ". " + (currentItem.emoji + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") +
+                                      currentItem.getNameAndNick(), value=currentItem.statsStringShort(), inline=False)
 
         if item in ["all", "weapon"]:
             for weaponNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("weapon", page, maxPerPage) + 1):
@@ -1988,8 +1988,8 @@ async def cmd_hangar(message, args, isDM):
                         name="‎", value="__**Stored Weapons**__", inline=False)
                 currentItem = requestedBBUser.inactiveWeapons[weaponNum - 1].item
                 currentItemCount = requestedBBUser.inactiveWeapons.items[currentItem].count
-                hangarEmbed.add_field(name=str(weaponNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") +
-                                      currentItem.name, value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
+                hangarEmbed.add_field(name=str(weaponNum) + ". " + (currentItem.emoji + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") +
+                                      currentItem.name, value=currentItem.statsStringShort(), inline=False)
 
         if item in ["all", "module"]:
             for moduleNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("module", page, maxPerPage) + 1):
@@ -1998,8 +1998,8 @@ async def cmd_hangar(message, args, isDM):
                         name="‎", value="__**Stored Modules**__", inline=False)
                 currentItem = requestedBBUser.inactiveModules[moduleNum - 1].item
                 currentItemCount = requestedBBUser.inactiveModules.items[currentItem].count
-                hangarEmbed.add_field(name=str(moduleNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name,
-                                      value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
+                hangarEmbed.add_field(name=str(moduleNum) + ". " + (currentItem.emoji + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name,
+                                      value=currentItem.statsStringShort(), inline=False)
 
         if item in ["all", "turret"]:
             for turretNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("turret", page, maxPerPage) + 1):
@@ -2008,8 +2008,8 @@ async def cmd_hangar(message, args, isDM):
                         name="‎", value="__**Stored Turrets**__", inline=False)
                 currentItem = requestedBBUser.inactiveTurrets[turretNum - 1].item
                 currentItemCount = requestedBBUser.inactiveTurrets.items[currentItem].count
-                hangarEmbed.add_field(name=str(turretNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name,
-                                      value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
+                hangarEmbed.add_field(name=str(turretNum) + ". " + (currentItem.emoji + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name,
+                                      value=currentItem.statsStringShort(), inline=False)
 
         try:
             await sendChannel.send(embed=hangarEmbed)
@@ -2090,8 +2090,8 @@ async def cmd_shop(message, args, isDM):
                 continue
 
             currentItemCount = requestedShop.shipsStock.items[currentItem].count
-            shopEmbed.add_field(name=str(shipNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.getNameAndNick() + "**",
-                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + bbUtil.commaSplitNum(str(currentItem.getValue())) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+            shopEmbed.add_field(name=str(shipNum) + ". " + (currentItem.emoji + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.getNameAndNick() + "**",
+                                value=bbUtil.commaSplitNum(str(currentItem.getValue())) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "weapon"]:
         for weaponNum in range(1, requestedShop.weaponsStock.numKeys + 1):
@@ -2121,8 +2121,8 @@ async def cmd_shop(message, args, isDM):
                 continue
 
             currentItemCount = requestedShop.weaponsStock.items[currentItem].count
-            shopEmbed.add_field(name=str(weaponNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+            shopEmbed.add_field(name=str(weaponNum) + ". " + (currentItem.emoji + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
+                                value=bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "module"]:
         for moduleNum in range(1, requestedShop.modulesStock.numKeys + 1):
@@ -2152,8 +2152,8 @@ async def cmd_shop(message, args, isDM):
                 continue
 
             currentItemCount = requestedShop.modulesStock.items[currentItem].count
-            shopEmbed.add_field(name=str(moduleNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+            shopEmbed.add_field(name=str(moduleNum) + ". " + (currentItem.emoji + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
+                                value=bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "turret"]:
         for turretNum in range(1, requestedShop.turretsStock.numKeys + 1):
@@ -2183,8 +2183,8 @@ async def cmd_shop(message, args, isDM):
                 continue
 
             currentItemCount = requestedShop.turretsStock.items[currentItem].count
-            shopEmbed.add_field(name=str(turretNum) + ". " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=(currentItem.emoji if currentItem.hasEmoji else "") + " " + bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+            shopEmbed.add_field(name=str(turretNum) + ". " + (currentItem.emoji + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
+                                value=bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     try:
         await sendChannel.send(embed=shopEmbed)
@@ -2248,20 +2248,17 @@ async def cmd_loadout(message, args, isDM):
         loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
             activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
         for weaponNum in range(1, len(activeShip.weapons) + 1):
-            loadoutEmbed.add_field(name=str(weaponNum) + ". " + activeShip.weapons[weaponNum - 1].name, value=(
-                activeShip.weapons[weaponNum - 1].emoji if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
+            loadoutEmbed.add_field(name=str(weaponNum) + ". " + (activeShip.weapons[weaponNum - 1] + " " if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].name, value=activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
 
         loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
             activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + "*", inline=False)
         for moduleNum in range(1, len(activeShip.modules) + 1):
-            loadoutEmbed.add_field(name=str(moduleNum) + ". " + activeShip.modules[moduleNum - 1].name, value=(
-                activeShip.modules[moduleNum - 1].emoji if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
+            loadoutEmbed.add_field(name=str(moduleNum) + ". " + (activeShip.modules[moduleNum - 1].emoji + " " if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].name, value=activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
 
         loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
             activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + "*", inline=False)
         for turretNum in range(1, len(activeShip.turrets) + 1):
-            loadoutEmbed.add_field(name=str(turretNum) + ". " + activeShip.turrets[turretNum - 1].name, value=(
-                activeShip.turrets[turretNum - 1].emoji if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
+            loadoutEmbed.add_field(name=str(turretNum) + ". " + (activeShip.turrets[turretNum - 1].emoji + " " if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].name, value=activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
 
         await message.channel.send(embed=loadoutEmbed)
         return
@@ -2283,22 +2280,19 @@ async def cmd_loadout(message, args, isDM):
                 loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
                     activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
                 for weaponNum in range(1, len(activeShip.weapons) + 1):
-                    loadoutEmbed.add_field(name=str(weaponNum) + ". " + activeShip.weapons[weaponNum - 1].name, value=(
-                        activeShip.weapons[weaponNum - 1].emoji if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
+                    loadoutEmbed.add_field(name=str(weaponNum) + ". " + (activeShip.weapons[weaponNum - 1].emoji + " " if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].name, value=activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
 
             if activeShip.getMaxModules() > 0:
                 loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
                     activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + "*", inline=False)
                 for moduleNum in range(1, len(activeShip.modules) + 1):
-                    loadoutEmbed.add_field(name=str(moduleNum) + ". " + activeShip.modules[moduleNum - 1].name, value=(
-                        activeShip.modules[moduleNum - 1].emoji if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
+                    loadoutEmbed.add_field(name=str(moduleNum) + ". " + (activeShip.modules[moduleNum - 1].emoji + " " if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].name, value=activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
 
             if activeShip.getMaxTurrets() > 0:
                 loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
                     activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + "*", inline=False)
                 for turretNum in range(1, len(activeShip.turrets) + 1):
-                    loadoutEmbed.add_field(name=str(turretNum) + ". " + activeShip.turrets[turretNum - 1].name, value=(
-                        activeShip.turrets[turretNum - 1].emoji if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
+                    loadoutEmbed.add_field(name=str(turretNum) + ". " + (activeShip.turrets[turretNum - 1].emoji + " " if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].name, value=activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
 
         await message.channel.send(embed=loadoutEmbed)
 
@@ -3730,22 +3724,19 @@ async def dev_cmd_del_item(message, args, isDM):
                 itemEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
                     requestedItem.weapons)) + "/" + str(requestedItem.getMaxPrimaries()) + "*", inline=False)
                 for weaponNum in range(1, len(requestedItem.weapons) + 1):
-                    itemEmbed.add_field(name=str(weaponNum) + ". " + requestedItem.weapons[weaponNum - 1].name, value=(
-                        requestedItem.weapons[weaponNum - 1].emoji if requestedItem.weapons[weaponNum - 1].hasEmoji else "") + requestedItem.weapons[weaponNum - 1].statsStringShort(), inline=True)
+                    itemEmbed.add_field(name=str(weaponNum) + ". " + (requestedItem.weapons[weaponNum - 1].emoji + " " if requestedItem.weapons[weaponNum - 1].hasEmoji else "") + requestedItem.weapons[weaponNum - 1].name, value=requestedItem.weapons[weaponNum - 1].statsStringShort(), inline=True)
 
             if requestedItem.getMaxModules() > 0:
                 itemEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
                     requestedItem.modules)) + "/" + str(requestedItem.getMaxModules()) + "*", inline=False)
                 for moduleNum in range(1, len(requestedItem.modules) + 1):
-                    itemEmbed.add_field(name=str(moduleNum) + ". " + requestedItem.modules[moduleNum - 1].name, value=(
-                        requestedItem.modules[moduleNum - 1].emoji if requestedItem.modules[moduleNum - 1].hasEmoji else "") + requestedItem.modules[moduleNum - 1].statsStringShort(), inline=True)
+                    itemEmbed.add_field(name=str(moduleNum) + ". " + (requestedItem.modules[moduleNum - 1].emoji + " " if requestedItem.modules[moduleNum - 1].hasEmoji else "") + requestedItem.modules[moduleNum - 1].name, value=requestedItem.modules[moduleNum - 1].statsStringShort(), inline=True)
 
             if requestedItem.getMaxTurrets() > 0:
                 itemEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
                     requestedItem.turrets)) + "/" + str(requestedItem.getMaxTurrets()) + "*", inline=False)
                 for turretNum in range(1, len(requestedItem.turrets) + 1):
-                    itemEmbed.add_field(name=str(turretNum) + ". " + requestedItem.turrets[turretNum - 1].name, value=(
-                        requestedItem.turrets[turretNum - 1].emoji if requestedItem.turrets[turretNum - 1].hasEmoji else "") + requestedItem.turrets[turretNum - 1].statsStringShort(), inline=True)
+                    itemEmbed.add_field(name=str(turretNum) + ". " + (requestedItem.turrets[turretNum - 1].emoji + " " if requestedItem.turrets[turretNum - 1].hasEmoji else "") + requestedItem.turrets[turretNum - 1].name, value=requestedItem.turrets[turretNum - 1].statsStringShort(), inline=True)
 
     else:
         itemName = requestedItem.name + "\n" + requestedItem.statsStringShort()
@@ -3827,22 +3818,19 @@ async def dev_cmd_del_item_key(message, args, isDM):
                 itemEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
                     requestedItem.weapons)) + "/" + str(requestedItem.getMaxPrimaries()) + "*", inline=False)
                 for weaponNum in range(1, len(requestedItem.weapons) + 1):
-                    itemEmbed.add_field(name=str(weaponNum) + ". " + requestedItem.weapons[weaponNum - 1].name, value=(
-                        requestedItem.weapons[weaponNum - 1].emoji if requestedItem.weapons[weaponNum - 1].hasEmoji else "") + requestedItem.weapons[weaponNum - 1].statsStringShort(), inline=True)
+                    itemEmbed.add_field(name=str(weaponNum) + ". " + (requestedItem.weapons[weaponNum - 1].emoji + " " if requestedItem.weapons[weaponNum - 1].hasEmoji else "") + requestedItem.weapons[weaponNum - 1].name, value=requestedItem.weapons[weaponNum - 1].statsStringShort(), inline=True)
 
             if requestedItem.getMaxModules() > 0:
                 itemEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
                     requestedItem.modules)) + "/" + str(requestedItem.getMaxModules()) + "*", inline=False)
                 for moduleNum in range(1, len(requestedItem.modules) + 1):
-                    itemEmbed.add_field(name=str(moduleNum) + ". " + requestedItem.modules[moduleNum - 1].name, value=(
-                        requestedItem.modules[moduleNum - 1].emoji if requestedItem.modules[moduleNum - 1].hasEmoji else "") + requestedItem.modules[moduleNum - 1].statsStringShort(), inline=True)
+                    itemEmbed.add_field(name=str(moduleNum) + ". " + (requestedItem.modules[moduleNum - 1].emoji + " " if requestedItem.modules[moduleNum - 1].hasEmoji else "") + requestedItem.modules[moduleNum - 1].name, value=requestedItem.modules[moduleNum - 1].statsStringShort(), inline=True)
 
             if requestedItem.getMaxTurrets() > 0:
                 itemEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
                     requestedItem.turrets)) + "/" + str(requestedItem.getMaxTurrets()) + "*", inline=False)
                 for turretNum in range(1, len(requestedItem.turrets) + 1):
-                    itemEmbed.add_field(name=str(turretNum) + ". " + requestedItem.turrets[turretNum - 1].name, value=(
-                        requestedItem.turrets[turretNum - 1].emoji if requestedItem.turrets[turretNum - 1].hasEmoji else "") + requestedItem.turrets[turretNum - 1].statsStringShort(), inline=True)
+                    itemEmbed.add_field(name=str(turretNum) + ". " + (requestedItem.turrets[turretNum - 1].emoji + " " if requestedItem.turrets[turretNum - 1].hasEmoji else "") + requestedItem.turrets[turretNum - 1].name, value=requestedItem.turrets[turretNum - 1].statsStringShort(), inline=True)
 
     else:
         itemName = requestedItem.name + "\n" + requestedItem.statsStringShort()
@@ -4618,8 +4606,8 @@ async def dev_cmd_debug_hangar(message, args, isDM):
                 else:
                     currentItemName = currentItem.name
                 try:
-                    hangarEmbed.add_field(name=str(itemNum) + ". " + ("" if itemStored else "⚠ KEY NOT FOUND IN ITEMS DICT ") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItemName + "\n`" + repr(currentItem) + "`",
-                                          value=(currentItem.emoji if currentItem.hasEmoji else "") + currentItem.statsStringShort(), inline=False)
+                    hangarEmbed.add_field(name=str(itemNum) + (currentItem.emoji + " " if currentItem.hasEmoji else "") + ". " + ("" if itemStored else "⚠ KEY NOT FOUND IN ITEMS DICT ") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItemName + "\n`" + repr(currentItem) + "`",
+                                          value=currentItem.statsStringShort(), inline=False)
                 except AttributeError:
                     hangarEmbed.add_field(name=str(itemNum) + ". " + ("" if itemStored else "⚠ KEY NOT FOUND IN ITEMS DICT ") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItemName + "\n`" + repr(currentItem) + "`",
                                           value="unexpected type", inline=False)
@@ -4633,8 +4621,8 @@ async def dev_cmd_debug_hangar(message, args, isDM):
                     else:
                         currentItemName = itemKey.name
                     try:
-                        hangarEmbed.add_field(name=str(itemNum) + ". ⚠ ITEM LISTING NOT FOUND IN KEYS " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItemName + "\n`" + repr(itemKey) + "`",
-                                              value=(itemKey.emoji if itemKey.hasEmoji else "") + itemKey.statsStringShort(), inline=False)
+                        hangarEmbed.add_field(name=str(itemNum) + (itemKey.emoji + " " if itemKey.hasEmoji else "") + ". ⚠ ITEM LISTING NOT FOUND IN KEYS " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItemName + "\n`" + repr(itemKey) + "`",
+                                              value=itemKey.statsStringShort(), inline=False)
                     except AttributeError:
                         hangarEmbed.add_field(name=str(itemNum) + ". ⚠ ITEM LISTING NOT FOUND IN KEYS " + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItemName + "\n`" + repr(itemKey) + "`",
                                               value="unexpected type", inline=False)
