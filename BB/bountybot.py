@@ -948,6 +948,11 @@ async def cmd_check(message, args, isDM):
         else:
             await message.channel.send(":x: You have reached the maximum number of bounty wins allowed for today! Check back tomorrow.")
             return
+        
+    # Reset daily bounty wins every day
+    elif requestedBBUser.dailyBountyWinsReset < datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0):
+        requestedBBUser.dailyBountyWinsReset = datetime.utcnow()
+        requestedBBUser.bountyWinsToday = 0
 
     # ensure the calling user is not on checking cooldown
     if datetime.utcfromtimestamp(requestedBBUser.bountyCooldownEnd) < datetime.utcnow():
@@ -1074,7 +1079,8 @@ async def cmd_bounties(message, args, isDM):
         # If no active bounties were found, print an error
         if len(outmessage) == preLen:
             outmessage += "\n[  No currently active bounties! Please check back later.  ]"
-        await message.channel.send(outmessage + "```")
+        outmessage += "```\nYou have **" + str(bbConfig.maxDailyBountyWins - usersDB.getOrAddID(message.author.id).bountyWinsToday) + "** remaining bounty wins today!"
+        await message.channel.send(outmessage)
 
     # if a faction is specified
     else:
@@ -1089,7 +1095,7 @@ async def cmd_bounties(message, args, isDM):
 
         # Ensure the requested faction has active bounties
         if not bountiesDB.hasBounties(faction=requestedFaction):
-            await message.channel.send(":stopwatch: There are no **" + requestedFaction.title() + "** bounties active currently!")
+            await message.channel.send(":stopwatch: There are no **" + requestedFaction.title() + "** bounties active currently!\nYou have **" + str(bbConfig.maxDailyBountyWins - usersDB.getOrAddID(message.author.id).bountyWinsToday) + "** remaining bounty wins today!")
         else:
             # Collect and print summaries of the requested faction's active bounties
             outmessage = "__**Active " + requestedFaction.title() + \
@@ -1107,7 +1113,7 @@ async def cmd_bounties(message, args, isDM):
                     str(len(bounty.route)) + " possible system"
                 if len(bounty.route) != 1:
                     outmessage += "s"
-            await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!")
+            await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!\nYou have **" + str(bbConfig.maxDailyBountyWins - usersDB.getOrAddID(message.author.id).bountyWinsToday) + "** remaining bounty wins today!")
 
 bbCommands.register("bounties", cmd_bounties)
 dmCommands.register("bounties", cmd_bounties)
