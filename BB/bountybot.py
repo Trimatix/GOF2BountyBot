@@ -810,125 +810,73 @@ print the stats of the specified user, use the calling user if no user is specif
 async def cmd_stats(message, args, isDM):
     # if no user is specified
     if args == "":
-        # create the embed
-        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=message.author.display_name,
-                               footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url_as(size=64))
-        # If the calling user is not in the database, don't bother adding them just print zeroes.
-        if not usersDB.userIDExists(message.author.id):
-            statsEmbed.add_field(name="Credits balance:", value=0, inline=True)
-            statsEmbed.add_field(name="Total value:",
-                                 value=str(bbUser.defaultUserValue), inline=True)
-            statsEmbed.add_field(name="‎", value="__Bounty Hunting__", inline=False)
-            statsEmbed.add_field(
-                name="Total systems checked:", value=0, inline=True)
-            statsEmbed.add_field(
-                name="Total bounties won:", value=0, inline=True)
-            statsEmbed.add_field(
-                name="Total earned from bounties:", value=0, inline=True)
-            statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
-            statsEmbed.add_field(name="Duels won:", value="0", inline=True)
-            statsEmbed.add_field(name="Duels lost:", value="0", inline=True)
-            statsEmbed.add_field(name="Total credits won:", value="0", inline=True)
-            statsEmbed.add_field(name="Total credits lost:", value="0", inline=True)
-        # If the calling user is in the database, print the stats stored in the user's database entry
-        else:
-            userObj = usersDB.getUser(message.author.id)
-            hunterLvl = bbConfig.calculateUserBountyHuntingLevel(userObj.bountyHuntingXP)
-            statsEmbed.add_field(name="Bounty Hunter Level:",
-                                value=str(hunterLvl))
-            statsEmbed.add_field(name="Bounty Hunter XP:",
-                                value=str(userObj.bountyHuntingXP))
-            statsEmbed.add_field(name="Bounty Hunter XP until next level:",
-                                value=str(bbConfig.bountyHuntingXPForLevel(hunterLvl+1)-userObj.bountyHuntingXP))
-            statsEmbed.add_field(name="Credits balance:",
-                                 value=str(userObj.credits), inline=True)
-            statsEmbed.add_field(name="Total value:",
-                                 value=str(userObj.getStatByName("value")), inline=True)
-            statsEmbed.add_field(name="‎", value="__Bounty Hunting__", inline=False)
-            statsEmbed.add_field(name="Total systems checked:", value=str(
-                userObj.systemsChecked), inline=True)
-            statsEmbed.add_field(name="Total bounties won:", value=str(
-                userObj.bountyWins), inline=True)
-            statsEmbed.add_field(name="Total credits earned from bounties:", value=str(
-                userObj.lifetimeCredits), inline=True)
-            statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
-            statsEmbed.add_field(name="Duels won:", value=str(
-                userObj.duelWins), inline=True)
-            statsEmbed.add_field(name="Duels lost:", value=str(
-                userObj.duelLosses), inline=True)
-            statsEmbed.add_field(name="Total credits won:", value=str(
-                userObj.duelCreditsWins), inline=True)
-            statsEmbed.add_field(name="Total credits lost:", value=str(
-                userObj.duelCreditsLosses), inline=True)
-
-        # send the stats embed
-        await message.channel.send(embed=statsEmbed)
-        return
-
-    # If a user is specified
+        requestedID = message.author.id
     else:
         # verify the user mention
         if not bbUtil.isMention(args) and not bbUtil.isInt(args):
             await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
             return
 
-        if bbUtil.isMention(args):
-            # Get the discord user object for the given tag
-            requestedUser = client.get_user(
-                int(args.lstrip("<@!").rstrip(">")))
-        else:
-            requestedUser = client.get_user(int(args))
-        # ensure the mentioned user could be found
-        if requestedUser is None:
-            await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
-            return
+        requestedID = int(args.lstrip("<@!").rstrip(">"))
 
-        # create the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=userOrMemberName(requestedUser, message.guild),
-                               footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
-        # If the requested user is not in the database, don't bother adding them just print zeroes
-        if not usersDB.userIDExists(requestedUser.id):
-            statsEmbed.add_field(name="Credits balance:", value=0, inline=True)
-            statsEmbed.add_field(name="Total value:",
-                                 value=str(bbUser.defaultUserValue), inline=True)
-            statsEmbed.add_field(name="‎", value="__Bounty Hunting__", inline=False)
-            statsEmbed.add_field(
-                name="Total systems checked:", value=0, inline=True)
-            statsEmbed.add_field(
-                name="Total bounties won:", value=0, inline=True)
-            statsEmbed.add_field(
-                name="Total earned from bounties:", value=0, inline=True)
-            statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
-            statsEmbed.add_field(name="Duels won:", value="0", inline=True)
-            statsEmbed.add_field(name="Duels lost:", value="0", inline=True)
-            statsEmbed.add_field(name="Total credits won:", value="0", inline=True)
-            statsEmbed.add_field(name="Total credits lost:", value="0", inline=True)
-        # Otherwise, print the stats stored in the user's database entry
-        else:
-            userObj = usersDB.getUser(requestedUser.id)
-            statsEmbed.add_field(name="Credits balance:",
-                                 value=str(userObj.credits), inline=True)
-            statsEmbed.add_field(name="Total value:",
-                                 value=str(userObj.getStatByName("value")), inline=True)
-            statsEmbed.add_field(name="‎", value="__Bounty Hunting__", inline=False)
-            statsEmbed.add_field(name="Total systems checked:", value=str(
-                userObj.systemsChecked), inline=True)
-            statsEmbed.add_field(name="Total bounties won:", value=str(
-                userObj.bountyWins), inline=True)
-            statsEmbed.add_field(name="Total credits earned from bounties:", value=str(
-                userObj.lifetimeCredits), inline=True)
-            statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
-            statsEmbed.add_field(name="Duels won:", value=str(
-                userObj.duelWins), inline=True)
-            statsEmbed.add_field(name="Duels lost:", value=str(
-                userObj.duelLosses), inline=True)
-            statsEmbed.add_field(name="Total credits won:", value=str(
-                userObj.duelCreditsWins), inline=True)
-            statsEmbed.add_field(name="Total credits lost:", value=str(
-                userObj.duelCreditsLosses), inline=True)
+    # ensure the mentioned user could be found
+    requestedUser = client.get_user(requestedID)
+    if requestedUser is None:
+        await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
+        return
 
-        # send the stats embed
-        await message.channel.send(embed=statsEmbed)
+    # create the stats embed
+    statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=userOrMemberName(requestedUser, message.guild),
+                            footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
+    # If the requested user is not in the database, don't bother adding them just print zeroes
+    if not usersDB.userIDExists(requestedUser.id):
+        statsEmbed.add_field(name="Credits balance:", value=0, inline=True)
+        statsEmbed.add_field(name="Total value:",
+                                value=str(bbUser.defaultUserValue), inline=True)
+        statsEmbed.add_field(name="‎", value="__Bounty Hunting__", inline=False)
+        statsEmbed.add_field(name="Bounty Hunter Level:",
+                            value="1")
+        statsEmbed.add_field(name="XP until next level:",
+                            value=str(bbConfig.bountyHuntingXPForLevel(2)))
+        statsEmbed.add_field(name="Systems checked:", value=0, inline=True)
+        statsEmbed.add_field(name="Bounties won:", value=0, inline=True)
+        statsEmbed.add_field(name="Credits earned:", value=0, inline=True)
+        statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
+        statsEmbed.add_field(name="Duels won:", value="0", inline=True)
+        statsEmbed.add_field(name="Duels lost:", value="0", inline=True)
+        statsEmbed.add_field(name="Credits won:", value="0", inline=True)
+        statsEmbed.add_field(name="Credits lost:", value="0", inline=True)
+    # Otherwise, print the stats stored in the user's database entry
+    else:
+        userObj = usersDB.getUser(requestedUser.id)
+        statsEmbed.add_field(name="Credits balance:",
+                                value=str(userObj.credits), inline=True)
+        statsEmbed.add_field(name="Total value:",
+                                value=str(userObj.getStatByName("value")), inline=True)
+        statsEmbed.add_field(name="‎", value="__Bounty Hunting__", inline=False)
+        hunterLvl = bbConfig.calculateUserBountyHuntingLevel(userObj.bountyHuntingXP)
+        statsEmbed.add_field(name="Bounty Hunter Level:",
+                            value=str(hunterLvl))
+        statsEmbed.add_field(name="XP until next level:",
+                            value=str(bbConfig.bountyHuntingXPForLevel(hunterLvl+1)-userObj.bountyHuntingXP))
+        statsEmbed.add_field(name="Systems checked:", value=str(
+            userObj.systemsChecked), inline=True)
+        statsEmbed.add_field(name="Bounties won:", value=str(
+            userObj.bountyWins), inline=True)
+        statsEmbed.add_field(name="Credits earned:", value=str(
+            userObj.lifetimeCredits), inline=True)
+        statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
+        statsEmbed.add_field(name="Duels won:", value=str(
+            userObj.duelWins), inline=True)
+        statsEmbed.add_field(name="Duels lost:", value=str(
+            userObj.duelLosses), inline=True)
+        statsEmbed.add_field(name="Credits won:", value=str(
+            userObj.duelCreditsWins), inline=True)
+        statsEmbed.add_field(name="Credits lost:", value=str(
+            userObj.duelCreditsLosses), inline=True)
+
+    # send the stats embed
+    await message.channel.send(embed=statsEmbed)
 
 bbCommands.register("stats", cmd_stats)
 dmCommands.register("stats", cmd_stats)
@@ -1067,7 +1015,7 @@ async def cmd_check(message, args, isDM):
                     # add this bounty to the list of bounties to be removed
                     toPop += [bounty]
 
-                if checkResult != 0:
+                if checkResult in [2, 3]:
                     oldLevel = bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP)
                     requestedBBUser.bountyHuntingXP += bbConfig.hunterXPPerSysCheck
                     if checkResult == 3:

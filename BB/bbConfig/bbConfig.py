@@ -16,7 +16,7 @@ def truncToRes(num):
 hunterXPPerSysCheck = 10
 
 # Amount of XP to award users per bounty win
-hunterXPPerWin = 25
+hunterXPPerWin = 0
 
 
 def bountyHuntingXPForLevel(xp):
