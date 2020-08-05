@@ -427,6 +427,7 @@ class bbShip(bbItem):
         itemDict["modules"] = modulesList
         itemDict["turrets"] = turretsList
         itemDict["upgradesApplied"] = upgradesList
+        itemDict["nickname"] = self.nickname
 
         if not self.builtIn:
             itemDict["armour"] = self.armour
@@ -436,7 +437,6 @@ class bbShip(bbItem):
             itemDict["maxPrimaries"] = self.maxPrimaries
             itemDict["maxTurrets"] = self.maxTurrets
             itemDict["maxModules"] = self.maxModules
-            itemDict["nickname"] = self.nickname
         
         return itemDict
 
