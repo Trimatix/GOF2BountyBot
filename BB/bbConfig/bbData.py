@@ -435,7 +435,7 @@ builtInSystemData = { #Terran
             "Oom'Bak": {"name":"Oom'Bak", "faction":"vossk", "neighbours":["Magnetar", "Vulpes", "S'Kolptorr", "V'Ikka"], "security":1, "coordinates":(9, 8), "aliases":["oombak"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Oom'Bak"},
             "S'Kolptorr": {"name":"S'Kolptorr", "faction":"vossk", "neighbours":["K'Ontrr", "Oom'Bak", "V'Ikka"], "security":2, "coordinates":(9, 9), "aliases":["skolptorr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:S'Kolptorr"},
             "V'Ikka": {"name":"V'Ikka", "faction":"vossk", "neighbours":["Augmenta", "Buntta", "Magnetar", "Oom'Bak", "S'Kolptorr"], "security":1, "coordinates":(7, 8), "aliases":["vikka"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:V'Ikka"},
-            "Wah'Norr": {"name":"Wah'Norr", "faction":"vossk", "neighbours":["K'Ontrr", "Ni'mrrod"], "security":3, "coordinates":(12, 8), "aliases":["wahnorr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Wah'Norr"},
+            "Wah'Norr": {"name":"Wah'Norr", "faction":"vossk", "neighbours":["K'Ontrr", "Ni'Mrrod"], "security":3, "coordinates":(12, 8), "aliases":["wahnorr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Wah'Norr"},
             "Y'Mirr": {"name":"Y'Mirr", "faction":"vossk", "neighbours":[], "security":3, "coordinates":(11, 9), "aliases":["ymirr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Y'Mirr"},
             
             #Nivelian
