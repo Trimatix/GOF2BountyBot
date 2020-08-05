@@ -436,6 +436,7 @@ class bbShip(bbItem):
             itemDict["maxPrimaries"] = self.maxPrimaries
             itemDict["maxTurrets"] = self.maxTurrets
             itemDict["maxModules"] = self.maxModules
+            itemDict["nickname"] = self.nickname
         
         return itemDict
 
