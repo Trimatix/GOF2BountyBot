@@ -4003,7 +4003,7 @@ async def dev_cmd_broadcast(message, args, isDM):
             msg = args[17:]
 
         try:
-            embedIndex = msg.index("embed=")
+            embedIndex = msg.index("embed=")+len("embed=")
         except ValueError:
             embedIndex = -1
 
@@ -4145,7 +4145,7 @@ async def dev_cmd_say(message, args, isDM):
             msg = args[17:]
 
         try:
-            embedIndex = msg.index("embed=")
+            embedIndex = msg.index("embed=")+len("embed=")
         except ValueError:
             embedIndex = -1
 
@@ -4255,8 +4255,7 @@ async def dev_cmd_say(message, args, isDM):
         await message.channel.send(msgText, embed=broadcastEmbed)
 
 bbCommands.register("say", dev_cmd_say, isDev=True, forceKeepArgsCasing=True)
-dmCommands.register("broadcast", dev_cmd_broadcast,
-                    isDev=True, forceKeepArgsCasing=True)
+dmCommands.register("say", dev_cmd_say, isDev=True, forceKeepArgsCasing=True)
 
 
 """
