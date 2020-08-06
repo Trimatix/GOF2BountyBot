@@ -18,7 +18,7 @@ import traceback
 
 # may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .bbObjects import bbUser
+from .bbObjects import bbUser, bbInventory
 from .bbObjects.bounties import bbBounty, bbBountyConfig
 from .bbObjects.items import bbShip, bbModuleFactory, bbShipUpgrade, bbTurret, bbWeapon
 from .bbObjects.battles import ShipFight, DuelRequest
@@ -28,6 +28,7 @@ from .scheduling import TimedTaskHeap
 from . import bbUtil, ActiveTimedTasks
 from .userAlerts import UserAlerts
 from .logging import bbLogger
+from .reactionMenus import ReactionInventoryPicker
 
 
 ####### DATABASE METHODS #######
@@ -4772,6 +4773,15 @@ async def on_message(message):
     except discord.HTTPException:
         pass
 
+    if message.content == "!trade <@!212542588643835905>":
+        inv = bbInventory.bbInventory()
+        inv.addItem(bbData.builtInModuleObjs["E2 Exoclad"])
+        inv.addItem(bbData.builtInModuleObjs["Medium Cabin"])
+        menuMsg = await message.channel.send("‎")
+        menu = ReactionInventoryPicker.ReactionInventoryPicker(menuMsg, inv, 5, titleTxt="**Niker107's Hangar**", footerTxt="React for your desired item", thumb="https://cdn.discordapp.com/avatars/212542588643835905/a20a7a46f7e3e4889363b14f485a3075.png?size=128")
+        await menu.updateMessage()
+        ActiveTimedTasks.reactionMenus[menuMsg.id] = menu
+
     # if not guildsDB.guildIdExists(message.guild.id):
     #     guildsDB.addGuildID(message.guild.id)
 
@@ -4847,6 +4857,15 @@ async def on_message(message):
                 userTitle = bbConfig.devTitle if userIsDev else (
                     bbConfig.adminTitle if userIsAdmin else bbConfig.userTitle)
                 await message.channel.send(""":question: Can't do that, """ + userTitle + """. Type `""" + bbConfig.commandPrefix + """help` for a list of commands! **o7**""")
+
+
+@client.event
+async def on_reaction_add(reaction, user):
+    if user != client.user and \
+            reaction.message.id in ActiveTimedTasks.reactionMenus and \
+            ActiveTimedTasks.reactionMenus[reaction.message.id].hasEmojiRegistered(reaction.emoji):
+        await ActiveTimedTasks.reactionMenus[reaction.message.id].reactionAdded(reaction.emoji)
+        # await ActiveTimedTasks.reactionMenus[reaction.message.id].updateMessage()
 
 
 client.run(bbPRIVATE.botToken)
