@@ -243,6 +243,7 @@ maxDevShipNickLength = 100
 # The default emojis to list in a reaction menu
 numberEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 defaultMenuEmojis = numberEmojis
+defaultCancelEmoji = "🇽"
 
 
 
