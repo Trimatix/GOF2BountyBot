@@ -1,22 +1,64 @@
 import inspect
 from discord import Embed
+from ..bbConfig import bbConfig
+from .. import ActiveTimedTasks
+
+
+async def deleteReactionMenu(menu):
+    del ActiveTimedTasks.reactionMenus[menu.msg.id]
+    await menu.msg.delete()
+
+
+class ReactionMenuExternalParameter:
+    def __init__(self):
+        pass
+
+CALLING_USER = ReactionMenuExternalParameter()
 
 
 class ReactionMenuOption:
-    def __init__(self, emoji, func, args, name):
-        self.emoji = emoji
-        self.func = func
-        self.args = args
-        self.isCoroutine = inspect.iscoroutinefunction(func)
+    def __init__(self, name, emoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
         self.name = name
+        self.emoji = emoji
+        
+        self.addFunc = addFunc
+        self.addArgs = addArgs
+        self.addIsCoroutine = addFunc is not None and inspect.iscoroutinefunction(addFunc)
+        self.addIncludeUser = addFunc is not None and 'reactingUser' in inspect.signature(addFunc).parameters
+        self.addHasArgs = addFunc is not None and len(inspect.signature(addFunc).parameters) != (1 if self.addIncludeUser else 0)
+
+        self.removeFunc = removeFunc
+        self.removeArgs = removeArgs
+        self.removeIsCoroutine = removeFunc is not None and inspect.iscoroutinefunction(removeFunc)
+        self.removeIncludeUser = removeFunc is not None and 'reactingUser' in inspect.signature(addFunc).parameters
+        self.removeHasArgs = removeFunc is not None and len(inspect.signature(removeFunc).parameters) != (1 if self.removeIncludeUser else 0)
     
-    async def call(self):
-        return await self.func(self.args) if self.isCoroutine else self.func(self.args)
+
+    async def add(self, user):
+        if self.addFunc is not None:
+            if self.addIncludeUser:
+                if self.addHasArgs:
+                    return await self.addFunc(self.addArgs, reactingUser=user) if self.addIsCoroutine else self.addFunc(self.addArgs, reactingUser=user)
+                return await self.addFunc(reactingUser=user) if self.addIsCoroutine else self.addFunc(reactingUser=user)
+            if self.addHasArgs:
+                return await self.addFunc(self.addArgs) if self.addIsCoroutine else self.addFunc(self.addArgs)
+            return await self.addFunc() if self.addIsCoroutine else self.addFunc()
+
+
+    async def remove(self, user):
+        if self.removeFunc is not None:
+            if self.removeIncludeUser:
+                if self.removeHasArgs:
+                    return await self.removeFunc(self.removeArgs, reactingUser=user) if self.removeIsCoroutine else self.removeFunc(self.removeArgs, reactingUser=user)
+                return await self.removeFunc(reactingUser=user) if self.removeIsCoroutine else self.removeFunc(reactingUser=user)
+            if self.removeHasArgs:
+                return await self.removeFunc(self.removeArgs) if self.removeIsCoroutine else self.removeFunc(self.removeArgs)
+            return await self.removeFunc() if self.removeIsCoroutine else self.removeFunc()
 
 
 class ReactionMenu:
     def __init__(self, msg, options={}, 
-                    titleTxt="", desc="", col=Embed.Empty, footerTxt="", img="", thumb="", icon="", authorName=""):
+                    titleTxt="", desc="", col=Embed.Empty, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None):
         # discord.message
         self.msg = msg
         # Dict of discord.emoji: ReactionMenuOption
@@ -30,15 +72,19 @@ class ReactionMenu:
         self.thumb = thumb
         self.icon = icon
         self.authorName = authorName
-
+        self.timeout = timeout
 
     
     def hasEmojiRegistered(self, emoji):
         return emoji in self.options
 
 
-    async def reactionAdded(self, emoji):
-        return await self.options[emoji].call()
+    async def reactionAdded(self, emoji, user):
+        return await self.options[emoji].add(user)
+
+    
+    async def reactionRemoved(self, emoji, user):
+        return await self.options[emoji].remove(user)
 
 
     async def getMenuEmbed(self):
@@ -57,5 +103,20 @@ class ReactionMenu:
         await self.msg.clear_reactions()
         await self.msg.edit(embed=await self.getMenuEmbed())
         for option in self.options:
-            await self.msg.add_reaction(option) 
-            
+            await self.msg.add_reaction(option)
+
+
+    async def delete(self):
+        if self.timeout is None:
+            await deleteReactionMenu(self)
+        else:
+            await self.timeout.forceExpire()
+
+
+class CancellableReactionMenu(ReactionMenu):
+    def __init__(self, msg, options={}, cancelEmoji=bbConfig.defaultCancelEmoji,
+                    titleTxt="", desc="", col=Embed.Empty, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None):
+        options[cancelEmoji] = ReactionMenuOption("cancel", cancelEmoji, self.delete, None)
+        super(CancellableReactionMenu, self).__init__(msg, options=options, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout)
+
+
