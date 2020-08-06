@@ -3,6 +3,7 @@ from .bbObjects.bounties import bbSystem
 import json
 import math
 import random
+import inspect
 
 
 def readJSON(dbFile):
@@ -196,3 +197,21 @@ def commaSplitNum(num):
     for i in range(len(num), 0, -3):
         outStr = outStr[0:i] + "," + outStr[i:]
     return outStr[:-1]
+
+"""
+class funcRef:
+    def __init__(self, func):
+        self.func = func
+        self.isCoroutine = inspect.iscoroutinefunction(func)
+        self.params = inspect.signature(addFunc).parameters
+
+
+    async def call(self, args):
+        if self.isCoroutine:
+            await self.func(args)
+        else:
+            self.func(args)
+
+
+class funcArgs:
+    def __init__(self, args{}):"""
