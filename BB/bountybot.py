@@ -28,7 +28,7 @@ from .scheduling import TimedTaskHeap
 from . import bbUtil, ActiveTimedTasks
 from .userAlerts import UserAlerts
 from .logging import bbLogger
-from .reactionMenus import ReactionInventoryPicker
+from .reactionMenus import ReactionInventoryPicker, ReactionRolePicker
 
 
 ####### DATABASE METHODS #######
@@ -566,6 +566,7 @@ def getAlertIDFromHeirarchicalAliases(alertName):
     #     return ["ERR", "Item notifications have not been implemented yet! \:("]
     else:
         return ["ERR", ":x: Unknown notification type! Please refer to `" + bbConfig.commandPrefix + "help notify`"]
+
 
 
 ####### SYSTEM COMMANDS #######
@@ -3412,6 +3413,34 @@ bbCommands.register("remove-notify-role",
                     admin_cmd_remove_notify_role, isAdmin=True)
 
 
+async def admin_cmd_make_role_menu(message, args, isDM):
+    reactionRoles = {}
+
+    argsSplit = args.split("|")
+    for arg in argsSplit:
+        roleStr, reactionStr = arg.split(" ")[0], arg.split(" ")[1]
+        reactionRoles[reactionStr] = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
+
+    menuMsg = await message.channel.send("‎")
+    menu = ReactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, titleTxt="**Role Menu**", footerTxt="React for your desired role!")
+    await menu.updateMessage()
+    ActiveTimedTasks.reactionMenus[menuMsg.id] = menu
+
+bbCommands.register("make-role-menu", admin_cmd_make_role_menu, isAdmin=True)
+
+
+async def admin_cmd_del_reaction_menu(message, args, isDM):
+    msgID = int(args)
+    if msgID in ActiveTimedTasks.reactionMenus:
+        await ActiveTimedTasks.reactionMenus[msgID].delete()
+    else:
+        await message.channel.send(":x: Unrecognised reaction menu!")
+
+
+bbCommands.register("del-reaction-menu", admin_cmd_del_reaction_menu, isAdmin=True)
+
+
+
 ####### DEVELOPER COMMANDS #######
 
 
@@ -4864,7 +4893,16 @@ async def on_reaction_add(reaction, user):
     if user != client.user and \
             reaction.message.id in ActiveTimedTasks.reactionMenus and \
             ActiveTimedTasks.reactionMenus[reaction.message.id].hasEmojiRegistered(reaction.emoji):
-        await ActiveTimedTasks.reactionMenus[reaction.message.id].reactionAdded(reaction.emoji)
+        await ActiveTimedTasks.reactionMenus[reaction.message.id].reactionAdded(reaction.emoji, user)
+        # await ActiveTimedTasks.reactionMenus[reaction.message.id].updateMessage()
+
+
+@client.event
+async def on_reaction_remove(reaction, user):
+    if user != client.user and \
+            reaction.message.id in ActiveTimedTasks.reactionMenus and \
+            ActiveTimedTasks.reactionMenus[reaction.message.id].hasEmojiRegistered(reaction.emoji):
+        await ActiveTimedTasks.reactionMenus[reaction.message.id].reactionRemoved(reaction.emoji, user)
         # await ActiveTimedTasks.reactionMenus[reaction.message.id].updateMessage()
 
 
