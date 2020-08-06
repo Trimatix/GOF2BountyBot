@@ -23,3 +23,7 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
             roleOptions[reaction] = ReactionMenu.ReactionMenuOption(reactionRoles[reaction].name, reaction, addFunc=toggleRole, addArgs=(dcGuild, reactionRoles[reaction], msg.id), removeFunc=toggleRole, removeArgs=(dcGuild, reactionRoles[reaction], msg.id))
 
         super(ReactionRolePicker, self).__init__(msg, options=roleOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout)
+
+
+    def toDict(self):
+        baseDict = super(ReactionRolePicker, self).toDict()

@@ -24,3 +24,7 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
     def pickItem(self, item):
         print("picked " + str(item))
         return item
+
+
+    def toDict(self):
+        baseDict = super(ReactionInventoryPicker, self).toDict()
