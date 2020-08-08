@@ -4,7 +4,8 @@ import json
 import math
 import random
 import inspect
-
+from emoji import UNICODE_EMOJI
+from . import bbGlobals
 
 def readJSON(dbFile):
     f = open(dbFile, "r")
@@ -214,4 +215,100 @@ class funcRef:
 
 
 class funcArgs:
-    def __init__(self, args{}):"""
+    def __init__(self, args{}):
+"""
+
+
+class dumbEmoji:
+    def __init__(self, id=-1, unicode=""):
+        if id == -1 and unicode == "":
+            raise ValueError("At least one of id or unicode is required")
+        elif id != -1 and unicode != "":
+            raise ValueError("Can only accept one of id or unicode, not both")
+        
+        self.id = id
+        self.unicode = unicode
+        self.isID = id != -1
+        self.isUnicode = not self.isID
+        self.sendable = self.unicode if self.isUnicode else str(bbGlobals.client.get_emoji(self.id))
+        # if self.sendable is None:
+        #     self.sendable = '❓'
+
+    
+    def toDict(self):
+        if self.isUnicode:
+            return {"unicode":self.unicode}
+        else:
+            return {"id":self.id}
+
+
+    def __repr__(self):
+        return "<dumbEmoji-" + ("id" if self.isID else "unicode") + ":" + (str(self.id) if self.isID else self.unicode) + ">"
+
+    
+    def __hash__(self):
+        return hash(repr(self))
+
+    
+    def __eq__(self, other):
+        return type(other) == dumbEmoji and self.isID == other.isID and (self.id == other.id or self.unicode == other.unicode)
+
+    
+    def __str__(self):
+        return self.sendable
+
+
+EMPTY_DUMBEMOJI = dumbEmoji(unicode=" ")
+EMPTY_DUMBEMOJI.isUnicode = False
+EMPTY_DUMBEMOJI.unicode = ""
+EMPTY_DUMBEMOJI.sendable = ""
+
+
+def dumbEmojiFromDict(emojiDict):
+    if type(emojiDict) == dumbEmoji:
+        return emojiDict
+    if "id" in emojiDict:
+        return dumbEmoji(id=emojiDict["id"])
+    else:
+        return dumbEmoji(unicode=emojiDict["unicode"])
+
+
+def isUnicodeEmoji(c):
+    if len(c) != 1:
+        return False
+    return c in UNICODE_EMOJI
+
+
+def isCustomEmoji(s):
+    if s.startswith("<") and s.endswith(">"):
+        try:
+            first = s.index(":")
+            second = first + s[first+1:].index(":") + 1
+        except ValueError:
+            return False
+        return isInt(s[second+1:-1])
+    return False
+
+
+def dumbEmojiFromStr(s):
+    if type(s) == dumbEmoji:
+        return s
+    if type(s) == dict:
+        return dumbEmojiFromDict(s)
+    if isUnicodeEmoji(s):
+        return dumbEmoji(unicode=s)
+    elif isCustomEmoji(s):
+        return dumbEmoji(id=int(s[s[s.index(":")+1:].index(":")+3:-1]))
+    elif isInt(s):
+        return dumbEmoji(id=int(s))
+    else:
+        return None
+
+
+def dumbEmojiFromPartial(e):
+    if type(e) == dumbEmoji:
+        return emojiDict
+    if e.is_unicode_emoji():
+        return dumbEmoji(unicode=e.name)
+    else:
+        return dumbEmoji(id=e.id)    

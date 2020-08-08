@@ -1,6 +1,7 @@
 from .bbItem import bbItem
 from . import bbTurret, bbWeapon, bbShipUpgrade, bbModuleFactory
 from ...bbConfig import bbConfig, bbData
+from ... import bbUtil
 
 class bbShip(bbItem):
     hasNickname = False
@@ -22,7 +23,7 @@ class bbShip(bbItem):
     upgradesApplied = []
 
 
-    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon="", emoji="", techLevel=-1, shopSpawnRate=0, builtIn=False):
+    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon="", emoji=bbUtil.EMPTY_DUMBEMOJI, techLevel=-1, shopSpawnRate=0, builtIn=False):
         super(bbShip, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
         if len(weapons) > maxPrimaries:
@@ -494,7 +495,7 @@ def fromDict(shipDict):
                     numSecondaries=builtInDict["numSecondaries"] if "numSecondaries" in builtInDict else 0, handling=builtInDict["handling"] if "handling" in builtInDict else 0,
                     value=builtInDict["value"] if "value" in builtInDict else 0, aliases=builtInDict["aliases"] if "aliases" in builtInDict else [],
                     weapons=weapons if "weapons" in shipDict else builtInWeapons, modules=modules if "modules" in shipDict else builtInModules, turrets=turrets if "turrets" in shipDict else builtInTurrets, wiki=builtInDict["wiki"] if "wiki" in builtInDict else "0",
-                    upgradesApplied=shipUpgrades if "shipUpgrades" in shipDict else builtInShipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else (builtInDict["nickname"] if "nickname" in builtInDict else ""), icon=builtInDict["icon"] if "icon" in builtInDict else bbData.rocketIcon, emoji=builtInDict["emoji"] if "emoji" in builtInDict else "", techLevel=builtInDict["techLevel"] if "techLevel" in builtInDict else -1, shopSpawnRate=builtInDict["shopSpawnRate"] if "shopSpawnRate" in builtInDict else 0,
+                    upgradesApplied=shipUpgrades if "shipUpgrades" in shipDict else builtInShipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else (builtInDict["nickname"] if "nickname" in builtInDict else ""), icon=builtInDict["icon"] if "icon" in builtInDict else bbData.rocketIcon, emoji=bbUtil.dumbEmojiFromStr(builtInDict["emoji"]) if "emoji" in builtInDict else bbUtil.EMPTY_DUMBEMOJI, techLevel=builtInDict["techLevel"] if "techLevel" in builtInDict else -1, shopSpawnRate=builtInDict["shopSpawnRate"] if "shopSpawnRate" in builtInDict else 0,
                     builtIn=True)
         return newShip
 
@@ -504,5 +505,5 @@ def fromDict(shipDict):
                         numSecondaries=shipDict["numSecondaries"] if "numSecondaries" in shipDict else 0, handling=shipDict["handling"] if "handling" in shipDict else 0,
                         value=shipDict["value"] if "value" in shipDict else 0, aliases=shipDict["aliases"] if "aliases" in shipDict else [],
                         weapons=weapons, modules=modules, turrets=turrets, wiki=shipDict["wiki"] if "wiki" in shipDict else "0",
-                        upgradesApplied=shipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else "", icon=shipDict["icon"] if "icon" in shipDict else bbData.rocketIcon, emoji=shipDict["emoji"] if "emoji" in shipDict else "", techLevel=shipDict["techLevel"] if "techLevel" in shipDict else -1, shopSpawnRate=shipDict["shopSpawnRate"] if "shopSpawnRate" in shipDict else 0,
+                        upgradesApplied=shipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else "", icon=shipDict["icon"] if "icon" in shipDict else bbData.rocketIcon, emoji=bbUtil.dumbEmojiFromStr(shipDict["emoji"]) if "emoji" in shipDict else bbUtil.EMPTY_DUMBEMOJI, techLevel=shipDict["techLevel"] if "techLevel" in shipDict else -1, shopSpawnRate=shipDict["shopSpawnRate"] if "shopSpawnRate" in shipDict else 0,
                         builtIn=False)

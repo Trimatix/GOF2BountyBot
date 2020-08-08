@@ -1,5 +1,8 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
+from .. import bbGlobals, bbUtil
+from discord import Colour
+from datetime import datetime
 
 
 async def toggleRole(args, reactingUser=None):
@@ -16,14 +19,53 @@ async def toggleRole(args, reactingUser=None):
         return True
 
 
+class ReactionRolePickerOption(ReactionMenu.ReactionMenuOption):
+    def __init__(self, emoji, role, menu):
+        self.role = role
+        super(ReactionRolePickerOption, self).__init__(self.role.name, emoji, addFunc=toggleRole, addArgs=(menu.dcGuild, self.role, menu.msg.id), removeFunc=toggleRole, removeArgs=(menu.dcGuild, self.role, menu.msg.id))
+
+
+    def toDict(self):
+        # baseDict = super(ReactionRolePickerOption, self).toDict()
+        # baseDict["role"] = self.role.id
+        
+        # return baseDict
+
+        return {"role": self.role.id}
+
+
 class ReactionRolePicker(ReactionMenu.ReactionMenu):
     def __init__(self, msg, reactionRoles, dcGuild, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None):
+        self.dcGuild = dcGuild
+        self.msg = msg
         roleOptions = {}
         for reaction in reactionRoles:
-            roleOptions[reaction] = ReactionMenu.ReactionMenuOption(reactionRoles[reaction].name, reaction, addFunc=toggleRole, addArgs=(dcGuild, reactionRoles[reaction], msg.id), removeFunc=toggleRole, removeArgs=(dcGuild, reactionRoles[reaction], msg.id))
+            roleOptions[reaction] = ReactionRolePickerOption(reaction, reactionRoles[reaction], self)
 
         super(ReactionRolePicker, self).__init__(msg, options=roleOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout)
 
 
     def toDict(self):
         baseDict = super(ReactionRolePicker, self).toDict()
+        baseDict["guild"] = self.dcGuild.id
+        return baseDict
+
+
+async def fromDict(rmDict):
+    dcGuild = bbGlobals.client.get_guild(rmDict["guild"])
+    msg = await dcGuild.get_channel(rmDict["channel"]).fetch_message(rmDict["msg"])
+
+    reactionRoles = {}
+    for reaction in rmDict["options"]:
+        reactionRoles[bbUtil.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
+
+    return ReactionRolePicker(msg, reactionRoles, dcGuild,
+                                titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
+                                desc=rmDict["desc"] if "desc" in rmDict else "",
+                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.default(),
+                                footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
+                                img=rmDict["img"] if "img" in rmDict else "",
+                                thumb=rmDict["thumb"] if "thumb" in rmDict else "",
+                                icon=rmDict["icon"] if "icon" in rmDict else "",
+                                authorName=rmDict["authorName"] if "authorName" in rmDict else "",
+                                timeout=datetime.utcfromtimestamp(rmDict["timeout"]) if "timeout" in rmDict else None)

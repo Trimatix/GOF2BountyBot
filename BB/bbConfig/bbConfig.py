@@ -1,4 +1,5 @@
 import math, random, pprint
+from ..bbUtil import dumbEmoji
 
 ##### UTIL #####
 
@@ -208,6 +209,7 @@ savePeriod = {"hours":1}
 userDBPath = "saveData/users.json"
 guildDBPath = "saveData/guilds.json"
 bountyDBPath = "saveData/bounties.json"
+reactionMenusDBPath = "saveData/reactionMenus.json"
 
 # path to folder to save log txts to
 loggingFolderPath = "saveData/logs"
@@ -232,7 +234,7 @@ timedTaskLatenessThresholdSeconds = 10
 commandPrefix = "$"
 
 # When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
-dmSentEmoji = "📬"
+dmSentEmoji = dumbEmoji(unicode="📬")
 
 # max number of characters accepted by nameShip
 maxShipNickLength = 30
@@ -241,9 +243,10 @@ maxShipNickLength = 30
 maxDevShipNickLength = 100
 
 # The default emojis to list in a reaction menu
-numberEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+numberEmojis = [dumbEmoji(unicode="0️⃣"), dumbEmoji(unicode="1️⃣"), dumbEmoji(unicode="2️⃣"), dumbEmoji(unicode="3️⃣"), dumbEmoji(unicode="4️⃣"), dumbEmoji(unicode="5️⃣"), dumbEmoji(unicode="6️⃣"), dumbEmoji(unicode="7️⃣"), dumbEmoji(unicode="8️⃣"), dumbEmoji(unicode="9️⃣"), dumbEmoji(unicode="🔟")]
 defaultMenuEmojis = numberEmojis
-defaultCancelEmoji = "🇽"
+defaultCancelEmoji = dumbEmoji(unicode="🇽")
+defaultErrEmoji = dumbEmoji(unicode="❓")
 
 
 

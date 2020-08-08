@@ -1,19 +1,13 @@
 import inspect
 from discord import Embed, Colour
 from ..bbConfig import bbConfig
-from .. import ActiveTimedTasks
+from .. import bbGlobals, bbUtil
+from abc import ABC, abstractmethod
 
 
 async def deleteReactionMenu(menu):
-    del ActiveTimedTasks.reactionMenus[menu.msg.id]
+    del bbGlobals.reactionMenusDB[menu.msg.id]
     await menu.msg.delete()
-
-
-class ReactionMenuExternalParameter:
-    def __init__(self):
-        pass
-
-CALLING_USER = ReactionMenuExternalParameter()
 
 
 class ReactionMenuOption:
@@ -56,27 +50,13 @@ class ReactionMenuOption:
             return await self.removeFunc() if self.removeIsCoroutine else self.removeFunc()
 
 
+    @abstractmethod
     def toDict(self):
-        self.name = name
-        self.emoji = emoji
-        
-        self.addFunc = addFunc
-        self.addArgs = addArgs
-        self.addIsCoroutine = addFunc is not None and inspect.iscoroutinefunction(addFunc)
-        self.addIncludeUser = addFunc is not None and 'reactingUser' in inspect.signature(addFunc).parameters
-        self.addHasArgs = addFunc is not None and len(inspect.signature(addFunc).parameters) != (1 if self.addIncludeUser else 0)
+        return {"name":self.name, "emoji": self.emoji.toDict()}
 
-        self.removeFunc = removeFunc
-        self.removeArgs = removeArgs
-        self.removeIsCoroutine = removeFunc is not None and inspect.iscoroutinefunction(removeFunc)
-        self.removeIncludeUser = removeFunc is not None and 'reactingUser' in inspect.signature(addFunc).parameters
-        self.removeHasArgs = removeFunc is not None and len(inspect.signature(removeFunc).parameters) != (1 if self.removeIncludeUser else 0)
-
-        data = {"name":self.name, "emoji": str(self.emoji)}
-
-        if self.addFunc is not None:
-            data["addFunc"] = {"module": self.addFunc.__module, "func": self.addFunc.__name__}
-            if self.addArgs
+        # if self.addFunc is not None:
+        #     data["addFunc"] = {"module": self.addFunc.__module, "func": self.addFunc.__name__}
+        #     if self.addArgs
 
 
 class ReactionMenu:
@@ -84,7 +64,7 @@ class ReactionMenu:
                     titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None):
         # discord.message
         self.msg = msg
-        # Dict of discord.emoji: ReactionMenuOption
+        # Dict of bbUtil.dumbEmoji: ReactionMenuOption
         self.options = options
 
         self.titleTxt = titleTxt
@@ -118,7 +98,7 @@ class ReactionMenu:
         if self.icon != "": menuEmbed.set_author(name=self.authorName, icon_url=self.icon)
 
         for option in self.options:
-            menuEmbed.add_field(name=option + " : " + self.options[option].name, value="‎", inline=False)
+            menuEmbed.add_field(name=option.sendable + " : " + self.options[option].name, value="‎", inline=False)
 
         return menuEmbed
     
@@ -126,7 +106,7 @@ class ReactionMenu:
         await self.msg.clear_reactions()
         await self.msg.edit(embed=await self.getMenuEmbed())
         for option in self.options:
-            await self.msg.add_reaction(option)
+            await self.msg.add_reaction(option.sendable)
 
 
     async def delete(self):
@@ -139,9 +119,9 @@ class ReactionMenu:
     def toDict(self):
         optionsDict = {}
         for reaction in self.options:
-            optionsDict[str(reaction)] = self.options[reaction].toDict()
+            optionsDict[reaction.sendable] = self.options[reaction].toDict()
 
-        data = {"channel": self.msg.channel.id, "msg": self.msg.id, "options": optionsDict}
+        data = {"channel": self.msg.channel.id, "msg": self.msg.id, "options": optionsDict, "type": self.__class__.__name__}
         
         if self.titleTxt != "":
             data["titleTxt"] = self.titleTxt
@@ -150,7 +130,7 @@ class ReactionMenu:
             data["desc"] = self.desc
 
         if self.col != Colour.default():
-            data["col"] = self.col
+            data["col"] = self.col.to_rgb()
 
         if self.footerTxt != "":
             data["footerTxt"] = self.footerTxt
