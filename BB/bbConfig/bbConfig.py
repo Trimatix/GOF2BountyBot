@@ -19,12 +19,19 @@ hunterXPPerSysCheck = 10
 hunterXPPerWin = 0
 
 
-def bountyHuntingXPForLevel(xp):
-    return int(1000 * math.exp((xp - 1)/3.74) - 1000)
+# def bountyHuntingXPForLevel(level):
+#     return int(1000 * math.exp((level - 1)/3.74) - 1000)
 
 
-def calculateUserBountyHuntingLevel(level):
-    return int(1 + 3.74 * math.log((level/1000)+1))
+# def calculateUserBountyHuntingLevel(xp):
+#     return int(1 + 3.74 * math.log((xp/1000)+1))
+
+def bountyHuntingXPForLevel(level):
+    return int((level + 30001)/4)
+
+
+def calculateUserBountyHuntingLevel(xp):
+    return 4 * xp - 30001
 
 
 
