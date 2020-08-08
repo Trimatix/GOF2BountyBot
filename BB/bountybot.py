@@ -169,13 +169,13 @@ async def removeBountyBoardChannelMessage(guild, bounty):
     if guild.bountyBoardChannel.hasMessageForBounty(bounty):
         try:
             await guild.bountyBoardChannel.getMessageForBounty(bounty).delete()
-        except HTTPException:
+        except discord.HTTPException:
             bbLogger.log("Main", "rmBBCMsg", "HTTPException thrown when removing bounty listing message for criminal: " +
                          bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-HTTPERR")
-        except Forbidden:
+        except discord.Forbidden:
             bbLogger.log("Main", "rmBBCMsg", "Forbidden exception thrown when removing bounty listing message for criminal: " +
                          bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-FORBIDDENERR")
-        except NotFound:
+        except discord.NotFound:
             bbLogger.log("Main", "rmBBCMsg", "Bounty listing message no longer exists, BBC entry removed: " +
                          bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-NOT_FOUND")
         await guild.bountyBoardChannel.removeBounty(bounty)
