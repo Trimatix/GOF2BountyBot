@@ -10,6 +10,20 @@ async def deleteReactionMenu(menu):
     await menu.msg.delete()
 
 
+async def markExpiredMenu(menuID):
+    if menuID in bbGlobals.reactionMenusDB:
+        menu = bbGlobals.reactionMenusDB[menuID]
+        try:
+            await menu.msg.edit(content=bbConfig.expiredMenuMsg)
+        except NotFound:
+            pass
+        except HTTPException:
+            pass
+        except Forbidden:
+            pass
+        del bbGlobals.reactionMenusDB[menuID]
+
+
 class ReactionMenuOption:
     def __init__(self, name, emoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
         self.name = name

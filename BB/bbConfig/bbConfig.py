@@ -295,7 +295,7 @@ userAlertsIDsDefaults = {   "bounties_new": False,
 ##### REACTION MENUS #####
 
 roleMenuDefaultTimeout = {"days": 1}
-expiredRoleMenuMsg = "😴 This role menu has now expired."
+expiredMenuMsg = "😴 This role menu has now expired."
 
 
 

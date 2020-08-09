@@ -3535,7 +3535,7 @@ async def admin_cmd_make_role_menu(message, args, isDM):
 
     if timeoutExists:
         timeoutDelta = timeDeltaFromDict(bbConfig.roleMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
-        timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionRolePicker.markExpiredMenu, expiryFunctionArgs=menuMsg.id)
+        timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionMenu.markExpiredMenu, expiryFunctionArgs=menuMsg.id)
         bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
     
     else:

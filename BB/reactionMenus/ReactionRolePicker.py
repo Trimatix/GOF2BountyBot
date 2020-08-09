@@ -28,20 +28,6 @@ async def removeRole(args, reactingUser=None):
     return False
 
 
-async def markExpiredMenu(menuID):
-    if menuID in bbGlobals.reactionMenusDB:
-        menu = bbGlobals.reactionMenusDB[menuID]
-        try:
-            await menu.msg.edit(content=bbConfig.expiredRoleMenuMsg)
-        except NotFound:
-            pass
-        except HTTPException:
-            pass
-        except Forbidden:
-            pass
-        del bbGlobals.reactionMenusDB[menuID]
-
-
 class ReactionRolePickerOption(ReactionMenu.ReactionMenuOption):
     def __init__(self, emoji, role, menu):
         self.role = role
@@ -85,7 +71,7 @@ async def fromDict(rmDict):
     timeoutTT = None
     if "timeout" in rmDict:
         expiryTime = datetime.utcfromtimestamp(rmDict["timeout"])
-        bbGlobals.reactionMenusTTDB.scheduleTask(TimedTask.TimedTask(expiryTime=expiryTime, expiryFunction=markExpiredMenu, expiryFunctionArgs=msg.id))
+        bbGlobals.reactionMenusTTDB.scheduleTask(TimedTask.TimedTask(expiryTime=expiryTime, expiryFunction=ReactionMenu.markExpiredMenu, expiryFunctionArgs=msg.id))
 
 
     return ReactionRolePicker(msg, reactionRoles, dcGuild,
