@@ -29,7 +29,7 @@ from .scheduling import TimedTaskHeap
 from . import bbUtil, bbGlobals
 from .userAlerts import UserAlerts
 from .logging import bbLogger
-from .reactionMenus import ReactionInventoryPicker, ReactionRolePicker
+from .reactionMenus import ReactionMenu, ReactionInventoryPicker, ReactionRolePicker, ReactionDuelChallengeMenu
 
 
 ####### DATABASE METHODS #######
@@ -472,45 +472,12 @@ async def expireAndAnnounceDuelReq(duelReqDict):
     duelReq.sourceBBUser.removeDuelChallengeObj(duelReq)
 
 
-def findBBUserDCGuild(user):
-    if user.hasLastSeenGuildId:
-        lastSeenGuild = bbGlobals.client.get_guild(user.lastSeenGuildId)
-        if lastSeenGuild is None or lastSeenGuild.get_member(user.id) is None:
-            user.hasLastSeenGuildId = False
-        else:
-            return lastSeenGuild
-
-    if not user.hasLastSeenGuildId:
-        for guild in bbGlobals.guildsDB.guilds.values():
-            lastSeenGuild = bbGlobals.client.get_guild(guild.id)
-            if lastSeenGuild is not None and lastSeenGuild.get_member(user.id) is not None:
-                user.lastSeenGuildId = guild.id
-                user.hasLastSeenGuildId = True
-                return lastSeenGuild
-    return None
-
-
-def userOrMemberName(dcUser, dcGuild):
-    if dcUser is None:
-        bbLogger.log("Main", "usrMmbrNme",
-                     "Null dcUser given", eventType="USR_NONE")
-        raise ValueError("Null dcUser given")
-
-    if dcGuild is None:
-        return dcUser.name
-
-    guildMember = dcGuild.get_member(dcUser.id)
-    if guildMember is None:
-        return dcUser.name
-    return guildMember.display_name
-
-
 def typeAlertedUserMentionOrName(alertType, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None):
     if dcUser is None and bbUser is None:
         raise ValueError("At least one of dcUser or bbUser must be given.")
 
     if bbGuild is None and dcGuild is None:
-        dcGuild = findBBUserDCGuild(dcUser)
+        dcGuild = bbUtil.findBBUserDCGuild(dcUser)
         if dcGuild is None:
             raise ValueError("user does not share an guilds with the bot")
     if bbGuild is None:
@@ -583,6 +550,10 @@ def getAlertIDFromHeirarchicalAliases(alertName):
 
 
 async def shutdown():
+    menus = list(bbGlobals.reactionMenusDB.values())
+    for menu in menus:
+        if not menu.saveable:
+            await menu.delete()
     botLoggedIn = False
     await bbGlobals.client.logout()
     saveAllDBs()
@@ -810,7 +781,7 @@ async def cmd_balance(message, args, isDM):
         if not bbGlobals.usersDB.userIDExists(requestedUser.id):
             bbGlobals.usersDB.addUser(requestedUser.id)
         # send the user's balance
-        await message.channel.send(":moneybag: **" + userOrMemberName(requestedUser, message.guild) + "** has **" + str(bbGlobals.usersDB.getUser(requestedUser.id).credits) + " Credits**.")
+        await message.channel.send(":moneybag: **" + bbUtil.userOrMemberName(requestedUser, message.guild) + "** has **" + str(bbGlobals.usersDB.getUser(requestedUser.id).credits) + " Credits**.")
 
 bbCommands.register("balance", cmd_balance)
 bbCommands.register("bal", cmd_balance)
@@ -903,7 +874,7 @@ async def cmd_stats(message, args, isDM):
             return
 
         # create the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=userOrMemberName(requestedUser, message.guild),
+        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=bbUtil.userOrMemberName(requestedUser, message.guild),
                                footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
         # If the requested user is not in the database, don't bother adding them just print zeroes
         if not bbGlobals.usersDB.userIDExists(requestedUser.id):
@@ -2860,7 +2831,7 @@ async def cmd_pay(message, args, isDM):
     sourceBBUser.credits -= amount
     targetBBUser.credits += amount
 
-    await message.channel.send(":moneybag: You paid " + userOrMemberName(requestedUser, message.guild) + " **" + str(amount) + "** credits!")
+    await message.channel.send(":moneybag: You paid " + bbUtil.userOrMemberName(requestedUser, message.guild) + " **" + str(amount) + "** credits!")
 
 bbCommands.register("pay", cmd_pay)
 dmCommands.register("pay", cmd_pay)
@@ -2953,7 +2924,7 @@ async def cmd_total_value(message, args, isDM):
         if not bbGlobals.usersDB.userIDExists(requestedUser.id):
             bbGlobals.usersDB.addUser(requestedUser.id)
         # send the user's balance
-        await message.channel.send(":moneybag: **" + userOrMemberName(requestedUser, message.guild) + "**'s items and balance have a total value of **" + str(bbGlobals.usersDB.getUser(requestedUser.id).getStatByName("value")) + " Credits**.")
+        await message.channel.send(":moneybag: **" + bbUtil.userOrMemberName(requestedUser, message.guild) + "**'s items and balance have a total value of **" + str(bbGlobals.usersDB.getUser(requestedUser.id).getStatByName("value")) + " Credits**.")
 
 bbCommands.register("total-value", cmd_total_value)
 dmCommands.register("total-value", cmd_total_value)
@@ -3018,7 +2989,7 @@ async def cmd_duel(message, args, isDM):
     if action == "challenge":
         stakes = int(argsSplit[2])
         if sourceBBUser.hasDuelChallengeFor(targetBBUser):
-            await message.channel.send(":x: You already have a duel challenge pending for " + userOrMemberName(requestedUser, message.guild) + "! To make a new one, cancel it first. (see `" + bbConfig.commandPrefix + "help duel`)")
+            await message.channel.send(":x: You already have a duel challenge pending for " + bbUtil.userOrMemberName(requestedUser, message.guild) + "! To make a new one, cancel it first. (see `" + bbConfig.commandPrefix + "help duel`)")
             return
 
         try:
@@ -3040,8 +3011,10 @@ async def cmd_duel(message, args, isDM):
         duelExpiryTimeString = "This duel request will expire on the **" + expiryTimesSplit[0].lstrip('0') + getNumExtension(int(
             expiryTimesSplit[0])) + "** of **" + expiryTimesSplit[1] + "**, at **" + expiryTimesSplit[2] + ":" + expiryTimesSplit[3] + "** UTC."
 
+        sentMsgs = []
+
         if message.guild.get_member(requestedUser.id) is None:
-            targetUserDCGuild = findBBUserDCGuild(targetBBUser)
+            targetUserDCGuild = bbUtil.findBBUserDCGuild(targetBBUser)
             if targetUserDCGuild is None:
                 await message.channel.send(":x: User not found! Did they leave the server?")
                 return
@@ -3050,12 +3023,21 @@ async def cmd_duel(message, args, isDM):
                 if targetUserBBGuild.hasPlayChannel():
                     targetUserNameOrTag = IDAlertedUserMentionOrName(
                         "duels_challenge_incoming_new", dcGuild=targetUserDCGuild, bbGuild=targetUserBBGuild, dcUser=requestedUser, bbUser=targetBBUser)
-                    await bbGlobals.client.get_channel(targetUserBBGuild.getPlayChannelId()).send(":crossed_swords: **" + str(message.author) + "** challenged " + targetUserNameOrTag + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
-            await message.channel.send(":crossed_swords: " + message.author.mention + " challenged **" + str(requestedUser) + "** to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
+                    sentMsgs.append(await bbGlobals.client.get_channel(targetUserBBGuild.getPlayChannelId()).send(":crossed_swords: **" + str(message.author) + "** challenged " + targetUserNameOrTag + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString))
+            sentMsgs.append(await message.channel.send(":crossed_swords: " + message.author.mention + " challenged **" + str(requestedUser) + "** to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString))
         else:
             targetUserNameOrTag = IDAlertedUserMentionOrName(
                 "duels_challenge_incoming_new", dcGuild=message.guild, dcUser=requestedUser, bbUser=targetBBUser)
-            await message.channel.send(":crossed_swords: " + message.author.mention + " challenged " + targetUserNameOrTag + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString)
+            sentMsgs.append(await message.channel.send(":crossed_swords: " + message.author.mention + " challenged " + targetUserNameOrTag + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString))
+
+        for msg in sentMsgs:
+            menuTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.duelChallengeMenuDefaultTimeout), expiryFunction=ReactionMenu.removeEmbedAndOptions, expiryFunctionArgs=msg.id)
+            bbGlobals.reactionMenusTTDB.scheduleTask(menuTT)
+            newMenu = ReactionDuelChallengeMenu.ReactionDuelChallengeMenu(msg, newDuelReq, timeout=menuTT)
+            newDuelReq.menus.append(newMenu)
+            await newMenu.updateMessage()
+            bbGlobals.reactionMenusDB[msg.id] = newMenu
+
 
     elif action == "cancel":
         if not sourceBBUser.hasDuelChallengeFor(targetBBUser):
@@ -3064,7 +3046,7 @@ async def cmd_duel(message, args, isDM):
 
         if message.guild.get_member(requestedUser.id) is None:
             await message.channel.send(":white_check_mark: You have cancelled your duel challenge for **" + str(requestedUser) + "**.")
-            targetUserGuild = findBBUserDCGuild(targetBBUser)
+            targetUserGuild = bbUtil.findBBUserDCGuild(targetBBUser)
             if targetUserGuild is not None:
                 targetUserBBGuild = bbGlobals.guildsDB.getGuild(targetUserGuild.id)
                 if targetUserBBGuild.hasPlayChannel() and \
@@ -3077,6 +3059,8 @@ async def cmd_duel(message, args, isDM):
                 await message.channel.send(":white_check_mark: You have cancelled your duel challenge for **" + str(requestedUser) + "**.")
 
         # IDAlertedUserMentionOrName(alertType, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None)
+        for menu in sourceBBUser.duelRequests[targetBBUser].menus:
+            await menu.delete()
         await sourceBBUser.duelRequests[targetBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
         sourceBBUser.removeDuelChallengeTarget(targetBBUser)
 
@@ -3085,16 +3069,8 @@ async def cmd_duel(message, args, isDM):
             await message.channel.send(":x: This user does not have an active duel challenge for you! Did it expire?")
             return
 
-        await targetBBUser.duelRequests[sourceBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
-        targetBBUser.removeDuelChallengeTarget(sourceBBUser)
-
-        await message.channel.send(":white_check_mark: You have rejected **" + str(requestedUser) + "**'s duel challenge.")
-        if message.guild.get_member(targetBBUser.id) is None:
-            targetDCGuild = findBBUserDCGuild(targetBBUser)
-            if targetDCGuild is not None:
-                targetBBGuild = bbGlobals.guildsDB.getGuild(targetDCGuild.id)
-                if targetBBGuild.hasPlayChannel():
-                    await bbGlobals.client.get_channel(targetBBGuild.getPlayChannelId()).send(":-1: <@" + str(targetBBUser.id) + ">, **" + str(message.author) + "** has rejected your duel request!")
+        duelReq = targetBBUser.duelRequests[sourceBBUser]
+        await DuelRequest.rejectDuel(duelReq, message, requestedUser, message.author)
 
     elif action == "accept":
         if not targetBBUser.hasDuelChallengeFor(sourceBBUser):
@@ -3110,91 +3086,7 @@ async def cmd_duel(message, args, isDM):
             await message.channel.send(":x:" + str(requestedUser) + " does not have enough credits to fight this duel! (" + str(requestedDuel.stakes) + ")")
             return
 
-        # fight = ShipFight.ShipFight(sourceBBUser.activeShip, targetBBUser.activeShip)
-        # duelResults = fight.fightShips(bbConfig.duelVariancePercent)
-        duelResults = bbUtil.fightShips(
-            sourceBBUser.activeShip, targetBBUser.activeShip, bbConfig.duelVariancePercent)
-        winningShip = duelResults["winningShip"]
-
-        if winningShip is sourceBBUser.activeShip:
-            winningBBUser = sourceBBUser
-            losingBBUser = targetBBUser
-        elif winningShip is targetBBUser.activeShip:
-            winningBBUser = targetBBUser
-            losingBBUser = sourceBBUser
-        else:
-            winningBBUser = None
-            losingBBUser = None
-
-        # battleMsg =
-
-        # winningBBUser = sourceBBUser if winningShip is sourceBBUser.activeShip else (targetBBUser if winningShip is targetBBUser.activeShip else None)
-        # losingBBUser = None if winningBBUser is None else (sourceBBUser if winningBBUser is targetBBUser else targetBBUser)
-
-        if winningBBUser is None:
-            await message.channel.send(":crossed_swords: **Stalemate!** " + str(requestedUser) + " and " + message.author.mention + " drew in a duel!")
-            if message.guild.get_member(requestedUser.id) is None:
-                targetDCGuild = findBBUserDCGuild(targetBBUser)
-                if targetDCGuild is not None:
-                    targetBBGuild = bbGlobals.guildsDB.getGuild(targetDCGuild.id)
-                    if targetBBGuild.hasPlayChannel():
-                        await bbGlobals.client.get_channel(targetBBGuild.getPlayChannelId()).send(":crossed_swords: **Stalemate!** " + targetDCGuild.get_member(requestedUser.id).mention + " and " + str(message.author) + " drew in a duel!")
-            else:
-                await message.channel.send(":crossed_swords: **Stalemate!** " + requestedUser.mention + " and " + message.author.mention + " drew in a duel!")
-        else:
-            winningBBUser.duelWins += 1
-            losingBBUser.duelLosses += 1
-            winningBBUser.duelCreditsWins += requestedDuel.stakes
-            losingBBUser.duelCreditsLosses += requestedDuel.stakes
-
-            winningBBUser.credits += requestedDuel.stakes
-            losingBBUser.credits -= requestedDuel.stakes
-            creditsMsg = "The stakes were **" + \
-                str(requestedDuel.stakes) + "** credit" + \
-                ("s" if requestedDuel.stakes != 1 else "")
-
-            # Only display the new player balances if the duel stakes are greater than zero.
-            if requestedDuel.stakes > 0:
-                creditsMsg += ".\n**" + bbGlobals.client.get_user(winningBBUser.id).name + "** now has **" + str(winningBBUser.credits) + " credits**.\n**" + \
-                    bbGlobals.client.get_user(losingBBUser.id).name + "** now has **" + \
-                    str(losingBBUser.credits) + " credits**."
-
-            # statsMsg = "**" + message.author.name + "** had " + (str(duelResults["ship1"]["DPS"]["varied"]) if duelResults["ship1"]["DPS"]["varied"] != -1 else "inf.") + " DPS and " + (str(duelResults["ship1"]["health"]["varied"]) if duelResults["ship1"]["health"]["varied"] != -1 else "inf.") + " health." \
-            #             + "**" + requestedUser.name + "** had " + (str(duelResults["ship2"]["DPS"]["varied"]) if duelResults["ship2"]["DPS"]["varied"] != -1 else "inf.") + " DPS and " + (str(duelResults["ship2"]["health"]["varied"]) if duelResults["ship2"]["health"]["varied"] != -1 else "inf.") + " health." \
-            #             + "**" + message.author.name + "** had " + (str(duelResults["ship1"]["TTK"]) if duelResults["ship1"]["TTK"] != -1 else "inf.") + "s time to kill." \
-            #             + "**" + requestedUser.name + "** had " + (str(duelResults["ship2"]["TTK"]) if duelResults["ship2"]["TTK"] != -1 else "inf.") + "s time to kill."
-            statsEmbed = makeEmbed(authorName="**Duel Stats**")
-            statsEmbed.add_field(name="DPS (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)", value=message.author.mention + ": " + str(round(
-                duelResults["ship1"]["DPS"]["varied"], 2)) + "\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["DPS"]["varied"], 2)))
-            statsEmbed.add_field(name="Health (" + str(bbConfig.duelVariancePercent * 100) + "% RNG)", value=message.author.mention + ": " + str(round(
-                duelResults["ship1"]["health"]["varied"])) + "\n" + requestedUser.mention + ": " + str(round(duelResults["ship2"]["health"]["varied"], 2)))
-            statsEmbed.add_field(name="Time To Kill", value=message.author.mention + ": " + (str(round(duelResults["ship1"]["TTK"], 2)) if duelResults["ship1"]["TTK"] != -1 else "inf.") + "s\n" + requestedUser.mention + ": " + (
-                str(round(duelResults["ship2"]["TTK"], 2)) if duelResults["ship2"]["TTK"] != -1 else "inf.") + "s")
-
-            if message.guild.get_member(winningBBUser.id) is None:
-                await message.channel.send(":crossed_swords: **Fight!** " + str(bbGlobals.client.get_user(winningBBUser.id)) + " beat " + bbGlobals.client.get_user(losingBBUser.id).mention + " in a duel!\n" + creditsMsg, embed=statsEmbed)
-                winnerDCGuild = findBBUserDCGuild(winningBBUser)
-                if winnerDCGuild is not None:
-                    winnerBBGuild = bbGlobals.guildsDB.getGuild(winnerDCGuild.id)
-                    if winnerBBGuild.hasPlayChannel():
-                        await bbGlobals.client.get_channel(winnerBBGuild.getPlayChannelId()).send(":crossed_swords: **Fight!** " + winnerDCGuild.get_member(winningBBUser.id).mention + " beat " + str(bbGlobals.client.get_user(losingBBUser.id)) + " in a duel!\n" + creditsMsg, embed=statsEmbed)
-            else:
-                if message.guild.get_member(losingBBUser.id) is None:
-                    await message.channel.send(":crossed_swords: **Fight!** " + bbGlobals.client.get_user(winningBBUser.id).mention + " beat " + str(bbGlobals.client.get_user(losingBBUser.id)) + " in a duel!\n" + creditsMsg, embed=statsEmbed)
-                    loserDCGuild = findBBUserDCGuild(losingBBUser)
-                    if loserDCGuild is not None:
-                        loserBBGuild = bbGlobals.guildsDB.getGuild(loserDCGuild.id)
-                        if loserBBGuild.hasPlayChannel():
-                            await bbGlobals.client.get_channel(loserBBGuild.getPlayChannelId()).send(":crossed_swords: **Fight!** " + str(bbGlobals.client.get_user(winningBBUser.id)) + " beat " + loserDCGuild.get_member(losingBBUser.id).mention + " in a duel!\n" + creditsMsg, embed=statsEmbed)
-                else:
-                    await message.channel.send(":crossed_swords: **Fight!** " + bbGlobals.client.get_user(winningBBUser.id).mention + " beat " + bbGlobals.client.get_user(losingBBUser.id).mention + " in a duel!\n" + creditsMsg, embed=statsEmbed)
-
-        await targetBBUser.duelRequests[sourceBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
-        targetBBUser.removeDuelChallengeObj(requestedDuel)
-        # logStr = ""
-        # for s in duelResults["battleLog"]:
-        #     logStr += s.replace("{PILOT1NAME}",message.author.name).replace("{PILOT2NAME}",requestedUser.name) + "\n"
-        # await message.channel.send(logStr)
+        await DuelRequest.fightDuel(message.author, requestedUser, requestedDuel, message)
 
 bbCommands.register("duel", cmd_duel)
 dmCommands.register("duel", err_nodm)
@@ -3541,7 +3433,7 @@ async def admin_cmd_make_role_menu(message, args, isDM):
     else:
         timeoutTT = None
 
-    menu = ReactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, titleTxt="**Role Menu**", desc="React for your desired role!", footerTxt=("This menu will expire in " + bbUtil.td_format_noYM(timeoutDelta) + ".") if timeoutExists else "", targetRole=targetRole, targetMember=targetMember, timeout=timeoutTT)
+    menu = ReactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, targetRole=targetRole, targetMember=targetMember, timeout=timeoutTT)
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
@@ -3794,7 +3686,7 @@ async def dev_cmd_give(message, args, isDM):
 
     requestedUser.getInactivesByName(itemType).addItem(newItem)
 
-    await message.channel.send(":white_check_mark: Given one '" + newItem.name + "' to **" + userOrMemberName(bbGlobals.client.get_user(requestedUser.id), message.guild) + "**!")
+    await message.channel.send(":white_check_mark: Given one '" + newItem.name + "' to **" + bbUtil.userOrMemberName(bbGlobals.client.get_user(requestedUser.id), message.guild) + "**!")
 
 bbCommands.register("give", dev_cmd_give, isDev=True, forceKeepArgsCasing=True)
 dmCommands.register("give", dev_cmd_give, isDev=True, forceKeepArgsCasing=True)
@@ -3887,7 +3779,7 @@ async def dev_cmd_del_item(message, args, isDM):
     else:
         itemName = requestedItem.name + "\n" + requestedItem.statsStringShort()
 
-    await message.channel.send(":white_check_mark: One item deleted from " + userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
+    await message.channel.send(":white_check_mark: One item deleted from " + bbUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
     userItemInactives.removeItem(requestedItem)
 
 bbCommands.register("del-item", dev_cmd_del_item)
@@ -3984,13 +3876,13 @@ async def dev_cmd_del_item_key(message, args, isDM):
     if requestedItem not in userItemInactives.items:
         userItemInactives.keys.remove(requestedItem)
         userItemInactives.numKeys -= 1
-        await message.channel.send(":white_check_mark: **Erroneous key** deleted from " + userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
+        await message.channel.send(":white_check_mark: **Erroneous key** deleted from " + bbUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
     else:
         itemCount = userItemInactives.items[requestedItem].count
         del userItemInactives.items[requestedItem]
         userItemInactives.keys.remove(requestedItem)
         userItemInactives.numKeys -= 1
-        await message.channel.send(":white_check_mark: " + str(itemCount) + " item(s) deleted from " + userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
+        await message.channel.send(":white_check_mark: " + str(itemCount) + " item(s) deleted from " + bbUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
 
 bbCommands.register("del-item-key", dev_cmd_del_item_key)
 dmCommands.register("del-item-key", dev_cmd_del_item_key)
@@ -5131,34 +5023,34 @@ async def on_message(message):
 
 @bbGlobals.client.event
 async def on_raw_reaction_add(payload):
-    emoji = bbUtil.dumbEmojiFromPartial(payload.emoji)
-    if emoji.sendable is None:
-        return
+    if payload.user_id != bbGlobals.client.user.id:
+        emoji = bbUtil.dumbEmojiFromPartial(payload.emoji)
+        if emoji.sendable is None:
+            return
 
-    message = await bbGlobals.client.get_guild(payload.guild_id).get_channel(payload.channel_id).fetch_message(payload.message_id)
-    member = payload.member
+        message = await bbGlobals.client.get_guild(payload.guild_id).get_channel(payload.channel_id).fetch_message(payload.message_id)
+        member = payload.member
 
-    if member != message.guild.me and \
-            message.id in bbGlobals.reactionMenusDB and \
-            bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):
-        await bbGlobals.reactionMenusDB[message.id].reactionAdded(emoji, member)
-        # await bbGlobals.reactionMenusDB[message.id].updateMessage()
+        if message.id in bbGlobals.reactionMenusDB and \
+                bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):
+            await bbGlobals.reactionMenusDB[message.id].reactionAdded(emoji, member)
+            # await bbGlobals.reactionMenusDB[message.id].updateMessage()
 
 
 @bbGlobals.client.event
 async def on_raw_reaction_remove(payload):
-    emoji = bbUtil.dumbEmojiFromPartial(payload.emoji)
-    if emoji.sendable is None:
-        return
+    if payload.user_id != bbGlobals.client.user.id:
+        emoji = bbUtil.dumbEmojiFromPartial(payload.emoji)
+        if emoji.sendable is None:
+            return
 
-    message = await bbGlobals.client.get_guild(payload.guild_id).get_channel(payload.channel_id).fetch_message(payload.message_id)
-    member = message.guild.get_member(payload.user_id)
+        message = await bbGlobals.client.get_guild(payload.guild_id).get_channel(payload.channel_id).fetch_message(payload.message_id)
+        member = message.guild.get_member(payload.user_id)
 
-    if member != message.guild.me and \
-            message.id in bbGlobals.reactionMenusDB and \
-            bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):
-        await bbGlobals.reactionMenusDB[message.id].reactionRemoved(emoji, member)
-        # await bbGlobals.reactionMenusDB[message.id].updateMessage()
+        if message.id in bbGlobals.reactionMenusDB and \
+                bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):
+            await bbGlobals.reactionMenusDB[message.id].reactionRemoved(emoji, member)
+            # await bbGlobals.reactionMenusDB[message.id].updateMessage()
 
 
 @bbGlobals.client.event

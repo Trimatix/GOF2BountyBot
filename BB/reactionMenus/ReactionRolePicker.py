@@ -44,7 +44,7 @@ class ReactionRolePickerOption(ReactionMenu.ReactionMenuOption):
 
 
 class ReactionRolePicker(ReactionMenu.ReactionMenu):
-    def __init__(self, msg, reactionRoles, dcGuild, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None, targetMember=None, targetRole=None):
+    def __init__(self, msg, reactionRoles, dcGuild, titleTxt="**Role Menu**", desc="React for your desired role!", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
         self.dcGuild = dcGuild
         self.msg = msg
         roleOptions = {}
@@ -52,6 +52,7 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
             roleOptions[reaction] = ReactionRolePickerOption(reaction, reactionRoles[reaction], self)
 
         super(ReactionRolePicker, self).__init__(msg, options=roleOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
+        self.saveable = True
 
 
     def toDict(self):

@@ -6,6 +6,7 @@ import random
 import inspect
 from emoji import UNICODE_EMOJI
 from . import bbGlobals
+from .logging import bbLogger
 
 def readJSON(dbFile):
     f = open(dbFile, "r")
@@ -331,3 +332,36 @@ def td_format_noYM(td_object):
             strings.append("%s %s%s" % (period_value, period_name, has_s))
 
     return ", ".join(strings)
+
+
+def findBBUserDCGuild(user):
+    if user.hasLastSeenGuildId:
+        lastSeenGuild = bbGlobals.client.get_guild(user.lastSeenGuildId)
+        if lastSeenGuild is None or lastSeenGuild.get_member(user.id) is None:
+            user.hasLastSeenGuildId = False
+        else:
+            return lastSeenGuild
+
+    if not user.hasLastSeenGuildId:
+        for guild in bbGlobals.guildsDB.guilds.values():
+            lastSeenGuild = bbGlobals.client.get_guild(guild.id)
+            if lastSeenGuild is not None and lastSeenGuild.get_member(user.id) is not None:
+                user.lastSeenGuildId = guild.id
+                user.hasLastSeenGuildId = True
+                return lastSeenGuild
+    return None
+
+
+def userOrMemberName(dcUser, dcGuild):
+    if dcUser is None:
+        bbLogger.log("Main", "usrMmbrNme",
+                     "Null dcUser given", eventType="USR_NONE")
+        raise ValueError("Null dcUser given")
+
+    if dcGuild is None:
+        return dcUser.name
+
+    guildMember = dcGuild.get_member(dcUser.id)
+    if guildMember is None:
+        return dcUser.name
+    return guildMember.display_name

@@ -28,7 +28,7 @@ class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
 
 
 class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
-    def __init__(self, msg, bbInventory, itemsPerPage, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None, targetMember=None, targetRole=None):
+    def __init__(self, msg, bbInventory, itemsPerPage, titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):        
         if itemsPerPage > 10:
             raise ValueError("Tried to instantiate a ReactionItemPicker with more than " + str(maxItemsPerPage) + " itemsPerPage (requested " + str(itemsPerPage) + ")")
         self.bbInventory = bbInventory

@@ -1,26 +1,35 @@
 import inspect
-from discord import Embed, Colour
+from discord import Embed, Colour, NotFound, HTTPException, Forbidden
 from ..bbConfig import bbConfig
 from .. import bbGlobals, bbUtil
 from abc import ABC, abstractmethod
 
 
-async def deleteReactionMenu(menu):
-    del bbGlobals.reactionMenusDB[menu.msg.id]
+async def deleteReactionMenu(menuID):
+    menu = bbGlobals.reactionMenusDB[menuID]
     await menu.msg.delete()
+    del bbGlobals.reactionMenusDB[menu.msg.id]
+
+
+async def removeEmbedAndOptions(menuID):
+    menu = bbGlobals.reactionMenusDB[menuID]
+    for react in menu.options:
+        await menu.msg.remove_reaction(react.sendable, menu.msg.guild.me)
+    await menu.msg.edit(suppress=True)
+    del bbGlobals.reactionMenusDB[menu.msg.id]
 
 
 async def markExpiredMenu(menuID):
+    menu = bbGlobals.reactionMenusDB[menuID]
+    try:
+        await menu.msg.edit(content=bbConfig.expiredMenuMsg)
+    except NotFound:
+        pass
+    except HTTPException:
+        pass
+    except Forbidden:
+        pass
     if menuID in bbGlobals.reactionMenusDB:
-        menu = bbGlobals.reactionMenusDB[menuID]
-        try:
-            await menu.msg.edit(content=bbConfig.expiredMenuMsg)
-        except NotFound:
-            pass
-        except HTTPException:
-            pass
-        except Forbidden:
-            pass
         del bbGlobals.reactionMenusDB[menuID]
 
 
@@ -68,14 +77,22 @@ class ReactionMenuOption:
     def toDict(self):
         return {"name":self.name, "emoji": self.emoji.toDict()}
 
-        # if self.addFunc is not None:
-        #     data["addFunc"] = {"module": self.addFunc.__module, "func": self.addFunc.__name__}
-        #     if self.addArgs
+
+class NonSaveableReactionMenuOption(ReactionMenuOption):
+    def __init__(self, name, emoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
+        super(NonSaveableReactionMenuOption, self).__init__(name, emoji, addFunc=addFunc, addArgs=addArgs, removeFunc=removeFunc, removeArgs=removeArgs)
+
+
+    def toDict(self):
+        return super(NonSaveableReactionMenuOption, self).toDict()
 
 
 class ReactionMenu:
     def __init__(self, msg, options={}, 
-                    titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None, targetMember=None, targetRole=None):
+                    titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+        if footerTxt == "" and timeout is not None:
+            footerTxt = "This menu will expire in " + bbUtil.td_format_noYM(timeout.expiryDelta) + "."
+        
         # discord.message
         self.msg = msg
         # Dict of bbUtil.dumbEmoji: ReactionMenuOption
@@ -92,6 +109,7 @@ class ReactionMenu:
         self.timeout = timeout
         self.targetMember = targetMember
         self.targetRole = targetRole
+        self.saveable = False
 
     
     def hasEmojiRegistered(self, emoji):
@@ -120,7 +138,7 @@ class ReactionMenu:
         return await self.options[emoji].remove(member)
 
 
-    async def getMenuEmbed(self):
+    def getMenuEmbed(self):
         menuEmbed = Embed(title=self.titleTxt, description=self.desc, colour=self.col)
         if self.footerTxt != "": menuEmbed.set_footer(text=self.footerTxt)
         menuEmbed.set_image(url=self.img)
@@ -134,14 +152,14 @@ class ReactionMenu:
     
     async def updateMessage(self):
         await self.msg.clear_reactions()
-        await self.msg.edit(embed=await self.getMenuEmbed())
+        await self.msg.edit(embed=self.getMenuEmbed())
         for option in self.options:
             await self.msg.add_reaction(option.sendable)
 
 
     async def delete(self):
         if self.timeout is None:
-            await deleteReactionMenu(self)
+            await deleteReactionMenu(self.msg.id)
         else:
             await self.timeout.forceExpire()
 
@@ -190,11 +208,15 @@ class ReactionMenu:
 
 class CancellableReactionMenu(ReactionMenu):
     def __init__(self, msg, options={}, cancelEmoji=bbConfig.defaultCancelEmoji,
-                    titleTxt="", desc="", col=Embed.Empty, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None, targetMember=None, targetRole=None):
-        options[cancelEmoji] = ReactionMenuOption("cancel", cancelEmoji, self.delete, None)
+                    titleTxt="", desc="", col=Embed.Empty, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+        self.cancelEmoji = cancelEmoji
+        options[cancelEmoji] = NonSaveableReactionMenuOption("cancel", cancelEmoji, self.delete, None)
         super(CancellableReactionMenu, self).__init__(msg, options=options, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 
 
     def toDict(self):
-        return super(CancellableReactionMenu, self).toDict()
+        baseDict = super(CancellableReactionMenu, self).toDict()
+        del baseDict["options"][self.cancelEmoji.sendable]
+
+        return baseDict
 

@@ -247,6 +247,8 @@ numberEmojis = [dumbEmoji(unicode="0️⃣"), dumbEmoji(unicode="1️⃣"), dumb
 defaultMenuEmojis = numberEmojis
 defaultCancelEmoji = dumbEmoji(unicode="🇽")
 defaultErrEmoji = dumbEmoji(unicode="❓")
+defaultAcceptEmoji = dumbEmoji(unicode="👍")
+defaultRejectEmoji = dumbEmoji(unicode="👎")
 
 
 
@@ -295,6 +297,7 @@ userAlertsIDsDefaults = {   "bounties_new": False,
 ##### REACTION MENUS #####
 
 roleMenuDefaultTimeout = {"days": 1}
+duelChallengeMenuDefaultTimeout = {"hours": 2}
 expiredMenuMsg = "😴 This role menu has now expired."
 
 
