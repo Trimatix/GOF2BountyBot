@@ -35,14 +35,14 @@ class ReactionRolePickerOption(ReactionMenu.ReactionMenuOption):
 
 
 class ReactionRolePicker(ReactionMenu.ReactionMenu):
-    def __init__(self, msg, reactionRoles, dcGuild, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None):
+    def __init__(self, msg, reactionRoles, dcGuild, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None, targetMember=None, targetRole=None):
         self.dcGuild = dcGuild
         self.msg = msg
         roleOptions = {}
         for reaction in reactionRoles:
             roleOptions[reaction] = ReactionRolePickerOption(reaction, reactionRoles[reaction], self)
 
-        super(ReactionRolePicker, self).__init__(msg, options=roleOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout)
+        super(ReactionRolePicker, self).__init__(msg, options=roleOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 
 
     def toDict(self):
@@ -68,4 +68,6 @@ async def fromDict(rmDict):
                                 thumb=rmDict["thumb"] if "thumb" in rmDict else "",
                                 icon=rmDict["icon"] if "icon" in rmDict else "",
                                 authorName=rmDict["authorName"] if "authorName" in rmDict else "",
-                                timeout=datetime.utcfromtimestamp(rmDict["timeout"]) if "timeout" in rmDict else None)
+                                timeout=datetime.utcfromtimestamp(rmDict["timeout"]) if "timeout" in rmDict else None,
+                                targetMember=dcGuild.get_member(rmDict["targetMember"]) if "targetMember" in rmDict else None,
+                                targetRole=dcGuild.get_role(rmDict["targetRole"]) if "targetRole" in rmDict else None)

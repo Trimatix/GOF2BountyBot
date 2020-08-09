@@ -5036,13 +5036,13 @@ async def on_raw_reaction_add(payload):
     if emoji.sendable is None:
         return
 
-    user = bbGlobals.client.get_user(payload.user_id)
     message = await bbGlobals.client.get_guild(payload.guild_id).get_channel(payload.channel_id).fetch_message(payload.message_id)
+    member = payload.member
 
-    if user != bbGlobals.client.user and \
+    if member != message.guild.me and \
             message.id in bbGlobals.reactionMenusDB and \
             bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):
-        await bbGlobals.reactionMenusDB[message.id].reactionAdded(emoji, user)
+        await bbGlobals.reactionMenusDB[message.id].reactionAdded(emoji, member)
         # await bbGlobals.reactionMenusDB[message.id].updateMessage()
 
 
@@ -5052,13 +5052,13 @@ async def on_raw_reaction_remove(payload):
     if emoji.sendable is None:
         return
 
-    user = bbGlobals.client.get_user(payload.user_id)
     message = await bbGlobals.client.get_guild(payload.guild_id).get_channel(payload.channel_id).fetch_message(payload.message_id)
-    
-    if user != bbGlobals.client.user and \
+    member = message.guild.get_member(payload.user_id)
+
+    if member != message.guild.me and \
             message.id in bbGlobals.reactionMenusDB and \
             bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):
-        await bbGlobals.reactionMenusDB[message.id].reactionRemoved(emoji, user)
+        await bbGlobals.reactionMenusDB[message.id].reactionRemoved(emoji, member)
         # await bbGlobals.reactionMenusDB[message.id].updateMessage()
 
 

@@ -28,7 +28,7 @@ class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
 
 
 class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
-    def __init__(self, msg, bbInventory, itemsPerPage, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None):
+    def __init__(self, msg, bbInventory, itemsPerPage, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", timeout=None, targetMember=None, targetRole=None):
         if itemsPerPage > 10:
             raise ValueError("Tried to instantiate a ReactionItemPicker with more than " + str(maxItemsPerPage) + " itemsPerPage (requested " + str(itemsPerPage) + ")")
         self.bbInventory = bbInventory
@@ -42,7 +42,7 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
             item = itemPage[itemNum].item
             itemOptions[optionEmoji] = ReactionInventoryPickerOption(item, self, emoji=optionEmoji)
 
-        super(ReactionInventoryPicker, self).__init__(msg, options=itemOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout)
+        super(ReactionInventoryPicker, self).__init__(msg, options=itemOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 
 
     def selectItem(self, item):
