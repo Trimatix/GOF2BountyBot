@@ -1063,8 +1063,8 @@ async def cmd_check(message, args, isDM):
         # If a bounty was won, print a congratulatory message
         if bountyWon:
             requestedBBUser.bountyWins += 1
-            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.display_name + "**, you now have **" + str(requestedBBUser.credits) + " Credits!**" +
-                                       ("\nYou have now reached the maximum number of bounty wins allowed for today! Please check back tomorrow." if dailyBountiesMaxReached else userOrMemberName(message.author, message.guild) + ", you have **" + str(bbConfig.maxDailyBountyWins - usersDB.getOrAddID(message.author.id).bountyWinsToday) + "** remaining bounty wins today!"))
+            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.display_name + "**, you now have **" + str(requestedBBUser.credits) + " Credits!**\n" +
+                                       ("You have now reached the maximum number of bounty wins allowed for today! Please check back tomorrow." if dailyBountiesMaxReached else userOrMemberName(message.author, message.guild) + ", you have **" + str(bbConfig.maxDailyBountyWins - usersDB.getOrAddID(message.author.id).bountyWinsToday) + "** remaining bounty wins today!"))
 
             if sightedCriminalsStr != "":
                 for currentGuild in guildsDB.getGuilds():
