@@ -311,4 +311,23 @@ def dumbEmojiFromPartial(e):
     if e.is_unicode_emoji():
         return dumbEmoji(unicode=e.name)
     else:
-        return dumbEmoji(id=e.id)    
+        return dumbEmoji(id=e.id)
+
+
+def td_format_noYM(td_object):
+    seconds = int(td_object.total_seconds())
+    periods = [
+        ('day',         60*60*24),
+        ('hour',        60*60),
+        ('minute',      60),
+        ('second',      1)
+    ]
+
+    strings=[]
+    for period_name, period_seconds in periods:
+        if seconds >= period_seconds:
+            period_value , seconds = divmod(seconds, period_seconds)
+            has_s = 's' if period_value > 1 else ''
+            strings.append("%s %s%s" % (period_value, period_name, has_s))
+
+    return ", ".join(strings)

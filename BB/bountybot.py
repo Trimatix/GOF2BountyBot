@@ -182,13 +182,13 @@ async def removeBountyBoardChannelMessage(guild, bounty):
     if guild.bountyBoardChannel.hasMessageForBounty(bounty):
         try:
             await guild.bountyBoardChannel.getMessageForBounty(bounty).delete()
-        except HTTPException:
+        except discord.HTTPException:
             bbLogger.log("Main", "rmBBCMsg", "HTTPException thrown when removing bounty listing message for criminal: " +
                          bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-HTTPERR")
-        except Forbidden:
+        except discord.Forbidden:
             bbLogger.log("Main", "rmBBCMsg", "Forbidden exception thrown when removing bounty listing message for criminal: " +
                          bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-FORBIDDENERR")
-        except NotFound:
+        except discord.NotFound:
             bbLogger.log("Main", "rmBBCMsg", "Bounty listing message no longer exists, BBC entry removed: " +
                          bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-NOT_FOUND")
         await guild.bountyBoardChannel.removeBounty(bounty)
@@ -3437,11 +3437,11 @@ bbCommands.register("remove-notify-role",
 async def admin_cmd_make_role_menu(message, args, isDM):
     reactionRoles = {}
 
-    argsSplit = args.split("|")
+    argsSplit = args.split(",")
     for arg in argsSplit:
-        roleStr, dumbReact = arg.split(" ")[0], bbUtil.dumbEmojiFromStr(arg.split(" ")[1])
+        roleStr, dumbReact = arg.strip(" ").split(" ")[0], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[1])
         if dumbReact is None:
-            await message.channel.send(":x: Invalid emoji: " + arg.split(" ")[1])
+            await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
 
         role = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
@@ -3450,8 +3450,62 @@ async def admin_cmd_make_role_menu(message, args, isDM):
             return
         reactionRoles[dumbReact] = role
 
+    targetRole = None
+    targetMember = None
+    if "target=" in arg:
+        argIndex = arg.index("target=") + len("target=")
+        try:
+            arg[argIndex:].index(" ")
+        except ValueError:
+            endIndex = len(arg)
+        else:
+            endIndex = arg[argIndex:].index(" ") + argIndex + 1
+
+        targetStr = arg[argIndex:endIndex]
+
+        if bbUtil.isRoleMention(targetStr):
+            targetRole = message.guild.get_role(int(targetStr.lstrip("<@&").rstrip(">")))
+            if targetRole is None:
+                await message.channel.send(":x: Unknown target role!")
+                return
+        
+        elif bbUtil.isMention(targetStr):
+            targetMember = message.guild.get_member(int(targetStr.lstrip("<@!").rstrip(">")))
+            if targetMember is None:
+                await message.channel.send(":x: Unknown target user!")
+                return
+
+        else:
+            await message.channel.send(":x: Invalid target role/user!")
+            return
+    
+    timeoutDict = {}
+
+    for timeName in ["days", "hours", "minutes", "seconds"]:
+        if timeName + "=" in arg:
+            argIndex = arg.index(timeName + "=") + len(timeName + "=")
+            try:
+                arg[argIndex:].index(" ")
+            except ValueError:
+                endIndex = len(arg)
+            else:
+                endIndex = arg[argIndex:].index(" ") + argIndex + 1
+
+            targetStr = arg[argIndex:endIndex]
+
+            if not bbUtil.isInt(targetStr) or int(targetStr) < 1:
+                await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
+                return
+
+            timeoutDict[timeName] = int(targetStr)
+    
+    timeoutDelta = timeDeltaFromDict(bbConfig.roleMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
+
     menuMsg = await message.channel.send("‎")
-    menu = ReactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, titleTxt="**Role Menu**", footerTxt="React for your desired role!")
+    timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionRolePicker.markExpiredMenu, expiryFunctionArgs=menuMsg.id)
+    bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
+
+    menu = ReactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, titleTxt="**Role Menu**", desc="React for your desired role!", footerTxt="This menu will expire in " + bbUtil.td_format_noYM(timeoutDelta) + ".", targetRole=targetRole, targetMember=targetMember, timeout=timeoutTT)
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
@@ -4853,16 +4907,6 @@ async def on_ready():
         if guild.hasBountyBoardChannel:
             await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
 
-    if not path.exists(bbConfig.reactionMenusDBPath):
-        try:
-            f = open(bbConfig.reactionMenusDBPath, 'x')
-            f.write("{}")
-            f.close()
-        except IOError as e:
-            bbLogger.log("main","on_ready","IOError creating reactionMenuDB save file: " + e.__class__.__name__, trace=traceback.format_exc())
-
-    bbGlobals.reactionMenusDB = await loadReactionMenusDB(bbConfig.reactionMenusDBPath)
-
     print("shop stocks are shared." if bbGlobals.guildsDB.getGuild(699744305274945650).shop.shipsStock is bbGlobals.guildsDB.getGuild(
         711548456019296289).shop.shipsStock else "shop stocks are not shared.")
     # for currentUser in bbGlobals.usersDB.users.values():
@@ -4896,6 +4940,19 @@ async def on_ready():
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" +
                          bbConfig.timedTaskCheckingType + "'")
 
+
+    bbGlobals.reactionMenusTTDB = TimedTaskHeap.TimedTaskHeap()
+
+    if not path.exists(bbConfig.reactionMenusDBPath):
+        try:
+            f = open(bbConfig.reactionMenusDBPath, 'x')
+            f.write("{}")
+            f.close()
+        except IOError as e:
+            bbLogger.log("main","on_ready","IOError creating reactionMenuDB save file: " + e.__class__.__name__, trace=traceback.format_exc())
+
+    bbGlobals.reactionMenusDB = await loadReactionMenusDB(bbConfig.reactionMenusDBPath)
+
     # TODO: find next closest task with min over heap[0] for all task DBs and delay by that amount
     # newTaskAdded = False
     # nextTask
@@ -4917,6 +4974,8 @@ async def on_ready():
         await bbGlobals.dbSaveTT.doExpiryCheck()
 
         await bbGlobals.duelRequestTTDB.doTaskChecking()
+
+        await bbGlobals.reactionMenusTTDB.doTaskChecking()
 
 
 """
@@ -4952,6 +5011,10 @@ async def on_message(message):
         menu = ReactionInventoryPicker.ReactionInventoryPicker(menuMsg, inv, 5, titleTxt="**Niker107's Hangar**", footerTxt="React for your desired item", thumb="https://cdn.discordapp.com/avatars/212542588643835905/a20a7a46f7e3e4889363b14f485a3075.png?size=128")
         await menu.updateMessage()
         bbGlobals.reactionMenusDB[menuMsg.id] = menu
+
+
+    if message.content == "printreactions":
+        await message.channel.send(str(bbGlobals.reactionMenusDB.toDict()))
 
     # if not bbGlobals.guildsDB.guildIdExists(message.guild.id):
     #     bbGlobals.guildsDB.addGuildID(message.guild.id)
@@ -5060,6 +5123,26 @@ async def on_raw_reaction_remove(payload):
             bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):
         await bbGlobals.reactionMenusDB[message.id].reactionRemoved(emoji, member)
         # await bbGlobals.reactionMenusDB[message.id].updateMessage()
+
+
+@bbGlobals.client.event
+async def on_raw_message_delete(payload):
+    if payload.message_id in bbGlobals.reactionMenusDB:
+        try:
+            await bbGlobals.reactionMenusDB[payload.message_id].delete()
+        except discord.NotFound:
+            pass
+        except discord.HTTPException:
+            pass
+        except discord.Forbidden:
+            pass
+
+
+@bbGlobals.client.event
+async def on_raw_bulk_message_delete(payload):
+    for msgID in payload.message_ids:
+        if msgID in bbGlobals.reactionMenusDB:
+            await bbGlobals.reactionMenusDB[msgID].delete()
 
 
 bbGlobals.client.run(bbPRIVATE.botToken)

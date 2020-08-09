@@ -164,7 +164,7 @@ class ReactionMenu:
             data["authorName"] = self.authorName
 
         if self.timeout != None:
-            data["timeout"] = self.timeout.timestamp
+            data["timeout"] = self.timeout.expiryTime.timestamp()
 
         if self.targetMember is not None:
             data["targetMember"] = self.targetMember.id

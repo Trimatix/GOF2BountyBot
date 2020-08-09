@@ -1,11 +1,23 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from .. import bbGlobals, bbUtil
-from discord import Colour
+from discord import Colour, NotFound, HTTPException, Forbidden
 from datetime import datetime
+from ..scheduling import TimedTask
 
 
-async def toggleRole(args, reactingUser=None):
+async def giveRole(args, reactingUser=None):
+    dcGuild = args[0]
+    dcMember = dcGuild.get_member(reactingUser.id)
+    role = args[1]
+    msgID = args[2]
+
+    if role not in dcMember.roles:
+        await dcMember.add_roles(role, reason="User requested role toggle via BB reaction menu " + str(msgID))
+    return True
+
+
+async def removeRole(args, reactingUser=None):
     dcGuild = args[0]
     dcMember = dcGuild.get_member(reactingUser.id)
     role = args[1]
@@ -13,16 +25,27 @@ async def toggleRole(args, reactingUser=None):
 
     if role in dcMember.roles:
         await dcMember.remove_roles(role, reason="User requested role toggle via BB reaction menu " + str(msgID))
-        return False
-    else:
-        await dcMember.add_roles(role, reason="User requested role toggle via BB reaction menu " + str(msgID))
-        return True
+    return False
+
+
+async def markExpiredMenu(menuID):
+    if menuID in bbGlobals.reactionMenusDB:
+        menu = bbGlobals.reactionMenusDB[menuID]
+        try:
+            await menu.msg.edit(content=bbConfig.expiredRoleMenuMsg)
+        except NotFound:
+            pass
+        except HTTPException:
+            pass
+        except Forbidden:
+            pass
+        del bbGlobals.reactionMenusDB[menuID]
 
 
 class ReactionRolePickerOption(ReactionMenu.ReactionMenuOption):
     def __init__(self, emoji, role, menu):
         self.role = role
-        super(ReactionRolePickerOption, self).__init__(self.role.name, emoji, addFunc=toggleRole, addArgs=(menu.dcGuild, self.role, menu.msg.id), removeFunc=toggleRole, removeArgs=(menu.dcGuild, self.role, menu.msg.id))
+        super(ReactionRolePickerOption, self).__init__(self.role.name, emoji, addFunc=giveRole, addArgs=(menu.dcGuild, self.role, menu.msg.id), removeFunc=removeRole, removeArgs=(menu.dcGuild, self.role, menu.msg.id))
 
 
     def toDict(self):
@@ -59,6 +82,12 @@ async def fromDict(rmDict):
     for reaction in rmDict["options"]:
         reactionRoles[bbUtil.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
 
+    timeoutTT = None
+    if "timeout" in rmDict:
+        expiryTime = datetime.utcfromtimestamp(rmDict["timeout"])
+        bbGlobals.reactionMenusTTDB.scheduleTask(TimedTask.TimedTask(expiryTime=expiryTime, expiryFunction=markExpiredMenu, expiryFunctionArgs=msg.id))
+
+
     return ReactionRolePicker(msg, reactionRoles, dcGuild,
                                 titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
                                 desc=rmDict["desc"] if "desc" in rmDict else "",
@@ -68,6 +97,6 @@ async def fromDict(rmDict):
                                 thumb=rmDict["thumb"] if "thumb" in rmDict else "",
                                 icon=rmDict["icon"] if "icon" in rmDict else "",
                                 authorName=rmDict["authorName"] if "authorName" in rmDict else "",
-                                timeout=datetime.utcfromtimestamp(rmDict["timeout"]) if "timeout" in rmDict else None,
+                                timeout=timeoutTT,
                                 targetMember=dcGuild.get_member(rmDict["targetMember"]) if "targetMember" in rmDict else None,
                                 targetRole=dcGuild.get_role(rmDict["targetRole"]) if "targetRole" in rmDict else None)

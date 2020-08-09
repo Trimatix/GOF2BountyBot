@@ -20,3 +20,4 @@ duelRequestTTDB = None
 
 # Reaction Menus
 reactionMenusDB = None
+reactionMenusTTDB = None
