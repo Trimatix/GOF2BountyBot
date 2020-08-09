@@ -3435,20 +3435,43 @@ bbCommands.register("remove-notify-role",
 
 
 async def admin_cmd_make_role_menu(message, args, isDM):
+    botRole = None
+    potentialRoles = []
+    for currRole in message.guild.me.roles:
+        if currRole.name == message.guild.me.name and currRole.managed:
+            potentialRoles.append(currRole)
+    
+    if potentialRoles == []:
+        await message.channel.send(":x: I can't find my '" + message.guild.me.name + "' role! Have you renamed it?")
+        return
+    botRole = potentialRoles[-1]
+
     reactionRoles = {}
 
     argsSplit = args.split(",")
+    argPos = 0
     for arg in argsSplit:
+        argPos += 1
         roleStr, dumbReact = arg.strip(" ").split(" ")[0], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[1])
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
+        elif dumbReact.isID and dumbReact.sendable not in message.guild.emojis:
+            await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+            return
+
 
         role = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
         if role is None:
             await message.channel.send(":x: Unrecognised role: " + roleStr)
             return
+        elif role.position > botRole.position:
+            await message.channel.send(":x: I can't grant the **" + role.name + "** role!\nMake sure it's below my '" + botRole.name + "' role in the server roles list.")
         reactionRoles[dumbReact] = role
+
+    if len(reactionRoles) == 0:
+        await message.channel.send(":x: No roles given!")
+        return
 
     targetRole = None
     targetMember = None
@@ -5141,14 +5164,7 @@ async def on_raw_reaction_remove(payload):
 @bbGlobals.client.event
 async def on_raw_message_delete(payload):
     if payload.message_id in bbGlobals.reactionMenusDB:
-        try:
-            await bbGlobals.reactionMenusDB[payload.message_id].delete()
-        except discord.NotFound:
-            pass
-        except discord.HTTPException:
-            pass
-        except discord.Forbidden:
-            pass
+        await bbGlobals.reactionMenusDB[payload.message_id].delete()
 
 
 @bbGlobals.client.event
