@@ -1,5 +1,7 @@
 from ..bbObjects import bbUser
 from .. import bbUtil
+from ..logging import bbLogger
+import traceback
 
 """
 A database of bbUser objects.
@@ -162,7 +164,10 @@ class bbUserDB:
         for id in self.getIds():
             # Serialise each bbUser in the database and save it, along with its ID to dict 
             # JSON stores properties as strings, so ids must be converted to str first.
-            data[str(id)] = self.users[id].toDictNoId()
+            try:
+                data[str(id)] = self.users[id].toDictNoId()
+            except Exception as e:
+                bbLogger.log("UserDB", "toDict", "Error serialising bbUser: " + e.__class__.__name__, trace=traceback.format_exc(), eventType="USERERR")
         return data
 
 

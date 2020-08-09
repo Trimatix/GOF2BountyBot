@@ -154,12 +154,12 @@ Construct a bbGuildDB object from dictionary-serialised format; the reverse of b
 @param bountyDBDict -- The dictionary representation of the bbGuildDB to create
 @return -- The new bbGuildDB
 """
-def fromDict(bountyDBDict):
+def fromDict(guildsDBDict):
     # Instance the new bbGuildDB
     newDB = bbGuildDB()
     # Iterate over all IDs to add to the DB
-    for id in bountyDBDict.keys():
+    for id in guildsDBDict.keys():
         # Instance new bbGuilds for each ID, with the provided data
         # JSON stores properties as strings, so ids must be converted to int first.
-        newDB.addGuildObj(bbGuild.fromDict(int(id), bountyDBDict[id]))
+        newDB.addGuildObj(bbGuild.fromDict(int(id), guildsDBDict[id]))
     return newDB

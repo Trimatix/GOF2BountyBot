@@ -54,11 +54,15 @@ class bbInventory:
         if item in self.items and self.items[item].count >= quantity:
             # Update item's count and inventory's totalItems tracker
             self.items[item].count -= quantity
-            self.totalItems -= 1
+            self.totalItems -= quantity
             # remove the bbItemListing if it is now empty
             if self.items[item].count == 0:
                 # update the keys and numKeys trackers
-                self.keys.remove(item)
+                for i in range(len(self.keys)):
+                    if self.keys[i] is item:
+                        self.keys.pop(i)
+                        break
+                # self.keys.remove(item)
                 self.numKeys -= 1
                 del self.items[item]
         else:
@@ -147,7 +151,13 @@ class bbInventory:
     @return -- The bbInventoryListing for the item at the requested index
     """
     def __getitem__(self, key):
-        return self.items[self.keys[key]]
+        if bool(self.keys): 
+            if key in range(len(self.keys)):
+                if self.keys[key] in self.items:
+                    return self.items[self.keys[key]]
+                raise KeyError("Failed get of key number " + str(key) + " - " + str(self.keys[key]) + ". Key does not exist in inventory.")
+            raise IndexError("Key of incorrect type or out of range: "+ str(key) + ". Valid range: 0 - " + str(len(self.keys)-1))
+        raise ValueError("Attempted to fetch key " + str(key) + ", but keys list is empty")
 
 
     """

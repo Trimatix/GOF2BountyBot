@@ -1,9 +1,10 @@
 from .bbItem import bbItem
 from ...bbConfig import bbData
+from ... import bbUtil
 
 class bbWeapon(bbItem):
-    def __init__(self, name, aliases, dps=0.0, value=0, wiki="", manufacturer="", icon="", emoji="", techLevel=-1):
-        super(bbWeapon, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel)
+    def __init__(self, name, aliases, dps=0.0, value=0, wiki="", manufacturer="", icon="", emoji=bbUtil.EMPTY_DUMBEMOJI, techLevel=-1, builtIn=False):
+        super(bbWeapon, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
         
         self.dps = dps
 
@@ -15,6 +16,13 @@ class bbWeapon(bbItem):
     def getType(self):
         return bbWeapon
 
+    
+    def toDict(self):
+        itemDict = super(bbWeapon, self).toDict()
+        if not self.builtIn:
+            itemDict["dps"] = self.dps
+        return itemDict
+
 
 def fromDict(weaponDict):
     if weaponDict["builtIn"]:
@@ -22,5 +30,5 @@ def fromDict(weaponDict):
     else:
         return bbWeapon(weaponDict["name"], weaponDict["aliases"], dps=weaponDict["dps"], value=weaponDict["value"],
         wiki=weaponDict["wiki"] if "wiki" in weaponDict else "", manufacturer=weaponDict["manufacturer"] if "manufacturer" in weaponDict else "",
-        icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=weaponDict["emoji"] if "emoji" in weaponDict else "",
-        techLevel=weaponDict["techLevel"] if "techLevel" in weaponDict else -1)
+        icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=bbUtil.dumbEmojiFromStr(weaponDict["emoji"]) if "emoji" in weaponDict else bbUtil.EMPTY_DUMBEMOJI,
+        techLevel=weaponDict["techLevel"] if "techLevel" in weaponDict else -1, builtIn=False)

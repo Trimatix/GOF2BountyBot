@@ -2,6 +2,7 @@ from ..bbConfig import bbData, bbConfig
 from .items import bbModuleFactory, bbShip, bbWeapon, bbTurret
 from . import bbInventory, bbInventoryListing
 import random
+from ..logging import bbLogger
 
 class bbShop:
     def __init__(self, maxShips=bbConfig.shopDefaultShipsNum, maxModules=bbConfig.shopDefaultModulesNum, maxWeapons=bbConfig.shopDefaultWeaponsNum, maxTurrets=bbConfig.shopDefaultTurretsNum, shipsStock=bbInventory.bbInventory(), weaponsStock=bbInventory.bbInventory(), modulesStock=bbInventory.bbInventory(), turretsStock=bbInventory.bbInventory(), currentTechLevel=bbConfig.minTechLevel):
@@ -11,7 +12,7 @@ class bbShop:
         self.maxTurrets = maxTurrets
         self.currentTechLevel = currentTechLevel
 
-        # TODO: Somewhere, stocks are getting passed in and shared amongst all shops. Fix this. Temporary measure here to make sure each shop gets its own inventory objects.
+        # TODO: Somewhere, stocks are getting passed in and shared amongst all shops. Fix this. Temporary manual deep copy here to make sure each shop gets its own inventory objects.
         # self.shipsStock = shipsStock
         # self.weaponsStock = weaponsStock
         # self.modulesStock = modulesStock
@@ -24,6 +25,15 @@ class bbShop:
 
         if shipsStock.isEmpty() and weaponsStock.isEmpty() and modulesStock.isEmpty() and turretsStock.isEmpty():
             self.refreshStock()
+        else:
+            for itemListing in shipsStock.items.values():
+                self.shipsStock.addItem(itemListing.item, itemListing.count)
+            for itemListing in weaponsStock.items.values():
+                self.weaponsStock.addItem(itemListing.item, itemListing.count)
+            for itemListing in modulesStock.items.values():
+                self.modulesStock.addItem(itemListing.item, itemListing.count)
+            for itemListing in turretsStock.items.values():
+                self.turretsStock.addItem(itemListing.item, itemListing.count)
 
 
     def refreshStock(self, level=-1):
@@ -207,21 +217,33 @@ class bbShop:
     def toDict(self):
         shipsStockDict = []
         for ship in self.shipsStock.keys:
-            shipsStockDict.append(shipsStock.items[ship].toDict())
+            if ship in self.shipsStock.items:
+                shipsStockDict.append(self.shipsStock.items[ship].toDict())
+            else:
+                bbLogger.log("bbShp", "toDict", "Failed to save invalid ship key '" + str(ship) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
 
         weaponsStockDict = []
         for weapon in self.weaponsStock.keys:
-            weaponsStockDict.append(weaponsStock.items[weapon].toDict())
+            if weapon in self.weaponsStock.items:
+                weaponsStockDict.append(self.weaponsStock.items[weapon].toDict())
+            else:
+                bbLogger.log("bbShp", "toDict", "Failed to save invalid weapon key '" + str(weapon) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
 
         modulesStockDict = []
         for module in self.modulesStock.keys:
-            modulesStockDict.append(modulesStock.items[module].toDict())
+            if module in self.modulesStock.items:
+                modulesStockDict.append(self.modulesStock.items[module].toDict())
+            else:
+                bbLogger.log("bbShp", "toDict", "Failed to save invalid module key '" + str(module) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
 
         turretsStockDict = []
         for turret in self.turretsStock.keys:
-            turretsStockDict.append(turretsStock.items[turret].toDict())
+            if turret in self.turretsStock.items:
+                turretsStockDict.append(self.turretsStock.items[turret].toDict())
+            else:
+                bbLogger.log("bbShp", "toDict", "Failed to save invalid turret key '" + str(turret) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
 
-        return {"maxShips":self.maxShips, "maxWeapons":self.maxWeapons, "maxModules":self.maxModules,
+        return {"maxShips":self.maxShips, "maxWeapons":self.maxWeapons, "maxModules":self.maxModules, "currentTechLevel":self.currentTechLevel,
                     "shipsStock":shipsStockDict, "weaponsStock":weaponsStockDict, "modulesStock":modulesStockDict, "turretsStock":turretsStockDict}
 
 
@@ -242,5 +264,5 @@ def fromDict(shopDict):
     for turretListingDict in shopDict["turretsStock"]:
         turretsStock.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-    return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"],
+    return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"], currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
                     shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)

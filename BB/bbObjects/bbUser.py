@@ -2,6 +2,7 @@ from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from ..bbConfig import bbConfig
 from . import bbInventory, bbInventoryListing
 from ..userAlerts import UserAlerts
+from datetime import datetime
 
 
 defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
@@ -9,10 +10,15 @@ defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
                         "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}, {"name": "IMT Extract 1.3", "builtIn": True}]}
 
 defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"item": {"name": "Nirai Impulse EX 1", "builtIn": True}, "count": 1}]}
+defaultUserValue = 28970
 
 
 class bbUser:
-    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0, alerts=bbConfig.userAlertsIDsDefaults):
+    def __init__(self, id, credits=0, lifetimeCredits=0, 
+                    bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None,
+                    inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[],
+                    lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0,
+                    alerts=bbConfig.userAlertsIDsDefaults, bountyWinsToday=0, dailyBountyWinsReset=datetime.utcnow()):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -57,7 +63,7 @@ class bbUser:
         self.inactiveTurrets = inactiveTurrets
 
         self.lastSeenGuildId = lastSeenGuildId
-        self.haslastSeenGuildId = lastSeenGuildId != -1
+        self.hasLastSeenGuildId = lastSeenGuildId != -1
 
         self.duelRequests = {}
         self.duelWins = duelWins
@@ -66,6 +72,9 @@ class bbUser:
         self.duelCreditsWins = duelCreditsWins
         self.duelCreditsLosses = duelCreditsLosses
         self.userAlerts = alerts
+
+        self.bountyWinsToday = bountyWinsToday
+        self.dailyBountyWinsReset = dailyBountyWinsReset
 
     
     def resetUser(self):
@@ -206,11 +215,17 @@ class bbUser:
         for turret in self.inactiveTurrets.keys:
             inactiveTurretsDict.append(self.inactiveTurrets.items[turret].toDict())
 
+        alerts = {}
+        for alertID in self.userAlerts.keys():
+            if isinstance(self.userAlerts[alertID], UserAlerts.StateUserAlert):
+                alerts[alertID] = self.userAlerts[alertID].state
+
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "lastSeenGuildId":self.lastSeenGuildId,
-                "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses}
+                "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses,
+                "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp()}
 
 
     def userDump(self):
@@ -277,7 +292,6 @@ class bbUser:
         if duelReq.targetBBUser is self:
             raise ValueError("Attempted to add a DuelRequest for self: " + str(duelReq.sourceBBUser.id))
         self.duelRequests[duelReq.targetBBUser] = duelReq
-        # print("user " + str(self.id) + " stored a new duel request, from " + str(duelReq.sourceBBUser.id) + " to " + str(duelReq.targetBBUser.id))
 
 
     def removeDuelChallengeObj(self, duelReq):
@@ -290,30 +304,29 @@ class bbUser:
         self.removeDuelChallengeObj(self.duelRequests[duelTarget])
 
 
-    def setAlertType(self, alertType, newState):
-        self.userAlerts[alertType].state = newState
+    async def setAlertByType(self, alertType, dcGuild, bbGuild, dcMember, newState):
+        await self.userAlerts[alertType].setState(dcGuild, bbGuild, dcMember, newState)
         return newState
 
 
-    def setAlertID(self, alertID, newState):
-        return self.setAlertType(UserAlerts.userAlertsIDsTypes[alertID], newState)
+    async def setAlertByID(self, alertID, dcGuild, bbGuild, dcMember, newState):
+        return await self.setAlertType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember, newState)
 
 
-    def toggleAlertType(self, alertType):
-        self.userAlerts[alertType].state = not self.userAlerts[alertType].state
-        return self.userAlerts[alertType].state
-
-    
-    def toggleAlertID(self, alertID):
-        return self.toggleAlertType(UserAlerts.userAlertsIDsTypes[alertID])
-
-
-    def isAlertedForType(self, alertType):
-        return self.userAlerts[alertType].state
+    async def toggleAlertType(self, alertType, dcGuild, bbGuild, dcMember):
+        return await self.userAlerts[alertType].toggle(dcGuild, bbGuild, dcMember)
 
     
-    def isAlertedForID(self, alertID):
-        return self.isAlertedForType(UserAlerts.userAlertsIDsTypes[alertID])
+    async def toggleAlertID(self, alertID, dcGuild, bbGuild, dcMember):
+        return await self.toggleAlertType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
+
+
+    def isAlertedForType(self, alertType, dcGuild, bbGuild, dcMember):
+        return self.userAlerts[alertType].getState(dcGuild, bbGuild, dcMember)
+
+    
+    def isAlertedForID(self, alertID, dcGuild, bbGuild, dcMember):
+        return self.isAlertedForType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
 
 
     def __str__(self):
@@ -348,7 +361,7 @@ def fromDict(id, userDict):
         for alertID in UserAlerts.userAlertsIDsTypes:
             alertType = UserAlerts.userAlertsIDsTypes[alertID]
             if alertID in userDict["alerts"]:
-                userAlerts[alertType] = alertType(UserAlerts[alertID]["state"])
+                userAlerts[alertType] = alertType(userDict[alertID])
             else:
                 userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
     else:
@@ -361,4 +374,4 @@ def fromDict(id, userDict):
                     bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
                     inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
                     duelWins=userDict["duelWins"] if "duelWins" in userDict else 0, duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0, duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0, duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0,
-                    alerts=userAlerts)
+                    alerts=userAlerts, bountyWinsToday=userDict["bountyWinsToday"] if "bountyWinsToday" in userDict else 0, dailyBountyWinsReset=datetime.utcfromtimestamp(userDict["dailyBountyWinsReset"]) if "dailyBountyWinsReset" in userDict else datetime.utcnow())

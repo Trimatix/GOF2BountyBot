@@ -1,4 +1,5 @@
 import math, random, pprint
+from ..bbUtil import dumbEmoji
 
 ##### UTIL #####
 
@@ -98,7 +99,8 @@ shipMaxPriceTechLevels = [50000, 100000, 200000, 500000, 1000000, 2000000, 50000
 itemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 cumulativeItemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 
-# Parameters for itemTLSpawnChanceForShopTL values, using u function: https://www.desmos.com/calculator/tnldodey5u
+# Parameters for itemTLSpawnChanceForShopTL values, using quadratic function: https://www.desmos.com/calculator/n2xfxf8taj
+# Original u function by Novahkiin22: https://www.desmos.com/calculator/tnldodey5u
 # Original function by Novahkiin22: https://www.desmos.com/calculator/nrshikfmxc
 tl_s = 7
 tl_o = 2.3
@@ -165,6 +167,9 @@ def pickRandomItemTL(shopTL):
 
 maxBountiesPerFaction = 5
 
+# The maximum number of bounties a player is allowed to win each day
+maxDailyBountyWins = 10
+
 # can be "fixed" or "random"
 newBountyDelayType = "random"
 
@@ -190,6 +195,9 @@ checkCooldown = {"minutes":3}
 # number of bounties ahead of a checked system in a route to report a recent criminal spotting (+1)
 closeBountyThreshold = 4
 
+# Text to send to a BountyBoardChannel when no bounties are currently active
+bbcNoBountiesMsg = "```css\n[ NO ACTIVE BOUNTIES ]\n\nThere are currently no active bounty listings.\nPlease check back later, or use [ $notify bounties ] to be pinged when new ones become available!\n```"
+
 
 
 ##### SAVING #####
@@ -201,6 +209,10 @@ savePeriod = {"hours":1}
 userDBPath = "saveData/users.json"
 guildDBPath = "saveData/guilds.json"
 bountyDBPath = "saveData/bounties.json"
+reactionMenusDBPath = "saveData/reactionMenus.json"
+
+# path to folder to save log txts to
+loggingFolderPath = "saveData/logs"
 
 
 
@@ -222,14 +234,19 @@ timedTaskLatenessThresholdSeconds = 10
 commandPrefix = "$"
 
 # When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
-dmSentEmoji = "📬"
+dmSentEmoji = dumbEmoji(unicode="📬")
 
 # max number of characters accepted by nameShip
 maxShipNickLength = 30
 
+# max number of characters accepted by nameShip, when called by a developer
+maxDevShipNickLength = 100
+
 # The default emojis to list in a reaction menu
-numberEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+numberEmojis = [dumbEmoji(unicode="0️⃣"), dumbEmoji(unicode="1️⃣"), dumbEmoji(unicode="2️⃣"), dumbEmoji(unicode="3️⃣"), dumbEmoji(unicode="4️⃣"), dumbEmoji(unicode="5️⃣"), dumbEmoji(unicode="6️⃣"), dumbEmoji(unicode="7️⃣"), dumbEmoji(unicode="8️⃣"), dumbEmoji(unicode="9️⃣"), dumbEmoji(unicode="🔟")]
 defaultMenuEmojis = numberEmojis
+defaultCancelEmoji = dumbEmoji(unicode="🇽")
+defaultErrEmoji = dumbEmoji(unicode="❓")
 
 
 
@@ -262,7 +279,9 @@ validItemNames = ["ship", "weapon", "module", "turret", "all"]
 
 ##### USERS #####
 
-userAlertsIDsDefaults = {   #"shop_refresh": False,
+userAlertsIDsDefaults = {   "bounties_new": False,
+    
+                            "shop_refresh": False,
 
                             "duels_challenge_incoming_new": True,
                             "duels_challenge_incoming_cancel": False,

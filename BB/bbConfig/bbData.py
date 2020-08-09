@@ -58,7 +58,7 @@ securityLevels = ["secure", "average", "risky", "dangerous"]
 
 # map image URLS for cmd_map
 mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/700683544103747594/700683693215318076/gof2_coords.png"
-mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png'
+mapImageNoGraphLink = 'https://i.imgur.com/TmPgPd3.png'
 
 # intro for help commands
 helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
@@ -69,7 +69,8 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently six pages, and six sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Loadout`, `Shopping` and `Credits`."),
                             "stats": ("**stats** *[userTag]*", "Get various credits and bounty statistics about yourself, or a tagged user."),
                             "leaderboard": ("**leaderboard** *[-g|-c|-s|-w]*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
-                            "notify": ("**notify <type>** *[alert]*", "Subscribe to pings when events take place. Currently, **type** can be `bounties`, `shop`, or `duels`.\n> `shop` requires the `refresh` option.\n> `duels` requires the `new` option.")},
+                            "notify": ("**notify <type>** *[alert]*", "Subscribe to pings when events take place. Currently, **type** can be `bounties`, `shop`, `duels`, or `bot`.\n> `shop` requires the `refresh` option.\n> `duels` requires either `new` or `cancel`.\n> `bot` can take `updates` or `announcements`.\n> `bot updates` must be `major` or `minor`."),
+                            "source": ("**source**", "Show links to the project's GitHub page and todo list, and some information about the people behind BountyBot.")},
             
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
                             "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
@@ -96,19 +97,17 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "pay": ("**pay <user> <amount>**", "Pay the mentioned user an amount of credits from your balance.")}}
 
 # intro for admin help commands
-adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
+adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help how-to-play`
 **[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
 
 # help strings for admin bb commands
 adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display information about admin-only commands."),
                                         "set-announce-channel": ("**set-announce-channel** *[off]*", "Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements."),
                                         "set-play-channel": ("**set-play-channel** *[off]*", "Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements."),
-                                        "set-bounty-notify-role": ("**set-bounty-notify-role <role>**", "Set a role to ping when new bounties are created. **<role>** can be either a role mention, or a role ID."),
-                                        "set-shoprefresh-notify-role": ("**set-shoprefresh-notify-role <role>**", "Set a role to ping when the shop stock is refreshed. **<role>** can be either a role mention, or a role ID."),
-                                        "set-minorupdates-notify-role": ("**set-minorupdates-notify-role <role>**", "Set a role to minor bot updates are released. **<role>** can be either a role mention, or a role ID."),
-                                        "set-majorupdates-notify-role": ("**set-majorupdates-notify-role <role>**", "Set a role to ping when major bot updates are released. **<role>** can be either a role mention, or a role ID."),
-                                        "set-announcements-notify-role": ("**set-announcements-notify-role <role>**", "Set a role to ping when miscellaneous BountyBot announcements are broadcasted. **<role>** can be either a role mention, or a role ID."),
-                                        "remove-bounty-notify-role": ("**remove-bounty-notify-role**", "Stop pinging the bounty notify role when new bounties are created.")}}
+                                        "set-notify-role": ("**set-notify-role <type>** *[alert]* **<role>**", "Set a role to ping when various events occur. **<type>** and/or *[alert]]* must specify a type of notification. **<role>** can be either a role mention, or a role ID. For valid notification types, see `$COMMANDPREFIX$help notify`."),
+                                        "remove-notify-role": ("**remove-notify-role**", "Stop pinging the bounty notify role when new bounties are created."),
+                                        "set-bounty-board-channel": ("**set-bounty-board-channel**", "Send from within a channel to set that channel as a *bountyboard*.\nBountyBoard channels show *all* information about active bounties, continuously update their listings (e.g cross through checked systems), and only show *active* bounties (listings for located bounties are removed)."),
+                                        "remove-bounty-board-channel": ("**remove-bounty-board-channel**", "Send from any channel to remove the server's bountyboard channel, if one is set.")}}
 
 # string extensions for numbers, e.g 11th, 1st, 23rd...
 numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
@@ -348,7 +347,7 @@ builtInWeaponData = {   # Lasers
                         "Gram Blaster": {"name": "Gram Blaster", "aliases": ["Gram"], "techLevel": 7, "dps":40, "value":41703, "wiki": "https://galaxyonfire.fandom.com/wiki/Gram_Blaster", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476763291680779/gram_blaster.png", "emoji": "<:gramblaster:723709619624476795>"},
                         "Ridil Blaster": {"name": "Ridil Blaster", "aliases": ["Ridil"], "techLevel": 8, "dps":48, "value":67535, "wiki": "https://galaxyonfire.fandom.com/wiki/Ridil_Blaster", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476812814090300/ridil_blaster.png", "emoji": "<:ridilblaster:723709620446822420>"},
                         "Tyrfing Blaster": {"name": "Tyrfing Blaster", "aliases": ["Tyrfing"], "techLevel": 9, "dps":59.09, "value":97683, "wiki": "https://galaxyonfire.fandom.com/wiki/Tyrfing_Blaster", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723484968055079002/tyrfing_blaster.png", "emoji": "<:tyrfingblaster:723709620220198974>"},
-                        "Mimung Blaster": {"name": "Mimung Blaster", "aliases": ["Mimung"], "techLevel": 9, "dps":69.59, "value":369763, "wiki": "https://galaxyonfire.fandom.com/wiki/Mimung_Blaster", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476793658572800/mimung_blaster.png", "emoji": "<:mimungblaster:723709620169736204>"},
+                        "Mimung Blaster": {"name": "Mimung Blaster", "aliases": ["Mimung"], "techLevel": 9, "dps":69.56, "value":369763, "wiki": "https://galaxyonfire.fandom.com/wiki/Mimung_Blaster", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476793658572800/mimung_blaster.png", "emoji": "<:mimungblaster:723709620169736204>"},
                         
                         # EMP Blasters
                         "Luna EMP Mk I": {"name": "Luna EMP Mk I", "aliases": ["Luna Mk I", "Luna EMP", "Luna", "EMP Mk I", "EMP I"], "techLevel": 4, "dps":8.57, "value":5942, "wiki": "https://galaxyonfire.fandom.com/wiki/Luna_EMP_Mk_I", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476864126943232/luna_emp_mk_i.png", "emoji": "<:lunaempmki:723709689149390888>"},
@@ -430,13 +429,13 @@ builtInSystemData = { #Terran
             "Wolf-Reiser": {"name":"Wolf-Reiser", "faction":"terran", "neighbours":["Aquila"], "security":0, "coordinates":(10, 3), "aliases":["wolfreiser","wolf","reiser"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Wolf-Reiser"},
             
             #Vossk
-            "K'Ontrr": {"name":"K'Ontrr", "faction":"vossk", "neighbours":["S'Kolptorr", "Ni'Mrrod", "Me'Enkk"], "security":3, "coordinates":(10, 11), "aliases":["kontrr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:K'Ontrr"},
+            "K'Ontrr": {"name":"K'Ontrr", "faction":"vossk", "neighbours":["S'Kolptorr", "Ni'Mrrod", "Me'Enkk", "Wah'Norr"], "security":3, "coordinates":(10, 11), "aliases":["kontrr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:K'Ontrr"},
             "Me'Enkk": {"name":"Me'Enkk", "faction":"vossk", "neighbours":["Ni'Mrrod", "K'Ontrr"], "security":3, "coordinates":(11, 12), "aliases":["meenkk"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Me'Enkk"},
-            "Ni'Mrrod": {"name":"Ni'Mrrod", "faction":"vossk", "neighbours":["K'Ontrr", "Me'Enkk"], "security":3, "coordinates":(12, 12), "aliases":["nimrrod"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Ni'Mrrod"},
+            "Ni'Mrrod": {"name":"Ni'Mrrod", "faction":"vossk", "neighbours":["K'Ontrr", "Me'Enkk", "Wah'Norr"], "security":3, "coordinates":(12, 12), "aliases":["nimrrod"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Ni'Mrrod"},
             "Oom'Bak": {"name":"Oom'Bak", "faction":"vossk", "neighbours":["Magnetar", "Vulpes", "S'Kolptorr", "V'Ikka"], "security":1, "coordinates":(9, 8), "aliases":["oombak"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Oom'Bak"},
             "S'Kolptorr": {"name":"S'Kolptorr", "faction":"vossk", "neighbours":["K'Ontrr", "Oom'Bak", "V'Ikka"], "security":2, "coordinates":(9, 9), "aliases":["skolptorr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:S'Kolptorr"},
             "V'Ikka": {"name":"V'Ikka", "faction":"vossk", "neighbours":["Augmenta", "Buntta", "Magnetar", "Oom'Bak", "S'Kolptorr"], "security":1, "coordinates":(7, 8), "aliases":["vikka"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:V'Ikka"},
-            "Wah'Norr": {"name":"Wah'Norr", "faction":"vossk", "neighbours":[], "security":3, "coordinates":(12, 8), "aliases":["wahnorr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Wah'Norr"},
+            "Wah'Norr": {"name":"Wah'Norr", "faction":"vossk", "neighbours":["K'Ontrr", "Ni'Mrrod"], "security":3, "coordinates":(12, 8), "aliases":["wahnorr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Wah'Norr"},
             "Y'Mirr": {"name":"Y'Mirr", "faction":"vossk", "neighbours":[], "security":3, "coordinates":(11, 9), "aliases":["ymirr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Y'Mirr"},
             
             #Nivelian
