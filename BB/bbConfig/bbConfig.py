@@ -298,7 +298,9 @@ userAlertsIDsDefaults = {   "bounties_new": False,
 
 roleMenuDefaultTimeout = {"days": 1}
 duelChallengeMenuDefaultTimeout = {"hours": 2}
+pollMenuDefaultTimeout = {"hours": 2}
 expiredMenuMsg = "😴 This role menu has now expired."
+pollMenuResultsBarLength = 10
 
 
 

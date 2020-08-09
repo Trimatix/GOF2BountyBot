@@ -3,7 +3,7 @@ from ...bbConfig import bbConfig
 from discord import Embed
 
 
-def makeDuelStatsEmbed(duelResults, sourceUser, targetUser):
+def makeDuelStatsEmbed(duelResults, targetUser, sourceUser):
     statsEmbed = Embed()
     statsEmbed.set_author(name="Duel Stats")
 

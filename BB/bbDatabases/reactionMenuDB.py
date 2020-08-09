@@ -1,4 +1,4 @@
-from ..reactionMenus import ReactionMenu, ReactionRolePicker, ReactionInventoryPicker, ReactionDuelChallengeMenu
+from ..reactionMenus import ReactionMenu, ReactionRolePicker, ReactionInventoryPicker, ReactionDuelChallengeMenu, ReactionPollMenu
 
 unsaveableMenuTypes = ["ReactionDuelChallengeMenu"]
 
@@ -25,6 +25,9 @@ async def fromDict(dbDict):
 
             elif dbDict[msgID]["type"] == "ReactionDuelChallengeMenu":
                 continue
+
+            elif dbDict[msgID]["type"] == "ReactionPollMenu":
+                newDB[int(msgID)] = await ReactionPollMenu.fromDict(dbDict[msgID])
 
             else:
                 newDB[int(msgID)] = ReactionMenu.fromDict(dbDict[msgID])

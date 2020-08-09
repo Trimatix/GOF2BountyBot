@@ -29,7 +29,7 @@ from .scheduling import TimedTaskHeap
 from . import bbUtil, bbGlobals
 from .userAlerts import UserAlerts
 from .logging import bbLogger
-from .reactionMenus import ReactionMenu, ReactionInventoryPicker, ReactionRolePicker, ReactionDuelChallengeMenu
+from .reactionMenus import ReactionMenu, ReactionInventoryPicker, ReactionRolePicker, ReactionDuelChallengeMenu, ReactionPollMenu
 
 
 ####### DATABASE METHODS #######
@@ -3112,6 +3112,125 @@ async def cmd_source(message, args, isDM):
 
 bbCommands.register("source", cmd_source)
 dmCommands.register("source", cmd_source)
+
+
+async def cmd_poll(message, args, isDM):
+    pollOptions = {}
+
+    argsSplit = args.split(",")
+    argPos = 0
+    for arg in argsSplit:
+        argPos += 1
+        optionName, dumbReact = arg.strip(" ").split(" ")[0], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[1])
+        if dumbReact is None:
+            await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
+            return
+        elif dumbReact.isID and dumbReact.sendable not in message.guild.emojis:
+            await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+            return
+
+        pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
+
+    if len(pollOptions) == 0:
+        await message.channel.send(":x: No options given!")
+        return
+
+    targetRole = None
+    targetMember = None
+    if "target=" in arg:
+        argIndex = arg.index("target=") + len("target=")
+        try:
+            arg[argIndex:].index(" ")
+        except ValueError:
+            endIndex = len(arg)
+        else:
+            endIndex = arg[argIndex:].index(" ") + argIndex + 1
+
+        targetStr = arg[argIndex:endIndex]
+
+        if bbUtil.isRoleMention(targetStr):
+            targetRole = message.guild.get_role(int(targetStr.lstrip("<@&").rstrip(">")))
+            if targetRole is None:
+                await message.channel.send(":x: Unknown target role!")
+                return
+        
+        elif bbUtil.isMention(targetStr):
+            targetMember = message.guild.get_member(int(targetStr.lstrip("<@!").rstrip(">")))
+            if targetMember is None:
+                await message.channel.send(":x: Unknown target user!")
+                return
+
+        else:
+            await message.channel.send(":x: Invalid target role/user!")
+            return
+    
+    timeoutDict = {}
+
+    for timeName in ["days", "hours", "minutes", "seconds"]:
+        if timeName + "=" in arg:
+            argIndex = arg.index(timeName + "=") + len(timeName + "=")
+            try:
+                arg[argIndex:].index(" ")
+            except ValueError:
+                endIndex = len(arg)
+            else:
+                endIndex = arg[argIndex:].index(" ") + argIndex + 1
+
+            targetStr = arg[argIndex:endIndex]
+
+            if targetStr == "off":
+                timeoutDict[timeName] = -1
+            else:
+                if not bbUtil.isInt(targetStr) or int(targetStr) < 1:
+                    await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
+                    return
+
+                timeoutDict[timeName] = int(targetStr)
+
+
+    multipleChoice = True
+
+    if "multiplechoice=" in arg:
+        argIndex = arg.index("multiplechoice=") + len("multiplechoice=")
+        try:
+            arg[argIndex:].index(" ")
+        except ValueError:
+            endIndex = len(arg)
+        else:
+            endIndex = arg[argIndex:].index(" ") + argIndex + 1
+
+        targetStr = arg[argIndex:endIndex]
+
+        if targetStr in ["off", "no", "false", "single", "one"]:
+            multipleChoice = False
+        elif targetStr not in ["on", "yes", "true", "multiple", "many"]:
+            await message.channel.send("Invalid `multiplechoice` argument! Please use either `multiplechoice=yes` or `multiplechoice=no`")
+            return
+
+
+    timeoutExists = False
+    for timeName in timeoutDict:
+        if timeoutDict[timeName] != -1:
+            timeoutExists = True
+    timeoutExists = timeoutExists or timeoutDict == {}
+
+    if not timeoutExists:
+        await message.channel.send(":x: Poll timeouts cannot be disabled!")
+        return
+    
+    menuMsg = await message.channel.send("‎")
+
+    timeoutDelta = timeDeltaFromDict(bbConfig.pollMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
+    timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionPollMenu.printAndExpirePollResults, expiryFunctionArgs=menuMsg.id)
+    bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
+
+    menu = ReactionPollMenu.ReactionPollMenu(menuMsg, pollOptions, timeoutTT, pollStarter=message.author, multipleChoice=multipleChoice, targetRole=targetRole, targetMember=targetMember)
+    await menu.updateMessage()
+    bbGlobals.reactionMenusDB[menuMsg.id] = menu
+
+bbCommands.register("poll", cmd_poll)
+dmCommands.register("poll", err_nodm)
+
 
 
 ####### ADMINISTRATOR COMMANDS #######

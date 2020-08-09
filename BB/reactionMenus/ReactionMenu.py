@@ -73,6 +73,10 @@ class ReactionMenuOption:
             return await self.removeFunc() if self.removeIsCoroutine else self.removeFunc()
 
 
+    def __hash__(self):
+        return hash(repr(self)) 
+
+
     @abstractmethod
     def toDict(self):
         return {"name":self.name, "emoji": self.emoji.toDict()}
@@ -85,6 +89,15 @@ class NonSaveableReactionMenuOption(ReactionMenuOption):
 
     def toDict(self):
         return super(NonSaveableReactionMenuOption, self).toDict()
+
+        
+class DummyReactionMenuOption(ReactionMenuOption):
+    def __init__(self, name, emoji):
+        super(DummyReactionMenuOption, self).__init__(name, emoji)
+
+
+    def toDict(self):
+        return super(DummyReactionMenuOption, self).toDict()
 
 
 class ReactionMenu:
