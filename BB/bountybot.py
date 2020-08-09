@@ -1002,7 +1002,7 @@ async def cmd_check(message, args, isDM):
     if requestedBBUser.dailyBountyWinsReset < datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0):
         requestedBBUser.bountyWinsToday = 0
     if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
-        message.channel.send(":x: You have reached the maximum number of bounty wins allowed for today! Check back tomorrow.")
+        await message.channel.send(":x: You have reached the maximum number of bounty wins allowed for today! Check back tomorrow.")
         return
 
     # ensure the calling user is not on checking cooldown
