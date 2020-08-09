@@ -3506,6 +3506,7 @@ async def admin_cmd_make_role_menu(message, args, isDM):
     for timeName in timeoutDict:
         if timeoutDict[timeName] != -1:
             timeoutExists = True
+    timeoutExists = timeoutExists or timeoutDict == {}
     
     menuMsg = await message.channel.send("‎")
 
