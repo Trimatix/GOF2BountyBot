@@ -3493,19 +3493,31 @@ async def admin_cmd_make_role_menu(message, args, isDM):
 
             targetStr = arg[argIndex:endIndex]
 
-            if not bbUtil.isInt(targetStr) or int(targetStr) < 1:
-                await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
-                return
+            if targetStr == "off":
+                timeoutDict[timeName] = -1
+            else:
+                if not bbUtil.isInt(targetStr) or int(targetStr) < 1:
+                    await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
+                    return
 
-            timeoutDict[timeName] = int(targetStr)
+                timeoutDict[timeName] = int(targetStr)
+
+    timeoutExists = False
+    for timeName in timeoutDict:
+        if timeoutDict[timeName] != -1:
+            timeoutExists = True
     
-    timeoutDelta = timeDeltaFromDict(bbConfig.roleMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
-
     menuMsg = await message.channel.send("‎")
-    timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionRolePicker.markExpiredMenu, expiryFunctionArgs=menuMsg.id)
-    bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
 
-    menu = ReactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, titleTxt="**Role Menu**", desc="React for your desired role!", footerTxt="This menu will expire in " + bbUtil.td_format_noYM(timeoutDelta) + ".", targetRole=targetRole, targetMember=targetMember, timeout=timeoutTT)
+    if timeoutExists:
+        timeoutDelta = timeDeltaFromDict(bbConfig.roleMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
+        timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionRolePicker.markExpiredMenu, expiryFunctionArgs=menuMsg.id)
+        bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
+    
+    else:
+        timeoutTT = None
+
+    menu = ReactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, titleTxt="**Role Menu**", desc="React for your desired role!", footerTxt=("This menu will expire in " + bbUtil.td_format_noYM(timeoutDelta) + ".") if timeoutExists else "", targetRole=targetRole, targetMember=targetMember, timeout=timeoutTT)
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
