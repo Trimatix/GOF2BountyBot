@@ -4757,7 +4757,7 @@ Currently handles:
 - random !drink
 - command calling
 
-@paran message: The message that triggered this command on sending
+@param message: The message that triggered this command on sending
 """
 
 

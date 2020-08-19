@@ -219,7 +219,7 @@ loggingFolderPath = "saveData/logs"
 # Whether to execute timedtask checks every timedTaskLatenessThresholdSeconds ("fixed"), or to calculate the delay to wait until the next TimedTask is schedule to expire ("dynamic")
 timedTaskCheckingType = "fixed"
 
-# How late a timed task acceptably be
+# How late a timed task may acceptably be in seconds.
 # I.e a scheduled task may expire up to timedTaskLatenessThresholdSeconds seconds after their intended expiration time.
 # replaces the depracated 'delayFactor' variable
 timedTaskLatenessThresholdSeconds = 10
