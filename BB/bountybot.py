@@ -3506,6 +3506,12 @@ bbCommands.register("remove-notify-role",
 
 
 async def admin_cmd_make_role_menu(message, args, isDM):
+    requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
+    if requestedBBGuild.ownedRoleMenus >= bbConfig.maxRoleMenusPerGuild:
+        await message.channel.send(":x: Guilds can have at most " + str(bbConfig.maxRoleMenusPerGuild) + " role menus!")
+        return
+    requestedBBGuild.ownedRoleMenus += 1
+
     botRole = None
     potentialRoles = []
     for currRole in message.guild.me.roles:
@@ -3612,7 +3618,7 @@ async def admin_cmd_make_role_menu(message, args, isDM):
 
     if timeoutExists:
         timeoutDelta = timeDeltaFromDict(bbConfig.roleMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
-        timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionMenu.markExpiredMenu, expiryFunctionArgs=menuMsg.id)
+        timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionRolePicker.markExpiredRoleMenu, expiryFunctionArgs=menuMsg.id)
         bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
     
     else:
