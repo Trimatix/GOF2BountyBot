@@ -65,6 +65,18 @@ class bbGuild:
         return self.playChannel != -1
 
 
+    def removePlayChannel(self):
+        if not self.hasPlayChannel():
+            raise ValueError("Attempted to remove play channel on a bbGuild that has no playChannel")
+        self.playChannel = -1
+
+    
+    def removeAnnounceChannel(self):
+        if not self.hasAnnounceChannel():
+            raise ValueError("Attempted to remove announce channel on a bbGuild that has no announceChannel")
+        self.announceChannel = -1
+
+
 
     def getUserAlertRoleID(self, alertID):
         return self.alertRoles[alertID]
@@ -88,7 +100,7 @@ class bbGuild:
     async def addBountyBoardChannel(self, channel, client, factions):
         if self.hasBountyBoardChannel:
             raise RuntimeError("Attempted to assign a bountyboard channel for guild " + str(self.id) + " but one is already assigned")
-        self.bountyBoardChannel = BountyBoardChannel.BountyBoardChannel(channel.id, {})
+        self.bountyBoardChannel = BountyBoardChannel.BountyBoardChannel(channel.id, {}, -1)
         await self.bountyBoardChannel.init(client, factions)
         self.hasBountyBoardChannel = True
 

@@ -34,7 +34,7 @@ class bbShipUpgrade:
     def __init__(self, name, shipToUpgradeValueMult,
                     armour=0.0, armourMultiplier=1.0, cargo=0, cargoMultiplier=1.0, numSecondaries=0, numSecondariesMultiplier=1.0,
                     handling=0, handlingMultiplier=1.0, maxPrimaries=0, maxPrimariesMultiplier=1.0, maxTurrets=0, maxTurretsMultiplier=1.0,
-                    maxModules=0, maxModulesMultiplier=1.0, vendor="", wiki="", techLevel=-1):
+                    maxModules=0, maxModulesMultiplier=1.0, vendor="", wiki="", techLevel=-1, builtIn=False):
         self.name = name
         self.shipToUpgradeValueMult = shipToUpgradeValueMult
         self.vendor = vendor
@@ -67,6 +67,8 @@ class bbShipUpgrade:
         self.techLevel = techLevel
         self.hasTechLevel = techLevel != -1
 
+        self.builtIn = builtIn
+
 
 
     def __eq__(self, other):
@@ -78,7 +80,58 @@ class bbShipUpgrade:
 
     
     def toDict(self):
-        return {"name": self.name, "builtIn": True}
+        itemDict = {"name": self.name, "builtIn": self.builtIn}
+
+        if not self.builtIn:
+            if self.hasVendor:
+                itemDict["vendor"] = self.vendor
+
+            if self.shipToUpgradeValueMult != 1.0:
+                itemDict["shipToUpgradeValueMult"] = self.shipToUpgradeValueMult
+
+            if self.armour != 0.0:
+                itemDict["armour"] = self.armour
+
+            if self.armourMultiplier != 1.0:
+                itemDict["armourMultiplier"] = self.armourMultiplier
+
+            if self.cargo != 1.0:
+                itemDict["cargo"] = self.cargo
+
+            if self.cargoMultiplier != 1.0:
+                itemDict["cargoMultiplier"] = self.cargoMultiplier
+
+            if self.numSecondaries != 0:
+                itemDict["numSecondaries"] = self.numSecondaries
+
+            if self.numSecondariesMultiplier != 1.0:
+                itemDict["numSecondariesMultiplier"] = self.numSecondariesMultiplier
+
+            if self.handling != 0:
+                itemDict["handling"] = self.handling
+
+            if self.handlingMultiplier != 1.0:
+                itemDict["handlingMultiplier"] = self.handlingMultiplier
+
+            if self.maxPrimaries != 0:
+                itemDict["maxPrimaries"] = self.maxPrimaries
+
+            if self.maxPrimariesMultiplier != 1.0:
+                itemDict["maxPrimariesMultiplier"] = self.maxPrimariesMultiplier
+
+            if self.maxTurrets != 0:
+                itemDict["maxTurrets"] = self.maxTurrets
+
+            if self.maxTurretsMultiplier != 1.0:
+                itemDict["maxTurretsMultiplier"] = self.maxTurretsMultiplier
+
+            if self.maxModules != 0:
+                itemDict["maxModules"] = self.maxModules
+
+            if self.maxModulesMultiplier != 1.0:
+                itemDict["maxModulesMultiplier"] = self.maxModulesMultiplier
+
+        return itemDict
 
     
     def statsStringShort(self):
@@ -140,4 +193,4 @@ def fromDict(upgradeDict):
                                 maxModules=upgradeDict["maxModules"] if "maxModules" in upgradeDict else 0,
                                 maxModulesMultiplier=upgradeDict["maxModulesMultiplier"] if "maxModulesMultiplier" in upgradeDict else 1.0,
                                 vendor=upgradeDict["vendor"] if "vendor" in upgradeDict else "",
-                                wiki=upgradeDict["wiki"] if "wiki" in upgradeDict else "", techLevel=upgradeDict["techLevel"] if "techLevel" in upgradeDict else -1)
+                                builtIn=False)

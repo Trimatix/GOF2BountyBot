@@ -1,4 +1,5 @@
 import math, random, pprint
+from ..bbUtil import dumbEmoji
 
 ##### UTIL #####
 
@@ -167,21 +168,31 @@ def pickRandomItemTL(shopTL):
 
 maxBountiesPerFaction = 5
 
-# can be "fixed" or "random"
-newBountyDelayType = "random"
+# The maximum number of bounties a player is allowed to win each day
+maxDailyBountyWins = 10
 
+# can be "fixed" or "random"
+newBountyDelayType = "random-routeScale"
+
+### fixed delay config
 # only spawn bounties at this time
 newBountyFixedDailyTime = {"hours":18, "minutes":40, "seconds":0}
 # use the above, or just spawn after every newBountyFixedDelta
 newBountyFixedUseDailyTime = False
 
 # time to wait inbetween spawning bounties
-newBountyFixedDelta = {"days":0, "hours":0, "minutes":40, "seconds":0}
+# when using fixed-routeScale generation, use this for bounties of route length 1
+newBountyFixedDelta = {"days":0, "hours":0, "minutes":1, "seconds":0}
 
-# when using random delay generation, use this as the minimum wait time in seconds
-newBountyDelayMin = 1 * 60
-# when using random delay generation, use this as the maximum wait time in seconds
-newBountyDelayMax = 5 * 60
+### random delay config
+# when using random delay generation, use these min and max points
+# when using random-routeScale generation, use these min and max points for bounties of route length 1
+newBountyDelayRandomRange = {"min": 5 * 60, "max": 7 * 60}
+
+### routeScale config
+newBountyDelayRouteScaleCoefficient = 1
+fallbackRouteScale = 5
+
 
 # The number of credits to award for each bPoint (each system in a criminal route)
 bPointsToCreditsRatio = 1000
@@ -259,6 +270,10 @@ savePeriod = {"hours":1}
 userDBPath = "saveData/users.json"
 guildDBPath = "saveData/guilds.json"
 bountyDBPath = "saveData/bounties.json"
+reactionMenusDBPath = "saveData/reactionMenus.json"
+
+# path to folder to save log txts to
+loggingFolderPath = "saveData/logs"
 
 
 
@@ -267,7 +282,7 @@ bountyDBPath = "saveData/bounties.json"
 # Whether to execute timedtask checks every timedTaskLatenessThresholdSeconds ("fixed"), or to calculate the delay to wait until the next TimedTask is schedule to expire ("dynamic")
 timedTaskCheckingType = "fixed"
 
-# How late a timed task acceptably be
+# How late a timed task may acceptably be in seconds.
 # I.e a scheduled task may expire up to timedTaskLatenessThresholdSeconds seconds after their intended expiration time.
 # replaces the depracated 'delayFactor' variable
 timedTaskLatenessThresholdSeconds = 10
@@ -280,14 +295,21 @@ timedTaskLatenessThresholdSeconds = 10
 commandPrefix = "$"
 
 # When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
-dmSentEmoji = "📬"
+dmSentEmoji = dumbEmoji(unicode="📬")
 
 # max number of characters accepted by nameShip
 maxShipNickLength = 30
 
+# max number of characters accepted by nameShip, when called by a developer
+maxDevShipNickLength = 100
+
 # The default emojis to list in a reaction menu
-numberEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+numberEmojis = [dumbEmoji(unicode="0️⃣"), dumbEmoji(unicode="1️⃣"), dumbEmoji(unicode="2️⃣"), dumbEmoji(unicode="3️⃣"), dumbEmoji(unicode="4️⃣"), dumbEmoji(unicode="5️⃣"), dumbEmoji(unicode="6️⃣"), dumbEmoji(unicode="7️⃣"), dumbEmoji(unicode="8️⃣"), dumbEmoji(unicode="9️⃣"), dumbEmoji(unicode="🔟")]
 defaultMenuEmojis = numberEmojis
+defaultCancelEmoji = dumbEmoji(unicode="🇽")
+defaultErrEmoji = dumbEmoji(unicode="❓")
+defaultAcceptEmoji = dumbEmoji(unicode="👍")
+defaultRejectEmoji = dumbEmoji(unicode="👎")
 
 
 
@@ -330,6 +352,16 @@ userAlertsIDsDefaults = {   "bounties_new": False,
                             "system_updates_major": False,
                             "system_updates_minor": False,
                             "system_misc": False}
+
+
+
+##### REACTION MENUS #####
+
+roleMenuDefaultTimeout = {"days": 1}
+duelChallengeMenuDefaultTimeout = {"hours": 2}
+pollMenuDefaultTimeout = {"hours": 2}
+expiredMenuMsg = "😴 This role menu has now expired."
+pollMenuResultsBarLength = 10
 
 
 

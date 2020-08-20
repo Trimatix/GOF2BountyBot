@@ -2,6 +2,7 @@ from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from ..bbConfig import bbConfig
 from . import bbInventory, bbInventoryListing
 from ..userAlerts import UserAlerts
+from datetime import datetime
 
 
 defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
@@ -9,10 +10,15 @@ defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
                         "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}, {"name": "IMT Extract 1.3", "builtIn": True}]}
 
 defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"item": {"name": "Nirai Impulse EX 1", "builtIn": True}, "count": 1}]}
+defaultUserValue = 28970
 
 
 class bbUser:
-    def __init__(self, id, credits=0, lifetimeCredits=0, bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None, inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[], lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0, alerts=bbConfig.userAlertsIDsDefaults):
+    def __init__(self, id, credits=0, lifetimeCredits=0, 
+                    bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None,
+                    inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[],
+                    lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0,
+                    alerts=bbConfig.userAlertsIDsDefaults, bountyWinsToday=0, dailyBountyWinsReset=datetime.utcnow()):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -66,6 +72,9 @@ class bbUser:
         self.duelCreditsWins = duelCreditsWins
         self.duelCreditsLosses = duelCreditsLosses
         self.userAlerts = alerts
+
+        self.bountyWinsToday = bountyWinsToday
+        self.dailyBountyWinsReset = dailyBountyWinsReset
 
     
     def resetUser(self):
@@ -215,7 +224,8 @@ class bbUser:
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "lastSeenGuildId":self.lastSeenGuildId,
-                "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses}
+                "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses,
+                "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp()}
 
 
     def userDump(self):
@@ -282,7 +292,6 @@ class bbUser:
         if duelReq.targetBBUser is self:
             raise ValueError("Attempted to add a DuelRequest for self: " + str(duelReq.sourceBBUser.id))
         self.duelRequests[duelReq.targetBBUser] = duelReq
-        # print("user " + str(self.id) + " stored a new duel request, from " + str(duelReq.sourceBBUser.id) + " to " + str(duelReq.targetBBUser.id))
 
 
     def removeDuelChallengeObj(self, duelReq):
@@ -365,4 +374,4 @@ def fromDict(id, userDict):
                     bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
                     inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
                     duelWins=userDict["duelWins"] if "duelWins" in userDict else 0, duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0, duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0, duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0,
-                    alerts=userAlerts)
+                    alerts=userAlerts, bountyWinsToday=userDict["bountyWinsToday"] if "bountyWinsToday" in userDict else 0, dailyBountyWinsReset=datetime.utcfromtimestamp(userDict["dailyBountyWinsReset"]) if "dailyBountyWinsReset" in userDict else datetime.utcnow())
