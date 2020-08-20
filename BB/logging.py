@@ -12,7 +12,7 @@ class logger:
     def clearLogs(self):
         self.logs = {"usersDB":{}, "guildsDB":{}, "bountiesDB":{},
                         "shop":{}, "escapedBounties": {}, "bountyConfig": {}, "duels": {},
-                        "hangar": {}, "misc": {}, "bountyBoards": {}}
+                        "hangar": {}, "misc": {}, "bountyBoards": {}, "newBounties": {}}
 
 
     def isEmpty(self):
@@ -91,14 +91,19 @@ class logger:
         self.clearLogs()
 
 
-    def log(self, classStr, funcStr, event, category="misc", eventType="MISC_ERR", trace=""):
+    def log(self, classStr, funcStr, event, category="misc", eventType="MISC_ERR", trace="", noPrintEvent=False):
         if category not in self.logs:
             self.log("misc", "Log", "log", "ATTEMPTED TO LOG TO AN UNKNOWN CATEGORY '" + str(category) + "' -> Redirected to misc.", eventType="UNKWN_CTGR")
 
         now = datetime.utcnow()
-        eventStr = now.strftime("(%d/%m/%H:%M)") + "-[" + str(classStr).upper() + "::" + str(funcStr).upper() + "]>" + str(eventType) + ": " + str(event)
-        print(eventStr)
-        self.logs[category][now] = eventStr + ("\n" + trace if trace != "" else "") + "\n\n"
+        if noPrintEvent:
+            eventStr = now.strftime("(%d/%m/%H:%M)") + "-[" + str(classStr).upper() + "::" + str(funcStr).upper() + "]>" + str(eventType)
+            print(eventStr)
+            self.logs[category][now] = eventStr + ": " + str(event) + ("\n" + trace if trace != "" else "") + "\n\n"
+        else:
+            eventStr = now.strftime("(%d/%m/%H:%M)") + "-[" + str(classStr).upper() + "::" + str(funcStr).upper() + "]>" + str(eventType) + ": " + str(event)
+            print(eventStr)
+            self.logs[category][now] = eventStr + ("\n" + trace if trace != "" else "") + "\n\n"
 
 
 bbLogger = logger()

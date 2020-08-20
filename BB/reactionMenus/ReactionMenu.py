@@ -13,10 +13,10 @@ async def deleteReactionMenu(menuID):
 
 async def removeEmbedAndOptions(menuID):
     menu = bbGlobals.reactionMenusDB[menuID]
-    for react in menu.options:
-        await menu.msg.remove_reaction(react.sendable, menu.msg.guild.me)
     await menu.msg.edit(suppress=True)
     del bbGlobals.reactionMenusDB[menu.msg.id]
+    for react in menu.options:
+        await menu.msg.remove_reaction(react.sendable, menu.msg.guild.me)
 
 
 async def markExpiredMenu(menuID):
@@ -182,7 +182,7 @@ class ReactionMenu:
         for reaction in self.options:
             optionsDict[reaction.sendable] = self.options[reaction].toDict()
 
-        data = {"channel": self.msg.channel.id, "msg": self.msg.id, "options": optionsDict, "type": self.__class__.__name__}
+        data = {"channel": self.msg.channel.id, "msg": self.msg.id, "options": optionsDict, "type": self.__class__.__name__, "guild": self.msg.channel.guild.id}
         
         if self.titleTxt != "":
             data["titleTxt"] = self.titleTxt

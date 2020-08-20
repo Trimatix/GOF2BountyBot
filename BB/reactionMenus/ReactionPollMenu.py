@@ -10,19 +10,24 @@ async def printAndExpirePollResults(msgID):
     menu = bbGlobals.reactionMenusDB[msgID]
     menuMsg = await menu.msg.channel.fetch_message(menu.msg.id)
     results = {}
+
     for option in menu.options.values():
         results[option] = []
 
     for reaction in menuMsg.reactions:
-        await reaction.remove(menuMsg.guild.me)
-
         if type(reaction.emoji) in [Emoji, PartialEmoji]:
             currentEmoji = bbUtil.dumbEmoji(id=reaction.emoji.id)
         else:
             currentEmoji = bbUtil.dumbEmoji(unicode=reaction.emoji)
+        
+        menuOption = None
+        for currentOption in results:
+            if currentOption.emoji.sendable == currentEmoji.sendable:
+                menuOption = currentOption
+                break
 
         async for user in reaction.users():
-            if user.id != menuMsg.guild.me.id:
+            if user != bbGlobals.client.user:
                 validVote = True
                 if not menu.multipleChoice:
                     for currentOption in results:
@@ -30,10 +35,7 @@ async def printAndExpirePollResults(msgID):
                             validVote = False
                             break
                 if validVote:
-                    for currentOption in results:
-                        if currentOption.emoji == currentEmoji:
-                            results[currentOption].append(user)
-                            break
+                    results[menuOption].append(user)
     
     pollEmbed = menuMsg.embeds[0]
     pollEmbed.set_footer(text="This poll has ended.")
@@ -54,9 +56,10 @@ async def printAndExpirePollResults(msgID):
             winnersStr += winner.name + ", "
         winnersStr = winnersStr[:-2]
 
-        resultsStr = ""
+        resultsStr = "```\n"
         for currentOption in results:
-            resultsStr += currentOption.name + " | `" + ("=" * int((len(results[currentOption]) / maxCount) * bbConfig.pollMenuResultsBarLength)) + (" " if len(results[currentOption]) == 0 else "")+ "` *+" + str(len(results[currentOption])) + " Vote" + ("s" if len(results[currentOption]) != 1 else "") + "*\n"
+            resultsStr += currentOption.name + " | " + ("=" * int((len(results[currentOption]) / maxCount) * bbConfig.pollMenuResultsBarLength)) + (" " if len(results[currentOption]) == 0 else "")+ " +" + str(len(results[currentOption])) + " Vote" + ("s" if len(results[currentOption]) != 1 else "") + "\n"
+        resultsStr += "```"
 
         pollEmbed.add_field(name="Winner" + ("s" if len(winningOptions) > 1 else "") + ": " + str(maxCount) + " Votes", value=winnersStr, inline=False)
         pollEmbed.add_field(name="Results", value=resultsStr, inline=False)
@@ -67,6 +70,9 @@ async def printAndExpirePollResults(msgID):
     await menuMsg.edit(embed=pollEmbed)
     if msgID in bbGlobals.reactionMenusDB:
         del bbGlobals.reactionMenusDB[msgID]
+
+    for reaction in menuMsg.reactions:
+        await reaction.remove(menuMsg.guild.me)
     
 
     

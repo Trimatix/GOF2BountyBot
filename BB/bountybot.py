@@ -424,11 +424,6 @@ def getNumExtension(num):
     return bbData.numExtensions[int(str(num)[-1])] if not (num > 10 and num < 20) else "th"
 
 
-# TODO: Remove calls of this in place of expiryDelta.
-def getFixedDelay(delayDict):
-    return timeDeltaFromDict(delayDict)
-
-
 # TODO: Replace with getFixedTimeOnDay, adding delayDict to the given day
 def getFixedDailyTime(delayDict):
     return (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(delayDict)) - datetime.utcnow()
@@ -437,6 +432,41 @@ def getFixedDailyTime(delayDict):
 # TODO: Convert to random across two dicts
 def getRandomDelaySeconds(minmaxDict):
     return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))
+
+
+"""
+New bounty delay generator, scaling a fixed delay by the length of the presently spawned bounty.
+
+@param baseDelayDict -- A timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
+@return -- A datetime.timeDelta indicating the time to wait before spawning a new bounty
+"""
+def getRouteScaledBountyDelayFixed(baseDelayDict):
+    timeScale = bbConfig.fallbackRouteScale if bbGlobals.bountiesDB.latestBounty is None else len(bbGlobals.bountiesDB.latestBounty.route)
+    delay = timeDeltaFromDict(baseDelayDict) * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient
+    bbLogger.log("Main", "routeScaleBntyDelayFixed", "New bounty delay generated, " + \
+                                                    ("no latest criminal." if bbGlobals.bountiesDB.latestBounty is None else \
+                                                        ("latest criminal: '" + bbGlobals.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bbGlobals.bountiesDB.latestBounty.route)))) + \
+                                                    "\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bbGlobals.bountiesDB.latestBounty is None else "DELAY_GEN", noPrintEvent=True)
+    return delay
+    
+
+"""
+New bounty delay generator, generating a random delay time between two points, scaled by the length of the presently spawned bounty.
+
+@param baseDelayDict -- A dictionary describing the minimum and maximum time in seconds to wait after a bounty is spawned with route length 1
+@return -- A datetime.timeDelta indicating the time to wait before spawning a new bounty
+"""
+def getRouteScaledBountyDelayRandom(baseDelayDict):
+    timeScale = bbConfig.fallbackRouteScale if bbGlobals.bountiesDB.latestBounty is None else len(bbGlobals.bountiesDB.latestBounty.route)
+    delay = getRandomDelaySeconds({"min": baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient,
+                                    "max": baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient})
+    bbLogger.log("Main", "routeScaleBntyDelayRand", "New bounty delay generated, " + \
+                                                    ("no latest criminal." if bbGlobals.bountiesDB.latestBounty is None else \
+                                                        ("latest criminal: '" + bbGlobals.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bbGlobals.bountiesDB.latestBounty.route)))) + \
+                                                    "\nRange: " + str((baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + "m - " + \
+                                                                    str((baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + \
+                                                    "m\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bbGlobals.bountiesDB.latestBounty is None else "DELAY_GEN", noPrintEvent=True)
+    return delay
 
 
 async def refreshAndAnnounceAllShopStocks():
@@ -993,17 +1023,14 @@ async def cmd_check(message, args, isDM):
         return
 
     # Restrict the number of bounties a player may win in a single day
-    if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
-        if datetime.utcnow() >= requestedBBUser.dailyBountyWinsReset:
-            requestedBBUser.bountyWinsToday = 0
-        else:
-            await message.channel.send(":x: You have reached the maximum number of bounty wins allowed for today! Check back tomorrow.")
-            return
-        
-    # Reset daily bounty wins every day
-    elif requestedBBUser.dailyBountyWinsReset < datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0):
-        requestedBBUser.dailyBountyWinsReset = datetime.utcnow()
+    if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
         requestedBBUser.bountyWinsToday = 0
+        requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
+                            hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours": 24})
+
+    if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
+        await message.channel.send(":x: You have reached the maximum number of bounty wins allowed for today! Check back tomorrow.")
+        return
 
     # ensure the calling user is not on checking cooldown
     if datetime.utcfromtimestamp(requestedBBUser.bountyCooldownEnd) < datetime.utcnow():
@@ -1063,8 +1090,8 @@ async def cmd_check(message, args, isDM):
         # If a bounty was won, print a congratulatory message
         if bountyWon:
             requestedBBUser.bountyWins += 1
-            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.display_name + "**, you now have **" + str(requestedBBUser.credits) + " Credits!**" +
-                                       ("\nYou have now reached the maximum number of bounty wins allowed for today! Please check back tomorrow." if dailyBountiesMaxReached else ""))
+            await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.display_name + "**, you now have **" + str(requestedBBUser.credits) + " Credits!**\n" +
+                                       ("You have now reached the maximum number of bounty wins allowed for today! Please check back tomorrow." if dailyBountiesMaxReached else "You have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"))
 
             if sightedCriminalsStr != "":
                 for currentGuild in bbGlobals.guildsDB.getGuilds():
@@ -1135,7 +1162,17 @@ async def cmd_bounties(message, args, isDM):
         # If no active bounties were found, print an error
         if len(outmessage) == preLen:
             outmessage += "\n[  No currently active bounties! Please check back later.  ]"
-        outmessage += "```\nYou have **" + str(bbConfig.maxDailyBountyWins - bbGlobals.usersDB.getOrAddID(message.author.id).bountyWinsToday) + "** remaining bounty wins today!"
+        # Restrict the number of bounties a player may win in a single day
+        requestedBBUser = usersDB.getOrAddID(message.author.id)
+        if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
+            requestedBBUser.bountyWinsToday = 0
+            requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
+                    hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours": 24})
+        if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
+            maxBountiesMsg = "\nYou have reached the maximum number of bounty wins allowed for today! Check back tomorrow."
+        else:
+            maxBountiesMsg = "\nYou have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"
+        outmessage += "```" + maxBountiesMsg
         await message.channel.send(outmessage)
 
     # if a faction is specified
@@ -1169,7 +1206,19 @@ async def cmd_bounties(message, args, isDM):
                     str(len(bounty.route)) + " possible system"
                 if len(bounty.route) != 1:
                     outmessage += "s"
-            await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!\nYou have **" + str(bbConfig.maxDailyBountyWins - bbGlobals.usersDB.getOrAddID(message.author.id).bountyWinsToday) + "** remaining bounty wins today!")
+            maxBountiesMsg = ""
+            if usersDB.userIDExists(message.author.id):
+                requestedBBUser = usersDB.getUser(message.author.id)
+                # Restrict the number of bounties a player may win in a single day
+                if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
+                    requestedBBUser.bountyWinsToday = 0
+                    requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
+                            hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours": 24})
+                if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
+                    maxBountiesMsg = "\nYou have reached the maximum number of bounty wins allowed for today! Check back tomorrow."
+                else:
+                    maxBountiesMsg = "\nYou have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"
+            await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!" + maxBountiesMsg)
 
 bbCommands.register("bounties", cmd_bounties)
 dmCommands.register("bounties", cmd_bounties)
@@ -2240,17 +2289,17 @@ async def cmd_loadout(message, args, isDM):
                                "\n" + activeShip.statsStringNoItems(), inline=False)
 
         loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
-            activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
+            activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + ("(+)" if activeShip.getMaxPrimaries(shipUpgradesOnly=True) > activeShip.maxPrimaries else "") + "*", inline=False)
         for weaponNum in range(1, len(activeShip.weapons) + 1):
             loadoutEmbed.add_field(name=str(weaponNum) + ". " + (activeShip.weapons[weaponNum - 1].emoji.sendable + " " if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].name, value=activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
 
         loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
-            activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + "*", inline=False)
+            activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + ("(+)" if activeShip.getMaxModules(shipUpgradesOnly=True) > activeShip.maxModules else "") + "*", inline=False)
         for moduleNum in range(1, len(activeShip.modules) + 1):
             loadoutEmbed.add_field(name=str(moduleNum) + ". " + (activeShip.modules[moduleNum - 1].emoji.sendable + " " if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].name, value=activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
 
         loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
-            activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + "*", inline=False)
+            activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + ("(+)" if activeShip.getMaxTurrets(shipUpgradesOnly=True) > activeShip.maxTurrets else "") + "*", inline=False)
         for turretNum in range(1, len(activeShip.turrets) + 1):
             loadoutEmbed.add_field(name=str(turretNum) + ". " + (activeShip.turrets[turretNum - 1].emoji.sendable + " " if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].name, value=activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
 
@@ -2272,19 +2321,19 @@ async def cmd_loadout(message, args, isDM):
 
             if activeShip.getMaxPrimaries() > 0:
                 loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
-                    activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
+                    activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + ("(+)" if activeShip.getMaxPrimaries(shipUpgradesOnly=True) > activeShip.maxPrimaries else "") + "*", inline=False)
                 for weaponNum in range(1, len(activeShip.weapons) + 1):
                     loadoutEmbed.add_field(name=str(weaponNum) + ". " + (activeShip.weapons[weaponNum - 1].emoji.sendable + " " if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].name, value=activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
 
             if activeShip.getMaxModules() > 0:
                 loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
-                    activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + "*", inline=False)
+                    activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + ("(+)" if activeShip.getMaxModules(shipUpgradesOnly=True) > activeShip.maxModules else "") + "*", inline=False)
                 for moduleNum in range(1, len(activeShip.modules) + 1):
                     loadoutEmbed.add_field(name=str(moduleNum) + ". " + (activeShip.modules[moduleNum - 1].emoji.sendable + " " if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].name, value=activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
 
             if activeShip.getMaxTurrets() > 0:
                 loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
-                    activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + "*", inline=False)
+                    activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + ("(+)" if activeShip.getMaxTurrets(shipUpgradesOnly=True) > activeShip.maxTurrets else "") + "*", inline=False)
                 for turretNum in range(1, len(activeShip.turrets) + 1):
                     loadoutEmbed.add_field(name=str(turretNum) + ". " + (activeShip.turrets[turretNum - 1].emoji.sendable + " " if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].name, value=activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
 
@@ -4148,7 +4197,7 @@ async def dev_cmd_broadcast(message, args, isDM):
             msg = args[17:]
 
         try:
-            embedIndex = msg.index("embed=")+len("embed=")
+            embedIndex = msg.index("embed=")
         except ValueError:
             embedIndex = -1
 
@@ -4158,7 +4207,7 @@ async def dev_cmd_broadcast(message, args, isDM):
             msgText = msg
 
         if embedIndex != -1:
-            msg = msg[embedIndex:]
+            msg = msg[embedIndex+len("embed="):]
             titleTxt = ""
             desc = ""
             footerTxt = ""
@@ -4290,7 +4339,7 @@ async def dev_cmd_say(message, args, isDM):
             msg = args[17:]
 
         try:
-            embedIndex = msg.index("embed=")+len("embed=")
+            embedIndex = msg.index("embed=")
         except ValueError:
             embedIndex = -1
 
@@ -4300,7 +4349,7 @@ async def dev_cmd_say(message, args, isDM):
             msgText = msg
 
         if embedIndex != -1:
-            msg = msg[embedIndex:]
+            msg = msg[embedIndex+len("embed="):]
             titleTxt = ""
             desc = ""
             footerTxt = ""
@@ -4964,22 +5013,26 @@ async def on_ready():
     # bot is now logged in
     botLoggedIn = True
 
-    bountyDelayGenerators = {"fixed": getFixedDelay,
-                             "random": getRandomDelaySeconds}
-    bountyDelayGeneratorArgs = {"fixed": bbConfig.newBountyFixedDelta, "random": {
-        "min": bbConfig.newBountyDelayMin, "max": bbConfig.newBountyDelayMax}}
+    bountyDelayGenerators = {"random": getRandomDelaySeconds,
+                             "fixed-routeScale": getRouteScaledBountyDelayFixed,
+                             "random-routeScale": getRouteScaledBountyDelayRandom}
 
-    try:
-        bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
-            bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
-    except KeyError:
-        raise ValueError(
-            "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
+    bountyDelayGeneratorArgs = {"random": bbConfig.newBountyDelayRandomRange,
+                                "fixed-routeScale": bbConfig.newBountyFixedDelta,
+                                "random-routeScale": bbConfig.newBountyDelayRandomRange}
 
-    bbGlobals.shopRefreshTT = TimedTask.DynamicRescheduleTask(
-        getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
-    bbGlobals.dbSaveTT = TimedTask.DynamicRescheduleTask(
-        getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
+    if bbConfig.newBountyDelayType == "fixed":
+        bbGlobals.newBountyTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+    else:
+        try:
+            bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
+                bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+        except KeyError:
+            raise ValueError(
+                "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
+    
+    bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
+    bbGlobals.dbSaveTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.savePeriod), autoReschedule=True, expiryFunction=saveAllDBs)
 
     bbGlobals.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
 
@@ -5031,7 +5084,7 @@ Currently handles:
 - random !drink
 - command calling
 
-@paran message: The message that triggered this command on sending
+@param message: The message that triggered this command on sending
 """
 
 

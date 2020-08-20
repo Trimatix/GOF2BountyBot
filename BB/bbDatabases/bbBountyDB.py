@@ -23,6 +23,8 @@ class bbBountyDB:
         # the maximum length a faction's self.bounties dict can be
         self.maxBountiesPerFaction = maxBountiesPerFaction
 
+        self.latestBounty = None
+
 
     """
     Add a new useable faction name to the DB
@@ -70,6 +72,8 @@ class bbBountyDB:
             # clearBounties for each faction in the DB
             for fac in self.getFactions():
                 self.clearBounties(faction=fac)
+
+        self.latestBounty = None
 
     
     """
@@ -227,6 +231,7 @@ class bbBountyDB:
 
         # Add the bounty to the database
         self.bounties[bounty.faction].append(bounty)
+        self.latestBounty = bounty
 
     
     """
@@ -246,6 +251,8 @@ class bbBountyDB:
     @param bounty -- the bbBounty object to remove from the database
     """
     def removeBountyObj(self, bounty):
+        if bounty is self.latestBounty:
+            self.latestBounty = None
         self.bounties[bounty.faction].remove(bounty)
 
     
