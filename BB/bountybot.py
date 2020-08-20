@@ -3174,9 +3174,15 @@ async def cmd_poll(message, args, isDM):
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
-        elif dumbReact.isID and dumbReact.sendable not in message.guild.emojis:
-            await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
-            return
+        elif dumbReact.isID:
+            localEmoji = False
+            for localEmoji in message.guild.emojis:
+                if localEmoji.id == dumbReact.id:
+                    localEmoji = True
+                    break
+            if not localEmoji:
+                await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+                return
 
         pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
 
@@ -3516,9 +3522,15 @@ async def admin_cmd_make_role_menu(message, args, isDM):
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
-        elif dumbReact.isID and dumbReact.sendable not in message.guild.emojis:
-            await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
-            return
+        elif dumbReact.isID:
+            localEmoji = False
+            for localEmoji in message.guild.emojis:
+                if localEmoji.id == dumbReact.id:
+                    localEmoji = True
+                    break
+            if not localEmoji:
+                await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+                return
 
 
         role = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
