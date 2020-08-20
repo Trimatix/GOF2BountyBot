@@ -30,6 +30,8 @@ class bbBountyDB:
             self.bounties[fac] = []
             self.escapedCriminals[fac] = []
 
+        self.latestBounty = None
+
 
     """
     Add a criminal to the record of escaped criminals.
