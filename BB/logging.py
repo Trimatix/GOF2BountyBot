@@ -91,18 +91,20 @@ class logger:
         self.clearLogs()
 
 
-    def log(self, classStr, funcStr, event, category="misc", eventType="MISC_ERR", trace="", noPrintEvent=False):
+    def log(self, classStr, funcStr, event, category="misc", eventType="MISC_ERR", trace="", noPrintEvent=False, noPrint=False):
         if category not in self.logs:
             self.log("misc", "Log", "log", "ATTEMPTED TO LOG TO AN UNKNOWN CATEGORY '" + str(category) + "' -> Redirected to misc.", eventType="UNKWN_CTGR")
 
         now = datetime.utcnow()
         if noPrintEvent:
             eventStr = now.strftime("(%d/%m/%H:%M)") + "-[" + str(classStr).upper() + "::" + str(funcStr).upper() + "]>" + str(eventType)
-            print(eventStr)
+            if not noPrint:
+                print(eventStr)
             self.logs[category][now] = eventStr + ": " + str(event) + ("\n" + trace if trace != "" else "") + "\n\n"
         else:
             eventStr = now.strftime("(%d/%m/%H:%M)") + "-[" + str(classStr).upper() + "::" + str(funcStr).upper() + "]>" + str(eventType) + ": " + str(event)
-            print(eventStr)
+            if not noPrint:
+                print(eventStr)
             self.logs[category][now] = eventStr + ("\n" + trace if trace != "" else "") + "\n\n"
 
 
