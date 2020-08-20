@@ -1029,8 +1029,11 @@ async def cmd_check(message, args, isDM):
         return
 
     # Restrict the number of bounties a player may win in a single day
-    if requestedBBUser.dailyBountyWinsReset < datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0):
+    if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
         requestedBBUser.bountyWinsToday = 0
+        requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
+                            hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours": 24})
+
     if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
         await message.channel.send(":x: You have reached the maximum number of bounty wins allowed for today! Check back tomorrow.")
         return
@@ -1165,7 +1168,17 @@ async def cmd_bounties(message, args, isDM):
         # If no active bounties were found, print an error
         if len(outmessage) == preLen:
             outmessage += "\n[  No currently active bounties! Please check back later.  ]"
-        outmessage += "```\nYou have **" + str(bbConfig.maxDailyBountyWins - usersDB.getOrAddID(message.author.id).bountyWinsToday) + "** remaining bounty wins today!"
+        # Restrict the number of bounties a player may win in a single day
+        requestedBBUser = usersDB.getOrAddID(message.author.id)
+        if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
+            requestedBBUser.bountyWinsToday = 0
+            requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
+                    hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours": 24})
+        if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
+            maxBountiesMsg = "\nYou have reached the maximum number of bounty wins allowed for today! Check back tomorrow."
+        else:
+            maxBountiesMsg = "\nYou have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"
+        outmessage += "```" + maxBountiesMsg
         await message.channel.send(outmessage)
 
     # if a faction is specified
@@ -1203,8 +1216,10 @@ async def cmd_bounties(message, args, isDM):
             if usersDB.userIDExists(message.author.id):
                 requestedBBUser = usersDB.getUser(message.author.id)
                 # Restrict the number of bounties a player may win in a single day
-                if requestedBBUser.dailyBountyWinsReset < datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0):
+                if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
                     requestedBBUser.bountyWinsToday = 0
+                    requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
+                            hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours": 24})
                 if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
                     maxBountiesMsg = "\nYou have reached the maximum number of bounty wins allowed for today! Check back tomorrow."
                 else:
