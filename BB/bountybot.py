@@ -4040,7 +4040,7 @@ async def dev_cmd_broadcast(message, args, isDM):
             msg = args[17:]
 
         try:
-            embedIndex = msg.index("embed=")+len("embed=")
+            embedIndex = msg.index("embed=")
         except ValueError:
             embedIndex = -1
 
@@ -4050,7 +4050,7 @@ async def dev_cmd_broadcast(message, args, isDM):
             msgText = msg
 
         if embedIndex != -1:
-            msg = msg[embedIndex:]
+            msg = msg[embedIndex+len("embed="):]
             titleTxt = ""
             desc = ""
             footerTxt = ""
@@ -4182,7 +4182,7 @@ async def dev_cmd_say(message, args, isDM):
             msg = args[17:]
 
         try:
-            embedIndex = msg.index("embed=")+len("embed=")
+            embedIndex = msg.index("embed=")
         except ValueError:
             embedIndex = -1
 
@@ -4192,7 +4192,7 @@ async def dev_cmd_say(message, args, isDM):
             msgText = msg
 
         if embedIndex != -1:
-            msg = msg[embedIndex:]
+            msg = msg[embedIndex+len("embed="):]
             titleTxt = ""
             desc = ""
             footerTxt = ""
