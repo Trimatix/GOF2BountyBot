@@ -31,7 +31,6 @@ from .userAlerts import UserAlerts
 from .logging import bbLogger
 from .reactionMenus import ReactionMenu, ReactionInventoryPicker, ReactionRolePicker, ReactionDuelChallengeMenu, ReactionPollMenu
 
-from . import ReactionInventoryPicker
 from .bbObjects import bbInventory
 
 
