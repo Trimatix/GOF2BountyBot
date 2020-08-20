@@ -1,16 +1,18 @@
 import discord
 from discord import Embed, HTTPException, Forbidden, NotFound
-from ....bbConfig import bbData
-from .... import bbUtil, bbConfig
+from ....bbConfig import bbConfig, bbData
 from .... import bbUtil
 from .. import bbCriminal
 from ....logging import bbLogger
 
 def makeBountyEmbed(bounty):
     embed = Embed(title=bounty.criminal.name, colour=bbData.factionColours[bounty.faction] if bounty.faction in bbData.factionColours else bbData.factionColours["neutral"])
-    embed.set_footer(text=bounty.faction.title())
+    embed.set_footer(text=bounty.faction.title(), icon_url=bbData.factionIcons[bounty.faction] if bounty.faction in bbData.factionIcons else "")
     embed.set_thumbnail(url=bounty.criminal.icon)
     embed.add_field(name="**Reward:**", value=bbUtil.commaSplitNum(str(bounty.reward)) + " Credits")
+    embed.add_field(name="**Difficulty:**", value=str(bounty.criminal.techLevel))
+    # embed = bbUtil.fillLoadoutEmbed(bounty.criminal.activeShip, embed, shipEmoji=True)
+    embed.add_field(name="**See the culprit's loadout with:**", value="`" + bbConfig.commandPrefix + "loadout criminal " + bounty.criminal.name + "`")
     routeStr = ""
     for system in bounty.route:
         if bounty.systemChecked(system):
@@ -24,11 +26,7 @@ def makeBountyEmbed(bounty):
             routeStr += system
         routeStr += ", "
     embed.add_field(name="**Route:**", value=routeStr[:-2], inline=False)
-    embed.add_field(name="-", value="> ~~Already checked systems~~\n> **Criminal spotted here recently**") #"‎"
-    # embed.add_field(value="`Stars indicate systems where the criminal has recently been spotted.`", name="`Crossed-through systems have already been checked.`")
-    embed.add_field(name="**Difficulty:**", value=str(bounty.criminal.techLevel))
-    # embed = bbUtil.fillLoadoutEmbed(bounty.criminal.activeShip, embed, shipEmoji=True)
-    embed.add_field(name="**See the culprit's loadout with:**", value="`" + bbConfig.commandPrefix + "loadout criminal " + bounty.criminal.name + "`")
+    embed.add_field(name="-", value="> ~~Already checked systems~~\n> **Criminal spotted here recently**")
     return embed
 
 noBountiesEmbed = Embed(description='> Please check back later, or use the `$notify bounties` command to be notified when they spawn!', colour=discord.Colour.dark_orange())
