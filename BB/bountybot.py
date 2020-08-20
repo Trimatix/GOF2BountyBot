@@ -411,11 +411,6 @@ def getNumExtension(num):
     return bbData.numExtensions[int(str(num)[-1])] if not (num > 10 and num < 20) else "th"
 
 
-# TODO: Remove calls of this in place of expiryDelta.
-def getFixedDelay(delayDict):
-    return timeDeltaFromDict(delayDict)
-
-
 # TODO: Replace with getFixedTimeOnDay, adding delayDict to the given day
 def getFixedDailyTime(delayDict):
     return (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(delayDict)) - datetime.utcnow()
@@ -424,6 +419,41 @@ def getFixedDailyTime(delayDict):
 # TODO: Convert to random across two dicts
 def getRandomDelaySeconds(minmaxDict):
     return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))
+
+
+"""
+New bounty delay generator, scaling a fixed delay by the length of the presently spawned bounty.
+
+@param baseDelayDict -- A timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
+@return -- A datetime.timeDelta indicating the time to wait before spawning a new bounty
+"""
+def getRouteScaledBountyDelayFixed(baseDelayDict):
+    timeScale = bbConfig.fallbackRouteScale if bountiesDB.latestBounty is None else len(bountiesDB.latestBounty.route)
+    delay = timeDeltaFromDict(baseDelayDict) * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient
+    bbLogger.log("Main", "routeScaleBntyDelayFixed", "New bounty delay generated, " + \
+                                                    ("no latest criminal." if bountiesDB.latestBounty is None else \
+                                                        ("latest criminal: '" + bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bountiesDB.latestBounty.route)))) + \
+                                                    "\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bountiesDB.latestBounty is None else "DELAY_GEN", noPrintEvent=True)
+    return delay
+    
+
+"""
+New bounty delay generator, generating a random delay time between two points, scaled by the length of the presently spawned bounty.
+
+@param baseDelayDict -- A dictionary describing the minimum and maximum time in seconds to wait after a bounty is spawned with route length 1
+@return -- A datetime.timeDelta indicating the time to wait before spawning a new bounty
+"""
+def getRouteScaledBountyDelayRandom(baseDelayDict):
+    timeScale = bbConfig.fallbackRouteScale if bountiesDB.latestBounty is None else len(bountiesDB.latestBounty.route)
+    delay = getRandomDelaySeconds({"min": baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient,
+                                    "max": baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient})
+    bbLogger.log("Main", "routeScaleBntyDelayRand", "New bounty delay generated, " + \
+                                                    ("no latest criminal." if bountiesDB.latestBounty is None else \
+                                                        ("latest criminal: '" + bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bountiesDB.latestBounty.route)))) + \
+                                                    "\nRange: " + str((baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + "m - " + \
+                                                                    str((baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + \
+                                                    "m\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bountiesDB.latestBounty is None else "DELAY_GEN", noPrintEvent=True)
+    return delay
 
 
 async def refreshAndAnnounceAllShopStocks():
@@ -4705,22 +4735,26 @@ async def on_ready():
     # bot is now logged in
     botLoggedIn = True
 
-    bountyDelayGenerators = {"fixed": getFixedDelay,
-                             "random": getRandomDelaySeconds}
-    bountyDelayGeneratorArgs = {"fixed": bbConfig.newBountyFixedDelta, "random": {
-        "min": bbConfig.newBountyDelayMin, "max": bbConfig.newBountyDelayMax}}
+    bountyDelayGenerators = {"random": getRandomDelaySeconds,
+                             "fixed-routeScale": getRouteScaledBountyDelayFixed,
+                             "random-routeScale": getRouteScaledBountyDelayRandom}
 
-    try:
-        ActiveTimedTasks.newBountyTT = TimedTask.DynamicRescheduleTask(
-            bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
-    except KeyError:
-        raise ValueError(
-            "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
+    bountyDelayGeneratorArgs = {"random": bbConfig.newBountyDelayRandomRange,
+                                "fixed-routeScale": bbConfig.newBountyFixedDelta,
+                                "random-routeScale": bbConfig.newBountyDelayRandomRange}
 
-    ActiveTimedTasks.shopRefreshTT = TimedTask.DynamicRescheduleTask(
-        getFixedDelay, delayTimeGeneratorArgs=bbConfig.shopRefreshStockPeriod, autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
-    ActiveTimedTasks.dbSaveTT = TimedTask.DynamicRescheduleTask(
-        getFixedDelay, delayTimeGeneratorArgs=bbConfig.savePeriod, autoReschedule=True, expiryFunction=saveAllDBs)
+    if bbConfig.newBountyDelayType == "fixed":
+        ActiveTimedTasks.newBountyTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+    else:
+        try:
+            ActiveTimedTasks.newBountyTT = TimedTask.DynamicRescheduleTask(
+                bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+        except KeyError:
+            raise ValueError(
+                "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
+    
+    ActiveTimedTasks.shopRefreshTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
+    ActiveTimedTasks.dbSaveTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.savePeriod), autoReschedule=True, expiryFunction=saveAllDBs)
 
     ActiveTimedTasks.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
 
@@ -4757,7 +4791,7 @@ Currently handles:
 - random !drink
 - command calling
 
-@paran message: The message that triggered this command on sending
+@param message: The message that triggered this command on sending
 """
 
 

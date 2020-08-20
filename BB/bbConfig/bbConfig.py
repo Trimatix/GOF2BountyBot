@@ -170,20 +170,27 @@ maxBountiesPerFaction = 5
 maxDailyBountyWins = 10
 
 # can be "fixed" or "random"
-newBountyDelayType = "random"
+newBountyDelayType = "random-routeScale"
 
+### fixed delay config
 # only spawn bounties at this time
 newBountyFixedDailyTime = {"hours":18, "minutes":40, "seconds":0}
 # use the above, or just spawn after every newBountyFixedDelta
 newBountyFixedUseDailyTime = False
 
 # time to wait inbetween spawning bounties
-newBountyFixedDelta = {"days":0, "hours":0, "minutes":40, "seconds":0}
+# when using fixed-routeScale generation, use this for bounties of route length 1
+newBountyFixedDelta = {"days":0, "hours":0, "minutes":1, "seconds":0}
 
-# when using random delay generation, use this as the minimum wait time in seconds
-newBountyDelayMin = 15 * 60
-# when using random delay generation, use this as the maximum wait time in seconds
-newBountyDelayMax = 1 * 60 * 60
+### random delay config
+# when using random delay generation, use these min and max points
+# when using random-routeScale generation, use these min and max points for bounties of route length 1
+newBountyDelayRandomRange = {"min": 5 * 60, "max": 7 * 60}
+
+### routeScale config
+newBountyDelayRouteScaleCoefficient = 1
+fallbackRouteScale = 5
+
 
 # The number of credits to award for each bPoint (each system in a criminal route)
 bPointsToCreditsRatio = 1000
@@ -219,7 +226,7 @@ loggingFolderPath = "saveData/logs"
 # Whether to execute timedtask checks every timedTaskLatenessThresholdSeconds ("fixed"), or to calculate the delay to wait until the next TimedTask is schedule to expire ("dynamic")
 timedTaskCheckingType = "fixed"
 
-# How late a timed task acceptably be
+# How late a timed task may acceptably be in seconds.
 # I.e a scheduled task may expire up to timedTaskLatenessThresholdSeconds seconds after their intended expiration time.
 # replaces the depracated 'delayFactor' variable
 timedTaskLatenessThresholdSeconds = 10
