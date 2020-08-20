@@ -1,8 +1,9 @@
-import operator, pprint
+"""import operator, pprint
 
 from . import bbData, bbConfig
 from ..bbObjects.bounties import bbCriminal, bbSystem
 from ..bbObjects.items import bbShip, bbModuleFactory, bbWeapon, bbShipUpgrade, bbTurret
+from .. import bbUtil
 
 
 
@@ -104,3 +105,4 @@ for module in bbData.builtInModuleObjs.values():
 
 for turret in bbData.builtInTurretObjs.values():
     turret.shopSpawnRate = bbConfig.truncToRes((bbConfig.itemTLSpawnChanceForShopTL[turret.techLevel - 1][turret.techLevel - 1] / len(bbData.turretObjsByTL[turret.techLevel - 1])) * 100)
+"""
