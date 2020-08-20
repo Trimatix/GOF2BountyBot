@@ -80,7 +80,8 @@ class bbShipUpgrade:
 
     
     def toDict(self):
-        itemDict = super(bbShipUpgrade, self).toDict()
+        itemDict = {"name": self.name, "builtIn": True}
+
         if not self.builtIn:
             if self.hasVendor:
                 itemDict["vendor"] = self.vendor
@@ -192,5 +193,4 @@ def fromDict(upgradeDict):
                                 maxModules=upgradeDict["maxModules"] if "maxModules" in upgradeDict else 0,
                                 maxModulesMultiplier=upgradeDict["maxModulesMultiplier"] if "maxModulesMultiplier" in upgradeDict else 1.0,
                                 vendor=upgradeDict["vendor"] if "vendor" in upgradeDict else "",
-                                wiki=upgradeDict["wiki"] if "wiki" in upgradeDict else "", techLevel=upgradeDict["techLevel"] if "techLevel" in upgradeDict else -1,
                                 builtIn=False)
