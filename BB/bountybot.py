@@ -5067,11 +5067,11 @@ async def on_ready():
 
     # Use the behaviour and delay period defined in bbConfig.
     if bbConfig.newBountyDelayType == "fixed":
-        bbGlobals.newBountyTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+        bbGlobals.newBountyTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
     else:
         try:
             bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
-                bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+                bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
         except KeyError:
             raise ValueError(
                 "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
