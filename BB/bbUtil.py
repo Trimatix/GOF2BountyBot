@@ -275,8 +275,6 @@ def dumbEmojiFromDict(emojiDict):
 
 
 def isUnicodeEmoji(c):
-    if len(c) != 1:
-        return False
     return c in UNICODE_EMOJI
 
 
