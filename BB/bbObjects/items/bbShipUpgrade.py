@@ -80,7 +80,7 @@ class bbShipUpgrade:
 
     
     def toDict(self):
-        itemDict = {"name": self.name, "builtIn": True}
+        itemDict = {"name": self.name, "builtIn": self.builtIn}
 
         if not self.builtIn:
             if self.hasVendor:

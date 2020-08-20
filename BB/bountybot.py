@@ -2295,17 +2295,17 @@ async def cmd_loadout(message, args, isDM):
                                "\n" + activeShip.statsStringNoItems(), inline=False)
 
         loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
-            activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
+            activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + ("(+)" if activeShip.getMaxPrimaries(shipUpgradesOnly=True) > activeShip.maxPrimaries else "") + "*", inline=False)
         for weaponNum in range(1, len(activeShip.weapons) + 1):
             loadoutEmbed.add_field(name=str(weaponNum) + ". " + (activeShip.weapons[weaponNum - 1] + " " if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].name, value=activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
 
         loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
-            activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + "*", inline=False)
+            activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + ("(+)" if activeShip.getMaxModules(shipUpgradesOnly=True) > activeShip.maxModules else "") + "*", inline=False)
         for moduleNum in range(1, len(activeShip.modules) + 1):
             loadoutEmbed.add_field(name=str(moduleNum) + ". " + (activeShip.modules[moduleNum - 1].emoji + " " if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].name, value=activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
 
         loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
-            activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + "*", inline=False)
+            activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + ("(+)" if activeShip.getMaxTurrets(shipUpgradesOnly=True) > activeShip.maxTurrets else "") + "*", inline=False)
         for turretNum in range(1, len(activeShip.turrets) + 1):
             loadoutEmbed.add_field(name=str(turretNum) + ". " + (activeShip.turrets[turretNum - 1].emoji + " " if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].name, value=activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
 
@@ -2327,19 +2327,19 @@ async def cmd_loadout(message, args, isDM):
 
             if activeShip.getMaxPrimaries() > 0:
                 loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
-                    activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + "*", inline=False)
+                    activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + ("(+)" if activeShip.getMaxPrimaries(shipUpgradesOnly=True) > activeShip.maxPrimaries else "") + "*", inline=False)
                 for weaponNum in range(1, len(activeShip.weapons) + 1):
                     loadoutEmbed.add_field(name=str(weaponNum) + ". " + (activeShip.weapons[weaponNum - 1].emoji + " " if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].name, value=activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
 
             if activeShip.getMaxModules() > 0:
                 loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
-                    activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + "*", inline=False)
+                    activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + ("(+)" if activeShip.getMaxModules(shipUpgradesOnly=True) > activeShip.maxModules else "") + "*", inline=False)
                 for moduleNum in range(1, len(activeShip.modules) + 1):
                     loadoutEmbed.add_field(name=str(moduleNum) + ". " + (activeShip.modules[moduleNum - 1].emoji + " " if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].name, value=activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
 
             if activeShip.getMaxTurrets() > 0:
                 loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
-                    activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + "*", inline=False)
+                    activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + ("(+)" if activeShip.getMaxTurrets(shipUpgradesOnly=True) > activeShip.maxTurrets else "") + "*", inline=False)
                 for turretNum in range(1, len(activeShip.turrets) + 1):
                     loadoutEmbed.add_field(name=str(turretNum) + ". " + (activeShip.turrets[turretNum - 1].emoji + " " if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].name, value=activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
 
