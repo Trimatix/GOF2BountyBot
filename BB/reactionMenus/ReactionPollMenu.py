@@ -11,6 +11,9 @@ async def printAndExpirePollResults(msgID):
     menuMsg = await menu.msg.channel.fetch_message(menu.msg.id)
     results = {}
 
+    if menu.owningBBUser is not None:
+        menu.owningBBUser.pollOwned = False
+
     maxOptionLen = 0
     for option in menu.options.values():
         results[option] = []
@@ -71,8 +74,9 @@ async def printAndExpirePollResults(msgID):
                 
 
 class ReactionPollMenu(ReactionMenu.ReactionMenu):
-    def __init__(self, msg, pollOptions, timeout, pollStarter=None, multipleChoice=False, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="Poll", targetMember=None, targetRole=None):
+    def __init__(self, msg, pollOptions, timeout, pollStarter=None, multipleChoice=False, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="Poll", targetMember=None, targetRole=None, owningBBUser=None):
         self.multipleChoice = multipleChoice
+        self.owningBBUser = owningBBUser
 
         if pollStarter is not None and desc == "":
             desc = "__" + str(pollStarter) + " started a poll!__"
@@ -94,6 +98,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
     def toDict(self):
         baseDict = super(ReactionPollMenu, self).toDict()
         baseDict["multipleChoice"] = self.multipleChoice
+        baseDict["owningBBUser"] = self.owningBBUser.id
         return baseDict
 
     
@@ -123,4 +128,5 @@ async def fromDict(rmDict):
                                 icon=rmDict["icon"] if "icon" in rmDict else "",
                                 authorName=rmDict["authorName"] if "authorName" in rmDict else "",
                                 targetMember=dcGuild.get_member(rmDict["targetMember"]) if "targetMember" in rmDict else None,
-                                targetRole=dcGuild.get_role(rmDict["targetRole"]) if "targetRole" in rmDict else None)
+                                targetRole=dcGuild.get_role(rmDict["targetRole"]) if "targetRole" in rmDict else None,
+                                owningBBUser=bbGlobals.usersDB.getUser(rmDict["owningBBUser"]) if "owningBBUser" in rmDict and bbGlobals.usersDB.userIDExists(rmDict["owningBBUser"]) else None)

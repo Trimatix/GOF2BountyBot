@@ -3164,6 +3164,11 @@ dmCommands.register("source", cmd_source)
 
 
 async def cmd_poll(message, args, isDM):
+    if bbGlobals.usersDB.getOrAddID(message.author.id).pollOwned:
+        await message.channel.send(":x: You can only make one poll at a time!")
+        return
+    bbGlobals.usersDB.getUser(message.author.id).pollOwned = True
+
     pollOptions = {}
 
     argsSplit = args.split(",")
@@ -3279,7 +3284,7 @@ async def cmd_poll(message, args, isDM):
     timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionPollMenu.printAndExpirePollResults, expiryFunctionArgs=menuMsg.id)
     bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
 
-    menu = ReactionPollMenu.ReactionPollMenu(menuMsg, pollOptions, timeoutTT, pollStarter=message.author, multipleChoice=multipleChoice, targetRole=targetRole, targetMember=targetMember)
+    menu = ReactionPollMenu.ReactionPollMenu(menuMsg, pollOptions, timeoutTT, pollStarter=message.author, multipleChoice=multipleChoice, targetRole=targetRole, targetMember=targetMember, owningBBUser=bbGlobals.usersDB.getUser(message.author.id))
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
