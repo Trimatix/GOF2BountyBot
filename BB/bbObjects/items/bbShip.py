@@ -462,7 +462,7 @@ def fromDict(shipDict):
             turrets.append(bbTurret.fromDict(turret))
 
     shipUpgrades = []
-    if "shipUpgrade" in shipDict:
+    if "shipUpgrades" in shipDict:
         for shipUpgrade in shipDict["shipUpgrades"]:
             shipUpgrades.append(bbShipUpgrade.fromDict(shipUpgrade))
     
