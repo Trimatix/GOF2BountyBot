@@ -2,6 +2,7 @@ from .bbConfig import bbConfig
 import os.path
 from os import path
 from datetime import datetime
+import traceback
 
 class logger:
     def __init__(self):
@@ -11,7 +12,7 @@ class logger:
     def clearLogs(self):
         self.logs = {"usersDB":{}, "guildsDB":{}, "bountiesDB":{},
                         "shop":{}, "escapedBounties": {}, "bountyConfig": {}, "duels": {},
-                        "hangar": {}, "misc": {}, "bountyBoards": {}}
+                        "hangar": {}, "misc": {}, "bountyBoards": {}, "newBounties": {}}
 
 
     def isEmpty(self):
@@ -64,11 +65,11 @@ class logger:
                             f.close()
                             logsSaved += "[+]"
                         except IOError as e:
-                            print(nowStr + "-[LOG::SAVE]>F_NEW_IOERR: ERROR CREATING LOG FILE: " + currentFName + ":" + e.__class__.__name__, trace=traceback.format_exc())
+                            print(nowStr + "-[LOG::SAVE]>F_NEW_IOERR: ERROR CREATING LOG FILE: " + currentFName + ":" + e.__class__.__name__ + "\n" + traceback.format_exc())
                     try:
                         files[category] = open(currentFName, 'ab')
                     except IOError as e:
-                        print(nowStr + "-[LOG::SAVE]>F_OPN_IOERR: ERROR OPENING LOG FILE: " + currentFName + ":" + e.__class__.__name__, trace=traceback.format_exc())
+                        print(nowStr + "-[LOG::SAVE]>F_OPN_IOERR: ERROR OPENING LOG FILE: " + currentFName + ":" + e.__class__.__name__ + "\n" + traceback.format_exc())
                         files[category] = None
 
         while not self.isEmpty():
@@ -78,7 +79,7 @@ class logger:
                     # log strings first encoded to bytes (utf-8) to allow for unicode chars
                     files[category].write(log.encode())
                 except IOError as e:
-                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + currentFName + ":" + e.__class__.__name__, trace=traceback.format_exc())
+                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + currentFName + ":" + e.__class__.__name__ + "\n" + traceback.format_exc())
                 except UnicodeEncodeError as e:
                     print(e.start)
         
@@ -90,14 +91,21 @@ class logger:
         self.clearLogs()
 
 
-    def log(self, classStr, funcStr, event, category="misc", eventType="MISC_ERR", trace=""):
+    def log(self, classStr, funcStr, event, category="misc", eventType="MISC_ERR", trace="", noPrintEvent=False, noPrint=False):
         if category not in self.logs:
             self.log("misc", "Log", "log", "ATTEMPTED TO LOG TO AN UNKNOWN CATEGORY '" + str(category) + "' -> Redirected to misc.", eventType="UNKWN_CTGR")
 
         now = datetime.utcnow()
-        eventStr = now.strftime("(%d/%m/%H:%M)") + "-[" + str(classStr).upper() + "::" + str(funcStr).upper() + "]>" + str(eventType) + ": " + str(event)
-        print(eventStr)
-        self.logs[category][now] = eventStr + ("\n" + trace if trace != "" else "") + "\n\n"
+        if noPrintEvent:
+            eventStr = now.strftime("(%d/%m/%H:%M)") + "-[" + str(classStr).upper() + "::" + str(funcStr).upper() + "]>" + str(eventType)
+            if not noPrint:
+                print(eventStr)
+            self.logs[category][now] = eventStr + ": " + str(event) + ("\n" + trace if trace != "" else "") + "\n\n"
+        else:
+            eventStr = now.strftime("(%d/%m/%H:%M)") + "-[" + str(classStr).upper() + "::" + str(funcStr).upper() + "]>" + str(eventType) + ": " + str(event)
+            if not noPrint:
+                print(eventStr)
+            self.logs[category][now] = eventStr + ("\n" + trace if trace != "" else "") + "\n\n"
 
 
 bbLogger = logger()

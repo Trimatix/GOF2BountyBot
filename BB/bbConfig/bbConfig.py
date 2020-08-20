@@ -1,4 +1,5 @@
 import math, random, pprint
+from ..bbUtil import dumbEmoji
 
 ##### UTIL #####
 
@@ -55,7 +56,7 @@ duelCloakChance = 20
 ##### SHOPS #####
 
 # Amount of time to wait between refreshing stock of all shops
-shopRefreshStockPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
+shopRefreshStockPeriod = {"days":0, "hours":0, "minutes":15, "seconds":0}
 
 # The number of ranks to use when randomly picking shop stock
 numShipRanks = 10
@@ -196,20 +197,27 @@ maxBountiesPerFaction = 5
 maxDailyBountyWins = 10
 
 # can be "fixed" or "random"
-newBountyDelayType = "random"
+newBountyDelayType = "random-routeScale"
 
+### fixed delay config
 # only spawn bounties at this time
 newBountyFixedDailyTime = {"hours":18, "minutes":40, "seconds":0}
 # use the above, or just spawn after every newBountyFixedDelta
 newBountyFixedUseDailyTime = False
 
 # time to wait inbetween spawning bounties
-newBountyFixedDelta = {"days":0, "hours":0, "minutes":40, "seconds":0}
+# when using fixed-routeScale generation, use this for bounties of route length 1
+newBountyFixedDelta = {"days":0, "hours":0, "minutes":1, "seconds":0}
 
-# when using random delay generation, use this as the minimum wait time in seconds
-newBountyDelayMin = 1 * 60
-# when using random delay generation, use this as the maximum wait time in seconds
-newBountyDelayMax = 5 * 60
+### random delay config
+# when using random delay generation, use these min and max points
+# when using random-routeScale generation, use these min and max points for bounties of route length 1
+newBountyDelayRandomRange = {"min": 5 * 60, "max": 7 * 60}
+
+### routeScale config
+newBountyDelayRouteScaleCoefficient = 1
+fallbackRouteScale = 5
+
 
 # The number of credits to award for each bPoint (each system in a criminal route)
 bPointsToCreditsRatio = 1000
@@ -228,24 +236,24 @@ criminalEquipTurretChance = 30
 
 # The maximum total-value a player may have before being disallowed from hunting a tech-level of bounty. 0th index = tech level 1
 # I.e, to hunt level 1 bounties, a player must be worth no more than bountyTLMaxPlayerValues[0] credits.
-bountyTLMaxPlayerValues = [75000, 100000, 200000, 450000, 600000, 800000, 1000000, 2000000, 3000000, 999999999]
+bountyTLMaxPlayerValues = [50000, 75000, 100000, 200000, 450000, 600000, 800000, 1000000, 2000000, 3000000, 999999999]
 
 # The probability of a shop spawning with a given tech level. Tech level = index + 1
-cumulativeCriminalTLChance = [0 for tl in range(minTechLevel, maxTechLevel + 1)]
-criminalTLChance = [0 for tl in range(minTechLevel, maxTechLevel + 1)]
+cumulativeCriminalTLChance = [0 for tl in range(minTechLevel-1, maxTechLevel + 1)]
+criminalTLChance = [0 for tl in range(minTechLevel-1, maxTechLevel + 1)]
 
 itemChanceSum = 0
 
 
 
 # Calculate spawn chance for each criminal TL
-for criminalTL in range(minTechLevel, maxTechLevel + 1):
+for criminalTL in range(minTechLevel-1, maxTechLevel + 1):
     itemChance = truncToRes(1 - math.exp((criminalTL - 10.5) / 5))
     cumulativeCriminalTLChance[criminalTL - 1] = itemChance
     itemChanceSum += itemChance
 
 # Scale criminal TL probabilities so that they add up to 1
-for criminalTL in range(minTechLevel, maxTechLevel + 1):
+for criminalTL in range(minTechLevel-1, maxTechLevel + 1):
     currentChance = cumulativeCriminalTLChance[criminalTL - 1]
     if currentChance != 0:
         cumulativeCriminalTLChance[criminalTL - 1] = truncToRes(currentChance / itemChanceSum)
@@ -256,7 +264,7 @@ for i in range(len(cumulativeCriminalTLChance)):
 
 # Sum probabilities to give cumulative scale
 currentSum = 0
-for criminalTL in range(minTechLevel, maxTechLevel + 1):
+for criminalTL in range(minTechLevel-1, maxTechLevel + 1):
     currentChance = cumulativeCriminalTLChance[criminalTL - 1]
     if currentChance != 0:
         cumulativeCriminalTLChance[criminalTL - 1] = truncToRes(currentSum + currentChance)
@@ -266,11 +274,15 @@ def pickRandomCriminalTL():
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
     for criminalTL in range(len(cumulativeCriminalTLChance)):
         if cumulativeCriminalTLChance[criminalTL] >= tlChance:
-            return criminalTL + 1
+            return criminalTL
     return maxTechLevel
     
 # Text to send to a BountyBoardChannel when no bounties are currently active
 bbcNoBountiesMsg = "```css\n[ NO ACTIVE BOUNTIES ]\n\nThere are currently no active bounty listings.\nPlease check back later, or use [ $notify bounties ] to be pinged when new ones become available!\n```"
+
+level0CrimLoadout = {"name": "Betty", "builtIn":True,
+                    "weapons":[{"name": "Nirai Impulse EX 1", "builtIn": True}],
+                    "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "ZMI Optistore", "builtIn": True}, {"name": "IMT Extract 2.7", "builtIn": True}]}
 
 
 
@@ -283,6 +295,7 @@ savePeriod = {"hours":1}
 userDBPath = "saveData/users.json"
 guildDBPath = "saveData/guilds.json"
 bountyDBPath = "saveData/bounties.json"
+reactionMenusDBPath = "saveData/reactionMenus.json"
 
 # path to folder to save log txts to
 loggingFolderPath = "saveData/logs"
@@ -294,7 +307,7 @@ loggingFolderPath = "saveData/logs"
 # Whether to execute timedtask checks every timedTaskLatenessThresholdSeconds ("fixed"), or to calculate the delay to wait until the next TimedTask is schedule to expire ("dynamic")
 timedTaskCheckingType = "fixed"
 
-# How late a timed task acceptably be
+# How late a timed task may acceptably be in seconds.
 # I.e a scheduled task may expire up to timedTaskLatenessThresholdSeconds seconds after their intended expiration time.
 # replaces the depracated 'delayFactor' variable
 timedTaskLatenessThresholdSeconds = 10
@@ -307,7 +320,7 @@ timedTaskLatenessThresholdSeconds = 10
 commandPrefix = "$"
 
 # When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
-dmSentEmoji = "📬"
+dmSentEmoji = dumbEmoji(unicode="📬")
 
 # max number of characters accepted by nameShip
 maxShipNickLength = 30
@@ -316,8 +329,12 @@ maxShipNickLength = 30
 maxDevShipNickLength = 100
 
 # The default emojis to list in a reaction menu
-numberEmojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+numberEmojis = [dumbEmoji(unicode="0️⃣"), dumbEmoji(unicode="1️⃣"), dumbEmoji(unicode="2️⃣"), dumbEmoji(unicode="3️⃣"), dumbEmoji(unicode="4️⃣"), dumbEmoji(unicode="5️⃣"), dumbEmoji(unicode="6️⃣"), dumbEmoji(unicode="7️⃣"), dumbEmoji(unicode="8️⃣"), dumbEmoji(unicode="9️⃣"), dumbEmoji(unicode="🔟")]
 defaultMenuEmojis = numberEmojis
+defaultCancelEmoji = dumbEmoji(unicode="🇽")
+defaultErrEmoji = dumbEmoji(unicode="❓")
+defaultAcceptEmoji = dumbEmoji(unicode="👍")
+defaultRejectEmoji = dumbEmoji(unicode="👎")
 
 
 
@@ -360,6 +377,17 @@ userAlertsIDsDefaults = {   "bounties_new": False,
                             "system_updates_major": False,
                             "system_updates_minor": False,
                             "system_misc": False}
+
+
+
+##### REACTION MENUS #####
+
+roleMenuDefaultTimeout = {"days": 1}
+duelChallengeMenuDefaultTimeout = {"hours": 2}
+pollMenuDefaultTimeout = {"hours": 2}
+expiredMenuMsg = "😴 This role menu has now expired."
+pollMenuResultsBarLength = 10
+maxRoleMenusPerGuild = 10
 
 
 

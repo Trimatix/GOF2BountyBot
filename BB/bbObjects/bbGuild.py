@@ -3,7 +3,7 @@ from .bounties.bountyBoards import BountyBoardChannel
 from ..userAlerts import UserAlerts
 
 class bbGuild:
-    def __init__(self, id, announceChannel=-1, playChannel=-1, shop=None, bountyBoardChannel=None, alertRoles={}):
+    def __init__(self, id, announceChannel=-1, playChannel=-1, shop=None, bountyBoardChannel=None, alertRoles={}, ownedRoleMenus=0):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -35,6 +35,7 @@ class bbGuild:
         
         self.bountyBoardChannel = bountyBoardChannel
         self.hasBountyBoardChannel = bountyBoardChannel is not None
+        self.ownedRoleMenus = ownedRoleMenus
 
 
     def getAnnounceChannelId(self):
@@ -116,7 +117,8 @@ class bbGuild:
         return {"announceChannel":self.announceChannel, "playChannel":self.playChannel, 
                 "bountyBoardChannel": self.bountyBoardChannel.toDict() if self.hasBountyBoardChannel else None,
                 "alertRoles": self.alertRoles,
-                "shop": self.shop.toDict()
+                "shop": self.shop.toDict(),
+                "ownedRoleMenus": self.ownedRoleMenus
                 }
 
 
@@ -139,4 +141,4 @@ def fromDict(id, guildDict):
     return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
                     shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
                     bountyBoardChannel=BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
-                    alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {})
+                    alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0)

@@ -3,7 +3,10 @@ from .bbObjects.bounties import bbSystem
 import json
 import math
 import random
-
+import inspect
+from emoji import UNICODE_EMOJI
+from . import bbGlobals
+from .logging import bbLogger
 
 def readJSON(dbFile):
     f = open(dbFile, "r")
@@ -196,3 +199,197 @@ def commaSplitNum(num):
     for i in range(len(num), 0, -3):
         outStr = outStr[0:i] + "," + outStr[i:]
     return outStr[:-1]
+
+
+"""
+Populate a discord.embed with information describing a ship.
+
+@param ship -- The ship to add descriptive fields for
+@param baseEmbed -- The embed to add fields to
+@param shipEmoji -- whether or not to use the ship's emoji next to its name. You may wish to leave this as false and instead use the ship's icon in the embed icon
+"""
+def fillLoadoutEmbed(ship, baseEmbed, shipEmoji=False):
+    if ship is not None:
+        baseEmbed.add_field(name="Active Ship:", value=(ship.emoji if shipEmoji and ship.hasEmoji else "") + ship.getNameAndNick() + "\n" + ship.statsStringNoItems(), inline=False)
+
+        if ship.getMaxPrimaries() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(ship.weapons)) + "/" + str(ship.getMaxPrimaries()) + "*", inline=False)
+            for weaponNum in range(1, len(ship.weapons) + 1):
+                baseEmbed.add_field(name=str(weaponNum) + ". " + ship.weapons[weaponNum - 1].name, value=(ship.weapons[weaponNum - 1].emoji if ship.weapons[weaponNum - 1].hasEmoji else "") + ship.weapons[weaponNum - 1].statsStringShort(), inline=True)
+
+        if ship.getMaxModules() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(ship.modules)) + "/" + str(ship.getMaxModules()) + "*", inline=False)
+            for moduleNum in range(1, len(ship.modules) + 1):
+                baseEmbed.add_field(name=str(moduleNum) + ". " + ship.modules[moduleNum - 1].name, value=(ship.modules[moduleNum - 1].emoji if ship.modules[moduleNum - 1].hasEmoji else "") + ship.modules[moduleNum - 1].statsStringShort(), inline=True)
+        
+        if ship.getMaxTurrets() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(ship.turrets)) + "/" + str(ship.getMaxTurrets()) + "*", inline=False)
+            for turretNum in range(1, len(ship.turrets) + 1):
+                baseEmbed.add_field(name=str(turretNum) + ". " + ship.turrets[turretNum - 1].name, value=(ship.turrets[turretNum - 1].emoji if ship.turrets[turretNum - 1].hasEmoji else "") + ship.turrets[turretNum - 1].statsStringShort(), inline=True)
+
+    return baseEmbed
+
+    
+"""
+class funcRef:
+    def __init__(self, func):
+        self.func = func
+        self.isCoroutine = inspect.iscoroutinefunction(func)
+        self.params = inspect.signature(addFunc).parameters
+
+
+    async def call(self, args):
+        if self.isCoroutine:
+            await self.func(args)
+        else:
+            self.func(args)
+
+
+class funcArgs:
+    def __init__(self, args{}):
+"""
+
+
+class dumbEmoji:
+    def __init__(self, id=-1, unicode=""):
+        if id == -1 and unicode == "":
+            raise ValueError("At least one of id or unicode is required")
+        elif id != -1 and unicode != "":
+            raise ValueError("Can only accept one of id or unicode, not both")
+        
+        self.id = id
+        self.unicode = unicode
+        self.isID = id != -1
+        self.isUnicode = not self.isID
+        self.sendable = self.unicode if self.isUnicode else str(bbGlobals.client.get_emoji(self.id))
+        # if self.sendable is None:
+        #     self.sendable = '❓'
+
+    
+    def toDict(self):
+        if self.isUnicode:
+            return {"unicode":self.unicode}
+        else:
+            return {"id":self.id}
+
+
+    def __repr__(self):
+        return "<dumbEmoji-" + ("id" if self.isID else "unicode") + ":" + (str(self.id) if self.isID else self.unicode) + ">"
+
+    
+    def __hash__(self):
+        return hash(repr(self))
+
+    
+    def __eq__(self, other):
+        return type(other) == dumbEmoji and self.isID == other.isID and (self.id == other.id or self.unicode == other.unicode)
+
+    
+    def __str__(self):
+        return self.sendable
+
+
+EMPTY_DUMBEMOJI = dumbEmoji(unicode=" ")
+EMPTY_DUMBEMOJI.isUnicode = False
+EMPTY_DUMBEMOJI.unicode = ""
+EMPTY_DUMBEMOJI.sendable = ""
+
+
+def dumbEmojiFromDict(emojiDict):
+    if type(emojiDict) == dumbEmoji:
+        return emojiDict
+    if "id" in emojiDict:
+        return dumbEmoji(id=emojiDict["id"])
+    else:
+        return dumbEmoji(unicode=emojiDict["unicode"])
+
+
+def isUnicodeEmoji(c):
+    return c in UNICODE_EMOJI
+
+
+def isCustomEmoji(s):
+    if s.startswith("<") and s.endswith(">"):
+        try:
+            first = s.index(":")
+            second = first + s[first+1:].index(":") + 1
+        except ValueError:
+            return False
+        return isInt(s[second+1:-1])
+    return False
+
+
+def dumbEmojiFromStr(s):
+    if type(s) == dumbEmoji:
+        return s
+    if type(s) == dict:
+        return dumbEmojiFromDict(s)
+    if isUnicodeEmoji(s):
+        return dumbEmoji(unicode=s)
+    elif isCustomEmoji(s):
+        return dumbEmoji(id=int(s[s[s.index(":")+1:].index(":")+3:-1]))
+    elif isInt(s):
+        return dumbEmoji(id=int(s))
+    else:
+        return None
+
+
+def dumbEmojiFromPartial(e):
+    if type(e) == dumbEmoji:
+        return emojiDict
+    if e.is_unicode_emoji():
+        return dumbEmoji(unicode=e.name)
+    else:
+        return dumbEmoji(id=e.id)
+
+
+def td_format_noYM(td_object):
+    seconds = int(td_object.total_seconds())
+    periods = [
+        ('day',         60*60*24),
+        ('hour',        60*60),
+        ('minute',      60),
+        ('second',      1)
+    ]
+
+    strings=[]
+    for period_name, period_seconds in periods:
+        if seconds >= period_seconds:
+            period_value , seconds = divmod(seconds, period_seconds)
+            has_s = 's' if period_value > 1 else ''
+            strings.append("%s %s%s" % (period_value, period_name, has_s))
+
+    return ", ".join(strings)
+
+
+def findBBUserDCGuild(user):
+    if user.hasLastSeenGuildId:
+        lastSeenGuild = bbGlobals.client.get_guild(user.lastSeenGuildId)
+        if lastSeenGuild is None or lastSeenGuild.get_member(user.id) is None:
+            user.hasLastSeenGuildId = False
+        else:
+            return lastSeenGuild
+
+    if not user.hasLastSeenGuildId:
+        for guild in bbGlobals.guildsDB.guilds.values():
+            lastSeenGuild = bbGlobals.client.get_guild(guild.id)
+            if lastSeenGuild is not None and lastSeenGuild.get_member(user.id) is not None:
+                user.lastSeenGuildId = guild.id
+                user.hasLastSeenGuildId = True
+                return lastSeenGuild
+    return None
+
+
+def userOrMemberName(dcUser, dcGuild):
+    if dcUser is None:
+        bbLogger.log("Main", "usrMmbrNme",
+                     "Null dcUser given", eventType="USR_NONE")
+        raise ValueError("Null dcUser given")
+
+    if dcGuild is None:
+        return dcUser.name
+
+    guildMember = dcGuild.get_member(dcUser.id)
+    if guildMember is None:
+        return dcUser.name
+    return guildMember.display_name

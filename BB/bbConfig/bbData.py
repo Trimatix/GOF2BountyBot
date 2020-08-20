@@ -58,7 +58,7 @@ securityLevels = ["secure", "average", "risky", "dangerous"]
 
 # map image URLS for cmd_map
 mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/700683544103747594/700683693215318076/gof2_coords.png"
-mapImageNoGraphLink = 'https://cdn.discordapp.com/attachments/700683544103747594/700683699334807612/Gof2_supernova_map.png'
+mapImageNoGraphLink = 'https://i.imgur.com/TmPgPd3.png'
 
 # intro for help commands
 helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
@@ -429,13 +429,13 @@ builtInSystemData = { #Terran
             "Wolf-Reiser": {"name":"Wolf-Reiser", "faction":"terran", "neighbours":["Aquila"], "security":0, "coordinates":(10, 3), "aliases":["wolfreiser","wolf","reiser"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Wolf-Reiser"},
             
             #Vossk
-            "K'Ontrr": {"name":"K'Ontrr", "faction":"vossk", "neighbours":["S'Kolptorr", "Ni'Mrrod", "Me'Enkk"], "security":3, "coordinates":(10, 11), "aliases":["kontrr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:K'Ontrr"},
+            "K'Ontrr": {"name":"K'Ontrr", "faction":"vossk", "neighbours":["S'Kolptorr", "Ni'Mrrod", "Me'Enkk", "Wah'Norr"], "security":3, "coordinates":(10, 11), "aliases":["kontrr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:K'Ontrr"},
             "Me'Enkk": {"name":"Me'Enkk", "faction":"vossk", "neighbours":["Ni'Mrrod", "K'Ontrr"], "security":3, "coordinates":(11, 12), "aliases":["meenkk"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Me'Enkk"},
-            "Ni'Mrrod": {"name":"Ni'Mrrod", "faction":"vossk", "neighbours":["K'Ontrr", "Me'Enkk"], "security":3, "coordinates":(12, 12), "aliases":["nimrrod"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Ni'Mrrod"},
+            "Ni'Mrrod": {"name":"Ni'Mrrod", "faction":"vossk", "neighbours":["K'Ontrr", "Me'Enkk", "Wah'Norr"], "security":3, "coordinates":(12, 12), "aliases":["nimrrod"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Ni'Mrrod"},
             "Oom'Bak": {"name":"Oom'Bak", "faction":"vossk", "neighbours":["Magnetar", "Vulpes", "S'Kolptorr", "V'Ikka"], "security":1, "coordinates":(9, 8), "aliases":["oombak"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Oom'Bak"},
             "S'Kolptorr": {"name":"S'Kolptorr", "faction":"vossk", "neighbours":["K'Ontrr", "Oom'Bak", "V'Ikka"], "security":2, "coordinates":(9, 9), "aliases":["skolptorr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:S'Kolptorr"},
             "V'Ikka": {"name":"V'Ikka", "faction":"vossk", "neighbours":["Augmenta", "Buntta", "Magnetar", "Oom'Bak", "S'Kolptorr"], "security":1, "coordinates":(7, 8), "aliases":["vikka"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:V'Ikka"},
-            "Wah'Norr": {"name":"Wah'Norr", "faction":"vossk", "neighbours":[], "security":3, "coordinates":(12, 8), "aliases":["wahnorr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Wah'Norr"},
+            "Wah'Norr": {"name":"Wah'Norr", "faction":"vossk", "neighbours":["K'Ontrr", "Ni'Mrrod"], "security":3, "coordinates":(12, 8), "aliases":["wahnorr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Wah'Norr"},
             "Y'Mirr": {"name":"Y'Mirr", "faction":"vossk", "neighbours":[], "security":3, "coordinates":(11, 9), "aliases":["ymirr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Y'Mirr"},
             
             #Nivelian

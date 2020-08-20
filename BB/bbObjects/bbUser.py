@@ -18,8 +18,7 @@ class bbUser:
                     bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None,
                     inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[],
                     lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0,
-                    alerts=bbConfig.userAlertsIDsDefaults, bountyWinsToday=0, dailyBountyWinsReset=datetime.utcnow()):
-                    
+                    alerts=bbConfig.userAlertsIDsDefaults, bountyWinsToday=0, dailyBountyWinsReset=datetime.utcnow(), pollOwned=False):
         if type(id) == float:
             id = int(id)
         elif type(id) != int:
@@ -78,6 +77,8 @@ class bbUser:
         self.bountyWinsToday = bountyWinsToday
         self.dailyBountyWinsReset = dailyBountyWinsReset
 
+        self.pollOwned = pollOwned
+
     
     def resetUser(self):
         self.credits = 0
@@ -94,6 +95,7 @@ class bbUser:
         self.duelLosses = 0
         self.duelCreditsWins = 0
         self.duelCreditsLosses = 0
+        self.pollOwned = False
 
 
     def numInventoryPages(self, item, maxPerPage):
@@ -227,7 +229,7 @@ class bbUser:
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "lastSeenGuildId":self.lastSeenGuildId,
                 "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses,
-                "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "bountyHuntingXP": self.bountyHuntingXP}
+                "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "bountyHuntingXP": self.bountyHuntingXP, "pollOwned": self.pollOwned}
 
 
     def userDump(self):
@@ -382,4 +384,4 @@ def fromDict(id, userDict):
                     bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
                     inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
                     duelWins=userDict["duelWins"] if "duelWins" in userDict else 0, duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0, duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0, duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0,
-                    alerts=userAlerts, bountyHuntingXP=bountyHuntingXP, bountyWinsToday=userDict["bountyWinsToday"] if "bountyWinsToday" in userDict else 0, dailyBountyWinsReset=datetime.utcfromtimestamp(userDict["dailyBountyWinsReset"]) if "dailyBountyWinsReset" in userDict else datetime.utcnow())
+                    alerts=userAlerts, bountyHuntingXP=bountyHuntingXP, bountyWinsToday=userDict["bountyWinsToday"] if "bountyWinsToday" in userDict else 0, dailyBountyWinsReset=datetime.utcfromtimestamp(userDict["dailyBountyWinsReset"]) if "dailyBountyWinsReset" in userDict else datetime.utcnow(), pollOwned=userDict["pollOwned"] if "pollOwned" in userDict else False)

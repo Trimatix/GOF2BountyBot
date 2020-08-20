@@ -1,6 +1,7 @@
 from .bbItem import bbItem
 from . import bbTurret, bbWeapon, bbShipUpgrade, bbModuleFactory
 from ...bbConfig import bbConfig, bbData
+from ... import bbUtil
 
 class bbShip(bbItem):
     hasNickname = False
@@ -22,7 +23,7 @@ class bbShip(bbItem):
     upgradesApplied = []
 
 
-    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon="", emoji="", techLevel=-1, shopSpawnRate=0, builtIn=False):
+    def __init__(self, name, maxPrimaries, maxTurrets, maxModules, manufacturer="", armour=0.0, cargo=0, numSecondaries=0, handling=0, value=0, aliases=[], weapons=[], modules=[], turrets=[], wiki="", upgradesApplied=[], nickname="", icon="", emoji=bbUtil.EMPTY_DUMBEMOJI, techLevel=-1, shopSpawnRate=0, builtIn=False):
         super(bbShip, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
         if len(weapons) > maxPrimaries:
@@ -55,7 +56,7 @@ class bbShip(bbItem):
         if nickname != "":
             self.changeNickname(nickname)
 
-        self.upgradesApplied = []
+        self.upgradesApplied = upgradesApplied
 
         self.shopSpawnRate = shopSpawnRate
 
@@ -193,7 +194,7 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             total += upgrade.shield
             multiplier *= upgrade.shieldMultiplier
-        return total * multiplier
+        return int(total * multiplier)
 
 
     def getArmour(self, shipUpgradesOnly=False):
@@ -207,7 +208,7 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             total += upgrade.armour
             multiplier *= upgrade.armourMultiplier
-        return total * multiplier
+        return int(total * multiplier)
 
 
     def getCargo(self, shipUpgradesOnly=False):
@@ -221,7 +222,7 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             total += upgrade.cargo
             multiplier *= upgrade.cargoMultiplier
-        return total * multiplier
+        return int(total * multiplier)
 
 
     def getHandling(self, shipUpgradesOnly=False):
@@ -235,7 +236,7 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             total += upgrade.handling
             multiplier *= upgrade.handlingMultiplier
-        return total * multiplier
+        return int(total * multiplier)
 
 
     def getNumSecondaries(self, shipUpgradesOnly=False):
@@ -245,7 +246,7 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             total += upgrade.numSecondaries
             multiplier *= upgrade.numSecondariesMultiplier
-        return total * multiplier
+        return int(total * multiplier)
 
 
     def getMaxPrimaries(self, shipUpgradesOnly=False):
@@ -255,7 +256,7 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             total += upgrade.maxPrimaries
             multiplier *= upgrade.maxPrimariesMultiplier
-        return total * multiplier
+        return int(total * multiplier)
 
 
     def getMaxTurrets(self, shipUpgradesOnly=False):
@@ -265,7 +266,7 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             total += upgrade.maxTurrets
             multiplier *= upgrade.maxTurretsMultiplier
-        return total * multiplier
+        return int(total * multiplier)
 
 
     def getMaxModules(self, shipUpgradesOnly=False):
@@ -275,7 +276,7 @@ class bbShip(bbItem):
         for upgrade in self.upgradesApplied:
             total += upgrade.maxModules
             multiplier *= upgrade.maxModulesMultiplier
-        return total * multiplier
+        return int(total * multiplier)
 
 
     def getValue(self, shipUpgradesOnly=False):
@@ -366,23 +367,23 @@ class bbShip(bbItem):
 
     def statsStringShort(self):
         stats = ""
-        stats += "• *Armour: " + str(self.armour) + ("(+)" if self.armour < self.getArmour(shipUpgradesOnly=True) else "") + "*\n"
+        stats += "• *Armour: " + str(self.getArmour(shipUpgradesOnly=True)) + ("(+)" if self.getArmour(shipUpgradesOnly=True) > self.armour else "") + "*\n"
         # stats += "Cargo hold: " + str(self.cargo) + ", "
         # stats += "Handling: " + str(self.handling) + ", "
-        stats += "• *Primaries: " + str(len(self.weapons)) + "/" + str(self.maxPrimaries) + ("(+)" if self.maxPrimaries < self.getMaxPrimaries(shipUpgradesOnly=True) else "") + "*\n"
+        stats += "• *Primaries: " + str(len(self.weapons)) + "/" + str(self.getMaxPrimaries(shipUpgradesOnly=True)) + ("(+)" if self.getMaxPrimaries(shipUpgradesOnly=True) > self.maxPrimaries else "") + "*\n"
         if len(self.weapons) > 0:
             stats += "*["
             for weapon in self.weapons:
                 stats += weapon.name + ", "
             stats = stats[:-2] + "]*\n"
         # stats += "Max secondaries: " + str(self.numSecondaries) + ", "
-        stats += "• *Turrets: " + str(len(self.turrets)) + "/" + str(self.maxTurrets) + ("(+)" if self.maxTurrets < self.getMaxTurrets(shipUpgradesOnly=True) else "") + "*\n"
+        stats += "• *Turrets: " + str(len(self.turrets)) + "/" + str(self.getMaxTurrets(shipUpgradesOnly=True)) + ("(+)" if self.getMaxTurrets(shipUpgradesOnly=True) > self.maxTurrets else "") + "*\n"
         if len(self.turrets) > 0:
             stats += "*["
             for turret in self.turrets:
                 stats += turret.name + ", "
             stats = stats[:-2] + "]*\n"
-        stats += "• *Modules: " + str(len(self.modules)) + "/" + str(self.maxModules) + ("(+)" if self.maxModules < self.getMaxModules(shipUpgradesOnly=True) else "") + "*\n"
+        stats += "• *Modules: " + str(len(self.modules)) + "/" + str(self.getMaxModules(shipUpgradesOnly=True)) + ("(+)" if self.getMaxModules(shipUpgradesOnly=True) > self.maxModules else "") + "*\n"
         if len(self.modules) > 0:
             stats += "*["
             for module in self.modules:
@@ -393,10 +394,10 @@ class bbShip(bbItem):
     
     def statsStringNoItems(self):
         stats = ""
-        stats += "*Armour: " + str(self.armour) + ("(+)" if self.armour < self.getArmour(shipUpgradesOnly=True) else "") + ", "
-        stats += "Cargo hold: " + str(self.cargo) + ("(+)" if self.cargo < self.getCargo(shipUpgradesOnly=True) else "") + ", "
-        stats += "Handling: " + str(self.handling) + ("(+)" if self.handling < self.getHandling(shipUpgradesOnly=True) else "") + ", "
-        stats += "Max secondaries: " + str(self.numSecondaries) + ("(+)" if self.numSecondaries < self.getNumSecondaries(shipUpgradesOnly=True) else "") + "*"
+        stats += "*Armour: " + str(self.getArmour(shipUpgradesOnly=True)) + ("(+)" if self.getArmour(shipUpgradesOnly=True) > self.armour else "") + ", "
+        stats += "Cargo hold: " + str(self.getCargo(shipUpgradesOnly=True)) + ("(+)" if self.getCargo(shipUpgradesOnly=True) > self.cargo else "") + ", "
+        stats += "Handling: " + str(self.getHandling(shipUpgradesOnly=True)) + ("(+)" if self.getHandling(shipUpgradesOnly=True) > self.handling else "") + ", "
+        stats += "Max secondaries: " + str(self.getNumSecondaries(shipUpgradesOnly=True)) + ("(+)" if self.getNumSecondaries(shipUpgradesOnly=True) > self.numSecondaries else "") + "*"
         return stats
     
 
@@ -426,7 +427,8 @@ class bbShip(bbItem):
         itemDict["weapons"] = weaponsList
         itemDict["modules"] = modulesList
         itemDict["turrets"] = turretsList
-        itemDict["upgradesApplied"] = upgradesList
+        itemDict["shipUpgrades"] = upgradesList
+        itemDict["nickname"] = self.nickname
 
         if not self.builtIn:
             itemDict["armour"] = self.armour
@@ -461,7 +463,7 @@ def fromDict(shipDict):
             turrets.append(bbTurret.fromDict(turret))
 
     shipUpgrades = []
-    if "shipUpgrade" in shipDict:
+    if "shipUpgrades" in shipDict:
         for shipUpgrade in shipDict["shipUpgrades"]:
             shipUpgrades.append(bbShipUpgrade.fromDict(shipUpgrade))
     
@@ -484,7 +486,7 @@ def fromDict(shipDict):
                 builtInTurrets.append(bbTurret.fromDict(turret))
 
         builtInShipUpgrades = []
-        if "shipUpgrade" in shipDict:
+        if "shipUpgrades" in shipDict:
             for shipUpgrade in shipDict["shipUpgrades"]:
                 builtInShipUpgrades.append(bbShipUpgrade.fromDict(shipUpgrade))
 
@@ -493,7 +495,7 @@ def fromDict(shipDict):
                     numSecondaries=builtInDict["numSecondaries"] if "numSecondaries" in builtInDict else 0, handling=builtInDict["handling"] if "handling" in builtInDict else 0,
                     value=builtInDict["value"] if "value" in builtInDict else 0, aliases=builtInDict["aliases"] if "aliases" in builtInDict else [],
                     weapons=weapons if "weapons" in shipDict else builtInWeapons, modules=modules if "modules" in shipDict else builtInModules, turrets=turrets if "turrets" in shipDict else builtInTurrets, wiki=builtInDict["wiki"] if "wiki" in builtInDict else "0",
-                    upgradesApplied=shipUpgrades if "shipUpgrades" in shipDict else builtInShipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else (builtInDict["nickname"] if "nickname" in builtInDict else ""), icon=builtInDict["icon"] if "icon" in builtInDict else bbData.rocketIcon, emoji=builtInDict["emoji"] if "emoji" in builtInDict else "", techLevel=builtInDict["techLevel"] if "techLevel" in builtInDict else -1, shopSpawnRate=builtInDict["shopSpawnRate"] if "shopSpawnRate" in builtInDict else 0,
+                    upgradesApplied=shipUpgrades if "shipUpgrades" in shipDict else builtInShipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else (builtInDict["nickname"] if "nickname" in builtInDict else ""), icon=builtInDict["icon"] if "icon" in builtInDict else bbData.rocketIcon, emoji=bbUtil.dumbEmojiFromStr(builtInDict["emoji"]) if "emoji" in builtInDict else bbUtil.EMPTY_DUMBEMOJI, techLevel=builtInDict["techLevel"] if "techLevel" in builtInDict else -1, shopSpawnRate=builtInDict["shopSpawnRate"] if "shopSpawnRate" in builtInDict else 0,
                     builtIn=True)
         return newShip
 
@@ -503,5 +505,5 @@ def fromDict(shipDict):
                         numSecondaries=shipDict["numSecondaries"] if "numSecondaries" in shipDict else 0, handling=shipDict["handling"] if "handling" in shipDict else 0,
                         value=shipDict["value"] if "value" in shipDict else 0, aliases=shipDict["aliases"] if "aliases" in shipDict else [],
                         weapons=weapons, modules=modules, turrets=turrets, wiki=shipDict["wiki"] if "wiki" in shipDict else "0",
-                        upgradesApplied=shipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else "", icon=shipDict["icon"] if "icon" in shipDict else bbData.rocketIcon, emoji=shipDict["emoji"] if "emoji" in shipDict else "", techLevel=shipDict["techLevel"] if "techLevel" in shipDict else -1, shopSpawnRate=shipDict["shopSpawnRate"] if "shopSpawnRate" in shipDict else 0,
+                        upgradesApplied=shipUpgrades, nickname=shipDict["nickname"] if "nickname" in shipDict else "", icon=shipDict["icon"] if "icon" in shipDict else bbData.rocketIcon, emoji=bbUtil.dumbEmojiFromStr(shipDict["emoji"]) if "emoji" in shipDict else bbUtil.EMPTY_DUMBEMOJI, techLevel=shipDict["techLevel"] if "techLevel" in shipDict else -1, shopSpawnRate=shipDict["shopSpawnRate"] if "shopSpawnRate" in shipDict else 0,
                         builtIn=False)

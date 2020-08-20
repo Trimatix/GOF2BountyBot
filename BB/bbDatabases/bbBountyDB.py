@@ -30,6 +30,8 @@ class bbBountyDB:
             self.bounties[fac] = []
             self.escapedCriminals[fac] = []
 
+        self.latestBounty = None
+
 
     """
     Add a criminal to the record of escaped criminals.
@@ -66,6 +68,8 @@ class bbBountyDB:
     """
     def escapedCriminalExists(self, crim):
         return crim in self.escapedCriminals[crim.faction]
+
+        self.latestBounty = None
 
 
     """
@@ -118,6 +122,8 @@ class bbBountyDB:
             # clearBounties for each faction in the DB
             for fac in self.getFactions():
                 self.clearBounties(faction=fac)
+
+        self.latestBounty = None
 
     
     """
@@ -306,11 +312,12 @@ class bbBountyDB:
             raise OverflowError("Requested faction's bounty DB is full")
 
         # ensure the given bounty does not already exist
-        if self.bountyNameExists(bounty.criminal.name):
+        if self.bountyNameExists(bounty.criminal.name, noEscapedCrim=False):
             raise ValueError("Attempted to add a bounty whose name already exists: " + bounty.criminal.name)
 
         # Add the bounty to the database
         self.bounties[bounty.faction].append(bounty)
+        self.latestBounty = bounty
 
     
     """
@@ -330,6 +337,8 @@ class bbBountyDB:
     @param bounty -- the bbBounty object to remove from the database
     """
     def removeBountyObj(self, bounty):
+        if bounty is self.latestBounty:
+            self.latestBounty = None
         self.bounties[bounty.faction].remove(bounty)
 
     
