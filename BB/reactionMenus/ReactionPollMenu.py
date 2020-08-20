@@ -11,8 +11,11 @@ async def printAndExpirePollResults(msgID):
     menuMsg = await menu.msg.channel.fetch_message(menu.msg.id)
     results = {}
 
+    maxOptionLen = 0
     for option in menu.options.values():
         results[option] = []
+        if len(option.name) > maxOptionLen:
+            maxOptionLen = len(option.name)
 
     for reaction in menuMsg.reactions:
         if type(reaction.emoji) in [Emoji, PartialEmoji]:
@@ -46,22 +49,11 @@ async def printAndExpirePollResults(msgID):
             maxCount = len(currentResult)
     
     if maxCount > 0:
-        winningOptions = []
-        for currentOption in results:
-            if len(results[currentOption]) == maxCount:
-                winningOptions.append(currentOption)
-
-        winnersStr = ""
-        for winner in winningOptions:
-            winnersStr += winner.name + ", "
-        winnersStr = winnersStr[:-2]
-
         resultsStr = "```\n"
         for currentOption in results:
-            resultsStr += currentOption.name + " | " + ("=" * int((len(results[currentOption]) / maxCount) * bbConfig.pollMenuResultsBarLength)) + (" " if len(results[currentOption]) == 0 else "")+ " +" + str(len(results[currentOption])) + " Vote" + ("s" if len(results[currentOption]) != 1 else "") + "\n"
+            resultsStr += ("🏆" if len(results[currentOption]) == maxCount else "  ") + currentOption.name + (" " * (maxOptionLen - len(currentOption.name))) + " | " + ("=" * int((len(results[currentOption]) / maxCount) * bbConfig.pollMenuResultsBarLength)) + (" " if len(results[currentOption]) == 0 else "")+ " +" + str(len(results[currentOption])) + " Vote" + ("s" if len(results[currentOption]) != 1 else "") + "\n"
         resultsStr += "```"
 
-        pollEmbed.add_field(name="Winner" + ("s" if len(winningOptions) > 1 else "") + ": " + str(maxCount) + " Votes", value=winnersStr, inline=False)
         pollEmbed.add_field(name="Results", value=resultsStr, inline=False)
     
     else:
@@ -83,7 +75,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
         self.multipleChoice = multipleChoice
 
         if pollStarter is not None and desc == "":
-            desc = str(pollStarter) + " started a poll!"
+            desc = "__" + str(pollStarter) + " started a poll!__"
 
         super(ReactionPollMenu, self).__init__(msg, options=pollOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
         self.saveable = True
