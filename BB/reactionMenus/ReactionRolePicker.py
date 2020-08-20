@@ -28,6 +28,13 @@ async def removeRole(args, reactingUser=None):
     return False
 
 
+async def markExpiredRoleMenu(menuID):
+    menu = bbGlobals.reactionMenusDB[menuID]
+    if bbGlobals.guildsDB.guildIdExists(menu.msg.guild.id):
+        bbGlobals.guildsDB.getGuild(menu.msg.guild.id).ownedRoleMenus -= 1
+    await ReactionMenu.markExpiredMenu(menuID)
+
+
 class ReactionRolePickerOption(ReactionMenu.ReactionMenuOption):
     def __init__(self, emoji, role, menu):
         self.role = role

@@ -448,7 +448,7 @@ def getRouteScaledBountyDelayFixed(baseDelayDict):
     bbLogger.log("Main", "routeScaleBntyDelayFixed", "New bounty delay generated, " + \
                                                     ("no latest criminal." if bbGlobals.bountiesDB.latestBounty is None else \
                                                         ("latest criminal: '" + bbGlobals.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bbGlobals.bountiesDB.latestBounty.route)))) + \
-                                                    "\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bbGlobals.bountiesDB.latestBounty is None else "DELAY_GEN", noPrintEvent=True)
+                                                    "\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bbGlobals.bountiesDB.latestBounty is None else "DELAY_GEN", noPrint=True)
     return delay
     
 
@@ -467,7 +467,7 @@ def getRouteScaledBountyDelayRandom(baseDelayDict):
                                                         ("latest criminal: '" + bbGlobals.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bbGlobals.bountiesDB.latestBounty.route)))) + \
                                                     "\nRange: " + str((baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + "m - " + \
                                                                     str((baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + \
-                                                    "m\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bbGlobals.bountiesDB.latestBounty is None else "DELAY_GEN", noPrintEvent=True)
+                                                    "m\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bbGlobals.bountiesDB.latestBounty is None else "DELAY_GEN", noPrint=True)
     return delay
 
 
@@ -3208,6 +3208,11 @@ dmCommands.register("source", cmd_source)
 
 
 async def cmd_poll(message, args, isDM):
+    if bbGlobals.usersDB.getOrAddID(message.author.id).pollOwned:
+        await message.channel.send(":x: You can only make one poll at a time!")
+        return
+    bbGlobals.usersDB.getUser(message.author.id).pollOwned = True
+
     pollOptions = {}
 
     argsSplit = args.split(",")
@@ -3218,9 +3223,15 @@ async def cmd_poll(message, args, isDM):
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
-        elif dumbReact.isID and dumbReact.sendable not in message.guild.emojis:
-            await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
-            return
+        elif dumbReact.isID:
+            localEmoji = False
+            for localEmoji in message.guild.emojis:
+                if localEmoji.id == dumbReact.id:
+                    localEmoji = True
+                    break
+            if not localEmoji:
+                await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+                return
 
         pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
 
@@ -3317,7 +3328,7 @@ async def cmd_poll(message, args, isDM):
     timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionPollMenu.printAndExpirePollResults, expiryFunctionArgs=menuMsg.id)
     bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
 
-    menu = ReactionPollMenu.ReactionPollMenu(menuMsg, pollOptions, timeoutTT, pollStarter=message.author, multipleChoice=multipleChoice, targetRole=targetRole, targetMember=targetMember)
+    menu = ReactionPollMenu.ReactionPollMenu(menuMsg, pollOptions, timeoutTT, pollStarter=message.author, multipleChoice=multipleChoice, targetRole=targetRole, targetMember=targetMember, owningBBUser=bbGlobals.usersDB.getUser(message.author.id))
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
@@ -3539,6 +3550,12 @@ bbCommands.register("remove-notify-role",
 
 
 async def admin_cmd_make_role_menu(message, args, isDM):
+    requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
+    if requestedBBGuild.ownedRoleMenus >= bbConfig.maxRoleMenusPerGuild:
+        await message.channel.send(":x: Guilds can have at most " + str(bbConfig.maxRoleMenusPerGuild) + " role menus!")
+        return
+    requestedBBGuild.ownedRoleMenus += 1
+
     botRole = None
     potentialRoles = []
     for currRole in message.guild.me.roles:
@@ -3560,9 +3577,15 @@ async def admin_cmd_make_role_menu(message, args, isDM):
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
-        elif dumbReact.isID and dumbReact.sendable not in message.guild.emojis:
-            await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
-            return
+        elif dumbReact.isID:
+            localEmoji = False
+            for localEmoji in message.guild.emojis:
+                if localEmoji.id == dumbReact.id:
+                    localEmoji = True
+                    break
+            if not localEmoji:
+                await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+                return
 
 
         role = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
@@ -3639,7 +3662,7 @@ async def admin_cmd_make_role_menu(message, args, isDM):
 
     if timeoutExists:
         timeoutDelta = timeDeltaFromDict(bbConfig.roleMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
-        timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionMenu.markExpiredMenu, expiryFunctionArgs=menuMsg.id)
+        timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionRolePicker.markExpiredRoleMenu, expiryFunctionArgs=menuMsg.id)
         bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
     
     else:

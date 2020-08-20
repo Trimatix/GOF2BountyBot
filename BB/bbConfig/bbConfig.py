@@ -362,6 +362,7 @@ duelChallengeMenuDefaultTimeout = {"hours": 2}
 pollMenuDefaultTimeout = {"hours": 2}
 expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
+maxRoleMenusPerGuild = 10
 
 
 
