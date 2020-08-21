@@ -1,7 +1,6 @@
 import discord
 from discord import Embed, HTTPException, Forbidden, NotFound
-from ....bbConfig import bbData
-from .... import bbUtil, bbConfig
+from ....bbConfig import bbData, bbConfig
 from .... import bbUtil
 from .. import bbCriminal
 from ....logging import bbLogger
