@@ -1163,7 +1163,7 @@ async def cmd_bounties(message, args, isDM):
         if len(outmessage) == preLen:
             outmessage += "\n[  No currently active bounties! Please check back later.  ]"
         # Restrict the number of bounties a player may win in a single day
-        requestedBBUser = usersDB.getOrAddID(message.author.id)
+        requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
         if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
             requestedBBUser.bountyWinsToday = 0
             requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
