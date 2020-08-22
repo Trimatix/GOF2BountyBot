@@ -3189,6 +3189,10 @@ async def cmd_poll(message, args, isDM):
                 await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
                 return
 
+        if dumbReact in pollOptions:
+            await message.channel.send(":x: Cannot use the same emoji for two options!")
+            return
+
         pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
 
     if len(pollOptions) == 0:
@@ -3542,6 +3546,10 @@ async def admin_cmd_make_role_menu(message, args, isDM):
             if not localEmoji:
                 await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
                 return
+            
+        if dumbReact in reactionRoles:
+            await message.channel.send(":x: Cannot use the same emoji for two options!")
+            return
 
 
         role = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
