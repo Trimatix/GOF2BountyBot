@@ -3175,7 +3175,7 @@ async def cmd_poll(message, args, isDM):
     argPos = 0
     for arg in argsSplit:
         argPos += 1
-        optionName, dumbReact = arg[arg.index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
+        optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
