@@ -3175,7 +3175,7 @@ async def cmd_poll(message, args, isDM):
     argPos = 0
     for arg in argsSplit:
         argPos += 1
-        optionName, dumbReact = arg.strip(" ").split(" ")[0], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[1])
+        optionName, dumbReact = arg[arg.index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
@@ -3288,7 +3288,7 @@ async def cmd_poll(message, args, isDM):
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
-bbCommands.register("poll", cmd_poll)
+bbCommands.register("poll", cmd_poll, forceKeepArgsCasing=True)
 dmCommands.register("poll", err_nodm)
 
 
@@ -3529,7 +3529,7 @@ async def admin_cmd_make_role_menu(message, args, isDM):
     argPos = 0
     for arg in argsSplit:
         argPos += 1
-        roleStr, dumbReact = arg.strip(" ").split(" ")[0], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[1])
+        roleStr, dumbReact = arg.strip(" ").split(" ")[1], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
@@ -3628,7 +3628,7 @@ async def admin_cmd_make_role_menu(message, args, isDM):
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
-bbCommands.register("make-role-menu", admin_cmd_make_role_menu, isAdmin=True)
+bbCommands.register("make-role-menu", admin_cmd_make_role_menu, isAdmin=True, forceKeepArgsCasing=True)
 
 
 async def admin_cmd_del_reaction_menu(message, args, isDM):
@@ -3811,6 +3811,26 @@ async def dev_cmd_reset_cooldown(message, args, isDM):
 
 bbCommands.register("reset-cool", dev_cmd_reset_cooldown, isDev=True)
 dmCommands.register("reset-cool", dev_cmd_reset_cooldown, isDev=True)
+
+
+"""
+developer command resetting the poll ownership of the calling user, or the specified user if one is given.
+
+@param message -- the discord message calling the command
+@param args -- string, can be empty or contain a user mention
+"""
+async def dev_cmd_reset_has_poll(message, args, isDM):
+    # reset the calling user's cooldown if no user is specified
+    if args == "":
+        bbGlobals.usersDB.getUser(
+            message.author.id).pollOwned = False
+        # otherwise get the specified user's discord object and reset their cooldown.
+        # [!] no validation is done.
+    else:
+        bbGlobals.usersDB.getUser(int(args.lstrip("<@!").rstrip(">"))).pollOwned = False
+        await message.channel.send("Done!")
+
+bbCommands.register("reset-has-poll", dev_cmd_reset_reset_has_poll, isDev=True)
 
 
 """
