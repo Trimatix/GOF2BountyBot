@@ -9,12 +9,12 @@ defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
                         "weapons":[{"name": "Micro Gun MK I", "builtIn": True}],
                         "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}, {"name": "IMT Extract 1.3", "builtIn": True}]}
 
-defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"item": {"name": "Nirai Impulse EX 1", "builtIn": True}, "count": 1}]}
+defaultUserDict = {"bountyHuntingXP": bbConfig.bountyHuntingXPForLevel(1), "credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"item": {"name": "Nirai Impulse EX 1", "builtIn": True}, "count": 1}]}
 defaultUserValue = 28970
 
 
 class bbUser:
-    def __init__(self, id, credits=0, lifetimeCredits=0, bountyHuntingXP=0, 
+    def __init__(self, id, credits=0, lifetimeCredits=0, bountyHuntingXP=bbConfig.bountyHuntingXPForLevel(1), 
                     bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None,
                     inactiveShips=[], inactiveModules=[], inactiveWeapons=[], inactiveTurrets=[],
                     lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0,
@@ -96,6 +96,7 @@ class bbUser:
         self.duelCreditsWins = 0
         self.duelCreditsLosses = 0
         self.pollOwned = False
+        self.bountyHuntingXP = bbConfig.bountyHuntingXPForLevel(1)
 
 
     def numInventoryPages(self, item, maxPerPage):

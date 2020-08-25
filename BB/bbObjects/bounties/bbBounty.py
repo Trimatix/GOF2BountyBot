@@ -69,7 +69,7 @@ class Bounty:
             if self.systemChecked(system):
                 checkedSystems += 1
                 if self.checked[system] not in rewards:
-                    rewards[self.checked[system]] = {"reward":0,"checked":0,"won":False}
+                    rewards[self.checked[system]] = {"reward":0,"checked":0,"won":False,"xp":0}
 
         uncheckedSystems = len(self.route) - checkedSystems
         winningUserID = self.checked[self.answer]
@@ -82,9 +82,13 @@ class Bounty:
                     currentReward = bbConfig.bPointsToCreditsRatio
                     rewards[self.checked[system]]["reward"] += currentReward
                     creditsPool -= currentReward
+                rewards[self.checked[system]]["xp"] += bbConfig.hunterXPPerSysCheck
+            else:
+                rewards[self.checked[self.answer]]["xp"] += bbConfig.hunterXPPerSysCheck
 
         rewards[self.checked[self.answer]]["reward"] = creditsPool
         rewards[self.checked[self.answer]]["won"] = True
+        rewards[self.checked[self.answer]]["xp"] += int((self.criminal.activeShip.getValue() * bbConfig.shipValueRewardPercentage) / bbConfig.hunterXPPerSysCheck)
         return rewards
 
     def toDict(self):
