@@ -377,7 +377,9 @@ def fromDict(id, userDict):
     if "bountyHuntingXP" in userDict:
         bountyHuntingXP = userDict["bountyHuntingXP"]
     else:
-        bountyHuntingXP = bbConfig.hunterXPPerSysCheck * userDict["systemsChecked"]
+        # bountyHuntingXP = bbConfig.hunterXPPerSysCheck * userDict["systemsChecked"]
+        # Convert pre-bountyShips savedata to bounty hunter XP by calculating XP directly from total credits earned from bounties
+        bountyHuntingXP = bbConfig.bountyHuntingXPForLevel(1) if "lifetimeCredits" not in userDict else int(userDict["lifetimeCredits"] * bbConfig.bountyRewardToXPGainMult)
         
 
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],

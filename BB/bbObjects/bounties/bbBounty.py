@@ -82,13 +82,13 @@ class Bounty:
                     currentReward = bbConfig.bPointsToCreditsRatio
                     rewards[self.checked[system]]["reward"] += currentReward
                     creditsPool -= currentReward
-                rewards[self.checked[system]]["xp"] += bbConfig.hunterXPPerSysCheck
-            else:
-                rewards[self.checked[self.answer]]["xp"] += bbConfig.hunterXPPerSysCheck
+
+        for user in rewards:
+            rewards[user]["xp"] = rewards[user]["reward"] * bbConfig.bountyRewardToXPGainMult
 
         rewards[self.checked[self.answer]]["reward"] = creditsPool
         rewards[self.checked[self.answer]]["won"] = True
-        rewards[self.checked[self.answer]]["xp"] += int((self.criminal.activeShip.getValue() * bbConfig.shipValueRewardPercentage) / bbConfig.hunterXPPerSysCheck)
+        rewards[self.checked[self.answer]]["xp"] += int(rewards[self.checked[self.answer]]["reward"] * bbConfig.bountyRewardToXPGainMult)
         return rewards
 
     def toDict(self):

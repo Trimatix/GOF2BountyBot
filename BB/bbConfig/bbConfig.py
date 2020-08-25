@@ -13,8 +13,10 @@ def truncToRes(num):
 
 ##### USER LEVELING #####
 
-# Amount of XP to award users per system check
-hunterXPPerSysCheck = 10
+# Old method: Amount of XP to award users per system check
+# hunterXPPerSysCheck = 10
+# New method: Apply a multiplier to all rewards gained from a bounty. bounty hunter xp is thus a measure of total earnings from bounty hunting.
+bountyRewardToXPGainMult = 0.1
 
 # Amount of XP to award users per bounty win
 hunterXPPerWin = 0
