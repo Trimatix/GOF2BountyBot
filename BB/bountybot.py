@@ -275,11 +275,11 @@ async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
                 # If the winning user is not in the current guild, use the user's name and discriminator
                 if bbGlobals.client.get_guild(currentGuild.id).get_member(winningUserId) is None:
                     rewardsEmbed.add_field(name="1. 🏆 " + str(rewards[winningUserId]["reward"]) + " credits:", value=str(bbGlobals.client.get_user(winningUserId)) + " checked " + str(
-                        int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
+                        int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else "") + "\n*+" + str(rewards[winningUserId]["xp"]) + "xp*", inline=False)
                 # If the winning user is in the current guild, use the user's mention
                 else:
                     rewardsEmbed.add_field(name="1. 🏆 " + str(rewards[winningUserId]["reward"]) + " credits:", value="<@" + str(winningUserId) + "> checked " + str(
-                        int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
+                        int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else "") + "\n*+" + str(rewards[winningUserId]["xp"]) + "xp*", inline=False)
 
                 # The index of the current user in the embed
                 place = 2
@@ -289,11 +289,11 @@ async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
                         # If the current user is not in the current guild, use the user's name and discriminator
                         if bbGlobals.client.get_guild(currentGuild.id).get_member(userID) is None:
                             rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value=str(bbGlobals.client.get_user(
-                                userID)) + " checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
+                                userID)) + " checked " + str(int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else "") + "\n*+" + str(rewards[userID]["xp"]) + "xp*", inline=False)
                         # Otherwise, use the user's mention
                         else:
                             rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value="<@" + str(userID) + "> checked " + str(
-                                int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
+                                int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else "") + "\n*+" + str(rewards[userID]["xp"]) + "xp*", inline=False)
                         place += 1
 
                 # Send the announcement to the current guild's playChannel
@@ -607,7 +607,7 @@ async def shutdown():
     for menu in menus:
         if not menu.saveable:
             await menu.delete()
-    botLoggedIn = False
+    bbGlobals.botLoggedIn = False
     await bbGlobals.client.logout()
     saveAllDBs()
     print(datetime.now().strftime("%H:%M:%S: Data saved!"))
@@ -856,57 +856,7 @@ print the stats of the specified user, use the calling user if no user is specif
 async def cmd_stats(message, args, isDM):
     # if no user is specified
     if args == "":
-        # create the embed
-        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=message.author.display_name,
-                               footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url_as(size=64))
-        # If the calling user is not in the database, don't bother adding them just print zeroes.
-        if not bbGlobals.usersDB.userIDExists(message.author.id):
-            statsEmbed.add_field(name="Credits balance:", value=0, inline=True)
-            statsEmbed.add_field(name="Total value:",
-                                 value=str(bbUser.defaultUserValue), inline=True)
-            statsEmbed.add_field(
-                name="‎", value="__Bounty Hunting__", inline=False)
-            statsEmbed.add_field(
-                name="Total systems checked:", value=0, inline=True)
-            statsEmbed.add_field(
-                name="Total bounties won:", value=0, inline=True)
-            statsEmbed.add_field(
-                name="Total earned from bounties:", value=0, inline=True)
-            statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
-            statsEmbed.add_field(name="Duels won:", value="0", inline=True)
-            statsEmbed.add_field(name="Duels lost:", value="0", inline=True)
-            statsEmbed.add_field(name="Total credits won:",
-                                 value="0", inline=True)
-            statsEmbed.add_field(name="Total credits lost:",
-                                 value="0", inline=True)
-        # If the calling user is in the database, print the stats stored in the user's database entry
-        else:
-            userObj = bbGlobals.usersDB.getUser(message.author.id)
-            statsEmbed.add_field(name="Credits balance:",
-                                 value=str(userObj.credits), inline=True)
-            statsEmbed.add_field(name="Total value:",
-                                 value=str(userObj.getStatByName("value")), inline=True)
-            statsEmbed.add_field(
-                name="‎", value="__Bounty Hunting__", inline=False)
-            statsEmbed.add_field(name="Total systems checked:", value=str(
-                userObj.systemsChecked), inline=True)
-            statsEmbed.add_field(name="Total bounties won:", value=str(
-                userObj.bountyWins), inline=True)
-            statsEmbed.add_field(name="Total credits earned from bounties:", value=str(
-                userObj.lifetimeCredits), inline=True)
-            statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
-            statsEmbed.add_field(name="Duels won:", value=str(
-                userObj.duelWins), inline=True)
-            statsEmbed.add_field(name="Duels lost:", value=str(
-                userObj.duelLosses), inline=True)
-            statsEmbed.add_field(name="Total credits won:", value=str(
-                userObj.duelCreditsWins), inline=True)
-            statsEmbed.add_field(name="Total credits lost:", value=str(
-                userObj.duelCreditsLosses), inline=True)
-
-        # send the stats embed
-        await message.channel.send(embed=statsEmbed)
-        return
+        requestedID = message.author.id
 
     # If a user is specified
     else:
@@ -915,67 +865,74 @@ async def cmd_stats(message, args, isDM):
             await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
             return
 
-        if bbUtil.isMention(args):
-            # Get the discord user object for the given tag
-            requestedUser = bbGlobals.client.get_user(
-                int(args.lstrip("<@!").rstrip(">")))
-        else:
-            requestedUser = bbGlobals.client.get_user(int(args))
-        # ensure the mentioned user could be found
-        if requestedUser is None:
-            await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
-            return
+        requestedID = int(args.lstrip("<@!").rstrip(">"))
 
-        # create the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=bbUtil.userOrMemberName(requestedUser, message.guild),
-                               footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
-        # If the requested user is not in the database, don't bother adding them just print zeroes
-        if not bbGlobals.usersDB.userIDExists(requestedUser.id):
-            statsEmbed.add_field(name="Credits balance:", value=0, inline=True)
-            statsEmbed.add_field(name="Total value:",
-                                 value=str(bbUser.defaultUserValue), inline=True)
-            statsEmbed.add_field(
-                name="‎", value="__Bounty Hunting__", inline=False)
-            statsEmbed.add_field(
-                name="Total systems checked:", value=0, inline=True)
-            statsEmbed.add_field(
-                name="Total bounties won:", value=0, inline=True)
-            statsEmbed.add_field(
-                name="Total earned from bounties:", value=0, inline=True)
-            statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
-            statsEmbed.add_field(name="Duels won:", value="0", inline=True)
-            statsEmbed.add_field(name="Duels lost:", value="0", inline=True)
-            statsEmbed.add_field(name="Total credits won:",
-                                 value="0", inline=True)
-            statsEmbed.add_field(name="Total credits lost:",
-                                 value="0", inline=True)
-        # Otherwise, print the stats stored in the user's database entry
-        else:
-            userObj = bbGlobals.usersDB.getUser(requestedUser.id)
-            statsEmbed.add_field(name="Credits balance:",
-                                 value=str(userObj.credits), inline=True)
-            statsEmbed.add_field(name="Total value:",
-                                 value=str(userObj.getStatByName("value")), inline=True)
-            statsEmbed.add_field(
-                name="‎", value="__Bounty Hunting__", inline=False)
-            statsEmbed.add_field(name="Total systems checked:", value=str(
-                userObj.systemsChecked), inline=True)
-            statsEmbed.add_field(name="Total bounties won:", value=str(
-                userObj.bountyWins), inline=True)
-            statsEmbed.add_field(name="Total credits earned from bounties:", value=str(
-                userObj.lifetimeCredits), inline=True)
-            statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
-            statsEmbed.add_field(name="Duels won:", value=str(
-                userObj.duelWins), inline=True)
-            statsEmbed.add_field(name="Duels lost:", value=str(
-                userObj.duelLosses), inline=True)
-            statsEmbed.add_field(name="Total credits won:", value=str(
-                userObj.duelCreditsWins), inline=True)
-            statsEmbed.add_field(name="Total credits lost:", value=str(
-                userObj.duelCreditsLosses), inline=True)
+    # ensure the mentioned user could be found
+    requestedUser = bbGlobals.client.get_user(requestedID)
+    if requestedUser is None:
+        await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
+        return
 
-        # send the stats embed
-        await message.channel.send(embed=statsEmbed)
+    # create the stats embed
+    statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=bbUtil.userOrMemberName(requestedUser, message.guild),
+                            footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
+
+    # If the requested user is not in the database, don't bother adding them just print zeroes
+    if not bbGlobals.usersDB.userIDExists(requestedUser.id):
+        statsEmbed.add_field(name="Credits balance:", value=0, inline=True)
+        statsEmbed.add_field(name="Total value:",
+                                value=str(bbUser.defaultUserValue), inline=True)
+        statsEmbed.add_field(
+            name="‎", value="__Bounty Hunting__", inline=False)
+        statsEmbed.add_field(name="Bounty Hunter Level:",
+                            value="1")
+        statsEmbed.add_field(name="XP until next level:",
+                            value=str(bbConfig.bountyHuntingXPForLevel(2) - bbConfig.bountyHuntingXPForLevel(1)))
+        statsEmbed.add_field(
+            name="Total systems checked:", value=0, inline=True)
+        statsEmbed.add_field(
+            name="Total bounties won:", value=0, inline=True)
+        statsEmbed.add_field(
+            name="Total earned from bounties:", value=0, inline=True)
+        statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
+        statsEmbed.add_field(name="Duels won:", value="0", inline=True)
+        statsEmbed.add_field(name="Duels lost:", value="0", inline=True)
+        statsEmbed.add_field(name="Total credits won:",
+                                value="0", inline=True)
+        statsEmbed.add_field(name="Total credits lost:",
+                                value="0", inline=True)
+    # Otherwise, print the stats stored in the user's database entry
+    else:
+        userObj = bbGlobals.usersDB.getUser(requestedUser.id)
+        statsEmbed.add_field(name="Credits balance:",
+                                value=str(userObj.credits), inline=True)
+        statsEmbed.add_field(name="Total value:",
+                                value=str(userObj.getStatByName("value")), inline=True)
+        statsEmbed.add_field(
+            name="‎", value="__Bounty Hunting__", inline=False)
+        hunterLvl = bbConfig.calculateUserBountyHuntingLevel(userObj.bountyHuntingXP)
+        statsEmbed.add_field(name="Bounty Hunter Level:",
+                            value=str(hunterLvl))
+        statsEmbed.add_field(name="XP until next level:",
+                            value=str(bbConfig.bountyHuntingXPForLevel(hunterLvl+1)-userObj.bountyHuntingXP))
+        statsEmbed.add_field(name="Total systems checked:", value=str(
+            userObj.systemsChecked), inline=True)
+        statsEmbed.add_field(name="Total bounties won:", value=str(
+            userObj.bountyWins), inline=True)
+        statsEmbed.add_field(name="Total credits earned from bounties:", value=str(
+            userObj.lifetimeCredits), inline=True)
+        statsEmbed.add_field(name="‎", value="__Dueling__", inline=False)
+        statsEmbed.add_field(name="Duels won:", value=str(
+            userObj.duelWins), inline=True)
+        statsEmbed.add_field(name="Duels lost:", value=str(
+            userObj.duelLosses), inline=True)
+        statsEmbed.add_field(name="Total credits won:", value=str(
+            userObj.duelCreditsWins), inline=True)
+        statsEmbed.add_field(name="Total credits lost:", value=str(
+            userObj.duelCreditsLosses), inline=True)
+
+    # send the stats embed
+    await message.channel.send(embed=statsEmbed)
 
 bbCommands.register("stats", cmd_stats)
 dmCommands.register("stats", cmd_stats)
@@ -1091,7 +1048,7 @@ async def cmd_check(message, args, isDM):
                                                         expiryFunction=spawnAndAnnounceBounty,
                                                         expiryFunctionArgs={"newBounty": bounty, "newConfig": bbBountyConfig.BountyConfig(faction=bounty.criminal.faction, techLevel=bounty.criminal.techLevel)},
                                                         rescheduleOnExpiryFuncFailure=True)
-                        ActiveTimedTasks.escapedBountiesRespawnTTDB.scheduleTask(respawnTT)
+                        bbGlobals.escapedBountiesRespawnTTDB.scheduleTask(respawnTT)
 
                         bountyLost = True
                         bbGlobals.bountiesDB.addEscapedCriminal(bounty.criminal, len(bounty.route))
@@ -1105,31 +1062,37 @@ async def cmd_check(message, args, isDM):
                             requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours":24})
                             dailyBountiesMaxReached = True
 
+                        # reward all contributing users
+                        rewards = bounty.calcRewards()
+                        levelUpMsg = ""
+                        for userID in rewards:
+                            currentBBUser = bbGlobals.usersDB.getUser(userID)
+                            currentBBUser.credits += rewards[userID]["reward"]
+                            currentBBUser.lifetimeCredits += rewards[userID]["reward"]
+
+                            oldLevel = bbConfig.calculateUserBountyHuntingLevel(currentBBUser.bountyHuntingXP)
+                            currentBBUser.bountyHuntingXP += rewards[userID]["xp"]
+
+                            newLevel = bbConfig.calculateUserBountyHuntingLevel(currentBBUser.bountyHuntingXP)
+                            # TODO: Move level management to outside of this loop to support users from different servers
+                            if newLevel > oldLevel and message.guild.get_member(currentBBUser.id) is not None:
+                                levelUpMsg += "\n:arrow_up: **Level Up!**\n" + bbUtil.userOrMemberName(bbGlobals.client.get_user(currentBBUser.id), message.guild) + " reached **Bounty Hunter Level " + str(newLevel) + "!** :partying_face:"
+                        
+                        if levelUpMsg != "":
+                            await message.channel.send(levelUpMsg)
+
+                        # Announce the bounty has been completed
+                        await announceBountyWon(bounty, rewards, message.guild, message.author.id)
+                        await message.channel.send("__Duel Statistics__",embed=statsEmbed)
+
                         # criminal ship unequip is delayed until now rather than handled in bounty.check
                         # to allow for duel info printing. this could instead be replaced by bounty.check returning the ShipFight info.
                         bounty.criminal.clearShip()
-
-                        # reward all contributing users
-                        rewards = bounty.calcRewards()
-                        for userID in rewards:
-                            bbGlobals.usersDB.getUser(userID).credits += rewards[userID]["reward"]
-                            bbGlobals.usersDB.getUser(userID).lifetimeCredits += rewards[userID]["reward"]
-                        
-                        # Announce the bounty has ben completed
-                        await announceBountyWon(bounty, rewards, message.guild, message.author.id)
-                        await message.channel.send("__Duel Statistics__",embed=statsEmbed)
                     
                     # add this bounty to the list of bounties to be removed
                     toPop += [bounty]
 
                 if checkResult in [2, 3]:
-                    oldLevel = bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP)
-                    requestedBBUser.bountyHuntingXP += bbConfig.hunterXPPerSysCheck
-                    if checkResult == 3:
-                        requestedBBUser.bountyHuntingXP += bbConfig.hunterXPPerWin
-                    newLevel = bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP)
-                    if newLevel > oldLevel:
-                        await message.channel.send(":arrow_up: **Level Up!**\n" + userOrMemberName(message.author, message.guild) + ":partying_face:")
                     systemInBountyRoute = True
                     await updateAllBountyBoardChannels(bounty, bountyComplete=checkResult == 3)
 
@@ -1229,7 +1192,7 @@ async def cmd_bounties(message, args, isDM):
         if len(outmessage) == preLen:
             outmessage += "\n[  No currently active bounties! Please check back later.  ]"
         # Restrict the number of bounties a player may win in a single day
-        requestedBBUser = usersDB.getOrAddID(message.author.id)
+        requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
         if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
             requestedBBUser.bountyWinsToday = 0
             requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
@@ -1273,8 +1236,8 @@ async def cmd_bounties(message, args, isDM):
                 if len(bounty.route) != 1:
                     outmessage += "s"
             maxBountiesMsg = ""
-            if usersDB.userIDExists(message.author.id):
-                requestedBBUser = usersDB.getUser(message.author.id)
+            if bbGlobals.usersDB.userIDExists(message.author.id):
+                requestedBBUser = bbGlobals.usersDB.getUser(message.author.id)
                 # Restrict the number of bounties a player may win in a single day
                 if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
                     requestedBBUser.bountyWinsToday = 0
@@ -2335,7 +2298,7 @@ async def cmd_loadout(message, args, isDM):
         criminalName = args[9:].title()
 
         # report unrecognised criminal names
-        if not bountiesDB.bountyNameExists(criminalName, noEscapedCrim=True):
+        if not bbGlobals.bountiesDB.bountyNameExists(criminalName, noEscapedCrim=True):
             errmsg = ":x: That pilot is not currently wanted!"
             
             if bbUtil.isMention(criminalName):
@@ -2344,7 +2307,7 @@ async def cmd_loadout(message, args, isDM):
             await message.channel.send(errmsg)
             return
 
-        criminalObj = bountiesDB.getBounty(criminalName).criminal
+        criminalObj = bbGlobals.bountiesDB.getBounty(criminalName).criminal
         
         activeShip = criminalObj.activeShip
         loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=criminalObj.name.title() + "\n`Difficulty: " + str(criminalObj.techLevel) + "`", col=bbData.factionColours[criminalObj.faction] if criminalObj.faction in bbData.factionColours else bbData.factionColours["neutral"], thumb=criminalObj.icon)
@@ -4832,6 +4795,42 @@ dmCommands.register("setbalance", dev_cmd_setbalance, isDev=True)
 
 
 """
+developer command setting the requested user's bounty hunting xp.
+
+@param message -- the discord message calling the command
+@param args -- string containing a user mention and an integer amount of xp
+"""
+
+
+async def dev_cmd_set_bounty_xp(message, args, isDM):
+    argsSplit = args.split(" ")
+    # verify both a user and a balance were given
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Please give a user mention followed by the new xp!")
+        return
+    # verify the requested balance is an integer
+    if not bbUtil.isInt(argsSplit[1]):
+        await message.channel.send(":x: that's not a number!")
+        return
+    # verify the requested user
+    requestedUser = bbGlobals.client.get_user(
+        int(argsSplit[0].lstrip("<@!").rstrip(">")))
+    if requestedUser is None:
+        await message.channel.send(":x: invalid user!!")
+        return
+    if not bbGlobals.usersDB.userIDExists(requestedUser.id):
+        requestedBBUser = bbGlobals.usersDB.addUser(requestedUser.id)
+    else:
+        requestedBBUser = bbGlobals.usersDB.getUser(requestedUser.id)
+    # update the balance
+    requestedBBUser.bountyHuntingXP = int(argsSplit[1])
+    await message.channel.send("Done!")
+
+bbCommands.register("set-bounty-xp", dev_cmd_set_bounty_xp, isDev=True)
+dmCommands.register("set-bounty-xp", dev_cmd_set_bounty_xp, isDev=True)
+
+
+"""
 developer command printing the requested user's hangar, including object memory addresses.
 
 @param message -- the discord message calling the command
@@ -5088,7 +5087,7 @@ async def on_ready():
     print('We have logged in as {0.user}'.format(bbGlobals.client))
     await bbGlobals.client.change_presence(activity=discord.Game("Galaxy on Fire 2™ Full HD"))
     # bot is now logged in
-    botLoggedIn = True
+    bbGlobals.botLoggedIn = True
 
     bountyDelayGenerators = {"random": getRandomDelaySeconds,
                              "fixed-routeScale": getRouteScaledBountyDelayFixed,
@@ -5151,7 +5150,7 @@ async def on_ready():
     # nextTask
 
     # execute regular tasks while the bot is logged in
-    while botLoggedIn:
+    while bbGlobals.botLoggedIn:
         if bbConfig.timedTaskCheckingType == "fixed":
             await asyncio.sleep(bbConfig.timedTaskLatenessThresholdSeconds)
         # elif bbConfig.timedTaskCheckingType == "dynamic":
@@ -5226,7 +5225,7 @@ async def on_message(message):
         menuMsg = await message.channel.send("‎")
         menu = ReactionInventoryPicker.ReactionInventoryPicker(menuMsg, inv, 5, titleTxt="**Niker107's Hangar**", footerTxt="React for your desired item", thumb="https://cdn.discordapp.com/avatars/212542588643835905/a20a7a46f7e3e4889363b14f485a3075.png?size=128")
         await menu.updateMessage()
-        ActiveTimedTasks.reactionMenus[menuMsg.id] = menu"""
+        bbGlobals.reactionMenus[menuMsg.id] = menu"""
 
     if message.author.id in bbConfig.developers or message.guild is None or not message.guild.id in bbConfig.disabledServers:
         # For any messages beginning with bbConfig.commandPrefix
