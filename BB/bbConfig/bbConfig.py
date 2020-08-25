@@ -20,6 +20,16 @@ hunterXPPerSysCheck = 10
 hunterXPPerWin = 0
 
 
+# Inverse of calculateUserBountyHuntingLevel
+def bountyHuntingXPForLevel(level):
+    return int((1000000 * math.pow(10, (level - 13.55) / 7) - 15000)/10)
+
+
+# https://www.desmos.com/calculator/8cz2ab8tgi
+def calculateUserBountyHuntingLevel(xp):
+    return max(1, int(7 * math.log10(((xp*10) + 15000)/1000000) + 13.55))
+
+
 # def bountyHuntingXPForLevel(level):
 #     return int(1000 * math.exp((level - 1)/3.74) - 1000)
 
@@ -27,12 +37,14 @@ hunterXPPerWin = 0
 # def calculateUserBountyHuntingLevel(xp):
 #     return int(1 + 3.74 * math.log((xp/1000)+1))
 
-def bountyHuntingXPForLevel(level):
-    return int((level + 30001)/4)
 
 
-def calculateUserBountyHuntingLevel(xp):
-    return 4 * xp - 30001
+# def bountyHuntingXPForLevel(level):
+#     return int((level + 30001)/4)
+
+
+# def calculateUserBountyHuntingLevel(xp):
+#     return 4 * xp - 30001
 
 
 
