@@ -279,7 +279,7 @@ disabledServers = [723704980246233219, 723702782640783361, 723708988830515231, 7
 # The maximum number of items that will be displayed per page of a user's hangar, when all item types are requested
 maxItemsPerHangarPageAll = 3
 # The maximum number of items that will be displayed per page of a user's hangar, when a single item type is requested
-maxItemsPerHangarPageIndividual = 5
+maxItemsPerHangarPageIndividual = 10
 
 # Names to be used when checking input to !bb hangar and bbUser.numInventoryPages
 validItemNames = ["ship", "weapon", "module", "turret", "all"]
