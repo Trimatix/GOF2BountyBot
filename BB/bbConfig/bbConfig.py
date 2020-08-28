@@ -19,17 +19,24 @@ def truncToRes(num):
 bountyRewardToXPGainMult = 0.1
 
 # Amount of XP to award users per bounty win
+# ⚠ DEPRECATED
 hunterXPPerWin = 0
+
+
+BHLa = 4
+BHLb = 2300000
+BHLc = 0
+BHLd = 13.55
 
 
 # Inverse of calculateUserBountyHuntingLevel
 def bountyHuntingXPForLevel(level):
-    return int((1000000 * math.pow(10, (level - 13.55) / 7) - 15000)/10)
+    return max(0, int(BHLb * math.pow(10, (level - BHLd) / BHLa) - BHLc))
 
 
-# https://www.desmos.com/calculator/8cz2ab8tgi
+# https://www.desmos.com/calculator/ljkio5xyfz
 def calculateUserBountyHuntingLevel(xp):
-    return max(1, int(7 * math.log10(((xp*10) + 15000)/1000000) + 13.55))
+    return max(1, int(BHLa * math.log10((xp + BHLc)/BHLb) + BHLd))
 
 
 # def bountyHuntingXPForLevel(level):
@@ -237,7 +244,7 @@ fallbackRouteScale = 5
 bPointsToCreditsRatio = 1000
 
 # The percentage of a criminal's ship value to award to the winner
-shipValueRewardPercentage = 0.05
+shipValueRewardPercentage = 0.01
 
 # time to put users on cooldown between using !bb check
 checkCooldown = {"minutes":3}
