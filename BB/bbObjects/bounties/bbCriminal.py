@@ -34,6 +34,7 @@ class Criminal (bbAliasable.Aliasable):
             raise RuntimeError("CRIM_CLEARSH_NOSHIP: Attempted to clearShip on a Criminal with no active ship")
         del self.activeShip
         self.hasShip = False
+        self.techLevel = -1
 
 
     def unequipShip(self):
@@ -41,6 +42,7 @@ class Criminal (bbAliasable.Aliasable):
             raise RuntimeError("CRIM_UNEQSH_NOSHIP: Attempted to unequipShip on a Criminal with no active ship")
         self.activeShip = None
         self.hasShip = False
+        self.techLevel = -1
 
 
     def equipShip(self, newShip):
