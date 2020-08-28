@@ -26,8 +26,6 @@ def makeBountyEmbed(bounty):
             routeStr += system
         routeStr += ", "
     
-    embed.add_field(name="**Difficulty:**", value=str(bounty.criminal.techLevel))
-    embed.add_field(name="**See the culprit's loadout with:**", value="`" + bbConfig.commandPrefix + "loadout criminal " + bounty.criminal.name + "`")
     embed.add_field(name="**Route:**", value=routeStr[:-2], inline=False)
     embed.add_field(name="-", value="> ~~Already checked systems~~\n> **Criminal spotted here recently**")
     return embed
