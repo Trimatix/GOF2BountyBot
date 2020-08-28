@@ -1163,7 +1163,7 @@ async def cmd_bounties(message, args, isDM):
         if len(outmessage) == preLen:
             outmessage += "\n[  No currently active bounties! Please check back later.  ]"
         # Restrict the number of bounties a player may win in a single day
-        requestedBBUser = usersDB.getOrAddID(message.author.id)
+        requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
         if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
             requestedBBUser.bountyWinsToday = 0
             requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
@@ -3175,7 +3175,7 @@ async def cmd_poll(message, args, isDM):
     argPos = 0
     for arg in argsSplit:
         argPos += 1
-        optionName, dumbReact = arg.strip(" ").split(" ")[0], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[1])
+        optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
@@ -3188,6 +3188,10 @@ async def cmd_poll(message, args, isDM):
             if not localEmoji:
                 await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
                 return
+
+        if dumbReact in pollOptions:
+            await message.channel.send(":x: Cannot use the same emoji for two options!")
+            return
 
         pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
 
@@ -3288,7 +3292,7 @@ async def cmd_poll(message, args, isDM):
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
-bbCommands.register("poll", cmd_poll)
+bbCommands.register("poll", cmd_poll, forceKeepArgsCasing=True)
 dmCommands.register("poll", err_nodm)
 
 
@@ -3529,7 +3533,7 @@ async def admin_cmd_make_role_menu(message, args, isDM):
     argPos = 0
     for arg in argsSplit:
         argPos += 1
-        roleStr, dumbReact = arg.strip(" ").split(" ")[0], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[1])
+        roleStr, dumbReact = arg.strip(" ").split(" ")[1], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
@@ -3542,6 +3546,10 @@ async def admin_cmd_make_role_menu(message, args, isDM):
             if not localEmoji:
                 await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
                 return
+            
+        if dumbReact in reactionRoles:
+            await message.channel.send(":x: Cannot use the same emoji for two options!")
+            return
 
 
         role = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
@@ -3628,7 +3636,7 @@ async def admin_cmd_make_role_menu(message, args, isDM):
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
-bbCommands.register("make-role-menu", admin_cmd_make_role_menu, isAdmin=True)
+bbCommands.register("make-role-menu", admin_cmd_make_role_menu, isAdmin=True, forceKeepArgsCasing=True)
 
 
 async def admin_cmd_del_reaction_menu(message, args, isDM):
@@ -3811,6 +3819,26 @@ async def dev_cmd_reset_cooldown(message, args, isDM):
 
 bbCommands.register("reset-cool", dev_cmd_reset_cooldown, isDev=True)
 dmCommands.register("reset-cool", dev_cmd_reset_cooldown, isDev=True)
+
+
+"""
+developer command resetting the poll ownership of the calling user, or the specified user if one is given.
+
+@param message -- the discord message calling the command
+@param args -- string, can be empty or contain a user mention
+"""
+async def dev_cmd_reset_has_poll(message, args, isDM):
+    # reset the calling user's cooldown if no user is specified
+    if args == "":
+        bbGlobals.usersDB.getUser(
+            message.author.id).pollOwned = False
+        # otherwise get the specified user's discord object and reset their cooldown.
+        # [!] no validation is done.
+    else:
+        bbGlobals.usersDB.getUser(int(args.lstrip("<@!").rstrip(">"))).pollOwned = False
+        await message.channel.send("Done!")
+
+bbCommands.register("reset-has-poll", dev_cmd_reset_has_poll, isDev=True)
 
 
 """
