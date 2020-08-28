@@ -1024,7 +1024,7 @@ async def cmd_check(message, args, isDM):
             # list of completed bounties to remove from the bounties database
             toPop = []
             for bounty in bbGlobals.bountiesDB.getFactionBounties(fac):
-                if bounty.answer == requestedSystem and requestedBBUser.getStatByName("value") >= bbConfig.bountyTLMaxPlayerValues[bounty.criminal.techLevel]:
+                if bounty.answer == requestedSystem and bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP) > bounty.criminal.techLevel + 1:
                     await message.channel.send(":space_invader: You located **" + bounty.criminal.name + "**, but you are too high level to fight them!")
                     continue
                 # Check the passed system in current bounty
