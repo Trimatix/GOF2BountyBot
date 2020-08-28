@@ -42,11 +42,12 @@ async def printAndExpirePollResults(msgID):
                 break
 
         if menuOption is None:
-            bbLogger.log("ReactPollMenu", "prtAndExpirePollResults", "Failed to find menuOption for emoji: " + str(currentEmoji), category="reactionMenus", eventType="UNKN_OPTN")
-            pollEmbed = menuMsg.embeds[0]
-            pollEmbed.set_footer(text="This poll has ended.")
-            await menu.msg.edit(content="An error occured when calculating the results of this poll. The error has been logged.", embed=pollEmbed)
-            return
+            # bbLogger.log("ReactPollMenu", "prtAndExpirePollResults", "Failed to find menuOption for emoji: " + str(currentEmoji), category="reactionMenus", eventType="UNKN_OPTN")
+            # pollEmbed = menuMsg.embeds[0]
+            # pollEmbed.set_footer(text="This poll has ended.")
+            # await menu.msg.edit(content="An error occured when calculating the results of this poll. The error has been logged.", embed=pollEmbed)
+            # return
+            continue
 
         async for user in reaction.users():
             if user != bbGlobals.client.user:
