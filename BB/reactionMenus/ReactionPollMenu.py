@@ -4,6 +4,7 @@ from .. import bbGlobals, bbUtil
 from discord import Colour, NotFound, HTTPException, Forbidden, Emoji, PartialEmoji
 from datetime import datetime
 from ..scheduling import TimedTask
+from ..logging import bbLogger
 
 
 async def printAndExpirePollResults(msgID):
@@ -15,6 +16,7 @@ async def printAndExpirePollResults(msgID):
         menu.owningBBUser.pollOwned = False
 
     maxOptionLen = 0
+    
     for option in menu.options.values():
         results[option] = []
         if len(option.name) > maxOptionLen:
@@ -25,12 +27,26 @@ async def printAndExpirePollResults(msgID):
             currentEmoji = bbUtil.dumbEmoji(id=reaction.emoji.id)
         else:
             currentEmoji = bbUtil.dumbEmoji(unicode=reaction.emoji)
-        
+
+        if currentEmoji is None:
+            bbLogger.log("ReactPollMenu", "prtAndExpirePollResults", "Failed to fetch dumbEmoji for reaction: " + str(reaction), category="reactionMenus", eventType="INV_REACT")
+            pollEmbed = menuMsg.embeds[0]
+            pollEmbed.set_footer(text="This poll has ended.")
+            await menu.msg.edit(content="An error occured when calculating the results of this poll. The error has been logged.", embed=pollEmbed)
+            return
+
         menuOption = None
         for currentOption in results:
-            if currentOption.emoji.sendable == currentEmoji.sendable:
+            if currentOption.emoji == currentEmoji:
                 menuOption = currentOption
                 break
+
+        if menuOption is None:
+            bbLogger.log("ReactPollMenu", "prtAndExpirePollResults", "Failed to find menuOption for emoji: " + str(currentEmoji), category="reactionMenus", eventType="UNKN_OPTN")
+            pollEmbed = menuMsg.embeds[0]
+            pollEmbed.set_footer(text="This poll has ended.")
+            await menu.msg.edit(content="An error occured when calculating the results of this poll. The error has been logged.", embed=pollEmbed)
+            return
 
         async for user in reaction.users():
             if user != bbGlobals.client.user:
