@@ -114,10 +114,11 @@ class BountyConfig:
                     self.activeShip = bbShip.fromDict(bbData.builtInShipData[random.choice(list(bbData.shipKeysByTL[shipTL]))])
                     shipHasPrimary = self.activeShip.maxPrimaries > 0
 
-                if self.techLevel < self.activeShip.maxPrimaries:
-                    numWeapons = random.randint(self.techLevel, self.activeShip.maxPrimaries)
-                else:
-                    numWeapons = self.activeShip.maxPrimaries
+                # if self.techLevel < self.activeShip.maxPrimaries:
+                #     numWeapons = random.randint(self.techLevel, self.activeShip.maxPrimaries)
+                # else:
+                #     numWeapons = self.activeShip.maxPrimaries
+                numWeapons = random.randint(max(1, self.activeShip.maxPrimaries - 1), self.activeShip.maxPrimaries)
                 for i in range(numWeapons):
                     itemTL = self.techLevel - 1
                     # itemTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
