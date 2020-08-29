@@ -14,7 +14,9 @@ async def deleteReactionMenu(menuID):
 async def removeEmbedAndOptions(menuID):
     menu = bbGlobals.reactionMenusDB[menuID]
     await menu.msg.edit(suppress=True)
-    del bbGlobals.reactionMenusDB[menu.msg.id]
+    if menu.msg.id in bbGlobals.reactionMenusDB:
+        del bbGlobals.reactionMenusDB[menu.msg.id]
+    
     for react in menu.options:
         await menu.msg.remove_reaction(react.sendable, menu.msg.guild.me)
 
