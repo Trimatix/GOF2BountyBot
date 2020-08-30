@@ -3836,7 +3836,7 @@ async def dev_cmd_reset_has_poll(message, args, isDM):
         # [!] no validation is done.
     else:
         bbGlobals.usersDB.getUser(int(args.lstrip("<@!").rstrip(">"))).pollOwned = False
-        await message.channel.send("Done!")
+    await message.channel.send("Done!")
 
 bbCommands.register("reset-has-poll", dev_cmd_reset_has_poll, isDev=True)
 
