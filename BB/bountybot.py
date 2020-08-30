@@ -3129,7 +3129,6 @@ async def cmd_poll(message, args, isDM):
     if bbGlobals.usersDB.getOrAddID(message.author.id).pollOwned:
         await message.channel.send(":x: You can only make one poll at a time!")
         return
-    bbGlobals.usersDB.getUser(message.author.id).pollOwned = True
 
     pollOptions = {}
 
@@ -3155,6 +3154,10 @@ async def cmd_poll(message, args, isDM):
             await message.channel.send(":x: Cannot use the same emoji for two options!")
             return
 
+        for kwArg in [" target=", " days=", " hours=", " seconds=", " minutes=", " multiplechoice="]:
+            if kwArg in optionName.lower():
+                optionName = optionName[:optionName.lower().index(kwArg)]
+
         pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
 
     if len(pollOptions) == 0:
@@ -3163,8 +3166,8 @@ async def cmd_poll(message, args, isDM):
 
     targetRole = None
     targetMember = None
-    if "target=" in arg:
-        argIndex = arg.index("target=") + len("target=")
+    if "target=" in arg.lower():
+        argIndex = arg.lower().index("target=") + len("target=")
         try:
             arg[argIndex:].index(" ")
         except ValueError:
@@ -3193,8 +3196,8 @@ async def cmd_poll(message, args, isDM):
     timeoutDict = {}
 
     for timeName in ["days", "hours", "minutes", "seconds"]:
-        if timeName + "=" in arg:
-            argIndex = arg.index(timeName + "=") + len(timeName + "=")
+        if timeName + "=" in arg.lower():
+            argIndex = arg.lower().index(timeName + "=") + len(timeName + "=")
             try:
                 arg[argIndex:].index(" ")
             except ValueError:
@@ -3216,21 +3219,21 @@ async def cmd_poll(message, args, isDM):
 
     multipleChoice = True
 
-    if "multiplechoice=" in arg:
-        argIndex = arg.index("multiplechoice=") + len("multiplechoice=")
+    if "multiplechoice=" in arg.lower():
+        argIndex = arg.lower().index("multiplechoice=") + len("multiplechoice=")
         try:
             arg[argIndex:].index(" ")
         except ValueError:
             endIndex = len(arg)
         else:
-            endIndex = arg[argIndex:].index(" ") + argIndex + 1
+            endIndex = arg[argIndex:].index(" ") + argIndex
 
         targetStr = arg[argIndex:endIndex]
 
-        if targetStr in ["off", "no", "false", "single", "one"]:
+        if targetStr.lower() in ["off", "no", "false", "single", "one"]:
             multipleChoice = False
-        elif targetStr not in ["on", "yes", "true", "multiple", "many"]:
-            await message.channel.send("Invalid `multiplechoice` argument! Please use either `multiplechoice=yes` or `multiplechoice=no`")
+        elif targetStr.lower() not in ["on", "yes", "true", "multiple", "many"]:
+            await message.channel.send("Invalid `multiplechoice` argument '" + targetStr + "'! Please use either `multiplechoice=yes` or `multiplechoice=no`")
             return
 
 
@@ -3253,6 +3256,7 @@ async def cmd_poll(message, args, isDM):
     menu = ReactionPollMenu.ReactionPollMenu(menuMsg, pollOptions, timeoutTT, pollStarter=message.author, multipleChoice=multipleChoice, targetRole=targetRole, targetMember=targetMember, owningBBUser=bbGlobals.usersDB.getUser(message.author.id))
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
+    bbGlobals.usersDB.getUser(message.author.id).pollOwned = True
 
 bbCommands.register("poll", cmd_poll, forceKeepArgsCasing=True)
 dmCommands.register("poll", err_nodm)
@@ -3529,9 +3533,9 @@ async def admin_cmd_make_role_menu(message, args, isDM):
     targetRole = None
     targetMember = None
     if "target=" in arg:
-        argIndex = arg.index("target=") + len("target=")
+        argIndex = arg.lower().index("target=") + len("target=")
         try:
-            arg[argIndex:].index(" ")
+            arg[argIndex:].lower().index(" ")
         except ValueError:
             endIndex = len(arg)
         else:
@@ -3558,8 +3562,8 @@ async def admin_cmd_make_role_menu(message, args, isDM):
     timeoutDict = {}
 
     for timeName in ["days", "hours", "minutes", "seconds"]:
-        if timeName + "=" in arg:
-            argIndex = arg.index(timeName + "=") + len(timeName + "=")
+        if timeName + "=" in arg.lower():
+            argIndex = arg.lower().index(timeName + "=") + len(timeName + "=")
             try:
                 arg[argIndex:].index(" ")
             except ValueError:

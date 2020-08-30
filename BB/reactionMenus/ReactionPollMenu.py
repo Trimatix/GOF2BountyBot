@@ -57,8 +57,9 @@ async def printAndExpirePollResults(msgID):
                         if currentOption.emoji != currentEmoji and user in results[currentOption]:
                             validVote = False
                             break
-                if validVote:
+                if validVote and user not in results[menuOption]:
                     results[menuOption].append(user)
+                    # print(str(user),"voted for", menuOption.emoji.sendable)
     
     pollEmbed = menuMsg.embeds[0]
     pollEmbed.set_footer(text="This poll has ended.")
