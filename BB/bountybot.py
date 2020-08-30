@@ -673,7 +673,7 @@ async def cmd_help(message, args, isDM):
 
     if page == 0:
         for sectionNum in range(maxPage):
-            if sectionNum == maxPage - 1 and (maxPage + 1) % 2 != 0:
+            if sectionNum == maxPage - 1 and maxPage % 2 != 0:
                 helpEmbed = makeEmbed(titleTxt="BountyBot Commands",
                                       thumb=bbGlobals.client.user.avatar_url_as(size=64))
                 helpEmbed.set_footer(text="Page " + str(maxPage))
@@ -1915,7 +1915,7 @@ async def cmd_hangar(message, args, isDM):
         argNum = 1
         for arg in argsSplit:
             if arg != "":
-                if bbUtil.isUserRef(arg):
+                if bbUtil.isUserRef(arg, dcGuild=message.guild):
                     if foundUser:
                         await message.channel.send(":x: I can only take one user!")
                         return
