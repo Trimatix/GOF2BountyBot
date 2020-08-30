@@ -363,3 +363,45 @@ def userOrMemberName(dcUser, dcGuild):
     if guildMember is None:
         return dcUser.name
     return guildMember.display_name
+
+
+# Use of this method is discouraged. It would be just as efficient to check that getMemberFromRef is not None, and that would require only one function call!
+def isUserRef(uRef, dcGuild=None):
+    if isMention(uRef):
+        return True
+    
+    if dcGuild is not None:
+        if isInt(uRef):
+            return dcGuild.get_member(uRef) is not None
+        else:
+            return dcGuild.get_member_named(uRef) is not None
+
+    return False
+
+
+"""
+Attempt to find a member of a given discord guild object from a string or integer.
+uRef can be one of:
+- A user mention <@!123456>
+- A user ID 123456
+- A user name Carl
+- A user name and discriminator Carl#0324
+
+If the passed user reference is none of the above, or a matching user cannot be found in the requested guild, None is returned.
+
+@param uRef -- A string or integer indentifying a user within dcGuild either by mention, ID, name, or name and discriminator
+@param dcGuild -- A discord.guild in which to search for a member matching uRef
+@return -- Either discord.member of a member belonging to dcGuild and matching uRef, or None if uRef is invalid or no matching user could be found
+"""
+def getMemberFromRef(uRef, dcGuild):
+    # Handle user mentions
+    if isMention(uRef):
+        return dcGuild.get_member(int(uRef.lstrip("<@!").rstrip(">")))
+    # Handle IDs
+    elif isInt(uRef):
+        userAttempt = dcGuild.get_member(int(uRef))
+        # handle the case where uRef may be the username (without discrim) of a user whose name consists only of digits.
+        if userAttempt is not None:
+            return userAttempt
+    # Handle user names and user name+discrim combinations
+    return dcGuild.get_member_named(uRef)

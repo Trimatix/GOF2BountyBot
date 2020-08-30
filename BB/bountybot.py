@@ -591,6 +591,20 @@ async def shutdown():
 
 
 
+def getMemberByRefOverDB(uRef, dcGuild=None):
+    if dcGuild is not None:
+        userAttempt = bbUtil.getMemberFromRef(uRef, dcGuild)
+    else:
+        userAttempt = None
+    if userAttempt is None and bbUtil.isInt(uRef):
+        if bbGlobals.usersDB.userIDExists(int(uRef)):
+            userGuild = bbUtil.findBBUserDCGuild(bbGlobals.usersDB.getUser(int(uRef)))
+            if userGuild is not None:
+                return userGuild.get_member(int(uRef))
+    return userAttempt
+
+
+
 ####### SYSTEM COMMANDS #######
 
 
@@ -659,7 +673,7 @@ async def cmd_help(message, args, isDM):
 
     if page == 0:
         for sectionNum in range(maxPage):
-            if sectionNum == maxPage - 1:
+            if sectionNum == maxPage - 1 and (maxPage + 1) % 2 != 0:
                 helpEmbed = makeEmbed(titleTxt="BountyBot Commands",
                                       thumb=bbGlobals.client.user.avatar_url_as(size=64))
                 helpEmbed.set_footer(text="Page " + str(maxPage))
@@ -795,15 +809,7 @@ async def cmd_balance(message, args, isDM):
     # If a user is specified
     else:
         # Verify the passed user tag
-        if not bbUtil.isMention(args) and not bbUtil.isInt(args):
-            await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
-            return
-        if bbUtil.isMention(args):
-            # Get the discord user object for the given tag
-            requestedUser = bbGlobals.client.get_user(
-                int(args.lstrip("<@!").rstrip(">")))
-        else:
-            requestedUser = bbGlobals.client.get_user(int(args))
+        requestedUser = getMemberByRefOverDB(args, dcGuild=message.guild)
         if requestedUser is None:
             await message.channel.send(":x: Unknown user!")
             return
@@ -813,13 +819,13 @@ async def cmd_balance(message, args, isDM):
         # send the user's balance
         await message.channel.send(":moneybag: **" + bbUtil.userOrMemberName(requestedUser, message.guild) + "** has **" + str(bbGlobals.usersDB.getUser(requestedUser.id).credits) + " Credits**.")
 
-bbCommands.register("balance", cmd_balance)
-bbCommands.register("bal", cmd_balance)
-bbCommands.register("credits", cmd_balance)
+bbCommands.register("balance", cmd_balance, forceKeepArgsCasing=True)
+bbCommands.register("bal", cmd_balance, forceKeepArgsCasing=True)
+bbCommands.register("credits", cmd_balance, forceKeepArgsCasing=True)
 
-dmCommands.register("balance", cmd_balance)
-dmCommands.register("bal", cmd_balance)
-dmCommands.register("credits", cmd_balance)
+dmCommands.register("balance", cmd_balance, forceKeepArgsCasing=True)
+dmCommands.register("bal", cmd_balance, forceKeepArgsCasing=True)
+dmCommands.register("credits", cmd_balance, forceKeepArgsCasing=True)
 
 
 """
@@ -887,20 +893,10 @@ async def cmd_stats(message, args, isDM):
 
     # If a user is specified
     else:
+        requestedUser = getMemberByRefOverDB(args, dcGuild=message.guild)
         # verify the user mention
-        if not bbUtil.isMention(args) and not bbUtil.isInt(args):
-            await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
-            return
-
-        if bbUtil.isMention(args):
-            # Get the discord user object for the given tag
-            requestedUser = bbGlobals.client.get_user(
-                int(args.lstrip("<@!").rstrip(">")))
-        else:
-            requestedUser = bbGlobals.client.get_user(int(args))
-        # ensure the mentioned user could be found
         if requestedUser is None:
-            await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance @userTag` to display someone else's balance!")
+            await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "balance` to display your own balance, or `" + bbConfig.commandPrefix + "balance <user>` to display someone else's balance!\nWhen referencing a player from another server, you must use their long ID number")
             return
 
         # create the stats embed
@@ -954,8 +950,8 @@ async def cmd_stats(message, args, isDM):
         # send the stats embed
         await message.channel.send(embed=statsEmbed)
 
-bbCommands.register("stats", cmd_stats)
-dmCommands.register("stats", cmd_stats)
+bbCommands.register("stats", cmd_stats, forceKeepArgsCasing=True)
+dmCommands.register("stats", cmd_stats, forceKeepArgsCasing=True)
 
 
 """
@@ -1884,7 +1880,7 @@ dmCommands.register("leaderboard", err_nodm)
 
 
 """
-return a page listing the target user's items.
+return a page listing the calling user's items. Administrators may view the hangar of any user.
 can apply to a specified user, or the calling user if none is specified.
 can apply to a type of item (ships, modules, turrets or weapons), or all items if none is specified.
 can apply to a page, or the first page if none is specified.
@@ -1919,13 +1915,12 @@ async def cmd_hangar(message, args, isDM):
         argNum = 1
         for arg in argsSplit:
             if arg != "":
-                if bbUtil.isMention(arg):
+                if bbUtil.isUserRef(arg):
                     if foundUser:
                         await message.channel.send(":x: I can only take one user!")
                         return
                     else:
-                        requestedUser = bbGlobals.client.get_user(
-                            int(arg.lstrip("<@!")[:-1]))
+                        requestedUser = getMemberByRefOverDB(arg, dcGuild=message.guild)
                         foundUser = True
 
                 elif arg.rstrip("s") in bbConfig.validItemNames:
@@ -1937,9 +1932,6 @@ async def cmd_hangar(message, args, isDM):
                         foundItem = True
 
                 elif bbUtil.isInt(arg):
-                    if bbGlobals.client.get_user(int(arg)) is not None and not foundUser:
-                        requestedUser = bbGlobals.client.get_user(int(arg))
-                        continue
                     if foundPage:
                         await message.channel.send(":x: I can only take one page number!")
                         return
@@ -2061,11 +2053,11 @@ async def cmd_hangar(message, args, isDM):
         except discord.Forbidden:
             await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
 
-bbCommands.register("hangar", cmd_hangar)
-bbCommands.register("hanger", cmd_hangar)
+bbCommands.register("hangar", cmd_hangar, forceKeepArgsCasing=True)
+bbCommands.register("hanger", cmd_hangar, forceKeepArgsCasing=True)
 
-dmCommands.register("hangar", cmd_hangar)
-dmCommands.register("hanger", cmd_hangar)
+dmCommands.register("hangar", cmd_hangar, forceKeepArgsCasing=True)
+dmCommands.register("hanger", cmd_hangar, forceKeepArgsCasing=True)
 
 
 """
@@ -2261,19 +2253,11 @@ async def cmd_loadout(message, args, isDM):
         await message.channel.send(":x: Too many arguments! I can only take a target user!")
         return
 
-    if bbUtil.isMention(args) or bbUtil.isInt(args):
-        if bbUtil.isMention(args):
-            # Get the discord user object for the given tag
-            requestedUser = bbGlobals.client.get_user(
-                int(args.lstrip("<@!").rstrip(">")))
-        else:
-            requestedUser = bbGlobals.client.get_user(int(args))
+    if args != "":
+        requestedUser = getMemberByRefOverDB(args, dcGuild=message.guild)
         if requestedUser is None:
-            await message.channel.send(":x: Unrecognised user!")
+            await message.channel.send(":x: Invalid user requested! Please either ping them, or give their ID!")
             return
-    elif args != "":
-        await message.channel.send(":x: Invalid user requested! Please either ping them, or give their ID!")
-        return
 
     if not bbGlobals.usersDB.userIDExists(requestedUser.id):
         if not userFound:
@@ -2339,8 +2323,8 @@ async def cmd_loadout(message, args, isDM):
 
         await message.channel.send(embed=loadoutEmbed)
 
-bbCommands.register("loadout", cmd_loadout)
-dmCommands.register("loadout", cmd_loadout)
+bbCommands.register("loadout", cmd_loadout, forceKeepArgsCasing=True)
+dmCommands.register("loadout", cmd_loadout, forceKeepArgsCasing=True)
 
 
 """
@@ -2841,19 +2825,12 @@ async def cmd_pay(message, args, isDM):
     if len(argsSplit) < 2:
         await message.channel.send(":x: Please give a target user and an amount!")
         return
-    if not bbUtil.isMention(argsSplit[0]) and not bbUtil.isInt(argsSplit[0]):
-        await message.channel.send(":x: Invalid user tag!")
-        return
+
     if not bbUtil.isInt(argsSplit[1]):
         await message.channel.send(":x: Invalid amount!")
         return
 
-    if bbUtil.isMention(argsSplit[0]):
-        # Get the discord user object for the given tag
-        requestedUser = bbGlobals.client.get_user(
-            int(argsSplit[0].lstrip("<@!").rstrip(">")))
-    else:
-        requestedUser = bbGlobals.client.get_user(int(argsSplit[0]))
+    requestedUser = getMemberByRefOverDB(argsSplit[0], dcGuild=message.guild)
     if requestedUser is None:
         await message.channel.send(":x: Unknown user!")
         return
@@ -2882,8 +2859,8 @@ async def cmd_pay(message, args, isDM):
 
     await message.channel.send(":moneybag: You paid " + bbUtil.userOrMemberName(requestedUser, message.guild) + " **" + str(amount) + "** credits!")
 
-bbCommands.register("pay", cmd_pay)
-dmCommands.register("pay", cmd_pay)
+bbCommands.register("pay", cmd_pay, forceKeepArgsCasing=True)
+dmCommands.register("pay", cmd_pay, forceKeepArgsCasing=True)
 
 
 """
@@ -2957,15 +2934,7 @@ async def cmd_total_value(message, args, isDM):
     # If a user is specified
     else:
         # Verify the passed user tag
-        if not bbUtil.isMention(args) and not bbUtil.isInt(args):
-            await message.channel.send(":x: **Invalid user!** use `" + bbConfig.commandPrefix + "total-value` to display your own total value, or `" + bbConfig.commandPrefix + "total-value @userTag` to display someone else's total value!")
-            return
-        if bbUtil.isMention(args):
-            # Get the discord user object for the given tag
-            requestedUser = bbGlobals.client.get_user(
-                int(args.lstrip("<@!").rstrip(">")))
-        else:
-            requestedUser = bbGlobals.client.get_user(int(args))
+        requestedUser = getMemberByRefOverDB(args, dcGuild=message.guild)
         if requestedUser is None:
             await message.channel.send(":x: Unknown user!")
             return
@@ -2975,8 +2944,8 @@ async def cmd_total_value(message, args, isDM):
         # send the user's balance
         await message.channel.send(":moneybag: **" + bbUtil.userOrMemberName(requestedUser, message.guild) + "**'s items and balance have a total value of **" + str(bbGlobals.usersDB.getUser(requestedUser.id).getStatByName("value")) + " Credits**.")
 
-bbCommands.register("total-value", cmd_total_value)
-dmCommands.register("total-value", cmd_total_value)
+bbCommands.register("total-value", cmd_total_value, forceKeepArgsCasing=True)
+dmCommands.register("total-value", cmd_total_value, forceKeepArgsCasing=True)
 
 
 """
@@ -3014,14 +2983,7 @@ async def cmd_duel(message, args, isDM):
         if len(argsSplit) < 2:
             await message.channel.send(":x: Please provide a user!")
             return
-    if not bbUtil.isMention(argsSplit[1]) and not bbUtil.isInt(argsSplit[1]):
-        await message.channel.send(":x: Invalid user!")
-        return
-    if bbUtil.isMention(argsSplit[1]):
-        requestedUser = bbGlobals.client.get_user(
-            int(argsSplit[1].strip("<@!").rstrip(">")))
-    else:
-        requestedUser = bbGlobals.client.get_user(int(argsSplit[1]))
+    requestedUser = getMemberByRefOverDB(argsSplit[1], dcGuild=message.guild)
     if requestedUser is None:
         await message.channel.send(":x: User not found!")
         return
@@ -3137,7 +3099,7 @@ async def cmd_duel(message, args, isDM):
 
         await DuelRequest.fightDuel(message.author, requestedUser, requestedDuel, message)
 
-bbCommands.register("duel", cmd_duel)
+bbCommands.register("duel", cmd_duel, forceKeepArgsCasing=True)
 dmCommands.register("duel", err_nodm)
 
 
