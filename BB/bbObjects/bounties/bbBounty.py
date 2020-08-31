@@ -36,6 +36,7 @@ class Bounty:
         self.endTime = config.endTime
         self.route = config.route
         self.reward = config.reward
+        self.rewardPerSys = config.rewardPerSys
         self.checked = config.checked
         self.answer = config.answer
         if self.criminal.techLevel == -1:
@@ -79,7 +80,8 @@ class Bounty:
                 rewards[self.checked[system]]["checked"] += 1
                 if self.checked[system] != winningUserID:
                     # currentReward = int(self.reward / len(self.route))
-                    currentReward = bbConfig.bPointsToCreditsRatio
+                    # currentReward = bbConfig.bPointsToCreditsRatio
+                    currentReward = self.rewardPerSys
                     rewards[self.checked[system]]["reward"] += currentReward
                     creditsPool -= currentReward
 
@@ -94,11 +96,11 @@ class Bounty:
         return rewards
 
     def toDict(self):
-        return {"faction": self.faction, "route": self.route, "answer": self.answer, "checked": self.checked, "reward": self.reward, "issueTime": self.issueTime, "endTime": self.endTime, "criminal": self.criminal.toDict()}
+        return {"faction": self.faction, "route": self.route, "answer": self.answer, "checked": self.checked, "reward": self.reward, "issueTime": self.issueTime, "endTime": self.endTime, "criminal": self.criminal.toDict(), "rewardPerSys": self.rewardPerSys}
 
 
 
 def fromDict(bounty, dbReload=False):
     return Bounty(dbReload=dbReload,
                     criminalObj=bbCriminal.fromDict(bounty["criminal"]), 
-                    config=bbBountyConfig.BountyConfig(faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))
+                    config=bbBountyConfig.BountyConfig(faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], rewardPerSys=bounty["rewardPerSys"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))

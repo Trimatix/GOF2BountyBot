@@ -206,6 +206,7 @@ Messages will be sent to the announceChannels of all guilds in the bbGlobals.gui
 
 
 async def announceNewBounty(newBounty):
+    print("Difficulty",newBounty.criminal.techLevel,"New bounty with value:",newBounty.criminal.activeShip.getValue())
     # Create the announcement embed
     bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(newBounty.criminal), desc="<:documents:723709178589347921> __New Bounty Available__", col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
     bountyEmbed.add_field(name="Difficulty:", value=str(newBounty.criminal.techLevel))
@@ -1024,8 +1025,12 @@ async def cmd_check(message, args, isDM):
             # list of completed bounties to remove from the bounties database
             toPop = []
             for bounty in bbGlobals.bountiesDB.getFactionBounties(fac):
-                if bounty.answer == requestedSystem and bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP) > bounty.criminal.techLevel + 1:
-                    await message.channel.send(":space_invader: You located **" + bounty.criminal.name + "**, but you are too high level to fight them!")
+                if bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP) > bounty.criminal.techLevel + 1 or bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP) < bounty.criminal.techLevel - 1:
+
+                    if bounty.answer == requestedSystem and bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP) > bounty.criminal.techLevel + 1:
+                        await message.channel.send(":space_invader: You located **" + bounty.criminal.name + "**, but you are too high level to fight them!")
+                    if bounty.answer == requestedSystem and bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP) < bounty.criminal.techLevel - 1:
+                        await message.channel.send(":space_invader: You located **" + bounty.criminal.name + "**, but you are too low level to fight them!")
                     continue
                 # Check the passed system in current bounty
                 # If current bounty resides in the requested system

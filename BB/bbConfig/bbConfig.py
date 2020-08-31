@@ -233,7 +233,8 @@ newBountyFixedDelta = {"days":0, "hours":0, "minutes":1, "seconds":0}
 ### random delay config
 # when using random delay generation, use these min and max points
 # when using random-routeScale generation, use these min and max points for bounties of route length 1
-newBountyDelayRandomRange = {"min": 5 * 60, "max": 7 * 60}
+# newBountyDelayRandomRange = {"min": 5 * 60, "max": 7 * 60}
+newBountyDelayRandomRange = {"min": 60, "max": 5 * 60}
 
 ### routeScale config
 newBountyDelayRouteScaleCoefficient = 1
@@ -242,6 +243,10 @@ fallbackRouteScale = 5
 
 # The number of credits to award for each bPoint (each system in a criminal route)
 bPointsToCreditsRatio = 1000
+
+# The number of credits to award for each system check of a bounty
+def rewardPerSysCheck(techLevel, loadoutValue):
+    return int((loadoutValue * (1.3 if techLevel == 1 else 1)) / (2*(techLevel+(1 if techLevel == 1 else 2)) * 10))
 
 # The percentage of a criminal's ship value to award to the winner
 shipValueRewardPercentage = 0.01

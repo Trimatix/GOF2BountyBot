@@ -7,7 +7,7 @@ from ..items import bbShip
 from ..items.modules import bbArmourModule, bbShieldModule
 
 class BountyConfig:
-    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki="", activeShip=None, techLevel=-1):
+    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, rewardPerSys=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki="", activeShip=None, techLevel=-1):
         self.faction = faction.lower()
         self.name = name.title()
         self.isPlayer = False if isPlayer is None else isPlayer
@@ -20,6 +20,9 @@ class BountyConfig:
         self.answer = answer.title()
         self.checked = checked
         self.reward = reward
+        self.rewardPerSys = rewardPerSys
+        if type(rewardPerSys) == float:
+            self.rewardPerSys = int(rewardPerSys)
         if type(reward) == float:
             self.reward = int(reward)
         self.issueTime = issueTime
@@ -233,7 +236,9 @@ class BountyConfig:
             #                 pass
         
         if self.reward == -1:
-            self.reward = int(len(self.route) * bbConfig.bPointsToCreditsRatio + self.activeShip.getValue() * bbConfig.shipValueRewardPercentage)
+            # self.reward = int(len(self.route) * bbConfig.bPointsToCreditsRatio + self.activeShip.getValue() * bbConfig.shipValueRewardPercentage)
+            self.rewardPerSys = bbConfig.rewardPerSysCheck(self.techLevel, self.activeShip.getValue())
+            self.reward = self.rewardPerSys * len(self.route)
         elif self.reward < 0:
             raise ValueError("Bounty constructor: Invalid reward requested '" + str(self.reward) + "'")
         if self.issueTime == -1.0:
