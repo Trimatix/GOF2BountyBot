@@ -13,7 +13,7 @@ class logger:
         self.logs = {"usersDB":{}, "guildsDB":{}, "bountiesDB":{},
                         "shop":{}, "escapedBounties": {}, "bountyConfig": {}, "duels": {},
                         "hangar": {}, "misc": {}, "bountyBoards": {}, "newBounties": {},
-                        "reactionMenus": {}}
+                        "reactionMenus": {}, "userAlerts": {}}
 
 
     def isEmpty(self):

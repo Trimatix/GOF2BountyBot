@@ -14,6 +14,7 @@ import operator
 import json
 import traceback
 from os import path
+from aiohttp import client_exceptions
 
 # BountyBot Imports
 
@@ -2906,6 +2907,9 @@ async def cmd_notify(message, args, isDM):
             await message.channel.send(":woozy_face: Something went wrong! Please contact an admin or try again later.")
         except ValueError:
             await message.channel.send(":x: This server does not have a role for " + UserAlerts.userAlertsTypesNames[alertType] + " notifications. :robot:")
+        except client_exceptions.ClientOSError:
+            await message.channel.send(":thinking: Whoops! A connection error occurred, and the error has been logged. Could you try that again please?")
+            bbLogger.log("main", "cmd_notify", "aiohttp.client_exceptions.ClientOSError occurred when attempting to grant " + message.author.name + "#" + str(message.author.id) + " alert " + alertID + "in guild " + message.guild.name + "#" + str(message.guild.id) + ".", category="userAlerts", eventType="ClientOSError", trace=traceback.format_exc())
 
 bbCommands.register("notify", cmd_notify)
 dmCommands.register("notify", err_nodm)
