@@ -4,6 +4,7 @@ from ....bbConfig import bbData, bbConfig
 from .... import bbUtil
 from .. import bbCriminal
 from ....logging import bbLogger
+import asyncio
 
 def makeBountyEmbed(bounty):
     embed = Embed(title=bounty.criminal.name, colour=bbData.factionColours[bounty.faction] if bounty.faction in bbData.factionColours else bbData.factionColours["neutral"])
@@ -59,7 +60,18 @@ class BountyBoardChannel:
                 msg = await self.channel.fetch_message(id)
                 self.bountyMessages[criminal.faction][criminal] = msg
             except HTTPException:
-                bbLogger.log("BBC", "init", "HTTPException thrown when fetching listing for criminal: " + criminal.name, category='bountyBoards', eventType="LISTING_LOAD-HTTPERR")
+                succeeded = False
+                for tryNum in bbConfig.bbcHTTPErrRetries:
+                    try:
+                        msg = await self.channel.fetch_message(id)
+                        self.bountyMessages[criminal.faction][criminal] = msg
+                        succeeded = True
+                    except HTTPException:
+                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        continue
+                    break
+                if not succeeded:
+                    bbLogger.log("BBC", "init", "HTTPException thrown when fetching listing for criminal: " + criminal.name, category='bountyBoards', eventType="LISTING_LOAD-HTTPERR")
             except Forbidden:
                 bbLogger.log("BBC", "init", "Forbidden exception thrown when fetching listing for criminal: " + criminal.name, category='bountyBoards', eventType="LISTING_LOAD-FORBIDDENERR")
             except NotFound:
@@ -72,7 +84,17 @@ class BountyBoardChannel:
             try:
                 self.noBountiesMessage = await self.channel.fetch_message(self.noBountiesMsgToBeLoaded)
             except HTTPException:
-                bbLogger.log("BBC", "init", "HTTPException thrown when fetching no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
+                succeeded = False
+                for tryNum in bbConfig.bbcHTTPErrRetries:
+                    try:
+                        self.noBountiesMessage = await self.channel.fetch_message(self.noBountiesMsgToBeLoaded)
+                        succeeded = True
+                    except HTTPException:
+                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        continue
+                    break
+                if not succeeded:
+                    bbLogger.log("BBC", "init", "HTTPException thrown when fetching no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
             except Forbidden:
                 bbLogger.log("BBC", "init", "Forbidden exception thrown when fetching no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-FORBIDDENERR")
             except NotFound:
@@ -112,7 +134,17 @@ class BountyBoardChannel:
             try:
                 await self.noBountiesMessage.delete()
             except HTTPException:
-                print("addBounty HTTPException")
+                succeeded = False
+                for tryNum in bbConfig.bbcHTTPErrRetries:
+                    try:
+                        await self.noBountiesMessage.delete()
+                        succeeded = True
+                    except HTTPException:
+                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        continue
+                    break
+                if not succeeded:
+                    print("addBounty HTTPException")
             except Forbidden:
                 print("addBounty Forbidden")
             except AttributeError:
@@ -131,7 +163,17 @@ class BountyBoardChannel:
                 self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
 
             except HTTPException:
-                bbLogger.log("BBC", "remBty", "HTTPException thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
+                succeeded = False
+                for tryNum in bbConfig.bbcHTTPErrRetries:
+                    try:
+                        self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
+                        succeeded = True
+                    except HTTPException:
+                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        continue
+                    break
+                if not succeeded:
+                    bbLogger.log("BBC", "remBty", "HTTPException thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
                 self.noBountiesMessage = None
             except Forbidden:
                 bbLogger.log("BBC", "remBty", "Forbidden exception thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-FORBIDDENERR")
@@ -147,7 +189,17 @@ class BountyBoardChannel:
         try:
             await self.bountyMessages[bounty.criminal.faction][bounty.criminal].edit(content=content, embed=makeBountyEmbed(bounty))
         except HTTPException:
-            bbLogger.log("BBC", "updBtyMsg", "HTTPException thrown when updating bounty listing for criminal: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-HTTPERR")
+            succeeded = False
+            for tryNum in bbConfig.bbcHTTPErrRetries:
+                try:
+                    await self.bountyMessages[bounty.criminal.faction][bounty.criminal].edit(content=content, embed=makeBountyEmbed(bounty))
+                    succeeded = True
+                except HTTPException:
+                    await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                    continue
+                break
+            if not succeeded:
+                bbLogger.log("BBC", "updBtyMsg", "HTTPException thrown when updating bounty listing for criminal: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-HTTPERR")
         except Forbidden:
             bbLogger.log("BBC", "updBtyMsg", "Forbidden exception thrown when updating bounty listing for criminal: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-FORBIDDENERR")
         except NotFound:

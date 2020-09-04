@@ -205,6 +205,11 @@ closeBountyThreshold = 4
 # Text to send to a BountyBoardChannel when no bounties are currently active
 bbcNoBountiesMsg = "```css\n[ NO ACTIVE BOUNTIES ]\n\nThere are currently no active bounty listings.\nPlease check back later, or use [ $notify bounties ] to be pinged when new ones become available!\n```"
 
+# The number of times to retry BBC listing updates when HTTP exceptions are thrown
+bbcHTTPErrRetries = 3
+
+# The number of seconds to wait between BBC listing update retries upon HTTP exception catching
+bbcHTTPErrRetryDelaySeconds = 1
 
 
 ##### SAVING #####
