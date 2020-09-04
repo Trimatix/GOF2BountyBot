@@ -61,7 +61,7 @@ class BountyBoardChannel:
                 self.bountyMessages[criminal.faction][criminal] = msg
             except HTTPException:
                 succeeded = False
-                for tryNum in bbConfig.bbcHTTPErrRetries:
+                for tryNum in range(bbConfig.bbcHTTPErrRetries):
                     try:
                         msg = await self.channel.fetch_message(id)
                         self.bountyMessages[criminal.faction][criminal] = msg
@@ -86,7 +86,7 @@ class BountyBoardChannel:
 
                 except HTTPException:
                     succeeded = False
-                    for tryNum in bbConfig.bbcHTTPErrRetries:
+                    for tryNum in range(bbConfig.bbcHTTPErrRetries):
                         try:
                             self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
                             succeeded = True
@@ -106,7 +106,7 @@ class BountyBoardChannel:
                 self.noBountiesMessage = await self.channel.fetch_message(self.noBountiesMsgToBeLoaded)
             except HTTPException:
                 succeeded = False
-                for tryNum in bbConfig.bbcHTTPErrRetries:
+range(                for tryNum )in range(bbConfig.bbcHTTPErrRetries):
                     try:
                         self.noBountiesMessage = await self.channel.fetch_message(self.noBountiesMsgToBeLoaded)
                         succeeded = True
@@ -156,7 +156,7 @@ class BountyBoardChannel:
                 await self.noBountiesMessage.delete()
             except HTTPException:
                 succeeded = False
-                for tryNum in bbConfig.bbcHTTPErrRetries:
+                for tryNum in range(bbConfig.bbcHTTPErrRetries):
                     try:
                         await self.noBountiesMessage.delete()
                         succeeded = True
@@ -185,7 +185,7 @@ class BountyBoardChannel:
 
             except HTTPException:
                 succeeded = False
-                for tryNum in bbConfig.bbcHTTPErrRetries:
+                for tryNum in range(bbConfig.bbcHTTPErrRetries):
                     try:
                         self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
                         succeeded = True
@@ -211,7 +211,7 @@ class BountyBoardChannel:
             await self.bountyMessages[bounty.criminal.faction][bounty.criminal].edit(content=content, embed=makeBountyEmbed(bounty))
         except HTTPException:
             succeeded = False
-            for tryNum in bbConfig.bbcHTTPErrRetries:
+            for tryNum in range(bbConfig.bbcHTTPErrRetries):
                 try:
                     await self.bountyMessages[bounty.criminal.faction][bounty.criminal].edit(content=content, embed=makeBountyEmbed(bounty))
                     succeeded = True
