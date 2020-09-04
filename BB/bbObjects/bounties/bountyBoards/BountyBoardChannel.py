@@ -106,7 +106,7 @@ class BountyBoardChannel:
                 self.noBountiesMessage = await self.channel.fetch_message(self.noBountiesMsgToBeLoaded)
             except HTTPException:
                 succeeded = False
-range(                for tryNum )in range(bbConfig.bbcHTTPErrRetries):
+                for tryNum in range(bbConfig.bbcHTTPErrRetries):
                     try:
                         self.noBountiesMessage = await self.channel.fetch_message(self.noBountiesMsgToBeLoaded)
                         succeeded = True
