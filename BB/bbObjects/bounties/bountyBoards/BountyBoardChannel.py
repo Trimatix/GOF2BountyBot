@@ -79,6 +79,27 @@ class BountyBoardChannel:
 
         if self.noBountiesMsgToBeLoaded == -1:
             self.noBountiesMessage = None
+            if self.isEmpty():
+                try:
+                    # self.noBountiesMessage = await self.channel.send(bbConfig.bbcNoBountiesMsg)
+                    self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
+
+                except HTTPException:
+                    succeeded = False
+                    for tryNum in bbConfig.bbcHTTPErrRetries:
+                        try:
+                            self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
+                            succeeded = True
+                        except HTTPException:
+                            await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                            continue
+                        break
+                    if not succeeded:
+                        bbLogger.log("BBC", "init", "HTTPException thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
+                    self.noBountiesMessage = None
+                except Forbidden:
+                    bbLogger.log("BBC", "init", "Forbidden exception thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-FORBIDDENERR")
+                    self.noBountiesMessage = None
             
         else:
             try:
