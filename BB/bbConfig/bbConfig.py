@@ -314,10 +314,3 @@ pollMenuDefaultTimeout = {"hours": 2}
 expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
-
-
-
-##### INTERNAL #####
-# Do not touch these!
-newBountyDelayReset = False
-newBountyFixedDeltaChanged = False

@@ -4124,7 +4124,7 @@ async def dev_cmd_setbountyperiodm(message, args, isDM):
         return
     # update the new bounty generation cooldown
     bbConfig.newBountyFixedDelta["minutes"] = int(args)
-    bbConfig.newBountyFixedDeltaChanged = True
+    bbGlobals.newBountyFixedDeltaChanged = True
     await message.channel.send("Done! *you still need to update the file though* " + message.author.mention)
 
 bbCommands.register("setbountyperiodm", dev_cmd_setbountyperiodm, isDev=True)
@@ -4151,7 +4151,7 @@ async def dev_cmd_setbountyperiodh(message, args, isDM):
         await message.channel.send(":x: that's not a number!")
         return
     # update the bounty generation period
-    bbConfig.newBountyFixedDeltaChanged = True
+    bbGlobals.newBountyFixedDeltaChanged = True
     bbConfig.newBountyFixedDelta["hours"] = int(args)
     await message.channel.send("Done! *you still need to update the file though* " + message.author.mention)
 
@@ -4169,7 +4169,7 @@ instantly generating a new bounty
 
 
 async def dev_cmd_resetnewbountycool(message, args, isDM):
-    bbConfig.newBountyDelayReset = True
+    bbGlobals.newBountyDelayReset = True
     await message.channel.send(":ballot_box_with_check: New bounty cooldown reset!")
 
 bbCommands.register("resetnewbountycool",
@@ -5086,9 +5086,9 @@ async def on_ready():
 
         await bbGlobals.shopRefreshTT.doExpiryCheck()
 
-        if bbConfig.newBountyDelayReset:
+        if bbGlobals.newBountyDelayReset:
             await bbGlobals.newBountyTT.forceExpire()
-            bbConfig.newBountyDelayReset = False
+            bbGlobals.newBountyDelayReset = False
         else:
             await bbGlobals.newBountyTT.doExpiryCheck()
 

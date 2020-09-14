@@ -21,3 +21,9 @@ duelRequestTTDB = None
 # Reaction Menus
 reactionMenusDB = None
 reactionMenusTTDB = None
+
+
+# Scheduling overrides
+# Do not touch these!
+newBountyDelayReset = False
+newBountyFixedDeltaChanged = False
