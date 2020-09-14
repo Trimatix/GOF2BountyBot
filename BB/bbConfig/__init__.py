@@ -1,3 +1,6 @@
+# This file used to initialize BB-specific objects stored in bbData.
+# Some objects now require discord behaviour to initialize (e.g message references), so this has been moved to bountybot.on_ready 
+
 """import operator, pprint
 
 from . import bbData, bbConfig

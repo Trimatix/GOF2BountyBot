@@ -24,6 +24,5 @@ reactionMenusTTDB = None
 
 
 # Scheduling overrides
-# Do not touch these!
 newBountyDelayReset = False
 newBountyFixedDeltaChanged = False
