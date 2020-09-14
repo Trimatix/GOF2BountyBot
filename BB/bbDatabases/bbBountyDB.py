@@ -267,7 +267,7 @@ class bbBountyDB:
 
 
     
-    def canMakeBounty(self) -> bounty:
+    def canMakeBounty(self) -> bbBounty.Bounty:
         """Check whether this DB has space for more bounties
 
         Returns
