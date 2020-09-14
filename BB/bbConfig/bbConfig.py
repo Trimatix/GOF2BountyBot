@@ -6,7 +6,21 @@ from ..bbUtil import dumbEmoji
 # Number of decimal places to calculate itemTLSpawnChanceForShopTL values to
 tl_resolution = 3
 
-def truncToRes(num):
+
+def truncToRes(num : float) -> float:
+    """
+    Truncate the passed float to tl_resolution decimal places.
+
+    Parameters
+    ----------
+    num : float
+        Float number to truncate
+    
+    Returns
+    -------
+    float
+        num, truncated to tl_resolution decimal places
+    """
     return math.trunc(num * math.pow(10, tl_resolution)) / math.pow(10, tl_resolution)
 
 
@@ -83,12 +97,21 @@ for shopTL in range(minTechLevel, maxTechLevel + 1):
         currentSum += currentChance
 
 
-def pickRandomShopTL():
+def pickRandomShopTL() -> int:
+    """
+    Pick a random shop techlevel, with probabilities calculated previously in bbConfig.
+
+    Returns
+    -------
+    int
+        An integer between 1 and 10 representing a shop tech level
+    """
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
     for shopTL in range(len(cumulativeShopTLChance)):
         if cumulativeShopTLChance[shopTL] >= tlChance:
             return shopTL + 1
     return maxTechLevel
+
 
 # Price ranges by which ships should be ranked into tech levels. 0th index = tech level 1
 shipMaxPriceTechLevels = [50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 7000000, 7500000, 999999999]
@@ -112,9 +135,25 @@ tl_o = 2.3
     outer = tl_s * mid - (h / 2)
     return truncToRes(outer if outer > 0 else 0)"""
 
-def tl_u(x, t):
+def tl_u(x : int, t : int) -> float:
+    """
+    math function used when calculating item spawn probabilities.
+
+    Parameters
+    ----------
+    x : int
+        int representing the item's tech level
+    t : int
+        int representing the owning shop's tech level
+
+    Returns
+    --------
+    float
+        A partial probability for use in probability generation
+    """
     chance = truncToRes(1 - math.pow((x - t)/1.4,2))
     return chance if chance > 0 else 0
+
 
 # Loop through shop TLs
 for shopTL in range(minTechLevel, maxTechLevel + 1):
@@ -154,7 +193,20 @@ for shopTL in range(len(itemTLSpawnChanceForShopTL)):
     print()
 
 
-def pickRandomItemTL(shopTL):
+def pickRandomItemTL(shopTL : int) -> int:
+    """
+    Pick a random item techlevel, with probabilities calculated previously in bbConfig.
+
+    Parameters
+    ----------
+    shopTL : int
+        int representing the tech level of the shop owning the item
+    
+    Returns
+    -------
+    int
+        An integer between 1 and 10 representing a item tech level
+    """
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
     for itemTL in range(len(cumulativeItemTLSpawnChanceForShopTL[shopTL - 1])):
         if cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL] >= tlChance:
