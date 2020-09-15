@@ -2,6 +2,7 @@ from .BattleShip import BattleShip
 from .BattleShipState import BattleShipState
 import random
 from ...bbConfig import bbConfig
+from ..items import bbShip
 
 # ⚠⚠ This file is currently unused and a work in progress
 
@@ -19,7 +20,7 @@ class ShipFight:
     :vartype battleState: list[BattleShipState]
     """
 
-    def __init__(self, bbShip1, bbShip2):
+    def __init__(self, bbShip1 : bbShip.bbShip, bbShip2 : bbShip.bbShip):
         """
         :param bbShip bbShip1: One of the bbShips participating in this fight
         :param bbShip bbShip2: One of the bbShips participating in this fight
@@ -30,7 +31,7 @@ class ShipFight:
         self.battleState = []
 
 
-    def fightShips(self, variancePercent):
+    def fightShips(self, variancePercent : float) -> dict:
         """
         Simulate the fight.
         Returns a dictionary containing a reference to the winning bbShip, as well as the battleLog.
