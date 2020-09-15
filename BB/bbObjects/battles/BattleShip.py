@@ -1,4 +1,5 @@
 from ..items.modules import bbCloakModule
+from ..items import bbShip
 
 
 class BattleShip:
@@ -6,7 +7,7 @@ class BattleShip:
     The ship has three health pools; hull, armour and shield.
     """
 
-    def __init__(self, bbShip : bbShip):
+    def __init__(self, bbShip : bbShip.bbShip):
         """
         :param bbShip bbShip: The bbShip for this BattleShip to inherit stats from
         """

@@ -1,8 +1,10 @@
+from . import BattleShip
+
 class BattleShipState:
     """Class representing the state of a BattleShip at a given moment in time.
     TODO: Move to BattleShip.py"""
 
-    def __init__(self, battleShip):
+    def __init__(self, battleShip : BattleShip.BattleShip):
         """
         :param BattleShip battleShip: the BattleShip to record the stats of
         """

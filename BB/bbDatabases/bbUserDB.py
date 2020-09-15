@@ -26,7 +26,7 @@ class bbUserDB:
         return id in self.users.keys()
 
 
-    def userObjExists(self, user : bbUser) -> bool:
+    def userObjExists(self, user : bbUser.bbUser) -> bool:
         """Check if a given bbUser object is stored in the database.
         Currently only checks if a user with the same ID is stored in the database, not if the objects are the same.
 
@@ -71,7 +71,7 @@ class bbUserDB:
         self.users[id].resetUser()
 
 
-    def addUser(self, id : int) -> bbUser:
+    def addUser(self, id : int) -> bbUser.bbUser:
         """
         Create a new bbUser object with the specified ID and add it to the database
 
@@ -89,7 +89,7 @@ class bbUserDB:
         self.users[id] = newUser
         return newUser
 
-    def addUserObj(self, userObj : bbUser):
+    def addUserObj(self, userObj : bbUser.bbUser):
         """Store the given bbUser object in the database
 
         :param bbUser userObj: bbUser to store
@@ -102,7 +102,7 @@ class bbUserDB:
         self.users[userObj.id] = userObj
 
 
-    def getOrAddID(self, id : int) -> bbUser:
+    def getOrAddID(self, id : int) -> bbUser.bbUser:
         """If a bbUser exists in the database with the requested ID, return it. If not, create and store a new bbUser and return it.
 
         :param int id: integer discord ID for the user to fetch or create
@@ -125,7 +125,7 @@ class bbUserDB:
         del self.users[id]
 
     
-    def getUser(self, id : int) -> bbUser:
+    def getUser(self, id : int) -> bbUser.bbUser:
         """Fetch the bbUser from the database with the given ID.
 
         :param int ID: integer discord ID for the user to fetch
@@ -136,7 +136,7 @@ class bbUserDB:
         return self.users[id]
 
 
-    def getUsers(self) -> List[bbUser]:
+    def getUsers(self) -> List[bbUser.bbUser]:
         """Get a list of all bbUser objects stored in the database
 
         :return: list containing all bbUser objects in the db
