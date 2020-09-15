@@ -1,9 +1,12 @@
 from ... import bbUtil, bbGlobals
 from ...bbConfig import bbConfig
-from discord import Embed
+from discord import Embed, User, Message
+from .. import bbUser
+from ...scheduling import TimedTask
+from .. import bbGuild
 
 
-def makeDuelStatsEmbed(duelResults, targetUser, sourceUser):
+def makeDuelStatsEmbed(duelResults : dict, targetUser : bbUser.bbUser, sourceUser : bbUser.bbUser) -> Embed:
     """Build a discord.Embed displaying the statistics of a completed duel.
 
     :param dict duelResults: A dictionary describing the results of the duel TODO: This is to be changed to a data class, or a ShipFight
@@ -41,7 +44,7 @@ class DuelRequest:
     :var menus: A list of ReactionDuelChallengeMenu, each of which may trigger, or be removed by, the expiry or completion of this duel request
     :vartype menus: ReactionDuelChallengeMenu
     """
-    def __init__(self, sourceBBUser, targetBBUser, stakes, duelTimeoutTask, sourceBBGuild):
+    def __init__(self, sourceBBUser : bbUser.bbUser, targetBBUser : bbUser.bbUser, stakes : int, duelTimeoutTask : TimedTask.TimedTask, sourceBBGuild : bbGuild.bbGuild):
         """
         :param bbUser sourceBBUser: -- The bbUser who issued the duel challenge
         :param bbUser targetBBUser: -- The bbUser to accept/reject the challenge
@@ -58,7 +61,7 @@ class DuelRequest:
 
 
 # ⚠⚠⚠ THIS FUNCTION IS MARKED FOR CHANGE
-async def fightDuel(sourceUser, targetUser, duelReq, acceptMsg):
+async def fightDuel(sourceUser : User, targetUser : User, duelReq : DuelRequest, acceptMsg : Message) -> dict:
     """Simulate a duel between two users.
     Returns a dictionary containing statistics about the duel, as well as references to the winning and losing bbUsers. 
 
@@ -158,7 +161,7 @@ async def fightDuel(sourceUser, targetUser, duelReq, acceptMsg):
 
 
 # ⚠⚠⚠ THIS FUNCTION IS MARKED FOR CHANGE
-async def rejectDuel(duelReq, rejectMsg, challenger, recipient):
+async def rejectDuel(duelReq : DuelRequest, rejectMsg : Message, challenger : User, recipient : User):
     """
     Reject a duel request, including expiring the DuelReq object and its TimedTask, announcing the request cancellation to both participants, and expiring all related ReactionDuelChallengeMenus.
 
