@@ -5,42 +5,8 @@ from typing import List
 class bbGuildDB:
     """A database of bbGuilds.
     
-    . . .
-
-    Attributes
-    ----------
-    guilds : dict
-        Dictionary of guild.id to guild, where guild is a bbGuild
-
-    Methods
-    -------
-    getIDs()
-        Get a list of all guild IDs in the database.
-    getGuilds()
-        Get a list of all bbGuilds in the database.
-    getGuild(id)
-        Get the bbGuild object with the specified ID.
-    guildIdExists(id)
-        Check whether a bbGuild with a given ID exists in the database.
-    guildObjExists(guild)
-        Check whether a bbGuild object exists in the database.
-        Existence checking is currently handled by checking if a guild with the requested ID is stored.
-    addGuildObj(guild)
-        Add a given bbGuild object to the database.
-    addGuildID(id)
-        Add a bbGuild object with the requested ID to the database
-    removeGuildId(id)
-        Remove the bbGuild with the requested ID from the database.
-    removeGuildObj(guild)
-        Remove the given bbGuild object from the database
-        Currently removes any bbGuild sharing the given guild's ID, even if it is a different object.
-    refreshAllShopStocks()
-        Generate new stock for all shops belonging to the stored bbGuilds
-    toDict()
-        Serialise this bbGuildDB into dictionary format
-    __str__()
-        Fetch summarising information about the database, as a string
-        Currently only the number of guilds stored
+    :var guilds: Dictionary of guild.id to guild, where guild is a bbGuild
+    :vartype guilds: dict[int, bbGuild]
     """
 
     def __init__(self):
@@ -52,10 +18,8 @@ class bbGuildDB:
     def getIDs(self) -> List[int]:
         """Get a list of all guild IDs in the database.
 
-        Returns
-        -------
-        list
-            A list containing all guild IDs (ints) stored in the database.
+        :return: A list containing all guild IDs (ints) stored in the database.
+        :rtype: list
         """
         return list(self.guilds.keys())
 
@@ -64,10 +28,8 @@ class bbGuildDB:
     def getGuilds(self) -> List[bbGuild.bbGuild]:
         """Get a list of all bbGuilds in the database.
 
-        Returns
-        -------
-        list
-            A list containing all bbGuild objects stored in the database
+        :return: A list containing all bbGuild objects stored in the database
+        :rtype: list
         """
         return list(self.guilds.values())
 
@@ -76,15 +38,9 @@ class bbGuildDB:
     def getGuild(self, id : int) -> bbGuild.bbGuild:
         """Get the bbGuild object with the specified ID.
 
-        Parameters
-        ----------
-        id : str
-            integer discord ID for the requested guild
-        
-        Returns
-        -------
-        bbGuild
-            bbGuild having the requested ID
+        :param str id: integer discord ID for the requested guild
+        :return: bbGuild having the requested ID
+        :rtype: bbGuild
         """
         return self.guilds[id]
 
@@ -93,15 +49,9 @@ class bbGuildDB:
     def guildIdExists(self, id : int) -> bool:
         """Check whether a bbGuild with a given ID exists in the database.
         
-        Parameters
-        ----------
-        id : int
-            integer discord ID to check for existence
-        
-        Returns
-        -------
-        bool
-            True if a bbGuild is stored in the database with the requested ID, False otherwise
+        :param int id: integer discord ID to check for existence
+        :return: True if a bbGuild is stored in the database with the requested ID, False otherwise
+        :rtype: bool
         """
         # Search the DB for the requested ID
         try:
@@ -118,15 +68,10 @@ class bbGuildDB:
         """Check whether a bbGuild object exists in the database.
         Existence checking is currently handled by checking if a guild with the requested ID is stored.
 
-        Parameters
-        ----------
-        guild : bbGuild
-            bbGuild object to check for existence
+        :param bbGuild guild: bbGuild object to check for existence
 
-        Returns
-        -------
-        bool
-            True if the exact bbGuild exists in the DB, False otherwise
+        :return: True if the exact bbGuild exists in the DB, False otherwise
+        :rtype: bool
         """
         return self.guildIdExists(guild.id)
 
@@ -135,15 +80,8 @@ class bbGuildDB:
     def addGuildObj(self, guild : bbGuild.bbGuild):
         """Add a given bbGuild object to the database.
 
-        Parameters
-        ----------
-        guild : bbGuild
-            the bbGuild object to store
-        
-        Raises
-        ------
-        KeyError
-            If the the guild is already in the database
+        :param bbGuild guild: the bbGuild object to store
+        :raise KeyError: If the the guild is already in the database
         """
         # Ensure guild is not yet in the database
         if self.guildObjExists(guild):
@@ -155,20 +93,11 @@ class bbGuildDB:
     def addGuildID(self, id: int) -> bbGuild.bbGuild:
         """Add a bbGuild object with the requested ID to the database
 
-        Parameters
-        ----------
-        id : int
-            integer discord ID to create and store a bbGuild for
+        :param int id: integer discord ID to create and store a bbGuild for
+        :raise KeyError: If a bbGuild is already stored for the requested ID
         
-        Raises
-        ------
-        KeyError
-            If a bbGuild is already stored for the requested ID
-        
-        Returns
-        -------
-        bbGuild
-            the new bbGuild object
+        :return: the new bbGuild object
+        :rtype: bbGuild
         """
         # Ensure the requested ID does not yet exist in the database
         if self.guildIdExists(id):
@@ -182,10 +111,7 @@ class bbGuildDB:
     def removeGuildId(self, id : int):
         """Remove the bbGuild with the requested ID from the database.
         
-        Parameters
-        ----------
-        id : int
-            integer discord ID to remove from the database
+        :param int id: integer discord ID to remove from the database
         """
         self.guilds.pop(id)
 
@@ -195,10 +121,7 @@ class bbGuildDB:
         """Remove the given bbGuild object from the database
         Currently removes any bbGuild sharing the given guild's ID, even if it is a different object.
 
-        Parameters
-        ----------
-        guild : bbGuild
-            the guild object to remove from the database
+        :param bbGuild guild: the guild object to remove from the database
         """
         self.removeGuildId(guild.id)
 
@@ -215,10 +138,8 @@ class bbGuildDB:
     def toDict(self) -> dict:
         """Serialise this bbGuildDB into dictionary format
 
-        Returns
-        -------
-        dict
-            A dictionary containing all data needed to recreate this bbGuildDB
+        :return: A dictionary containing all data needed to recreate this bbGuildDB
+        :rtype: dict
         """
         data = {}
         # Iterate over all stored guilds
@@ -234,10 +155,8 @@ class bbGuildDB:
         """Fetch summarising information about the database, as a string
         Currently only the number of guilds stored
 
-        Returns
-        -------
-        str
-            A string summarising this db
+        :return: A string summarising this db
+        :rtype: str
         """
         return "<bbGuildDB: " + str(len(self.guilds)) + " guilds>"
 
@@ -246,15 +165,9 @@ class bbGuildDB:
 def fromDict(guildsDBDict : dict) -> bbGuildDB:
     """Construct a bbGuildDB object from dictionary-serialised format; the reverse of bbGuildDB.todict()
 
-    Parameters
-    ----------
-    bountyDBDict : dict
-        The dictionary representation of the bbGuildDB to create
-    
-    Returns
-    -------
-    bbGuildDB
-        The new bbGuildDB
+    :param dict bountyDBDict: The dictionary representation of the bbGuildDB to create
+    :return: The new bbGuildDB
+    :rtype: bbGuildDB
     """
     # Instance the new bbGuildDB
     newDB = bbGuildDB()
