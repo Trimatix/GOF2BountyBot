@@ -6,7 +6,7 @@ class BattleShip:
     The ship has three health pools; hull, armour and shield.
     """
 
-    def __init__(self, bbShip):
+    def __init__(self, bbShip : bbShip):
         """
         :param bbShip bbShip: The bbShip for this BattleShip to inherit stats from
         """
@@ -26,7 +26,7 @@ class BattleShip:
                 self.cloaks += module
     
 
-    def hasHull(self):
+    def hasHull(self) -> bool:
         """Test whether this BattleShip has any hull HP remaining.
 
         :return: True if this BattleShip's hull HP is greater than 0, False otherwise
@@ -36,7 +36,7 @@ class BattleShip:
 
     
     
-    def hasArmour(self):
+    def hasArmour(self) -> bool:
         """Test whether this BattleShip has any armour HP remaining.
 
         :return: True if this BattleShip's armour HP is greater than 0, False otherwise
@@ -46,7 +46,7 @@ class BattleShip:
 
 
     
-    def hasShield(self):
+    def hasShield(self) -> bool:
         """Test whether this BattleShip has any shield HP remaining.
 
         :return: True if this BattleShip's shield HP is greater than 0, False otherwise
@@ -56,7 +56,7 @@ class BattleShip:
 
     
     
-    def hasCloaks(self):
+    def hasCloaks(self) -> bool:
         """Test whether this BattleShip has any cloak modules equipped.
 
         :return: True if this BattleShip has at least one cloak module equipped, False otherwise
@@ -66,7 +66,7 @@ class BattleShip:
 
 
     
-    def getShield(self):
+    def getShield(self) -> int:
         """Get this BattleShip's remaining shield HP.
 
         :return: Integer amount of shield HP remaining; 0 or more.
@@ -76,7 +76,7 @@ class BattleShip:
 
 
     
-    def getArmour(self):
+    def getArmour(self) -> int:
         """Get this BattleShip's remaining armour HP.
 
         :return: Integer amount of armour HP remaining; 0 or more.
@@ -86,7 +86,7 @@ class BattleShip:
 
 
     
-    def getHull(self):
+    def getHull(self) -> int:
         """Get this BattleShip's remaining hull HP.
 
         :return: Integer amount of hull HP remaining; 0 or more.
@@ -95,7 +95,7 @@ class BattleShip:
         return self.hull
 
     
-    def setShield(self, new):
+    def setShield(self, new : int):
         """Set this BattleShip's remaining shield HP.
 
         :param int new: Integer new amount of shield HP remaining; 0 or more.
@@ -103,7 +103,7 @@ class BattleShip:
         self.shield = new
         
     
-    def setArmour(self, new):
+    def setArmour(self, new : int):
         """Set this BattleShip's remaining armour HP.
 
         :param int new: Integer new amount of armour HP remaining; 0 or more.
@@ -111,7 +111,7 @@ class BattleShip:
         self.armour = new
 
     
-    def setHull(self, new):
+    def setHull(self, new : int):
         """Set this BattleShip's remaining hull HP.
 
         :param int new: Integer new amount of hull HP remaining; 0 or more.
