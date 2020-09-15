@@ -1,6 +1,9 @@
 from ..reactionMenus import ReactionMenu, ReactionRolePicker, ReactionInventoryPicker, ReactionDuelChallengeMenu, ReactionPollMenu
 
+# ReactionMenu subclasses that cannot be saved to dictionary
+# TODO: change to a class-variable reference e.g menu.__class__.SAVEABLE
 unsaveableMenuTypes = ["ReactionDuelChallengeMenu"]
+
 
 class ReactionMenuDB(dict):
     def toDict(self):
