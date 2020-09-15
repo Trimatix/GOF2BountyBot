@@ -16,7 +16,7 @@ class HeirarchicalCommandsDB:
         self.devCommands = {}
 
     
-    def register(self, command, function, isAdmin=False, isDev=False, forceKeepArgsCasing=False, forceKeepCommandCasing = False):
+    def register(self, command : str, function : builtin_function_or_method, isAdmin=False, isDev=False, forceKeepArgsCasing=False, forceKeepCommandCasing=False):
         """Register a command in the database.
 
         :param str command: the text name users should call the function by. Commands are case sensitive.
@@ -32,7 +32,7 @@ class HeirarchicalCommandsDB:
             self.userCommands[command if forceKeepCommandCasing else command.lower()] = (function, forceKeepArgsCasing, forceKeepCommandCasing)
 
     
-    async def call(self, command, message, args, isAdmin=False, isDev=False, isDM=False):
+    async def call(self, command : str, message : discord.message, args : str, isAdmin=False, isDev=False, isDM=False):
         """Call a command or send an error message.
 
         :param str command: the text name of the command to attempt to call. Commands are case sensitive
