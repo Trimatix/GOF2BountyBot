@@ -2,6 +2,7 @@ from ..bbObjects import bbUser
 from .. import bbUtil
 from ..logging import bbLogger
 import traceback
+from typing import List
 
 class bbUserDB:
     """A database of bbUser objects.
@@ -15,7 +16,7 @@ class bbUserDB:
         self.users = {}
 
 
-    def userIDExists(self, id):
+    def userIDExists(self, id : int) -> bool:
         """Check if a user is stored in the database with the given ID.
 
         :param int id: integer discord ID for the bbUser to search for
@@ -25,7 +26,7 @@ class bbUserDB:
         return id in self.users.keys()
 
 
-    def userObjExists(self, user):
+    def userObjExists(self, user : bbUser) -> bool:
         """Check if a given bbUser object is stored in the database.
         Currently only checks if a user with the same ID is stored in the database, not if the objects are the same.
 
@@ -36,11 +37,11 @@ class bbUserDB:
         return self.userIDExists(user.id)
 
 
-    def validateID(self, id):
+    def validateID(self, id : int) -> int:
         """Internal function to assert the type of and, potentially cast, an ID.
 
         :param int ID: the ID to type check. Can be either int or a string consisting only of digits.
-        :throws TypeError: If the ID does not conform to the above requirements.
+        :raise TypeError: If the ID does not conform to the above requirements.
         :return: ID if ID is an int, or int(ID) if ID is a string of digits.
         :rtype: int
         """
@@ -56,11 +57,11 @@ class bbUserDB:
         return id
     
 
-    def reinitUser(self, id):
+    def reinitUser(self, id : int):
         """Reset the stats for the user with the specified ID.
 
         :param int ID: The ID of the user to reset. Can be integer or a string of digits.
-        :throws KeyError: If no user is found with the requested ID
+        :raise KeyError: If no user is found with the requested ID
         """
         id = self.validateID(id)
         # ensure the ID exists in the database
@@ -70,12 +71,12 @@ class bbUserDB:
         self.users[id].resetUser()
 
 
-    def addUser(self, id):
+    def addUser(self, id : int) -> bbUser:
         """
         Create a new bbUser object with the specified ID and add it to the database
 
         :param int id: integer discord ID for the user to add
-        :throws KeyError: If a bbUser already exists in the database with the specified ID
+        :raise KeyError: If a bbUser already exists in the database with the specified ID
         :return: the newly created bbUser
         :rtype: bbUser
         """
@@ -88,11 +89,11 @@ class bbUserDB:
         self.users[id] = newUser
         return newUser
 
-    def addUserObj(self, userObj):
+    def addUserObj(self, userObj : bbUser):
         """Store the given bbUser object in the database
 
         :param bbUser userObj: bbUser to store
-        :throws KeyError: If a bbUser already exists in the database with the same ID as the given bbUser
+        :raise KeyError: If a bbUser already exists in the database with the same ID as the given bbUser
         """
         # Ensure no bbUser exists in the db with the same ID as the given bbUser
         if self.userIDExists(userObj.id):
@@ -101,7 +102,7 @@ class bbUserDB:
         self.users[userObj.id] = userObj
 
 
-    def getOrAddID(self, id):
+    def getOrAddID(self, id : int) -> bbUser:
         """If a bbUser exists in the database with the requested ID, return it. If not, create and store a new bbUser and return it.
 
         :param int id: integer discord ID for the user to fetch or create
@@ -111,12 +112,12 @@ class bbUserDB:
         return self.getUser(id) if self.userIDExists(id) else self.addUser(id)
 
     
-    def removeUser(self, id):
+    def removeUser(self, id : int):
         """Remove the new bbUser object with the specified ID from the database
         ⚠ The bbUser object is deleted from memory.
 
         :param int id: integer discord ID for the user to remove
-        :throws KeyError: If no bbUser exists in the database with the specified ID
+        :raise KeyError: If no bbUser exists in the database with the specified ID
         """
         id = self.validateID(id)
         if not self.userIDExists(id):
@@ -124,7 +125,7 @@ class bbUserDB:
         del self.users[id]
 
     
-    def getUser(self, id):
+    def getUser(self, id : int) -> bbUser:
         """Fetch the bbUser from the database with the given ID.
 
         :param int ID: integer discord ID for the user to fetch
@@ -135,7 +136,7 @@ class bbUserDB:
         return self.users[id]
 
 
-    def getUsers(self):
+    def getUsers(self) -> List[bbUser]:
         """Get a list of all bbUser objects stored in the database
 
         :return: list containing all bbUser objects in the db
@@ -144,7 +145,7 @@ class bbUserDB:
         return list(self.users.values())
 
     
-    def getIds(self):
+    def getIds(self) -> List[int]:
         """Get a list of all user IDs stored in the database
 
         :return: list containing all int discord IDs for which bbUsers are stored in the database
@@ -153,7 +154,7 @@ class bbUserDB:
         return list(self.users.keys())
 
     
-    def toDict(self):
+    def toDict(self) -> dict:
         """Serialise this bbUserDB into dictionary format.
 
         :return: A dictionary containing all data needed to recreate this bbUserDB
@@ -171,7 +172,7 @@ class bbUserDB:
         return data
 
     
-    def __str__(self):
+    def __str__(self) -> str:
         """Get summarising information about this bbUserDB in string format.
         Currently only the number of users stored.
 
@@ -181,7 +182,7 @@ class bbUserDB:
         return "<bbUserDB: " + str(len(self.users)) + " users>"
 
 
-def fromDict(userDBDict):
+def fromDict(userDBDict : dict) -> bbUserDB:
     """Construct a bbUserDB from a dictionary-serialised representation - the reverse of bbUserDB.toDict()
 
     :param dict userDBDict: a dictionary-serialised representation of the bbUserDB to construct
