@@ -1,12 +1,14 @@
 import discord
-from discord import Embed, HTTPException, Forbidden, NotFound
+from discord import Embed, HTTPException, Forbidden, NotFound, Client, Message
 from ....bbConfig import bbData, bbConfig
 from .... import bbUtil
 from .. import bbCriminal
 from ....logging import bbLogger
 import asyncio
+from .. import bbBounty
+from typing import Dict, Union, List
 
-def makeBountyEmbed(bounty):
+def makeBountyEmbed(bounty : bbBounty.Bounty) -> Embed:
     """Construct a discord.Embed for listing in a BountyBoardChannel
 
     :param Bounty bounty: The bounty to describe in this embed
@@ -61,7 +63,7 @@ class BountyBoardChannel:
     :vartype channel: discord.TextChannel
     """
 
-    def __init__(self, channelIDToBeLoaded, messagesToBeLoaded, noBountiesMsgToBeLoaded):
+    def __init__(self, channelIDToBeLoaded : int, messagesToBeLoaded : Dict[int, dict], noBountiesMsgToBeLoaded : Union[int, None]):
         """
         :param int channelIDToBeLoaded: The discord channel ID of the channel where this BBC is active, to be loaded into the BBC
         :param messagesToBeLoaded: A dictionary of bounty listings to be loaded into the BBC, where keys are message IDs, and values are bbCriminal dicts
@@ -80,7 +82,7 @@ class BountyBoardChannel:
         self.channel = None
 
 
-    async def init(self, client, factions):
+    async def init(self, client : Client, factions : List[str]):
         """Initialise the BBC's attributes to allow it to function.
         Initialisation is done here rather than in the constructor as initialisation can only be done asynchronously.
 
@@ -165,7 +167,7 @@ class BountyBoardChannel:
         # del self.noBountiesMsgToBeLoaded
 
 
-    def hasMessageForBounty(self, bounty):
+    def hasMessageForBounty(self, bounty : bbBounty.Bounty) -> bool:
         """Decide whether this BBC stores a listing for the given bounty 
 
         :param Bounty bounty: The bounty to check for listing existence
@@ -175,7 +177,7 @@ class BountyBoardChannel:
         return bounty.criminal in self.bountyMessages[bounty.criminal.faction]
 
 
-    def getMessageForBounty(self, bounty):
+    def getMessageForBounty(self, bounty : bbBounty.Bounty) -> Message:
         """Return the message acting as a listing for the given bounty
 
         :param Bounty bounty: The bounty to fetch a listing for
@@ -185,7 +187,7 @@ class BountyBoardChannel:
         return self.bountyMessages[bounty.criminal.faction][bounty.criminal]
 
 
-    def isEmpty(self):
+    def isEmpty(self) -> bool:
         """Decide whether this BBC stores any bounty listings
 
         :return: False if this BBC stores any bounty listings, True otherwise
@@ -197,7 +199,7 @@ class BountyBoardChannel:
         return True
 
     
-    async def addBounty(self, bounty, message):
+    async def addBounty(self, bounty : bbBounty.Bounty, message : Message):
         """
         Treat the given message as a listing for the given bounty, and store it in the database.
         If the BBC was previously empty, remove the empty bounty board message if one exists.
@@ -236,7 +238,7 @@ class BountyBoardChannel:
                 print("addBounty no message")
     
 
-    async def removeBounty(self, bounty):
+    async def removeBounty(self, bounty : bbBounty.Bounty):
         """
         Remove the listing message stored for the given bounty from the database. This does not attempt to delete the message from discord.
         If the BBC is now empty, send an empty bounty board message.
@@ -273,7 +275,7 @@ class BountyBoardChannel:
                 self.noBountiesMessage = None
 
 
-    async def updateBountyMessage(self, bounty):
+    async def updateBountyMessage(self, bounty : bbBounty.Bounty):
         """
         Update the embed for the listing associated with the given bounty. This includes newly checked and near-correct systems along the route.
         If a HTTP error is thrown when updating the listing, wait and retry the edit for the number of times defined in bbConfig
@@ -307,7 +309,7 @@ class BountyBoardChannel:
             await self.removeBounty(bounty)
 
 
-    def toDict(self):
+    def toDict(self) -> dict:
         """
         Serialise this BBC to dictionary format
 
@@ -322,7 +324,7 @@ class BountyBoardChannel:
         return {"channel":self.channel.id, "listings":listings, "noBountiesMsg": self.noBountiesMessage.id if self.noBountiesMessage is not None else -1}
 
 
-def fromDict(BBCDict):
+def fromDict(BBCDict : dict) -> BountyBoardChannel:
     """Factory function constructing a new BBC from the information in the provided dictionary - the opposite of BountyBoardChannel.toDict
 
     :param dict BBCDict: a dictionary representation of the BBC, to convert to an object
