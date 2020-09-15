@@ -4,6 +4,14 @@ from discord import Embed
 
 
 def makeDuelStatsEmbed(duelResults, targetUser, sourceUser):
+    """Build a discord.Embed displaying the statistics of a completed duel.
+
+    :param dict duelResults: A dictionary describing the results of the duel TODO: This is to be changed to a data class, or a ShipFight
+    :param bbUser targetUser: The bbUser that the duel challenged was directed at
+    :param bbUser sourceUser: The bbUser that issued the challenge
+    :return: A discord.Embed displaying the information described in duelResults
+    :rtype: discord.Embed
+    """
     statsEmbed = Embed()
     statsEmbed.set_author(name="Duel Stats")
 
@@ -17,17 +25,30 @@ def makeDuelStatsEmbed(duelResults, targetUser, sourceUser):
     return statsEmbed
 
 
-"""
-A duel challenge for stakes credits, issued by sourceBBUser to targetBBUser in sourceBBGuild, and expiring with duelTimeoutTask.
-
-@param sourceBBUser -- The bbUser who issued the duel challenge
-@param targetBBUser -- The bbUser to accept/reject the challenge
-@param stakes -- The amount of credits to move from the winner to the loser
-@param duelTimeoutTask -- the TimedTask responsible for expiring this challenge
-@param sourceBBGuild -- The bbGuild from which the challenge was issued
-"""
 class DuelRequest:
+    """A duel challenge for stakes credits, issued by sourceBBUser to targetBBUser in sourceBBGuild, and expiring with duelTimeoutTask.
+
+    :var sourceBBUser: The bbUser that issued this challenge
+    :vartype sourceBBUser: bbUser
+    :var targetBBUser: The bbUser that this challenge was targetted towards
+    :vartype targetBBUser: bbUser
+    :var stakes: The amount of credits to award the winner of the duel, and take from the loser
+    :vartype stakes: int
+    :var duelTimeoutTask: The TimedTask responsible for expiring this duel challenge
+    :vartype duelTimeoutTask: TimedTask
+    :var sourceBBGuild: The bbGuild in which this challenge was issued
+    :vartype sourceBBGuild: bbGuild
+    :var menus: A list of ReactionDuelChallengeMenu, each of which may trigger, or be removed by, the expiry or completion of this duel request
+    :vartype menus: ReactionDuelChallengeMenu
+    """
     def __init__(self, sourceBBUser, targetBBUser, stakes, duelTimeoutTask, sourceBBGuild):
+        """
+        :param bbUser sourceBBUser: -- The bbUser who issued the duel challenge
+        :param bbUser targetBBUser: -- The bbUser to accept/reject the challenge
+        :param int stakes: -- The amount of credits to move from the winner to the loser
+        :param TimedTask duelTimeoutTask: -- the TimedTask responsible for expiring this challenge
+        :param bbGuild sourceBBGuild: -- The bbGuild from which the challenge was issued
+        """
         self.sourceBBUser = sourceBBUser
         self.targetBBUser = targetBBUser
         self.stakes = stakes
@@ -38,6 +59,16 @@ class DuelRequest:
 
 # ⚠⚠⚠ THIS FUNCTION IS MARKED FOR CHANGE
 async def fightDuel(sourceUser, targetUser, duelReq, acceptMsg):
+    """Simulate a duel between two users.
+    Returns a dictionary containing statistics about the duel, as well as references to the winning and losing bbUsers. 
+
+    :param bbUser sourceUser: The bbUser that issued this challenge 
+    :param bbUser targetUser: The bbUser that this challenge was targetted towards 
+    :param DuelRequest duelReq: The duel request that this duel simulation satisfies
+    :param discord.message acceptMsg: The message tha triggered this duel simulation
+    :return: A dictionary containing statistics about the duel, as well as references to the winning and losing bbUsers
+    :rtype: dict
+    """
     for menu in duelReq.menus:
         await menu.delete()
 
@@ -126,7 +157,16 @@ async def fightDuel(sourceUser, targetUser, duelReq, acceptMsg):
     # await acceptMsg.channel.send(logStr)
 
 
+# ⚠⚠⚠ THIS FUNCTION IS MARKED FOR CHANGE
 async def rejectDuel(duelReq, rejectMsg, challenger, recipient):
+    """
+    Reject a duel request, including expiring the DuelReq object and its TimedTask, announcing the request cancellation to both participants, and expiring all related ReactionDuelChallengeMenus.
+
+    :param DuelRequest duelReq: The duel request associated with this duel
+    :param discord.message rejectMsg: The message that triggered the rejection of this duel challenge
+    :param discord.User challenger: The user or member that issued this challenge 
+    :param discord.User recipient: The user or member that this challenge was targetted towards 
+    """
     for menu in duelReq.menus:
         await menu.delete()
 
