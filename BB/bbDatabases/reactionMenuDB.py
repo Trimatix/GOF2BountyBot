@@ -6,7 +6,15 @@ unsaveableMenuTypes = ["ReactionDuelChallengeMenu"]
 
 
 class ReactionMenuDB(dict):
+    """A database of ReactionMenu instances.
+    Currently just an extension of dict to add toDict()."""
+
     def toDict(self):
+        """Serialise all saveable ReactionMenus in this DB into a single dictionary.
+
+        :return: A dictionary containing full dictionary descriptions of all saveable ReactionMenu instances in this database
+        :rtype: dict
+        """
         data = {}
         for msgID in self:
             menuData = self[msgID].toDict()
@@ -16,6 +24,12 @@ class ReactionMenuDB(dict):
 
 
 async def fromDict(dbDict):
+    """Factory function constructing a new ReactionMenuDB from dictionary-serialized format; the opposite of ReactionMenuDB.toDict
+
+    :param dict dbDict: A dictionary containing all info needed to reconstruct a ReactionMenuDB, in accordance with ReactionMenuDB.toDict
+    :return: A new ReactionMenuDB instance as described by dbDict
+    :rtype: ReactionMenuDB
+    """
     newDB = ReactionMenuDB()
 
     for msgID in dbDict:
