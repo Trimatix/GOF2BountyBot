@@ -1,9 +1,31 @@
 from . import bbModule
 from ....bbConfig import bbData
 from .... import bbUtil
+from typing import List
 
 class bbSpectralFilterModule(bbModule.bbModule):
-    def __init__(self, name, aliases, showInfo=False, showOnRadar=False, value=0, wiki="", manufacturer="", icon="", emoji=bbUtil.EMPTY_DUMBEMOJI, techLevel=-1, builtIn=False):
+    """A module allowing the user to see plasma clouds in space.
+
+    :var showOnRadar: Whether or not plasma clouds are marked on the ships radar
+    :vartype showOnRadar: bool
+    :var showInfo: Whether information about plasma clouds is shown on the ship's heads up display
+    :vartype showInfo: bool
+    """
+
+    def __init__(self, name : str, aliases : List[str], showInfo=False, showOnRadar=False, value=0, wiki="", manufacturer="", icon="", emoji=bbUtil.EMPTY_DUMBEMOJI, techLevel=-1, builtIn=False):
+        """
+        :param str name: The name of the module. Must be unique.
+        :param list[str] aliases: Alternative names by which this module may be referred to
+        :param bool showOnRadar: Whether or not plasma clouds are marked on the ships radar (Default False)
+        :param bool showInfo: Whether information about plasma clouds is shown on the ship's heads up display (Default False)
+        :param int value: The number of credits this module may be sold or bought or at a shop (Default 0)
+        :param str wiki: A web page that is displayed as the wiki page for this module. (Default "")
+        :param str manufacturer: The name of the manufacturer of this module (Default "")
+        :param str icon: A URL pointing to an image to use for this module's icon (Default "")
+        :param bbUtil.dumbEmoji emoji: The emoji to use for this module's small icon (Default bbUtil.EMPTY_DUMBEMOJI)
+        :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other modules of the same type (Default -1)
+        :param bool builtIn: Whether this is a BountyBot standard module (loaded in from bbData) or a custom spawned module (Default False)
+        """
         super(bbSpectralFilterModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
         self.showOnRadar = showOnRadar
@@ -14,11 +36,23 @@ class bbSpectralFilterModule(bbModule.bbModule):
         return "*Show Info? " + ("Yes" if self.showInfo else "No") + ", Show On Radar? " + ("Yes" if self.showOnRadar else "No") + "*"
 
 
-    def getType(self):
+    def getType(self) -> type:
+        """⚠ DEPRACATED
+        Get the object's __class__ attribute.
+
+        :return: A reference to this class
+        :rtype: type
+        """
         return bbSpectralFilterModule
 
     
-    def toDict(self):
+    def toDict(self) -> dict:
+        """Serialize this module into dictionary format, to be saved to file.
+        Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
+
+        :return: A dictionary containing all information needed to reconstruct this module
+        :rtype: dict
+        """
         itemDict = super(bbSpectralFilterModule, self).toDict()
         if not self.builtIn:
             itemDict["showOnRadar"] = self.showOnRadar
@@ -26,7 +60,13 @@ class bbSpectralFilterModule(bbModule.bbModule):
         return itemDict
 
 
-def fromDict(moduleDict):
+def fromDict(moduleDict : dict) -> bbSpectralFilterModule:
+    """Factory function building a new module object from the information in the provided dictionary. The opposite of this class's toDict function.
+
+    :param moduleDict: A dictionary containing all information needed to construct the requested module
+    :return: The new module object as described in moduleDict
+    :rtype: dict
+    """
     return bbSpectralFilterModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], showInfo=moduleDict["showInfo"] if "showInfo" in moduleDict else False,
                             showOnRadar=moduleDict["showOnRadar"] if "showOnRadar" in moduleDict else False, 
                             value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
