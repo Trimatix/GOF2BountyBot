@@ -58,7 +58,7 @@ class bbShip(bbItem):
         :param bbUtil.dumbEmoji emoji: The emoji to use for this ship's small icon (Default bbUtil.EMPTY_DUMBEMOJI)
         :param int techLevel: A rating from 1 to 10 of this ship's technical advancement. Used as a rough and arbitrary measure for its effectiveness compared to other ships. (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard ship (loaded in from bbData) or a custom spawned ship (Default False)
-        :param float shopSpawnRate: A pre-calculated float indicating the highest spawn rate of this ship (i.e its spawn probability for a shop of the same techLevel)
+        :param float shopSpawnRate: A pre-calculated float indicating the highest spawn rate of this ship (i.e its spawn probability for a shop of the same techLevel) (Default 0)
         """
         super(bbShip, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
