@@ -14,6 +14,7 @@ class bbTurret(bbItem):
         """
         :param str name: The name of the turret. Must be unique. (a model number is a good starting point)
         :param list[str] aliases: A list of alternative names this turret may be referred to by.
+        :param int valie: The amount of credits that this turret can be bought/sold for at a shop. (Default 0)
         :param float dps:The turret's damage per second to a target ship. (Default 0)
         :param str wiki: A web page that is displayed as the wiki page for this turret. (Default "")
         :param str manufacturer: The name of the manufacturer of this turret (Default "")
