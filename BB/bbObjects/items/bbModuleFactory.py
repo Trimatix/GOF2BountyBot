@@ -26,6 +26,7 @@ typeConstructors = {"armour": bbArmourModule.fromDict,
 
 
 # the max number of each module type that can be equipped on a ship.
+# TODO: This should probably be moved elsewhere, e.g bbConfig
 maxModuleTypeEquips = {     bbArmourModule.bbArmourModule: 1,
                             bbBoosterModule.bbBoosterModule: 1,
                             bbCabinModule.bbCabinModule: -1,
@@ -50,6 +51,14 @@ maxModuleTypeEquips = {     bbArmourModule.bbArmourModule: 1,
 
 
 def fromDict(moduleDict):
+    """Factory function recreating any bbModule or bbModule subtype from a dictionary-serialized representation.
+    If implemented correctly, this should act as the opposite to the original object's toDict method.
+    If the requested module is builtIn, return the builtIn module object of the same name.
+
+    :param dict moduleDict: A dictionary containg all information necessary to create the desired bbModule object
+    :return: The bbModule object described in moduleDict
+    :rtype: bbModule
+    """
     if "builtIn" in moduleDict and moduleDict["builtIn"]:
         return bbData.builtInModuleObjs[moduleDict["name"]]
     else:
