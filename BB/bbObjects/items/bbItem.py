@@ -36,15 +36,15 @@ class bbItem(bbAliasable.Aliasable):
 
     def __init__(self, name : str, aliases : List[str], value=0, wiki="", manufacturer="", icon="", emoji=bbUtil.EMPTY_DUMBEMOJI, techLevel=-1, builtIn=False):
         """
-        :param str name: The name of the module. Must be unique. (a model number is a good starting point)
-        :param list[str] aliases: A list of alternative names this module may be referred to by.
-        :param int value: The number of credits that this module can be bought/sold for at a shop. (Default 0)
-        :param str wiki: A web page that is displayed as the wiki page for this module. (Default "")
-        :param str manufacturer: The name of the manufacturer of this module (Default "")
-        :param str icon: A URL pointing to an image to use for this module's icon (Default "")
-        :param bbUtil.dumbEmoji emoji: The emoji to use for this module's small icon (Default bbUtil.EMPTY_DUMBEMOJI)
-        :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other modules of the same type (Default -1)
-        :param bool builtIn: Whether this is a BountyBot standard module (loaded in from bbData) or a custom spawned module (Default False)
+        :param str name: The name of the item. Must be unique. (a model number is a good starting point)
+        :param list[str] aliases: A list of alternative names this item may be referred to by.
+        :param int value: The number of credits that this item can be bought/sold for at a shop. (Default 0)
+        :param str wiki: A web page that is displayed as the wiki page for this item. (Default "")
+        :param str manufacturer: The name of the manufacturer of this item (Default "")
+        :param str icon: A URL pointing to an image to use for this item's icon (Default "")
+        :param bbUtil.dumbEmoji emoji: The emoji to use for this item's small icon (Default bbUtil.EMPTY_DUMBEMOJI)
+        :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other items of the same type (Default -1)
+        :param bool builtIn: Whether this is a BountyBot standard item (loaded in from bbData) or a custom spawned item (Default False)
         """
         super(bbItem, self).__init__(name, aliases)
         self.wiki = wiki
