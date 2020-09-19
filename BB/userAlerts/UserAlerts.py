@@ -4,16 +4,19 @@ from abc import ABC, abstractmethod
 class UABase(ABC):
     @abstractmethod
     async def toggle(self, dcGuild, bbGuild, dcMember):
+        # TODO: Stop requesting bbGuild, look it up from bbGlobals using dcGuild
         pass
 
 
     @abstractmethod
     def getState(self, dcGuild, bbGuild, dcMember):
+        # TODO: Stop requesting bbGuild, look it up from bbGlobals using dcGuild
         pass
 
 
     @abstractmethod
     async def setState(self, dcGuild, bbGuild, dcMember, newState):
+        # TODO: Stop requesting bbGuild, look it up from bbGlobals using dcGuild
         pass
 
 
