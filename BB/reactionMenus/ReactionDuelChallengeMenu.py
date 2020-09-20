@@ -1,7 +1,7 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from .. import bbGlobals, bbUtil
-from discord import Colour, NotFound, HTTPException, Forbidden, Message
+from discord import Colour, NotFound, HTTPException, Forbidden, Message, Embed
 from datetime import datetime
 from ..scheduling import TimedTask
 from..bbObjects.battles import DuelRequest
@@ -15,7 +15,19 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
     """
     def __init__(self, msg : Message, duelChallenge : DuelRequest, titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/crossed-swords_2694.png", authorName="", targetMember=None, targetRole=None):
         """
-        par
+        :param discord.Message msg: The discord message where this menu should be embedded
+        :param DuelRequest duelChallenge: The DuelRequest that this menu controls
+        :param str titleTxt: The content of the embed title (Default "")
+        :param str desc: The content of the embed description; appears at the top below the title (Default "")
+        :param discord.Colour col: The colour of the embed's side strip (Default None)
+        :param TimedTask timeout: The TimedTask responsible for expiring this menu (Default None)
+        :param str footerTxt: Secondary description appearing in darker font at the bottom of the embed (Default "")
+        :param str img: URL to a large icon appearing as the content of the embed, left aligned like a field (Default "")
+        :param str thumb: URL to a larger image appearing to the right of the title (Default "")
+        :param str authorName: Secondary, smaller title for the embed (Default "")
+        :param str icon: URL to a smaller image to the left of authorName. AuthorName is required for this to be displayed. (Default "")
+        :param discord.Member targetMember: The only discord.Member that is able to interact with this menu. All other reactions are ignored (Default None)
+        :param discord.Role targetRole: In order to interact with this menu, users must possess this role. All other reactions are ignored (Default None)
         """
         
         # if desc == "":
@@ -32,7 +44,12 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
         super(ReactionDuelChallengeMenu, self).__init__(msg, options=options, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 
 
-    def getMenuEmbed(self):
+    def getMenuEmbed(self) -> Embed:
+        """Generate this menu's Embed, containing all required information, instructions, restrictions, and options.
+
+        :return: The embed to display in this menu's message
+        :rtype: discord.Embed
+        """
         baseEmbed = super(ReactionDuelChallengeMenu, self).getMenuEmbed()
         baseEmbed.add_field(name="Stakes:", value=str(self.duelChallenge.stakes) + " Credits")
 
@@ -40,6 +57,9 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
 
 
     async def acceptChallenge(self):
+        """Accept a duel challenge on behalf of a user.
+        This method is called when the challenge recipient adds the 'accept' reaction to this menu.
+        """
         if self.duelChallenge.sourceBBUser.credits < self.duelChallenge.stakes:
             await self.msg.channel.send(":x: You do not have enough credits to accept this duel request! (" + str(self.duelChallenge.stakes) + ")")
             return
@@ -51,15 +71,33 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
 
 
     async def rejectChallenge(self):
+        """Reject a duel challenge on behalf of a user.
+        This method is called when the challenge recipient adds the 'reject' reaction to this menu.
+        """
         await DuelRequest.rejectDuel(self.duelChallenge, self.msg, bbGlobals.client.get_user(self.duelChallenge.sourceBBUser.id), bbGlobals.client.get_user(self.duelChallenge.targetBBUser.id))
 
 
-    def toDict(self):
+    def toDict(self) -> dict:
+        """⚠ ReactionDuelChallengeMenus are not currently saveable. Do not use this method.
+        Dummy method, once implemented this method will serialize this reactionMenu to dictionary format.
+
+        :return: A dummy dictionary containing basic information about the menu, but not all information needed to reconstruct the menu.
+        :rtype: dict
+        :raise NotImplementedError: Always.
+        """
+        raise NotImplementedError("Attempted to call toDict on a non-saveable reaction menu")
         baseDict = super(ReactionDuelChallengeMenu, self).toDict()
         return baseDict
 
 
-async def fromDict(rmDict):
+async def fromDict(rmDict : dict) -> ReactionDuelChallengeMenu:
+    """⚠ ReactionDuelChallengeMenus are not currently saveable. Do not use this method.
+    When implemented, this function will construct a new ReactionDuelChallengeMenu from a dictionary-serialized representation - The opposite of ReactionDuelChallengeMenu.toDict.
+
+    :param dict rmDict: A dictionary containg all information needed to construct the required ReactionDuelChallengeMenu
+    :raise NotImplementedError: Always.
+    """
+    raise NotImplementedError("Attempted to call fromDict on a non-saveable reaction menu")
     dcGuild = bbGlobals.client.get_guild(rmDict["guild"])
     msg = await dcGuild.get_channel(rmDict["channel"]).fetch_message(rmDict["msg"])
 
