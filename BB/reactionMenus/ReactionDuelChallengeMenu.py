@@ -1,14 +1,23 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from .. import bbGlobals, bbUtil
-from discord import Colour, NotFound, HTTPException, Forbidden
+from discord import Colour, NotFound, HTTPException, Forbidden, Message
 from datetime import datetime
 from ..scheduling import TimedTask
 from..bbObjects.battles import DuelRequest
 
 
 class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
-    def __init__(self, msg, duelChallenge, titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/crossed-swords_2694.png", authorName="", targetMember=None, targetRole=None):
+    """A ReactionMenu allowing the recipient of a duel challenge to accept or reject the challenge through reactions.
+
+    :var duelChallenge: The DuelRequest that this menu controls
+    :vartype duelChallenge: DuelRequest
+    """
+    def __init__(self, msg : Message, duelChallenge : DuelRequest, titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/crossed-swords_2694.png", authorName="", targetMember=None, targetRole=None):
+        """
+        par
+        """
+        
         # if desc == "":
         #     desc = bbGlobals.client.get_user(duelChallenge.sourceBBUser.id).mention + " challenged " + bbGlobals.client.get_user(duelChallenge.targetBBUser.id).mention + " to a duel!"
         
@@ -61,10 +70,10 @@ async def fromDict(rmDict):
     timeoutTT = None
     if "timeout" in rmDict:
         expiryTime = datetime.utcfromtimestamp(rmDict["timeout"])
-        bbGlobals.reactionMenusTTDB.scheduleTask(TimedTask.TimedTask(expiryTime=expiryTime, expiryFunction=removeEmbedAndOptions, expiryFunctionArgs=msg.id))
+        bbGlobals.reactionMenusTTDB.scheduleTask(TimedTask.TimedTask(expiryTime=expiryTime, expiryFunction=ReactionMenu.removeEmbedAndOptions, expiryFunctionArgs=msg.id))
 
 
-    return ReactionRolePicker(msg, reactionRoles, dcGuild,
+    return ReactionDuelChallengeMenu(msg, reactionRoles, dcGuild,
                                 titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
                                 desc=rmDict["desc"] if "desc" in rmDict else "",
                                 col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.default(),
