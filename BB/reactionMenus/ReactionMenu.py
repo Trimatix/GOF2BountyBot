@@ -1,17 +1,26 @@
 import inspect
-from discord import Embed, Colour, NotFound, HTTPException, Forbidden
+from discord import Embed, Colour, NotFound, HTTPException, Forbidden, Member, Message
 from ..bbConfig import bbConfig
 from .. import bbGlobals, bbUtil
 from abc import ABC, abstractmethod
 
 
-async def deleteReactionMenu(menuID):
+async def deleteReactionMenu(menuID : int):
+    """Delete the currently active reaction menu and its message entirely, with the given message ID
+
+    :param int menuID: The ID of the menu, corresponding with the discord ID of the menu's message
+    """
     menu = bbGlobals.reactionMenusDB[menuID]
     await menu.msg.delete()
     del bbGlobals.reactionMenusDB[menu.msg.id]
 
 
-async def removeEmbedAndOptions(menuID):
+async def removeEmbedAndOptions(menuID : int):
+    """Delete the currently active menu with the given ID, removing its embed and option reactions, but
+    leaving the corresponding message intact.
+
+    :param int menuID: The ID of the menu, corresponding with the discord ID of the menu's message
+    """
     if menuID in bbGlobals.reactionMenusDB:
         menu = bbGlobals.reactionMenusDB[menuID]
         await menu.msg.edit(suppress=True)
@@ -22,7 +31,12 @@ async def removeEmbedAndOptions(menuID):
         del bbGlobals.reactionMenusDB[menu.msg.id]
 
 
-async def markExpiredMenu(menuID):
+async def markExpiredMenu(menuID : int):
+    """Replace the message content of the given menu with bbConfig.expiredMenuMsg, and remove 
+    the menu from the active reaction menus DB.
+
+    :param int menuID: The ID of the menu, corresponding with the discord ID of the menu's message
+    """
     menu = bbGlobals.reactionMenusDB[menuID]
     try:
         await menu.msg.edit(content=bbConfig.expiredMenuMsg)
@@ -37,7 +51,46 @@ async def markExpiredMenu(menuID):
 
 
 class ReactionMenuOption:
-    def __init__(self, name, emoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
+    """An abstract class representing an option in a reaction menu.
+    Reaction menu options must have a name and emoji. They may optionally have a function to call when added,
+    a function to call when removed, and arguments for each.
+    If either function has a keyword argument called 'reactingUser', the user who added/removed the reaction will
+    be passed there.
+
+    :var name: The name of this option, as displayed in the menu embed.
+    :vartype name: str
+    :var emoji: The emoji that a user must react with to trigger this option
+    :vartype emoji: bbUtil.dumbEmoji
+    :var addFunc: The function to call when this option is added by a user
+    :vartype addFunc: function
+    :var removeFunc: The function to call when this option is removed by a user
+    :vartype removeFunc: function
+    :var addArgs: The arguments to pass to addFunc. No type checking is done on this parameter, but a dict is recommended as a close alternative to keyword args.
+    :var removeArgs: The arguments to pass to removeFunc.
+    :var addIsCoroutine: Whether or not addFuc is a coroutine and must be awaited
+    :vartype addIsCoroutine: bool
+    :var addIncludeUser: Whether or not to give the reacting user as a keyword argument to addFunc
+    :vartype addIncludeUser: bool
+    :var addHasArgs: Whether addFunc takes arguments, and addArgs should be attempt to be passed
+    :vartype addHasArgs: bool
+    :var removeIsCoroutine: Whether or not removeFuc is a coroutine and must be awaited
+    :vartype removeIsCoroutine: bool
+    :var removeIncludeUser: Whether or not to give the reacting user as a keyword argument to removeFunc
+    :vartype removeIncludeUser: bool
+    :var removeHasArgs: Whether removeFunc takes arguments, and removeArgs should be attempt to be passed
+    :vartype removeHasArgs: bool
+    """
+
+    def __init__(self, name : str, emoji : bbUtil.dumbEmoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
+        """
+        :param str name: The name of this option, as displayed in the menu embed.
+        :param bbUtil.dumbEmoji emoji: The emoji that a user must react with to trigger this option
+        :param function addFunc: The function to call when this option is added by a user
+        :param function removeFunc: The function to call when this option is removed by a user
+        :param addArgs: The arguments to pass to addFunc. No type checking is done on this parameter, but a dict is recommended as a close alternative to keyword args.
+        :param removeArgs: The arguments to pass to removeFunc.
+        """
+        
         self.name = name
         self.emoji = emoji
         
@@ -54,7 +107,11 @@ class ReactionMenuOption:
         self.removeHasArgs = removeFunc is not None and len(inspect.signature(removeFunc).parameters) != (1 if self.removeIncludeUser else 0)
     
 
-    async def add(self, member):
+    async def add(self, member : Member):
+        """
+        This method is called by the owning reaction menu whenever this option is added by any user
+        that matches the menu's restrictions, if any apply (e.g targetMember, targetRole)
+        """
         if self.addFunc is not None:
             if self.addIncludeUser:
                 if self.addHasArgs:
@@ -65,7 +122,7 @@ class ReactionMenuOption:
             return await self.addFunc() if self.addIsCoroutine else self.addFunc()
 
 
-    async def remove(self, member):
+    async def remove(self, member : Member):
         if self.removeFunc is not None:
             if self.removeIncludeUser:
                 if self.removeHasArgs:
@@ -76,35 +133,35 @@ class ReactionMenuOption:
             return await self.removeFunc() if self.removeIsCoroutine else self.removeFunc()
 
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(repr(self)) 
 
 
     @abstractmethod
-    def toDict(self):
+    def toDict(self) -> dict:
         return {"name":self.name, "emoji": self.emoji.toDict()}
 
 
 class NonSaveableReactionMenuOption(ReactionMenuOption):
-    def __init__(self, name, emoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
+    def __init__(self, name : str, emoji : bbUtil.dumbEmoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
         super(NonSaveableReactionMenuOption, self).__init__(name, emoji, addFunc=addFunc, addArgs=addArgs, removeFunc=removeFunc, removeArgs=removeArgs)
 
 
-    def toDict(self):
+    def toDict(self) -> dict:
         return super(NonSaveableReactionMenuOption, self).toDict()
 
         
 class DummyReactionMenuOption(ReactionMenuOption):
-    def __init__(self, name, emoji):
+    def __init__(self, name : str, emoji : bbUtil.dumbEmoji):
         super(DummyReactionMenuOption, self).__init__(name, emoji)
 
 
-    def toDict(self):
+    def toDict(self) -> dict:
         return super(DummyReactionMenuOption, self).toDict()
 
 
 class ReactionMenu:
-    def __init__(self, msg, options={}, 
+    def __init__(self, msg : Message, options={}, 
                     titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
         if footerTxt == "" and timeout is not None:
             footerTxt = "This menu will expire in " + bbUtil.td_format_noYM(timeout.expiryDelta) + "."
@@ -128,11 +185,11 @@ class ReactionMenu:
         self.saveable = False
 
     
-    def hasEmojiRegistered(self, emoji):
+    def hasEmojiRegistered(self, emoji : bbUtil.dumbEmoji) -> bool:
         return emoji in self.options
 
 
-    async def reactionAdded(self, emoji, member):
+    async def reactionAdded(self, emoji : bbUtil.dumbEmoji, member : Member):
         if self.targetMember is not None:
             if member != self.targetMember:
                 return
@@ -143,7 +200,7 @@ class ReactionMenu:
         return await self.options[emoji].add(member)
 
     
-    async def reactionRemoved(self, emoji, member):
+    async def reactionRemoved(self, emoji : bbUtil.dumbEmoji, member : Member):
         if self.targetMember is not None:
             if member != self.targetMember:
                 return
@@ -154,7 +211,7 @@ class ReactionMenu:
         return await self.options[emoji].remove(member)
 
 
-    def getMenuEmbed(self):
+    def getMenuEmbed(self) -> Embed:
         menuEmbed = Embed(title=self.titleTxt, description=self.desc, colour=self.col)
         if self.footerTxt != "": menuEmbed.set_footer(text=self.footerTxt)
         menuEmbed.set_image(url=self.img)
@@ -180,7 +237,7 @@ class ReactionMenu:
             await self.timeout.forceExpire()
 
 
-    def toDict(self):
+    def toDict(self) -> dict:
         optionsDict = {}
         for reaction in self.options:
             optionsDict[reaction.sendable] = self.options[reaction].toDict()
@@ -223,14 +280,14 @@ class ReactionMenu:
         return data
 
 class CancellableReactionMenu(ReactionMenu):
-    def __init__(self, msg, options={}, cancelEmoji=bbConfig.defaultCancelEmoji,
+    def __init__(self, msg : Message, options={}, cancelEmoji=bbConfig.defaultCancelEmoji,
                     titleTxt="", desc="", col=Embed.Empty, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
         self.cancelEmoji = cancelEmoji
         options[cancelEmoji] = NonSaveableReactionMenuOption("cancel", cancelEmoji, self.delete, None)
         super(CancellableReactionMenu, self).__init__(msg, options=options, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 
 
-    def toDict(self):
+    def toDict(self) -> dict:
         baseDict = super(CancellableReactionMenu, self).toDict()
         del baseDict["options"][self.cancelEmoji.sendable]
 
