@@ -373,11 +373,10 @@ Build a simple discord embed.
 @param desc -- The description of the embed; appears at the top below the title
 @param col -- The colour of the side strip of the embed
 @param footerTxt -- Secondary description appearing at the bottom of the embed
-@param img -- Lare icon appearing as the content of the embed, left aligned like a field
+@param img -- Large icon appearing as the content of the embed, left aligned like a field
 @param thumb -- larger image appearing to the right of the title
 @param authorName -- Secondary title for the embed
 @param icon -- smaller image to the left of authorName. AuthorName is required for this to be displayed.
-TODO: Correct these descriptions for images, can't remember which is which right now
 @return -- the created discord embed
 """
 
