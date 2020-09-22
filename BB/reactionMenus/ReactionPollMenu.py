@@ -1,13 +1,20 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from .. import bbGlobals, bbUtil
-from discord import Colour, NotFound, HTTPException, Forbidden, Emoji, PartialEmoji
+from discord import Colour, NotFound, HTTPException, Forbidden, Emoji, PartialEmoji, Message, Embed
 from datetime import datetime
 from ..scheduling import TimedTask
 from ..logging import bbLogger
+from typing import Dict
 
 
-async def printAndExpirePollResults(msgID):
+async def printAndExpirePollResults(msgID : int):
+    """Menu expiring method specific to ReactionPollMenus. Count the reactions on the menu, selecting only one per user
+    in the case of single-choice mode polls, and replace the menu embed content with a bar chart summarising
+    the results of the poll.
+
+    :param int msgID: The id of the discord message containing the menu to expire
+    """
     menu = bbGlobals.reactionMenusDB[msgID]
     menuMsg = await menu.msg.channel.fetch_message(menu.msg.id)
     results = {}
@@ -88,11 +95,14 @@ async def printAndExpirePollResults(msgID):
         await reaction.remove(menuMsg.guild.me)
     
 
-    
-                
-
 class ReactionPollMenu(ReactionMenu.ReactionMenu):
-    def __init__(self, msg, pollOptions, timeout, pollStarter=None, multipleChoice=False, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="Poll", targetMember=None, targetRole=None, owningBBUser=None):
+    """A reaction menu taking a vote from its participants on a selection of option strings.
+    On menu expiry,
+
+    TODO: change pollOptions from dict[dumbEmoji, ReactionMenuOption] to dict[dumbEmoji, str] which is used to spawn DummyReactionMenuOptions
+
+    """
+    def __init__(self, msg : Message, pollOptions : dict, timeout : TimedTask.TimedTask, pollStarter=None, multipleChoice=False, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="Poll", targetMember=None, targetRole=None, owningBBUser=None):
         self.multipleChoice = multipleChoice
         self.owningBBUser = owningBBUser
 
@@ -103,7 +113,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
         self.saveable = True
 
 
-    def getMenuEmbed(self):
+    def getMenuEmbed(self) -> Embed:
         baseEmbed = super(ReactionPollMenu, self).getMenuEmbed()
         if self.multipleChoice:
             baseEmbed.add_field(name="This is a multiple choice poll!", value="Voting for more than one option is allowed.", inline=False)
@@ -113,7 +123,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
         return baseEmbed
 
     
-    def toDict(self):
+    def toDict(self) -> dict:
         baseDict = super(ReactionPollMenu, self).toDict()
         baseDict["multipleChoice"] = self.multipleChoice
         baseDict["owningBBUser"] = self.owningBBUser.id
@@ -123,7 +133,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
     
 
 
-async def fromDict(rmDict):
+async def fromDict(rmDict : dict) -> ReactionPollMenu:
     options = {}
     for emojiName in rmDict["options"]:
         emoji = bbUtil.dumbEmojiFromStr(emojiName)
