@@ -57,7 +57,7 @@ class ReactionMenuOption:
     Reaction menu options must have a name and emoji. They may optionally have a function to call when added,
     a function to call when removed, and arguments for each.
     If either function has a keyword argument called 'reactingUser', the user who added/removed the reaction will
-    be passed there.
+    be passed there. TODO: Should probably change this to reactingMember
 
     :var name: The name of this option, as displayed in the menu embed.
     :vartype name: str
