@@ -1,3 +1,5 @@
+# TODO: Write a targettable ReactionMenuOption subclass, that implements targetMember and targetRole on a per-option basis. Use this to write ReactionRolePickers with multipleChoice=False!
+
 import inspect
 from discord import Embed, Colour, NotFound, HTTPException, Forbidden, Member, Message
 from ..bbConfig import bbConfig
@@ -230,6 +232,13 @@ class DummyReactionMenuOption(ReactionMenuOption):
 
 class ReactionMenu:
     """A versatile class implementing emoji reaction menus.
+    This class can be used as-is, to create unsaveable reaction menus of any type, with vast possibilities for behaviour.
+    ReactionMenu need only be extended in the following cases:
+    - You wish to create a 'preset' class with a new constructor creating a commonly used menu format, such as ReactionRolePicker
+    - Your reaction menu should be saveable to file to be reloaded after a bot restart, such as ReactionPollMenu
+    - The default getMenuEmbed method is inadequate
+    - You require specialized behaviour handled/triggered outside of reactions. For exapmple, a menu whose content may be changed via commands.
+
     How to use this class:
     1. Send a message
     2. Create a TimedTask that will call a menu deleting function (e.g deleteReactionMenu) with your new message ID on expiry TODO: add a constructor flag and TimedTask config data class to ReactionMenu constructor for autoscheduling menu expiry on menu creation
@@ -242,6 +251,9 @@ class ReactionMenu:
     defining a new constructor which transforms a dictionary of emojis to roles into an options dictionary, where each option's addFunc is bound to a role granting
     function, and its removeFunc is bount to a role removing function. The only extra behaviour ReactionRolePickerOption implements over ReactionMenuOption is
     the addition of its associated role ID being saved during toDict.
+    The options in your options dictionary do not have to be of the same type - each option could have completely different behaviour.
+    The only consideration you may need to make when creating such an object is whether or not you wish for it to be saveable - in which
+    case, you should extend ReactionMenu into a new module, providing a custom toDict method and fromDict function.
 
     :var msg: the message where this menu is embedded
     :vartype msg: discord.Message
@@ -277,19 +289,19 @@ class ReactionMenu:
                     titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
         """
         :param discord.Message msg: the message where this menu is embedded
-        :param options: A dictionary storing all of the menu's options and their behaviour
+        :param options: A dictionary storing all of the menu's options and their behaviour (Default {})
         :type options: dict[bbUtil.dumbEmoji, ReactionMenuOption]
-        :param str titleTxt: The content of the embed title
-        :param str desc: he content of the embed description; appears at the top below the title
-        :param discord.Colour col: The colour of the embed's side strip
-        :param str footerTxt: Secondary description appearing in darker font at the bottom of the embed
-        :param str img: URL to a large icon appearing as the content of the embed, left aligned like a field
-        :param str thumb: URL to a larger image appearing to the right of the title
-        :param str icon: URL to a smaller image to the left of authorName. AuthorName is required for this to be displayed.
-        :param str authorName: Secondary, smaller title for the embed
-        :param TimedTask timeout: The TimedTask responsible for expiring this menu
-        :param discord.Member targetMember: The only discord.Member that is able to interact with this menu. All other reactions are ignored
-        :param discord.Role targetRole: In order to interact with this menu, users must possess this role. All other reactions are ignored
+        :param str titleTxt: The content of the embed title (Default "")
+        :param str desc: he content of the embed description; appears at the top below the title (Default "")
+        :param discord.Colour col: The colour of the embed's side strip (Default None)
+        :param str footerTxt: Secondary description appearing in darker font at the bottom of the embed (Default time until menu expiry if timeout is not None, "" otherwise)
+        :param str img: URL to a large icon appearing as the content of the embed, left aligned like a field (Default "")
+        :param str thumb: URL to a larger image appearing to the right of the title (Default "")
+        :param str icon: URL to a smaller image to the left of authorName. AuthorName is required for this to be displayed. (Default "")
+        :param str authorName: Secondary, smaller title for the embed (Default "")
+        :param TimedTask timeout: The TimedTask responsible for expiring this menu (Default None)
+        :param discord.Member targetMember: The only discord.Member that is able to interact with this menu. All other reactions are ignored (Default None)
+        :param discord.Role targetRole: In order to interact with this menu, users must possess this role. All other reactions are ignored (Default None)
         """
 
         if footerTxt == "" and timeout is not None:
@@ -325,6 +337,19 @@ class ReactionMenu:
 
 
     async def reactionAdded(self, emoji : bbUtil.dumbEmoji, member : Member):
+        """Invoke an option's behaviour when it is selected by a user.
+        This method should be called during your discord client's on_reaction_add or on_raw_reaction_add event.
+        
+        If a targetMember was specified in this reaction menu's constructor, option behaviour will only be triggered
+        if member is targetMember.
+        If a targetRole was specified in this reaction menu's constructor, option behaviour will only be triggered
+        if member has targetRole.
+        Both may be specified and required.
+
+        :param bbUtil.dumbEmoji emoji: The emoji that member reacted to the menu with
+        :param discord.Member member: The member that added the emoji reaction
+        :return: The result of the corresponding menu option's addFunc, if any
+        """
         if self.targetMember is not None:
             if member != self.targetMember:
                 return
@@ -336,6 +361,19 @@ class ReactionMenu:
 
     
     async def reactionRemoved(self, emoji : bbUtil.dumbEmoji, member : Member):
+        """Invoke an option's behaviour when it is deselected by a user.
+        This method should be called during your discord client's on_reaction_remove or on_raw_reaction_remove event.
+        
+        If a targetMember was specified in this reaction menu's constructor, option behaviour will only be triggered
+        if member is targetMember.
+        If a targetRole was specified in this reaction menu's constructor, option behaviour will only be triggered
+        if member has targetRole.
+        Both may be specified and required.
+
+        :param bbUtil.dumbEmoji emoji: The emoji reaction that member removed from the menu
+        :param discord.Member member: The member that removed the emoji reaction
+        :return: The result of the corresponding menu option's removeFunc, if any
+        """
         if self.targetMember is not None:
             if member != self.targetMember:
                 return
@@ -347,6 +385,13 @@ class ReactionMenu:
 
 
     def getMenuEmbed(self) -> Embed:
+        """Generate the discord.Embed representing the reaction menu, and that
+        should be embedded into the menu's message.
+        This will usually contain a short description of the menu, its options, and its expiry time.
+
+        :return: A discord.Embed representing the menu and its options
+        :rtype: discord.Embed 
+        """
         menuEmbed = Embed(title=self.titleTxt, description=self.desc, colour=self.col)
         if self.footerTxt != "": menuEmbed.set_footer(text=self.footerTxt)
         menuEmbed.set_image(url=self.img)
@@ -358,7 +403,11 @@ class ReactionMenu:
 
         return menuEmbed
     
+
     async def updateMessage(self):
+        """Update the menu message by removing all reactions, replacing any existing embed with
+        up to date embed content, and readd all of the menu's option reactions.
+        """
         await self.msg.clear_reactions()
         await self.msg.edit(embed=self.getMenuEmbed())
         for option in self.options:
@@ -366,6 +415,11 @@ class ReactionMenu:
 
 
     async def delete(self):
+        """⚠ WARNING: DO NOT SET THIS AS YOUR MENU'S TIMEDTASK EXPIRY FUNCTION. This method calls the menu's TimedTask expiry function.
+        Forcibly delete the menu.
+        If a timeout TimedTask was defined in this menu's constructor, this will be forcibly expired.
+        If no TimedTask was given, the menu will default to calling deleteReactionMenu.
+        """
         if self.timeout is None:
             await deleteReactionMenu(self.msg.id)
         else:
@@ -373,6 +427,14 @@ class ReactionMenu:
 
 
     def toDict(self) -> dict:
+        """Serialize this ReactionMenu into dictionary format for saving to file.
+        This is a base, concrete implementation that saves all information required to recreate a ReactionMenu instance;
+        when extending ReactionMenu, you will likely wish to overload this method, using super.toDict as a base for your
+        implementation. For an example, see ReactionPollMenu.toDict
+
+        This method relies on your chosen ReactionMenuOption objects having a concrete, SAVEABLE toDict method.
+        If any option in the menu is unsaveable, the menu becomes unsaveable.
+        """
         optionsDict = {}
         for reaction in self.options:
             optionsDict[reaction.sendable] = self.options[reaction].toDict()
@@ -414,16 +476,56 @@ class ReactionMenu:
         
         return data
 
+
 class CancellableReactionMenu(ReactionMenu):
+    """A simple ReactionMenu extension that adds an extra 'cancel' option to your given options dictionary.
+    The 'cancel' option will call the menu's delete method. No extra restrictions beyond targetMember/targetRole are placed
+    on members who may cancel the menu. 
+    
+    If CancellableReactionMenu is extended into a saveable menu class, the cancel option will not be included in the menu's
+    dictionary-serialized representation. This is fine, since the constructor in your saveable subclass of CancellableReactionMenu
+    must call super.__init__, which will add the cancel option back in again.
+    TODO: Currently, if a different cancelEmoji is specified, it will not be saved to file, and it must be specified again when reloading the menu. Just save the cancel emoji in the dict, outside of options
+
+    :var cancelEmoji: The emoji used for the menu's cancel button.
+    :vartype cancelEmoji: bbUtil.dumbEmoji
+    """
     def __init__(self, msg : Message, options={}, cancelEmoji=bbConfig.defaultCancelEmoji,
                     titleTxt="", desc="", col=Embed.Empty, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+        """
+        :param discord.Message msg: the message where this menu is embedded
+        :param options: A dictionary storing all of the menu's options and their behaviour (Default {})
+        :type options: dict[bbUtil.dumbEmoji, ReactionMenuOption]
+        :param bbUtil.dumbEmoji emoji: The emoji members should react with to cancel the menu. (Default bbConfig.defaultCancelEmoji)
+        :param str titleTxt: The content of the embed title (Default "")
+        :param str desc: he content of the embed description; appears at the top below the title (Default "")
+        :param discord.Colour col: The colour of the embed's side strip (Default None)
+        :param str footerTxt: Secondary description appearing in darker font at the bottom of the embed (Default time until menu expiry if timeout is not None, "" otherwise)
+        :param str img: URL to a large icon appearing as the content of the embed, left aligned like a field (Default "")
+        :param str thumb: URL to a larger image appearing to the right of the title (Default "")
+        :param str icon: URL to a smaller image to the left of authorName. AuthorName is required for this to be displayed. (Default "")
+        :param str authorName: Secondary, smaller title for the embed (Default "")
+        :param TimedTask timeout: The TimedTask responsible for expiring this menu (Default None)
+        :param discord.Member targetMember: The only discord.Member that is able to interact with this menu. All other reactions are ignored (Default None)
+        :param discord.Role targetRole: In order to interact with this menu, users must possess this role. All other reactions are ignored (Default None)
+        """
         self.cancelEmoji = cancelEmoji
         options[cancelEmoji] = NonSaveableReactionMenuOption("cancel", cancelEmoji, self.delete, None)
         super(CancellableReactionMenu, self).__init__(msg, options=options, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 
 
     def toDict(self) -> dict:
+        """Serializes the reaction menu to a dictionary representation.
+        This currently does not add any information on top of ReactionMenu.toDict, but ensures that the cancel option
+        is not included in the dictionary for space efficiency purposes.
+        This function does not currently have an associated fromDict function, making this class unsaveable. To make this class
+        saveable, extend it and create custom toDict and fromDict methods, with knowledge of what the option functionality will be.
+
+        :return: A dictionary containing information about this menu, to be used when configuring a recreation of this object.
+        :rtype: dict
+        """
         baseDict = super(CancellableReactionMenu, self).toDict()
+        # TODO: Make sure the option is in there?
         del baseDict["options"][self.cancelEmoji.sendable]
 
         return baseDict

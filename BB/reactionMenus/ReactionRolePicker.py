@@ -52,6 +52,7 @@ class ReactionRolePickerOption(ReactionMenu.ReactionMenuOption):
 
 class ReactionRolePicker(ReactionMenu.ReactionMenu):
     def __init__(self, msg, reactionRoles, dcGuild, titleTxt="**Role Menu**", desc="React for your desired role!", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+        # TODO: Stop taking dcGuild, and instead extract dcGuild from msg.guild
         self.dcGuild = dcGuild
         self.msg = msg
         roleOptions = {}
@@ -63,6 +64,7 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
 
 
     def toDict(self):
+        # TODO: Remove this method. The guild is already saved in ReactionMenu.toDict
         baseDict = super(ReactionRolePicker, self).toDict()
         baseDict["guild"] = self.dcGuild.id
         return baseDict
