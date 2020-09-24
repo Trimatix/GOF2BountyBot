@@ -306,7 +306,7 @@ def dumbEmojiFromStr(s):
 
 def dumbEmojiFromPartial(e):
     if type(e) == dumbEmoji:
-        return emojiDict
+        return e
     if e.is_unicode_emoji():
         return dumbEmoji(unicode=e.name)
     else:
