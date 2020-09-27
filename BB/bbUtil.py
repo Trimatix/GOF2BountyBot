@@ -7,15 +7,30 @@ import inspect
 from emoji import UNICODE_EMOJI
 from . import bbGlobals
 from .logging import bbLogger
+from typing import List, Dict
+from .bbObjects.items import bbShip
 
-def readJSON(dbFile):
+
+def readJSON(dbFile : str) -> dict:
+    """Read the json file with the given path, and return the contents as a dictionary.
+    
+    :param str dbFile: Path to the file to read
+    :return: The contents of the requested json file, parsed into a python dictionary
+    :rtype: dict 
+    """
     f = open(dbFile, "r")
     txt = f.read()
     f.close()
     return json.loads(txt)
 
 
-def writeJSON(dbFile, db):
+def writeJSON(dbFile : str, db : dict):
+    """Write the given json-serializable dictionary to the given file path. All objects in the dictionary must be JSON-serializable.
+    TODO: Check this makes the file if it doesnt exist
+
+    :param str dbFile: Path to the file which db should be written to
+    :param dict db: The json-serializable dictionary to write
+    """
     txt = json.dumps(db)
     f = open(dbFile, "w")
     txt = f.write(txt)
@@ -23,13 +38,29 @@ def writeJSON(dbFile, db):
 
 
 class AStarNode(bbSystem.System):
-    syst = None
-    parent = None
-    g = 0
-    h = 0
-    f = 0
+    """A node for use in a* pathfinding.
+    TODO: Does this really need to extend bbSystem?
+
+    :var syst: this node's associated bbSystem object.
+    :vartype syst: bbSystem
+    :var parent: The previous AStarNode in the generated path
+    :vartype parent: AStarNode
+    :var g: The total distance travelled to get to this node
+    :vartype g: int
+    :var h: The estimated distance from this node to the nearest goal
+    :vartype h: int
+    :var f: The node's estimated "value" when picking the next node in the route, equal to g + h
+    :vartype f: int
+    """
     
-    def __init__(self, syst, parent, g=0, h=0, f=0):
+    def __init__(self, syst : bbSystem.System, parent : AStarNode, g=0, h=0, f=0):
+        """
+        :param bbSystem syst: this node's associated bbSystem object.
+        :param AStarNode parent: The previous AStarNode in the generated path
+        :param int g: The total distance travelled to get to this node (Default 0)
+        :param int h: The estimated distance from this node to the nearest goal (Default 0)
+        :param int f: The node's estimated "value" when picking the next node in the route, equal to g + h (Default g + h)
+        """
         self.syst = syst
         self.parent = parent
         self.g = g
@@ -37,12 +68,29 @@ class AStarNode(bbSystem.System):
         self.f = g + h
 
 
-def heuristic(start, end):
+def heuristic(start : bbSystem.System, end : bbSystem.System) -> float:
+    """Estimate the distance between two bbSystems, using straight line (pythagorean) distance.
+
+    :param bbSystem start: The system to start calculating distance from
+    :param bbSystem end: The system to find distance to
+    :return: The straight-line distance from start to end
+    """
     return math.sqrt((end.coordinates[1] - start.coordinates[1]) ** 2 +
                     (end.coordinates[0] - start.coordinates[0]) ** 2)
 
 
-def bbAStar(start, end, graph):
+def bbAStar(start : bbSystem.System, end : bbSystem.System, graph : Dict[str, bbSystem.System]) -> List[str]:
+    """Find the shortest path from the given start bbSystem to the end bbSystem, using the given graph for edges.
+    If no route can be found, the string "! " + start + " -> " + end is returned.
+    If the max route length (50) is reached, "#" is returned.
+
+    :param bbSystem start: The starting system for route generation
+    :param bbSystem end: The goal system where route generation terminates
+    :param dict[str, bbSystem] graph: A dictionary mapping system names to bbSystem objects
+    :return: A list containing string system names representing the shortest route from start (the first element) to end (the last element)
+    :rtype: list
+    """
+
     if start == end:
         return [start]
     open = [AStarNode(graph[start], None, h=heuristic(graph[start], graph[end]))]
@@ -90,7 +138,14 @@ def bbAStar(start, end, graph):
     return "! " + start + " -> " + end
 
 
-def isInt(x):
+def isInt(x) -> bool:
+    """Decide whether or not something is either an integer, or is castable to integer.
+
+    :param x: The object to type-check
+    :return: True if x is an integer or if x can be casted to integer. False otherwise
+    :rtype: bool
+    """
+
     try:
         int(x)
     except TypeError:
@@ -100,15 +155,37 @@ def isInt(x):
     return True
 
 
-def isMention(mention):
+def isMention(mention : str) -> bool:
+    """Decide whether the given string is a discord user mention, being either <@USERID> or <@!USERID> where USERID is an integer discord user id.
+
+    :param str mention: The string to check
+    :return: True if mention matches the formatting of a discord user mention, False otherwise
+    :rtype bool
+    """
     return mention.endswith(">") and ((mention.startswith("<@") and isInt(mention[2:-1])) or (mention.startswith("<@!") and isInt(mention[3:-1])))
 
 
-def isRoleMention(mention):
+def isRoleMention(mention : str) -> bool:
+    """Decide whether the given string is a discord role mention, being <@&ROLEID> where ROLEID is an integer discord role id.
+
+    :param str mention: The string to check
+    :return: True if mention matches the formatting of a discord role mention, False otherwise
+    :rtype bool
+    """
     return mention.endswith(">") and mention.startswith("<@&") and isInt(mention[3:-1])
 
 
-def fightShips(ship1, ship2, variancePercent):
+def fightShips(ship1 : bbShip.bbShip, ship2 : bbShip.bbShip, variancePercent : float) -> dict:
+    """Simulate a duel between two ships.
+    Returns a dictionary containing statistics about the duel, as well as a reference to the winning ship. 
+
+    :param bbShip ship1: One of the ships partaking in the duel 
+    :param bbShip ship2: One of the ships partaking in the duel
+    :param float variancePercent: The amount of random variance to apply to ship statistics, as a float percentage (e.g 0.5 for 50% random variance lll)
+    :return: A dictionary containing statistics about the duel, as well as a reference to the winning ship.
+    :rtype: dict
+    """
+
     # Fetch ship total healths
     ship1HP = ship1.getArmour() + ship1.getShield()
     ship2HP = ship2.getArmour() + ship2.getShield()
@@ -188,13 +265,14 @@ def fightShips(ship1, ship2, variancePercent):
                     "TTK": ship2TTK}}
 
 
-"""
-Insert commas into every third position in a string.
+def commaSplitNum(num : str) -> str:
+    """Insert commas into every third position in a string.
+    For example: "3" -> "3", "30000" -> "30,000", and "561928301" -> "561,928,301"
 
-@param num -- string to insert commas into. probably just containing digits
-@return outStr -- num, but split with commas at every third digit
-"""
-def commaSplitNum(num):
+    :param str num: string to insert commas into. probably just containing digits
+    :return: num, but split with commas at every third digit
+    :rtype: str
+    """
     outStr = num
     for i in range(len(num), 0, -3):
         outStr = outStr[0:i] + "," + outStr[i:]
@@ -221,7 +299,27 @@ class funcArgs:
 
 
 class dumbEmoji:
+    """A class that really shouldnt be necessary, acting as a union over the str (unicode) and Emoji type emojis used and returned by discord.
+    To instance this class, provide exactly one of the constructor's keyword arguments.
+
+    :var id: The ID of the Emoji that this object represents, if isID
+    :vartype id: int
+    :var unicode: The string unicode emoji that this object represents, if isUnicode
+    :vartype unicode: 
+    :var isID: True if this object represents a custom emoji, False if it represents a unicode emoji.
+    :vartype isID: bool
+    :var isUnicode: False if this object represents a custom emoji, True if it represents a unicode emoji.
+    :vartype isUnicode: bool
+    :var sendable: A string sendable in a discord message that discord will render an emoji over.
+    :vartype sendable: str
+    """
+
     def __init__(self, id=-1, unicode=""):
+        """
+        :param int id: The ID of the custom emoji that this object should represent.
+        :param str unicode: The unicode emoji that this object should represent.
+        """
+
         if id == -1 and unicode == "":
             raise ValueError("At least one of id or unicode is required")
         elif id != -1 and unicode != "":
@@ -236,36 +334,73 @@ class dumbEmoji:
         #     self.sendable = '❓'
 
     
-    def toDict(self):
+    def toDict(self) -> dict:
+        """Serialize this emoji to dictionary format for saving to file.
+
+        :return: A dictionary containing all information needed to reconstruct this emoji.
+        :rtype: dict
+        """
         if self.isUnicode:
             return {"unicode":self.unicode}
         else:
             return {"id":self.id}
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Get a string uniquely identifying this object, specifying what type of emoji it represents and the emoji itself.
+
+        :return: A string identifying this object.
+        :rtype: str
+        """
         return "<dumbEmoji-" + ("id" if self.isID else "unicode") + ":" + (str(self.id) if self.isID else self.unicode) + ">"
 
     
-    def __hash__(self):
+    def __hash__(self) -> int:
+        """Calculate a hash of this emoji, based on its repr string. Two dumbEmoji objects representing the same emoji will have the same repr and hash.
+
+        :return: A hash of this emoji
+        :rtype: int
+        """
         return hash(repr(self))
 
     
-    def __eq__(self, other):
+    def __eq__(self, other : dumbEmoji) -> bool:
+        """Decide if this dumbEmoji is equal to another.
+        Two dumbEmojis are equal if they represent the same emoji (i.e ID/unicode) of the same type (custom/unicode)
+        
+        :param dumbEmoji other: the emoji to compare this one to
+        :return: True of this emoji is semantically equal to the given emoji, False otherwise
+        :rtype: bool
+        """
         return type(other) == dumbEmoji and self.isID == other.isID and (self.id == other.id or self.unicode == other.unicode)
 
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """Get the object's 'sendable' string.
+        
+        :return: A string sendable to discord that will be translated into an emoji by the discord client.
+        :rtype: str
+        """
         return self.sendable
 
 
+# 'static' object representing an empty/lack of emoji
 EMPTY_DUMBEMOJI = dumbEmoji(unicode=" ")
 EMPTY_DUMBEMOJI.isUnicode = False
 EMPTY_DUMBEMOJI.unicode = ""
 EMPTY_DUMBEMOJI.sendable = ""
 
 
-def dumbEmojiFromDict(emojiDict):
+def dumbEmojiFromDict(emojiDict : dict) -> dumbEmoji:
+    """Construct a dumbEmoji object from its dictionary representation.
+    If both an ID and a unicode representation are provided, the emoji ID will be used.
+
+    TODO: If ID is -1, use unicode. If unicode is "", use ID.
+
+    :param dict emojiDict: A dictionary containing either an ID (for custom emojis) or a unicode emoji string (for unicode emojis)
+    :return: A new dumbEmoji object as described in emojiDict
+    :rtype: dumbEmoji
+    """
     if type(emojiDict) == dumbEmoji:
         return emojiDict
     if "id" in emojiDict:
