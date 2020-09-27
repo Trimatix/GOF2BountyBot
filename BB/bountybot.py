@@ -1209,8 +1209,8 @@ async def cmd_bounties(message, args, isDM):
                 if len(bounty.route) != 1:
                     outmessage += "s"
             maxBountiesMsg = ""
-            if usersDB.userIDExists(message.author.id):
-                requestedBBUser = usersDB.getUser(message.author.id)
+            if bbGlobals.usersDB.userIDExists(message.author.id):
+                requestedBBUser = bbGlobals.usersDB.getUser(message.author.id)
                 # Restrict the number of bounties a player may win in a single day
                 if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
                     requestedBBUser.bountyWinsToday = 0
