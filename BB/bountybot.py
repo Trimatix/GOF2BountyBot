@@ -36,57 +36,63 @@ from .reactionMenus import ReactionMenu, ReactionInventoryPicker, ReactionRolePi
 ####### DATABASE METHODS #######
 
 
-"""
-Build a bbUserDB from the specified JSON file.
+def loadUsersDB(filePath : str) -> bbUserDB.bbUserDB:
+    """Build a bbUserDB from the specified JSON file.
 
-@param filePath -- path to the JSON file to load. Theoretically, this can be absolute or relative.
-"""
-
-
-def loadUsersDB(filePath):
+    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
+    :return: a bbUserDB as described by the dictionary-serialized representation stored in the file located in filePath.
+    """
     return bbUserDB.fromDict(bbUtil.readJSON(filePath))
 
 
-"""
-Build a bbGuildDB from the specified JSON file.
+def loadGuildsDB(filePath : str) -> bbGuildDB.bbGuildDB:
+    """Build a bbGuildDB from the specified JSON file.
 
-@param filePath -- path to the JSON file to load. Theoretically, this can be absolute or relative.
-"""
-
-
-def loadGuildsDB(filePath):
+    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
+    :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
+    """
     return bbGuildDB.fromDict(bbUtil.readJSON(filePath))
 
 
-"""
-Build a bbBountyDB from the specified JSON file.
+def loadBountiesDB(filePath : str) -> bbBountyDB.bbBountyDB:
+    """Build a bbBountyDB from the specified JSON file.
 
-@param filePath -- path to the JSON file to load. Theoretically, this can be absolute or relative.
-"""
-
-
-def loadBountiesDB(filePath):
+    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
+    :return: a bbBountyDB as described by the dictionary-serialized representation stored in the file located in filePath.
+    """
     return bbBountyDB.fromDict(bbUtil.readJSON(filePath), bbConfig.maxBountiesPerFaction, dbReload=True)
 
 
-async def loadReactionMenusDB(filePath):
+async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.reactionMenuDB:
+    """Build a reactionMenuDB from the specified JSON file.
+    This method must be called asynchronously, to allow awaiting of discord message fetching functions.
+
+    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
+    :return: a reactionMenuDB as described by the dictionary-serialized representation stored in the file located in filePath.
+    """
     return await reactionMenuDB.fromDict(bbUtil.readJSON(filePath))
 
 
-"""
-Save a database object to the specified JSON file.
-TODO: child database classes to a single ABC, and type check to that ABC here before saving
+def saveDB(dbPath : str, db):
+    """Call the given database object's toDict method, and save the resulting dictionary to the specified JSON file.
+    TODO: child database classes to a single ABC, and type check to that ABC here before saving
 
-@param dbPath -- path to the JSON file to save to. Theoretically, this can be absolute or relative.
-@param db -- the database object to save
-"""
-
-
-def saveDB(dbPath, db):
+    :param str dbPath: path to the JSON file to save to. Theoretically, this can be absolute or relative.
+    :param db: the database object to save
+    """
     bbUtil.writeJSON(dbPath, db.toDict())
 
 
 async def saveDBAsync(dbPath, db):
+    """This function should be used in place of saveDB for database objects whose toDict method is asynchronous.
+    This function is currently unused.
+
+    Await the given database object's toDict method, and save the resulting dictionary to the specified JSON file.
+    TODO: child database classes to a single ABC, and type check to that ABC here before saving
+
+    :param str dbPath: path to the JSON file to save to. Theoretically, this can be absolute or relative.
+    :param db: the database object to save
+    """
     bbUtil.writeJSON(dbPath, await db.toDict())
 
 
