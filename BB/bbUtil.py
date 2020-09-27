@@ -7,6 +7,11 @@ import inspect
 from emoji import UNICODE_EMOJI
 from . import bbGlobals
 from .logging import bbLogger
+# purely for type hinting
+from discord import PartialEmoji, Guild, User
+from datetime import timedelta
+from .bbObjects import bbUser
+from typing import Union
 
 def readJSON(dbFile):
     f = open(dbFile, "r")
@@ -274,11 +279,24 @@ def dumbEmojiFromDict(emojiDict):
         return dumbEmoji(unicode=emojiDict["unicode"])
 
 
-def isUnicodeEmoji(c):
+def isUnicodeEmoji(c : str) -> bool:
+    """Decide whether a given string contrains a single unicode emoji.
+
+    :param str c: The string to test
+    :return: True if c contains exactly one character, and that character is a unicode emoji. False otherwise.
+    :rtype: bool
+    """
     return c in UNICODE_EMOJI
 
 
-def isCustomEmoji(s):
+def isCustomEmoji(s : str) -> bool:
+    """Decide whether the given string matches the formatting of a discord custom emoji,
+    being <:NAME:ID> where NAME is the name of the emoji, and ID is the integer ID.
+
+    :param str c: The string to test
+    :return: True if s 'looks like' a discord custom emoji, matching their structure. False otherwise.
+    :rtype: bool
+    """
     if s.startswith("<") and s.endswith(">"):
         try:
             first = s.index(":")
@@ -289,7 +307,15 @@ def isCustomEmoji(s):
     return False
 
 
-def dumbEmojiFromStr(s):
+def dumbEmojiFromStr(s : str) -> dumbEmoji:
+    """Construct a dumbEmoji object from a string containing either a unicode emoji or a discord custom emoji.
+    s may also be a dumbEmoji (returns s), a dictionary-serialized dumbEmoji (returns dumbEmojiFromDict(s)), or
+    only an ID of a discord custom emoji (may be either str or int)
+
+    :param str s: A string containing only one of: A unicode emoji, a discord custom emoji, or the ID of a discord custom emoji.
+    :return: A dumbEmoji representing the given string emoji
+    :rtype: dumbEmoji
+    """
     if type(s) == dumbEmoji:
         return s
     if type(s) == dict:
@@ -304,7 +330,12 @@ def dumbEmojiFromStr(s):
         return None
 
 
-def dumbEmojiFromPartial(e):
+def dumbEmojiFromPartial(e : PartialEmoji) -> dumbEmoji:
+    """Construct a new dumbEmoji object from a given discord.PartialEmoji.
+
+    :return: A dumbEmoji representing e
+    :rtype: dumbEmoji
+    """
     if type(e) == dumbEmoji:
         return e
     if e.is_unicode_emoji():
@@ -313,7 +344,16 @@ def dumbEmojiFromPartial(e):
         return dumbEmoji(id=e.id)
 
 
-def td_format_noYM(td_object):
+def td_format_noYM(td_object : timedelta) -> str:
+    """Create a string describing the attributes of a given datetime.timedelta object, in a
+    human reader-friendly format.
+    This function does not create 'week', 'month' or 'year' strings, its highest time denominator is 'day'.
+    Any time denominations that are equal to zero will not be present in the string.
+
+    :param datetime.timedelta td_object: The timedelta to describe
+    :return: A string describing td_object's attributes in a human-readable format
+    :rtype: str
+    """
     seconds = int(td_object.total_seconds())
     periods = [
         ('day',         60*60*24),
@@ -332,7 +372,14 @@ def td_format_noYM(td_object):
     return ", ".join(strings)
 
 
-def findBBUserDCGuild(user):
+def findBBUserDCGuild(user : bbUser.bbUser) -> Union[Guild, None]:
+    """Attempt to find a discord.guild containing the given bbUser.
+    If a guild is found, it will be returned as a discord.guild. If no guild can be found, None will be returned.
+
+    :param bbUser user: The user to attempt to locate
+    :return: A discord.Guild where user is a member, if one can be found. None if no such guild can be found.
+    :rtype: discord.guild or None
+    """
     if user.hasLastSeenGuildId:
         lastSeenGuild = bbGlobals.client.get_guild(user.lastSeenGuildId)
         if lastSeenGuild is None or lastSeenGuild.get_member(user.id) is None:
@@ -350,7 +397,15 @@ def findBBUserDCGuild(user):
     return None
 
 
-def userOrMemberName(dcUser, dcGuild):
+def userOrMemberName(dcUser : User, dcGuild : Guild) -> str:
+    """If dcUser is a member of dcGuild, return dcUser's display name in dcGuild (their nickname if they have one, or their user name otherwise),
+    Otherwise, retur dcUser's discord user name.
+
+    :param discord.User dcUser: The user whose name to get
+    :return: dcUser's display name in dcGuild if dcUser is a member of dcGuild, dcUser.name otherwise
+    :rtype: str
+    :raise ValueError: When given a None dcUser
+    """
     if dcUser is None:
         bbLogger.log("Main", "usrMmbrNme",
                      "Null dcUser given", eventType="USR_NONE")
@@ -366,7 +421,26 @@ def userOrMemberName(dcUser, dcGuild):
 
 
 # Use of this method is discouraged. It would be just as efficient to check that getMemberFromRef is not None, and that would require only one function call!
-def isUserRef(uRef, dcGuild=None):
+def isUserRef(uRef : str, dcGuild=None) -> bool:
+    """Decide whether the given string is a valid user reference, pointing to a user.
+    #TODO: if uRef is a mention or ID, validate that getUser doesnt return None
+    If this method is to be used before a call to getMemberFromRef, you should instead consider
+    calling getMemberRef and checking whether the result is None. Both functions perform similar
+    calculations, and this method of uRef validation will use one function call rather than two.
+
+    uRef can be one of:
+    - A user mention <@123456> or <@!123456>
+    - A user ID 123456
+    - A user name Carl
+    - A user name and discriminator Carl#0324
+
+    If uRef is not a user mention or ID, dcGuild must be provided, to be searched for the given name.
+    When validating a name uRef, the process is much more efficient when also given the user's discriminator.
+
+    :param str uRef: The string to test
+    :param discord.Guild dcGuild: The guild in which to search for a user identified by uRef. Required if uRef is not a mention or ID. (Default None)
+    :return: True if uRef identifies a discord.User or a discord.Member in dcGuild, False otherwise
+    """
     if isMention(uRef):
         return True
     
@@ -379,21 +453,22 @@ def isUserRef(uRef, dcGuild=None):
     return False
 
 
-"""
-Attempt to find a member of a given discord guild object from a string or integer.
-uRef can be one of:
-- A user mention <@!123456>
-- A user ID 123456
-- A user name Carl
-- A user name and discriminator Carl#0324
+def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
+    """
+    Attempt to find a member of a given discord guild object from a string or integer.
+    uRef can be one of:
+    - A user mention <@123456> or <@!123456>
+    - A user ID 123456
+    - A user name Carl
+    - A user name and discriminator Carl#0324
 
-If the passed user reference is none of the above, or a matching user cannot be found in the requested guild, None is returned.
+    If the passed user reference is none of the above, or a matching user cannot be found in the requested guild, None is returned.
 
-@param uRef -- A string or integer indentifying a user within dcGuild either by mention, ID, name, or name and discriminator
-@param dcGuild -- A discord.guild in which to search for a member matching uRef
-@return -- Either discord.member of a member belonging to dcGuild and matching uRef, or None if uRef is invalid or no matching user could be found
-"""
-def getMemberFromRef(uRef, dcGuild):
+    :param str uRef: A string or integer indentifying a user within dcGuild either by mention, ID, name, or name and discriminator
+    :param discord.Guild dcGuild: A discord.guild in which to search for a member matching uRef
+    :return: Either discord.member of a member belonging to dcGuild and matching uRef, or None if uRef is invalid or no matching user could be found
+    :rtype: discord.Member or None
+    """
     # Handle user mentions
     if isMention(uRef):
         return dcGuild.get_member(int(uRef.lstrip("<@!").rstrip(">")))
