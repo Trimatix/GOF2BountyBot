@@ -43,8 +43,7 @@ noBountiesEmbed.set_author(name='No Bounties Available', icon_url='https://emoji
 
 
 class BountyBoardChannel:
-    """
-    A channel which stores a continuously updating listing message for every active bounty.
+    """A channel which stores a continuously updating listing message for every active bounty.
 
     Initialisation atts: These attributes are used only when loading in the BBC from dictionary-serialised format. They must be used to initialise the BBC before the BBC can be used.
     :var messagesToBeLoaded: A dictionary of bounty listings to be loaded into the BBC, where keys are message IDs, and values are bbCriminal dicts
@@ -200,8 +199,7 @@ class BountyBoardChannel:
 
     
     async def addBounty(self, bounty : bbBounty.Bounty, message : Message):
-        """
-        Treat the given message as a listing for the given bounty, and store it in the database.
+        """Treat the given message as a listing for the given bounty, and store it in the database.
         If the BBC was previously empty, remove the empty bounty board message if one exists.
         If a HTTP error is thrown when attempting to remove the empty board message, wait and retry the removal for the number of times defined in bbConfig
 
@@ -239,8 +237,7 @@ class BountyBoardChannel:
     
 
     async def removeBounty(self, bounty : bbBounty.Bounty):
-        """
-        Remove the listing message stored for the given bounty from the database. This does not attempt to delete the message from discord.
+        """Remove the listing message stored for the given bounty from the database. This does not attempt to delete the message from discord.
         If the BBC is now empty, send an empty bounty board message.
         If a HTTP error is thrown when sending the empty BBC message, wait and retry the removal for the number of times defined in bbConfig
 
@@ -276,8 +273,7 @@ class BountyBoardChannel:
 
 
     async def updateBountyMessage(self, bounty : bbBounty.Bounty):
-        """
-        Update the embed for the listing associated with the given bounty. This includes newly checked and near-correct systems along the route.
+        """Update the embed for the listing associated with the given bounty. This includes newly checked and near-correct systems along the route.
         If a HTTP error is thrown when updating the listing, wait and retry the edit for the number of times defined in bbConfig
         
         :param Bounty bounty: The bounty whose listing should be updated
@@ -310,8 +306,7 @@ class BountyBoardChannel:
 
 
     def toDict(self) -> dict:
-        """
-        Serialise this BBC to dictionary format
+        """Serialise this BBC to dictionary format
 
         :return: A dictionary containing all data needed to recreate this BBC
         :rtype: dict
