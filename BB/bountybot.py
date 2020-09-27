@@ -15,6 +15,7 @@ import json
 import traceback
 from os import path
 from aiohttp import client_exceptions
+from typing import List, Dict, Union
 
 # BountyBot Imports
 
@@ -123,30 +124,26 @@ botLoggedIn = False
 
 
 
-"""
-Find the shortest route between two systems.
+def makeRoute(start : str, end : str) -> List[str]:
+    """Find the shortest route between two systems.
 
-@param start -- string name of the starting system. Must exist in bbData.builtInSystemObjs
-@param end -- string name of the target system. Must exist in bbData.builtInSystemObjs
-@return -- list of string system names where the first element is start, the last element is end, and all intermediary systems are adjacent
-"""
-
-
-def makeRoute(start, end):
+    :param str start: string name of the starting system. Must exist in bbData.builtInSystemObjs
+    :param str end: string name of the target system. Must exist in bbData.builtInSystemObjs
+    :return: list of string system names where the first element is start, the last element is end, and all intermediary systems are adjacent
+    :rtype: list[str]
+    """
     return bbUtil.bbAStar(start, end, bbData.builtInSystemObjs)
 
 
-"""
-If a passed userID is valid and shares a common server with the bot,
-return the user's name and discriminator.
-Otherwise, return the passed userID.
+def userTagOrDiscrim(userID : str, guild=None) -> str:
+    """If a passed user mention or ID is valid and shares a common server with the bot,
+    return the user's name and discriminator. TODO: Should probably change this to display name
+    Otherwise, return the passed userID.
 
-@param userID -- ID to attempt to convert to name and discrim
-@return -- The user's name and discriminator if the user is reachable, userID otherwise
-"""
-
-
-def userTagOrDiscrim(userID, guild=None):
+    :param str userID: A user mention or ID in string form, to attempt to convert to name and discrim
+    :return: The user's name and discriminator if the user is reachable, userID otherwise
+    :rtype: str
+    """
     if guild is None:
         userObj = bbGlobals.client.get_user(int(userID.lstrip("<@!").rstrip(">")))
     else:
@@ -159,28 +156,36 @@ def userTagOrDiscrim(userID, guild=None):
     return userID
 
 
-"""
-If a passed criminal is a player, attempt to return the user's name and discriminator.
-Otherwise, return the passed criminal's name.
+def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
+    """If a passed criminal is a player, attempt to return the user's name and discriminator.
+    Otherwise, return the passed criminal's name. TODO: Should probably change this to display name
 
-@param criminal -- criminal whose name to attempt to convert to name and discrim
-@return -- The user's name and discriminator if the criminal is a player, criminal.name otherwise
-
-"""
-
-
-def criminalNameOrDiscrim(criminal):
+    :param bbCriminal criminal: criminal whose name to attempt to convert to name and discrim
+    :return: The user's name and discriminator if the criminal is a player, criminal.name otherwise
+    :rtype: str
+    """
     if not criminal.isPlayer:
         return criminal.name
     return userTagOrDiscrim(criminal.name)
 
 
-async def makeBountyBoardChannelMessage(guild, bounty, msg="", embed=None):
+async def makeBountyBoardChannelMessage(guild : bbGuild.bbGuild, bounty : bbBounty.Bounty, msg="", embed=None) -> Message:
+    """Create a new BountyBoardChannel listing for the given bounty, in the given guild.
+    guild must own a BountyBoardChannel.
+
+    :param bbGuild guild: The guild in which to create the BBC listing. Must own a BountyBoardChannel.
+    :param bbBounty.Bounty bounty: The bounty for which to create a listing
+    :param str msg: The text to display in the listing message content (Default "")
+    :param discord.Embed embed: The embed to display in the listing message - this will be removed immediately in place of the embed generated during BountyBoardChannel.updateBountyMessage, so is only really useful in case updateBountyMessage fails. (Default None)
+    :return: The new discord message containing the BBC listing
+    :rtype: discord.Message
+    """
     if not guild.hasBountyBoardChannel:
         raise KeyError("The requested bbGuild has no bountyBoardChannel")
     bountyListing = await guild.bountyBoardChannel.channel.send(msg, embed=embed)
     await guild.bountyBoardChannel.addBounty(bounty, bountyListing)
     await guild.bountyBoardChannel.updateBountyMessage(bounty)
+    return bountyListing
 
 
 async def removeBountyBoardChannelMessage(guild, bounty):
