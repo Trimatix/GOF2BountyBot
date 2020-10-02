@@ -167,7 +167,7 @@ def isMention(mention : str) -> bool:
 
     :param str mention: The string to check
     :return: True if mention matches the formatting of a discord user mention, False otherwise
-    :rtype bool
+    :rtype: bool
     """
     return mention.endswith(">") and ((mention.startswith("<@") and isInt(mention[2:-1])) or (mention.startswith("<@!") and isInt(mention[3:-1])))
 
@@ -177,7 +177,7 @@ def isRoleMention(mention : str) -> bool:
 
     :param str mention: The string to check
     :return: True if mention matches the formatting of a discord role mention, False otherwise
-    :rtype bool
+    :rtype: bool
     """
     return mention.endswith(">") and mention.startswith("<@&") and isInt(mention[3:-1])
 
