@@ -284,6 +284,7 @@ class ReactionMenu:
     :var saveable: Class attribute indicating whether or not this type of ReactionMenu can be saved to file. If not, this menu will be forcibly deleted before bot shutdown.
     :vartype saveable: bool
     """
+    saveable = False
 
     def __init__(self, msg : Message, options={}, 
                     titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
@@ -323,7 +324,6 @@ class ReactionMenu:
         self.timeout = timeout
         self.targetMember = targetMember
         self.targetRole = targetRole
-        self.saveable = False
 
     
     def hasEmojiRegistered(self, emoji : bbUtil.dumbEmoji) -> bool:
