@@ -162,14 +162,14 @@ class ReactionMenuOption:
 
         A generic but rather messy implementation for saving an option's addFunc and removeFunc could be written as follows:
         Saving:
-            - Get the name of the module where the function reference is located using func.__module__
-            - Get the name of the function reference using func.__name__
+        - Get the name of the module where the function reference is located using func.__module__
+        - Get the name of the function reference using func.__name__
         Where func is addFunc or removeFunc as needed.
         
         Loading:
         Find the function reference from the module_name and function_name with one of:
-            - getattr(globals()[module_name], function_name)
-            - getattr(sys.modules[module_name], function_name)
+        - getattr(globals()[module_name], function_name)
+        - getattr(sys.modules[module_name], function_name)
 
         This is obviously a less than ideal implementation, and there are likely to be other solutions.
 
