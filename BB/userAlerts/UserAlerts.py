@@ -1,5 +1,9 @@
+# Typing imports
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..bbObjects import bbGuild
+
 from discord import utils, Guild, Member
-from ..bbObjects import bbGuild
 from abc import ABC, abstractmethod
 
 class UABase(ABC):
