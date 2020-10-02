@@ -476,11 +476,17 @@ def getRouteScaledBountyDelayRandom(baseDelayDict):
 
 
 async def refreshAndAnnounceAllShopStocks():
+    """Generate new tech levels and inventories for the shops of all joined guilds,
+    and announce the stock refresh to those guilds.
+    """
     bbGlobals.guildsDB.refreshAllShopStocks()
     await announceNewShopStock()
 
 
 async def spawnAndAnnounceRandomBounty():
+    """Generate a completely random bounty, spawn it, and announce it to all guilds that have
+    an appropriate channel selected.
+    """
     # ensure a new bounty can be created
     if bbGlobals.bountiesDB.canMakeBounty():
         newBounty = bbBounty.Bounty(bountyDB=bbGlobals.bountiesDB)
@@ -490,6 +496,13 @@ async def spawnAndAnnounceRandomBounty():
 
 
 def saveAllDBs():
+    """Save all of the bot's savedata to file.
+    This currently saves:
+    - the users database
+    - the bounties database
+    - the guilds database
+    - the reaction menus database
+    """
     saveDB(bbConfig.userDBPath, bbGlobals.usersDB)
     saveDB(bbConfig.bountyDBPath, bbGlobals.bountiesDB)
     saveDB(bbConfig.guildDBPath, bbGlobals.guildsDB)
@@ -498,7 +511,12 @@ def saveAllDBs():
     print(datetime.now().strftime("%H:%M:%S: Data saved!"))
 
 
-async def expireAndAnnounceDuelReq(duelReqDict):
+async def expireAndAnnounceDuelReq(duelReqDict : DuelRequest.DuelRequest):
+    """Foce the expiry of a given DuelRequest. The duel expiry will be announced to the issuing user.
+    TODO: Announce duel expiry to target user, if they have the UA.
+
+    :param DuelRequest duelReqDict: The duel request to expire
+    """
     duelReq = duelReqDict["duelReq"]
     await duelReq.duelTimeoutTask.forceExpire(callExpiryFunc=False)
     if duelReq.sourceBBGuild.hasPlayChannel():
@@ -508,14 +526,30 @@ async def expireAndAnnounceDuelReq(duelReqDict):
     duelReq.sourceBBUser.removeDuelChallengeObj(duelReq)
 
 
-def typeAlertedUserMentionOrName(alertType, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None):
+def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None) -> str:
+    """If the given user has subscribed to the given alert type, return the user's mention. Otherwise, return their display name and discriminator.
+    At least one of dcUser or bbUser must be provided.
+    bbGuild and dcGuild are both optional. If neither are provided then the joined guilds will be searched for the given user.
+    This means that giving at least one of bbGuild or dcGuild will drastically improve efficiency.
+    TODO: rename bbUser and bbGuild so it doesnt match the class name
+
+    :param UserAlerts.UABase alertType: The type of alert to check the state of
+    :param discord.User dcUser: The user to check the alert state of. One of dcUser or bbUser is required. (Default None)
+    :param bbUser bbUser: The user to check the alert state of. One of dcUser or bbUser is required. (Default None)
+    :param bbGuild bbGuild: The guild in which to check the alert state. Optional, but improves efficiency. (Default None)
+    :param dcGuild dcGuild: The guild in which to check the alert state. Optional, but improves efficiency. (Default None)
+    :return: If the given user is alerted for the given type in the selected guild, the user's mention. The user's display name and discriminator otherwise.
+    :rtype: str
+    :raise ValueError: When given neither dcUser nor bbUser
+    :raise KeyError: When given neither bbGuild nor dcGuild, and the user could not be located in any of the bot's joined guilds.
+    """
     if dcUser is None and bbUser is None:
         raise ValueError("At least one of dcUser or bbUser must be given.")
 
     if bbGuild is None and dcGuild is None:
         dcGuild = bbUtil.findBBUserDCGuild(dcUser)
         if dcGuild is None:
-            raise ValueError("user does not share an guilds with the bot")
+            raise KeyError("user does not share an guilds with the bot")
     if bbGuild is None:
         bbGuild = bbGlobals.guildsDB.getGuild(dcGuild.id)
     elif dcGuild is None:
@@ -531,11 +565,42 @@ def typeAlertedUserMentionOrName(alertType, dcUser=None, bbUser=None, bbGuild=No
     return guildMember.display_name + "#" + str(guildMember.discriminator)
 
 
-def IDAlertedUserMentionOrName(alertID, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None):
+def IDAlertedUserMentionOrName(alertID : str, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None) -> str:
+    """If the given user has subscribed to the alert type of the given ID, return the user's mention. Otherwise, return their display name and discriminator.
+    At least one of dcUser or bbUser must be provided.
+    bbGuild and dcGuild are both optional. If neither are provided then the joined guilds will be searched for the given user.
+    This means that giving at least one of bbGuild or dcGuild will drastically improve efficiency.
+    TODO: rename bbUser and bbGuild so it doesnt match the class name
+
+    :param UserAlerts.UABase alertType: The ID, according to UserAlerts.userAlertsIDsTypes, of type of alert to check the state of
+    :param discord.User dcUser: The user to check the alert state of. One of dcUser or bbUser is required. (Default None)
+    :param bbUser bbUser: The user to check the alert state of. One of dcUser or bbUser is required. (Default None)
+    :param bbGuild bbGuild: The guild in which to check the alert state. Optional, but improves efficiency. (Default None)
+    :param dcGuild dcGuild: The guild in which to check the alert state. Optional, but improves efficiency. (Default None)
+    :return: If the given user is alerted for the given type in the selected guild, the user's mention. The user's display name otherwise.
+    :rtype: str
+    """
     return typeAlertedUserMentionOrName(UserAlerts.userAlertsIDsTypes[alertID], dcUser=dcUser, bbUser=bbUser, bbGuild=bbGuild, dcGuild=dcGuild)
 
 
-def getAlertIDFromHeirarchicalAliases(alertName):
+def getAlertIDFromHeirarchicalAliases(alertName : Union[str, List[str]]) -> List[str]:
+    """Look up a given multi-levelled alert reference, and return a list of associated UserAlert IDs.
+    This function implements:
+    - user friendly alert names
+    - user alert heirarchical referencing
+    - multi-alert references TODO: Currently unused and/or broken. Implement bot updates all
+    - aliases at every level of the alert reference
+
+    ⚠ If the given string could not be deferenced to UserAlerts, then the 0th element of the returned list
+    will be 'ERR'. Before handling the returned list, check to make sure this is not the case.
+
+    TODO: Replace with a LUT implementation
+
+    # :param alertName: A reference to an alert. Heirarchy levels can be given as a space-separated string, or ordered list elements. E.g: 'bot patches major' or ['bot', 'patches', 'major']
+    :type alertName: list[str] or str
+    :return: A list of UserAlert IDs in accordance with UserAlerts.userAlertsIDsTypes, that are associated with the requested alert reference.
+    :rtype: list[str]
+    """
     if type(alertName) != list:
         alertName = alertName.split(" ")
 
@@ -586,6 +651,13 @@ def getAlertIDFromHeirarchicalAliases(alertName):
 
 
 async def shutdown():
+    """Cleanly prepare for, and then perform, shutdown of the bot.
+
+    This currently:
+    - expires all non-saveable reaction menus
+    - logs out of discord
+    - saves all savedata to file
+    """
     menus = list(bbGlobals.reactionMenusDB.values())
     for menu in menus:
         if not menu.saveable:
@@ -597,7 +669,22 @@ async def shutdown():
 
 
 
-def getMemberByRefOverDB(uRef, dcGuild=None):
+def getMemberByRefOverDB(uRef : str, dcGuild=None) -> discord.User:
+    """Attempt to get a user object from a given string user reference.
+    a user reference can be one of:
+    - A user mention <@123456> or <@!123456>
+    - A user ID 123456
+    - A user name Carl
+    - A user name and discriminator Carl#0324
+
+    If uRef is not a user mention or ID, dcGuild must be provided, to be searched for the given name.
+    When validating a name uRef, the process is much more efficient when also given the user's discriminator.
+
+    :param str uRef: A string or integer indentifying the user object to look up
+    :param discord.Guild dcGuild: The guild in which to search for a user identified by uRef. Required if uRef is not a mention or ID. (Default None)
+    :return: Either discord.member of a member belonging to dcGuild and matching uRef, or None if uRef is invalid or no matching user could be found
+    :rtype: discord.Member or None
+    """
     if dcGuild is not None:
         userAttempt = bbUtil.getMemberFromRef(uRef, dcGuild)
     else:
