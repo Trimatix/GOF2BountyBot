@@ -1,8 +1,11 @@
+# Typing imports
+from __future__ import annotations
+from typing import List, Union
+
 from .bbItem import bbItem
 from . import bbTurret, bbWeapon, bbShipUpgrade, bbModuleFactory
 from ...bbConfig import bbConfig, bbData
 from ... import bbUtil
-from typing import List, Union
 
 class bbShip(bbItem):
     """An equippable and customisable ship for use by players and NPCs.
@@ -596,7 +599,7 @@ class bbShip(bbItem):
             other.equipTurret(self.turrets.pop(0))
 
 
-    def getActivesByName(self, item : str) - > Union[bbWeapon.bbWeapon, bbModule.bbModule, bbTurret.bbTurret]:
+    def getActivesByName(self, item : str) -> Union[bbWeapon.bbWeapon, bbModule.bbModule, bbTurret.bbTurret]:
         """Return a requested array of equipped items, specified by string name.
 
         :param str item: one of weapon, module or turret.

@@ -1,7 +1,10 @@
+# Typing imports
+from __future__ import annotations
+from typing import Dict, Union
+
 from . import bbBountyConfig
 from ...bbConfig import bbData
 from . import bbCriminal
-from typing import Dict, Union
 
 class Bounty:
     """A bounty listing for a criminal, to be hunted down by players.

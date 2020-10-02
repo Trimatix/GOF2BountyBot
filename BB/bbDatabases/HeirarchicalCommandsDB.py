@@ -1,3 +1,7 @@
+# Typing imports
+from types import FunctionType
+from discord import Message
+
 class HeirarchicalCommandsDB:
     """Class that stores, categorises, and calls commands based on a text name and caller permissions.
     TODO: Change to a single list of [{}] where the internal {} is as userCommands etc currently are, and its index in the outer list corresponds to command access level
@@ -16,7 +20,7 @@ class HeirarchicalCommandsDB:
         self.devCommands = {}
 
     
-    def register(self, command : str, function : builtin_function_or_method, isAdmin=False, isDev=False, forceKeepArgsCasing=False, forceKeepCommandCasing=False):
+    def register(self, command : str, function : FunctionType, isAdmin=False, isDev=False, forceKeepArgsCasing=False, forceKeepCommandCasing=False):
         """Register a command in the database.
 
         :param str command: the text name users should call the function by. Commands are case sensitive.
@@ -32,7 +36,7 @@ class HeirarchicalCommandsDB:
             self.userCommands[command if forceKeepCommandCasing else command.lower()] = (function, forceKeepArgsCasing, forceKeepCommandCasing)
 
     
-    async def call(self, command : str, message : discord.message, args : str, isAdmin=False, isDev=False, isDM=False):
+    async def call(self, command : str, message : Message, args : str, isAdmin=False, isDev=False, isDM=False):
         """Call a command or send an error message.
 
         :param str command: the text name of the command to attempt to call. Commands are case sensitive

@@ -1,5 +1,8 @@
-from abc import ABC, abstractmethod
+# Typing imports
+from __future__ import annotations
 from typing import List
+
+from abc import ABC, abstractmethod
 
 class Aliasable (ABC):
     """An abstract class allowing subtype instances to be identified and compared by any list of names (aliases).

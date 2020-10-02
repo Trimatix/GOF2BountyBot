@@ -1,3 +1,7 @@
+# Typing imports
+from __future__ import annotations
+from typing import List, Dict, Union
+
 # Discord Imports
 
 import discord
@@ -15,7 +19,6 @@ import json
 import traceback
 from os import path
 from aiohttp import client_exceptions
-from typing import List, Dict, Union
 
 # BountyBot Imports
 

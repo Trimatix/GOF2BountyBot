@@ -41,10 +41,10 @@ class bbWeapon(bbItem):
         """⚠ DEPRACATED
         Get the type of this object.
 
-        :return: The bbTurret class
+        :return: The bbWeapon class
         :rtype: type
         """
-        return bbTurret
+        return bbWeapon
 
 
     def toDict(self) -> dict:
@@ -53,7 +53,7 @@ class bbWeapon(bbItem):
         :return: A dictionary containing all information needed to reconstruct this weapon. If the weapon is builtIn, this is only its name.
         :rtype: dict
         """
-        itemDict = super(bbTurret, self).toDict()
+        itemDict = super(bbWeapon, self).toDict()
         if not self.builtIn:
             itemDict["dps"] = self.dps
         return itemDict

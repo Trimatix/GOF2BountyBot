@@ -1,3 +1,12 @@
+# Typing imports
+from __future__ import annotations
+from typing import Union, List, Dict, TYPE_CHECKING
+if TYPE_CHECKING:
+    from .bbObjects.items import bbShip
+    from discord import PartialEmoji, Guild, User
+    from datetime import timedelta
+    from .bbObjects import bbUser
+
 from .bbObjects.bounties import bbSystem
 
 import json
@@ -7,13 +16,6 @@ import inspect
 from emoji import UNICODE_EMOJI
 from . import bbGlobals
 from .logging import bbLogger
-
-# purely for type hinting
-from discord import PartialEmoji, Guild, User
-from datetime import timedelta
-from .bbObjects import bbUser
-from typing import Union, List, Dict
-from .bbObjects.items import bbShip
 
 
 def readJSON(dbFile : str) -> dict:

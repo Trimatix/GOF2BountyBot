@@ -1,6 +1,9 @@
+# Typing imports
+from __future__ import annotations
+from typing import List, Tuple
+
 from .. import bbAliasable
 import math
-from typing import List, Tuple
 
 class System (bbAliasable.Aliasable):
     """A solar system where a bounty may be located.

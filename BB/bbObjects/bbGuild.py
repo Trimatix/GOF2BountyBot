@@ -1,7 +1,7 @@
 from . import bbShop
 from .bounties.bountyBoards import BountyBoardChannel
 from ..userAlerts import UserAlerts
-from discord import Channel, Client
+from discord import channel, Client
 from typing import List
 
 class bbGuild:
@@ -190,7 +190,7 @@ class bbGuild:
 
 
     
-    async def addBountyBoardChannel(self, channel : discord.Channel, client : discord.Client, factions : List[str]):
+    async def addBountyBoardChannel(self, channel : channel, client : Client, factions : List[str]):
         """Set this guild's bounty board channel.
 
         :param discord.Channel channel: The channel where bounty listings should be posted

@@ -1,11 +1,15 @@
+# Typing imports
+from __future__ import annotations
+from typing import Union, List, TYPE_CHECKING
+if TYPE_CHECKING:
+    from .battles import DuelRequest
+
 from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from .items.modules import bbModule
 from ..bbConfig import bbConfig
 from . import bbInventory, bbInventoryListing
 from ..userAlerts import UserAlerts
 from datetime import datetime
-from typing import Union, List
-from .battles import DuelRequest
 from discord import Guild, Member
 from . import bbGuild
 from ..logging import bbLogger
@@ -161,20 +165,20 @@ class bbUser:
                 if isinstance(alerts[alertType], UserAlerts.UABase):
                     self.userAlerts[alertType] = alerts[alertType]
                 elif isinstance(alerts[alertType], bool):
-                    userAlerts[alertType] = alertType(alerts[alertType])
+                    self.userAlerts[alertType] = alertType(alerts[alertType])
                 else:
                     bbLogger.log("bbUsr", "init", "Given unknown alert state type for UA " + alertID + ". Must be either UABase or bool, given " + alerts[alertType].__class__.__name__ + ". Alert reset to default (" + str(alertType(bbConfig.userAlertsIDsDefaults[alertID])) + ")", category="usersDB", eventType="LOAD-UA_STATE_TYPE")
-                    userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
+                    self.userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
             elif alertID in alerts:
                 if isinstance(alerts[alertID], UserAlerts.UABase):
                     self.userAlerts[alertType] = alerts[alertID]
                 elif isinstance(alerts[alertID], bool):
-                    userAlerts[alertType] = alertType(alerts[alertID])
+                    self.userAlerts[alertType] = alertType(alerts[alertID])
                 else:
                     bbLogger.log("bbUsr", "init", "Given unknown alert state type for UA " + alertID + ". Must be either UABase or bool, given " + alerts[alertID].__class__.__name__ + ". Alert reset to default (" + str(alertType(bbConfig.userAlertsIDsDefaults[alertID])) + ")", category="usersDB", eventType="LOAD-UA_STATE_TYPE")
-                    userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
+                    self.userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
             else:
-                userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
+                self.userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
 
         self.bountyWinsToday = bountyWinsToday
         self.dailyBountyWinsReset = dailyBountyWinsReset

@@ -1,7 +1,10 @@
+# Typing imports
+from __future__ import annotations
+from typing import List
+
 from .. import bbAliasable
 from abc import abstractmethod
 from ... import bbUtil
-from typing import List
 
 class bbItem(bbAliasable.Aliasable):
     """A game item, with a value, a manufacturer, a wiki page, an icon, an emoji, and a tech level.

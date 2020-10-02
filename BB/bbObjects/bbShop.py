@@ -1,10 +1,15 @@
+# Typing imports
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from . import bbUser
+
 from ..bbConfig import bbData, bbConfig
 from .items import bbModuleFactory, bbShip, bbWeapon, bbTurret, bbItem
 from .items.modules import bbModule
 from . import bbInventory, bbInventoryListing
 import random
 from ..logging import bbLogger
-from . import bbUser
 
 class bbShop:
     """A shop containing a random selection of items which players can buy.

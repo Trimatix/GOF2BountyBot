@@ -1,3 +1,6 @@
+# Typing imports
+from __future__ import annotations
+
 import math, random, pprint
 from ..bbUtil import dumbEmoji
 

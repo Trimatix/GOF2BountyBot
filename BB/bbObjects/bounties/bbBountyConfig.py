@@ -1,9 +1,14 @@
+# Typing imports
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ...bbDatabases import bbBountyDB
+
 import random
 from datetime import datetime, timedelta
 
 from ...bbConfig import bbData, bbConfig
 from ... import bbUtil
-from ...bbDatabases import bbBountyDB
 
 class BountyConfig:
     """

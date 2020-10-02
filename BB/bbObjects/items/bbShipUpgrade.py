@@ -1,3 +1,6 @@
+# Typing imports
+from __future__ import annotations
+
 from ...bbConfig import bbData
 from . import bbShip
 
