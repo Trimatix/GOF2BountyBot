@@ -179,18 +179,26 @@ async def makeBountyBoardChannelMessage(guild : bbGuild.bbGuild, bounty : bbBoun
     :param discord.Embed embed: The embed to display in the listing message - this will be removed immediately in place of the embed generated during BountyBoardChannel.updateBountyMessage, so is only really useful in case updateBountyMessage fails. (Default None)
     :return: The new discord message containing the BBC listing
     :rtype: discord.Message
+    :raise ValueError: If guild does not own a BountyBoardChannel
     """
     if not guild.hasBountyBoardChannel:
-        raise KeyError("The requested bbGuild has no bountyBoardChannel")
+        raise ValueError("The requested bbGuild has no bountyBoardChannel")
     bountyListing = await guild.bountyBoardChannel.channel.send(msg, embed=embed)
     await guild.bountyBoardChannel.addBounty(bounty, bountyListing)
     await guild.bountyBoardChannel.updateBountyMessage(bounty)
     return bountyListing
 
 
-async def removeBountyBoardChannelMessage(guild, bounty):
+async def removeBountyBoardChannelMessage(guild : bbGuild.bbGuild, bounty : bbBounty.Bounty):
+    """Remove guild's BountyBoardChannel listing for bounty.
+
+    :param bbGuild guild: The guild in which to remove bounty's BBC listing
+    :param bbBounty bounty: The bounty whose BBC listing should be removed
+    :raise ValueError: If guild does not own a BBC
+    :raise KeyError: If the guild's BBC does not have a listing for bounty
+    """
     if not guild.hasBountyBoardChannel:
-        raise KeyError("The requested bbGuild has no bountyBoardChannel")
+        raise ValueError("The requested bbGuild has no bountyBoardChannel")
     if guild.bountyBoardChannel.hasMessageForBounty(bounty):
         try:
             await guild.bountyBoardChannel.getMessageForBounty(bounty).delete()
@@ -204,17 +212,16 @@ async def removeBountyBoardChannelMessage(guild, bounty):
             bbLogger.log("Main", "rmBBCMsg", "Bounty listing message no longer exists, BBC entry removed: " +
                          bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-NOT_FOUND")
         await guild.bountyBoardChannel.removeBounty(bounty)
+    else:
+        raise KeyError("The requested bbGuild (" + str(guild.id) + ") does not have a BountyBoardChannel listing for the given bounty: " + bounty.criminal.name)
 
 
-"""
-Announce the creation of a new bounty across all joined servers
-Messages will be sent to the announceChannels of all guilds in the bbGlobals.guildsDB, if they have one
+async def announceNewBounty(newBounty : bbBounty.Bounty):
+    """Announce the creation of a new bounty across all joined servers
+    Messages will be sent to the announceChannels of all guilds in the bbGlobals.guildsDB, if they have one
 
-@param newBounty -- the bounty to announce
-"""
-
-
-async def announceNewBounty(newBounty):
+    :param bbBounty newBounty: the bounty to announce
+    """
     # Create the announcement embed
     bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
                             col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
@@ -261,18 +268,15 @@ async def announceNewBounty(newBounty):
             # TODO: may wish to add handling for invalid announceChannels - e.g remove them from the bbGuild object
 
 
-"""
-Announce the completion of a bounty across all joined servers
-Messages will be sent to the playChannels of all guilds in the bbGlobals.guildsDB, if they have one
+async def announceBountyWon(bounty : bbBounty.Bounty, rewards : Dict[int, Dict[str, Union[int, bool]]], winningGuildObj : discord.Guild, winningUserId : int):
+    """Announce the completion of a bounty across all joined servers
+    Messages will be sent to the playChannels of all guilds in the bbGlobals.guildsDB, if they have one
 
-@param bounty -- the bounty to announce
-@param rewards -- the rewards dictionary as defined by bbBounty.calculateRewards
-@param winningGuildObj -- the discord Guild object of the guild containing the winning user
-@param winningUserId -- the user ID of the discord user that won the bounty
-"""
-
-
-async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
+    :param bbBounty bounty: the bounty to announce
+    :param dict rewards: the rewards dictionary as defined by bbBounty.calculateRewards
+    :param discord.Guild winningGuildObj: the discord Guild object of the guild containing the winning user
+    :param int winningUserId: the user ID of the discord user that won the bounty
+    """
     # Loop over all guilds in the database that have playChannels
     for currentGuild in bbGlobals.guildsDB.getGuilds():
         if bbGlobals.client.get_guild(currentGuild.id) is not None:
@@ -319,7 +323,12 @@ async def announceBountyWon(bounty, rewards, winningGuildObj, winningUserId):
                         currentGuild.id).name + "#" + str(currentGuild.id) + " in channel ?#" + str(currentGuild.getPlayChannelId()), eventType="PLCH_NONE")
 
 
-async def updateAllBountyBoardChannels(bounty, bountyComplete=False):
+async def updateAllBountyBoardChannels(bounty : bbBounty.Bounty, bountyComplete=False):
+    """Update BBC listings for the given bounty across all joined servers.
+
+    :param bbBounty bounty: The bounty whose listings should be updated
+    :param bool bountyComplete: Whether or not the bounty has now been completed. When True, bounty listings will be removed rather than updated. (Default False)
+    """
     newBountyMsg = "A new bounty is now available from **" + \
         bounty.faction.title() + "** central command:"
     for guild in bbGlobals.guildsDB.getGuilds():
@@ -333,13 +342,12 @@ async def updateAllBountyBoardChannels(bounty, bountyComplete=False):
                     await guild.bountyBoardChannel.updateBountyMessage(bounty)
 
 
-"""
-Announce the refreshing of shop stocks to all guilds.
-Messages will be sent to the playChannels of all guilds in the bbGlobals.guildsDB, if they have one
-"""
-
-
 async def announceNewShopStock(guildID=-1):
+    """Announce the refreshing of shop stocks to one or all joined guilds.
+    Messages will be sent to the playChannels of all guilds in the bbGlobals.guildsDB, if they have one
+
+    :param int guildID: The guild to announce to. If guildID is -1, the shop refresh will be announced to all joined guilds. (Default -1)
+    """
     if guildID == -1:
         # loop over all guilds
         for guild in bbGlobals.guildsDB.guilds.values():
@@ -377,22 +385,20 @@ async def announceNewShopStock(guildID=-1):
                         guild.id).name + "#" + str(guild.id) + " in channel " + playCh.name + "#" + str(playCh.id), category="shop", eventType="PLCH_NONE")
 
 
-"""
-Build a simple discord embed.
+def makeEmbed(titleTxt="", desc="", col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> discord.Embed:
+    """Factory function building a simple discord embed from the provided arguments.
 
-@param titleTxt -- The title of the embed
-@param desc -- The description of the embed; appears at the top below the title
-@param col -- The colour of the side strip of the embed
-@param footerTxt -- Secondary description appearing at the bottom of the embed
-@param img -- Large icon appearing as the content of the embed, left aligned like a field
-@param thumb -- larger image appearing to the right of the title
-@param authorName -- Secondary title for the embed
-@param icon -- smaller image to the left of authorName. AuthorName is required for this to be displayed.
-@return -- the created discord embed
-"""
-
-
-def makeEmbed(titleTxt="", desc="", col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon=""):
+    :param str titleTxt: The title of the embed (Default "")
+    :param str desc: The description of the embed; appears at the top below the title (Default "")
+    :param discord.Colour col: The colour of the side strip of the embed (Default discord.Colour.blue())
+    :param str footerTxt: Secondary description appearing at the bottom of the embed (Default "")
+    :param str img: Large icon appearing as the content of the embed, left aligned like a field (Default "")
+    :param str thumb: larger image appearing to the right of the title (Default "")
+    :param str authorName: Secondary title for the embed (Default "")
+    :param str icon: smaller image to the left of authorName. AuthorName is required for this to be displayed. (Default "")
+    :return: a new discord embed as described in the given parameters
+    :rtype: discord.Embed
+    """
     embed = discord.Embed(title=titleTxt, description=desc, colour=col)
     if footerTxt != "":
         embed.set_footer(text=footerTxt)
@@ -404,16 +410,14 @@ def makeEmbed(titleTxt="", desc="", col=discord.Colour.blue(), footerTxt="", img
     return embed
 
 
-"""
-Construct a datetime.timedelta from a dictionary,
-transforming keys into keyword arguments for the timedelta constructor.
+def timeDeltaFromDict(timeDict : dict) -> timedelta:
+    """Construct a datetime.timedelta from a dictionary,
+    transforming keys into keyword arguments for the timedelta constructor.
 
-@param timeDict -- dictionary containing measurements for each time interval. i.e weeks, days, hours, minutes, seconds, microseconds and milliseconds. all are optional and case sensitive.
-@return -- a timedelta with all of the attributes requested in the dictionary.
-"""
-
-
-def timeDeltaFromDict(timeDict):
+    :param dict timeDict: dictionary containing measurements for each time interval. i.e weeks, days, hours, minutes, seconds, microseconds and milliseconds. all are optional and case sensitive.
+    :return: a timedelta with all of the attributes requested in the dictionary.
+    :rtype: datetime.timedelta
+    """
     return timedelta(weeks=timeDict["weeks"] if "weeks" in timeDict else 0,
                      days=timeDict["days"] if "days" in timeDict else 0,
                      hours=timeDict["hours"] if "hours" in timeDict else 0,
@@ -423,35 +427,45 @@ def timeDeltaFromDict(timeDict):
                      milliseconds=timeDict["milliseconds"] if "milliseconds" in timeDict else 0)
 
 
-"""
-Return the string extension for an integer, e.g 'th' or 'rd'.
+def getNumExtension(num : int) -> str:
+    """Return the string extension for an integer, e.g 'th' or 'rd'.
 
-@param num -- The integer to find the extension for
-@return -- string containing a number extension from bbData.numExtensions
-"""
-
-
-def getNumExtension(num):
+    :param int num: The integer to find the extension for
+    :return: string containing a number extension from bbData.numExtensions
+    :rtype: str
+    """
     return bbData.numExtensions[int(str(num)[-1])] if not (num > 10 and num < 20) else "th"
 
 
 # TODO: Replace with getFixedTimeOnDay, adding delayDict to the given day
-def getFixedDailyTime(delayDict):
+def getFixedDailyTime(delayDict : dict) -> datetime:
+    """Get a datetime.datetime object representing the soonest occurring time described in delayDict.
+    For example, if the date is 27/09/2020 and the time is currently 16:37, calling getFixedDailyTime({"hours":14, "minutes":40})
+    will return a datetime.datetime representing 28/09/2020 at 14:40 (2:40pm).
+
+    :param dict delayDict: The time of day, in dictionary representation, to fetch the next occurring datetime for. Must align with the argument requirements for timeDeltaFromDict.
+    :return: A datetime.datetime representing the next occurring instance of the given time, after now
+    :rtype: datetime.datetime
+    """
     return (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(delayDict)) - datetime.utcnow()
 
 
 # TODO: Convert to random across two dicts
-def getRandomDelaySeconds(minmaxDict):
+def getRandomDelaySeconds(minmaxDict : Dict[str, int]) -> timedelta:
+    """Generate a random timedelta between the given minimum and maximum number of seconds, inclusive.
+    minMaxDict must contain keys "min" and "max" (case sensitive), with values of integers representing
+    the minimium and maximum number of seconds this function can generate (inclusive)
+    """
     return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))
 
 
-"""
-New bounty delay generator, scaling a fixed delay by the length of the presently spawned bounty.
+def getRouteScaledBountyDelayFixed(baseDelayDict : Dict[str, int]) -> timedelta:
+    """New bounty delay generator, scaling a fixed delay by the length of the presently spawned bounty.
 
-@param baseDelayDict -- A timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
-@return -- A datetime.timeDelta indicating the time to wait before spawning a new bounty
-"""
-def getRouteScaledBountyDelayFixed(baseDelayDict):
+    :param dict baseDelayDict: A timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
+    :return: A datetime.timedelta indicating the time to wait before spawning a new bounty
+    :rtype: datetime.timedelta
+    """
     timeScale = bbConfig.fallbackRouteScale if bbGlobals.bountiesDB.latestBounty is None else len(bbGlobals.bountiesDB.latestBounty.route)
     delay = timeDeltaFromDict(baseDelayDict) * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient
     bbLogger.log("Main", "routeScaleBntyDelayFixed", "New bounty delay generated, " + \
@@ -461,13 +475,13 @@ def getRouteScaledBountyDelayFixed(baseDelayDict):
     return delay
     
 
-"""
-New bounty delay generator, generating a random delay time between two points, scaled by the length of the presently spawned bounty.
+def getRouteScaledBountyDelayRandom(baseDelayDict : Dict[str, int]) -> timedelta:
+    """New bounty delay generator, generating a random delay time between two points, scaled by the length of the presently spawned bounty.
 
-@param baseDelayDict -- A dictionary describing the minimum and maximum time in seconds to wait after a bounty is spawned with route length 1
-@return -- A datetime.timeDelta indicating the time to wait before spawning a new bounty
-"""
-def getRouteScaledBountyDelayRandom(baseDelayDict):
+    :param dict baseDelayDict: A dictionary describing the minimum and maximum time in seconds to wait after a bounty is spawned with route length 1
+    :return: A datetime.timedelta indicating the time to wait before spawning a new bounty
+    :rtype: datetime.timedelta
+    """
     timeScale = bbConfig.fallbackRouteScale if bbGlobals.bountiesDB.latestBounty is None else len(bbGlobals.bountiesDB.latestBounty.route)
     delay = getRandomDelaySeconds({"min": baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient,
                                     "max": baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient})
