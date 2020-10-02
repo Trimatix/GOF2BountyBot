@@ -241,7 +241,7 @@ class ReactionMenu:
 
     How to use this class:
     1. Send a message
-    2. Create a TimedTask that will call a menu deleting function (e.g deleteReactionMenu) with your new message ID on expiry TODO: add a constructor flag and TimedTask config data class to ReactionMenu constructor for autoscheduling menu expiry on menu creation
+    2. (optional) Create a TimedTask that will call a menu deleting function (e.g deleteReactionMenu) with your new message ID on expiry TODO: add a constructor flag and TimedTask config data class to ReactionMenu constructor for autoscheduling menu expiry on menu creation
     3. Pass your new message and TimedTask to the ReactionMenu constructor, also specifying a dictionary of menu options
     4. Call updateMessage on your new ReactionMenu instance
     5. Use discord's client events of either on_reaction_add and on_reaction_remove or on_raw_reaction_add and on_raw_reaction_remove to call your new menu's reactionAdded and reactionRemoved methods (bountybot.py has this behaviour already) TODO: Make reactionAdded and reactionRemoved ignore emoji that are not options in the menu
@@ -249,7 +249,7 @@ class ReactionMenu:
     The real power of this class can be harnessed by binding function calls to individual menu option reactions when creating your options dictionary.
     A great example of this is in ReactionRolePicker, which actually has no extra behaviour added over ReactionMenu. It acts more as a ReactionMenu preset,
     defining a new constructor which transforms a dictionary of emojis to roles into an options dictionary, where each option's addFunc is bound to a role granting
-    function, and its removeFunc is bount to a role removing function. The only extra behaviour ReactionRolePickerOption implements over ReactionMenuOption is
+    function, and its removeFunc is bound to a role removing function. The only extra behaviour ReactionRolePickerOption implements over ReactionMenuOption is
     the addition of its associated role ID being saved during toDict.
     The options in your options dictionary do not have to be of the same type - each option could have completely different behaviour.
     The only consideration you may need to make when creating such an object is whether or not you wish for it to be saveable - in which
