@@ -1084,7 +1084,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
     """⚠ WARNING: MARKED FOR CHANGE ⚠
     The following function is provisional and marked as planned for overhaul.
     Details: Criminal fights are to switch algorithm, using bbObjects.items.battles as a base. Criminals are to be assigned
-            Procedurally generated ships based on a difficulty rating (by direct extension of the items' rarity rankings from bbConfig.__init__)
+    Procedurally generated ships based on a difficulty rating (by direct extension of the items' rarity rankings from bbConfig.__init__)
 
     Check a system for bounties and handle rewards
 
@@ -2989,7 +2989,7 @@ async def cmd_total_value(message : discord.Message, args : str, isDM : bool):
     """⚠ WARNING: MARKED FOR CHANGE ⚠
     The following function is provisional and marked as planned for overhaul.
     Details: The command output is finalised. However, the inner workings of the command are to be replaced with attribute getters.
-            It is inefficient to calculate total value measurements on every call, so current totals should be cached in object attributes whenever modified.
+    It is inefficient to calculate total value measurements on every call, so current totals should be cached in object attributes whenever modified.
 
     print the total value of the specified user, use the calling user if no user is specified.
 
@@ -3024,8 +3024,8 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
     """⚠ WARNING: MARKED FOR CHANGE ⚠
     The following function is provisional and marked as planned for overhaul.
     Details: Overhaul is part-way complete, with a few fighting algorithm provided in bbObjects.items.battles. However, printing the fight details is yet to be implemented.
-            This is planned to be done using simple message editing-based animation of player ships and progress bars for health etc.
-            This command is functional for now, but the output is subject to change.
+    This is planned to be done using simple message editing-based animation of player ships and progress bars for health etc.
+    This command is functional for now, but the output is subject to change.
 
     Challenge another player to a duel, with an amount of credits as the stakes.
     The winning user is given stakes credits, the loser has stakes credits taken away.
@@ -4961,9 +4961,9 @@ async def on_guild_remove(guild : discord.Guild):
 async def on_ready():
     """Bot initialisation (called on bot login) and behaviour loops.
     Currently includes:
-        - new bounty spawning
-        - shop stock refreshing
-        - regular database saving to JSON
+    - new bounty spawning
+    - shop stock refreshing
+    - regular database saving to JSON
 
     TODO: Add bounty expiry and reaction menu (e.g duel challenges) expiry
     TODO: Implement dynamic timedtask checking period
