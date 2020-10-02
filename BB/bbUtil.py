@@ -589,8 +589,7 @@ def isUserRef(uRef : str, dcGuild=None) -> bool:
 
 
 def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
-    """
-    Attempt to find a member of a given discord guild object from a string or integer.
+    """Attempt to find a member of a given discord guild object from a string or integer.
     uRef can be one of:
     - A user mention <@123456> or <@!123456>
     - A user ID 123456
