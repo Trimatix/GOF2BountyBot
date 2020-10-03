@@ -16,7 +16,7 @@ class UABase(ABC):
     """
 
     @abstractmethod
-    async def toggle(self, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member) -> bool:
+    async def toggle(self, dcGuild : Guild, bbGuild : 'bbGuild.bbGuild', dcMember : Member) -> bool:
         # TODO: Stop requesting bbGuild, look it up from bbGlobals using dcGuild
         """Invert the alert's state (i.e if currently off, switch to on, and vice versa) for the given member in the given guild.
 
@@ -30,7 +30,7 @@ class UABase(ABC):
 
 
     @abstractmethod
-    def getState(self, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member) -> bool:
+    def getState(self, dcGuild : Guild, bbGuild : 'bbGuild.bbGuild', dcMember : Member) -> bool:
         # TODO: Stop requesting bbGuild, look it up from bbGlobals using dcGuild
         """Get the state of the alert for the given member in the given guild.
 
@@ -44,7 +44,7 @@ class UABase(ABC):
 
 
     @abstractmethod
-    async def setState(self, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member, newState : bool) -> bool:
+    async def setState(self, dcGuild : Guild, bbGuild : 'bbGuild.bbGuild', dcMember : Member, newState : bool) -> bool:
         # TODO: Stop requesting bbGuild, look it up from bbGlobals using dcGuild
         """Set the alert's state for the given member in the given guild, to the given state.
 
@@ -74,7 +74,7 @@ class StateUserAlert(UABase):
         self.state = state
 
     
-    async def toggle(self, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member) -> bool:
+    async def toggle(self, dcGuild : Guild, bbGuild : 'bbGuild.bbGuild', dcMember : Member) -> bool:
         """Invert the alert's state (i.e if currently off, switch to on, and vice versa).
 
         :param discord.Guild dcGuild: Ignored
@@ -87,7 +87,7 @@ class StateUserAlert(UABase):
         return self.state
 
 
-    def getState(self, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member) -> bool:
+    def getState(self, dcGuild : Guild, bbGuild : 'bbGuild.bbGuild', dcMember : Member) -> bool:
         """Get the state of the alert.
 
         :param discord.Guild dcGuild: Ignored
@@ -99,7 +99,7 @@ class StateUserAlert(UABase):
         return self.state
 
     
-    async def setState(self, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member, newState : bool) -> bool:
+    async def setState(self, dcGuild : Guild, bbGuild : 'bbGuild.bbGuild', dcMember : Member, newState : bool) -> bool:
         """Set the alert's state.
 
         :param discord.Guild dcGuild: Ignored
@@ -124,7 +124,7 @@ class GuildRoleUserAlert(UABase):
         super(GuildRoleUserAlert, self).__init__()
 
 
-    async def toggle(self, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member) -> bool:
+    async def toggle(self, dcGuild : Guild, bbGuild : 'bbGuild.bbGuild', dcMember : Member) -> bool:
         """Invert the alert's state (i.e if currently off, switch to on, and vice versa) of the alert,
         by fetching the role that the given guild has selected for this alert, and granting/removing it to the given member.
 
@@ -145,7 +145,7 @@ class GuildRoleUserAlert(UABase):
             return True
 
 
-    def getState(self, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member) -> bool:
+    def getState(self, dcGuild : Guild, bbGuild : 'bbGuild.bbGuild', dcMember : Member) -> bool:
         """Get the state of the alert for the given member in the given guild, by deciding the member's ownership of the role bbGuild
         has selected for this alert type.
 
@@ -159,7 +159,7 @@ class GuildRoleUserAlert(UABase):
         return alertRole in dcMember.roles
 
 
-    async def setState(self, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member, newState : bool) -> bool:
+    async def setState(self, dcGuild : Guild, bbGuild : 'bbGuild.bbGuild', dcMember : Member, newState : bool) -> bool:
         """Set the alert's state for the given member in the given guild, to the given state, granting the guild's selected role
         where newState is True, and taking the guild's selected role where newState is False.
 
