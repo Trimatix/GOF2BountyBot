@@ -1,3 +1,5 @@
+# TODO: Move items etc into JSON files
+
 # Shame, but i'd rather this than keep factionColours in bountybot.py
 from discord import Colour
 
