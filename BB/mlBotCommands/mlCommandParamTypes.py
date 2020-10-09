@@ -1,93 +1,58 @@
 from .. import bbUtil
-from abc import ABC, abstractclassmethod, abstractmethod
+from abc import ABC, abstractmethod
+from .mlCommandParams import *
 
 
 # class StringTerminator:
 
 
 
-class mlCommandParam:
-    descriptor = ""
-
-    @classmethod
-    @abstractclassmethod
-    def fromStr(cls, paramStr, **kwargs):
-        pass
+class mlCommandParamType:
+    def __init__(self, descriptor):
+        self.descriptor = descriptor
 
 
-class mlIntParam(mlCommandParam):
-    descriptor = ""
-    def __init__(self, intParam):
-        self.intParam = intParam
-
-    @classmethod
-    def fromStr(cls, paramStr, **kwargs):
-        if bbUtil.isInt(paramStr):
-            return mlIntParam(int(paramStr))
-        raise TypeError("Given a non int-castable string: " + paramStr)
+class mlIntParamType(mlCommandParamType):
+    def __init__(self, descriptor):
+        super().__init__(descriptor)
 
 
-class mlBoolParam(mlCommandParam):
-    descriptor = ""
-    trueAliases = ["true", "on", "yes", "enable", "enabled"]
-    falseAliases = ["false", "off", "no", "disable", "disabled"]
+class mlBoolParamType(mlCommandParamType):
+    def __init__(self, descriptor):
+        super().__init__(descriptor)
+    
 
-    def __init__(self, boolParam):
-        self.boolParam = boolParam
-
-    @classmethod
-    def fromStr(cls, paramStr, **kwargs):
-        paramStr = paramStr.lower().strip()
-        if paramStr in cls.trueAliases:
-            return mlBoolParam(True)
-        elif paramStr in cls.falseAliases:
-            return mlBoolParam(False)
-        raise TypeError("Given a non bool-castable string: " + paramStr)
+class mlStringParamType(mlCommandParamType):
+    def __init__(self, descriptor):
+        super().__init__(descriptor)
 
 
-class mlStringParam(mlCommandParam):
-    descriptor = ""
-    def __init__(self, strParam):
-        self.strParam = strParam
-
-    @classmethod
-    def fromStr(cls, paramStr, **kwargs):
-        return mlStringParam(paramStr)
+class mlUserRefParamType(mlCommandParamType):
+    def __init__(self, descriptor):
+        super().__init__(descriptor)
 
 
-class mlUserRefParam(mlCommandParam):
-    descriptor = ""
-    def __init__(self, userObj, isMember=False):
-        self.userObj = userObj
+# class mlGuildRefParamType
 
-    @classmethod
-    def fromStr(cls, paramStr, **kwargs):
-        if "dcGuild" in kwargs:
-            return mlUserRefParam(bbUtil.getMemberFromRef, isMember=True)
-        raise KeyError("dcGuild is a required kwarg for mlUserRefParam.fromStr")
+# class mlChannelRefParamType
 
+# class mlRoleRefParamType
 
-# class mlGuildRefParam
+# class mlUserAlertRefParamType
 
-# class mlChannelRefParam
+# class mlDateTimeParamType
 
-# class mlRoleRefParam
+# class mlTimeDeltaParamType
 
-# class mlUserAlertRefParam
+# class mlPageNumParamType(mlIntParamType)
 
-# class mlDateTimeParam
-
-# class mlTimeDeltaParam
-
-# class mlPageNumParam(mlIntParam)
-
-# class mlURLParam(mlStringParam)
+# class mlURLParamType(mlStringParamType)
 
 
 
-# class bbItemDictParam
-# class bbItemNameParam
-# class bbItemTypeParam
-# class bbSystemParam
-# class bbRouteParam
-# class bbDuelActionParam(mlStringParam)
+# class bbItemDictParamType
+# class bbItemNameParamType
+# class bbItemTypeParamType
+# class bbSystemParamType
+# class bbRouteParamType
+# class bbDuelActionParamType(mlStringParamType)

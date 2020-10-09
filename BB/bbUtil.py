@@ -15,7 +15,7 @@ import random
 import inspect
 from emoji import UNICODE_EMOJI
 from . import bbGlobals
-from .logging import bbLogger
+# from .logging import bbLogger
 
 
 def readJSON(dbFile : str) -> dict:
@@ -544,8 +544,8 @@ def userOrMemberName(dcUser : User, dcGuild : Guild) -> str:
     :raise ValueError: When given a None dcUser
     """
     if dcUser is None:
-        bbLogger.log("Main", "usrMmbrNme",
-                     "Null dcUser given", eventType="USR_NONE")
+        # bbLogger.log("Main", "usrMmbrNme",
+        #              "Null dcUser given", eventType="USR_NONE")
         raise ValueError("Null dcUser given")
 
     if dcGuild is None:
