@@ -19,6 +19,14 @@ class mlCommandSignature:
         
 
     def fromStr(self, strParams):
+        potentialSigs = []
+        # attempt to match args, assuming all optional args are present
+        # then attempt for optional args - 1
+        # then -2, etc
+        for i in range(self.optionalArgs):
+
+
+    def fromStrOld(self, strParams):
         positional = []
         keyword = {}
         argNum = 0
