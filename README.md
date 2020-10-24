@@ -1,7 +1,7 @@
 README UNFINISHED
 
 # GOF2BountyBot
-Small discord bot written in python, for the Kaamo Club discord server. Main goal is to provide a bounty hunting minigame.
+A relatively small yet ambitious discord bot written in python, recreating some of the features of Galaxy on Fire 2. Currently, the standout features are the bounty hunting system, and the items/loadout/trading/dueling system.
 
 # Architecture
 The bot's code is essentially contained within `bountybot.py`, which uses the other sub-packages for data management.
