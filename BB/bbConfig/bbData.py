@@ -2,6 +2,13 @@
 
 # Shame, but i'd rather this than keep factionColours in bountybot.py
 from discord import Colour
+# Used for importing items
+import os
+import json
+
+shipsDir = "items" + os.sep + "ships"
+
+
 
 # all factions recognised by BB
 factions = ["terran", "vossk", "midorian", "nivelian", "neutral"]
@@ -134,7 +141,22 @@ factionColours = {"terran":Colour.gold(), "vossk":Colour.dark_green(), "midorian
 
 # Data representing all ship items in the game. These are used to create bbShip objects, which are stored in builtInShipObjs in a similar dict format.
 # Ships to not have tech levels in GOF2, so tech levels will be automaticaly generated for the sake of the bot during bbConfig package init.
-builtInShipData = {# Terran
+builtInShipData = {}
+
+for subdir, dirs, files in os.walk(shipsDir):
+    for dirname in dirs:
+        dirpath = subdir + os.sep + dirname
+
+        if dirname.endswith(".bbship"):
+            with open(dirpath + os.sep + "META.json", "r") as f:
+                currentShipData = json.loads(f.read())
+                builtInShipData[currentShipData["name"]] = currentShipData
+                if "value" not in currentShipData:
+                    print(currentShipData)
+
+
+# Old Hardcoded version
+"""builtInShipData = {# Terran
                     "Inflict": {"name": "Inflict", "manufacturer": "terran", "maxPrimaries": 2, "maxTurrets": 0, "maxModules": 4, "armour": 150, "cargo": 45, "numSecondaries": 1, "handling": 125, "value": 30900, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Inflict", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694046057824296/inflict.png", "emoji":"<:inflict:723705238091202650>"},
                     "Furious": {"name": "Furious", "manufacturer": "terran", "maxPrimaries": 1, "maxTurrets": 1, "maxModules": 6, "armour": 176, "cargo": 108, "numSecondaries": 2, "handling": 112, "value": 75800, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Furious", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694028752126162/furious.png", "emoji":"<:furious:723705236958609520>"},
                     "Taipan": {"name": "Taipan", "manufacturer": "terran", "maxPrimaries": 3, "maxTurrets": 0, "maxModules": 5, "armour": 176, "cargo": 50, "numSecondaries": 2, "handling": 113, "value": 100100, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Taipan", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694066626691082/taipan.png", "emoji":"<:taipan:723705237088501781>"},
@@ -212,7 +234,8 @@ builtInShipData = {# Terran
                     "Phantom XT": {"name": "Phantom XT", "manufacturer": "kaamo club", "maxPrimaries": 4, "maxTurrets": 0, "maxModules": 14, "armour": 425, "cargo": 60, "numSecondaries": 1, "handling": 150, "value": 7430000, "aliases": ["PhantomXT"], "wiki": "https://galaxyonfire.fandom.com/wiki/Phantom_XT", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720787685035212830/phantom_xt.png", "emoji":"<:phantomxt:723705998660862064>"},
                     "Teneta R.E.D.": {"name": "Teneta R.E.D.", "manufacturer": "kaamo club", "maxPrimaries": 4, "maxTurrets": 1, "maxModules": 13, "armour": 545, "cargo": 70, "numSecondaries": 2, "handling": 117, "value": 7610000, "aliases": ["Teneta RED", "Teneta R.E.D"], "wiki": "https://galaxyonfire.fandom.com/wiki/Teneta_R.E.D.", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720787774328012840/teneta_r.e.d..png", "emoji":"<:tenetared:723705999277686814>"},
                     "Kinzer RS": {"name": "Kinzer RS", "manufacturer": "kaamo club", "maxPrimaries": 4, "maxTurrets": 0, "maxModules": 15, "armour": 420, "cargo": 65, "numSecondaries": 4, "handling": 125, "value": 8930000, "aliases": ["KinzerRS"], "wiki": "https://galaxyonfire.fandom.com/wiki/Kinzer_RS", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/720787863171629056/kinzer_rs.png", "emoji":"<:kinzerrs:723705998723907615>"}}
-                    
+"""
+
 # Data representing all module items in the game. These are used to create bbModule objects, which are stored in builtInModuleObjs in a similar dict format.
 builtInModuleData = {   # armour
                         "E2 Exoclad": {"type": "armour", "name": "E2 Exoclad", "aliases": ["E2", "Exoclad", "Exoclad E2"], "techLevel": 1, "armour": 40, "value": 1070, "wiki": "https://galaxyonfire.fandom.com/wiki/E2_Exoclad", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723474328687214612/e2_exoclad.png", "emoji": "<:e2exoclad:723706394716536842>"},
