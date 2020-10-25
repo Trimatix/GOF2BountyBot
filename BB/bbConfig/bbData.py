@@ -151,8 +151,6 @@ for subdir, dirs, files in os.walk(shipsDir):
             with open(dirpath + os.sep + "META.json", "r") as f:
                 currentShipData = json.loads(f.read())
                 builtInShipData[currentShipData["name"]] = currentShipData
-                if "value" not in currentShipData:
-                    print(currentShipData)
 
 
 # Old Hardcoded version
