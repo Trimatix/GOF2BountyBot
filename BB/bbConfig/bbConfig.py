@@ -256,6 +256,15 @@ reactionMenusDBPath = "saveData/reactionMenus.json"
 # path to folder to save log txts to
 loggingFolderPath = "saveData/logs"
 
+# Discord server containing the skinRendersChannel
+mediaServer = 699744305274945650
+# Channel to send ship skin renders to and link from
+skinRendersChannel = 770036783026667540
+# Resolution of skin render icons
+skinRenderIconResolution = [600, 600]
+# Resolution of skin render emojis (currently unused)
+skinRenderEmojiResolution = [400, 400]
+
 
 
 ##### SCHEDULING #####
