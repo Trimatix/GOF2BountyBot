@@ -7,7 +7,8 @@ import os
 import json
 
 shipsDir = "items" + os.sep + "ships"
-
+skinsDir = "items" + os.sep + "ship skins"
+CWD = os.getcwd()
 
 
 # all factions recognised by BB
@@ -147,10 +148,22 @@ for subdir, dirs, files in os.walk(shipsDir):
     for dirname in dirs:
         dirpath = subdir + os.sep + dirname
 
-        if dirname.endswith(".bbship"):
+        if dirname.lower().endswith(".bbship"):
             with open(dirpath + os.sep + "META.json", "r") as f:
                 currentShipData = json.loads(f.read())
+                currentShipData["path"] = CWD + os.sep + dirpath
+                if "skinnable" not in currentShipData or "model" not in currentShipData:
+                    currentShipData["skinnable"] = False
                 builtInShipData[currentShipData["name"]] = currentShipData
+
+                if "compatibleSkins" not in currentShipData:
+                    currentShipData["compatibleSkins"] = []
+
+
+# Objects representing all ship skins in the game.
+builtInShipSkins = {}
+
+
 
 
 # Old Hardcoded version
