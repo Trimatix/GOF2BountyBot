@@ -1080,6 +1080,14 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Please provide a system to check! E.g: `" + bbConfig.commandPrefix + "check Pescal Inartu`")
         return
 
+    # ensure the calling user is in the users database
+    requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
+    if not requestedBBUser.hasHomeGuild() is None:
+        requestedBBUser.transferGuild(message.guild)
+    elif requestedBBUser.homeGuild != message.guild:
+        await message.channel.send(":x: This command can only be used from your home guild!")
+        return
+
     requestedSystem = args.title()
     systObj = None
 
@@ -1097,9 +1105,6 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
         return
 
     requestedSystem = systObj.name
-
-    # ensure the calling user is in the users database
-    requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
 
     if not requestedBBUser.activeShip.hasWeaponsEquipped() and not requestedBBUser.activeShip.hasTurretsEquipped():
         await message.channel.send(":x: Your ship has no weapons equipped!")
@@ -2404,6 +2409,14 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
     :param str args: string containing an item type and an index number, and optionally "transfer", and optionally "sell" separated by a single space
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
+    # ensure the calling user is in the users database
+    requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
+    if not requestedBBUser.hasHomeGuild() is None:
+        requestedBBUser.transferGuild(message.guild)
+    elif requestedBBUser.homeGuild != message.guild:
+        await message.channel.send(":x: This command can only be used from your home guild!")
+        return
+
     argsSplit = args.split(" ")
     if len(argsSplit) < 2:
         await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `" + bbConfig.commandPrefix + "shop`")
@@ -2459,7 +2472,6 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
                 await message.channel.send(":x: Invalid argument! Please only give an item type (ship/weapon/module/turret), an item number, and optionally `transfer` and/or `sell` when buying a ship.")
                 return
 
-    requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
     requestedItem = shopItemStock[itemNum - 1].item
 
     if item == "ship":
@@ -2529,6 +2541,14 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     :param str args: string containing an item type and an index number, and optionally "clear", separated by a single space
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
+    # ensure the calling user is in the users database
+    requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
+    if not requestedBBUser.hasHomeGuild() is None:
+        requestedBBUser.transferGuild(message.guild)
+    elif requestedBBUser.homeGuild != message.guild:
+        await message.channel.send(":x: This command can only be used from your home guild!")
+        return
+        
     argsSplit = args.split(" ")
     if len(argsSplit) < 2:
         await message.channel.send(":x: Not enough arguments! Please provide both an item type (ship/weapon/module/turret) and an item number from `" + bbConfig.commandPrefix + "hangar`")
@@ -2541,8 +2561,6 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     if item == "all" or item not in bbConfig.validItemNames:
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
         return
-
-    requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
 
     itemNum = argsSplit[1]
     if not bbUtil.isInt(itemNum):
