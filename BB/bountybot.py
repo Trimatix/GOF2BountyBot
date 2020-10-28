@@ -3359,6 +3359,26 @@ bbCommands.register("poll", cmd_poll, forceKeepArgsCasing=True)
 dmCommands.register("poll", err_nodm)
 
 
+def cmd_transfer(message : discord.Message, args : str, isDM : bool):
+    """Transfer the calling user's home guild to the guild where the message was sent.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
+    if message.guild == requestedBBUser.homeGuild:
+        await message.channel.send(":x: This is already your home guild!")
+    elif not requestedBBUser.canTransferGuild():
+        await message.channel.send(":x: This command is still on cooldown. (" + bbUtil.td_format_noYM(self.guildTransferCooldownEnd) + " left)")
+    else:
+        requestedBBUser.transferGuild(message.guild)
+        await message.channel.send(":airplane_arriving: You transferred your home guild to " + message.guild.name + "!")
+
+bbCommands.register("transfer", cmd_transfer)
+dmCommands.register("transfer", err_nodm)
+
+
 
 ####### ADMINISTRATOR COMMANDS #######
 
