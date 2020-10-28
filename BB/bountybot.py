@@ -413,23 +413,6 @@ def makeEmbed(titleTxt="", desc="", col=discord.Colour.blue(), footerTxt="", img
     return embed
 
 
-def timeDeltaFromDict(timeDict : dict) -> timedelta:
-    """Construct a datetime.timedelta from a dictionary,
-    transforming keys into keyword arguments for the timedelta constructor.
-
-    :param dict timeDict: dictionary containing measurements for each time interval. i.e weeks, days, hours, minutes, seconds, microseconds and milliseconds. all are optional and case sensitive.
-    :return: a timedelta with all of the attributes requested in the dictionary.
-    :rtype: datetime.timedelta
-    """
-    return timedelta(weeks=timeDict["weeks"] if "weeks" in timeDict else 0,
-                     days=timeDict["days"] if "days" in timeDict else 0,
-                     hours=timeDict["hours"] if "hours" in timeDict else 0,
-                     minutes=timeDict["minutes"] if "minutes" in timeDict else 0,
-                     seconds=timeDict["seconds"] if "seconds" in timeDict else 0,
-                     microseconds=timeDict["microseconds"] if "microseconds" in timeDict else 0,
-                     milliseconds=timeDict["milliseconds"] if "milliseconds" in timeDict else 0)
-
-
 def getNumExtension(num : int) -> str:
     """Return the string extension for an integer, e.g 'th' or 'rd'.
 
@@ -446,11 +429,11 @@ def getFixedDailyTime(delayDict : dict) -> datetime:
     For example, if the date is 27/09/2020 and the time is currently 16:37, calling getFixedDailyTime({"hours":14, "minutes":40})
     will return a datetime.datetime representing 28/09/2020 at 14:40 (2:40pm).
 
-    :param dict delayDict: The time of day, in dictionary representation, to fetch the next occurring datetime for. Must align with the argument requirements for timeDeltaFromDict.
+    :param dict delayDict: The time of day, in dictionary representation, to fetch the next occurring datetime for. Must align with the argument requirements for bbUtil.timeDeltaFromDict.
     :return: A datetime.datetime representing the next occurring instance of the given time, after now
     :rtype: datetime.datetime
     """
-    return (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict(delayDict)) - datetime.utcnow()
+    return (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + bbUtil.timeDeltaFromDict(delayDict)) - datetime.utcnow()
 
 
 # TODO: Convert to random across two dicts
@@ -465,12 +448,12 @@ def getRandomDelaySeconds(minmaxDict : Dict[str, int]) -> timedelta:
 def getRouteScaledBountyDelayFixed(baseDelayDict : Dict[str, int]) -> timedelta:
     """New bounty delay generator, scaling a fixed delay by the length of the presently spawned bounty.
 
-    :param dict baseDelayDict: A timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
+    :param dict baseDelayDict: A bbUtil.timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
     :return: A datetime.timedelta indicating the time to wait before spawning a new bounty
     :rtype: datetime.timedelta
     """
     timeScale = bbConfig.fallbackRouteScale if bbGlobals.bountiesDB.latestBounty is None else len(bbGlobals.bountiesDB.latestBounty.route)
-    delay = timeDeltaFromDict(baseDelayDict) * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient
+    delay = bbUtil.timeDeltaFromDict(baseDelayDict) * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient
     bbLogger.log("Main", "routeScaleBntyDelayFixed", "New bounty delay generated, " + \
                                                     ("no latest criminal." if bbGlobals.bountiesDB.latestBounty is None else \
                                                         ("latest criminal: '" + bbGlobals.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bbGlobals.bountiesDB.latestBounty.route)))) + \
@@ -1126,7 +1109,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
     if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
         requestedBBUser.bountyWinsToday = 0
         requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
-                            hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours": 24})
+                            hour=0, minute=0, second=0, microsecond=0) + bbUtil.timeDeltaFromDict({"hours": 24})
 
     if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
         await message.channel.send(":x: You have reached the maximum number of bounty wins allowed for today! Check back tomorrow.")
@@ -1151,7 +1134,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
                     requestedBBUser.bountyWinsToday += 1
                     if not dailyBountiesMaxReached and requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
                         requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
-                            hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours": 24})
+                            hour=0, minute=0, second=0, microsecond=0) + bbUtil.timeDeltaFromDict({"hours": 24})
                         dailyBountiesMaxReached = True
 
                     bountyWon = True
@@ -1265,7 +1248,7 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
         if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
             requestedBBUser.bountyWinsToday = 0
             requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
-                    hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours": 24})
+                    hour=0, minute=0, second=0, microsecond=0) + bbUtil.timeDeltaFromDict({"hours": 24})
         if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
             maxBountiesMsg = "\nYou have reached the maximum number of bounty wins allowed for today! Check back tomorrow."
         else:
@@ -1311,7 +1294,7 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
                 if requestedBBUser.dailyBountyWinsReset < datetime.utcnow():
                     requestedBBUser.bountyWinsToday = 0
                     requestedBBUser.dailyBountyWinsReset = datetime.utcnow().replace(
-                            hour=0, minute=0, second=0, microsecond=0) + timeDeltaFromDict({"hours": 24})
+                            hour=0, minute=0, second=0, microsecond=0) + bbUtil.timeDeltaFromDict({"hours": 24})
                 if requestedBBUser.bountyWinsToday >= bbConfig.maxDailyBountyWins:
                     maxBountiesMsg = "\nYou have reached the maximum number of bounty wins allowed for today! Check back tomorrow."
                 else:
@@ -3076,7 +3059,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
         try:
             newDuelReq = DuelRequest.DuelRequest(
                 sourceBBUser, targetBBUser, stakes, None, bbGlobals.guildsDB.getGuild(message.guild.id))
-            duelTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(
+            duelTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(
                 bbConfig.duelReqExpiryTime), expiryFunction=expireAndAnnounceDuelReq, expiryFunctionArgs={"duelReq": newDuelReq})
             newDuelReq.duelTimeoutTask = duelTT
             bbGlobals.duelRequestTTDB.scheduleTask(duelTT)
@@ -3112,7 +3095,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
             sentMsgs.append(await message.channel.send(":crossed_swords: " + message.author.mention + " challenged " + targetUserNameOrTag + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString))
 
         for msg in sentMsgs:
-            menuTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.duelChallengeMenuDefaultTimeout), expiryFunction=ReactionMenu.removeEmbedAndOptions, expiryFunctionArgs=msg.id)
+            menuTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.duelChallengeMenuDefaultTimeout), expiryFunction=ReactionMenu.removeEmbedAndOptions, expiryFunctionArgs=msg.id)
             bbGlobals.reactionMenusTTDB.scheduleTask(menuTT)
             newMenu = ReactionDuelChallengeMenu.ReactionDuelChallengeMenu(msg, newDuelReq, timeout=menuTT)
             newDuelReq.menus.append(newMenu)
@@ -3345,7 +3328,7 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     
     menuMsg = await message.channel.send("‎")
 
-    timeoutDelta = timeDeltaFromDict(bbConfig.pollMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
+    timeoutDelta = bbUtil.timeDeltaFromDict(bbConfig.pollMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
     timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionPollMenu.printAndExpirePollResults, expiryFunctionArgs=menuMsg.id)
     bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
 
@@ -3702,7 +3685,7 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     menuMsg = await message.channel.send("‎")
 
     if timeoutExists:
-        timeoutDelta = timeDeltaFromDict(bbConfig.roleMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
+        timeoutDelta = bbUtil.timeDeltaFromDict(bbConfig.roleMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
         timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionRolePicker.markExpiredRoleMenu, expiryFunctionArgs=menuMsg.id)
         bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
     
@@ -5098,7 +5081,7 @@ async def on_ready():
                                 "random-routeScale": bbConfig.newBountyDelayRandomRange}
 
     if bbConfig.newBountyDelayType == "fixed":
-        bbGlobals.newBountyTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+        bbGlobals.newBountyTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
     else:
         try:
             bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
@@ -5107,8 +5090,8 @@ async def on_ready():
             raise ValueError(
                 "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
-    bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
-    bbGlobals.dbSaveTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.savePeriod), autoReschedule=True, expiryFunction=saveAllDBs)
+    bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
+    bbGlobals.dbSaveTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.savePeriod), autoReschedule=True, expiryFunction=saveAllDBs)
 
     bbGlobals.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
 
