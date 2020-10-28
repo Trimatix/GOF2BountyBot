@@ -592,15 +592,24 @@ class bbUser:
         return self.isAlertedForType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
 
 
+    def hasHomeGuild(self) -> bool:
+        """Decide whether or not this user has a home guild set.
+
+        :return: True if this user has a home guild, False otherwise
+        :rtype: bool
+        """
+        return self.homeGuild is not None
+
+
     def canTransferGuild(self, now=datetime.utcnow()) -> bool:
         """Decide whether this user is allowed to transfer their homeGuild.
         This is decided based on the time passed since their last guild transfer.
 
         :param datetime.datetime now: The current time, if known. This optional parameter is included for increasing efficiency in the case where the current time has already been calculated.
-        :return: True if this user's guild transfer cooldown has completed, false otherwise
+        :return: True if this user has no home guild, or their guild transfer cooldown has completed, false otherwise
         :rtype: bool
         """
-        return datetime.utcnow() > self.guildTransferCooldownEnd
+        return not self.hasHomeGuild() or datetime.utcnow() > self.guildTransferCooldownEnd
 
     
     def transferGuild(self, newGuild : Guild):
