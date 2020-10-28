@@ -33,7 +33,6 @@ def readJSON(dbFile : str) -> dict:
 
 def writeJSON(dbFile : str, db : dict, prettyPrint=False):
     """Write the given json-serializable dictionary to the given file path. All objects in the dictionary must be JSON-serializable.
-    TODO: Check this makes the file if it doesnt exist
 
     :param str dbFile: Path to the file which db should be written to
     :param dict db: The json-serializable dictionary to write
@@ -406,15 +405,13 @@ def dumbEmojiFromDict(emojiDict : dict) -> dumbEmoji:
     """Construct a dumbEmoji object from its dictionary representation.
     If both an ID and a unicode representation are provided, the emoji ID will be used.
 
-    TODO: If ID is -1, use unicode. If unicode is "", use ID.
-
     :param dict emojiDict: A dictionary containing either an ID (for custom emojis) or a unicode emoji string (for unicode emojis)
     :return: A new dumbEmoji object as described in emojiDict
     :rtype: dumbEmoji
     """
     if type(emojiDict) == dumbEmoji:
         return emojiDict
-    if "id" in emojiDict:
+    if "id" in emojiDict and emojiDict["id"] != -1:
         return dumbEmoji(id=emojiDict["id"])
     else:
         return dumbEmoji(unicode=emojiDict["unicode"])
@@ -559,39 +556,6 @@ def userOrMemberName(dcUser : User, dcGuild : Guild) -> str:
     if guildMember is None:
         return dcUser.name
     return guildMember.display_name
-
-
-# Use of this method is discouraged. It would be just as efficient to check that getMemberFromRef is not None, and that would require only one function call!
-def isUserRef(uRef : str, dcGuild=None) -> bool:
-    """Decide whether the given string is a valid user reference, pointing to a user.
-    #TODO: if uRef is a mention or ID, validate that getUser doesnt return None
-    If this method is to be used before a call to getMemberFromRef, you should instead consider
-    calling getMemberRef and checking whether the result is None. Both functions perform similar
-    calculations, and this method of uRef validation will use one function call rather than two.
-
-    uRef can be one of:
-    - A user mention <@123456> or <@!123456>
-    - A user ID 123456
-    - A user name Carl
-    - A user name and discriminator Carl#0324
-
-    If uRef is not a user mention or ID, dcGuild must be provided, to be searched for the given name.
-    When validating a name uRef, the process is much more efficient when also given the user's discriminator.
-
-    :param str uRef: The string to test
-    :param discord.Guild dcGuild: The guild in which to search for a user identified by uRef. Required if uRef is not a mention or ID. (Default None)
-    :return: True if uRef identifies a discord.User or a discord.Member in dcGuild, False otherwise
-    """
-    if isMention(uRef):
-        return True
-    
-    if dcGuild is not None:
-        if isInt(uRef):
-            return dcGuild.get_member(uRef) is not None
-        else:
-            return dcGuild.get_member_named(uRef) is not None
-
-    return False
 
 
 def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:

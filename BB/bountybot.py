@@ -2280,7 +2280,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
         argNum = 1
         for arg in argsSplit:
             if arg != "":
-                if bbUtil.isUserRef(arg, dcGuild=message.guild):
+                if bbUtil.getMemberFromRef(arg, message.guild) is not None:
                     if foundUser:
                         await message.channel.send(":x: I can only take one user!")
                         return
