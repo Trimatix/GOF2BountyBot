@@ -334,6 +334,8 @@ userAlertsIDsDefaults = {   "bounties_new": False,
                             "system_updates_minor": False,
                             "system_misc": False}
 
+homeGuildTransferCooldown = {"weeks":1}
+
 
 
 ##### REACTION MENUS #####
