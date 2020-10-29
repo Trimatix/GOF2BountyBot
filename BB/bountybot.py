@@ -5167,9 +5167,9 @@ async def on_message(message : discord.Message):
         return
 
     try:
-        if "bountybot" in message.content.lower() or bbGlobals.client.user in message.mentions:
+        if "bountybot" in message.content or bbGlobals.client.user in message.mentions:
             await message.add_reaction("👀")
-        if "<:tex:723331420919169036>" in message.content.lower():
+        if "<:tex:723331420919169036>" in message.content:
             await message.add_reaction("<:tex:723331420919169036>")
     except discord.Forbidden:
         pass
