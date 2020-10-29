@@ -3145,7 +3145,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
         await sourceBBUser.duelRequests[targetBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
         sourceBBUser.removeDuelChallengeTarget(targetBBUser)
 
-    elif action == "reject" or "decline":
+    elif action in ["reject", "decline"]:
         if not targetBBUser.hasDuelChallengeFor(sourceBBUser):
             await message.channel.send(":x: This user does not have an active duel challenge for you! Did it expire?")
             return
