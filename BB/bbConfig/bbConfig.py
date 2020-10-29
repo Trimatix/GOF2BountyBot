@@ -260,10 +260,14 @@ loggingFolderPath = "saveData/logs"
 mediaServer = 699744305274945650
 # Channel to send ship skin renders to and link from
 skinRendersChannel = 770036783026667540
+# Channel to send showme-prompted ship skin renders to and link from
+showmeSkinRendersChannel = 771368555019108352
 # Resolution of skin render icons
 skinRenderIconResolution = [600, 600]
 # Resolution of skin render emojis (currently unused)
 skinRenderEmojiResolution = [400, 400]
+# Resolution of skin renders from cmd_showme_ship calls
+skinRenderShowmeResolution = [352, 240]
 
 
 
@@ -287,6 +291,9 @@ commandPrefix = "$"
 # When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
 dmSentEmoji = dumbEmoji(unicode="📬")
 
+# When a message prompts a process that will take a long time (e.g rendering), this will be added to the message reactions. It will be removed when the long process is finished.
+longProcessEmoji = dumbEmoji(unicode="⏳")
+
 # max number of characters accepted by nameShip
 maxShipNickLength = 30
 
@@ -300,6 +307,8 @@ defaultCancelEmoji = dumbEmoji(unicode="🇽")
 defaultErrEmoji = dumbEmoji(unicode="❓")
 defaultAcceptEmoji = dumbEmoji(unicode="👍")
 defaultRejectEmoji = dumbEmoji(unicode="👎")
+
+tempRendersDir = "rendering-temp"
 
 
 
