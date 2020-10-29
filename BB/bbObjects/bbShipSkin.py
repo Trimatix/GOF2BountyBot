@@ -7,12 +7,15 @@ from discord import File
 def _saveShip(ship):
     shipData = bbData.builtInShipData[ship]
     shipTL = shipData["techLevel"]
+    shipPath = shipData["path"]
     del shipData["techLevel"]
+    del shipData["path"]
     shipData["builtIn"] = False
-    bbUtil.writeJSON(shipData["path"] + os.sep + "META.json", shipData, prettyPrint=True)
+    bbUtil.writeJSON(shipPath + os.sep + "META.json", shipData, prettyPrint=True)
     shipData["builtIn"] = True
     shipData["techLevel"] = shipTL
     shipData["saveDue"] = False
+    shipData["path"] = shipPath
 
 
 class bbShipSkin:
