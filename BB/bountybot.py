@@ -39,6 +39,7 @@ from . import bbUtil, bbGlobals
 from .userAlerts import UserAlerts
 from .logging import bbLogger
 from .reactionMenus import ReactionMenu, ReactionInventoryPicker, ReactionRolePicker, ReactionDuelChallengeMenu, ReactionPollMenu
+from .shipRenderer import shipRenderer
 
 
 ####### DATABASE METHODS #######
@@ -1922,7 +1923,13 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
         if len(args.split("+")) > 2:
             await message.channel.send(":x: Please only provide one skin, with one `+`!")
             return
-        args, skin = args.split("+")
+        elif args.split("+")[1] == "":
+            if len(message.attachments) < 1:
+                await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")
+                return
+            args, skin = args.split("+")[0], "$ATTACHEDFILE$"
+        else:
+            args, skin = args.split("+")
     else:
         skin = ""
 
@@ -1943,18 +1950,62 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
         return
 
     if skin != "":
-        skin = skin.lstrip(" ").lower()
-        if skin not in bbData.builtInShipSkins:
-            if len(itemName) < 20:
-                await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
-            else:
-                await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+        shipData = bbData.builtInShipData[itemObj.name]
+        if not shipData["skinnable"]:
+            await message.channel.send(":x: That ship is not skinnable!")
+            return
 
-        elif skin not in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:
-            await message.channel.send(":x: That skin is not compatible with the **" + itemObj.name + "**!")
-        
+        if skin == "$ATTACHEDFILE$":
+            if len(message.attachments) < 1:
+                await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")
+                return
+            skinFile = message.attachments[0]
+            if (not skinFile.filename.lower().endswith(".jpg")) or not (skinFile.width == 2048 and skinFile.height == 2048):
+                await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")
+                return
+            try:
+                await skinFile.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename)
+            except (discord.HTTPException, discord.NotFound):
+                await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")
+                return
+            
+            renderPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename[:-4] + "-RENDER.png"
+            skinPath = CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename
+            outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename
+
+            try:
+                await message.add_reaction(bbConfig.longProcessEmoji.sendable)
+            except (discord.HTTPException, discord.Forbidden):
+                pass
+            shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1])
+            
+            with open(renderPath, "rb") as f:
+                imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
+                renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
+                await message.channel.send(message.author.mention, embed=renderEmbed)
+                
+            os.remove(renderPath)
+            os.remove(skinPath)
+            os.remove(outSkinPath)
+
+            try:
+                await message.remove_reaction(bbConfig.longProcessEmoji.sendable, bbGlobals.client.user)
+            except (discord.HTTPException, discord.Forbidden):
+                pass
+            return
         else:
-            await message.channel.send(bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0])
+            skin = skin.lstrip(" ").lower()
+            if skin not in bbData.builtInShipSkins:
+                if len(itemName) < 20:
+                    await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+                else:
+                    await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+
+            elif skin not in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:
+                await message.channel.send(":x: That skin is not compatible with the **" + itemObj.name + "**!")
+            
+            else:
+                await message.channel.send(bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0])
 
     else:
         if not itemObj.hasIcon:
@@ -5601,8 +5652,8 @@ async def on_ready():
         if guild.hasBountyBoardChannel:
             await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
 
-    print("shop stocks are shared." if bbGlobals.guildsDB.getGuild(699744305274945650).shop.shipsStock is bbGlobals.guildsDB.getGuild(
-        711548456019296289).shop.shipsStock else "shop stocks are not shared.")
+    # print("shop stocks are shared." if bbGlobals.guildsDB.getGuild(699744305274945650).shop.shipsStock is bbGlobals.guildsDB.getGuild(
+    #     711548456019296289).shop.shipsStock else "shop stocks are not shared.")
     # for currentUser in bbGlobals.usersDB.users.values():
     #     currentUser.validateLoadout()
 
