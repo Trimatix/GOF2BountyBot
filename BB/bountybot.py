@@ -3042,7 +3042,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Please provide an action (`challenge`/`cancel`/`accept`/`reject or decline`), a user, and the stakes (an amount of credits)!")
         return
     action = argsSplit[0]
-    if action not in ["challenge", "cancel", "accept", "reject"]:
+    if action not in ["challenge", "cancel", "accept", "reject", "decline"]:
         await message.channel.send(":x: Invalid action! please choose from `challenge`, `cancel`, `reject/decline` or `accept`.")
         return
     if action == "challenge":
