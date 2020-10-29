@@ -725,6 +725,28 @@ def getMemberByRefOverDB(uRef : str, dcGuild=None) -> discord.User:
     return userAttempt
 
 
+async def startLongProcess(message : discord.Message):
+    """Indicates that a long process is starting, by adding a reaction to the given message.
+
+    :param discord.Message message: The message to react to
+    """
+    try:
+        await message.add_reaction(bbConfig.longProcessEmoji.sendable)
+    except (discord.HTTPException, discord.Forbidden):
+        pass
+
+
+async def endLongProcess(message : discord.Message):
+    """Indicates that a long process has finished, by removing a reaction from the given message.
+
+    :param discord.Message message: The message to remove the reaction from
+    """
+    try:
+        await message.remove_reaction(bbConfig.longProcessEmoji.sendable, bbGlobals.client.user)
+    except (discord.HTTPException, discord.Forbidden):
+        pass
+
+
 
 ####### SYSTEM COMMANDS #######
 
@@ -1973,10 +1995,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             skinPath = CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename
             outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename
 
-            try:
-                await message.add_reaction(bbConfig.longProcessEmoji.sendable)
-            except (discord.HTTPException, discord.Forbidden):
-                pass
+            await startLongProcess(message)
             shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1])
             
             with open(renderPath, "rb") as f:
@@ -1988,10 +2007,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             os.remove(skinPath)
             os.remove(outSkinPath)
 
-            try:
-                await message.remove_reaction(bbConfig.longProcessEmoji.sendable, bbGlobals.client.user)
-            except (discord.HTTPException, discord.Forbidden):
-                pass
+            await endLongProcess(message)
             return
         else:
             skin = skin.lstrip(" ").lower()
@@ -5376,7 +5392,9 @@ async def dev_cmd_addSkin(message : discord.Message, args : str, isDM : bool):
             await message.channel.send(":x: That skin is already compatible with the **" + itemObj.name + "**!")
         
         else:
+            await startLongProcess(message)
             await bbData.builtInShipSkins[skin].addShip(itemObj.name, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+            await endLongProcess(message)
             await message.channel.send("Done!")
 
     else:
