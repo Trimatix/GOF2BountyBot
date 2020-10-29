@@ -3039,11 +3039,11 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
     """
     argsSplit = args.split(" ")
     if len(argsSplit) == 0:
-        await message.channel.send(":x: Please provide an action (`challenge`/`cancel`/`accept`/`reject`), a user, and the stakes (an amount of credits)!")
+        await message.channel.send(":x: Please provide an action (`challenge`/`cancel`/`accept`/`reject or decline`), a user, and the stakes (an amount of credits)!")
         return
     action = argsSplit[0]
-    if action not in ["challenge", "cancel", "accept", "reject"]:
-        await message.channel.send(":x: Invalid action! please choose from `challenge`, `cancel`, `reject` or `accept`.")
+    if action not in ["challenge", "cancel", "accept", "reject", "decline"]:
+        await message.channel.send(":x: Invalid action! please choose from `challenge`, `cancel`, `reject/decline` or `accept`.")
         return
     if action == "challenge":
         if len(argsSplit) < 3:
@@ -3145,7 +3145,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
         await sourceBBUser.duelRequests[targetBBUser].duelTimeoutTask.forceExpire(callExpiryFunc=False)
         sourceBBUser.removeDuelChallengeTarget(targetBBUser)
 
-    elif action == "reject":
+    elif action == "reject" or "decline":
         if not targetBBUser.hasDuelChallengeFor(sourceBBUser):
             await message.channel.send(":x: This user does not have an active duel challenge for you! Did it expire?")
             return
@@ -5169,6 +5169,8 @@ async def on_message(message : discord.Message):
     try:
         if "bountybot" in message.content.lower() or bbGlobals.client.user in message.mentions:
             await message.add_reaction("👀")
+        if "<:tex:723331420919169036>" in message.content.lower():
+            await message.add_reaction("<:tex:723331420919169036>")
     except discord.Forbidden:
         pass
     except discord.HTTPException:
