@@ -268,6 +268,8 @@ skinRenderIconResolution = [600, 600]
 skinRenderEmojiResolution = [400, 400]
 # Resolution of skin renders from cmd_showme_ship calls
 skinRenderShowmeResolution = [352, 240]
+# Resolution of skin renders from admin_cmd_showmeHD calls
+skinRenderShowmeHDResolution = [1920, 1080]
 
 
 

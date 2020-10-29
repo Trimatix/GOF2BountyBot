@@ -85,6 +85,7 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
                             "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
                             "make-route": ("**make-route <startSystem>, <endSystem>**", "Find the shortest route from startSystem to endSystem.")},
+                            "showme": ("**showme <object-type> <name>** *[+ [skinName]]*", "Get an image of the requested item. If your item is a ship, you may also specify a skin name, prefaced by a `+` symbol. Alternatively, give a `+` and no ship name, and attach your own 2048x2048 jpg image, and I will render it onto your ship!"),
             
             "Bounties":{    "bounties": ("**bounties** *[faction]*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
                             "route": ("**route <criminal name>**", "Get the named criminal's current route."),
@@ -118,7 +119,8 @@ adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display in
                                         "remove-notify-role": ("**remove-notify-role**", "Stop pinging the bounty notify role when new bounties are created."),
                                         "set-bounty-board-channel": ("**set-bounty-board-channel**", "Send from within a channel to set that channel as a *bountyboard*.\nBountyBoard channels show *all* information about active bounties, continuously update their listings (e.g cross through checked systems), and only show *active* bounties (listings for located bounties are removed)."),
                                         "remove-bounty-board-channel": ("**remove-bounty-board-channel**", "Send from any channel to remove the server's bountyboard channel, if one is set."),
-                                        "hangar": ("**hangar** *[user]* *[item-type]*", "Administrators have permission to view the hangars of other users.")}}
+                                        "hangar": ("**hangar** *[user]* *[item-type]*", "Administrators have permission to view the hangars of other users."),
+                                        "showmeHD": ("**showmeHD <ship-name>**", "You must attach a 2048x2048 jpg to your message. Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME")}}
 
 # string extensions for numbers, e.g 11th, 1st, 23rd...
 numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]

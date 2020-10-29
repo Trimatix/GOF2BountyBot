@@ -4062,6 +4062,81 @@ async def admin_cmd_del_reaction_menu(message : discord.Message, args : str, isD
 bbCommands.register("del-reaction-menu", admin_cmd_del_reaction_menu, isAdmin=True)
 
 
+async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
+    """Render the attached image file onto the specified ship, in high definition.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a ship name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "ship Groza Mk II`")
+        return
+
+    # look up the ship object
+    itemName = args.rstrip(" ").title()
+    itemObj = None
+    for ship in bbData.builtInShipData.values():
+        shipObj = bbShip.fromDict(ship)
+        if shipObj.isCalled(itemName):
+            itemObj = shipObj
+
+    # report unrecognised ship names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+        return
+
+    shipData = bbData.builtInShipData[itemObj.name]
+    if not shipData["skinnable"]:
+        await message.channel.send(":x: That ship is not skinnable!")
+        return
+
+    if len(message.attachments) < 1:
+        await message.channel.send(":x: Please attach a 2048x2048 jpg to render.")
+        return
+    skinFile = message.attachments[0]
+    if (not skinFile.filename.lower().endswith(".jpg")) or not (skinFile.width == 2048 and skinFile.height == 2048):
+        await message.channel.send(":x: Please make sure your attached image is a 2048x2048 jpg.")
+        return
+    try:
+        await skinFile.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename)
+    except (discord.HTTPException, discord.NotFound):
+        await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")
+        return
+    
+    renderPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename[:-4] + "-RENDER.png"
+    skinPath = CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename
+    outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename
+
+    try:
+        await message.add_reaction(bbConfig.longProcessEmoji.sendable)
+    except (discord.HTTPException, discord.Forbidden):
+        pass
+    shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeHDResolution[0], bbConfig.skinRenderShowmeHDResolution[1])
+    
+    with open(renderPath, "rb") as f:
+        imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("HD-u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
+        renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="HD Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
+        await message.channel.send(message.author.mention, embed=renderEmbed)
+        
+    os.remove(renderPath)
+    os.remove(skinPath)
+    os.remove(outSkinPath)
+
+    try:
+        await message.remove_reaction(bbConfig.longProcessEmoji.sendable, bbGlobals.client.user)
+    except (discord.HTTPException, discord.Forbidden):
+        pass
+    return
+
+bbCommands.register("showmehd", cmd_showmeHD, isAdmin=True)
+dmCommands.register("showmehd", cmd_showmeHD, isDev=True)
+
+
 
 ####### DEVELOPER COMMANDS #######
 
