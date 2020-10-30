@@ -521,6 +521,9 @@ builtInCommodityData = {
             # 
 }
 
+builtInToolData = {}
+builtInToolObjs = {}
+
 # TO BE COMPLETED
 builtInSecondariesData = {
             # rockets
