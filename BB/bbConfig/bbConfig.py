@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import math, random, pprint
-from ..bbUtil import dumbEmoji
+from ..bbUtil import dumbEmoji, EMPTY_DUMBEMOJI
 
 ##### UTIL #####
 
@@ -310,7 +310,12 @@ defaultErrEmoji = dumbEmoji(unicode="❓")
 defaultAcceptEmoji = dumbEmoji(unicode="👍")
 defaultRejectEmoji = dumbEmoji(unicode="👎")
 
+# Path to the directory to use when temporarily saving textures downloaded from showme commands.
 tempRendersDir = "rendering-temp"
+
+# Default graphics to use for ship skin application tool items
+defaultShipSkinToolIcon = ""
+defaultShipSkinToolEmoji = EMPTY_DUMBEMOJI
 
 
 
@@ -337,7 +342,7 @@ maxItemsPerHangarPageAll = 3
 maxItemsPerHangarPageIndividual = 10
 
 # Names to be used when checking input to !bb hangar and bbUser.numInventoryPages
-validItemNames = ["ship", "weapon", "module", "turret", "all"]
+validItemNames = ["ship", "weapon", "module", "turret", "all", "tool"]
 
 
 
@@ -364,3 +369,4 @@ pollMenuDefaultTimeout = {"hours": 2}
 expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
+skinApplyConfirmTimeoutSeconds = 60
