@@ -584,3 +584,12 @@ def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
             return userAttempt
     # Handle user names and user name+discrim combinations
     return dcGuild.get_member_named(uRef)
+
+
+def shipSkinNameToToolName(skinName : str) -> str:
+    """Construct a name of a bbShipSkinTool from the name of the skin of the skin.
+
+    :param str skinName: The name of the skin this tool name should reference
+    :return: The name that should be given to a bbShipSkinTool that applies the named shipSkin
+    """
+    return "Ship Skin: " + skinName
