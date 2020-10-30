@@ -3,6 +3,8 @@ import os
 from ..shipRenderer import shipRenderer
 from .. import bbUtil
 from discord import File
+from .items import bbItem
+from typing import Dict
 
 def _saveShip(ship):
     shipData = bbData.builtInShipData[ship]
@@ -19,20 +21,29 @@ def _saveShip(ship):
 
 
 class bbShipSkin:
-    def __init__(self, name, textureRegions, shipRenders, path):
+    def __init__(self, name : str, textureRegions : int, shipRenders : Dict[str, str], path : str, designer : str, wiki=""):
         self.name = name
         self.textureRegions = textureRegions
         self.compatibleShips = list(shipRenders.keys())
         self.shipRenders = shipRenders
         self.path = path
-        self.averageTL = 0
-        for ship in self.compatibleShips:
-            self.averageTL += bbData.builtInShipData[ship]["techLevel"]
-        self.averageTL = int(self.averageTL / len(self.compatibleShips))
+        if len(self.compatibleShips) > 0:
+            self.averageTL = 0
+            for ship in self.compatibleShips:
+                self.averageTL += bbData.builtInShipData[ship]["techLevel"]
+            self.averageTL = int(self.averageTL / len(self.compatibleShips))
+        else:
+            self.averageTL = -1
+        self.designer = designer
+        self.wiki = wiki
+        self.hasWiki = wiki != ""
 
 
     def toDict(self):
-        return {"name": self.name, "textureRegions": self.textureRegions, "ships": self.shipRenders}
+        data = {"name": self.name, "textureRegions": self.textureRegions, "ships": self.shipRenders, "designer": self.designer}
+        if self.hasWiki:
+            data["wiki"] = self.wiki
+        return data
 
 
     def _save(self):
@@ -109,4 +120,4 @@ class bbShipSkin:
 def fromDict(skinDict):
     if skinDict["name"] in bbData.builtInShipSkins:
         return bbData.builtInShipSkins[skinDict["name"]]
-    return bbShipSkin(skinDict["name"], skinDict["textureRegions"], skinDict["ships"], skinDict["path"])
+    return bbShipSkin(skinDict["name"], skinDict["textureRegions"], skinDict["ships"], skinDict["path"], skinDict["designer"], skinDict["wiki"] if "wiki" in skinDict else "")
