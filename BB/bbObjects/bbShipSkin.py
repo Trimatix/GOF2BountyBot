@@ -78,7 +78,7 @@ class bbShipSkin:
             #     newEmoji = await rendersChannel.guild.create_custom_emoji(name=ship + "_+" + self.name, image=f.read(), reason="New skin '" + self.name + "' registered for ship '" + ship + "'")
 
             with open(renderPath, "rb") as f:
-                renderMsg = await rendersChannel.send(ship + " " + self.name, file=File(f))
+                renderMsg = await rendersChannel.send(ship + " +" + self.name, file=File(f))
                 self.shipRenders[ship] = [renderMsg.attachments[0].url, renderMsg.id]#, str(newEmoji)]
             os.remove(renderPath)
 
