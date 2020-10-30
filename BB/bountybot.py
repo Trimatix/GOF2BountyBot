@@ -31,6 +31,7 @@ from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .bbObjects import bbUser, bbInventory, bbShipSkin
 from .bbObjects.bounties import bbBounty, bbBountyConfig, bbCriminal, bbSystem
 from .bbObjects.items import bbShip, bbModuleFactory, bbShipUpgrade, bbTurret, bbWeapon
+from .bbObjects.items.tools import bbToolItemFactory, bbShipSkinTool
 from .bbObjects.battles import ShipFight, DuelRequest
 from .scheduling import TimedTask
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB, reactionMenuDB
@@ -109,6 +110,8 @@ async def saveDBAsync(dbPath, db):
 
 # interface into the discord servers
 bbGlobals.client = commands.Bot(command_prefix=bbConfig.commandPrefix)
+# Was unable to set this in bbConfig directly because client wasnt loaded yet, so moved here
+bbConfig.defaultShipSkinToolEmoji = bbUtil.dumbEmoji(id=723709178589347921)
 # TODO: This will be needed once discord command decorators are in use
 # bbGlobals.client.remove_command("help")
 
@@ -1818,24 +1821,18 @@ async def cmd_commodity(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Please provide a commodity! Example: `" + bbConfig.commandPrefix + "commodity Groza Mk II`")
         return
 
-    # look up the commodity object
-    itemName = args.title()
-    itemObj = None
-    for crim in bbData.builtInCommodityObjs.keys():
-        if bbData.builtInCommodityObjs[crim].isCalled(itemName):
-            itemObj = bbData.builtInCommodityObjs[crim]
-
-    # report unrecognised commodity names
-    if itemObj is None:
-        if len(itemName) < 20:
-            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+    skin = args.lower()
+    if skin not in bbData.builtInShipSkins:
+        if len(skin) < 20:
+            await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
         else:
-            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
-
+            await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
     else:
+        shipSkin = bbData.builtInShipSkins[skin]
+
         # build the stats embed
         statsEmbed = makeEmbed(
-            col=bbData.factionColours[itemObj.faction], desc="__Item File__", titleTxt=itemObj.name, thumb=itemObj.icon)
+            col=bbData.factionColours[itemObj.faction], desc="__Ship Skin File__", titleTxt=itemObj.name, thumb=itemObj.icon)
         if itemObj.hasTechLevel:
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(
@@ -1856,6 +1853,48 @@ async def cmd_commodity(message : discord.Message, args : str, isDM : bool):
 # bbCommands.register("commodity", cmd_commodity)
 
 
+async def cmd_skin(message : discord.Message, args : str, isDM : bool):
+    """return statistics about a specified inbuilt skin
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a skin name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a Skin! Example: `" + bbConfig.commandPrefix + "skin tex`")
+        return
+
+    skin = args.lower()
+    if skin not in bbData.builtInShipSkins:
+        if len(skin) < 20:
+            await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+
+    else:
+        shipSkin = bbData.builtInShipSkins[skin]
+        # build the stats embed
+        statsEmbed = makeEmbed(
+            col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), desc="__Ship Skin File__", titleTxt=shipSkin.name, thumb=bbConfig.defaultShipSkinToolIcon)
+        statsEmbed.add_field(
+            name="Designed by:", value=userTagOrDiscrim(str(shipSkin.designer), guild=message.guild))
+        compatibleShipsStr = ""
+        for ship in shipSkin.compatibleShips:
+            compatibleShipsStr += " - " + ship + "\n"
+        statsEmbed.add_field(
+            name="Compatible ships:", value=compatibleShipsStr[:-1] if compatibleShipsStr != "" else "None")
+        if shipSkin.averageTL != -1:
+            statsEmbed.add_field(name="Average tech level of compatible ships:", value=shipSkin.averageTL)
+        if shipSkin.hasWiki:
+            statsEmbed.add_field(
+                name="‎", value="[Wiki](" + shipSkin.wiki + ")", inline=False)
+        # send the embed
+        await message.channel.send(embed=statsEmbed)
+
+# bbCommands.register("commodity", cmd_commodity)
+
+
 async def cmd_info(message : discord.Message, args : str, isDM : bool):
     """Return statistics about a named game object, of a specified type.
     The named used to reference the object may be an alias.
@@ -1869,8 +1908,8 @@ async def cmd_info(message : discord.Message, args : str, isDM : bool):
         return
 
     argsSplit = args.split(" ")
-    if argsSplit[0] not in ["system", "criminal", "ship", "weapon", "module", "turret", "commodity"]:
-        await message.channel.send(":x: Invalid object type! (system/criminal/ship/weapon/module/turret/commodity)")
+    if argsSplit[0] not in ["system", "criminal", "ship", "weapon", "module", "turret", "commodity", "skin"]:
+        await message.channel.send(":x: Invalid object type! (system/criminal/ship/weapon/module/turret/commodity/skin)")
         return
 
     if argsSplit[0] == "system":
@@ -1887,8 +1926,10 @@ async def cmd_info(message : discord.Message, args : str, isDM : bool):
         await cmd_turret(message, args[7:], isDM)
     elif argsSplit[0] == "commodity":
         await cmd_commodity(message, args[10:], isDM)
+    elif argsSplit[0] == "skin":
+        await cmd_skin(message, args[5:], isDM)
     else:
-        await message.channel.send(":x: Unknown object type! (system/criminal/ship/weapon/module/turret/commodity)")
+        await message.channel.send(":x: Unknown object type! (system/criminal/ship/weapon/module/turret/commodity/skin)")
 
 bbCommands.register("info", cmd_info)
 dmCommands.register("info", cmd_info)
@@ -3733,7 +3774,7 @@ async def cmd_use(message : discord.Message, args : str, isDM : bool):
         elif toolNum > callingBBUser.inactiveTools.numKeys:
             await message.channel.send(":x: Tool number too big - you only have " + str(callingBBUser.inactiveTools.numKeys) + " tool" + ("" if callingBBUser.inactiveTools.numKeys == 1 else "s") + "!")
         else:
-            result = await callingBBUser.inactiveTools[toolNum - 1].userFriendlyUse(message, ship=callingBBUser.activeShip, callingBBUser=callingBBUser)
+            result = await callingBBUser.inactiveTools[toolNum - 1].item.userFriendlyUse(message, ship=callingBBUser.activeShip, callingBBUser=callingBBUser)
             await message.channel.send(result)
 
 
@@ -4419,7 +4460,8 @@ async def dev_cmd_give(message : discord.Message, args : str, isDM : bool):
     itemConstructors = {"ship": bbShip.fromDict,
                         "weapon": bbWeapon.fromDict,
                         "module": bbModuleFactory.fromDict,
-                        "turret": bbTurret.fromDict}
+                        "turret": bbTurret.fromDict,
+                        "tool": bbToolItemFactory.fromDict}
     newItem = itemConstructors[itemType](itemDict)
 
     requestedUser.getInactivesByName(itemType).addItem(newItem)
@@ -5701,16 +5743,6 @@ async def on_ready():
         bbData.builtInTurretData[turretDict["name"]]["builtIn"] = True
         bbData.builtInTurretObjs[turretDict["name"]].builtIn = True
 
-    # generate bbShipSkin objects from data stored on file
-    for subdir, dirs, files in os.walk(bbData.skinsDir):
-        for dirname in dirs:
-            dirpath = subdir + os.sep + dirname
-
-            if dirname.lower().endswith(".bbshipskin"):
-                skinData = bbUtil.readJSON(dirpath + os.sep + "META.json")
-                skinData["path"] = CWD + os.sep + dirpath
-                bbData.builtInShipSkins[skinData["name"].lower()] = bbShipSkin.fromDict(skinData)
-
 
 
     ##### ITEM TECHLEVEL AUTO-GENERATION #####
@@ -5722,6 +5754,31 @@ async def on_ready():
                 shipDict["techLevel"] = tl + 1
                 break
 
+
+    ##### SHIP SKIN GENERATION #####
+
+    # generate bbShipSkin objects from data stored on file
+    for subdir, dirs, files in os.walk(bbData.skinsDir):
+        for dirname in dirs:
+            dirpath = subdir + os.sep + dirname
+
+            if dirname.lower().endswith(".bbshipskin"):
+                skinData = bbUtil.readJSON(dirpath + os.sep + "META.json")
+                skinData["path"] = CWD + os.sep + dirpath
+                bbData.builtInShipSkins[skinData["name"].lower()] = bbShipSkin.fromDict(skinData)
+
+    # generate bbToolItem objects from data stored on file
+    for toolDict in bbData.builtInToolData.values():
+        bbData.builtInToolObjs[toolDict["name"]] = bbToolItemFactory.fromDict(toolDict)
+        bbData.builtInToolData[toolDict["name"]]["builtIn"] = True
+        bbData.builtInToolObjs[toolDict["name"]].builtIn = True
+    
+    # generate bbShipSkinTool objects for each bbShipSkin
+    for shipSkin in bbData.builtInShipSkins.values():
+        # if len(shipSkin.compatibleShips) > 0:
+        toolName = bbUtil.shipSkinNameToToolName(shipSkin.name)
+        if toolName not in bbData.builtInToolObjs:
+            bbData.builtInToolObjs[toolName] = bbShipSkinTool.bbShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=True)
 
 
     ##### SORT ITEMS BY TECHLEVEL #####
