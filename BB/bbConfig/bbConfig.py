@@ -314,8 +314,17 @@ defaultRejectEmoji = dumbEmoji(unicode="👎")
 tempRendersDir = "rendering-temp"
 
 # Default graphics to use for ship skin application tool items
-defaultShipSkinToolIcon = ""
-defaultShipSkinToolEmoji = EMPTY_DUMBEMOJI
+defaultShipSkinToolIcon = "https://cdn.discordapp.com/attachments/700683544103747594/723472334362771536/documents.png"
+defaultShipSkinToolEmoji = EMPTY_DUMBEMOJI # client is not yet initialized, move this to bountybot.py
+
+def shipSkinValueForTL(averageTL : int) -> int:
+    """Calculate how skins are valued with respect to their average compatible ship techlevel.
+
+    :param int averageTL: The average techLevel of the ships that this skin is compatible with
+    :return: The value to assign to the ship skin
+    :rtype: int
+    """
+    return averageTL * 10000
 
 
 
