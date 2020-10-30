@@ -2478,6 +2478,16 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
                 hangarEmbed.add_field(name=str(turretNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name,
                                       value=currentItem.statsStringShort(), inline=False)
 
+        if item in ["all", "tool"]:
+            for toolNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("tool", page, maxPerPage) + 1):
+                if toolNum == firstPlace:
+                    hangarEmbed.add_field(
+                        name="‎", value="__**Stored Tools**__", inline=False)
+                currentItem = requestedBBUser.inactiveTools[toolNum - 1].item
+                currentItemCount = requestedBBUser.inactiveTools.items[currentItem].count
+                hangarEmbed.add_field(name=str(toolNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name,
+                                      value=currentItem.statsStringShort(), inline=False)
+
         try:
             await sendChannel.send(embed=hangarEmbed)
             if sendDM:
@@ -2865,7 +2875,7 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
 
         await message.channel.send(outStr)
 
-    elif item in ["weapon", "module", "turret"]:
+    elif item in ["weapon", "module", "turret", "tool"]:
         if not requestedShop.userCanAffordItemObj(requestedBBUser, requestedItem):
             await message.channel.send(":x: You can't afford that item! (" + str(requestedItem.value) + ")")
             return
@@ -2949,7 +2959,7 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
             outStr += "\nItems removed from the ship can be found in the hangar."
         await message.channel.send(outStr)
 
-    elif item in ["weapon", "module", "turret"]:
+    elif item in ["weapon", "module", "turret", "tool"]:
         requestedBBUser.credits += requestedItem.getValue()
         userItemInactives.removeItem(requestedItem)
 
@@ -2984,7 +2994,7 @@ async def cmd_equip(message : discord.Message, args : str, isDM : bool):
         return
 
     item = argsSplit[0].rstrip("s")
-    if item == "all" or item not in bbConfig.validItemNames:
+    if item in ["all", "tool"] or item not in bbConfig.validItemNames:
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
         return
 
@@ -3701,6 +3711,34 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
 
 bbCommands.register("poll", cmd_poll, forceKeepArgsCasing=True)
 dmCommands.register("poll", err_nodm)
+
+
+async def cmd_use(message : discord.Message, args : str, isDM : bool):
+    """Use the specified tool from the user's inventory.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: a single integer indicating the index of the tool to use
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    callingBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
+
+    if not bbUtil.isInt(args):
+        await message.channel.send(":x: Please give the number of the tool you would like to use! e.g: `" + bbConfig.commandPrefix + "use 1`")
+    else:
+        toolNum = int(args)
+        if toolNum < 1:
+            await message.channel.send(":x: Tool number must be at least 1!")
+        elif callingBBUser.inactiveTools.isEmpty():
+            await message.channel.send(":x: You don't have any tools to use!")
+        elif toolNum > callingBBUser.inactiveTools.numKeys:
+            await message.channel.send(":x: Tool number too big - you only have " + str(callingBBUser.inactiveTools.numKeys) + " tool" + ("" if callingBBUser.inactiveTools.numKeys == 1 else "s") + "!")
+        else:
+            result = await callingBBUser.inactiveTools[toolNum - 1].userFriendlyUse(message, ship=callingBBUser.activeShip, callingBBUser=callingBBUser)
+            await message.channel.send(result)
+
+
+bbCommands.register("use", cmd_use)
+dmCommands.register("use", err_nodm)
 
 
 
@@ -5287,7 +5325,7 @@ async def dev_cmd_debug_hangar(message : discord.Message, args : str, isDM : boo
         await message.channel.send(":x: The requested pilot doesn't have any items!")
         return
 
-    itemTypes = ("ship", "weapon", "module", "turret")
+    itemTypes = ("ship", "weapon", "module", "turret", "tool")
     for itemType in itemTypes:
         itemInv = requestedBBUser.getInactivesByName(itemType)
         await message.channel.send(itemType.upper() + " KEYS: " + str(itemInv.keys) + "\n" + itemType.upper() + " LISTINGS: " + str(list(itemInv.items.keys())))
