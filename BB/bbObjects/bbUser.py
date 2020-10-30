@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from .items.modules import bbModule
-from .items.tools import bbToolItem
+from .items.tools import bbToolItemFactory
 from ..bbConfig import bbConfig
 from . import bbInventory, bbInventoryListing
 from ..userAlerts import UserAlerts
@@ -647,10 +647,10 @@ def fromDict(id : int, userDict : dict) -> bbUser:
         for turretListingDict in userDict["inactiveTurrets"]:
             inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-    inactiveTools = bbInventory.bbInventory
+    inactiveTools = bbInventory.bbInventory()
     if "inactiveTools" in userDict:
         for toolListingDict in userDict["inactiveTools"]:
-            inactiveTools.addItem(bbToolItem.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
+            inactiveTools.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
 
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
