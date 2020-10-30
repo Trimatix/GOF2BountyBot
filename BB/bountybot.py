@@ -17,14 +17,18 @@ import operator
 # used for spawning items from dict in dev_cmd_give
 import json
 import traceback
-from os import path
+import os
+
+CWD = os.getcwd()
+
 from aiohttp import client_exceptions
+import json
 
 # BountyBot Imports
 
 # may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .bbObjects import bbUser, bbInventory
+from .bbObjects import bbUser, bbInventory, bbShipSkin
 from .bbObjects.bounties import bbBounty, bbBountyConfig, bbCriminal, bbSystem
 from .bbObjects.items import bbShip, bbModuleFactory, bbShipUpgrade, bbTurret, bbWeapon
 from .bbObjects.battles import ShipFight, DuelRequest
@@ -35,6 +39,7 @@ from . import bbUtil, bbGlobals
 from .userAlerts import UserAlerts
 from .logging import bbLogger
 from .reactionMenus import ReactionMenu, ReactionInventoryPicker, ReactionRolePicker, ReactionDuelChallengeMenu, ReactionPollMenu
+from .shipRenderer import shipRenderer
 
 
 ####### DATABASE METHODS #######
@@ -529,6 +534,7 @@ def saveAllDBs():
     saveDB(bbConfig.bountyDBPath, bbGlobals.bountiesDB)
     saveDB(bbConfig.guildDBPath, bbGlobals.guildsDB)
     saveDB(bbConfig.reactionMenusDBPath, bbGlobals.reactionMenusDB)
+
     bbLogger.save()
     print(datetime.now().strftime("%H:%M:%S: Data saved!"))
 
@@ -717,6 +723,28 @@ def getMemberByRefOverDB(uRef : str, dcGuild=None) -> discord.User:
             if userGuild is not None:
                 return userGuild.get_member(int(uRef))
     return userAttempt
+
+
+async def startLongProcess(message : discord.Message):
+    """Indicates that a long process is starting, by adding a reaction to the given message.
+
+    :param discord.Message message: The message to react to
+    """
+    try:
+        await message.add_reaction(bbConfig.longProcessEmoji.sendable)
+    except (discord.HTTPException, discord.Forbidden):
+        pass
+
+
+async def endLongProcess(message : discord.Message):
+    """Indicates that a long process has finished, by removing a reaction from the given message.
+
+    :param discord.Message message: The message to remove the reaction from
+    """
+    try:
+        await message.remove_reaction(bbConfig.longProcessEmoji.sendable, bbGlobals.client.user)
+    except (discord.HTTPException, discord.Forbidden):
+        pass
 
 
 
@@ -1866,6 +1894,323 @@ bbCommands.register("info", cmd_info)
 dmCommands.register("info", cmd_info)
 
 
+async def cmd_showme_criminal(message : discord.Message, args : str, isDM : bool):
+    """Return the URL of the image bountybot uses to represent the specified inbuilt criminal
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a criminal name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a criminal was given
+    if args == "":
+        await message.channel.send(":x: Please provide a criminal! Example: `" + bbConfig.commandPrefix + "criminal Toma Prakupy`")
+        return
+
+    # look up the criminal object
+    criminalName = args.title()
+    criminalObj = None
+    for crim in bbData.builtInCriminalObjs.keys():
+        if bbData.builtInCriminalObjs[crim].isCalled(criminalName):
+            criminalObj = bbData.builtInCriminalObjs[crim]
+
+    # report unrecognised criminal names
+    if criminalObj is None:
+        if len(criminalName) < 20:
+            await message.channel.send(":x: **" + criminalName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + criminalName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        if not criminalObj.hasIcon:
+            await message.channel.send(":x: I don't have an icon for **" + criminalObj.name.title() + "**!")
+        else:
+            await message.channel.send(criminalObj.icon)
+
+# bbCommands.register("showme-criminal", cmd_showme_criminal)
+
+
+async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
+    """Return the URL of the image bountybot uses to represent the specified inbuilt ship
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a ship name and optionally a skin, prefaced with a + character.
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "ship Groza Mk II`")
+        return
+
+    if "+" in args:
+        if len(args.split("+")) > 2:
+            await message.channel.send(":x: Please only provide one skin, with one `+`!")
+            return
+        elif args.split("+")[1] == "":
+            if len(message.attachments) < 1:
+                await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")
+                return
+            args, skin = args.split("+")[0], "$ATTACHEDFILE$"
+        else:
+            args, skin = args.split("+")
+    else:
+        skin = ""
+
+    # look up the ship object
+    itemName = args.rstrip(" ").title()
+    itemObj = None
+    for ship in bbData.builtInShipData.values():
+        shipObj = bbShip.fromDict(ship)
+        if shipObj.isCalled(itemName):
+            itemObj = shipObj
+
+    # report unrecognised ship names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+        return
+
+    if skin != "":
+        shipData = bbData.builtInShipData[itemObj.name]
+        if not shipData["skinnable"]:
+            await message.channel.send(":x: That ship is not skinnable!")
+            return
+
+        if skin == "$ATTACHEDFILE$":
+            if len(message.attachments) < 1:
+                await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")
+                return
+            skinFile = message.attachments[0]
+            if (not skinFile.filename.lower().endswith(".jpg")) or not (skinFile.width == 2048 and skinFile.height == 2048):
+                await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")
+                return
+            try:
+                await skinFile.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename)
+            except (discord.HTTPException, discord.NotFound):
+                await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")
+                return
+            
+            renderPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename[:-4] + "-RENDER.png"
+            skinPath = CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename
+            outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename
+
+            await startLongProcess(message)
+            shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1])
+            
+            with open(renderPath, "rb") as f:
+                imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
+                renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
+                await message.channel.send(message.author.mention, embed=renderEmbed)
+                
+            os.remove(renderPath)
+            os.remove(skinPath)
+            os.remove(outSkinPath)
+
+            await endLongProcess(message)
+            return
+        else:
+            skin = skin.lstrip(" ").lower()
+            if skin not in bbData.builtInShipSkins:
+                if len(itemName) < 20:
+                    await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+                else:
+                    await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+
+            elif skin not in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:
+                await message.channel.send(":x: That skin is not compatible with the **" + itemObj.name + "**!")
+            
+            else:
+                await message.channel.send(bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0])
+
+    else:
+        if not itemObj.hasIcon:
+            await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
+        else:
+            await message.channel.send(itemObj.icon)
+
+# bbCommands.register("showme-ship", cmd_showme_ship)
+
+
+async def cmd_showme_weapon(message : discord.Message, args : str, isDM : bool):
+    """Return the URL of the image bountybot uses to represent the specified inbuilt weapon
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a weapon name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a weapon! Example: `" + bbConfig.commandPrefix + "weapon Nirai Impulse EX 1`")
+        return
+
+    # look up the weapon object
+    itemName = args.title()
+    itemObj = None
+    for weap in bbData.builtInWeaponObjs.keys():
+        if bbData.builtInWeaponObjs[weap].isCalled(itemName):
+            itemObj = bbData.builtInWeaponObjs[weap]
+
+    # report unrecognised weapon names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        if not itemObj.hasIcon:
+            await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
+        else:
+            await message.channel.send(itemObj.icon)
+
+# bbCommands.register("showme-weapon", cmd_showme_weapon)
+
+
+async def cmd_showme_module(message : discord.Message, args : str, isDM : bool):
+    """Return the URL of the image bountybot uses to represent the specified inbuilt module
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a module name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a module! Example: `" + bbConfig.commandPrefix + "module Groza Mk II`")
+        return
+
+    # look up the module object
+    itemName = args.title()
+    itemObj = None
+    for module in bbData.builtInModuleObjs.keys():
+        if bbData.builtInModuleObjs[module].isCalled(itemName):
+            itemObj = bbData.builtInModuleObjs[module]
+
+    # report unrecognised module names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        if not itemObj.hasIcon:
+            await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
+        else:
+            await message.channel.send(itemObj.icon)
+
+# bbCommands.register("showme-module", cmd_showme_module)
+
+
+async def cmd_showme_turret(message : discord.Message, args : str, isDM : bool):
+    """Return the URL of the image bountybot uses to represent the specified inbuilt turret
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a turret name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a turret! Example: `" + bbConfig.commandPrefix + "turret Groza Mk II`")
+        return
+
+    # look up the turret object
+    itemName = args.title()
+    itemObj = None
+    for turr in bbData.builtInTurretObjs.keys():
+        if bbData.builtInTurretObjs[turr].isCalled(itemName):
+            itemObj = bbData.builtInTurretObjs[turr]
+
+    # report unrecognised turret names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        if not itemObj.hasIcon:
+            await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
+        else:
+            await message.channel.send(itemObj.icon)
+
+# bbCommands.register("showme-turret", cmd_showme_turret)
+
+
+async def cmd_showme_commodity(message : discord.Message, args : str, isDM : bool):
+    """Return the URL of the image bountybot uses to represent the specified inbuilt commodity
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a commodity name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    await message.channel.send("Commodity items have not been implemented yet!")
+    return
+
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a commodity! Example: `" + bbConfig.commandPrefix + "commodity Groza Mk II`")
+        return
+
+    # look up the commodity object
+    itemName = args.title()
+    itemObj = None
+    for crim in bbData.builtInCommodityObjs.keys():
+        if bbData.builtInCommodityObjs[crim].isCalled(itemName):
+            itemObj = bbData.builtInCommodityObjs[crim]
+
+    # report unrecognised commodity names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+
+    else:
+        if not itemObj.hasIcon:
+            await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
+        else:
+            await message.channel.send(itemObj.icon)
+
+# bbCommands.register("showme-commodity", cmd_showme_commodity)
+
+
+async def cmd_showme(message : discord.Message, args : str, isDM : bool):
+    """Return the URL of the image bountybot uses to represent the named game object, of a specified type.
+    The named used to reference the object may be an alias.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing an object type, followed by a space, followed by the object name. For example, 'criminal toma prakupy'
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    if args == "":
+        await message.channel.send(":x: Please give an object type to look up! (system/criminal/ship/weapon/module/turret/commodity)")
+        return
+
+    argsSplit = args.split(" ")
+    if argsSplit[0] not in ["system", "criminal", "ship", "weapon", "module", "turret", "commodity"]:
+        await message.channel.send(":x: Invalid object type! (system/criminal/ship/weapon/module/turret/commodity)")
+        return
+
+    if argsSplit[0] == "criminal":
+        await cmd_showme_criminal(message, args[9:], isDM)
+    elif argsSplit[0] == "ship":
+        await cmd_showme_ship(message, args[5:], isDM)
+    elif argsSplit[0] == "weapon":
+        await cmd_showme_weapon(message, args[7:], isDM)
+    elif argsSplit[0] == "module":
+        await cmd_showme_module(message, args[7:], isDM)
+    elif argsSplit[0] == "turret":
+        await cmd_showme_turret(message, args[7:], isDM)
+    elif argsSplit[0] == "commodity":
+        await cmd_showme_commodity(message, args[10:], isDM)
+    else:
+        await message.channel.send(":x: Unknown object type! (criminal/ship/weapon/module/turret/commodity)")
+
+bbCommands.register("showme", cmd_showme)
+dmCommands.register("showme", cmd_showme)
+
+
 async def cmd_leaderboard(message : discord.Message, args : str, isDM : bool):
     """display leaderboards for different statistics
     if no arguments are given, display the local leaderboard for pilot value (value of loadout, hangar and balance, summed)
@@ -2002,7 +2347,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
         argNum = 1
         for arg in argsSplit:
             if arg != "":
-                if bbUtil.isUserRef(arg, dcGuild=message.guild):
+                if bbUtil.getMemberFromRef(arg, message.guild) is not None:
                     if foundUser:
                         await message.channel.send(":x: I can only take one user!")
                         return
@@ -3733,6 +4078,81 @@ async def admin_cmd_del_reaction_menu(message : discord.Message, args : str, isD
 bbCommands.register("del-reaction-menu", admin_cmd_del_reaction_menu, isAdmin=True)
 
 
+async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
+    """Render the attached image file onto the specified ship, in high definition.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a ship name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "ship Groza Mk II`")
+        return
+
+    # look up the ship object
+    itemName = args.rstrip(" ").title()
+    itemObj = None
+    for ship in bbData.builtInShipData.values():
+        shipObj = bbShip.fromDict(ship)
+        if shipObj.isCalled(itemName):
+            itemObj = shipObj
+
+    # report unrecognised ship names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+        return
+
+    shipData = bbData.builtInShipData[itemObj.name]
+    if not shipData["skinnable"]:
+        await message.channel.send(":x: That ship is not skinnable!")
+        return
+
+    if len(message.attachments) < 1:
+        await message.channel.send(":x: Please attach a 2048x2048 jpg to render.")
+        return
+    skinFile = message.attachments[0]
+    if (not skinFile.filename.lower().endswith(".jpg")) or not (skinFile.width == 2048 and skinFile.height == 2048):
+        await message.channel.send(":x: Please make sure your attached image is a 2048x2048 jpg.")
+        return
+    try:
+        await skinFile.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename)
+    except (discord.HTTPException, discord.NotFound):
+        await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")
+        return
+    
+    renderPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename[:-4] + "-RENDER.png"
+    skinPath = CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename
+    outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename
+
+    try:
+        await message.add_reaction(bbConfig.longProcessEmoji.sendable)
+    except (discord.HTTPException, discord.Forbidden):
+        pass
+    shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeHDResolution[0], bbConfig.skinRenderShowmeHDResolution[1])
+    
+    with open(renderPath, "rb") as f:
+        imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("HD-u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
+        renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="HD Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
+        await message.channel.send(message.author.mention, embed=renderEmbed)
+        
+    os.remove(renderPath)
+    os.remove(skinPath)
+    os.remove(outSkinPath)
+
+    try:
+        await message.remove_reaction(bbConfig.longProcessEmoji.sendable, bbGlobals.client.user)
+    except (discord.HTTPException, discord.Forbidden):
+        pass
+    return
+
+bbCommands.register("showmehd", cmd_showmeHD, isAdmin=True)
+dmCommands.register("showmehd", cmd_showmeHD, isDev=True)
+
+
 
 ####### DEVELOPER COMMANDS #######
 
@@ -4924,6 +5344,242 @@ bbCommands.register("debug-hangar", dev_cmd_debug_hangar, isDev=True)
 dmCommands.register("debug-hangar", dev_cmd_debug_hangar, isDev=True)
 
 
+async def dev_cmd_addSkin(message : discord.Message, args : str, isDM : bool):
+    """Make the specified ship compatible with the specified skin.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a ship name and a skin, prefaced with a + character.
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "ship Groza Mk II`")
+        return
+
+    if "+" in args:
+        if len(args.split("+")) > 2:
+            await message.channel.send(":x: Please only provide one skin, with one `+`!")
+            return
+        args, skin = args.split("+")
+    else:
+        skin = ""
+
+    # look up the ship object
+    itemName = args.rstrip(" ").title()
+    itemObj = None
+    for ship in bbData.builtInShipData.values():
+        shipObj = bbShip.fromDict(ship)
+        if shipObj.isCalled(itemName):
+            itemObj = shipObj
+
+    # report unrecognised ship names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+        return
+
+    if skin != "":
+        skin = skin.lstrip(" ").lower()
+        if skin not in bbData.builtInShipSkins:
+            if len(skin) < 20:
+                await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+            else:
+                await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+
+        elif skin in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:
+            await message.channel.send(":x: That skin is already compatible with the **" + itemObj.name + "**!")
+        
+        else:
+            await startLongProcess(message)
+            await bbData.builtInShipSkins[skin].addShip(itemObj.name, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+            await endLongProcess(message)
+            await message.channel.send("Done!")
+
+    else:
+        await message.channel.send(":x: Please provide a skin, prefaced by a `+`!")
+
+bbCommands.register("addSkin", dev_cmd_addSkin, isDev=True)
+dmCommands.register("addSkin", dev_cmd_addSkin, isDev=True)
+
+
+async def dev_cmd_delSkin(message : discord.Message, args : str, isDM : bool):
+    """Remove the specified ship's compatibility with the specified skin.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a ship name and a skin, prefaced with a + character.
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "ship Groza Mk II`")
+        return
+
+    if "+" in args:
+        if len(args.split("+")) > 2:
+            await message.channel.send(":x: Please only provide one skin, with one `+`!")
+            return
+        args, skin = args.split("+")
+    else:
+        skin = ""
+
+    # look up the ship object
+    itemName = args.rstrip(" ").title()
+    itemObj = None
+    for ship in bbData.builtInShipData.values():
+        shipObj = bbShip.fromDict(ship)
+        if shipObj.isCalled(itemName):
+            itemObj = shipObj
+
+    # report unrecognised ship names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+        return
+
+    if skin != "":
+        skin = skin.lstrip(" ").lower()
+        if skin not in bbData.builtInShipSkins:
+            if len(skin) < 20:
+                await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+            else:
+                await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+
+        elif skin not in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:
+            await message.channel.send(":x: That skin is already incompatible with the **" + itemObj.name + "**!")
+        
+        else:
+            await bbData.builtInShipSkins[skin].removeShip(itemObj.name, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+            await message.channel.send("Done!")
+
+    else:
+        await message.channel.send(":x: Please provide a skin, prefaced by a `+`!")
+
+bbCommands.register("delSkin", dev_cmd_delSkin, isDev=True)
+dmCommands.register("delSkin", dev_cmd_delSkin, isDev=True)
+
+
+async def dev_cmd_makeSkin(message : discord.Message, args : str, isDM : bool):
+    """Make the specified ship compatible with the specified skin.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a ship name and a skin, prefaced with a + character.
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "ship Groza Mk II`")
+        return
+
+    if "+" in args:
+        if len(args.split("+")) > 2:
+            await message.channel.send(":x: Please only provide one skin, with one `+`!")
+            return
+        args, skin = args.split("+")
+    else:
+        skin = ""
+
+    # look up the ship object
+    itemName = args.rstrip(" ").title()
+    itemObj = None
+    for ship in bbData.builtInShipData.values():
+        shipObj = bbShip.fromDict(ship)
+        if shipObj.isCalled(itemName):
+            itemObj = shipObj
+
+    # report unrecognised ship names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+        return
+
+    if skin != "":
+        skin = skin.lstrip(" ").lower()
+        if skin not in bbData.builtInShipSkins:
+            if len(skin) < 20:
+                await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+            else:
+                await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+
+        elif skin in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:
+            await message.channel.send(":x: That skin is already compatible with the **" + itemObj.name + "**!")
+        
+        else:
+            await bbData.builtInShipSkins[skin].addShip(itemObj.name, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+            await message.channel.send("Done!")
+
+    else:
+        await message.channel.send(":x: Please provide a skin, prefaced by a `+`!")
+
+bbCommands.register("makeSkin", dev_cmd_makeSkin, isDev=True)
+dmCommands.register("makeSkin", dev_cmd_makeSkin, isDev=True)
+
+
+async def dev_cmd_applySkin(message : discord.Message, args : str, isDM : bool):
+    """Apply the specified ship skin to the equipped ship.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a skin name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a skin!")
+        return
+
+    activeShip = bbGlobals.usersDB.getOrAddID(message.author.id).activeShip
+    if activeShip.isSkinned:
+        await message.channel.send(":x: Your ship already has a skin applied!")
+        return
+
+    if args != "":
+        skin = args.lower()
+        if skin not in bbData.builtInShipSkins:
+            if len(skin) < 20:
+                await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+            else:
+                await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+
+        elif skin not in bbData.builtInShipData[activeShip.name]["compatibleSkins"]:
+            await message.channel.send(":x: That skin is incompatible with your active ship! (" + activeShip.name + ")")
+        
+        else:
+            activeShip.applySkin(bbData.builtInShipSkins[skin])
+            await message.channel.send("Done!")
+
+bbCommands.register("applySkin", dev_cmd_applySkin, isDev=True)
+dmCommands.register("applySkin", dev_cmd_applySkin, isDev=True)
+
+
+async def dev_cmd_unapplySkin(message : discord.Message, args : str, isDM : bool):
+    """Remove the applied skin from the active ship.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+
+    activeShip = bbGlobals.usersDB.getOrAddID(message.author.id).activeShip
+    if not activeShip.isSkinned:
+        await message.channel.send(":x: Your ship has no skin applied!")
+    elif not activeShip.builtIn:
+        await message.channel.send(":x: Your ship is not built in, so the original icon cannot be recovered.")
+    else:
+        activeShip.icon = bbData.builtInShipData[activeShip.name]["icon"]
+        activeShip.skin = ""
+        activeShip.isSkinned = False
+        await message.channel.send("Done!")
+
+bbCommands.register("unApplySkin", dev_cmd_unapplySkin, isDev=True)
+dmCommands.register("unApplySkin", dev_cmd_unapplySkin, isDev=True)
+
+
+
 ####### MAIN FUNCTIONS #######
 
 
@@ -5007,6 +5663,16 @@ async def on_ready():
         bbData.builtInTurretData[turretDict["name"]]["builtIn"] = True
         bbData.builtInTurretObjs[turretDict["name"]].builtIn = True
 
+    # generate bbShipSkin objects from data stored on file
+    for subdir, dirs, files in os.walk(bbData.skinsDir):
+        for dirname in dirs:
+            dirpath = subdir + os.sep + dirname
+
+            if dirname.lower().endswith(".bbshipskin"):
+                skinData = bbUtil.readJSON(dirpath + os.sep + "META.json")
+                skinData["path"] = CWD + os.sep + dirpath
+                bbData.builtInShipSkins[skinData["name"].lower()] = bbShipSkin.fromDict(skinData)
+
 
 
     ##### ITEM TECHLEVEL AUTO-GENERATION #####
@@ -5079,8 +5745,8 @@ async def on_ready():
         if guild.hasBountyBoardChannel:
             await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
 
-    print("shop stocks are shared." if bbGlobals.guildsDB.getGuild(699744305274945650).shop.shipsStock is bbGlobals.guildsDB.getGuild(
-        711548456019296289).shop.shipsStock else "shop stocks are not shared.")
+    # print("shop stocks are shared." if bbGlobals.guildsDB.getGuild(699744305274945650).shop.shipsStock is bbGlobals.guildsDB.getGuild(
+    #     711548456019296289).shop.shipsStock else "shop stocks are not shared.")
     # for currentUser in bbGlobals.usersDB.users.values():
     #     currentUser.validateLoadout()
 
@@ -5119,7 +5785,7 @@ async def on_ready():
 
     bbGlobals.reactionMenusTTDB = TimedTaskHeap.TimedTaskHeap()
 
-    if not path.exists(bbConfig.reactionMenusDBPath):
+    if not os.path.exists(bbConfig.reactionMenusDBPath):
         try:
             f = open(bbConfig.reactionMenusDBPath, 'x')
             f.write("{}")
