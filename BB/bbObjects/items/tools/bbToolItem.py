@@ -2,6 +2,7 @@ from .. import bbItem
 from abc import abstractmethod
 from .... import bbUtil
 from discord import Message
+from typing import List
 
 class bbToolItem(bbItem.bbItem):
     """An item that has a function of some kind.
@@ -64,13 +65,14 @@ class bbToolItem(bbItem.bbItem):
 
     
     @abstractmethod
-    """Serialize this tool into dictionary format.
-    This step of implementation adds a 'type' string indicating the name of this tool's subclass.
-
-    :return: The default bbItem toDict implementation, with an added 'type' field
-    :rtype: dict
-    """
     def toDict(self) -> dict:
+        """Serialize this tool into dictionary format.
+        This step of implementation adds a 'type' string indicating the name of this tool's subclass.
+
+        :return: The default bbItem toDict implementation, with an added 'type' field
+        :rtype: dict
+        """
         data = super().toDict()
         data["type"] = type(self).__name__
         return data
+    
