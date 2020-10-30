@@ -25,6 +25,10 @@ class bbShipSkin:
         self.compatibleShips = list(shipRenders.keys())
         self.shipRenders = shipRenders
         self.path = path
+        self.averageTL = 0
+        for ship in self.compatibleShips:
+            self.averageTL += bbData.builtInShipData[ship]["techLevel"]
+        self.averageTL = int(self.averageTL / len(self.compatibleShips))
 
 
     def toDict(self):
