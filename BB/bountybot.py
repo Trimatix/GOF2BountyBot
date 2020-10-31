@@ -765,6 +765,17 @@ async def err_nodm(message : discord.Message, args : str, isDM : bool):
     await message.channel.send(":x: This command can only be used from inside of a server!")
 
 
+async def err_tempDisabled(message : discord.Message, args : str, isDM : bool):
+    """Send an error message when a bounties command is requested - all bounty and shop related behaviour is currently disabled.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: ignored
+    """
+    await message.channel.send(":x: All bounty/shop behaviour is currently disabled while I work on new features \:)")
+
+
+
 ####### USER COMMANDS #######
 
 
@@ -1262,10 +1273,13 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
         seconds = int(diff.total_seconds() % 60)
         await message.channel.send(":stopwatch: **" + message.author.display_name + "**, your *Khador Drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
 
-bbCommands.register("check", cmd_check)
-bbCommands.register("search", cmd_check)
+# bbCommands.register("check", cmd_check)
+# bbCommands.register("search", cmd_check)
 dmCommands.register("check", err_nodm)
 dmCommands.register("search", err_nodm)
+
+bbCommands.register("check", err_tempDisabled)
+bbCommands.register("search", err_tempDisabled)
 
 
 async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
@@ -1349,8 +1363,10 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
                     maxBountiesMsg = "\nYou have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"
             await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!" + maxBountiesMsg)
 
-bbCommands.register("bounties", cmd_bounties)
-dmCommands.register("bounties", cmd_bounties)
+# bbCommands.register("bounties", cmd_bounties)
+# dmCommands.register("bounties", cmd_bounties)
+bbCommands.register("bounties", err_tempDisabled)
+dmCommands.register("bounties", err_tempDisabled)
 
 
 async def cmd_route(message : discord.Message, args : str, isDM : bool):
@@ -1387,8 +1403,10 @@ async def cmd_route(message : discord.Message, args : str, isDM : bool):
                 bbConfig.commandPrefix + "route Trimatix#2244`"
         await message.channel.send(outmsg)
 
-bbCommands.register("route", cmd_route)
-dmCommands.register("route", cmd_route)
+# bbCommands.register("route", cmd_route)
+# dmCommands.register("route", cmd_route)
+bbCommands.register("route", err_tempDisabled)
+dmCommands.register("route", err_tempDisabled)
 
 
 async def cmd_make_route(message : discord.Message, args : str, isDM : bool):
@@ -1820,6 +1838,8 @@ async def cmd_commodity(message : discord.Message, args : str, isDM : bool):
     if args == "":
         await message.channel.send(":x: Please provide a commodity! Example: `" + bbConfig.commandPrefix + "commodity Groza Mk II`")
         return
+
+    itemObj = None
 
     skin = args.lower()
     if skin not in bbData.builtInShipSkins:
@@ -2796,8 +2816,10 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji.sendable)
 
-bbCommands.register("shop", cmd_shop)
-bbCommands.register("store", cmd_shop)
+# bbCommands.register("shop", cmd_shop)
+# bbCommands.register("store", cmd_shop)
+bbCommands.register("shop", err_tempDisabled)
+bbCommands.register("store", err_tempDisabled)
 
 dmCommands.register("shop", err_nodm)
 dmCommands.register("store", err_nodm)
@@ -3015,7 +3037,8 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("buy", cmd_shop_buy)
+# bbCommands.register("buy", cmd_shop_buy)
+bbCommands.register("buy", err_tempDisabled)
 dmCommands.register("buy", err_nodm)
 
 
@@ -3099,7 +3122,8 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("sell", cmd_shop_sell)
+# bbCommands.register("sell", cmd_shop_sell)
+bbCommands.register("sell", err_tempDisabled)
 dmCommands.register("sell", err_nodm)
 
 
@@ -3651,7 +3675,8 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
 
         await DuelRequest.fightDuel(message.author, requestedUser, requestedDuel, message)
 
-bbCommands.register("duel", cmd_duel, forceKeepArgsCasing=True)
+# bbCommands.register("duel", cmd_duel, forceKeepArgsCasing=True)
+bbCommands.register("duel", err_tempDisabled)
 dmCommands.register("duel", err_nodm)
 
 
@@ -3912,8 +3937,10 @@ async def admin_cmd_set_bounty_board_channel(message : discord.Message, args : s
     await guild.addBountyBoardChannel(message.channel, bbGlobals.client, bbData.bountyFactions)
     await message.channel.send(":ballot_box_with_check: Bounty board channel set!")
 
+# bbCommands.register("set-bounty-board-channel",
+#                     admin_cmd_set_bounty_board_channel, isAdmin=True)
 bbCommands.register("set-bounty-board-channel",
-                    admin_cmd_set_bounty_board_channel, isAdmin=True)
+                    err_tempDisabled, isAdmin=True)
 dmCommands.register("set-bounty-board-channel", err_nodm, isAdmin=True)
 
 
