@@ -10,6 +10,8 @@ import ntpath
 # import sys
 from typing import List
 import os
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 CWD = os.getcwd()
@@ -42,7 +44,11 @@ def setRenderArgs(args : List[str]):
             f.write(arg + "\n")
 
 
-def renderShip(skinName : str, shipPath : str, shipModelName : str, textures : List[str], res_x : int, res_y : int): # TODO: Add 'useBaseTexture' argument. Pass to render_vars. If true, should bypass skinBase (for 'full' skins that don't use skinBase)
+def start_render():
+    subprocess.call("blender -b \"" + SCRIPT_PATH + os.sep + "cube.blend\" -P \"" + SCRIPT_PATH + os.sep + "_render.py\"")
+
+
+async def renderShip(skinName : str, shipPath : str, shipModelName : str, textures : List[str], res_x : int, res_y : int): # TODO: Add 'useBaseTexture' argument. Pass to render_vars. If true, should bypass skinBase (for 'full' skins that don't use skinBase)
     """Render the given ship model with the specified skin layer(s).
     The resulting image is cropped to content and saved in shipPath + "/skins/" + skinName.jpg
 
@@ -72,7 +78,8 @@ def renderShip(skinName : str, shipPath : str, shipModelName : str, textures : L
     # Pass the arguments to the renderer
     setRenderArgs([render_resolution, texture_output_file, render_output_file, current_model] + current_texes)
     # Render the requested model
-    subprocess.call("blender -b \"" + SCRIPT_PATH + os.sep + "cube.blend\" -P \"" + SCRIPT_PATH + os.sep + "_render.py\"")
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(ThreadPoolExecutor(), start_render)
 
     # Load the newly rendered image
     bg = Image.open(render_output_file)
