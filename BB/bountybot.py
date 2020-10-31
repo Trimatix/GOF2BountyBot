@@ -2113,7 +2113,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
                 hangarEmbed.add_field(name=str(weaponNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") +
                                       currentItem.name, value=currentItem.statsStringShort(), inline=False)
 
-        if item in ["all", "module"]:
+        if item in ["all", "module", "modules"]:
             for moduleNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("module", page, maxPerPage) + 1):
                 if moduleNum == firstPlace:
                     hangarEmbed.add_field(
