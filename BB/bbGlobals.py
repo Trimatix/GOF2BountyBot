@@ -26,3 +26,7 @@ reactionMenusTTDB = None
 # Scheduling overrides
 newBountyDelayReset = False
 newBountyFixedDeltaChanged = False
+
+
+# Names of ships currently being rendered
+currentRenders = []

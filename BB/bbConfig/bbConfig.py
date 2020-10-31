@@ -326,6 +326,9 @@ def shipSkinValueForTL(averageTL : int) -> int:
     """
     return averageTL * 10000
 
+# The maximum number of rendering threads that may be dispatched simultaneously
+maxConcurrentRenders = 1
+
 
 
 ##### ADMINISTRATION #####

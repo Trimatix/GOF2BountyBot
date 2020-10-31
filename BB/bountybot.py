@@ -2019,6 +2019,13 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             return
 
         if skin == "$ATTACHEDFILE$":
+            if len(bbGlobals.currentRenders) >= bbConfig.maxConcurrentRenders:
+                await message.channel.send(":x: My rendering queue is full currently. Please try this command again once someone else's render has completed.")
+                return
+            if itemObj.name in bbGlobals.currentRenders:
+                await message.channel.send(":x: Someone else is currently rendering this ship! Please use this command again once my other " + itemObj.name + " render has completed.")
+                return
+
             if len(message.attachments) < 1:
                 await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")
                 return
@@ -2037,8 +2044,10 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename
 
             await startLongProcess(message)
+            bbGlobals.currentRenders.append(itemObj.name)
             await shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1])
-            
+            bbGlobals.currentRenders.remove(itemObj.name)
+
             with open(renderPath, "rb") as f:
                 imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
                 renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
@@ -4197,6 +4206,14 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
     if (not skinFile.filename.lower().endswith(".jpg")) or not (skinFile.width == 2048 and skinFile.height == 2048):
         await message.channel.send(":x: Please make sure your attached image is a 2048x2048 jpg.")
         return
+
+    if len(bbGlobals.currentRenders) >= bbConfig.maxConcurrentRenders:
+        await message.channel.send(":x: My rendering queue is full currently. Please try this command again once someone else's render has completed.")
+        return
+    if itemObj.name in bbGlobals.currentRenders:
+        await message.channel.send(":x: Someone else is currently rendering this ship! Please use this command again once my other " + itemObj.name + " render has completed.")
+        return
+
     try:
         await skinFile.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename)
     except (discord.HTTPException, discord.NotFound):
@@ -4211,8 +4228,11 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
         await message.add_reaction(bbConfig.longProcessEmoji.sendable)
     except (discord.HTTPException, discord.Forbidden):
         pass
+
+    bbGlobals.currentRenders.append(itemObj.name)
     await shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeHDResolution[0], bbConfig.skinRenderShowmeHDResolution[1])
-    
+    bbGlobals.currentRenders.remove(itemObj.name)    
+
     with open(renderPath, "rb") as f:
         imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("HD-u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
         renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="HD Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
