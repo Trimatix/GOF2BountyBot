@@ -2038,14 +2038,76 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             except (discord.HTTPException, discord.NotFound):
                 await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")
                 return
+
+            skinPaths = [CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename]
+            first = True
+
+            for skinNum in range(shipData["textureRegions"]):
+                if first:
+                    first = False
+                    confirmMsg = await message.channel.send("This ship has **" + str(shipData["textureRegions"]) + "** optional texture region" + ("" if shipData["textureRegions"] == 1 else "s") + ". Do you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+                else:
+                    confirmMsg = await message.channel.send("Texture accepted!\nDo you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+
+                def showmeRenderConfirmCheck(reactPL):
+                    return reactPL.message_id == confirmMsg.id and reactPL.user_id == message.author.id and bbUtil.dumbEmojiFromPartial(reactPL.emoji) in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji, bbConfig.defaultCancelEmoji]
+
+                def showmeAdditionalMessageCheck(newMessage):
+                    return reactPL.user_id == message.author.id and len(newMessage.attachments) > 0
+
+                try:
+                    reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=showmeRenderConfirmCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+                except asyncio.TimeoutError:
+                    await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
+                else:
+                    react = bbUtil.dumbEmojiFromPartial(reactPL.emoji)
+                    if react == bbConfig.defaultAcceptEmoji:
+                        await message.channel.send("Please send your next image file!")
+                        try:
+                            imgMsg = await bbGlobals.client.wait_for("message", check=showmeAdditionalMessageCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+                        except asyncio.TimeoutError:
+                            await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
+                        else:
+                            nextLayer = imgMsg.attachments[0]
+                            if (not nextLayer.filename.lower().endswith(".jpg")) or not (nextLayer.width == 2048 and nextLayer.height == 2048):
+                                await message.channel.send(":x: Please only give 2048x2048 jpgs!\n🛑 Skin render cancelled.")
+                                for skinPath in skinPaths:
+                                    os.remove(skinPath)
+                                return
+                            if os.path.isfile(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename):
+                                await message.channel.send(":x: I've already got a file with that name!\n🛑 Skin render cancelled.\n" + nextLayer.filename)
+                                for skinPath in skinPaths:
+                                    os.remove(skinPath)
+                                return
+                            try:
+                                await nextLayer.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename)
+                            except (discord.HTTPException, discord.NotFound):
+                                await message.channel.send(":x: I couldn't download your skin file. Did you delete it?\n🛑 Skin render cancelled.")
+                                for skinPath in skinPaths:
+                                    os.remove(skinPath)
+                                return
+                            skinPaths.append(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename)
+                    elif react == bbConfig.defaultCancelEmoji:
+                        await message.channel.send("🛑 Skin render cancelled.")
+                        for skinPath in skinPaths:
+                            os.remove(skinPath)
+                        return
+                    elif react == bbConfig.defaultRejectEmoji:
+                        break
+                    else:
+                        raise RuntimeError("wait_for accepted a reaction that it wasnt looking for: " + react.sendable)
+            
+            if first:
+                waitMsg = message
+            else:
+                waitMsg = await message.channel.send("🤖 Render started! I'll ping you when I'm done.")
             
             renderPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename[:-4] + "-RENDER.png"
-            skinPath = CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename
             outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename
 
-            await startLongProcess(message)
+            await startLongProcess(waitMsg)
             bbGlobals.currentRenders.append(itemObj.name)
-            await shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1])
+            await shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], skinPaths, bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1])
             bbGlobals.currentRenders.remove(itemObj.name)
 
             with open(renderPath, "rb") as f:
@@ -2054,10 +2116,11 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                 await message.channel.send(message.author.mention, embed=renderEmbed)
                 
             os.remove(renderPath)
-            os.remove(skinPath)
+            for skinPath in skinPaths:
+                os.remove(skinPath)
             os.remove(outSkinPath)
 
-            await endLongProcess(message)
+            await endLongProcess(waitMsg)
             return
         else:
             skin = skin.lstrip(" ").lower()
@@ -4219,33 +4282,81 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
     except (discord.HTTPException, discord.NotFound):
         await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")
         return
+
+    skinPaths = [CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename]
+
+    for skinNum in range(shipData["textureRegions"]):
+        confirmMsg = await message.channel.send("This ship has **" + str(shipData["textureRegions"]) + "** optional texture region" + ("" if shipData["textureRegions"] == 1 else "s") + ". Do you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+
+        def showmeRenderConfirmCheck(reactPL):
+            return reactPL.message_id == confirmMsg.id and reactPL.user_id == message.author.id and bbUtil.dumbEmojiFromPartial(reactPL.emoji) in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji, bbConfig.defaultCancelEmoji]
+
+        def showmeAdditionalMessageCheck(newMessage):
+            return reactPL.user_id == message.author.id and len(newMessage.attachments) > 0
+
+        try:
+            reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=showmeRenderConfirmCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+        except asyncio.TimeoutError:
+            await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
+        else:
+            react = bbUtil.dumbEmojiFromPartial(reactPL.emoji)
+            if react == bbConfig.defaultAcceptEmoji:
+                await message.channel.send("Please send your next image file!")
+                try:
+                    imgMsg = await bbGlobals.client.wait_for("message", check=showmeAdditionalMessageCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+                except asyncio.TimeoutError:
+                    await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
+                else:
+                    nextLayer = imgMsg.attachments[0]
+                    if (not nextLayer.filename.lower().endswith(".jpg")) or not (nextLayer.width == 2048 and nextLayer.height == 2048):
+                        await message.channel.send(":x: Please only give 2048x2048 jpgs!\n🛑 Skin render cancelled.")
+                        for skinPath in skinPaths:
+                            os.remove(skinPath)
+                        return
+                    if os.path.isfile(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename):
+                        await message.channel.send(":x: I've already got a file with that name!\n🛑 Skin render cancelled.\n" + nextLayer.filename)
+                        for skinPath in skinPaths:
+                            os.remove(skinPath)
+                        return
+                    try:
+                        await nextLayer.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename)
+                    except (discord.HTTPException, discord.NotFound):
+                        await message.channel.send(":x: I couldn't download your skin file. Did you delete it?\n🛑 Skin render cancelled.")
+                        for skinPath in skinPaths:
+                            os.remove(skinPath)
+                        return
+                    skinPaths.append(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename)
+            elif react == bbConfig.defaultCancelEmoji:
+                await message.channel.send("🛑 Skin render cancelled.")
+                for skinPath in skinPaths:
+                    os.remove(skinPath)
+                return
+            elif react == bbConfig.defaultRejectEmoji:
+                break
+            else:
+                raise RuntimeError("wait_for accepted a reaction that it wasnt looking for: " + react.sendable)
+
+    waitMsg = await message.channel.send("🤖 Render started! I'll ping you when I'm done.")
     
     renderPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename[:-4] + "-RENDER.png"
-    skinPath = CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename
     outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename
 
-    try:
-        await message.add_reaction(bbConfig.longProcessEmoji.sendable)
-    except (discord.HTTPException, discord.Forbidden):
-        pass
-
+    await startLongProcess(waitMsg)
     bbGlobals.currentRenders.append(itemObj.name)
-    await shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeHDResolution[0], bbConfig.skinRenderShowmeHDResolution[1])
-    bbGlobals.currentRenders.remove(itemObj.name)    
+    await shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], skinPaths, bbConfig.skinRenderShowmeHDResolution[0], bbConfig.skinRenderShowmeHDResolution[1])
+    bbGlobals.currentRenders.remove(itemObj.name)
 
     with open(renderPath, "rb") as f:
-        imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("HD-u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
+        imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
         renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="HD Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
         await message.channel.send(message.author.mention, embed=renderEmbed)
         
     os.remove(renderPath)
-    os.remove(skinPath)
+    for skinPath in skinPaths:
+        os.remove(skinPath)
     os.remove(outSkinPath)
 
-    try:
-        await message.remove_reaction(bbConfig.longProcessEmoji.sendable, bbGlobals.client.user)
-    except (discord.HTTPException, discord.Forbidden):
-        pass
+    await endLongProcess(waitMsg)
     return
 
 bbCommands.register("showmehd", cmd_showmeHD, isAdmin=True)
@@ -4263,6 +4374,14 @@ async def dev_cmd_sleep(message : discord.Message, args : str, isDM : bool):
     :param str args: ignored
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
+    waiting = False
+    if len(bbGlobals.currentRenders) > 0:
+        await startLongProcess(message)
+        waiting = True
+    while len(bbGlobals.currentRenders) > 0:
+        asyncio.sleep(3)
+    if waiting:
+        await endLongProcess(message)
     await message.channel.send("zzzz....")
     await shutdown()
 
@@ -6057,8 +6176,20 @@ async def on_raw_reaction_add(payload : discord.RawReactionActionEvent):
         if emoji.sendable is None:
             return
 
-        message = await bbGlobals.client.get_guild(payload.guild_id).get_channel(payload.channel_id).fetch_message(payload.message_id)
-        member = payload.member
+        guild = bbGlobals.client.get_guild(payload.guild_id)
+        if guild is None:
+            message = await bbGlobals.client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+        else:
+            message = await guild.get_channel(payload.channel_id).fetch_message(payload.message_id)
+        if message is None:
+            return
+        
+        if guild is None:
+            member = bbGlobals.client.get_user(payload.user_id)
+        else:
+            member = payload.member
+        if member is None:
+            return
 
         if message.id in bbGlobals.reactionMenusDB and \
                 bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):
@@ -6078,8 +6209,20 @@ async def on_raw_reaction_remove(payload : discord.RawReactionActionEvent):
         if emoji.sendable is None:
             return
 
-        message = await bbGlobals.client.get_guild(payload.guild_id).get_channel(payload.channel_id).fetch_message(payload.message_id)
-        member = message.guild.get_member(payload.user_id)
+        guild = bbGlobals.client.get_guild(payload.guild_id)
+        if guild is None:
+            message = await bbGlobals.client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+        else:
+            message = await guild.get_channel(payload.channel_id).fetch_message(payload.message_id)
+        if message is None:
+            return
+        
+        if guild is None:
+            member = bbGlobals.client.get_user(payload.user_id)
+        else:
+            member = message.guild.get_member(payload.user_id)
+        if member is None:
+            return
 
         if message.id in bbGlobals.reactionMenusDB and \
                 bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):
