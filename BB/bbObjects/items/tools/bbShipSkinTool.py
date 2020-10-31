@@ -49,7 +49,7 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         
         if ship.isSkinned:
             return ValueError("Attempted to apply a skin to an already-skinned ship")
-        if ship.name not in skin.compatibleShips:
+        if ship.name not in self.shipSkin.compatibleShips:
             return TypeError("The given skin is not compatible with this ship")
         
         ship.applySkin(self.shipSkin)
@@ -98,7 +98,7 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         except asyncio.TimeoutError:
             await confirmMsg.edit(content="This menu has now expired. Please use `" + bbConfig.commandPrefix + "use` again.")
         else:
-            if bbUtil.dumbEmojiFromPartial(reactPL.emoji).sendable == bbConfig.defaultAcceptEmoji.sendable:
+            if bbUtil.dumbEmojiFromPartial(reactPL.emoji) == bbConfig.defaultAcceptEmoji:
                 ship.applySkin(self.shipSkin)
                 if self in callingBBUser.inactiveTools:
                     callingBBUser.inactiveTools.removeItem(self)
