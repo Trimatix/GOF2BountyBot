@@ -84,8 +84,8 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
             
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
                             "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
-                            "make-route": ("**make-route <startSystem>, <endSystem>**", "Find the shortest route from startSystem to endSystem.")},
-                            "showme": ("**showme <object-type> <name>** *[+ [skinName]]*", "Get an image of the requested item. If your item is a ship, you may also specify a skin name, prefaced by a `+` symbol. Alternatively, give a `+` and no ship name, and attach your own 2048x2048 jpg image, and I will render it onto your ship!"),
+                            "make-route": ("**make-route <startSystem>, <endSystem>**", "Find the shortest route from startSystem to endSystem."),
+                            "showme": ("**showme <object-type> <name>** *[+ [skinName]]*", "Get an image of the requested item. If your item is a ship, you may also specify a skin name, prefaced by a `+` symbol.\nAlternatively, give a `+` and no ship name, and attach your own 2048x2048 jpg image, and I will render it onto your ship!")},
             
             "Bounties":{    "bounties": ("**bounties** *[faction]*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
                             "route": ("**route <criminal name>**", "Get the named criminal's current route."),
