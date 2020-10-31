@@ -801,7 +801,7 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
                         "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
                     await message.channel.send(embed=helpEmbed)
                     return
-            await message.channel.send(":x: Help: Command not found!")
+            await message.channel.send(":x: Unknown command!")
             return
 
     sendChannel = None
@@ -1876,7 +1876,7 @@ async def cmd_skin(message : discord.Message, args : str, isDM : bool):
         shipSkin = bbData.builtInShipSkins[skin]
         # build the stats embed
         statsEmbed = makeEmbed(
-            col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), desc="__Ship Skin File__", titleTxt=shipSkin.name, thumb=bbConfig.defaultShipSkinToolIcon)
+            col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), desc="__Ship Skin File__", titleTxt=shipSkin.name.title(), thumb=bbConfig.defaultShipSkinToolIcon, footerTxt = ("Preview this skin with the " + "`" + bbConfig.commandPrefix + "showme` command.") if len(shipSkin.compatibleShips) > 0 else "")
         statsEmbed.add_field(
             name="Designed by:", value=userTagOrDiscrim(str(shipSkin.designer), guild=message.guild))
         compatibleShipsStr = ""
@@ -2037,7 +2037,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename
 
             await startLongProcess(message)
-            shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1])
+            await shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1])
             
             with open(renderPath, "rb") as f:
                 imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
@@ -2388,7 +2388,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
         argNum = 1
         for arg in argsSplit:
             if arg != "":
-                if bbUtil.getMemberFromRef(arg, message.guild) is not None:
+                if getMemberByRefOverDB(arg, dcGuild=message.guild) is not None:
                     if foundUser:
                         await message.channel.send(":x: I can only take one user!")
                         return
@@ -4211,7 +4211,7 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
         await message.add_reaction(bbConfig.longProcessEmoji.sendable)
     except (discord.HTTPException, discord.Forbidden):
         pass
-    shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeHDResolution[0], bbConfig.skinRenderShowmeHDResolution[1])
+    await shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], [skinPath], bbConfig.skinRenderShowmeHDResolution[0], bbConfig.skinRenderShowmeHDResolution[1])
     
     with open(renderPath, "rb") as f:
         imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("HD-u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))

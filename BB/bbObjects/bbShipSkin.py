@@ -70,8 +70,8 @@ class bbShipSkin:
             textureFiles = [self.path + os.sep + "1.jpg"]
             for i in range(self.textureRegions):
                 textureFiles.append(self.path + os.sep + str(i+2) + ".jpg")
-            shipRenderer.renderShip(self.name, shipData["path"], shipData["model"], textureFiles, bbConfig.skinRenderIconResolution[0], bbConfig.skinRenderIconResolution[1])
-            # shipRenderer.renderShip(self.name + "_emoji", shipData["path"], shipData["model"], [texPath], bbConfig.skinRenderEmojiResolution[0], bbConfig.skinRenderEmojiResolution[1])
+            await shipRenderer.renderShip(self.name, shipData["path"], shipData["model"], textureFiles, bbConfig.skinRenderIconResolution[0], bbConfig.skinRenderIconResolution[1])
+            # await shipRenderer.renderShip(self.name + "_emoji", shipData["path"], shipData["model"], [texPath], bbConfig.skinRenderEmojiResolution[0], bbConfig.skinRenderEmojiResolution[1])
             # os.remove(emojiTexPath)
 
             # with open(emojiRenderPath, "rb") as f:
