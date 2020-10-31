@@ -2025,18 +2025,23 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             if itemObj.name in bbGlobals.currentRenders:
                 await message.channel.send(":x: Someone else is currently rendering this ship! Please use this command again once my other " + itemObj.name + " render has completed.")
                 return
+                
+            bbGlobals.currentRenders.append(itemObj.name)
 
             if len(message.attachments) < 1:
                 await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")
+                bbGlobals.currentRenders.remove(itemObj.name)
                 return
             skinFile = message.attachments[0]
             if (not skinFile.filename.lower().endswith(".jpg")) or not (skinFile.width == 2048 and skinFile.height == 2048):
                 await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")
+                bbGlobals.currentRenders.remove(itemObj.name)
                 return
             try:
                 await skinFile.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename)
             except (discord.HTTPException, discord.NotFound):
                 await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")
+                bbGlobals.currentRenders.remove(itemObj.name)
                 return
 
             skinPaths = [CWD + os.sep + bbConfig.tempRendersDir + os.sep + skinFile.filename]
@@ -2073,11 +2078,13 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                                 await message.channel.send(":x: Please only give 2048x2048 jpgs!\n🛑 Skin render cancelled.")
                                 for skinPath in skinPaths:
                                     os.remove(skinPath)
+                                bbGlobals.currentRenders.remove(itemObj.name)
                                 return
                             if os.path.isfile(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename):
                                 await message.channel.send(":x: I've already got a file with that name!\n🛑 Skin render cancelled.\n" + nextLayer.filename)
                                 for skinPath in skinPaths:
                                     os.remove(skinPath)
+                                bbGlobals.currentRenders.remove(itemObj.name)
                                 return
                             try:
                                 await nextLayer.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename)
@@ -2085,16 +2092,21 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                                 await message.channel.send(":x: I couldn't download your skin file. Did you delete it?\n🛑 Skin render cancelled.")
                                 for skinPath in skinPaths:
                                     os.remove(skinPath)
+                                bbGlobals.currentRenders.remove(itemObj.name)
                                 return
                             skinPaths.append(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename)
                     elif react == bbConfig.defaultCancelEmoji:
                         await message.channel.send("🛑 Skin render cancelled.")
                         for skinPath in skinPaths:
                             os.remove(skinPath)
+                        bbGlobals.currentRenders.remove(itemObj.name)
                         return
                     elif react == bbConfig.defaultRejectEmoji:
                         break
                     else:
+                        bbGlobals.currentRenders.remove(itemObj.name)
+                        for skinPath in skinPaths:
+                            os.remove(skinPath)
                         raise RuntimeError("wait_for accepted a reaction that it wasnt looking for: " + react.sendable)
             
             if first:
@@ -2106,7 +2118,6 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + skinFile.filename
 
             await startLongProcess(waitMsg)
-            bbGlobals.currentRenders.append(itemObj.name)
             await shipRenderer.renderShip(skinFile.filename[:-4], shipData["path"], shipData["model"], skinPaths, bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1])
             bbGlobals.currentRenders.remove(itemObj.name)
 
@@ -4375,15 +4386,11 @@ async def dev_cmd_sleep(message : discord.Message, args : str, isDM : bool):
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
     waiting = False
-    if len(bbGlobals.currentRenders) > 0:
-        await startLongProcess(message)
-        waiting = True
-    while len(bbGlobals.currentRenders) > 0:
-        asyncio.sleep(3)
-    if waiting:
-        await endLongProcess(message)
-    await message.channel.send("zzzz....")
-    await shutdown()
+    if len(bbGlobals.currentRenders) > 0 and "-f" not in args:
+        await message.channel.send(":x: A render is currently in progress!")
+    else:
+        await message.channel.send("zzzz....")
+        await shutdown()
 
 bbCommands.register("sleep", dev_cmd_sleep, isDev=True)
 dmCommands.register("sleep", dev_cmd_sleep, isDev=True)
