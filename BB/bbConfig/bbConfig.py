@@ -377,7 +377,7 @@ userAlertsIDsDefaults = {   "bounties_new": False,
 
 roleMenuDefaultTimeout = {"days": 1}
 duelChallengeMenuDefaultTimeout = {"hours": 2}
-pollMenuDefaultTimeout = {"seconds": 5}
+pollMenuDefaultTimeout = {"minutes": 5}
 expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
