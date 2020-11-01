@@ -29,7 +29,7 @@ class Criminal (bbAliasable.Aliasable):
     :vartype hasShip: bool
     """
 
-    def __init__(self, name : str, faction : str, icon, builtIn=False, isPlayer=False, aliases=[], wiki="", ship=None):
+    def __init__(self, name : str, faction : str, icon : icon, builtIn=False, isPlayer=False, aliases=[], wiki="", ship=None):
         """
         :param str name: The name of the criminal
         :param str faction: the faction that this criminal is wanted by
