@@ -45,7 +45,7 @@ def setRenderArgs(args : List[str]):
 
 
 def start_render():
-    subprocess.call("blender -b \"" + SCRIPT_PATH + os.sep + "cube.blend\" -P \"" + SCRIPT_PATH + os.sep + "_render.py\"")
+    subprocess.call("blender -b \"" + SCRIPT_PATH + os.sep + "cube.blend\" -P \"" + SCRIPT_PATH + os.sep + "_render.py\"", shell=True)
 
 
 async def renderShip(skinName : str, shipPath : str, shipModelName : str, textures : List[str], res_x : int, res_y : int): # TODO: Add 'useBaseTexture' argument. Pass to render_vars. If true, should bypass skinBase (for 'full' skins that don't use skinBase)
