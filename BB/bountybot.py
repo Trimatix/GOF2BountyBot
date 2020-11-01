@@ -4143,37 +4143,48 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     botRole = potentialRoles[-1]
 
     reactionRoles = {}
+    kwArgs = {}
 
-    argsSplit = args.split(",")
+    argsSplit = args.split("\n")
     argPos = 0
+
     for arg in argsSplit:
+        if arg == "":
+            continue
         argPos += 1
-        roleStr, dumbReact = arg.strip(" ").split(" ")[1], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
-        if dumbReact is None:
-            await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
-            return
-        elif dumbReact.isID:
-            localEmoji = False
-            for localEmoji in message.guild.emojis:
-                if localEmoji.id == dumbReact.id:
-                    localEmoji = True
+        try:
+            roleStr, dumbReact = arg.strip(" ").split(" ")[1], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
+        except ValueError:
+            for kwArg in ["target=", "days=", "hours=", "seconds=", "minutes=", "multiplechoice="]:
+                if arg.lower().startswith(kwArg):
+                    kwArgs[kwArg[:-1]] = arg[len(kwArg):]
                     break
-            if not localEmoji:
-                await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+        else:
+            if dumbReact is None:
+                await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
                 return
-            
-        if dumbReact in reactionRoles:
-            await message.channel.send(":x: Cannot use the same emoji for two options!")
-            return
+            elif dumbReact.isID:
+                localEmoji = False
+                for localEmoji in message.guild.emojis:
+                    if localEmoji.id == dumbReact.id:
+                        localEmoji = True
+                        break
+                if not localEmoji:
+                    await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+                    return
+
+            if dumbReact in reactionRoles:
+                await message.channel.send(":x: Cannot use the same emoji for two options!")
+                return
 
 
-        role = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
-        if role is None:
-            await message.channel.send(":x: Unrecognised role: " + roleStr)
-            return
-        elif role.position > botRole.position:
-            await message.channel.send(":x: I can't grant the **" + role.name + "** role!\nMake sure it's below my '" + botRole.name + "' role in the server roles list.")
-        reactionRoles[dumbReact] = role
+            role = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
+            if role is None:
+                await message.channel.send(":x: Unrecognised role: " + roleStr)
+                return
+            elif role.position > botRole.position:
+                await message.channel.send(":x: I can't grant the **" + role.name + "** role!\nMake sure it's below my '" + botRole.name + "' role in the server roles list.")
+            reactionRoles[dumbReact] = role
 
     if len(reactionRoles) == 0:
         await message.channel.send(":x: No roles given!")
@@ -4181,25 +4192,15 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
 
     targetRole = None
     targetMember = None
-    if "target=" in arg:
-        argIndex = arg.lower().index("target=") + len("target=")
-        try:
-            arg[argIndex:].lower().index(" ")
-        except ValueError:
-            endIndex = len(arg)
-        else:
-            endIndex = arg[argIndex:].index(" ") + argIndex + 1
-
-        targetStr = arg[argIndex:endIndex]
-
-        if bbUtil.isRoleMention(targetStr):
-            targetRole = message.guild.get_role(int(targetStr.lstrip("<@&").rstrip(">")))
+    if "target" in kwArgs:
+        if bbUtil.isRoleMention(kwArgs["target"]):
+            targetRole = message.guild.get_role(int(kwArgs["target"].lstrip("<@&").rstrip(">")))
             if targetRole is None:
                 await message.channel.send(":x: Unknown target role!")
                 return
         
-        elif bbUtil.isMention(targetStr):
-            targetMember = message.guild.get_member(int(targetStr.lstrip("<@!").rstrip(">")))
+        elif bbUtil.isMention(kwArgs["target"]):
+            targetMember = message.guild.get_member(int(kwArgs["target"].lstrip("<@!").rstrip(">")))
             if targetMember is None:
                 await message.channel.send(":x: Unknown target user!")
                 return
@@ -4211,25 +4212,25 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     timeoutDict = {}
 
     for timeName in ["days", "hours", "minutes", "seconds"]:
-        if timeName + "=" in arg.lower():
-            argIndex = arg.lower().index(timeName + "=") + len(timeName + "=")
-            try:
-                arg[argIndex:].index(" ")
-            except ValueError:
-                endIndex = len(arg)
-            else:
-                endIndex = arg[argIndex:].index(" ") + argIndex + 1
-
-            targetStr = arg[argIndex:endIndex]
-
-            if targetStr == "off":
+        if timeName in kwArgs:
+            if kwArgs[timeName].lower() == "off":
                 timeoutDict[timeName] = -1
             else:
-                if not bbUtil.isInt(targetStr) or int(targetStr) < 1:
+                if not bbUtil.isInt(kwArgs[timeName]) or int(kwArgs[timeName]) < 1:
                     await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
                     return
 
-                timeoutDict[timeName] = int(targetStr)
+                timeoutDict[timeName] = int(kwArgs[timeName])
+
+
+    multipleChoice = True
+
+    if "multiplechoice" in kwArgs:
+        if kwArgs["multiplechoice"].lower() in ["off", "no", "false", "single", "one"]:
+            multipleChoice = False
+        elif kwArgs["multiplechoice"].lower() not in ["on", "yes", "true", "multiple", "many"]:
+            await message.channel.send("Invalid `multiplechoice` argument '" + kwArgs["multiplechoice"] + "'! Please use either `multiplechoice=yes` or `multiplechoice=no`")
+            return
 
     timeoutExists = False
     for timeName in timeoutDict:
