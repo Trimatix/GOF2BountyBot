@@ -3764,6 +3764,8 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     argsSplit = args.split("\n")
     argPos = 0
     for arg in argsSplit:
+        if arg == "":
+            continue
         argPos += 1
         try:
             optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
