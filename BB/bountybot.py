@@ -3759,34 +3759,38 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
         return
 
     pollOptions = {}
+    kwArgs = {}
 
-    argsSplit = args.split(",")
+    argsSplit = args.split("\n")
     argPos = 0
     for arg in argsSplit:
         argPos += 1
-        optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
-        if dumbReact is None:
-            await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
-            return
-        elif dumbReact.isID:
-            localEmoji = False
-            for localEmoji in message.guild.emojis:
-                if localEmoji.id == dumbReact.id:
-                    localEmoji = True
+        try:
+            optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
+        except ValueError:
+            for kwArg in ["target=", "days=", "hours=", "seconds=", "minutes=", "multiplechoice="]:
+                if arg.lower().startswith(kwArg):
+                    kwArgs[kwArg[:-1]] = arg[len(kwArg):]
                     break
-            if not localEmoji:
-                await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+        else:
+            if dumbReact is None:
+                await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
+                return
+            elif dumbReact.isID:
+                localEmoji = False
+                for localEmoji in message.guild.emojis:
+                    if localEmoji.id == dumbReact.id:
+                        localEmoji = True
+                        break
+                if not localEmoji:
+                    await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+                    return
+
+            if dumbReact in pollOptions:
+                await message.channel.send(":x: Cannot use the same emoji for two options!")
                 return
 
-        if dumbReact in pollOptions:
-            await message.channel.send(":x: Cannot use the same emoji for two options!")
-            return
-
-        for kwArg in [" target=", " days=", " hours=", " seconds=", " minutes=", " multiplechoice="]:
-            if kwArg in optionName.lower():
-                optionName = optionName[:optionName.lower().index(kwArg)]
-
-        pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
+            pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
 
     if len(pollOptions) == 0:
         await message.channel.send(":x: No options given!")
@@ -3794,25 +3798,15 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
 
     targetRole = None
     targetMember = None
-    if "target=" in arg.lower():
-        argIndex = arg.lower().index("target=") + len("target=")
-        try:
-            arg[argIndex:].index(" ")
-        except ValueError:
-            endIndex = len(arg)
-        else:
-            endIndex = arg[argIndex:].index(" ") + argIndex + 1
-
-        targetStr = arg[argIndex:endIndex]
-
-        if bbUtil.isRoleMention(targetStr):
-            targetRole = message.guild.get_role(int(targetStr.lstrip("<@&").rstrip(">")))
+    if "target" in kwArgs:
+        if bbUtil.isRoleMention(kwArgs["target"]):
+            targetRole = message.guild.get_role(int(kwArgs["target"].lstrip("<@&").rstrip(">")))
             if targetRole is None:
                 await message.channel.send(":x: Unknown target role!")
                 return
         
-        elif bbUtil.isMention(targetStr):
-            targetMember = message.guild.get_member(int(targetStr.lstrip("<@!").rstrip(">")))
+        elif bbUtil.isMention(kwArgs["target"]):
+            targetMember = message.guild.get_member(int(kwArgs["target"].lstrip("<@!").rstrip(">")))
             if targetMember is None:
                 await message.channel.send(":x: Unknown target user!")
                 return
@@ -3824,44 +3818,24 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     timeoutDict = {}
 
     for timeName in ["days", "hours", "minutes", "seconds"]:
-        if timeName + "=" in arg.lower():
-            argIndex = arg.lower().index(timeName + "=") + len(timeName + "=")
-            try:
-                arg[argIndex:].index(" ")
-            except ValueError:
-                endIndex = len(arg)
-            else:
-                endIndex = arg[argIndex:].index(" ") + argIndex + 1
-
-            targetStr = arg[argIndex:endIndex]
-
-            if targetStr == "off":
+        if timeName in kwArgs:
+            if kwArgs[timeName].lower() == "off":
                 timeoutDict[timeName] = -1
             else:
-                if not bbUtil.isInt(targetStr) or int(targetStr) < 1:
+                if not bbUtil.isInt(kwArgs[timeName]) or int(kwArgs[timeName]) < 1:
                     await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
                     return
 
-                timeoutDict[timeName] = int(targetStr)
+                timeoutDict[timeName] = int(kwArgs[timeName])
 
 
     multipleChoice = True
 
-    if "multiplechoice=" in arg.lower():
-        argIndex = arg.lower().index("multiplechoice=") + len("multiplechoice=")
-        try:
-            arg[argIndex:].index(" ")
-        except ValueError:
-            endIndex = len(arg)
-        else:
-            endIndex = arg[argIndex:].index(" ") + argIndex
-
-        targetStr = arg[argIndex:endIndex]
-
-        if targetStr.lower() in ["off", "no", "false", "single", "one"]:
+    if "multiplechoice" in kwArgs:
+        if kwArgs["multiplechoice"].lower() in ["off", "no", "false", "single", "one"]:
             multipleChoice = False
-        elif targetStr.lower() not in ["on", "yes", "true", "multiple", "many"]:
-            await message.channel.send("Invalid `multiplechoice` argument '" + targetStr + "'! Please use either `multiplechoice=yes` or `multiplechoice=no`")
+        elif kwArgs["multiplechoice"].lower() not in ["on", "yes", "true", "multiple", "many"]:
+            await message.channel.send("Invalid `multiplechoice` argument '" + kwArgs["multiplechoice"] + "'! Please use either `multiplechoice=yes` or `multiplechoice=no`")
             return
 
 
@@ -4445,7 +4419,7 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
     bbGlobals.currentRenders.remove(itemObj.name)
 
     with open(renderPath, "rb") as f:
-        imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
+        imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("HD-u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
         renderEmbed = makeEmbed(col=randomColour(), img=imageEmbedMsg.attachments[0].url, authorName="HD Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png", footerTxt="HD custom skinned " + itemObj.name.capitalize())
         await message.channel.send(message.author.mention, embed=renderEmbed)
         
