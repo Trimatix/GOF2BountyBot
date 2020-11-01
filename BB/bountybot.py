@@ -775,6 +775,15 @@ async def err_tempDisabled(message : discord.Message, args : str, isDM : bool):
     await message.channel.send(":x: All bounty/shop behaviour is currently disabled while I work on new features \:)")
 
 
+def randomColour():
+    """Generate a completely random discord.Colour.
+
+    :return: A discord.Colour with randomized r, g and b components.
+    :rtype: discord.Colour
+    """
+    return discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+
 
 ####### USER COMMANDS #######
 
@@ -1896,7 +1905,7 @@ async def cmd_skin(message : discord.Message, args : str, isDM : bool):
         shipSkin = bbData.builtInShipSkins[skin]
         # build the stats embed
         statsEmbed = makeEmbed(
-            col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), desc="__Ship Skin File__", titleTxt=shipSkin.name.title(), thumb=bbConfig.defaultShipSkinToolIcon, footerTxt = ("Preview this skin with the " + "`" + bbConfig.commandPrefix + "showme` command.") if len(shipSkin.compatibleShips) > 0 else "")
+            col=randomColour(), desc="__Ship Skin File__", titleTxt=shipSkin.name.title(), thumb=bbConfig.defaultShipSkinToolIcon, footerTxt = ("Preview this skin with the " + "`" + bbConfig.commandPrefix + "showme` command.") if len(shipSkin.compatibleShips) > 0 else "")
         statsEmbed.add_field(
             name="Designed by:", value=userTagOrDiscrim(str(shipSkin.designer), guild=message.guild))
         compatibleShipsStr = ""
@@ -1982,10 +1991,8 @@ async def cmd_showme_criminal(message : discord.Message, args : str, isDM : bool
             await message.channel.send(":x: **" + criminalName[0:15] + "**... is not in my database! :detective:")
 
     else:
-        if not criminalObj.hasIcon:
-            await message.channel.send(":x: I don't have an icon for **" + criminalObj.name.title() + "**!")
-        else:
-            await message.channel.send(criminalObj.icon)
+        itemEmbed = makeEmbed(col=randomColour(), img=criminalObj.icon, titleTxt=criminalObj.name, footerTxt="Wanted criminal")
+        await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-criminal", cmd_showme_criminal)
 
@@ -2070,9 +2077,17 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             for skinNum in range(shipData["textureRegions"]):
                 if first:
                     first = False
-                    confirmMsg = await message.channel.send("This ship has **" + str(shipData["textureRegions"]) + "** optional texture region" + ("" if shipData["textureRegions"] == 1 else "s") + ". Do you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+                    confirmEmbed = makeEmbed(titleTxt="Custom Skin Renderer", desc="This ship has **" + str(shipData["textureRegions"]) + "** optional texture region" + ("" if shipData["textureRegions"] == 1 else "s") + ".\nDo you want to add more images?", icon=itemObj.icon if itemObj.hasIcon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/wrench_1f527.png", footerTxt="This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")
+                    confirmEmbed.add_field(name=bbConfig.defaultAcceptEmoji.sendable + " : add more images", value="‎", inline=False)
+                    confirmEmbed.add_field(name=bbConfig.defaultRejectEmoji.sendable + " : just render this image", value="‎", inline=False)
+                    confirmEmbed.add_field(name=bbConfig.defaultCancelEmoji.sendable + " : cancel render", value="‎", inline=False)
                 else:
-                    confirmMsg = await message.channel.send("Texture accepted!\nDo you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+                    confirmEmbed = makeEmbed(titleTxt="Custom Skin Renderer", desc="Texture accepted!\nDo you want to add more images?", icon=itemObj.icon if itemObj.hasIcon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/wrench_1f527.png", footerTxt="This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")
+                    confirmEmbed.add_field(name=bbConfig.defaultAcceptEmoji.sendable + " : add more images", value="‎", inline=False)
+                    confirmEmbed.add_field(name=bbConfig.defaultRejectEmoji.sendable + " : render current images", value="‎", inline=False)
+                    confirmEmbed.add_field(name=bbConfig.defaultCancelEmoji.sendable + " : cancel render", value="‎", inline=False)
+                
+                confirmMsg = await message.channel.send(embed=confirmEmbed)
 
                 for optionReact in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji, bbConfig.defaultCancelEmoji]:
                     await confirmMsg.add_reaction(optionReact.sendable)
@@ -2085,6 +2100,8 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
 
                 try:
                     reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=showmeRenderConfirmCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+                    confirmEmbed.set_footer(text="This menu has now expired.")
+                    await confirmMsg.edit(embed=confirmEmbed)
                 except asyncio.TimeoutError:
                     await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
                 else:
@@ -2093,6 +2110,8 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                         await message.channel.send("Please send your next image file!")
                         try:
                             imgMsg = await bbGlobals.client.wait_for("message", check=showmeAdditionalMessageCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+                            confirmEmbed.set_footer(text="This menu has now expired.")
+                            await confirmMsg.edit(embed=confirmEmbed)
                         except asyncio.TimeoutError:
                             await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
                         else:
@@ -2146,7 +2165,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
 
             with open(renderPath, "rb") as f:
                 imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
-                renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
+                renderEmbed = makeEmbed(col=randomColour(), img=imageEmbedMsg.attachments[0].url, authorName="Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png", footerTxt="Custom skinned " + itemObj.name.capitalize())
                 await message.channel.send(message.author.mention, embed=renderEmbed)
                 
             os.remove(renderPath)
@@ -2168,13 +2187,15 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                 await message.channel.send(":x: That skin is not compatible with the **" + itemObj.name + "**!")
             
             else:
-                await message.channel.send(bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0])
+                itemEmbed = makeEmbed(col=randomColour(), img=bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0], titleTxt=itemObj.name, footerTxt="Custom skin: " + skin.capitalize())
+                await message.channel.send(embed=itemEmbed)
 
     else:
         if not itemObj.hasIcon:
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
         else:
-            await message.channel.send(itemObj.icon)
+            itemEmbed = makeEmbed(col=randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt=itemObj.manufacturer.capitalize() + " ship")
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-ship", cmd_showme_ship)
 
@@ -2209,7 +2230,8 @@ async def cmd_showme_weapon(message : discord.Message, args : str, isDM : bool):
         if not itemObj.hasIcon:
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
         else:
-            await message.channel.send(itemObj.icon)
+            itemEmbed = makeEmbed(col=randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt="Level " + str(itemObj.techLevel) + " weapon")
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-weapon", cmd_showme_weapon)
 
@@ -2244,7 +2266,8 @@ async def cmd_showme_module(message : discord.Message, args : str, isDM : bool):
         if not itemObj.hasIcon:
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
         else:
-            await message.channel.send(itemObj.icon)
+            itemEmbed = makeEmbed(col=randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt="Level " + str(itemObj.techLevel) + " module")
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-module", cmd_showme_module)
 
@@ -2279,7 +2302,8 @@ async def cmd_showme_turret(message : discord.Message, args : str, isDM : bool):
         if not itemObj.hasIcon:
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
         else:
-            await message.channel.send(itemObj.icon)
+            itemEmbed = makeEmbed(col=randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt="Level " + str(itemObj.techLevel) + " turret")
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-turret", cmd_showme_turret)
 
@@ -2317,7 +2341,8 @@ async def cmd_showme_commodity(message : discord.Message, args : str, isDM : boo
         if not itemObj.hasIcon:
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
         else:
-            await message.channel.send(itemObj.icon)
+            itemEmbed = makeEmbed(col=randomColour(), img=itemObj.icon, titleTxt=itemObj.name)
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-commodity", cmd_showme_commodity)
 
@@ -4333,10 +4358,18 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
     for skinNum in range(shipData["textureRegions"]):
         if first:
             first = False
-            confirmMsg = await message.channel.send("This ship has **" + str(shipData["textureRegions"]) + "** optional texture region" + ("" if shipData["textureRegions"] == 1 else "s") + ". Do you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+            confirmEmbed = makeEmbed(titleTxt="HD Skin Renderer", desc="This ship has **" + str(shipData["textureRegions"]) + "** optional texture region" + ("" if shipData["textureRegions"] == 1 else "s") + ".\nDo you want to add more images?", icon=itemObj.icon if itemObj.hasIcon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/wrench_1f527.png", footerTxt="This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")
+            confirmEmbed.add_field(name=bbConfig.defaultAcceptEmoji.sendable + " : add more images", value="‎", inline=False)
+            confirmEmbed.add_field(name=bbConfig.defaultRejectEmoji.sendable + " : just render this image", value="‎", inline=False)
+            confirmEmbed.add_field(name=bbConfig.defaultCancelEmoji.sendable + " : cancel render", value="‎", inline=False)
         else:
-            confirmMsg = await message.channel.send("Texture accepted!\nDo you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+            confirmEmbed = makeEmbed(titleTxt="HD Skin Renderer", desc="Texture accepted!\nDo you want to add more images?", icon=itemObj.icon if itemObj.hasIcon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/wrench_1f527.png", footerTxt="This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")
+            confirmEmbed.add_field(name=bbConfig.defaultAcceptEmoji.sendable + " : add more images", value="‎", inline=False)
+            confirmEmbed.add_field(name=bbConfig.defaultRejectEmoji.sendable + " : render current images", value="‎", inline=False)
+            confirmEmbed.add_field(name=bbConfig.defaultCancelEmoji.sendable + " : cancel render", value="‎", inline=False)
         
+        confirmMsg = await message.channel.send(embed=confirmEmbed)
+
         for optionReact in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji, bbConfig.defaultCancelEmoji]:
             await confirmMsg.add_reaction(optionReact.sendable)
 
@@ -4348,6 +4381,8 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
 
         try:
             reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=showmeRenderConfirmCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+            confirmEmbed.set_footer(text="This menu has now expired.")
+            await confirmMsg.edit(embed=confirmEmbed)
         except asyncio.TimeoutError:
             await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
         else:
@@ -4356,6 +4391,8 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
                 await message.channel.send("Please send your next image file!")
                 try:
                     imgMsg = await bbGlobals.client.wait_for("message", check=showmeAdditionalMessageCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+                    confirmEmbed.set_footer(text="This menu has now expired.")
+                    await confirmMsg.edit(embed=confirmEmbed)
                 except asyncio.TimeoutError:
                     await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
                 else:
@@ -4390,6 +4427,9 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
             elif react == bbConfig.defaultRejectEmoji:
                 break
             else:
+                bbGlobals.currentRenders.remove(itemObj.name)
+                for skinPath in skinPaths:
+                    os.remove(skinPath)
                 raise RuntimeError("wait_for accepted a reaction that it wasnt looking for: " + react.sendable)
     
     if first:
@@ -4406,7 +4446,7 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
 
     with open(renderPath, "rb") as f:
         imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
-        renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="HD Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
+        renderEmbed = makeEmbed(col=randomColour(), img=imageEmbedMsg.attachments[0].url, authorName="HD Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png", footerTxt="HD custom skinned " + itemObj.name.capitalize())
         await message.channel.send(message.author.mention, embed=renderEmbed)
         
     os.remove(renderPath)
