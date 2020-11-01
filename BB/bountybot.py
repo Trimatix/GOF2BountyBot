@@ -6047,7 +6047,10 @@ async def on_ready():
 
     for guild in bbGlobals.guildsDB.getGuilds():
         if guild.hasBountyBoardChannel:
-            await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
+            if bbGlobals.client.get_channel(guild.bountyBoardChannel.channelIDToBeLoaded) is None:
+                guild.removeBountyBoardChannel()
+            else:
+                await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
 
     # print("shop stocks are shared." if bbGlobals.guildsDB.getGuild(699744305274945650).shop.shipsStock is bbGlobals.guildsDB.getGuild(
     #     711548456019296289).shop.shipsStock else "shop stocks are not shared.")
