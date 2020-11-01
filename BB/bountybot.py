@@ -2133,7 +2133,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                                 bbGlobals.currentRenders.remove(itemObj.name)
                                 return
                             if os.path.isfile(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename):
-                                await message.channel.send(":x: I've already got a file with that name!\n🛑 Skin render cancelled.\n" + nextLayer.filename)
+                                await message.channel.send(":x: I've already got a file with that name!\n🛑 Skin render cancelled.")
                                 for skinPath in skinPaths:
                                     os.remove(skinPath)
                                 bbGlobals.currentRenders.remove(itemObj.name)
