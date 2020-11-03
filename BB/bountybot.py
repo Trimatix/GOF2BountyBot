@@ -1075,6 +1075,9 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
     :param str args: string containing one system to check
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
+    # verify this is the calling user's home guild. If no home guild is set, transfer here.
+
+
     # verify a system was given
     if args == "":
         await message.channel.send(":x: Please provide a system to check! E.g: `" + bbConfig.commandPrefix + "check Pescal Inartu`")
@@ -3359,7 +3362,7 @@ bbCommands.register("poll", cmd_poll, forceKeepArgsCasing=True)
 dmCommands.register("poll", err_nodm)
 
 
-def cmd_transfer(message : discord.Message, args : str, isDM : bool):
+async def cmd_transfer(message : discord.Message, args : str, isDM : bool):
     """Transfer the calling user's home guild to the guild where the message was sent.
 
     :param discord.Message message: the discord message calling the command
@@ -3367,16 +3370,64 @@ def cmd_transfer(message : discord.Message, args : str, isDM : bool):
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
     requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
-    if message.guild == requestedBBUser.homeGuild:
-        await message.channel.send(":x: This is already your home guild!")
+    if message.guild.id == requestedBBUser.homeGuildID:
+        await message.channel.send(":x: This is already your home server!")
     elif not requestedBBUser.canTransferGuild():
-        await message.channel.send(":x: This command is still on cooldown. (" + bbUtil.td_format_noYM(self.guildTransferCooldownEnd) + " left)")
+        await message.channel.send(":x: This command is still on cooldown. (" + bbUtil.td_format_noYM(requestedBBUser.guildTransferCooldownEnd - datetime.utcnow()) + " left)")
     else:
-        requestedBBUser.transferGuild(message.guild)
-        await message.channel.send(":airplane_arriving: You transferred your home guild to " + message.guild.name + "!")
+        confirmEmbed = makeEmbed(desc="This command's cooldown is " + bbUtil.td_format_noYM(bbUtil.timeDeltaFromDict(bbConfig.homeGuildTransferCooldown)) + ".", footerTxt="This menu will expire in " + str(bbConfig.homeGuildTransferConfirmTimeoutSeconds) + " seconds.")
+        confirmEmbed.add_field(name=bbConfig.defaultAcceptEmoji.sendable + " : Confirm transfer", value="‎", inline=False)
+        confirmEmbed.add_field(name=bbConfig.defaultRejectEmoji.sendable + " : Cancel transfer", value="‎", inline=False)
+        confirmMsg = await message.channel.send("Move your home server to '" + message.guild.name + "'?\n", embed=confirmEmbed)
+
+        for optionReact in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji]:
+            await confirmMsg.add_reaction(optionReact.sendable)
+
+        def homeGuildTransferConfirmCheck(reactPL):
+            return reactPL.message_id == confirmMsg.id and reactPL.user_id == message.author.id and bbUtil.dumbEmojiFromPartial(reactPL.emoji) in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji]
+
+        try:
+            reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=homeGuildTransferConfirmCheck, timeout=bbConfig.homeGuildTransferConfirmTimeoutSeconds)
+            confirmEmbed.set_footer(text="This menu has now expired.")
+            await confirmMsg.edit(embed=confirmEmbed)
+        except asyncio.TimeoutError:
+            await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
+        else:
+            react = bbUtil.dumbEmojiFromPartial(reactPL.emoji)
+            if react == bbConfig.defaultAcceptEmoji:
+                await requestedBBUser.transferGuild(message.guild)
+                await message.channel.send(":airplane_arriving: You transferred your home server to " + message.guild.name + "!")
+            else:
+                await message.channel.send("🛑 Home guild transfer cancelled.")
 
 bbCommands.register("transfer", cmd_transfer)
 dmCommands.register("transfer", err_nodm)
+
+
+async def cmd_home(message : discord.Message, args : str, isDM : bool):
+    """Display the name of the calling user's home guild, if they have one.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    if bbGlobals.usersDB.userIDExists(message.author.id):
+        requestedBBUser = bbGlobals.usersDB.getUser(message.author.id)
+        if message.guild is not None and message.guild.id == requestedBBUser.homeGuildID:
+            await message.channel.send("🌍 This is your home server.")
+            return
+        elif requestedBBUser.hasHomeGuild() and bbGlobals.client.get_guild(requestedBBUser.homeGuildID) is not None:
+            await message.channel.send("🪐 Your home server is '" + bbGlobals.client.get_guild(requestedBBUser.homeGuildID).name + "'.")
+            return
+    await message.channel.send("🌑 Your home server has not yet been set.\nSet your home server by using the shop or bounty board, or with the `" + bbConfig.commandPrefix + "transfer` command.")
+
+bbCommands.register("home", cmd_home)
+bbCommands.register("homeserver", cmd_home)
+bbCommands.register("home-server", cmd_home)
+
+dmCommands.register("home", cmd_home)
+dmCommands.register("homeserver", cmd_home)
+dmCommands.register("home-server", cmd_home)
 
 
 
@@ -4943,6 +4994,30 @@ async def dev_cmd_debug_hangar(message : discord.Message, args : str, isDM : boo
 
 bbCommands.register("debug-hangar", dev_cmd_debug_hangar, isDev=True)
 dmCommands.register("debug-hangar", dev_cmd_debug_hangar, isDev=True)
+
+
+async def dev_cmd_reset_transfer_cool(message : discord.Message, args : str, isDM : bool):
+    """developer command resetting a user's home guild transfer cooldown.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: either empty string or string containing a user mention or ID
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # reset the calling user's cooldown if no user is specified
+    if args == "":
+        bbGlobals.usersDB.getUser(
+            message.author.id).guildTransferCooldownEnd = datetime.utcnow()
+    # otherwise get the specified user's discord object and reset their cooldown.
+    # [!] no validation is done.
+    else:
+        bbGlobals.usersDB.getUser(int(args.lstrip("<@!").rstrip(">"))
+                        ).guildTransferCooldownEnd = datetime.utcnow()
+    await message.channel.send("Done!")
+    
+
+bbCommands.register("reset-transfer-cool", dev_cmd_reset_transfer_cool, isDev=True)
+dmCommands.register("reset-transfer-cool", dev_cmd_reset_transfer_cool, isDev=True)
+
 
 
 ####### MAIN FUNCTIONS #######
