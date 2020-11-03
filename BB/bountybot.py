@@ -765,6 +765,36 @@ async def err_nodm(message : discord.Message, args : str, isDM : bool):
     await message.channel.send(":x: This command can only be used from inside of a server!")
 
 
+async def err_tempDisabled(message : discord.Message, args : str, isDM : bool):
+    """Send an error message when a bounties command is requested - all bounty and shop related behaviour is currently disabled.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: ignored
+    """
+    await message.channel.send(":x: All bounty/shop behaviour is currently disabled while I work on new features \:)")
+
+
+async def err_tempPerfDisabled(message : discord.Message, args : str, isDM : bool):
+    """Send an error message when a command is requested that is disabled for perfornance reasons.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: ignored
+    """
+    await message.channel.send(":x: This command has been temporarily disabled as it requires too much processing power. It may return in the future once hosting hardware has been upgraded! \:)")
+
+
+def randomColour():
+    """Generate a completely random discord.Colour.
+
+    :return: A discord.Colour with randomized r, g and b components.
+    :rtype: discord.Colour
+    """
+    return discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+
+
 ####### USER COMMANDS #######
 
 
@@ -1262,10 +1292,13 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
         seconds = int(diff.total_seconds() % 60)
         await message.channel.send(":stopwatch: **" + message.author.display_name + "**, your *Khador Drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
 
-bbCommands.register("check", cmd_check)
-bbCommands.register("search", cmd_check)
+# bbCommands.register("check", cmd_check)
+# bbCommands.register("search", cmd_check)
 dmCommands.register("check", err_nodm)
 dmCommands.register("search", err_nodm)
+
+bbCommands.register("check", err_tempDisabled)
+bbCommands.register("search", err_tempDisabled)
 
 
 async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
@@ -1349,8 +1382,10 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
                     maxBountiesMsg = "\nYou have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"
             await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!" + maxBountiesMsg)
 
-bbCommands.register("bounties", cmd_bounties)
-dmCommands.register("bounties", cmd_bounties)
+# bbCommands.register("bounties", cmd_bounties)
+# dmCommands.register("bounties", cmd_bounties)
+bbCommands.register("bounties", err_tempDisabled)
+dmCommands.register("bounties", err_tempDisabled)
 
 
 async def cmd_route(message : discord.Message, args : str, isDM : bool):
@@ -1387,8 +1422,10 @@ async def cmd_route(message : discord.Message, args : str, isDM : bool):
                 bbConfig.commandPrefix + "route Trimatix#2244`"
         await message.channel.send(outmsg)
 
-bbCommands.register("route", cmd_route)
-dmCommands.register("route", cmd_route)
+# bbCommands.register("route", cmd_route)
+# dmCommands.register("route", cmd_route)
+bbCommands.register("route", err_tempDisabled)
+dmCommands.register("route", err_tempDisabled)
 
 
 async def cmd_make_route(message : discord.Message, args : str, isDM : bool):
@@ -1821,6 +1858,8 @@ async def cmd_commodity(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Please provide a commodity! Example: `" + bbConfig.commandPrefix + "commodity Groza Mk II`")
         return
 
+    itemObj = None
+
     skin = args.lower()
     if skin not in bbData.builtInShipSkins:
         if len(skin) < 20:
@@ -1876,7 +1915,7 @@ async def cmd_skin(message : discord.Message, args : str, isDM : bool):
         shipSkin = bbData.builtInShipSkins[skin]
         # build the stats embed
         statsEmbed = makeEmbed(
-            col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), desc="__Ship Skin File__", titleTxt=shipSkin.name.title(), thumb=bbConfig.defaultShipSkinToolIcon, footerTxt = ("Preview this skin with the " + "`" + bbConfig.commandPrefix + "showme` command.") if len(shipSkin.compatibleShips) > 0 else "")
+            col=randomColour(), desc="__Ship Skin File__", titleTxt=shipSkin.name.title(), thumb=bbConfig.defaultShipSkinToolIcon, footerTxt = ("Preview this skin with the " + "`" + bbConfig.commandPrefix + "showme` command.") if len(shipSkin.compatibleShips) > 0 else "")
         statsEmbed.add_field(
             name="Designed by:", value=userTagOrDiscrim(str(shipSkin.designer), guild=message.guild))
         compatibleShipsStr = ""
@@ -1962,10 +2001,8 @@ async def cmd_showme_criminal(message : discord.Message, args : str, isDM : bool
             await message.channel.send(":x: **" + criminalName[0:15] + "**... is not in my database! :detective:")
 
     else:
-        if not criminalObj.hasIcon:
-            await message.channel.send(":x: I don't have an icon for **" + criminalObj.name.title() + "**!")
-        else:
-            await message.channel.send(criminalObj.icon)
+        itemEmbed = makeEmbed(col=randomColour(), img=criminalObj.icon, titleTxt=criminalObj.name, footerTxt="Wanted criminal")
+        await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-criminal", cmd_showme_criminal)
 
@@ -2050,9 +2087,17 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             for skinNum in range(shipData["textureRegions"]):
                 if first:
                     first = False
-                    confirmMsg = await message.channel.send("This ship has **" + str(shipData["textureRegions"]) + "** optional texture region" + ("" if shipData["textureRegions"] == 1 else "s") + ". Do you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+                    confirmEmbed = makeEmbed(titleTxt="Custom Skin Renderer", desc="This ship has **" + str(shipData["textureRegions"]) + "** optional texture region" + ("" if shipData["textureRegions"] == 1 else "s") + ".\nDo you want to add more images?", icon=itemObj.icon if itemObj.hasIcon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/wrench_1f527.png", footerTxt="This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")
+                    confirmEmbed.add_field(name=bbConfig.defaultAcceptEmoji.sendable + " : add more images", value="‎", inline=False)
+                    confirmEmbed.add_field(name=bbConfig.defaultRejectEmoji.sendable + " : just render this image", value="‎", inline=False)
+                    confirmEmbed.add_field(name=bbConfig.defaultCancelEmoji.sendable + " : cancel render", value="‎", inline=False)
                 else:
-                    confirmMsg = await message.channel.send("Texture accepted!\nDo you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+                    confirmEmbed = makeEmbed(titleTxt="Custom Skin Renderer", desc="Texture accepted!\nDo you want to add more images?", icon=itemObj.icon if itemObj.hasIcon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/wrench_1f527.png", footerTxt="This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")
+                    confirmEmbed.add_field(name=bbConfig.defaultAcceptEmoji.sendable + " : add more images", value="‎", inline=False)
+                    confirmEmbed.add_field(name=bbConfig.defaultRejectEmoji.sendable + " : render current images", value="‎", inline=False)
+                    confirmEmbed.add_field(name=bbConfig.defaultCancelEmoji.sendable + " : cancel render", value="‎", inline=False)
+                
+                confirmMsg = await message.channel.send(embed=confirmEmbed)
 
                 for optionReact in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji, bbConfig.defaultCancelEmoji]:
                     await confirmMsg.add_reaction(optionReact.sendable)
@@ -2065,6 +2110,8 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
 
                 try:
                     reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=showmeRenderConfirmCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+                    confirmEmbed.set_footer(text="This menu has now expired.")
+                    await confirmMsg.edit(embed=confirmEmbed)
                 except asyncio.TimeoutError:
                     await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
                 else:
@@ -2073,6 +2120,8 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                         await message.channel.send("Please send your next image file!")
                         try:
                             imgMsg = await bbGlobals.client.wait_for("message", check=showmeAdditionalMessageCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+                            confirmEmbed.set_footer(text="This menu has now expired.")
+                            await confirmMsg.edit(embed=confirmEmbed)
                         except asyncio.TimeoutError:
                             await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
                         else:
@@ -2084,7 +2133,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                                 bbGlobals.currentRenders.remove(itemObj.name)
                                 return
                             if os.path.isfile(CWD + os.sep + bbConfig.tempRendersDir + os.sep + nextLayer.filename):
-                                await message.channel.send(":x: I've already got a file with that name!\n🛑 Skin render cancelled.\n" + nextLayer.filename)
+                                await message.channel.send(":x: I've already got a file with that name!\n🛑 Skin render cancelled.")
                                 for skinPath in skinPaths:
                                     os.remove(skinPath)
                                 bbGlobals.currentRenders.remove(itemObj.name)
@@ -2126,7 +2175,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
 
             with open(renderPath, "rb") as f:
                 imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
-                renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
+                renderEmbed = makeEmbed(col=randomColour(), img=imageEmbedMsg.attachments[0].url, authorName="Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png", footerTxt="Custom skinned " + itemObj.name.capitalize())
                 await message.channel.send(message.author.mention, embed=renderEmbed)
                 
             os.remove(renderPath)
@@ -2148,13 +2197,15 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                 await message.channel.send(":x: That skin is not compatible with the **" + itemObj.name + "**!")
             
             else:
-                await message.channel.send(bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0])
+                itemEmbed = makeEmbed(col=randomColour(), img=bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0], titleTxt=itemObj.name, footerTxt="Custom skin: " + skin.capitalize())
+                await message.channel.send(embed=itemEmbed)
 
     else:
         if not itemObj.hasIcon:
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
         else:
-            await message.channel.send(itemObj.icon)
+            itemEmbed = makeEmbed(col=randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt=itemObj.manufacturer.capitalize() + " ship")
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-ship", cmd_showme_ship)
 
@@ -2189,7 +2240,8 @@ async def cmd_showme_weapon(message : discord.Message, args : str, isDM : bool):
         if not itemObj.hasIcon:
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
         else:
-            await message.channel.send(itemObj.icon)
+            itemEmbed = makeEmbed(col=randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt="Level " + str(itemObj.techLevel) + " weapon")
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-weapon", cmd_showme_weapon)
 
@@ -2224,7 +2276,8 @@ async def cmd_showme_module(message : discord.Message, args : str, isDM : bool):
         if not itemObj.hasIcon:
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
         else:
-            await message.channel.send(itemObj.icon)
+            itemEmbed = makeEmbed(col=randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt="Level " + str(itemObj.techLevel) + " module")
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-module", cmd_showme_module)
 
@@ -2259,7 +2312,8 @@ async def cmd_showme_turret(message : discord.Message, args : str, isDM : bool):
         if not itemObj.hasIcon:
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
         else:
-            await message.channel.send(itemObj.icon)
+            itemEmbed = makeEmbed(col=randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt="Level " + str(itemObj.techLevel) + " turret")
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-turret", cmd_showme_turret)
 
@@ -2297,7 +2351,8 @@ async def cmd_showme_commodity(message : discord.Message, args : str, isDM : boo
         if not itemObj.hasIcon:
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
         else:
-            await message.channel.send(itemObj.icon)
+            itemEmbed = makeEmbed(col=randomColour(), img=itemObj.icon, titleTxt=itemObj.name)
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-commodity", cmd_showme_commodity)
 
@@ -2796,8 +2851,10 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji.sendable)
 
-bbCommands.register("shop", cmd_shop)
-bbCommands.register("store", cmd_shop)
+# bbCommands.register("shop", cmd_shop)
+# bbCommands.register("store", cmd_shop)
+bbCommands.register("shop", err_tempDisabled)
+bbCommands.register("store", err_tempDisabled)
 
 dmCommands.register("shop", err_nodm)
 dmCommands.register("store", err_nodm)
@@ -3015,7 +3072,8 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("buy", cmd_shop_buy)
+# bbCommands.register("buy", cmd_shop_buy)
+bbCommands.register("buy", err_tempDisabled)
 dmCommands.register("buy", err_nodm)
 
 
@@ -3099,7 +3157,8 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("sell", cmd_shop_sell)
+# bbCommands.register("sell", cmd_shop_sell)
+bbCommands.register("sell", err_tempDisabled)
 dmCommands.register("sell", err_nodm)
 
 
@@ -3651,7 +3710,8 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
 
         await DuelRequest.fightDuel(message.author, requestedUser, requestedDuel, message)
 
-bbCommands.register("duel", cmd_duel, forceKeepArgsCasing=True)
+# bbCommands.register("duel", cmd_duel, forceKeepArgsCasing=True)
+bbCommands.register("duel", err_tempDisabled)
 dmCommands.register("duel", err_nodm)
 
 
@@ -3709,34 +3769,40 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
         return
 
     pollOptions = {}
+    kwArgs = {}
 
-    argsSplit = args.split(",")
+    argsSplit = args.split("\n")
     argPos = 0
     for arg in argsSplit:
+        if arg == "":
+            continue
         argPos += 1
-        optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
-        if dumbReact is None:
-            await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
-            return
-        elif dumbReact.isID:
-            localEmoji = False
-            for localEmoji in message.guild.emojis:
-                if localEmoji.id == dumbReact.id:
-                    localEmoji = True
+        try:
+            optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
+        except ValueError:
+            for kwArg in ["target=", "days=", "hours=", "seconds=", "minutes=", "multiplechoice="]:
+                if arg.lower().startswith(kwArg):
+                    kwArgs[kwArg[:-1]] = arg[len(kwArg):]
                     break
-            if not localEmoji:
-                await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+        else:
+            if dumbReact is None:
+                await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
+                return
+            elif dumbReact.isID:
+                localEmoji = False
+                for localEmoji in message.guild.emojis:
+                    if localEmoji.id == dumbReact.id:
+                        localEmoji = True
+                        break
+                if not localEmoji:
+                    await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+                    return
+
+            if dumbReact in pollOptions:
+                await message.channel.send(":x: Cannot use the same emoji for two options!")
                 return
 
-        if dumbReact in pollOptions:
-            await message.channel.send(":x: Cannot use the same emoji for two options!")
-            return
-
-        for kwArg in [" target=", " days=", " hours=", " seconds=", " minutes=", " multiplechoice="]:
-            if kwArg in optionName.lower():
-                optionName = optionName[:optionName.lower().index(kwArg)]
-
-        pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
+            pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
 
     if len(pollOptions) == 0:
         await message.channel.send(":x: No options given!")
@@ -3744,25 +3810,15 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
 
     targetRole = None
     targetMember = None
-    if "target=" in arg.lower():
-        argIndex = arg.lower().index("target=") + len("target=")
-        try:
-            arg[argIndex:].index(" ")
-        except ValueError:
-            endIndex = len(arg)
-        else:
-            endIndex = arg[argIndex:].index(" ") + argIndex + 1
-
-        targetStr = arg[argIndex:endIndex]
-
-        if bbUtil.isRoleMention(targetStr):
-            targetRole = message.guild.get_role(int(targetStr.lstrip("<@&").rstrip(">")))
+    if "target" in kwArgs:
+        if bbUtil.isRoleMention(kwArgs["target"]):
+            targetRole = message.guild.get_role(int(kwArgs["target"].lstrip("<@&").rstrip(">")))
             if targetRole is None:
                 await message.channel.send(":x: Unknown target role!")
                 return
         
-        elif bbUtil.isMention(targetStr):
-            targetMember = message.guild.get_member(int(targetStr.lstrip("<@!").rstrip(">")))
+        elif bbUtil.isMention(kwArgs["target"]):
+            targetMember = message.guild.get_member(int(kwArgs["target"].lstrip("<@!").rstrip(">")))
             if targetMember is None:
                 await message.channel.send(":x: Unknown target user!")
                 return
@@ -3774,44 +3830,24 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     timeoutDict = {}
 
     for timeName in ["days", "hours", "minutes", "seconds"]:
-        if timeName + "=" in arg.lower():
-            argIndex = arg.lower().index(timeName + "=") + len(timeName + "=")
-            try:
-                arg[argIndex:].index(" ")
-            except ValueError:
-                endIndex = len(arg)
-            else:
-                endIndex = arg[argIndex:].index(" ") + argIndex + 1
-
-            targetStr = arg[argIndex:endIndex]
-
-            if targetStr == "off":
+        if timeName in kwArgs:
+            if kwArgs[timeName].lower() == "off":
                 timeoutDict[timeName] = -1
             else:
-                if not bbUtil.isInt(targetStr) or int(targetStr) < 1:
+                if not bbUtil.isInt(kwArgs[timeName]) or int(kwArgs[timeName]) < 1:
                     await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
                     return
 
-                timeoutDict[timeName] = int(targetStr)
+                timeoutDict[timeName] = int(kwArgs[timeName])
 
 
     multipleChoice = True
 
-    if "multiplechoice=" in arg.lower():
-        argIndex = arg.lower().index("multiplechoice=") + len("multiplechoice=")
-        try:
-            arg[argIndex:].index(" ")
-        except ValueError:
-            endIndex = len(arg)
-        else:
-            endIndex = arg[argIndex:].index(" ") + argIndex
-
-        targetStr = arg[argIndex:endIndex]
-
-        if targetStr.lower() in ["off", "no", "false", "single", "one"]:
+    if "multiplechoice" in kwArgs:
+        if kwArgs["multiplechoice"].lower() in ["off", "no", "false", "single", "one"]:
             multipleChoice = False
-        elif targetStr.lower() not in ["on", "yes", "true", "multiple", "many"]:
-            await message.channel.send("Invalid `multiplechoice` argument '" + targetStr + "'! Please use either `multiplechoice=yes` or `multiplechoice=no`")
+        elif kwArgs["multiplechoice"].lower() not in ["on", "yes", "true", "multiple", "many"]:
+            await message.channel.send("Invalid `multiplechoice` argument '" + kwArgs["multiplechoice"] + "'! Please use either `multiplechoice=yes` or `multiplechoice=no`")
             return
 
 
@@ -3912,8 +3948,10 @@ async def admin_cmd_set_bounty_board_channel(message : discord.Message, args : s
     await guild.addBountyBoardChannel(message.channel, bbGlobals.client, bbData.bountyFactions)
     await message.channel.send(":ballot_box_with_check: Bounty board channel set!")
 
+# bbCommands.register("set-bounty-board-channel",
+#                     admin_cmd_set_bounty_board_channel, isAdmin=True)
 bbCommands.register("set-bounty-board-channel",
-                    admin_cmd_set_bounty_board_channel, isAdmin=True)
+                    err_tempDisabled, isAdmin=True)
 dmCommands.register("set-bounty-board-channel", err_nodm, isAdmin=True)
 
 
@@ -4115,37 +4153,48 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     botRole = potentialRoles[-1]
 
     reactionRoles = {}
+    kwArgs = {}
 
-    argsSplit = args.split(",")
+    argsSplit = args.split("\n")
     argPos = 0
+
     for arg in argsSplit:
+        if arg == "":
+            continue
         argPos += 1
-        roleStr, dumbReact = arg.strip(" ").split(" ")[1], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
-        if dumbReact is None:
-            await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
-            return
-        elif dumbReact.isID:
-            localEmoji = False
-            for localEmoji in message.guild.emojis:
-                if localEmoji.id == dumbReact.id:
-                    localEmoji = True
+        try:
+            roleStr, dumbReact = arg.strip(" ").split(" ")[1], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
+        except ValueError:
+            for kwArg in ["target=", "days=", "hours=", "seconds=", "minutes=", "multiplechoice="]:
+                if arg.lower().startswith(kwArg):
+                    kwArgs[kwArg[:-1]] = arg[len(kwArg):]
                     break
-            if not localEmoji:
-                await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+        else:
+            if dumbReact is None:
+                await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
                 return
-            
-        if dumbReact in reactionRoles:
-            await message.channel.send(":x: Cannot use the same emoji for two options!")
-            return
+            elif dumbReact.isID:
+                localEmoji = False
+                for localEmoji in message.guild.emojis:
+                    if localEmoji.id == dumbReact.id:
+                        localEmoji = True
+                        break
+                if not localEmoji:
+                    await message.channel.send(":x: I don't know your " + str(argPos) + getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+                    return
+
+            if dumbReact in reactionRoles:
+                await message.channel.send(":x: Cannot use the same emoji for two options!")
+                return
 
 
-        role = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
-        if role is None:
-            await message.channel.send(":x: Unrecognised role: " + roleStr)
-            return
-        elif role.position > botRole.position:
-            await message.channel.send(":x: I can't grant the **" + role.name + "** role!\nMake sure it's below my '" + botRole.name + "' role in the server roles list.")
-        reactionRoles[dumbReact] = role
+            role = message.guild.get_role(int(roleStr.lstrip("<@&").rstrip(">")))
+            if role is None:
+                await message.channel.send(":x: Unrecognised role: " + roleStr)
+                return
+            elif role.position > botRole.position:
+                await message.channel.send(":x: I can't grant the **" + role.name + "** role!\nMake sure it's below my '" + botRole.name + "' role in the server roles list.")
+            reactionRoles[dumbReact] = role
 
     if len(reactionRoles) == 0:
         await message.channel.send(":x: No roles given!")
@@ -4153,25 +4202,15 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
 
     targetRole = None
     targetMember = None
-    if "target=" in arg:
-        argIndex = arg.lower().index("target=") + len("target=")
-        try:
-            arg[argIndex:].lower().index(" ")
-        except ValueError:
-            endIndex = len(arg)
-        else:
-            endIndex = arg[argIndex:].index(" ") + argIndex + 1
-
-        targetStr = arg[argIndex:endIndex]
-
-        if bbUtil.isRoleMention(targetStr):
-            targetRole = message.guild.get_role(int(targetStr.lstrip("<@&").rstrip(">")))
+    if "target" in kwArgs:
+        if bbUtil.isRoleMention(kwArgs["target"]):
+            targetRole = message.guild.get_role(int(kwArgs["target"].lstrip("<@&").rstrip(">")))
             if targetRole is None:
                 await message.channel.send(":x: Unknown target role!")
                 return
         
-        elif bbUtil.isMention(targetStr):
-            targetMember = message.guild.get_member(int(targetStr.lstrip("<@!").rstrip(">")))
+        elif bbUtil.isMention(kwArgs["target"]):
+            targetMember = message.guild.get_member(int(kwArgs["target"].lstrip("<@!").rstrip(">")))
             if targetMember is None:
                 await message.channel.send(":x: Unknown target user!")
                 return
@@ -4183,25 +4222,25 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     timeoutDict = {}
 
     for timeName in ["days", "hours", "minutes", "seconds"]:
-        if timeName + "=" in arg.lower():
-            argIndex = arg.lower().index(timeName + "=") + len(timeName + "=")
-            try:
-                arg[argIndex:].index(" ")
-            except ValueError:
-                endIndex = len(arg)
-            else:
-                endIndex = arg[argIndex:].index(" ") + argIndex + 1
-
-            targetStr = arg[argIndex:endIndex]
-
-            if targetStr == "off":
+        if timeName in kwArgs:
+            if kwArgs[timeName].lower() == "off":
                 timeoutDict[timeName] = -1
             else:
-                if not bbUtil.isInt(targetStr) or int(targetStr) < 1:
+                if not bbUtil.isInt(kwArgs[timeName]) or int(kwArgs[timeName]) < 1:
                     await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
                     return
 
-                timeoutDict[timeName] = int(targetStr)
+                timeoutDict[timeName] = int(kwArgs[timeName])
+
+
+    multipleChoice = True
+
+    if "multiplechoice" in kwArgs:
+        if kwArgs["multiplechoice"].lower() in ["off", "no", "false", "single", "one"]:
+            multipleChoice = False
+        elif kwArgs["multiplechoice"].lower() not in ["on", "yes", "true", "multiple", "many"]:
+            await message.channel.send("Invalid `multiplechoice` argument '" + kwArgs["multiplechoice"] + "'! Please use either `multiplechoice=yes` or `multiplechoice=no`")
+            return
 
     timeoutExists = False
     for timeName in timeoutDict:
@@ -4306,10 +4345,18 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
     for skinNum in range(shipData["textureRegions"]):
         if first:
             first = False
-            confirmMsg = await message.channel.send("This ship has **" + str(shipData["textureRegions"]) + "** optional texture region" + ("" if shipData["textureRegions"] == 1 else "s") + ". Do you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+            confirmEmbed = makeEmbed(titleTxt="HD Skin Renderer", desc="This ship has **" + str(shipData["textureRegions"]) + "** optional texture region" + ("" if shipData["textureRegions"] == 1 else "s") + ".\nDo you want to add more images?", icon=itemObj.icon if itemObj.hasIcon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/wrench_1f527.png", footerTxt="This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")
+            confirmEmbed.add_field(name=bbConfig.defaultAcceptEmoji.sendable + " : add more images", value="‎", inline=False)
+            confirmEmbed.add_field(name=bbConfig.defaultRejectEmoji.sendable + " : just render this image", value="‎", inline=False)
+            confirmEmbed.add_field(name=bbConfig.defaultCancelEmoji.sendable + " : cancel render", value="‎", inline=False)
         else:
-            confirmMsg = await message.channel.send("Texture accepted!\nDo you want to add more images? Please react to this message:\n" + bbConfig.defaultAcceptEmoji.sendable + " : add more images\n" + bbConfig.defaultRejectEmoji.sendable + " : render current image(s)\n" + bbConfig.defaultCancelEmoji.sendable + " : cancel render")
+            confirmEmbed = makeEmbed(titleTxt="HD Skin Renderer", desc="Texture accepted!\nDo you want to add more images?", icon=itemObj.icon if itemObj.hasIcon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/wrench_1f527.png", footerTxt="This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")
+            confirmEmbed.add_field(name=bbConfig.defaultAcceptEmoji.sendable + " : add more images", value="‎", inline=False)
+            confirmEmbed.add_field(name=bbConfig.defaultRejectEmoji.sendable + " : render current images", value="‎", inline=False)
+            confirmEmbed.add_field(name=bbConfig.defaultCancelEmoji.sendable + " : cancel render", value="‎", inline=False)
         
+        confirmMsg = await message.channel.send(embed=confirmEmbed)
+
         for optionReact in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji, bbConfig.defaultCancelEmoji]:
             await confirmMsg.add_reaction(optionReact.sendable)
 
@@ -4321,6 +4368,8 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
 
         try:
             reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=showmeRenderConfirmCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+            confirmEmbed.set_footer(text="This menu has now expired.")
+            await confirmMsg.edit(embed=confirmEmbed)
         except asyncio.TimeoutError:
             await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
         else:
@@ -4329,6 +4378,8 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
                 await message.channel.send("Please send your next image file!")
                 try:
                     imgMsg = await bbGlobals.client.wait_for("message", check=showmeAdditionalMessageCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+                    confirmEmbed.set_footer(text="This menu has now expired.")
+                    await confirmMsg.edit(embed=confirmEmbed)
                 except asyncio.TimeoutError:
                     await confirmMsg.edit(content="This menu has now expired. Please try the command again.")
                 else:
@@ -4363,6 +4414,9 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
             elif react == bbConfig.defaultRejectEmoji:
                 break
             else:
+                bbGlobals.currentRenders.remove(itemObj.name)
+                for skinPath in skinPaths:
+                    os.remove(skinPath)
                 raise RuntimeError("wait_for accepted a reaction that it wasnt looking for: " + react.sendable)
     
     if first:
@@ -4378,8 +4432,8 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
     bbGlobals.currentRenders.remove(itemObj.name)
 
     with open(renderPath, "rb") as f:
-        imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
-        renderEmbed = makeEmbed(col=discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), img=imageEmbedMsg.attachments[0].url, authorName="HD Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png")
+        imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("HD-u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
+        renderEmbed = makeEmbed(col=randomColour(), img=imageEmbedMsg.attachments[0].url, authorName="HD Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png", footerTxt="HD custom skinned " + itemObj.name.capitalize())
         await message.channel.send(message.author.mention, embed=renderEmbed)
         
     os.remove(renderPath)
@@ -4389,8 +4443,10 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
 
     await endLongProcess(waitMsg)
 
-bbCommands.register("showmehd", cmd_showmeHD, isAdmin=True)
-dmCommands.register("showmehd", cmd_showmeHD, isDev=True)
+# bbCommands.register("showmehd", cmd_showmeHD, isAdmin=True)
+# dmCommands.register("showmehd", cmd_showmeHD, isDev=True)
+bbCommands.register("showmehd", err_tempPerfDisabled, isAdmin=True)
+dmCommands.register("showmehd", err_tempPerfDisabled, isDev=True)
 
 
 
@@ -6003,7 +6059,10 @@ async def on_ready():
 
     for guild in bbGlobals.guildsDB.getGuilds():
         if guild.hasBountyBoardChannel:
-            await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
+            if bbGlobals.client.get_channel(guild.bountyBoardChannel.channelIDToBeLoaded) is None:
+                guild.removeBountyBoardChannel()
+            else:
+                await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
 
     # print("shop stocks are shared." if bbGlobals.guildsDB.getGuild(699744305274945650).shop.shipsStock is bbGlobals.guildsDB.getGuild(
     #     711548456019296289).shop.shipsStock else "shop stocks are not shared.")
@@ -6023,20 +6082,20 @@ async def on_ready():
                                 "fixed-routeScale": bbConfig.newBountyFixedDelta,
                                 "random-routeScale": bbConfig.newBountyDelayRandomRange}
 
-    if bbConfig.newBountyDelayType == "fixed":
-        bbGlobals.newBountyTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
-    else:
-        try:
-            bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
-                bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
-        except KeyError:
-            raise ValueError(
-                "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
+    # if bbConfig.newBountyDelayType == "fixed":
+    #     bbGlobals.newBountyTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+    # else:
+    #     try:
+    #         bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
+    #             bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+    #     except KeyError:
+    #         raise ValueError(
+    #             "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
-    bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
+    # bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
     bbGlobals.dbSaveTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.savePeriod), autoReschedule=True, expiryFunction=saveAllDBs)
 
-    bbGlobals.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
+    # bbGlobals.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
 
     if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" +
@@ -6065,17 +6124,17 @@ async def on_ready():
             await asyncio.sleep(bbConfig.timedTaskLatenessThresholdSeconds)
         # elif bbConfig.timedTaskCheckingType == "dynamic":
 
-        await bbGlobals.shopRefreshTT.doExpiryCheck()
+        # await bbGlobals.shopRefreshTT.doExpiryCheck()
 
-        if bbGlobals.newBountyDelayReset:
-            await bbGlobals.newBountyTT.forceExpire()
-            bbGlobals.newBountyDelayReset = False
-        else:
-            await bbGlobals.newBountyTT.doExpiryCheck()
+        # if bbGlobals.newBountyDelayReset:
+        #     await bbGlobals.newBountyTT.forceExpire()
+        #     bbGlobals.newBountyDelayReset = False
+        # else:
+        #     await bbGlobals.newBountyTT.doExpiryCheck()
 
         await bbGlobals.dbSaveTT.doExpiryCheck()
 
-        await bbGlobals.duelRequestTTDB.doTaskChecking()
+        # await bbGlobals.duelRequestTTDB.doTaskChecking()
 
         await bbGlobals.reactionMenusTTDB.doTaskChecking()
 
