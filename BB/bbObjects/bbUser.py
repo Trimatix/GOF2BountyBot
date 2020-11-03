@@ -398,7 +398,7 @@ class bbUser:
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "lastSeenGuildId":self.lastSeenGuildId,
                 "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses,
                 "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "pollOwned": self.pollOwned,
-                "homeGuildID": self.homeGuildID.id, "guildTransferCooldownEnd": self.guildTransferCooldownEnd}
+                "homeGuildID": self.homeGuildID, "guildTransferCooldownEnd": self.guildTransferCooldownEnd.timestamp()}
 
 
     def userDump(self) -> str:
@@ -592,7 +592,7 @@ class bbUser:
         return self.isAlertedForType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
 
 
-    def hashomeGuild(self) -> bool:
+    def hasHomeGuild(self) -> bool:
         """Decide whether or not this user has a home guild set.
 
         :return: True if this user has a home guild, False otherwise
@@ -609,10 +609,10 @@ class bbUser:
         :return: True if this user has no home guild, or their guild transfer cooldown has completed, false otherwise
         :rtype: bool
         """
-        return not self.hashomeGuild() or datetime.utcnow() > self.guildTransferCooldownEnd
+        return (not self.hasHomeGuild()) or datetime.utcnow() > self.guildTransferCooldownEnd
 
     
-    def transferGuild(self, newGuild : Guild):
+    async def transferGuild(self, newGuild : Guild):
         """Transfer the user's homeGuildID to the given guild.
         The user must not be on guild transfer cooldown.
 
@@ -623,11 +623,11 @@ class bbUser:
         now = datetime.utcnow()
         if not self.canTransferGuild(now=now):
             raise ValueError("This user cannot transfer guild again yet (" + bbUtil.td_format_noYM(self.guildTransferCooldownEnd) + " remaining)")
-        if newGuild.get_member(self.id) is None:
+        if await newGuild.fetch_member(self.id) is None:
             raise NameError("This user is not a member of the given guild '" + newGuild.name + "#" + str(newGuild.id) + "'")
         
         self.homeGuildID = newGuild.id
-        self.guildTransferCooldownEnd = now + bbUtil.timeDeltaFromDict(bbConfig.homeGuildIDTransferCooldown)
+        self.guildTransferCooldownEnd = now + bbUtil.timeDeltaFromDict(bbConfig.homeGuildTransferCooldown)
 
 
     def __str__(self) -> str:
@@ -636,7 +636,7 @@ class bbUser:
         :return: A string summar of the user, containing the user ID and home guild ID.
         :rtype: str
         """
-        return "<bbUser #" + str(self.id) + ((" @" + str(self.homeGuildID)) if self.hashomeGuildID() else "") + ">"
+        return "<bbUser #" + str(self.id) + ((" @" + str(self.homeGuildID)) if self.hasHomeGuildID() else "") + ">"
 
 
 def fromDict(id : int, userDict : dict) -> bbUser:
