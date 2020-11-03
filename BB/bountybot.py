@@ -1076,19 +1076,16 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
     # verify this is the calling user's home guild. If no home guild is set, transfer here.
-
+    requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
+    if not requestedBBUser.hasHomeGuild():
+        requestedBBUser.transferGuild(message.guild)
+    elif requestedBBUser.homeGuild != message.guild.id:
+        await message.channel.send(":x: This command can only be used from your home guild!")
+        return
 
     # verify a system was given
     if args == "":
         await message.channel.send(":x: Please provide a system to check! E.g: `" + bbConfig.commandPrefix + "check Pescal Inartu`")
-        return
-
-    # ensure the calling user is in the users database
-    requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
-    if not requestedBBUser.hasHomeGuild() is None:
-        requestedBBUser.transferGuild(message.guild)
-    elif requestedBBUser.homeGuild != message.guild:
-        await message.channel.send(":x: This command can only be used from your home guild!")
         return
 
     requestedSystem = args.title()
@@ -2412,11 +2409,11 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
     :param str args: string containing an item type and an index number, and optionally "transfer", and optionally "sell" separated by a single space
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    # ensure the calling user is in the users database
+    # verify this is the calling user's home guild. If no home guild is set, transfer here.
     requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
-    if not requestedBBUser.hasHomeGuild() is None:
+    if not requestedBBUser.hasHomeGuild():
         requestedBBUser.transferGuild(message.guild)
-    elif requestedBBUser.homeGuild != message.guild:
+    elif requestedBBUser.homeGuild != message.guild.id:
         await message.channel.send(":x: This command can only be used from your home guild!")
         return
 
@@ -2544,11 +2541,11 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     :param str args: string containing an item type and an index number, and optionally "clear", separated by a single space
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    # ensure the calling user is in the users database
+    # verify this is the calling user's home guild. If no home guild is set, transfer here.
     requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
-    if not requestedBBUser.hasHomeGuild() is None:
+    if not requestedBBUser.hasHomeGuild():
         requestedBBUser.transferGuild(message.guild)
-    elif requestedBBUser.homeGuild != message.guild:
+    elif requestedBBUser.homeGuild != message.guild.id:
         await message.channel.send(":x: This command can only be used from your home guild!")
         return
         
