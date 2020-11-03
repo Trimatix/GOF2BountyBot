@@ -5,7 +5,6 @@ botLoggedIn = False
 
 # Databases
 usersDB = None
-bountiesDB = None
 guildsDB = None
 
 
