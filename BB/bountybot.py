@@ -2168,7 +2168,7 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
     shopEmbed = makeEmbed(titleTxt="Shop", desc="__" + message.guild.name + "__\n`Current Tech Level: " + str(requestedShop.currentTechLevel) + "`",
                           footerTxt="All items" if item == "all" else (
                               item + "s").title(),
-                          thumb="https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64")
+                          thumb=("https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64") if message.guild.icon is not None else "")
 
     if item in ["all", "ship"]:
         for shipNum in range(1, requestedShop.shipsStock.numKeys + 1):
