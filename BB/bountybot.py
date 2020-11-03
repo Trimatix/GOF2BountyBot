@@ -1079,7 +1079,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
     requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
     if not requestedBBUser.hasHomeGuild():
         requestedBBUser.transferGuild(message.guild)
-    elif requestedBBUser.homeGuild != message.guild.id:
+    elif requestedBBUser.homeGuildID != message.guild.id:
         await message.channel.send(":x: This command can only be used from your home guild!")
         return
 
@@ -2413,7 +2413,7 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
     requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
     if not requestedBBUser.hasHomeGuild():
         requestedBBUser.transferGuild(message.guild)
-    elif requestedBBUser.homeGuild != message.guild.id:
+    elif requestedBBUser.homeGuildID != message.guild.id:
         await message.channel.send(":x: This command can only be used from your home guild!")
         return
 
@@ -2545,7 +2545,7 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
     if not requestedBBUser.hasHomeGuild():
         requestedBBUser.transferGuild(message.guild)
-    elif requestedBBUser.homeGuild != message.guild.id:
+    elif requestedBBUser.homeGuildID != message.guild.id:
         await message.channel.send(":x: This command can only be used from your home guild!")
         return
         
