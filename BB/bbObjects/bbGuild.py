@@ -1,8 +1,10 @@
 from . import bbShop
+from ..bbDatabases import bbBountyDB
 from .bounties.bountyBoards import BountyBoardChannel
 from ..userAlerts import UserAlerts
 from discord import channel, Client
 from typing import List
+from ..bbConfig import bbConfig, bbData
 
 class bbGuild:
     """A class representing a guild in discord, and storing extra BountyBot-related information about it. 
@@ -23,11 +25,14 @@ class bbGuild:
     :vartype hasBountyBoardChannel: bool
     :var ownedRoleMenus: The number of ReactionRolePickers present in this guild
     :vartype ownedRoleMenus: int
+    :var bountiesDB: This guild's active bounties
+    :vartype bountiesDB: bbBountyDB.bbBountyDB
     """
 
-    def __init__(self, id : int, announceChannel=-1, playChannel=-1, shop=None, bountyBoardChannel=None, alertRoles={}, ownedRoleMenus=0):
+    def __init__(self, id : int, bountiesDB: bbBountyDB.bbBountyDB, announceChannel=-1, playChannel=-1, shop=None, bountyBoardChannel=None, alertRoles={}, ownedRoleMenus=0):
         """
         :param int id: The ID of the guild, directly corresponding to a discord guild's ID.
+        :param bbBountyDB.bbBountyDB bountiesDB: This guild's active bounties
         :param int announceChannel: The ID of this guild's announcements chanel. -1 when no announce channel is set for this guild.
         :param int playChannel: The ID of this guild's bounty playing chanel. -1 when no bounty playing channel is set for this guild.
         :param bbShop shop: This guild's bbShop object
@@ -68,6 +73,7 @@ class bbGuild:
         self.bountyBoardChannel = bountyBoardChannel
         self.hasBountyBoardChannel = bountyBoardChannel is not None
         self.ownedRoleMenus = ownedRoleMenus
+        self.bountiesDB = bountiesDB
 
 
     def getAnnounceChannelId(self) -> int:
@@ -226,19 +232,26 @@ class bbGuild:
                 "bountyBoardChannel": self.bountyBoardChannel.toDict() if self.hasBountyBoardChannel else None,
                 "alertRoles": self.alertRoles,
                 "shop": self.shop.toDict(),
-                "ownedRoleMenus": self.ownedRoleMenus
+                "ownedRoleMenus": self.ownedRoleMenus,
+                "bountiesDB": self.bountiesDB.toDict()
                 }
 
 
-def fromDict(id : int, guildDict : dict) -> bbGuild:
+def fromDict(id : int, guildDict : dict, dbReload=False) -> bbGuild:
     """Factory function constructing a new bbGuild object from the information in the provided guildDict - the opposite of bbGuild.toDictNoId
 
     :param int id: The discord ID of the guild
     :param dict guildDict: A dictionary containing all information required to build the bbGuild object
+    :param bool dbReload: Whether or not this guild is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
     :return: A bbGuild according to the information in guildDict
     :rtype: bbGuild
     """
-    return bbGuild(id, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
+    if "bountiesDB" in guildDict:
+        bountiesDB = bbBountyDB.fromDict(guildDict["bountiesDB"], bbConfig.maxBountiesPerFaction, dbReload=dbReload)
+    else:
+        bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions, bbConfig.maxBountiesPerFaction)
+
+    return bbGuild(id, bountiesDB, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
                     shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
                     bountyBoardChannel=BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
                     alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0)

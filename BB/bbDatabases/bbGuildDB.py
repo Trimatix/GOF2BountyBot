@@ -162,10 +162,11 @@ class bbGuildDB:
 
 
 
-def fromDict(guildsDBDict : dict) -> bbGuildDB:
+def fromDict(guildsDBDict : dict, dbReload=False) -> bbGuildDB:
     """Construct a bbGuildDB object from dictionary-serialised format; the reverse of bbGuildDB.todict()
 
     :param dict bountyDBDict: The dictionary representation of the bbGuildDB to create
+    :param bool dbReload: Whether or not this DB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
     :return: The new bbGuildDB
     :rtype: bbGuildDB
     """
@@ -175,5 +176,5 @@ def fromDict(guildsDBDict : dict) -> bbGuildDB:
     for id in guildsDBDict.keys():
         # Instance new bbGuilds for each ID, with the provided data
         # JSON stores properties as strings, so ids must be converted to int first.
-        newDB.addGuildObj(bbGuild.fromDict(int(id), guildsDBDict[id]))
+        newDB.addGuildObj(bbGuild.fromDict(int(id), guildsDBDict[id], dbReload=dbReload))
     return newDB
