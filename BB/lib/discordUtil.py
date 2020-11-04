@@ -6,6 +6,7 @@ if TYPE_CHECKING:
 from ..logging import bbLogger
 from . import stringTyping
 from .. import bbGlobals
+from discord import Embed
 
 
 def findBBUserDCGuild(user : bbUser.bbUser) -> Union[Guild, None]:
@@ -149,3 +150,28 @@ def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
     if not criminal.isPlayer:
         return criminal.name
     return userTagOrDiscrim(criminal.name)
+
+
+def makeEmbed(titleTxt="", desc="", col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> discord.Embed:
+    """Factory function building a simple discord embed from the provided arguments.
+
+    :param str titleTxt: The title of the embed (Default "")
+    :param str desc: The description of the embed; appears at the top below the title (Default "")
+    :param discord.Colour col: The colour of the side strip of the embed (Default discord.Colour.blue())
+    :param str footerTxt: Secondary description appearing at the bottom of the embed (Default "")
+    :param str img: Large icon appearing as the content of the embed, left aligned like a field (Default "")
+    :param str thumb: larger image appearing to the right of the title (Default "")
+    :param str authorName: Secondary title for the embed (Default "")
+    :param str icon: smaller image to the left of authorName. AuthorName is required for this to be displayed. (Default "")
+    :return: a new discord embed as described in the given parameters
+    :rtype: discord.Embed
+    """
+    embed = Embed(title=titleTxt, description=desc, colour=col)
+    if footerTxt != "":
+        embed.set_footer(text=footerTxt)
+    embed.set_image(url=img)
+    if thumb != "":
+        embed.set_thumbnail(url=thumb)
+    if icon != "":
+        embed.set_author(name=authorName, icon_url=icon)
+    return embed

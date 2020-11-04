@@ -112,9 +112,6 @@ adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display in
                                         "remove-bounty-board-channel": ("**remove-bounty-board-channel**", "Send from any channel to remove the server's bountyboard channel, if one is set."),
                                         "hangar": ("**hangar** *[user]* *[item-type]*", "Administrators have permission to view the hangars of other users.")}}
 
-# string extensions for numbers, e.g 11th, 1st, 23rd...
-numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
-
 # icons for factions
 terranIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013574331596850/terran.png"
 vosskIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013681621893130/vossk.png"

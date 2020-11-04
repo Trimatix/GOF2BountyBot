@@ -49,3 +49,17 @@ def commaSplitNum(num : str) -> str:
     for i in range(len(num), 0, -3):
         outStr = outStr[0:i] + "," + outStr[i:]
     return outStr[:-1]
+
+
+# string extensions for numbers, e.g 11th, 1st, 23rd...
+numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
+
+
+def getNumExtension(num : int) -> str:
+    """Return the string extension for an integer, e.g 'th' or 'rd'.
+
+    :param int num: The integer to find the extension for
+    :return: string containing a number extension from numExtensions
+    :rtype: str
+    """
+    return numExtensions[int(str(num)[-1])] if not (num > 10 and num < 20) else "th"
