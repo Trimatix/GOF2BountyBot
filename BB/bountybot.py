@@ -22,7 +22,6 @@ from aiohttp import client_exceptions
 
 # BountyBot Imports
 
-# may replace these imports with a from . import * at some point
 from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .bbObjects import bbUser, bbInventory
 from .bbObjects.bounties import bbBounty, bbBountyConfig, bbCriminal, bbSystem
@@ -37,81 +36,11 @@ from .logging import bbLogger
 from .reactionMenus import ReactionMenu, ReactionInventoryPicker, ReactionRolePicker, ReactionDuelChallengeMenu, ReactionPollMenu
 
 
-####### DATABASE METHODS #######
-
-
-def loadUsersDB(filePath : str) -> bbUserDB.bbUserDB:
-    """Build a bbUserDB from the specified JSON file.
-
-    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
-    :return: a bbUserDB as described by the dictionary-serialized representation stored in the file located in filePath.
-    """
-    return bbUserDB.fromDict(lib.jsonHandler.readJSON(filePath))
-
-
-def loadGuildsDB(filePath : str) -> bbGuildDB.bbGuildDB:
-    """Build a bbGuildDB from the specified JSON file.
-
-    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
-    :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
-    """
-    return bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath))
-
-
-def loadBountiesDB(filePath : str) -> bbBountyDB.bbBountyDB:
-    """Build a bbBountyDB from the specified JSON file.
-
-    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
-    :return: a bbBountyDB as described by the dictionary-serialized representation stored in the file located in filePath.
-    """
-    return bbBountyDB.fromDict(lib.jsonHandler.readJSON(filePath), bbConfig.maxBountiesPerFaction, dbReload=True)
-
-
-async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.reactionMenuDB:
-    """Build a reactionMenuDB from the specified JSON file.
-    This method must be called asynchronously, to allow awaiting of discord message fetching functions.
-
-    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
-    :return: a reactionMenuDB as described by the dictionary-serialized representation stored in the file located in filePath.
-    """
-    return await reactionMenuDB.fromDict(lib.jsonHandler.readJSON(filePath))
-
-
-def saveDB(dbPath : str, db):
-    """Call the given database object's toDict method, and save the resulting dictionary to the specified JSON file.
-    TODO: child database classes to a single ABC, and type check to that ABC here before saving
-
-    :param str dbPath: path to the JSON file to save to. Theoretically, this can be absolute or relative.
-    :param db: the database object to save
-    """
-    lib.jsonHandler.writeJSON(dbPath, db.toDict())
-
-
-async def saveDBAsync(dbPath, db):
-    """This function should be used in place of saveDB for database objects whose toDict method is asynchronous.
-    This function is currently unused.
-
-    Await the given database object's toDict method, and save the resulting dictionary to the specified JSON file.
-    TODO: child database classes to a single ABC, and type check to that ABC here before saving
-
-    :param str dbPath: path to the JSON file to save to. Theoretically, this can be absolute or relative.
-    :param db: the database object to save
-    """
-    lib.jsonHandler.writeJSON(dbPath, await db.toDict())
-
 
 ####### GLOBAL VARIABLES #######
 
 # interface into the discord servers
 bbGlobals.client = commands.Bot(command_prefix=bbConfig.commandPrefix)
-# TODO: This will be needed once discord command decorators are in use
-# bbGlobals.client.remove_command("help")
-
-# Moved to on_ready
-# # Databases
-# bbGlobals.usersDB = loadUsersDB(bbConfig.userDBPath)
-# bbGlobals.bountiesDB = loadBountiesDB(bbConfig.bountyDBPath)
-# bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath)
 
 # BountyBot commands DB
 bbCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB()
@@ -525,10 +454,10 @@ def saveAllDBs():
     - the guilds database
     - the reaction menus database
     """
-    saveDB(bbConfig.userDBPath, bbGlobals.usersDB)
-    saveDB(bbConfig.bountyDBPath, bbGlobals.bountiesDB)
-    saveDB(bbConfig.guildDBPath, bbGlobals.guildsDB)
-    saveDB(bbConfig.reactionMenusDBPath, bbGlobals.reactionMenusDB)
+    lib.jsonHandler.saveDB(bbConfig.userDBPath, bbGlobals.usersDB)
+    lib.jsonHandler.saveDB(bbConfig.bountyDBPath, bbGlobals.bountiesDB)
+    lib.jsonHandler.saveDB(bbConfig.guildDBPath, bbGlobals.guildsDB)
+    lib.jsonHandler.saveDB(bbConfig.reactionMenusDBPath, bbGlobals.reactionMenusDB)
     bbLogger.save()
     print(datetime.now().strftime("%H:%M:%S: Data saved!"))
 
@@ -5071,9 +5000,9 @@ async def on_ready():
 
 
     # Databases
-    bbGlobals.usersDB = loadUsersDB(bbConfig.userDBPath)
-    bbGlobals.bountiesDB = loadBountiesDB(bbConfig.bountyDBPath)
-    bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath)
+    bbGlobals.usersDB = lib.jsonHandler.loadUsersDB(bbConfig.userDBPath)
+    bbGlobals.bountiesDB = lib.jsonHandler.loadBountiesDB(bbConfig.bountyDBPath)
+    bbGlobals.guildsDB = lib.jsonHandler.loadGuildsDB(bbConfig.guildDBPath)
 
     for guild in bbGlobals.guildsDB.getGuilds():
         if guild.hasBountyBoardChannel:
@@ -5125,7 +5054,7 @@ async def on_ready():
         except IOError as e:
             bbLogger.log("main","on_ready","IOError creating reactionMenuDB save file: " + e.__class__.__name__, trace=traceback.format_exc())
 
-    bbGlobals.reactionMenusDB = await loadReactionMenusDB(bbConfig.reactionMenusDBPath)
+    bbGlobals.reactionMenusDB = await lib.jsonHandler.loadReactionMenusDB(bbConfig.reactionMenusDBPath)
 
     # TODO: find next closest task with min over heap[0] for all task DBs and delay by that amount
     # newTaskAdded = False
