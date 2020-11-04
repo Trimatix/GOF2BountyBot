@@ -56,51 +56,6 @@ botLoggedIn = False
 
 
 
-def makeRoute(start : str, end : str) -> List[str]:
-    """Find the shortest route between two systems.
-
-    :param str start: string name of the starting system. Must exist in bbData.builtInSystemObjs
-    :param str end: string name of the target system. Must exist in bbData.builtInSystemObjs
-    :return: list of string system names where the first element is start, the last element is end, and all intermediary systems are adjacent
-    :rtype: list[str]
-    """
-    return lib.pathfinding.bbAStar(start, end, bbData.builtInSystemObjs)
-
-
-def userTagOrDiscrim(userID : str, guild=None) -> str:
-    """If a passed user mention or ID is valid and shares a common server with the bot,
-    return the user's name and discriminator. TODO: Should probably change this to display name
-    Otherwise, return the passed userID.
-
-    :param str userID: A user mention or ID in string form, to attempt to convert to name and discrim
-    :return: The user's name and discriminator if the user is reachable, userID otherwise
-    :rtype: str
-    """
-    if guild is None:
-        userObj = bbGlobals.client.get_user(int(userID.lstrip("<@!").rstrip(">")))
-    else:
-        userObj = guild.get_member(int(userID.lstrip("<@!").rstrip(">")))
-    if userObj is not None:
-        return userObj.name + "#" + userObj.discriminator
-    # Return the given mention as a fall back - might replace this with '#UNKNOWNUSER#' at some point.
-    bbLogger.log("Main", "uTgOrDscrm", "Unknown user requested." + (("Guild:" + guild.name + "#" + str(str(guild.id)))
-                                                                    if guild is not None else "Global/NoGuild") + ". uID:" + str(userID), eventType="UKNWN_USR")
-    return userID
-
-
-def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
-    """If a passed criminal is a player, attempt to return the user's name and discriminator.
-    Otherwise, return the passed criminal's name. TODO: Should probably change this to display name
-
-    :param bbCriminal criminal: criminal whose name to attempt to convert to name and discrim
-    :return: The user's name and discriminator if the criminal is a player, criminal.name otherwise
-    :rtype: str
-    """
-    if not criminal.isPlayer:
-        return criminal.name
-    return userTagOrDiscrim(criminal.name)
-
-
 async def makeBountyBoardChannelMessage(guild : bbGuild.bbGuild, bounty : bbBounty.Bounty, msg="", embed=None) -> Message:
     """Create a new BountyBoardChannel listing for the given bounty, in the given guild.
     guild must own a BountyBoardChannel.
@@ -155,13 +110,13 @@ async def announceNewBounty(newBounty : bbBounty.Bounty):
     :param bbBounty newBounty: the bounty to announce
     """
     # Create the announcement embed
-    bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
+    bountyEmbed = makeEmbed(titleTxt=lib.pathfinding.criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
                             col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
     bountyEmbed.add_field(name="Reward:", value=str(
         newBounty.reward) + " Credits")
     bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
     bountyEmbed.add_field(name="See the culprit's route with:", value="`" + bbConfig.commandPrefix +
-                          "route " + criminalNameOrDiscrim(newBounty.criminal) + "`", inline=False)
+                          "route " + lib.pathfinding.criminalNameOrDiscrim(newBounty.criminal) + "`", inline=False)
     # Create the announcement text
     msg = "A new bounty is now available from **" + \
         newBounty.faction.title() + "** central command:"
@@ -214,7 +169,7 @@ async def announceBountyWon(bounty : bbBounty.Bounty, rewards : Dict[int, Dict[s
         if bbGlobals.client.get_guild(currentGuild.id) is not None:
             if currentGuild.hasPlayChannel():
                 # Create the announcement embed
-                rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!", authorName=criminalNameOrDiscrim(bounty.criminal) + " Arrested",
+                rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!", authorName=lib.pathfinding.criminalNameOrDiscrim(bounty.criminal) + " Arrested",
                                          icon=bounty.criminal.icon, col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
 
                 # Add the winning user to the embed
@@ -1112,7 +1067,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
                     if 0 < bounty.route.index(bounty.answer) - bounty.route.index(requestedSystem) < bbConfig.closeBountyThreshold:
                         # Print any close bounty names
                         sightedCriminalsStr += "**       **• Local security forces spotted **" + \
-                            criminalNameOrDiscrim(
+                            lib.pathfinding.criminalNameOrDiscrim(
                                 bounty.criminal) + "** here recently.\n"
         sightedCriminalsStr = sightedCriminalsStr[:-1]
 
@@ -1184,7 +1139,7 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
             if bbGlobals.bountiesDB.hasBounties(faction=fac):
                 outmessage += "\n • [" + fac.title() + "]: "
                 for bounty in bbGlobals.bountiesDB.getFactionBounties(fac):
-                    outmessage += criminalNameOrDiscrim(bounty.criminal) + ", "
+                    outmessage += lib.pathfinding.criminalNameOrDiscrim(bounty.criminal) + ", "
                 outmessage = outmessage[:-2]
         # If no active bounties were found, print an error
         if len(outmessage) == preLen:
@@ -1223,7 +1178,7 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
             for bounty in bbGlobals.bountiesDB.getFactionBounties(requestedFaction):
                 endTimeStr = datetime.utcfromtimestamp(
                     bounty.endTime).strftime("%B %d %H %M %S").split(" ")
-                outmessage += "\n • [" + criminalNameOrDiscrim(bounty.criminal) + "]" + " " * (bbData.longestBountyNameLength + 1 - len(criminalNameOrDiscrim(bounty.criminal))) + ": " + str(
+                outmessage += "\n • [" + lib.pathfinding.criminalNameOrDiscrim(bounty.criminal) + "]" + " " * (bbData.longestBountyNameLength + 1 - len(lib.pathfinding.criminalNameOrDiscrim(bounty.criminal))) + ": " + str(
                     int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + getNumExtension(int(endTimeStr[1])) + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
                 if endTimeStr[4] != "00":
                     outmessage += ":" + endTimeStr[4]
@@ -1269,7 +1224,7 @@ async def cmd_route(message : discord.Message, args : str, isDM : bool):
         # display their route
         bounty = bbGlobals.bountiesDB.getBounty(requestedBountyName.lower())
         outmessage = "**" + \
-            criminalNameOrDiscrim(bounty.criminal) + "**'s current route:\n> "
+            lib.pathfinding.criminalNameOrDiscrim(bounty.criminal) + "**'s current route:\n> "
         for system in bounty.route:
             outmessage += " " + ("~~" if bounty.checked[system] != -1 else "") + system + (
                 "~~" if bounty.checked[system] != -1 else "") + ","
@@ -1339,7 +1294,7 @@ async def cmd_make_route(message : discord.Message, args : str, isDM : bool):
 
     # build and print the route, reporting any errors in the route generation process
     routeStr = ""
-    for currentSyst in makeRoute(startSyst, endSyst):
+    for currentSyst in lib.pathfinding.makeRoute(startSyst, endSyst):
         routeStr += currentSyst + ", "
     if routeStr.startswith("#"):
         await message.channel.send(":x: ERR: Processing took too long! :stopwatch:")
@@ -4615,7 +4570,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
             return
         # create a new bounty at random for the specified user
         newBounty = bbBounty.Bounty(bountyDB=bbGlobals.bountiesDB, config=bbBountyConfig.BountyConfig(
-            name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(bbGlobals.client.get_user(requestedID).avatar_url_as(size=64)), aliases=[userTagOrDiscrim(args)]))
+            name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(bbGlobals.client.get_user(requestedID).avatar_url_as(size=64)), aliases=[lib.pathfinding.userTagOrDiscrim(args)]))
 
     # if the faction is also given
     elif len(args.split("+")) == 2:
@@ -4627,7 +4582,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
         # create a bounty at random for the specified user and faction
         newFaction = args.split("+")[1]
         newBounty = bbBounty.Bounty(bountyDB=bbGlobals.bountiesDB, config=bbBountyConfig.BountyConfig(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(
-            bbGlobals.client.get_user(requestedID).avatar_url_as(size=64)), faction=newFaction, aliases=[userTagOrDiscrim(args.split(" ")[0])]))
+            bbGlobals.client.get_user(requestedID).avatar_url_as(size=64)), faction=newFaction, aliases=[lib.pathfinding.userTagOrDiscrim(args.split(" ")[0])]))
 
     # if all arguments are given
     elif len(args.split("+")) == 10:
@@ -4695,7 +4650,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
 
         # create the bounty object
         newBounty = bbBounty.Bounty(bountyDB=bbGlobals.bountiesDB, config=bbBountyConfig.BountyConfig(faction=newFaction, name=newName, route=newRoute, start=newStart,
-                                                                                            end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon, aliases=[userTagOrDiscrim(newName)]))
+                                                                                            end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon, aliases=[lib.pathfinding.userTagOrDiscrim(newName)]))
 
     # print an error for incorrect syntax
     else:

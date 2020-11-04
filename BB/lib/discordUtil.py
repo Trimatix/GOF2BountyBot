@@ -5,6 +5,7 @@ if TYPE_CHECKING:
 
 from ..logging import bbLogger
 from . import stringTyping
+from .. import bbGlobals
 
 
 def findBBUserDCGuild(user : bbUser.bbUser) -> Union[Guild, None]:
@@ -114,3 +115,37 @@ def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
             return userAttempt
     # Handle user names and user name+discrim combinations
     return dcGuild.get_member_named(uRef)
+
+
+def userTagOrDiscrim(userID : str, guild=None) -> str:
+    """If a passed user mention or ID is valid and shares a common server with the bot,
+    return the user's name and discriminator. TODO: Should probably change this to display name
+    Otherwise, return the passed userID.
+
+    :param str userID: A user mention or ID in string form, to attempt to convert to name and discrim
+    :return: The user's name and discriminator if the user is reachable, userID otherwise
+    :rtype: str
+    """
+    if guild is None:
+        userObj = bbGlobals.client.get_user(int(userID.lstrip("<@!").rstrip(">")))
+    else:
+        userObj = guild.get_member(int(userID.lstrip("<@!").rstrip(">")))
+    if userObj is not None:
+        return userObj.name + "#" + userObj.discriminator
+    # Return the given mention as a fall back - might replace this with '#UNKNOWNUSER#' at some point.
+    bbLogger.log("Main", "uTgOrDscrm", "Unknown user requested." + (("Guild:" + guild.name + "#" + str(str(guild.id)))
+                                                                    if guild is not None else "Global/NoGuild") + ". uID:" + str(userID), eventType="UKNWN_USR")
+    return userID
+
+
+def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
+    """If a passed criminal is a player, attempt to return the user's name and discriminator.
+    Otherwise, return the passed criminal's name. TODO: Should probably change this to display name
+
+    :param bbCriminal criminal: criminal whose name to attempt to convert to name and discrim
+    :return: The user's name and discriminator if the criminal is a player, criminal.name otherwise
+    :rtype: str
+    """
+    if not criminal.isPlayer:
+        return criminal.name
+    return userTagOrDiscrim(criminal.name)

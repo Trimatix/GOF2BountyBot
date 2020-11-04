@@ -102,3 +102,14 @@ def bbAStar(start : bbSystem.System, end : bbSystem.System, graph : Dict[str, bb
         closed.append(q)
 
     return "! " + start + " -> " + end
+
+
+def makeRoute(start : str, end : str) -> List[str]:
+    """Find the shortest route between two systems.
+
+    :param str start: string name of the starting system. Must exist in bbData.builtInSystemObjs
+    :param str end: string name of the target system. Must exist in bbData.builtInSystemObjs
+    :return: list of string system names where the first element is start, the last element is end, and all intermediary systems are adjacent
+    :rtype: list[str]
+    """
+    return lib.pathfinding.bbAStar(start, end, bbData.builtInSystemObjs)
