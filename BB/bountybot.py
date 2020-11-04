@@ -31,7 +31,7 @@ from .bbObjects.battles import ShipFight, DuelRequest
 from .scheduling import TimedTask
 from .bbDatabases import bbBountyDB, bbGuildDB, bbUserDB, HeirarchicalCommandsDB, reactionMenuDB
 from .scheduling import TimedTaskHeap
-from . import bbUtil, bbGlobals
+from . import lib, bbGlobals
 from .userAlerts import UserAlerts
 from .logging import bbLogger
 from .reactionMenus import ReactionMenu, ReactionInventoryPicker, ReactionRolePicker, ReactionDuelChallengeMenu, ReactionPollMenu
@@ -46,7 +46,7 @@ def loadUsersDB(filePath : str) -> bbUserDB.bbUserDB:
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
     :return: a bbUserDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
-    return bbUserDB.fromDict(bbUtil.readJSON(filePath))
+    return bbUserDB.fromDict(lib.jsonHandler.readJSON(filePath))
 
 
 def loadGuildsDB(filePath : str) -> bbGuildDB.bbGuildDB:
@@ -55,7 +55,7 @@ def loadGuildsDB(filePath : str) -> bbGuildDB.bbGuildDB:
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
     :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
-    return bbGuildDB.fromDict(bbUtil.readJSON(filePath))
+    return bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath))
 
 
 def loadBountiesDB(filePath : str) -> bbBountyDB.bbBountyDB:
@@ -64,7 +64,7 @@ def loadBountiesDB(filePath : str) -> bbBountyDB.bbBountyDB:
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
     :return: a bbBountyDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
-    return bbBountyDB.fromDict(bbUtil.readJSON(filePath), bbConfig.maxBountiesPerFaction, dbReload=True)
+    return bbBountyDB.fromDict(lib.jsonHandler.readJSON(filePath), bbConfig.maxBountiesPerFaction, dbReload=True)
 
 
 async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.reactionMenuDB:
@@ -74,7 +74,7 @@ async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.reactionMenuDB:
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
     :return: a reactionMenuDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
-    return await reactionMenuDB.fromDict(bbUtil.readJSON(filePath))
+    return await reactionMenuDB.fromDict(lib.jsonHandler.readJSON(filePath))
 
 
 def saveDB(dbPath : str, db):
@@ -84,7 +84,7 @@ def saveDB(dbPath : str, db):
     :param str dbPath: path to the JSON file to save to. Theoretically, this can be absolute or relative.
     :param db: the database object to save
     """
-    bbUtil.writeJSON(dbPath, db.toDict())
+    lib.jsonHandler.writeJSON(dbPath, db.toDict())
 
 
 async def saveDBAsync(dbPath, db):
@@ -97,7 +97,7 @@ async def saveDBAsync(dbPath, db):
     :param str dbPath: path to the JSON file to save to. Theoretically, this can be absolute or relative.
     :param db: the database object to save
     """
-    bbUtil.writeJSON(dbPath, await db.toDict())
+    lib.jsonHandler.writeJSON(dbPath, await db.toDict())
 
 
 ####### GLOBAL VARIABLES #######
@@ -135,7 +135,7 @@ def makeRoute(start : str, end : str) -> List[str]:
     :return: list of string system names where the first element is start, the last element is end, and all intermediary systems are adjacent
     :rtype: list[str]
     """
-    return bbUtil.bbAStar(start, end, bbData.builtInSystemObjs)
+    return lib.pathfinding.bbAStar(start, end, bbData.builtInSystemObjs)
 
 
 def userTagOrDiscrim(userID : str, guild=None) -> str:
@@ -569,7 +569,7 @@ def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser=None, bbU
         raise ValueError("At least one of dcUser or bbUser must be given.")
 
     if bbGuild is None and dcGuild is None:
-        dcGuild = bbUtil.findBBUserDCGuild(dcUser)
+        dcGuild = lib.discordUtil.findBBUserDCGuild(dcUser)
         if dcGuild is None:
             raise KeyError("user does not share an guilds with the bot")
     if bbGuild is None:
@@ -708,12 +708,12 @@ def getMemberByRefOverDB(uRef : str, dcGuild=None) -> discord.User:
     :rtype: discord.Member or None
     """
     if dcGuild is not None:
-        userAttempt = bbUtil.getMemberFromRef(uRef, dcGuild)
+        userAttempt = lib.discordUtil.getMemberFromRef(uRef, dcGuild)
     else:
         userAttempt = None
-    if userAttempt is None and bbUtil.isInt(uRef):
+    if userAttempt is None and lib.stringTyping.isInt(uRef):
         if bbGlobals.usersDB.userIDExists(int(uRef)):
-            userGuild = bbUtil.findBBUserDCGuild(bbGlobals.usersDB.getUser(int(uRef)))
+            userGuild = lib.discordUtil.findBBUserDCGuild(bbGlobals.usersDB.getUser(int(uRef)))
             if userGuild is not None:
                 return userGuild.get_member(int(uRef))
     return userAttempt
@@ -754,7 +754,7 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
     sectionNames = list(bbData.helpDict.keys())
 
     if args != "":
-        if bbUtil.isInt(args):
+        if lib.stringTyping.isInt(args):
             page = int(args)
             if page > maxPage:
                 await message.channel.send(":x: There are only " + str(maxPage) + " help pages! Showing page " + str(maxPage) + ":")
@@ -927,7 +927,7 @@ async def cmd_balance(message : discord.Message, args : str, isDM : bool):
         if not bbGlobals.usersDB.userIDExists(requestedUser.id):
             bbGlobals.usersDB.addUser(requestedUser.id)
         # send the user's balance
-        await message.channel.send(":moneybag: **" + bbUtil.userOrMemberName(requestedUser, message.guild) + "** has **" + str(bbGlobals.usersDB.getUser(requestedUser.id).credits) + " Credits**.")
+        await message.channel.send(":moneybag: **" + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + "** has **" + str(bbGlobals.usersDB.getUser(requestedUser.id).credits) + " Credits**.")
 
 bbCommands.register("balance", cmd_balance, forceKeepArgsCasing=True)
 bbCommands.register("bal", cmd_balance, forceKeepArgsCasing=True)
@@ -1008,7 +1008,7 @@ async def cmd_stats(message : discord.Message, args : str, isDM : bool):
             return
 
         # create the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=bbUtil.userOrMemberName(requestedUser, message.guild),
+        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=lib.discordUtil.userOrMemberName(requestedUser, message.guild),
                                footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
         # If the requested user is not in the database, don't bother adding them just print zeroes
         if not bbGlobals.usersDB.userIDExists(requestedUser.id):
@@ -1351,7 +1351,7 @@ async def cmd_route(message : discord.Message, args : str, isDM : bool):
         # display an error
         outmsg = ":x: That pilot isn't on any bounty boards! :clipboard:"
         # accept user name + discrim instead of tags to avoid mention spam
-        if bbUtil.isMention(requestedBountyName):
+        if lib.stringTyping.isMention(requestedBountyName):
             outmsg += "\n:warning: **Don't tag users**, use their name and ID number like so: `" + \
                 bbConfig.commandPrefix + "route Trimatix#2244`"
         await message.channel.send(outmsg)
@@ -1563,7 +1563,7 @@ async def cmd_ship(message : discord.Message, args : str, isDM : bool):
         # build the stats embed
         statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
                                desc="__Ship File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
-        statsEmbed.add_field(name="Value:", value=bbUtil.commaSplitNum(
+        statsEmbed.add_field(name="Value:", value=lib.stringTyping.commaSplitNum(
             str(itemObj.getValue(shipUpgradesOnly=True))) + " Credits")
         statsEmbed.add_field(name="Armour:", value=str(itemObj.getArmour()))
         statsEmbed.add_field(name="Cargo:", value=str(itemObj.getCargo()))
@@ -2002,7 +2002,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
         argNum = 1
         for arg in argsSplit:
             if arg != "":
-                if bbUtil.isUserRef(arg, dcGuild=message.guild):
+                if lib.discordUtil.isUserRef(arg, dcGuild=message.guild):
                     if foundUser:
                         await message.channel.send(":x: I can only take one user!")
                         return
@@ -2018,7 +2018,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
                         item = arg.rstrip("s")
                         foundItem = True
 
-                elif bbUtil.isInt(arg):
+                elif lib.stringTyping.isInt(arg):
                     if foundPage:
                         await message.channel.send(":x: I can only take one page number!")
                         return
@@ -2211,7 +2211,7 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
 
             currentItemCount = requestedShop.shipsStock.items[currentItem].count
             shopEmbed.add_field(name=str(shipNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.getNameAndNick() + "**",
-                                value=bbUtil.commaSplitNum(str(currentItem.getValue())) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+                                value=lib.stringTyping.commaSplitNum(str(currentItem.getValue())) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "weapon"]:
         for weaponNum in range(1, requestedShop.weaponsStock.numKeys + 1):
@@ -2242,7 +2242,7 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
 
             currentItemCount = requestedShop.weaponsStock.items[currentItem].count
             shopEmbed.add_field(name=str(weaponNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+                                value=lib.stringTyping.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "module"]:
         for moduleNum in range(1, requestedShop.modulesStock.numKeys + 1):
@@ -2273,7 +2273,7 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
 
             currentItemCount = requestedShop.modulesStock.items[currentItem].count
             shopEmbed.add_field(name=str(moduleNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+                                value=lib.stringTyping.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     if item in ["all", "turret"]:
         for turretNum in range(1, requestedShop.turretsStock.numKeys + 1):
@@ -2304,7 +2304,7 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
 
             currentItemCount = requestedShop.turretsStock.items[currentItem].count
             shopEmbed.add_field(name=str(turretNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=bbUtil.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+                                value=lib.stringTyping.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     try:
         await sendChannel.send(embed=shopEmbed)
@@ -2436,7 +2436,7 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
 
     itemNum = argsSplit[1]
     requestedShop = bbGlobals.guildsDB.getGuild(message.guild.id).shop
-    if not bbUtil.isInt(itemNum):
+    if not lib.stringTyping.isInt(itemNum):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
@@ -2562,7 +2562,7 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
 
     itemNum = argsSplit[1]
-    if not bbUtil.isInt(itemNum):
+    if not lib.stringTyping.isInt(itemNum):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
@@ -2646,7 +2646,7 @@ async def cmd_equip(message : discord.Message, args : str, isDM : bool):
     requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
 
     itemNum = argsSplit[1]
-    if not bbUtil.isInt(itemNum):
+    if not lib.stringTyping.isInt(itemNum):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
@@ -2764,7 +2764,7 @@ async def cmd_unequip(message : discord.Message, args : str, isDM : bool):
     unequipAll = argsSplit[1] == "all"
     if not unequipAll:
         itemNum = argsSplit[1]
-        if not bbUtil.isInt(itemNum):
+        if not lib.stringTyping.isInt(itemNum):
             await message.channel.send(":x: Invalid item number!")
             return
         itemNum = int(itemNum)
@@ -2899,7 +2899,7 @@ async def cmd_pay(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Please give a target user and an amount!")
         return
 
-    if not bbUtil.isInt(argsSplit[1]):
+    if not lib.stringTyping.isInt(argsSplit[1]):
         await message.channel.send(":x: Invalid amount!")
         return
 
@@ -2930,7 +2930,7 @@ async def cmd_pay(message : discord.Message, args : str, isDM : bool):
     sourceBBUser.credits -= amount
     targetBBUser.credits += amount
 
-    await message.channel.send(":moneybag: You paid " + bbUtil.userOrMemberName(requestedUser, message.guild) + " **" + str(amount) + "** credits!")
+    await message.channel.send(":moneybag: You paid " + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + " **" + str(amount) + "** credits!")
 
 bbCommands.register("pay", cmd_pay, forceKeepArgsCasing=True)
 dmCommands.register("pay", cmd_pay, forceKeepArgsCasing=True)
@@ -3014,7 +3014,7 @@ async def cmd_total_value(message : discord.Message, args : str, isDM : bool):
         if not bbGlobals.usersDB.userIDExists(requestedUser.id):
             bbGlobals.usersDB.addUser(requestedUser.id)
         # send the user's balance
-        await message.channel.send(":moneybag: **" + bbUtil.userOrMemberName(requestedUser, message.guild) + "**'s items and balance have a total value of **" + str(bbGlobals.usersDB.getUser(requestedUser.id).getStatByName("value")) + " Credits**.")
+        await message.channel.send(":moneybag: **" + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + "**'s items and balance have a total value of **" + str(bbGlobals.usersDB.getUser(requestedUser.id).getStatByName("value")) + " Credits**.")
 
 bbCommands.register("total-value", cmd_total_value, forceKeepArgsCasing=True)
 dmCommands.register("total-value", cmd_total_value, forceKeepArgsCasing=True)
@@ -3060,7 +3060,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
     if requestedUser.id == message.author.id:
         await message.channel.send(":x: You can't challenge yourself!")
         return
-    if action == "challenge" and (not bbUtil.isInt(argsSplit[2]) or int(argsSplit[2]) < 0):
+    if action == "challenge" and (not lib.stringTyping.isInt(argsSplit[2]) or int(argsSplit[2]) < 0):
         await message.channel.send(":x: Invalid stakes (amount of credits)!")
         return
 
@@ -3070,7 +3070,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
     if action == "challenge":
         stakes = int(argsSplit[2])
         if sourceBBUser.hasDuelChallengeFor(targetBBUser):
-            await message.channel.send(":x: You already have a duel challenge pending for " + bbUtil.userOrMemberName(requestedUser, message.guild) + "! To make a new one, cancel it first. (see `" + bbConfig.commandPrefix + "help duel`)")
+            await message.channel.send(":x: You already have a duel challenge pending for " + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + "! To make a new one, cancel it first. (see `" + bbConfig.commandPrefix + "help duel`)")
             return
 
         try:
@@ -3095,7 +3095,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
         sentMsgs = []
 
         if message.guild.get_member(requestedUser.id) is None:
-            targetUserDCGuild = bbUtil.findBBUserDCGuild(targetBBUser)
+            targetUserDCGuild = lib.discordUtil.findBBUserDCGuild(targetBBUser)
             if targetUserDCGuild is None:
                 await message.channel.send(":x: User not found! Did they leave the server?")
                 return
@@ -3127,7 +3127,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
 
         if message.guild.get_member(requestedUser.id) is None:
             await message.channel.send(":white_check_mark: You have cancelled your duel challenge for **" + str(requestedUser) + "**.")
-            targetUserGuild = bbUtil.findBBUserDCGuild(targetBBUser)
+            targetUserGuild = lib.discordUtil.findBBUserDCGuild(targetBBUser)
             if targetUserGuild is not None:
                 targetUserBBGuild = bbGlobals.guildsDB.getGuild(targetUserGuild.id)
                 if targetUserBBGuild.hasPlayChannel() and \
@@ -3232,7 +3232,7 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     argPos = 0
     for arg in argsSplit:
         argPos += 1
-        optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
+        optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], lib.emojis.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
@@ -3273,13 +3273,13 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
 
         targetStr = arg[argIndex:endIndex]
 
-        if bbUtil.isRoleMention(targetStr):
+        if lib.stringTyping.isRoleMention(targetStr):
             targetRole = message.guild.get_role(int(targetStr.lstrip("<@&").rstrip(">")))
             if targetRole is None:
                 await message.channel.send(":x: Unknown target role!")
                 return
         
-        elif bbUtil.isMention(targetStr):
+        elif lib.stringTyping.isMention(targetStr):
             targetMember = message.guild.get_member(int(targetStr.lstrip("<@!").rstrip(">")))
             if targetMember is None:
                 await message.channel.send(":x: Unknown target user!")
@@ -3306,7 +3306,7 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
             if targetStr == "off":
                 timeoutDict[timeName] = -1
             else:
-                if not bbUtil.isInt(targetStr) or int(targetStr) < 1:
+                if not lib.stringTyping.isInt(targetStr) or int(targetStr) < 1:
                     await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
                     return
 
@@ -3503,7 +3503,7 @@ async def admin_cmd_set_notify_role(message : discord.Message, args : str, isDM 
     if len(argsSplit) < 2:
         await message.channel.send(":x: Please provide both a notification type, and either a role mention or ID!")
         return
-    if not (bbUtil.isInt(argsSplit[-1]) or bbUtil.isRoleMention(argsSplit[-1])):
+    if not (lib.stringTyping.isInt(argsSplit[-1]) or lib.stringTyping.isRoleMention(argsSplit[-1])):
         await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
         return
 
@@ -3513,7 +3513,7 @@ async def admin_cmd_set_notify_role(message : discord.Message, args : str, isDM 
         return
 
     requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
-    if bbUtil.isRoleMention(argsSplit[-1]):
+    if lib.stringTyping.isRoleMention(argsSplit[-1]):
         requestedRole = message.guild.get_role(int(argsSplit[-1][3:-1]))
     else:
         requestedRole = message.guild.get_role(int(argsSplit[-1]))
@@ -3610,7 +3610,7 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     argPos = 0
     for arg in argsSplit:
         argPos += 1
-        roleStr, dumbReact = arg.strip(" ").split(" ")[1], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
+        roleStr, dumbReact = arg.strip(" ").split(" ")[1], lib.emojis.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
         if dumbReact is None:
             await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
             return
@@ -3654,13 +3654,13 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
 
         targetStr = arg[argIndex:endIndex]
 
-        if bbUtil.isRoleMention(targetStr):
+        if lib.stringTyping.isRoleMention(targetStr):
             targetRole = message.guild.get_role(int(targetStr.lstrip("<@&").rstrip(">")))
             if targetRole is None:
                 await message.channel.send(":x: Unknown target role!")
                 return
         
-        elif bbUtil.isMention(targetStr):
+        elif lib.stringTyping.isMention(targetStr):
             targetMember = message.guild.get_member(int(targetStr.lstrip("<@!").rstrip(">")))
             if targetMember is None:
                 await message.channel.send(":x: Unknown target user!")
@@ -3687,7 +3687,7 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
             if targetStr == "off":
                 timeoutDict[timeName] = -1
             else:
-                if not bbUtil.isInt(targetStr) or int(targetStr) < 1:
+                if not lib.stringTyping.isInt(targetStr) or int(targetStr) < 1:
                     await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
                     return
 
@@ -3940,7 +3940,7 @@ async def dev_cmd_give(message : discord.Message, args : str, isDM : bool):
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
     # reset the calling user's cooldown if no user is specified
-    if not bbUtil.isInt(args.split(" ")[0]) and not bbUtil.isMention(args.split(" ")[0]):
+    if not lib.stringTyping.isInt(args.split(" ")[0]) and not lib.stringTyping.isMention(args.split(" ")[0]):
         requestedUser = bbGlobals.usersDB.getOrAddID(message.author.id)
         itemStr = args
 
@@ -3966,7 +3966,7 @@ async def dev_cmd_give(message : discord.Message, args : str, isDM : bool):
 
     requestedUser.getInactivesByName(itemType).addItem(newItem)
 
-    await message.channel.send(":white_check_mark: Given one '" + newItem.name + "' to **" + bbUtil.userOrMemberName(bbGlobals.client.get_user(requestedUser.id), message.guild) + "**!")
+    await message.channel.send(":white_check_mark: Given one '" + newItem.name + "' to **" + lib.discordUtil.userOrMemberName(bbGlobals.client.get_user(requestedUser.id), message.guild) + "**!")
 
 bbCommands.register("give", dev_cmd_give, isDev=True, forceKeepArgsCasing=True)
 dmCommands.register("give", dev_cmd_give, isDev=True, forceKeepArgsCasing=True)
@@ -3995,7 +3995,7 @@ async def dev_cmd_del_item(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
         return
 
-    if not (bbUtil.isInt(argsSplit[0]) or bbUtil.isMention(argsSplit[0])):
+    if not (lib.stringTyping.isInt(argsSplit[0]) or lib.stringTyping.isMention(argsSplit[0])):
         await message.channel.send(":x: Invalid user! ")
         return
     requestedBBUser = bbGlobals.usersDB.getOrAddID(
@@ -4007,7 +4007,7 @@ async def dev_cmd_del_item(message : discord.Message, args : str, isDM : bool):
         return
 
     itemNum = argsSplit[2]
-    if not bbUtil.isInt(itemNum):
+    if not lib.stringTyping.isInt(itemNum):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
@@ -4057,7 +4057,7 @@ async def dev_cmd_del_item(message : discord.Message, args : str, isDM : bool):
     else:
         itemName = requestedItem.name + "\n" + requestedItem.statsStringShort()
 
-    await message.channel.send(":white_check_mark: One item deleted from " + bbUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
+    await message.channel.send(":white_check_mark: One item deleted from " + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
     userItemInactives.removeItem(requestedItem)
 
 bbCommands.register("del-item", dev_cmd_del_item)
@@ -4087,7 +4087,7 @@ async def dev_cmd_del_item_key(message : discord.Message, args : str, isDM : boo
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
         return
 
-    if not (bbUtil.isInt(argsSplit[0]) or bbUtil.isMention(argsSplit[0])):
+    if not (lib.stringTyping.isInt(argsSplit[0]) or lib.stringTyping.isMention(argsSplit[0])):
         await message.channel.send(":x: Invalid user! ")
         return
     requestedBBUser = bbGlobals.usersDB.getOrAddID(
@@ -4099,7 +4099,7 @@ async def dev_cmd_del_item_key(message : discord.Message, args : str, isDM : boo
         return
 
     itemNum = argsSplit[2]
-    if not bbUtil.isInt(itemNum):
+    if not lib.stringTyping.isInt(itemNum):
         await message.channel.send(":x: Invalid item number!")
         return
     itemNum = int(itemNum)
@@ -4152,13 +4152,13 @@ async def dev_cmd_del_item_key(message : discord.Message, args : str, isDM : boo
     if requestedItem not in userItemInactives.items:
         userItemInactives.keys.remove(requestedItem)
         userItemInactives.numKeys -= 1
-        await message.channel.send(":white_check_mark: **Erroneous key** deleted from " + bbUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
+        await message.channel.send(":white_check_mark: **Erroneous key** deleted from " + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
     else:
         itemCount = userItemInactives.items[requestedItem].count
         del userItemInactives.items[requestedItem]
         userItemInactives.keys.remove(requestedItem)
         userItemInactives.numKeys -= 1
-        await message.channel.send(":white_check_mark: " + str(itemCount) + " item(s) deleted from " + bbUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
+        await message.channel.send(":white_check_mark: " + str(itemCount) + " item(s) deleted from " + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
 
 bbCommands.register("del-item-key", dev_cmd_del_item_key)
 dmCommands.register("del-item-key", dev_cmd_del_item_key)
@@ -4177,7 +4177,7 @@ async def dev_cmd_setcheckcooldown(message : discord.Message, args : str, isDM :
         await message.channel.send(":x: please give the number of minutes!")
         return
     # verify the requested time is an integer
-    if not bbUtil.isInt(args):
+    if not lib.stringTyping.isInt(args):
         await message.channel.send(":x: that's not a number!")
         return
     # update the checking cooldown amount
@@ -4202,7 +4202,7 @@ async def dev_cmd_setbountyperiodm(message : discord.Message, args : str, isDM :
         await message.channel.send(":x: please give the number of minutes!")
         return
     # verify the given time is an integer
-    if not bbUtil.isInt(args):
+    if not lib.stringTyping.isInt(args):
         await message.channel.send(":x: that's not a number!")
         return
     # update the new bounty generation cooldown
@@ -4228,7 +4228,7 @@ async def dev_cmd_setbountyperiodh(message : discord.Message, args : str, isDM :
         await message.channel.send(":x: please give the number of minutes!")
         return
     # verify the given time is an integer
-    if not bbUtil.isInt(args):
+    if not lib.stringTyping.isInt(args):
         await message.channel.send(":x: that's not a number!")
         return
     # update the bounty generation period
@@ -4681,7 +4681,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
     if len(args.split(" ")) == 1:
         # verify the requested user
         requestedID = int(args.lstrip("<@!").rstrip(">"))
-        if not bbUtil.isInt(requestedID) or (bbGlobals.client.get_user(int(requestedID))) is None:
+        if not lib.stringTyping.isInt(requestedID) or (bbGlobals.client.get_user(int(requestedID))) is None:
             await message.channel.send(":x: Player not found!")
             return
         # create a new bounty at random for the specified user
@@ -4692,7 +4692,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
     elif len(args.split("+")) == 2:
         # verify the user
         requestedID = int(args.split(" ")[0].lstrip("<@!").rstrip(">"))
-        if not bbUtil.isInt(requestedID) or (bbGlobals.client.get_user(int(requestedID))) is None:
+        if not lib.stringTyping.isInt(requestedID) or (bbGlobals.client.get_user(int(requestedID))) is None:
             await message.channel.send(":x: Player not found!")
             return
         # create a bounty at random for the specified user and faction
@@ -4715,7 +4715,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
         newName = bData[1].rstrip(" ").title()
         # verify the requested user
         requestedID = int(newName.lstrip("<@!").rstrip(">"))
-        if not bbUtil.isInt(requestedID) or (bbGlobals.client.get_user(int(requestedID))) is None:
+        if not lib.stringTyping.isInt(requestedID) or (bbGlobals.client.get_user(int(requestedID))) is None:
             await message.channel.send(":x: Player not found!")
             return
         # ensure no bounty already exists for this user
@@ -4791,7 +4791,7 @@ async def dev_cmd_refreshshop(message : discord.Message, args : str, isDM : bool
     """
     level = -1
     if args != "":
-        if not bbUtil.isInt(args) or not int(args) in range(bbConfig.minTechLevel, bbConfig.maxTechLevel + 1):
+        if not lib.stringTyping.isInt(args) or not int(args) in range(bbConfig.minTechLevel, bbConfig.maxTechLevel + 1):
             await message.channel.send("Invalid tech level!")
             return
         level = int(args)
@@ -4818,7 +4818,7 @@ async def dev_cmd_setbalance(message : discord.Message, args : str, isDM : bool)
         await message.channel.send(":x: Please give a user mention followed by the new balance!")
         return
     # verify the requested balance is an integer
-    if not bbUtil.isInt(argsSplit[1]):
+    if not lib.stringTyping.isInt(argsSplit[1]):
         await message.channel.send(":x: that's not a number!")
         return
     # verify the requested user
@@ -4846,7 +4846,7 @@ async def dev_cmd_debug_hangar(message : discord.Message, args : str, isDM : boo
     :param str args: string containing a user mention or ID
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    if not (bbUtil.isInt(args) or bbUtil.isMention(args)):
+    if not (lib.stringTyping.isInt(args) or lib.stringTyping.isMention(args)):
         await message.channel.send(":x: Invalid user!")
         return
 
@@ -5079,8 +5079,6 @@ async def on_ready():
         if guild.hasBountyBoardChannel:
             await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
 
-    print("shop stocks are shared." if bbGlobals.guildsDB.getGuild(699744305274945650).shop.shipsStock is bbGlobals.guildsDB.getGuild(
-        711548456019296289).shop.shipsStock else "shop stocks are not shared.")
     # for currentUser in bbGlobals.usersDB.users.values():
     #     currentUser.validateLoadout()
 
@@ -5274,7 +5272,7 @@ async def on_raw_reaction_add(payload : discord.RawReactionActionEvent):
     :param discord.RawReactionActionEvent payload: An event describing the message and the reaction added
     """
     if payload.user_id != bbGlobals.client.user.id:
-        emoji = bbUtil.dumbEmojiFromPartial(payload.emoji)
+        emoji = lib.emojis.dumbEmojiFromPartial(payload.emoji)
         if emoji.sendable is None:
             return
 
@@ -5295,7 +5293,7 @@ async def on_raw_reaction_remove(payload : discord.RawReactionActionEvent):
     :param discord.RawReactionActionEvent payload: An event describing the message and the reaction removed
     """
     if payload.user_id != bbGlobals.client.user.id:
-        emoji = bbUtil.dumbEmojiFromPartial(payload.emoji)
+        emoji = lib.emojis.dumbEmojiFromPartial(payload.emoji)
         if emoji.sendable is None:
             return
 

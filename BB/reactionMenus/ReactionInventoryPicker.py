@@ -1,6 +1,6 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
-from .. import bbGlobals, bbUtil
+from .. import bbGlobals, lib
 from ..bbObjects.items import bbItem
 from ..bbObjects import bbInventory
 from discord import Message
@@ -21,7 +21,7 @@ class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
         """
         :param bbItem item: The bbItem that this option represents
         :param ReactionMenu menu: The ReactionMenu where this option is active
-        :param bbUtil.dumbEmoji emoji: The emoji that a user must react with in order to trigger this menu option (Default item.emoji)
+        :param lib.emojis.dumbEmoji emoji: The emoji that a user must react with in order to trigger this menu option (Default item.emoji)
         :param str name: The name of this option as shown in the menu (Default item.name)
         :raise ValueError: When an emoji isn't provided and the given bbItem does not have an emoji (TODO: default to bbConfig.defaultMenuEmojis)
         """

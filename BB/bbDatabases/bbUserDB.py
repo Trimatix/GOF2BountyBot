@@ -1,5 +1,5 @@
 from ..bbObjects import bbUser
-from .. import bbUtil
+from .. import lib
 from ..logging import bbLogger
 import traceback
 from typing import List
@@ -47,7 +47,7 @@ class bbUserDB:
         """
         # If ID is a string, ensure it can be casted to an int before casting and returning.
         if type(id) == str:
-            if not bbUtil.isInt(id):
+            if not lib.stringTyping.isInt(id):
                 raise TypeError("user ID must be either int or string of digits")
             return int(id)
         # If ID is not a string, nor an int, throw an error.
