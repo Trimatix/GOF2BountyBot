@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Union, List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from .bbObjects.items import bbShip
-    from discord import PartialEmoji, Guild, User
+    from discord import Emoji, Guild, User
     from datetime import timedelta
     from .bbObjects import bbUser
 
@@ -16,6 +16,7 @@ import inspect
 from emoji import UNICODE_EMOJI
 from . import bbGlobals
 from .logging import bbLogger
+from discord import PartialEmoji
 
 
 def readJSON(dbFile : str) -> dict:
@@ -478,6 +479,27 @@ def dumbEmojiFromPartial(e : PartialEmoji) -> dumbEmoji:
         return e
     if e.is_unicode_emoji():
         return dumbEmoji(unicode=e.name)
+    else:
+        return dumbEmoji(id=e.id)
+
+
+def dumbEmojiFromReaction(e : Union[Emoji, PartialEmoji, str]) -> dumbEmoji:
+    """Construct a new dumbEmoji object from a given discord.PartialEmoji, discord.Emoji, or string.
+
+    :return: A dumbEmoji representing e
+    :rtype: dumbEmoji
+    """
+    if type(e) == dumbEmoji:
+        return e
+    if type(e) == str:
+        if isUnicodeEmoji(e):
+            return dumbEmoji(unicode=e)
+        elif isCustomEmoji(e):
+            return dumbEmojiFromStr(e)
+        else:
+            raise ValueError("Given a string that does not match any emoji format: " + e)
+    if type(e) == PartialEmoji:
+        return dumbEmojiFromPartial(e)
     else:
         return dumbEmoji(id=e.id)
 
