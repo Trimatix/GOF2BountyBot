@@ -2101,7 +2101,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             skinPaths = {0:CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_0.jpg"}
             disabledLayers = []
 
-            if skin == "$ATTACHEDFILE$":
+            if skin == "$ATTACHEDFILE$" and shipData["textureRegions"]:
                 layerIndices = [i for i in range(1, shipData["textureRegions"] + 1)]
 
                 layersPickerMsg = await message.channel.send("** **")
