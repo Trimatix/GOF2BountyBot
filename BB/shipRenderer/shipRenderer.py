@@ -128,6 +128,7 @@ async def renderShip(skinName : str, shipPath : str, shipModelName : str, textur
     # Generate render arguments
     current_model = shipPath + os.sep + shipModelName
     render_output_file = shipPath + os.sep + "skins" + os.sep + skinName + "-RENDER.png"
+    texture_output_file = shipPath + os.sep + "skins" + os.sep + skinName + ".jpg"
 
     if res_x > 1920:
         raise ValueError("Attempted to render an image above 1080p (width=" + str(res_x) + ")")
@@ -141,7 +142,6 @@ async def renderShip(skinName : str, shipPath : str, shipModelName : str, textur
 
     if not full:
         compositeTextures(texture_output_file, shipPath, textures, disabledLayers)
-        texture_output_file = shipPath + os.sep + "skins" + os.sep + skinName + ".jpg"
 
     # Pass the arguments to the renderer
     setRenderArgs([render_resolution, render_output_file, current_model, textures[0] if full else texture_output_file])
