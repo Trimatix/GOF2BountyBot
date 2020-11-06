@@ -2,19 +2,69 @@ from . import bbShop
 from ..bbDatabases import bbBountyDB
 from .bounties.bountyBoards import BountyBoardChannel
 from ..userAlerts import UserAlerts
-from discord import channel, Client
+from discord import channel, Client, Forbidden, Guild
 from typing import List
 from ..bbConfig import bbConfig, bbData
+from .. import bbGlobals, bbUtil
+from ..scheduling import TimedTask
+from .bounties import bbBounty
+from ..logging import bbLogger
+from datetime import timedelta
+import random
+
+# TODO: Convert to random across two dicts
+def getRandomDelaySeconds(minmaxDict : Dict[str, int]) -> timedelta:
+    """Generate a random timedelta between the given minimum and maximum number of seconds, inclusive.
+    minMaxDict must contain keys "min" and "max" (case sensitive), with values of integers representing
+    the minimium and maximum number of seconds this function can generate (inclusive)
+    """
+    return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))
+
+
+def getRouteScaledBountyDelayFixed(baseDelayDict : Dict[str, int]) -> timedelta:
+    """New bounty delay generator, scaling a fixed delay by the length of the presently spawned bounty.
+
+    :param dict baseDelayDict: A bbUtil.timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
+    :return: A datetime.timedelta indicating the time to wait before spawning a new bounty
+    :rtype: datetime.timedelta
+    """
+    timeScale = bbConfig.fallbackRouteScale if bbGlobals.bountiesDB.latestBounty is None else len(bbGlobals.bountiesDB.latestBounty.route)
+    delay = bbUtil.timeDeltaFromDict(baseDelayDict) * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient
+    bbLogger.log("Main", "routeScaleBntyDelayFixed", "New bounty delay generated, " + \
+                                                    ("no latest criminal." if bbGlobals.bountiesDB.latestBounty is None else \
+                                                        ("latest criminal: '" + bbGlobals.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bbGlobals.bountiesDB.latestBounty.route)))) + \
+                                                    "\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bbGlobals.bountiesDB.latestBounty is None else "DELAY_GEN", noPrint=True)
+    return delay
+    
+
+def getRouteScaledBountyDelayRandom(baseDelayDict : Dict[str, int]) -> timedelta:
+    """New bounty delay generator, generating a random delay time between two points, scaled by the length of the presently spawned bounty.
+
+    :param dict baseDelayDict: A dictionary describing the minimum and maximum time in seconds to wait after a bounty is spawned with route length 1
+    :return: A datetime.timedelta indicating the time to wait before spawning a new bounty
+    :rtype: datetime.timedelta
+    """
+    timeScale = bbConfig.fallbackRouteScale if bbGlobals.bountiesDB.latestBounty is None else len(bbGlobals.bountiesDB.latestBounty.route)
+    delay = getRandomDelaySeconds({"min": baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient,
+                                    "max": baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient})
+    bbLogger.log("Main", "routeScaleBntyDelayRand", "New bounty delay generated, " + \
+                                                    ("no latest criminal." if bbGlobals.bountiesDB.latestBounty is None else \
+                                                        ("latest criminal: '" + bbGlobals.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bbGlobals.bountiesDB.latestBounty.route)))) + \
+                                                    "\nRange: " + str((baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + "m - " + \
+                                                                    str((baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + \
+                                                    "m\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bbGlobals.bountiesDB.latestBounty is None else "DELAY_GEN", noPrint=True)
+    return delay
+
 
 class bbGuild:
     """A class representing a guild in discord, and storing extra BountyBot-related information about it. 
     
     :var id: The ID of the guild, directly corresponding to a discord guild's ID.
     :vartype id: int
-    :var announceChannel: The ID of this guild's announcements chanel. -1 when no announce channel is set for this guild.
-    :vartype announceChannel: int
-    :var playChannel: The ID of this guild's bounty playing chanel. -1 when no bounty playing channel is set for this guild.
-    :vartype playChannel: int
+    :var announceChannel: The discord.channel object for this guild's announcements chanel. None when no announce channel is set for this guild.
+    :vartype announceChannel: discord.channel
+    :var playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
+    :vartype playChannel: discord.channel
     :var shop: This guild's bbShop object
     :vartype shop: bbShop
     :var alertRoles: A dictionary of user alert IDs to guild role IDs.
@@ -27,18 +77,27 @@ class bbGuild:
     :vartype ownedRoleMenus: int
     :var bountiesDB: This guild's active bounties
     :vartype bountiesDB: bbBountyDB.bbBountyDB
+    :var bountiesDisabled: Whether or not to disable this guild's bbBountyDB and bounty spawning
+    :vartype bountiesDisabled: bool
+    :var shopDisabled: Whether or not to disable this guild's bbShop and shop refreshing
+    :vartype shopDisabled: bool
+    :var dcGuild: This guild's corresponding discord.Guild object
+    :vartype dcGuild: None
     """
 
-    def __init__(self, id : int, bountiesDB: bbBountyDB.bbBountyDB, announceChannel=-1, playChannel=-1, shop=None, bountyBoardChannel=None, alertRoles={}, ownedRoleMenus=0):
+    def __init__(self, id : int, bountiesDB: bbBountyDB.bbBountyDB, dcGuild: Guild, announceChannel=None, playChannel=None, shop=None, bountyBoardChannel=None, alertRoles={}, ownedRoleMenus=0, bountiesDisabled=False, shopDisabled=False):
         """
         :param int id: The ID of the guild, directly corresponding to a discord guild's ID.
         :param bbBountyDB.bbBountyDB bountiesDB: This guild's active bounties
-        :param int announceChannel: The ID of this guild's announcements chanel. -1 when no announce channel is set for this guild.
-        :param int playChannel: The ID of this guild's bounty playing chanel. -1 when no bounty playing channel is set for this guild.
+        :param discord.Guild guild: This guild's corresponding discord.Guild object
+        :param discord.channel announceChannel: The discord.channel object for this guild's announcements chanel. None when no announce channel is set for this guild.
+        :param discord.channel playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
         :param bbShop shop: This guild's bbShop object
         :param dict[str, int] alertRoles: A dictionary of user alert IDs to guild role IDs.
         :param BoardBoardChannel bountyBoardChannel: A BountyBoardChannel object implementing this guild's bounty board channel if it has one, None otherwise.
         :param int ownedRoleMenus: The number of ReactionRolePickers present in this guild
+        :param bool bountiesDisabled: Whether or not to disable this guild's bbBountyDB and bounty spawning
+        :param bool shopDisabled: Whether or not to disable this guild's bbShop and shop refreshing
         :raise TypeError: When given an incompatible argument type
         """
         if type(id) == float:
@@ -46,41 +105,59 @@ class bbGuild:
         elif type(id) != int:
             raise TypeError("id must be int, given " + str(type(id)))
 
-        if type(announceChannel) == float:
-            announceChannel = int(announceChannel)
-        elif type(announceChannel) != int:
-            raise TypeError("announceChannel must be int, given " + str(type(announceChannel)))
-
-        if type(playChannel) == float:
-            playChannel = int(playChannel)
-        elif type(playChannel) != int:
-            raise TypeError("playChannel must be int, given " + str(type(playChannel)))
-        
-        if shop is not None and type(shop) != bbShop.bbShop:
-            raise TypeError("shop must be bbShop, given " + str(type(shop)))
-
         self.id = id
         self.announceChannel = announceChannel
         self.playChannel = playChannel
 
-        self.shop = bbShop.bbShop() if shop is None else shop
+        self.shopDisabled = shopDisabled
+        if shopDisabled:
+            self.shop = None
+        else:
+            self.shop = bbShop.bbShop() if shop is None else shop
         
         self.alertRoles = {}
         for alertID in UserAlerts.userAlertsIDsTypes.keys():
             if issubclass(UserAlerts.userAlertsIDsTypes[alertID], UserAlerts.GuildRoleUserAlert):
                 self.alertRoles[alertID] = alertRoles[alertID] if alertID in alertRoles else -1
         
-        self.bountyBoardChannel = bountyBoardChannel
-        self.hasBountyBoardChannel = bountyBoardChannel is not None
         self.ownedRoleMenus = ownedRoleMenus
+
         self.bountiesDB = bountiesDB
+        self.bountiesDisabled = bountiesDisabled
+
+        bountyDelayGenerators = {"random": getRandomDelaySeconds,
+                                "fixed-routeScale": getRouteScaledBountyDelayFixed,
+                                "random-routeScale": getRouteScaledBountyDelayRandom}
+
+        bountyDelayGeneratorArgs = {"random": bbConfig.newBountyDelayRandomRange,
+                                    "fixed-routeScale": bbConfig.newBountyFixedDelta,
+                                    "random-routeScale": bbConfig.newBountyDelayRandomRange}
+
+        if bountiesDisabled:
+            self.newBountyTT = None
+            self.bountyBoardChannel = bountyBoardChannel
+            self.hasBountyBoardChannel = bountyBoardChannel is not None
+        else:
+            self.bountyBoardChannel = bountyBoardChannel
+            self.hasBountyBoardChannel = bountyBoardChannel is not None
+
+            if bbConfig.newBountyDelayType == "fixed":
+                self.newBountyTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+                bbGlobals.newBountiesTTDB.scheduleTask(self.newBountyTT)
+            else:
+                try:
+                    bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
+                        bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+                except KeyError:
+                    raise ValueError(
+                        "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
 
 
-    def getAnnounceChannelId(self) -> int:
-        """Get the discord channel ID of the guild's announcements channel.
+    def getAnnounceChannel(self) -> channel:
+        """Get the discord channel object of the guild's announcements channel.
 
-        :return: the ID of the guild's announcements channel
-        :rtype: int
+        :return: the discord.channel of the guild's announcements channel
+        :rtype: discord.channel
         :raise ValueError: If this guild does not have an announcements channel
         """
         if not self.hasAnnounceChannel():
@@ -88,32 +165,32 @@ class bbGuild:
         return self.announceChannel
 
 
-    def getPlayChannelId(self) -> int:
-        """Get the discord channel ID of the guild's bounty playing channel.
+    def getPlayChannel(self) -> channel:
+        """Get the discord channel object of the guild's bounty playing channel.
 
-        :return: the ID of the guild's bounty playing channel
+        :return: the discord channel object of the guild's bounty playing channel
         :raise ValueError: If this guild does not have a play channel
-        :rtype: int
+        :rtype: discord.channel
         """
         if not self.hasPlayChannel():
             raise ValueError("This guild has no play channel set")
         return self.playChannel
 
 
-    def setAnnounceChannelId(self, announceChannelId : int):
-        """Set the discord channel ID of the guild's announcements channel.
+    def setAnnounceChannel(self, announceChannel : channel):
+        """Set the discord channel object of the guild's announcements channel.
 
-        :param int announceChannelId: The ID of the guild's new announcements channel
+        :param int announceChannel: The discord channel object of the guild's new announcements channel
         """
-        self.announceChannel = announceChannelId
+        self.announceChannel = announceChannel
 
 
-    def setPlayChannelId(self, playChannelId : int):
-        """Set the discord channel ID of the guild's bounty playing channel.
+    def setPlayChannel(self, playChannel : channel):
+        """Set the discord channel of the guild's bounty playing channel.
 
-        :param int announceChannelId: The ID of the guild's new bounty playing channel
+        :param int playChannel: The discord channel object of the guild's new bounty playing channel
         """
-        self.playChannel = playChannelId
+        self.playChannel = playChannel
     
 
     def hasAnnounceChannel(self) -> bool:
@@ -221,6 +298,69 @@ class bbGuild:
         self.bountyBoardChannel = None
         self.hasBountyBoardChannel = False
 
+    
+    async def announceNewBounty(self, newBounty : bbBounty.Bounty):
+        """Announce the creation of a new bounty to this guild's announceChannel, if it has one
+
+        :param bbBounty newBounty: the bounty to announce
+        """
+        # Create the announcement embed
+        bountyEmbed = bbUtil.makeEmbed(titleTxt=bbUtil.criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
+                                col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
+        bountyEmbed.add_field(name="Reward:", value=str(
+            newBounty.reward) + " Credits")
+        bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
+        bountyEmbed.add_field(name="See the culprit's route with:", value="`" + bbConfig.commandPrefix +
+                            "route " + bbUtil.criminalNameOrDiscrim(newBounty.criminal) + "`", inline=False)
+        # Create the announcement text
+        msg = "A new bounty is now available from **" + \
+            newBounty.faction.title() + "** central command:"
+
+        if self.hasBountyBoardChannel:
+            try:
+                if self.hasUserAlertRoleID("bounties_new"):
+                    msg = "<@&" + \
+                        str(self.getUserAlertRoleID(
+                            "bounties_new")) + "> " + msg
+                # announce to the given channel
+                bountyListing = await self.bountyBoardChannel.channel.send(msg, embed=bountyEmbed)
+                await self.bountyBoardChannel.addBounty(newBounty, bountyListing)
+                await self.bountyBoardChannel.updateBountyMessage(newBounty)
+                return bountyListing
+
+            except Forbidden:
+                bbLogger.log("bbGuild", "anncBnty", "Failed to post BBCh listing to guild " + bbGlobals.client.get_guild(
+                    self.id).name + "#" + str(self.id) + " in channel " + self.bountyBoardChannel.channel.name + "#" + str(self.bountyBoardChannel.channel.id), category="bountyBoards", eventType="BBC_NW_FRBDN")
+
+        # If the guild has an announceChannel
+        elif self.hasAnnounceChannel():
+            # ensure the announceChannel is valid
+            currentChannel = self.getAnnounceChannel()
+            if currentChannel is not None:
+                try:
+                    if self.hasUserAlertRoleID("bounties_new"):
+                        # announce to the given channel
+                        await currentChannel.send("<@&" + str(self.getUserAlertRoleID("bounties_new")) + "> " + msg, embed=bountyEmbed)
+                    else:
+                        await currentChannel.send(msg, embed=bountyEmbed)
+                except Forbidden:
+                    bbLogger.log("bbGuild", "anncBnty", "Failed to post announce-channel bounty listing to guild " + bbGlobals.client.get_guild(
+                        self.id).name + "#" + str(self.id) + " in channel " + currentChannel.name + "#" + str(currentChannel.id), eventType="ANNCCH_SND_FRBDN")
+
+            # TODO: may wish to add handling for invalid announceChannels - e.g remove them from the bbGuild object
+
+
+    async def spawnAndAnnounceRandomBounty(self):
+        """Generate a completely random bounty, spawn it, and announce it if this guild has
+        an appropriate channel selected.
+        """
+        # ensure a new bounty can be created
+        if self.bountiesDB.canMakeBounty():
+            newBounty = bbBounty.Bounty(bountyDB=self.bountiesDB)
+            # activate and announce the bounty
+            bbGlobals.bountiesDB.addBounty(newBounty)
+            await announceNewBounty(newBounty)
+
 
     def toDictNoId(self) -> dict:
         """Serialize this bbGuild into dictionary format to be saved to file.
@@ -228,13 +368,23 @@ class bbGuild:
         :return: A dictionary containing all information needed to reconstruct this bbGuild
         :rtype: dict
         """
-        return {"announceChannel":self.announceChannel, "playChannel":self.playChannel, 
-                "bountyBoardChannel": self.bountyBoardChannel.toDict() if self.hasBountyBoardChannel else None,
-                "alertRoles": self.alertRoles,
-                "shop": self.shop.toDict(),
-                "ownedRoleMenus": self.ownedRoleMenus,
-                "bountiesDB": self.bountiesDB.toDict()
-                }
+        if self.bountiesDisabled:
+            return {"announceChannel":self.announceChannel, "playChannel":self.playChannel, 
+                    "bountyBoardChannel": self.bountyBoardChannel.toDict() if self.hasBountyBoardChannel else None,
+                    "alertRoles": self.alertRoles,
+                    "shop": self.shop.toDict(),
+                    "ownedRoleMenus": self.ownedRoleMenus,
+                    "bountiesDisabled": True
+                    }
+        else:
+            return {"announceChannel":self.announceChannel, "playChannel":self.playChannel, 
+                    "bountyBoardChannel": self.bountyBoardChannel.toDict() if self.hasBountyBoardChannel else None,
+                    "alertRoles": self.alertRoles,
+                    "shop": self.shop.toDict(),
+                    "ownedRoleMenus": self.ownedRoleMenus,
+                    "bountiesDB": self.bountiesDB.toDict(),
+                    "bountiesDisabled": False
+                    }
 
 
 def fromDict(id : int, guildDict : dict, dbReload=False) -> bbGuild:
@@ -246,12 +396,17 @@ def fromDict(id : int, guildDict : dict, dbReload=False) -> bbGuild:
     :return: A bbGuild according to the information in guildDict
     :rtype: bbGuild
     """
-    if "bountiesDB" in guildDict:
-        bountiesDB = bbBountyDB.fromDict(guildDict["bountiesDB"], bbConfig.maxBountiesPerFaction, dbReload=dbReload)
+    if "bountiesDisabled" in guildDict and guildDict["bountiesDisabled"]:
+        bountiesDB = None
     else:
-        bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions, bbConfig.maxBountiesPerFaction)
+        if "bountiesDB" in guildDict:
+            bountiesDB = bbBountyDB.fromDict(guildDict["bountiesDB"], bbConfig.maxBountiesPerFaction, dbReload=dbReload)
+        else:
+            bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions, bbConfig.maxBountiesPerFaction)
+    
 
-    return bbGuild(id, bountiesDB, announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
+    return bbGuild(id, bountiesDB, bbGlobals.client.get_guild(id), announceChannel=guildDict["announceChannel"], playChannel=guildDict["playChannel"],
                     shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
                     bountyBoardChannel=BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
-                    alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0)
+                    alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0,
+                    bountiesDisabled=guildDict["bountiesDisabled"] if "bountiesDisabled" in guildDict else False)
