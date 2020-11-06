@@ -4469,10 +4469,10 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
     return
     
 
-bbCommands.register("showmehd", cmd_showmeHD, isAdmin=True)
-dmCommands.register("showmehd", cmd_showmeHD, isDev=True)
-# bbCommands.register("showmehd", err_tempPerfDisabled, isAdmin=True)
-# dmCommands.register("showmehd", err_tempPerfDisabled, isDev=True)
+# bbCommands.register("showmehd", cmd_showmeHD, isAdmin=True)
+# dmCommands.register("showmehd", cmd_showmeHD, isDev=True)
+bbCommands.register("showmehd", err_tempPerfDisabled, isAdmin=True)
+dmCommands.register("showmehd", err_tempPerfDisabled, isDev=True)
 
 
 
