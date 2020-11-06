@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from .bbObjects.items import bbShip
     from discord import PartialEmoji, Guild, User
     from .bbObjects import bbUser
+    from .bbObjects.bounties import bbCriminal
 
 from .bbObjects.bounties import bbSystem
 
@@ -16,6 +17,8 @@ import inspect
 from emoji import UNICODE_EMOJI
 from . import bbGlobals
 from .logging import bbLogger
+
+from discord import Embed
 
 
 def readJSON(dbFile : str) -> dict:
@@ -633,3 +636,62 @@ def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
             return userAttempt
     # Handle user names and user name+discrim combinations
     return dcGuild.get_member_named(uRef)
+
+
+def makeEmbed(titleTxt="", desc="", col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> Embed:
+    """Factory function building a simple discord embed from the provided arguments.
+
+    :param str titleTxt: The title of the embed (Default "")
+    :param str desc: The description of the embed; appears at the top below the title (Default "")
+    :param discord.Colour col: The colour of the side strip of the embed (Default discord.Colour.blue())
+    :param str footerTxt: Secondary description appearing at the bottom of the embed (Default "")
+    :param str img: Large icon appearing as the content of the embed, left aligned like a field (Default "")
+    :param str thumb: larger image appearing to the right of the title (Default "")
+    :param str authorName: Secondary title for the embed (Default "")
+    :param str icon: smaller image to the left of authorName. AuthorName is required for this to be displayed. (Default "")
+    :return: a new discord embed as described in the given parameters
+    :rtype: discord.Embed
+    """
+    embed = Embed(title=titleTxt, description=desc, colour=col)
+    if footerTxt != "":
+        embed.set_footer(text=footerTxt)
+    embed.set_image(url=img)
+    if thumb != "":
+        embed.set_thumbnail(url=thumb)
+    if icon != "":
+        embed.set_author(name=authorName, icon_url=icon)
+    return embed
+
+
+def userTagOrDiscrim(userID : str, guild=None) -> str:
+    """If a passed user mention or ID is valid and shares a common server with the bot,
+    return the user's name and discriminator. TODO: Should probably change this to display name
+    Otherwise, return the passed userID.
+
+    :param str userID: A user mention or ID in string form, to attempt to convert to name and discrim
+    :return: The user's name and discriminator if the user is reachable, userID otherwise
+    :rtype: str
+    """
+    if guild is None:
+        userObj = bbGlobals.client.get_user(int(userID.lstrip("<@!").rstrip(">")))
+    else:
+        userObj = guild.get_member(int(userID.lstrip("<@!").rstrip(">")))
+    if userObj is not None:
+        return userObj.name + "#" + userObj.discriminator
+    # Return the given mention as a fall back - might replace this with '#UNKNOWNUSER#' at some point.
+    bbLogger.log("Main", "uTgOrDscrm", "Unknown user requested." + (("Guild:" + guild.name + "#" + str(str(guild.id)))
+                                                                    if guild is not None else "Global/NoGuild") + ". uID:" + str(userID), eventType="UKNWN_USR")
+    return userID
+
+
+def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
+    """If a passed criminal is a player, attempt to return the user's name and discriminator.
+    Otherwise, return the passed criminal's name. TODO: Should probably change this to display name
+
+    :param bbCriminal criminal: criminal whose name to attempt to convert to name and discrim
+    :return: The user's name and discriminator if the criminal is a player, criminal.name otherwise
+    :rtype: str
+    """
+    if not criminal.isPlayer:
+        return criminal.name
+    return userTagOrDiscrim(criminal.name)
