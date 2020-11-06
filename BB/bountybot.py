@@ -2135,14 +2135,18 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                                 pass
                 
                 def showmeAdditionalMessageCheck(newMessage):
-                    return newMessage.author is message.author and (newMessage.content.lower().startswith(bbConfig.commandPrefix + "cancel") or len(newMessage.attachments) > 0)
+                    return newMessage.author == message.author and (newMessage.content.lower().startswith(bbConfig.commandPrefix + "cancel") or len(newMessage.attachments) > 0)
 
                 for regionNum in pickedLayers:
                     nextLayerMsg = await message.channel.send("Please send your image for texture region #" + str(regionNum) + ", or `" + bbConfig.commandPrefix + "cancel` to cancel the render, within " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")
                     try:
                         imgMsg = await bbGlobals.client.wait_for("message", check=showmeAdditionalMessageCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
                     except asyncio.TimeoutError:
-                        await nextLayerMsg.edit(content="This menu has now expired. Please try the command again.")
+                        await nextLayerMsg.edit(content="This menu has now expired. Please try the command again.\n🛑 Skin render cancelled.")
+                        for skinPath in skinPaths.values():
+                            os.remove(skinPath)
+                        bbGlobals.currentRenders.remove(itemObj.name)
+                        return
                     else:
                         if imgMsg.content.lower().startswith(bbConfig.commandPrefix + "cancel"):
                             await message.channel.send("🛑 Skin render cancelled.")
