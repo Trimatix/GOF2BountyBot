@@ -4446,7 +4446,7 @@ async def cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
         bbLogger.log("Main", "admin_cmd_showmeHD", "HD ship render failed with args: '" + args + "'")
     else:
         with open(renderPath, "rb") as f:
-            imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
+            imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("HD-u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))
             renderEmbed = makeEmbed(col=randomColour(), img=imageEmbedMsg.attachments[0].url, authorName="Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png", footerTxt="Custom skinned " + itemObj.name.capitalize())
             await message.channel.send(message.author.mention, embed=renderEmbed)
     
