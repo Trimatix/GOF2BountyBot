@@ -9,7 +9,7 @@ guildsDB = None
 
 
 # Timed tasks
-newBountyTT = None
+newBountiesTTDB = None
 
 shopRefreshTT = None
 dbSaveTT = None
