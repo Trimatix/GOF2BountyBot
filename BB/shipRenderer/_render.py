@@ -7,7 +7,6 @@ Written by Trimatix
 import bpy
 import os
 from math import radians
-from PIL import Image, ImageOps
 from pathlib import Path
 from typing import List
 
@@ -20,13 +19,6 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 
 # The camera's view distance. 5000 Should be plenty, but for larger models you may need to raise it. Tested with the Vossk Battlecruiser model.
 CAM_CLIP = 5000
-# Resolution of the render
-# Moved to render_vars
-# RES_X = 640
-# RES_Y = 480
-# Directory to save the final render in. The output file will have the same name as your model.
-# Now disabled in favour of specifying the output dir via render_vars
-# RENDER_OUTPUT_DIR = script_path + os.sep + "out"
 # Working directory for the script. This is used for temporarily saving intermediate textures e.g between mask applications (TODO: Save the completed texture to a cache directory [the bbShipSkin dir])
 RENDER_TEMP_DIR = script_path + os.sep + "temp"
 # Path to the script's render variables file.
@@ -52,38 +44,29 @@ class RenderArgs:
     :vartype model_filename: str
     :var model_filename_noext: The name of the model file with no extension
     :vartype model_filename_noext: str
-    :var base_texture_path: path to the base texture file containing the foreground features of the ship texture
-    :vartype base_texture_path: str
+    :var texture_path: path to the texture file to render on the model
+    :vartype texture_path: str
     :var material: path to the material to render. It must be in model_dir, and called model_filename_noext + '.mtl'
     :vartype material: str
-    :var texture_layers: A list of paths to texture files to mask and combine into the final ship texture
-    :vartype texture_layers: List[str]
-    :var has_textures: True if any textures were passed in texture_layers, False if texture_layers is empty
-    :vartype has_textures: bool
     """
 
-    def __init__(self, res_x : int, res_y : int, texture_output_file_path : str, render_output_file_path : str, model_path : str, base_texture_path : str, texture_layers : List[str]):
+    def __init__(self, res_x : int, res_y : int, output_file_path : str, model_path : str, texture_path : str):
         """
         :param int res_x: The width in pixels of the render resolution.
         :param int res_y: The height in pixels of the render resolution.
-        :param str texture_output_file_path: The path to save the final texture image to, including file name and extension
-        :param str render_output_file_path: The path to render the output image to, including the file name and extension
+        :param str output_file_path: The path to render the output image to, including the file name and extension
         :param str model_path: The path to the model to render
-        :param str base_texture_path: path to the base texture file containing the foreground features of the ship texture
-        :param List[str] texture_layers: A list of paths to texture files to mask and combine into the final ship texture
+        :param str texture_path: path to the texture file to render on the model
         """
         self.res_x = res_x
         self.res_y = res_y
-        self.texture_output_file_path = texture_output_file_path
-        self.render_output_file_path = render_output_file_path
+        self.output_file_path = output_file_path
         self.model_fullpath = model_path
         self.model_dir = str(Path(self.model_fullpath).parent)
         self.model_filename = Path(self.model_fullpath).name
         self.model_filename_noext = Path(self.model_fullpath).stem
-        self.base_texture_path = base_texture_path
+        self.texture_path = texture_path
         self.material = str(Path(self.model_fullpath).with_suffix(".mtl"))
-        self.texture_layers = texture_layers
-        self.has_textures = bool(texture_layers)
 
 
 def getRenderArgs() -> RenderArgs:
@@ -96,19 +79,7 @@ def getRenderArgs() -> RenderArgs:
     with open(RENDER_ARGS_PATH,"r") as f:
         for line in f.readlines():
             args.append(line.rstrip("\n"))
-    return RenderArgs(int(args[0].split("x")[0]), int(args[0].split("x")[1]), args[1], args[2], args[3], args[4], args[5:] if len(args) > 5 else [])
-
-
-def ensureImageMode(tex : Image, mode="RGBA") -> Image:
-    """Ensure the passed image is in a given mode. If it is not, convert it.
-    https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
-
-    :param Image tex: The image whose mode to check
-    :param str mode: The mode to ensure and convert to if needed
-    :return: tex if it is of the given mode. tex converted to mode otherwise.
-    :rtype: Image
-    """
-    return tex if tex.mode == mode else tex.convert(mode)
+    return RenderArgs(int(args[0].split("x")[0]), int(args[0].split("x")[1]), args[1], args[2], args[3])
 
 
 
@@ -116,47 +87,14 @@ def ensureImageMode(tex : Image, mode="RGBA") -> Image:
 
 # Fetch renderer arguments
 args = getRenderArgs()
-# Load the images pointed to in args
-if args.has_textures:
-    # Load and combine the base texture and under layer
-    workingTex = ensureImageMode(Image.open(args.texture_layers[0]))
-    baseTex = ensureImageMode(Image.open(args.base_texture_path))
-    workingTex = Image.alpha_composite(workingTex, baseTex)
 
-    # For each layer number
-    for layerData in [("secondary", 1), ("tertiary", 2)]:
-        # Check that a corresponding texture was passed
-        if len(args.texture_layers) > layerData[1]:
-            # Check that a corresponding mask exists for the model
-            try:
-                mask = Image.open(args.model_dir + os.sep + layerData[0] + "_mask.jpg")
-            except FileNotFoundError:
-                print("WARNING: Attempted to render " + layerData[0] + " texture region for an model with no " + layerData[0] + "_mask: " + args.model_fullpath)
-            else:
-                # If both a texture and mask exist, load in the texture
-                newTex = ensureImageMode(Image.open(args.texture_layers[layerData[1]]))
-                # Load in the mask
-                # Gimp and pillow use opposite shades to represent opacity in a mask, so invert the mask
-                mask = ensureImageMode(ImageOps.invert(mask), "L")
-                # Apply the texture with respect to the mask
-                workingTex = Image.composite(workingTex, newTex, mask)
-
-    # Save the completed ship texture to file
-    # TODO: Change this to the cache (bbShipSkin) dir
-    workingTex.save(RENDER_TEMP_DIR + os.sep + args.model_filename_noext + ".png")
-    # Update the renderer arguments to point to the new texture
-    args.base_texture_path = RENDER_TEMP_DIR + os.sep + args.model_filename_noext + ".png"
-
-if args.texture_output_file_path.lower() not in ["", "none", "off"]:
-    workingTex.convert("RGB").save(args.texture_output_file_path)
-    
 
 
 ##### CONFIGURE THE SCENE #####
 
 # Point the material at the requested texture
 with open(args.material, "a") as f:
-    f.write("map_Kd " + args.base_texture_path)
+    f.write("map_Kd " + args.texture_path)
 
 ctx = bpy.context
 # import the model into blender's scene
@@ -187,7 +125,7 @@ ctx.scene.render.resolution_percentage = 100
 ctx.scene.render.engine = 'CYCLES'
 # Set the render output file
 # ctx.scene.render.filepath = RENDER_OUTPUT_DIR + ("" if RENDER_OUTPUT_DIR.endswith(os.sep) else os.sep) + args.model_filename_noext
-ctx.scene.render.filepath = args.render_output_file_path
+ctx.scene.render.filepath = args.output_file_path
 
 # Move the camera so that the model fills the frame
 bpy.ops.view3d.camera_to_view_selected()
@@ -207,8 +145,3 @@ with open(args.material, "r") as f:
 with open(args.material, "w") as f:
     for line in lines[:-1]:
         f.write(line)
-
-# If a temporary texture file was generated (the composition of the passed images), delete it
-# TODO: Change this. Pass whether or not to delete the file as a boolean
-if len(args.texture_layers) > 0:
-    os.remove(args.base_texture_path)
