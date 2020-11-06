@@ -55,16 +55,7 @@ def loadGuildsDB(filePath : str) -> bbGuildDB.bbGuildDB:
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
     :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
-    return bbGuildDB.fromDict(bbUtil.readJSON(filePath))
-
-
-def loadBountiesDB(filePath : str) -> bbBountyDB.bbBountyDB:
-    """Build a bbBountyDB from the specified JSON file.
-
-    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
-    :return: a bbBountyDB as described by the dictionary-serialized representation stored in the file located in filePath.
-    """
-    return bbBountyDB.fromDict(bbUtil.readJSON(filePath), bbConfig.maxBountiesPerFaction, dbReload=True)
+    return bbGuildDB.fromDict(bbUtil.readJSON(filePath), dbReloadout=True)
 
 
 async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.reactionMenuDB:
@@ -138,40 +129,6 @@ def makeRoute(start : str, end : str) -> List[str]:
     return bbUtil.bbAStar(start, end, bbData.builtInSystemObjs)
 
 
-def userTagOrDiscrim(userID : str, guild=None) -> str:
-    """If a passed user mention or ID is valid and shares a common server with the bot,
-    return the user's name and discriminator. TODO: Should probably change this to display name
-    Otherwise, return the passed userID.
-
-    :param str userID: A user mention or ID in string form, to attempt to convert to name and discrim
-    :return: The user's name and discriminator if the user is reachable, userID otherwise
-    :rtype: str
-    """
-    if guild is None:
-        userObj = bbGlobals.client.get_user(int(userID.lstrip("<@!").rstrip(">")))
-    else:
-        userObj = guild.get_member(int(userID.lstrip("<@!").rstrip(">")))
-    if userObj is not None:
-        return userObj.name + "#" + userObj.discriminator
-    # Return the given mention as a fall back - might replace this with '#UNKNOWNUSER#' at some point.
-    bbLogger.log("Main", "uTgOrDscrm", "Unknown user requested." + (("Guild:" + guild.name + "#" + str(str(guild.id)))
-                                                                    if guild is not None else "Global/NoGuild") + ". uID:" + str(userID), eventType="UKNWN_USR")
-    return userID
-
-
-def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
-    """If a passed criminal is a player, attempt to return the user's name and discriminator.
-    Otherwise, return the passed criminal's name. TODO: Should probably change this to display name
-
-    :param bbCriminal criminal: criminal whose name to attempt to convert to name and discrim
-    :return: The user's name and discriminator if the criminal is a player, criminal.name otherwise
-    :rtype: str
-    """
-    if not criminal.isPlayer:
-        return criminal.name
-    return userTagOrDiscrim(criminal.name)
-
-
 async def makeBountyBoardChannelMessage(guild : bbGuild.bbGuild, bounty : bbBounty.Bounty, msg="", embed=None) -> Message:
     """Create a new BountyBoardChannel listing for the given bounty, in the given guild.
     guild must own a BountyBoardChannel.
@@ -226,13 +183,13 @@ async def announceNewBounty(newBounty : bbBounty.Bounty):
     :param bbBounty newBounty: the bounty to announce
     """
     # Create the announcement embed
-    bountyEmbed = makeEmbed(titleTxt=criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
+    bountyEmbed = bbUtil.makeEmbed(titleTxt=bbUtil.criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
                             col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
     bountyEmbed.add_field(name="Reward:", value=str(
         newBounty.reward) + " Credits")
     bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
     bountyEmbed.add_field(name="See the culprit's route with:", value="`" + bbConfig.commandPrefix +
-                          "route " + criminalNameOrDiscrim(newBounty.criminal) + "`", inline=False)
+                          "route " + bbUtil.criminalNameOrDiscrim(newBounty.criminal) + "`", inline=False)
     # Create the announcement text
     msg = "A new bounty is now available from **" + \
         newBounty.faction.title() + "** central command:"
@@ -255,8 +212,7 @@ async def announceNewBounty(newBounty : bbBounty.Bounty):
         # If the guild has an announceChannel
         elif currentGuild.hasAnnounceChannel():
             # ensure the announceChannel is valid
-            currentChannel = bbGlobals.client.get_channel(
-                currentGuild.getAnnounceChannelId())
+            currentChannel = currentGuild.getAnnounceChannel()
             if currentChannel is not None:
                 try:
                     if currentGuild.hasUserAlertRoleID("bounties_new"):
@@ -285,7 +241,7 @@ async def announceBountyWon(bounty : bbBounty.Bounty, rewards : Dict[int, Dict[s
         if bbGlobals.client.get_guild(currentGuild.id) is not None:
             if currentGuild.hasPlayChannel():
                 # Create the announcement embed
-                rewardsEmbed = makeEmbed(titleTxt="Bounty Complete!", authorName=criminalNameOrDiscrim(bounty.criminal) + " Arrested",
+                rewardsEmbed = bbUtil.makeEmbed(titleTxt="Bounty Complete!", authorName=bbUtil.criminalNameOrDiscrim(bounty.criminal) + " Arrested",
                                          icon=bounty.criminal.icon, col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
 
                 # Add the winning user to the embed
@@ -315,15 +271,15 @@ async def announceBountyWon(bounty : bbBounty.Bounty, rewards : Dict[int, Dict[s
 
                 # Send the announcement to the current guild's playChannel
                 # If this is the winning guild, send a special message!
-                if bbGlobals.client.get_channel(currentGuild.getPlayChannelId()) is not None:
+                if currentGuild.getPlayChannel() is not None:
                     if currentGuild.id == winningGuildObj.id:
-                        await bbGlobals.client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: **You win!**\n**" + winningGuildObj.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+                        await currentGuild.getPlayChannel().send(":trophy: **You win!**\n**" + winningGuildObj.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
                     else:
-                        await bbGlobals.client.get_channel(currentGuild.getPlayChannelId()).send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
+                        await currentGuild.getPlayChannel().send(":trophy: Another server has located **" + bounty.criminal.name + "**!", embed=rewardsEmbed)
 
                 else:
                     bbLogger.log("Main", "AnncBtyWn", "None playchannel received when posting bounty won to guild " + bbGlobals.client.get_guild(
-                        currentGuild.id).name + "#" + str(currentGuild.id) + " in channel ?#" + str(currentGuild.getPlayChannelId()), eventType="PLCH_NONE")
+                        currentGuild.id).name + "#" + str(currentGuild.id) + " in channel ?#" + str(currentGuild.getPlayChannel().id), eventType="PLCH_NONE")
 
 
 async def updateAllBountyBoardChannels(bounty : bbBounty.Bounty, bountyComplete=False):
@@ -356,7 +312,7 @@ async def announceNewShopStock(guildID=-1):
         for guild in bbGlobals.guildsDB.guilds.values():
             # ensure guild has a valid playChannel
             if guild.hasPlayChannel():
-                playCh = bbGlobals.client.get_channel(guild.getPlayChannelId())
+                playCh = guild.getPlayChannel()
                 if playCh is not None:
                     msg = "The shop stock has been refreshed!\n**        **Now at tech level: **" + \
                         str(guild.shop.currentTechLevel) + "**"
@@ -373,7 +329,7 @@ async def announceNewShopStock(guildID=-1):
         guild = bbGlobals.guildsDB.getGuild(guildID)
         # ensure guild has a valid playChannel
         if guild.hasPlayChannel():
-            playCh = bbGlobals.client.get_channel(guild.getPlayChannelId())
+            playCh = guild.getPlayChannel()
             if playCh is not None:
                 msg = "The shop stock has been refreshed!\n**        **Now at tech level: **" + \
                     str(guild.shop.currentTechLevel) + "**"
@@ -386,31 +342,6 @@ async def announceNewShopStock(guildID=-1):
                 except discord.Forbidden:
                     bbLogger.log("Main", "anncNwShp", "Failed to post shop stock announcement to guild " + bbGlobals.client.get_guild(
                         guild.id).name + "#" + str(guild.id) + " in channel " + playCh.name + "#" + str(playCh.id), category="shop", eventType="PLCH_NONE")
-
-
-def makeEmbed(titleTxt="", desc="", col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> discord.Embed:
-    """Factory function building a simple discord embed from the provided arguments.
-
-    :param str titleTxt: The title of the embed (Default "")
-    :param str desc: The description of the embed; appears at the top below the title (Default "")
-    :param discord.Colour col: The colour of the side strip of the embed (Default discord.Colour.blue())
-    :param str footerTxt: Secondary description appearing at the bottom of the embed (Default "")
-    :param str img: Large icon appearing as the content of the embed, left aligned like a field (Default "")
-    :param str thumb: larger image appearing to the right of the title (Default "")
-    :param str authorName: Secondary title for the embed (Default "")
-    :param str icon: smaller image to the left of authorName. AuthorName is required for this to be displayed. (Default "")
-    :return: a new discord embed as described in the given parameters
-    :rtype: discord.Embed
-    """
-    embed = discord.Embed(title=titleTxt, description=desc, colour=col)
-    if footerTxt != "":
-        embed.set_footer(text=footerTxt)
-    embed.set_image(url=img)
-    if thumb != "":
-        embed.set_thumbnail(url=thumb)
-    if icon != "":
-        embed.set_author(name=authorName, icon_url=icon)
-    return embed
 
 
 def getNumExtension(num : int) -> str:
@@ -525,7 +456,7 @@ async def expireAndAnnounceDuelReq(duelReqDict : DuelRequest.DuelRequest):
     duelReq = duelReqDict["duelReq"]
     await duelReq.duelTimeoutTask.forceExpire(callExpiryFunc=False)
     if duelReq.sourceBBGuild.hasPlayChannel():
-        playCh = bbGlobals.client.get_channel(duelReq.sourceBBGuild.getPlayChannelId())
+        playCh = duelReq.sourceBBGuild.getPlayChannel()
         if playCh is not None:
             await playCh.send(":stopwatch: <@" + str(duelReq.sourceBBUser.id) + ">, your duel challenge for **" + str(bbGlobals.client.get_user(duelReq.targetBBUser.id)) + "** has now expired.")
     duelReq.sourceBBUser.removeDuelChallengeObj(duelReq)
@@ -730,7 +661,7 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
     :param str args: empty, or a single command name
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    helpEmbed = makeEmbed(titleTxt="BountyBot Commands",
+    helpEmbed = bbUtil.makeEmbed(titleTxt="BountyBot Commands",
                           thumb=bbGlobals.client.user.avatar_url_as(size=64))
     page = 0
     maxPage = len(bbData.helpDict)
@@ -773,7 +704,7 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
     if page == 0:
         for sectionNum in range(maxPage):
             if sectionNum == maxPage - 1 and maxPage % 2 != 0:
-                helpEmbed = makeEmbed(titleTxt="BountyBot Commands",
+                helpEmbed = bbUtil.makeEmbed(titleTxt="BountyBot Commands",
                                       thumb=bbGlobals.client.user.avatar_url_as(size=64))
                 helpEmbed.set_footer(text="Page " + str(maxPage))
                 helpEmbed.add_field(name="‎", value="__" +
@@ -783,7 +714,7 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
                         "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
                 messagesToSend.append(("‎", helpEmbed))
             elif sectionNum % 2 == 0:
-                helpEmbed = makeEmbed(titleTxt="BountyBot Commands",
+                helpEmbed = bbUtil.makeEmbed(titleTxt="BountyBot Commands",
                                       thumb=bbGlobals.client.user.avatar_url_as(size=64))
                 helpEmbed.set_footer(
                     text="Pages " + str(sectionNum + 1) + " - " + str(sectionNum + 2))
@@ -850,9 +781,9 @@ async def cmd_how_to_play(message : discord.Message, args : str, isDM : bool):
             else:
                 requestedBBGuild = bbGlobals.guildsDB.addGuildID(message.guild.id)
 
-        howToPlayEmbed = makeEmbed(titleTxt='**How To Play**', desc="This game is based on the *'Most Wanted'* system from Galaxy on Fire 2. If you have played the Supernova addon, this should be familiar!\n\nIf at any time you would like information about a command, use the `" +
+        howToPlayEmbed = bbUtil.makeEmbed(titleTxt='**How To Play**', desc="This game is based on the *'Most Wanted'* system from Galaxy on Fire 2. If you have played the Supernova addon, this should be familiar!\n\nIf at any time you would like information about a command, use the `" +
                                    bbConfig.commandPrefix + "help [command]` command. To see all commands, just use `" + bbConfig.commandPrefix + "help`.\n‎", footerTxt="Have fun! 🚀", thumb='https://cdn.discordapp.com/avatars/699740424025407570/1bfc728f46646fa964c6a77fc0cf2335.webp')
-        howToPlayEmbed.add_field(name="1. New Bounties", value="Every 15m - 1h (randomly), bounties are announced" + ((" in <#" + str(requestedBBGuild.bountyBoardChannel.channel.id) + ">.") if not isDM and requestedBBGuild.hasBountyBoardChannel else (" in <#" + str(requestedBBGuild.getAnnounceChannelId()) + ">.") if not isDM and requestedBBGuild.hasAnnounceChannel() else ".") + "\n• Use `" + bbConfig.commandPrefix +
+        howToPlayEmbed.add_field(name="1. New Bounties", value="Every 15m - 1h (randomly), bounties are announced" + ((" in <#" + str(requestedBBGuild.bountyBoardChannel.channel.id) + ">.") if not isDM and requestedBBGuild.hasBountyBoardChannel else (" in <#" + str(requestedBBGuild.getAnnounceChannel().id) + ">.") if not isDM and requestedBBGuild.hasAnnounceChannel() else ".") + "\n• Use `" + bbConfig.commandPrefix +
                                  "bounties` to see the currently active bounties.\n• Criminals spawn in a system somewhere on the `" + bbConfig.commandPrefix + "map`.\n• To view a criminal's current route *(possible systems)*, use `" + bbConfig.commandPrefix + "route [criminal]`.\n‎", inline=False)
         howToPlayEmbed.add_field(name="2. System Checking", value="Now that we know where our criminal could be, we can check a system with `" + bbConfig.commandPrefix +
                                  "check [system]`.\nThis system will now be crossed out in the criminal's `" + bbConfig.commandPrefix + "route`, so we know not to check there.\n\n> Didn't win the bounty? No worries!\nYou will be awarded credits for helping *narrow down the search*.\n‎", inline=False)
@@ -931,7 +862,7 @@ async def cmd_stats(message : discord.Message, args : str, isDM : bool):
     # if no user is specified
     if args == "":
         # create the embed
-        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=message.author.display_name,
+        statsEmbed = bbUtil.makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=message.author.display_name,
                                footerTxt="Pilot number #" + message.author.discriminator, thumb=message.author.avatar_url_as(size=64))
         # If the calling user is not in the database, don't bother adding them just print zeroes.
         if not bbGlobals.usersDB.userIDExists(message.author.id):
@@ -991,7 +922,7 @@ async def cmd_stats(message : discord.Message, args : str, isDM : bool):
             return
 
         # create the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=bbUtil.userOrMemberName(requestedUser, message.guild),
+        statsEmbed = bbUtil.makeEmbed(col=bbData.factionColours["neutral"], desc="__Pilot Statistics__", titleTxt=bbUtil.userOrMemberName(requestedUser, message.guild),
                                footerTxt="Pilot number #" + requestedUser.discriminator, thumb=requestedUser.avatar_url_as(size=64))
         # If the requested user is not in the database, don't bother adding them just print zeroes
         if not bbGlobals.usersDB.userIDExists(requestedUser.id):
@@ -1171,7 +1102,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
                     if 0 < bounty.route.index(bounty.answer) - bounty.route.index(requestedSystem) < bbConfig.closeBountyThreshold:
                         # Print any close bounty names
                         sightedCriminalsStr += "**       **• Local security forces spotted **" + \
-                            criminalNameOrDiscrim(
+                            bbUtil.criminalNameOrDiscrim(
                                 bounty.criminal) + "** here recently.\n"
         sightedCriminalsStr = sightedCriminalsStr[:-1]
 
@@ -1184,8 +1115,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
             if sightedCriminalsStr != "":
                 for currentGuild in bbGlobals.guildsDB.getGuilds():
                     if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
-                        currentCh = bbGlobals.client.get_channel(
-                            currentGuild.getPlayChannelId())
+                        currentCh = currentGuild.getPlayChannel()
                         if currentCh is not None:
                             await currentCh.send(sightedCriminalsStr)
         # If no bounty was won, print an error message
@@ -1195,13 +1125,12 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
             for currentGuild in bbGlobals.guildsDB.getGuilds():
                 if bbGlobals.client.get_guild(currentGuild.id) is not None:
                     if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
-                        currentCh = bbGlobals.client.get_channel(
-                            currentGuild.getPlayChannelId())
+                        currentCh = currentGuild.getPlayChannel()
                         if currentCh is not None:
                             await currentCh.send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
                         else:
                             bbLogger.log("Main", "cmd_chk", "None playchannel received when posting global failed check to guild " + bbGlobals.client.get_guild(
-                                currentGuild.id).name + "#" + str(currentGuild.id) + " in channel ?#" + str(currentGuild.getPlayChannelId()), eventType="PLCH_NONE")
+                                currentGuild.id).name + "#" + str(currentGuild.id) + " in channel ?#" + str(currentGuild.getPlayChannel().id), eventType="PLCH_NONE")
 
         # Only put the calling user on checking cooldown and increment systemsChecked stat if the system checked is on an active bounty's route.
         if systemInBountyRoute:
@@ -1243,7 +1172,7 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
             if bbGlobals.bountiesDB.hasBounties(faction=fac):
                 outmessage += "\n • [" + fac.title() + "]: "
                 for bounty in bbGlobals.bountiesDB.getFactionBounties(fac):
-                    outmessage += criminalNameOrDiscrim(bounty.criminal) + ", "
+                    outmessage += bbUtil.criminalNameOrDiscrim(bounty.criminal) + ", "
                 outmessage = outmessage[:-2]
         # If no active bounties were found, print an error
         if len(outmessage) == preLen:
@@ -1282,7 +1211,7 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
             for bounty in bbGlobals.bountiesDB.getFactionBounties(requestedFaction):
                 endTimeStr = datetime.utcfromtimestamp(
                     bounty.endTime).strftime("%B %d %H %M %S").split(" ")
-                outmessage += "\n • [" + criminalNameOrDiscrim(bounty.criminal) + "]" + " " * (bbData.longestBountyNameLength + 1 - len(criminalNameOrDiscrim(bounty.criminal))) + ": " + str(
+                outmessage += "\n • [" + bbUtil.criminalNameOrDiscrim(bounty.criminal) + "]" + " " * (bbData.longestBountyNameLength + 1 - len(bbUtil.criminalNameOrDiscrim(bounty.criminal))) + ": " + str(
                     int(bounty.reward)) + " Credits - Ending " + endTimeStr[0] + " " + endTimeStr[1] + getNumExtension(int(endTimeStr[1])) + " at :" + endTimeStr[2] + ":" + endTimeStr[3]
                 if endTimeStr[4] != "00":
                     outmessage += ":" + endTimeStr[4]
@@ -1328,7 +1257,7 @@ async def cmd_route(message : discord.Message, args : str, isDM : bool):
         # display their route
         bounty = bbGlobals.bountiesDB.getBounty(requestedBountyName.lower())
         outmessage = "**" + \
-            criminalNameOrDiscrim(bounty.criminal) + "**'s current route:\n> "
+            bbUtil.criminalNameOrDiscrim(bounty.criminal) + "**'s current route:\n> "
         for system in bounty.route:
             outmessage += " " + ("~~" if bounty.checked[system] != -1 else "") + system + (
                 "~~" if bounty.checked[system] != -1 else "") + ","
@@ -1449,7 +1378,7 @@ async def cmd_system(message : discord.Message, args : str, isDM : bool):
             neighboursStr = neighboursStr[:-2]
 
         # build the statistics embed
-        statsEmbed = makeEmbed(col=bbData.factionColours[systObj.faction], desc="__System Information__",
+        statsEmbed = bbUtil.makeEmbed(col=bbData.factionColours[systObj.faction], desc="__System Information__",
                                titleTxt=systObj.name, footerTxt=systObj.faction.title(), thumb=bbData.factionIcons[systObj.faction])
         statsEmbed.add_field(
             name="Security Level:", value=bbData.securityLevels[systObj.security].title())
@@ -1500,7 +1429,7 @@ async def cmd_criminal(message : discord.Message, args : str, isDM : bool):
 
     else:
         # build the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours[criminalObj.faction],
+        statsEmbed = bbUtil.makeEmbed(col=bbData.factionColours[criminalObj.faction],
                                desc="__Criminal File__", titleTxt=criminalObj.name, thumb=criminalObj.icon)
         statsEmbed.add_field(
             name="Wanted By:", value=criminalObj.faction.title() + "s")
@@ -1549,7 +1478,7 @@ async def cmd_ship(message : discord.Message, args : str, isDM : bool):
 
     else:
         # build the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
+        statsEmbed = bbUtil.makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
                                desc="__Ship File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
         statsEmbed.add_field(name="Value:", value=bbUtil.commaSplitNum(
             str(itemObj.getValue(shipUpgradesOnly=True))) + " Credits")
@@ -1634,7 +1563,7 @@ async def cmd_weapon(message : discord.Message, args : str, isDM : bool):
 
     else:
         # build the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
+        statsEmbed = bbUtil.makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
                                desc="__Weapon File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
         if itemObj.hasTechLevel:
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
@@ -1686,7 +1615,7 @@ async def cmd_module(message : discord.Message, args : str, isDM : bool):
 
     else:
         # build the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
+        statsEmbed = bbUtil.makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
                                desc="__Module File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
         if itemObj.hasTechLevel:
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
@@ -1739,7 +1668,7 @@ async def cmd_turret(message : discord.Message, args : str, isDM : bool):
 
     else:
         # build the stats embed
-        statsEmbed = makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
+        statsEmbed = bbUtil.makeEmbed(col=bbData.factionColours[itemObj.manufacturer] if itemObj.manufacturer in bbData.factionColours else bbData.factionColours["neutral"],
                                desc="__Turret File__", titleTxt=itemObj.name, thumb=itemObj.icon if itemObj.hasIcon else bbData.rocketIcon)
         if itemObj.hasTechLevel:
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
@@ -1794,7 +1723,7 @@ async def cmd_commodity(message : discord.Message, args : str, isDM : bool):
 
     else:
         # build the stats embed
-        statsEmbed = makeEmbed(
+        statsEmbed = bbUtil.makeEmbed(
             col=bbData.factionColours[itemObj.faction], desc="__Item File__", titleTxt=itemObj.name, thumb=itemObj.icon)
         if itemObj.hasTechLevel:
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
@@ -1926,7 +1855,7 @@ async def cmd_leaderboard(message : discord.Message, args : str, isDM : bool):
     sortedUsers = sorted(inputDict.items(), key=operator.itemgetter(1))[::-1]
 
     # build the leaderboard embed
-    leaderboardEmbed = makeEmbed(titleTxt=boardTitle, authorName=boardScope,
+    leaderboardEmbed = bbUtil.makeEmbed(titleTxt=boardTitle, authorName=boardScope,
                                  icon=bbData.winIcon, col=bbData.factionColours["neutral"], desc=boardDesc)
 
     # add all users to the leaderboard embed with places and values
@@ -2050,7 +1979,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
             await message.channel.send(":x: Invalid page number. Showing page one:")
             page = 1
 
-        hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items" if item == "all" else item.rstrip(
+        hangarEmbed = bbUtil.makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items" if item == "all" else item.rstrip(
             "s").title() + "s - page " + str(page), thumb=requestedUser.avatar_url_as(size=64))
 
         hangarEmbed.add_field(name="No Stored Items", value="‎", inline=False)
@@ -2077,7 +2006,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
                 await message.channel.send(":x: " + ("The requested pilot" if foundUser else "You") + " only " + ("has " if foundUser else "have ") + str(maxPage) + " page(s) of items. Showing page " + str(maxPage) + ":")
                 page = maxPage
 
-        hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt=("All item" if item == "all" else item.rstrip(
+        hangarEmbed = bbUtil.makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt=("All item" if item == "all" else item.rstrip(
             "s").title()) + "s - page " + str(page) + "/" + str(requestedBBUser.numInventoryPages(item, maxPerPage)), thumb=requestedUser.avatar_url_as(size=64))
         firstPlace = maxPerPage * (page - 1) + 1
 
@@ -2165,7 +2094,7 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
         sendChannel = message.channel
 
     requestedShop = bbGlobals.guildsDB.getGuild(message.guild.id).shop
-    shopEmbed = makeEmbed(titleTxt="Shop", desc="__" + message.guild.name + "__\n`Current Tech Level: " + str(requestedShop.currentTechLevel) + "`",
+    shopEmbed = bbUtil.makeEmbed(titleTxt="Shop", desc="__" + message.guild.name + "__\n`Current Tech Level: " + str(requestedShop.currentTechLevel) + "`",
                           footerTxt="All items" if item == "all" else (
                               item + "s").title(),
                           thumb=("https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64") if message.guild.icon is not None else "")
@@ -2338,7 +2267,7 @@ async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
 
     if useDummyData:
         activeShip = bbShip.fromDict(bbUser.defaultShipLoadoutDict)
-        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours[activeShip.manufacturer] if activeShip.manufacturer in bbData.factionColours else bbData.factionColours[
+        loadoutEmbed = bbUtil.makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours[activeShip.manufacturer] if activeShip.manufacturer in bbData.factionColours else bbData.factionColours[
                                  "neutral"], thumb=activeShip.icon if activeShip.hasIcon else requestedUser.avatar_url_as(size=64))
         loadoutEmbed.add_field(name="Active Ship:", value=activeShip.name +
                                "\n" + activeShip.statsStringNoItems(), inline=False)
@@ -2364,7 +2293,7 @@ async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
     else:
         requestedBBUser = bbGlobals.usersDB.getUser(requestedUser.id)
         activeShip = requestedBBUser.activeShip
-        loadoutEmbed = makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours[activeShip.manufacturer] if activeShip.manufacturer in bbData.factionColours else bbData.factionColours[
+        loadoutEmbed = bbUtil.makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours[activeShip.manufacturer] if activeShip.manufacturer in bbData.factionColours else bbData.factionColours[
                                  "neutral"], thumb=activeShip.icon if activeShip.hasIcon else requestedUser.avatar_url_as(size=64))
 
         if activeShip is None:
@@ -3105,7 +3034,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
                 if targetUserBBGuild.hasPlayChannel():
                     targetUserNameOrTag = IDAlertedUserMentionOrName(
                         "duels_challenge_incoming_new", dcGuild=targetUserDCGuild, bbGuild=targetUserBBGuild, dcUser=requestedUser, bbUser=targetBBUser)
-                    sentMsgs.append(await bbGlobals.client.get_channel(targetUserBBGuild.getPlayChannelId()).send(":crossed_swords: **" + str(message.author) + "** challenged " + targetUserNameOrTag + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString))
+                    sentMsgs.append(await targetUserBBGuild.getPlayChannel().send(":crossed_swords: **" + str(message.author) + "** challenged " + targetUserNameOrTag + " to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString))
             sentMsgs.append(await message.channel.send(":crossed_swords: " + message.author.mention + " challenged **" + str(requestedUser) + "** to duel for **" + str(stakes) + " Credits!**\nType `" + bbConfig.commandPrefix + "duel accept " + str(message.author.id) + "` (or `" + bbConfig.commandPrefix + "duel accept @" + message.author.name + "` if you're in the same server) To accept the challenge!\n" + duelExpiryTimeString))
         else:
             targetUserNameOrTag = IDAlertedUserMentionOrName(
@@ -3133,7 +3062,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
                 targetUserBBGuild = bbGlobals.guildsDB.getGuild(targetUserGuild.id)
                 if targetUserBBGuild.hasPlayChannel() and \
                         targetBBUser.isAlertedForID("duels_challenge_incoming_cancel", targetUserGuild, targetUserBBGuild, targetUserGuild.get_member(targetBBUser.id)):
-                    await bbGlobals.client.get_channel(targetUserBBGuild.getPlayChannelId()).send(":shield: " + requestedUser.mention + ", " + str(message.author) + " has cancelled their duel challenge.")
+                    await targetUserBBGuild.getPlayChannel().send(":shield: " + requestedUser.mention + ", " + str(message.author) + " has cancelled their duel challenge.")
         else:
             if targetBBUser.isAlertedForID("duels_challenge_incoming_cancel", message.guild, bbGlobals.guildsDB.getGuild(message.guild.id), message.guild.get_member(targetBBUser.id)):
                 await message.channel.send(":white_check_mark: You have cancelled your duel challenge for " + requestedUser.mention + ".")
@@ -3181,7 +3110,7 @@ async def cmd_source(message : discord.Message, args : str, isDM : bool):
     :param str args: ignored
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    srcEmbed = makeEmbed(authorName="BB Source Code", desc="I am written using the rewrite branch of discord's python API.\n",
+    srcEmbed = bbUtil.makeEmbed(authorName="BB Source Code", desc="I am written using the rewrite branch of discord's python API.\n",
                          col=discord.Colour.purple(), footerTxt="BountyBot Source", icon="https://image.flaticon.com/icons/png/512/25/25231.png")
     srcEmbed.add_field(name="__GitHub Repository__",
                        value="My source code is public, and open to community contribution.\n[Click here](https://github.com/Trimatix/GOF2BountyBot/) to view my GitHub repo - please note, the project's readme file has not been written yet!", inline=False)
@@ -3372,7 +3301,7 @@ async def cmd_transfer(message : discord.Message, args : str, isDM : bool):
     elif not requestedBBUser.canTransferGuild():
         await message.channel.send(":x: This command is still on cooldown. (" + bbUtil.td_format_noYM(requestedBBUser.guildTransferCooldownEnd - datetime.utcnow()) + " left)")
     else:
-        confirmEmbed = makeEmbed(desc="This command's cooldown is " + bbUtil.td_format_noYM(bbUtil.timeDeltaFromDict(bbConfig.homeGuildTransferCooldown)) + ".", footerTxt="This menu will expire in " + str(bbConfig.homeGuildTransferConfirmTimeoutSeconds) + " seconds.")
+        confirmEmbed = bbUtil.makeEmbed(desc="This command's cooldown is " + bbUtil.td_format_noYM(bbUtil.timeDeltaFromDict(bbConfig.homeGuildTransferCooldown)) + ".", footerTxt="This menu will expire in " + str(bbConfig.homeGuildTransferConfirmTimeoutSeconds) + " seconds.")
         confirmEmbed.add_field(name=bbConfig.defaultAcceptEmoji.sendable + " : Confirm transfer", value="‎", inline=False)
         confirmEmbed.add_field(name=bbConfig.defaultRejectEmoji.sendable + " : Cancel transfer", value="‎", inline=False)
         confirmMsg = await message.channel.send("Move your home server to '" + message.guild.name + "'?\n", embed=confirmEmbed)
@@ -3449,7 +3378,7 @@ async def admin_cmd_set_announce_channel(message : discord.Message, args : str, 
     elif args != "":
         await message.channel.send(":x: Invalid arguments! Can only be `off` to disable this server's announce channel, or no args to use this channel as the announce channel.")
     else:
-        requestedBBGuild.setAnnounceChannelId(message.channel.id)
+        requestedBBGuild.setAnnounceChannel(message.channel)
         await message.channel.send(":ballot_box_with_check: Announcements channel set!")
 
 bbCommands.register("set-announce-channel",
@@ -3512,7 +3441,7 @@ async def admin_cmd_set_play_channel(message : discord.Message, args : str, isDM
     elif args != "":
         await message.channel.send(":x: Invalid arguments! Can only be `off` to disable this server's play channel, or no args to use this channel as the play channel.")
     else:
-        requestedBBGuild.setPlayChannelId(message.channel.id)
+        requestedBBGuild.setPlayChannel(message.channel)
         await message.channel.send(":ballot_box_with_check: Bounty play channel set!")
 
 bbCommands.register("set-play-channel",
@@ -3538,7 +3467,7 @@ async def admin_cmd_admin_help(message : discord.Message, args : str, isDM : boo
         sendChannel = message.author.dm_channel
         sendDM = True
 
-    helpEmbed = makeEmbed(titleTxt="BB Administrator Commands",
+    helpEmbed = bbUtil.makeEmbed(titleTxt="BB Administrator Commands",
                           thumb=bbGlobals.client.user.avatar_url_as(size=64))
     for section in bbData.adminHelpDict.keys():
         helpEmbed.add_field(name="‎", value="__" +
@@ -3862,7 +3791,7 @@ async def dev_cmd_get_announce(message : discord.Message, args : str, isDM : boo
     :param str args: ignored
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    await message.channel.send("<#" + str(bbGlobals.guildsDB.getGuild(message.guild.id).getAnnounceChannelId()) + ">")
+    await message.channel.send("<#" + str(bbGlobals.guildsDB.getGuild(message.guild.id).getAnnounceChannel().id) + ">")
 
 bbCommands.register("get-announce", dev_cmd_get_announce, isDev=True)
 dmCommands.register("get-announce", err_nodm, isDev=True)
@@ -3889,7 +3818,7 @@ async def dev_cmd_get_play(message : discord.Message, args : str, isDM : bool):
     :param str args: ignored
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    await message.channel.send("<#" + str(bbGlobals.guildsDB.getGuild(message.guild.id).getPlayChannelId()) + ">")
+    await message.channel.send("<#" + str(bbGlobals.guildsDB.getGuild(message.guild.id).getPlayChannel().id) + ">")
 
 bbCommands.register("get-play", dev_cmd_get_play, isDev=True)
 dmCommands.register("get-play", err_nodm, isDev=True)
@@ -4095,7 +4024,7 @@ async def dev_cmd_del_item(message : discord.Message, args : str, isDM : bool):
 
     if item == "ship":
         itemName = requestedItem.getNameAndNick()
-        itemEmbed = makeEmbed(col=bbData.factionColours[requestedItem.manufacturer] if requestedItem.manufacturer in bbData.factionColours else bbData.factionColours[
+        itemEmbed = bbUtil.makeEmbed(col=bbData.factionColours[requestedItem.manufacturer] if requestedItem.manufacturer in bbData.factionColours else bbData.factionColours[
             "neutral"], thumb=requestedItem.icon if requestedItem.hasIcon else "")
 
         if requestedItem is None:
@@ -4187,7 +4116,7 @@ async def dev_cmd_del_item_key(message : discord.Message, args : str, isDM : boo
 
     if item == "ship":
         itemName = requestedItem.getNameAndNick()
-        itemEmbed = makeEmbed(col=bbData.factionColours[requestedItem.manufacturer] if requestedItem.manufacturer in bbData.factionColours else bbData.factionColours[
+        itemEmbed = bbUtil.makeEmbed(col=bbData.factionColours[requestedItem.manufacturer] if requestedItem.manufacturer in bbData.factionColours else bbData.factionColours[
             "neutral"], thumb=requestedItem.icon if requestedItem.hasIcon else "")
 
         if requestedItem is None:
@@ -4446,7 +4375,7 @@ async def dev_cmd_broadcast(message : discord.Message, args : str, isDM : bool):
             except ValueError:
                 pass
 
-            broadcastEmbed = makeEmbed(titleTxt=titleTxt, desc=desc, footerTxt=footerTxt,
+            broadcastEmbed = bbUtil.makeEmbed(titleTxt=titleTxt, desc=desc, footerTxt=footerTxt,
                                        thumb=thumb, img=img, authorName=authorName, icon=icon)
 
             try:
@@ -4472,11 +4401,11 @@ async def dev_cmd_broadcast(message : discord.Message, args : str, isDM : bool):
         if useAnnounceChannel:
             for guild in bbGlobals.guildsDB.guilds.values():
                 if guild.hasAnnounceChannel():
-                    await bbGlobals.client.get_channel(guild.getAnnounceChannelId()).send(msgText, embed=broadcastEmbed)
+                    await guild.getAnnounceChannel().send(msgText, embed=broadcastEmbed)
         else:
             for guild in bbGlobals.guildsDB.guilds.values():
                 if guild.hasPlayChannel():
-                    await bbGlobals.client.get_channel(guild.getPlayChannelId()).send(msgText, embed=broadcastEmbed)
+                    await guild.getPlayChannel().send(msgText, embed=broadcastEmbed)
 
 bbCommands.register("broadcast", dev_cmd_broadcast,
                     isDev=True, forceKeepArgsCasing=True)
@@ -4586,7 +4515,7 @@ async def dev_cmd_say(message : discord.Message, args : str, isDM : bool):
             except ValueError:
                 pass
 
-            broadcastEmbed = makeEmbed(titleTxt=titleTxt, desc=desc, footerTxt=footerTxt,
+            broadcastEmbed = bbUtil.makeEmbed(titleTxt=titleTxt, desc=desc, footerTxt=footerTxt,
                                        thumb=thumb, img=img, authorName=authorName, icon=icon)
 
             try:
@@ -4755,7 +4684,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
             return
         # create a new bounty at random for the specified user
         newBounty = bbBounty.Bounty(bountyDB=bbGlobals.bountiesDB, config=bbBountyConfig.BountyConfig(
-            name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(bbGlobals.client.get_user(requestedID).avatar_url_as(size=64)), aliases=[userTagOrDiscrim(args)]))
+            name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(bbGlobals.client.get_user(requestedID).avatar_url_as(size=64)), aliases=[bbUtil.userTagOrDiscrim(args)]))
 
     # if the faction is also given
     elif len(args.split("+")) == 2:
@@ -4767,7 +4696,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
         # create a bounty at random for the specified user and faction
         newFaction = args.split("+")[1]
         newBounty = bbBounty.Bounty(bountyDB=bbGlobals.bountiesDB, config=bbBountyConfig.BountyConfig(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(
-            bbGlobals.client.get_user(requestedID).avatar_url_as(size=64)), faction=newFaction, aliases=[userTagOrDiscrim(args.split(" ")[0])]))
+            bbGlobals.client.get_user(requestedID).avatar_url_as(size=64)), faction=newFaction, aliases=[bbUtil.userTagOrDiscrim(args.split(" ")[0])]))
 
     # if all arguments are given
     elif len(args.split("+")) == 10:
@@ -4835,7 +4764,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
 
         # create the bounty object
         newBounty = bbBounty.Bounty(bountyDB=bbGlobals.bountiesDB, config=bbBountyConfig.BountyConfig(faction=newFaction, name=newName, route=newRoute, start=newStart,
-                                                                                            end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon, aliases=[userTagOrDiscrim(newName)]))
+                                                                                            end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon, aliases=[bbUtil.userTagOrDiscrim(newName)]))
 
     # print an error for incorrect syntax
     else:
@@ -4868,7 +4797,7 @@ async def dev_cmd_refreshshop(message : discord.Message, args : str, isDM : bool
     guild.shop.refreshStock(level=level)
     await announceNewShopStock(guild.id)
     # if guild.hasPlayChannel():
-    #     await bbGlobals.client.get_channel(guild.getPlayChannelId()).send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
+    #     await guild.getPlayChannel().send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
 
 bbCommands.register("refreshshop", dev_cmd_refreshshop, isDev=True)
 dmCommands.register("refreshshop", err_nodm, isDev=True)
@@ -4943,7 +4872,7 @@ async def dev_cmd_debug_hangar(message : discord.Message, args : str, isDM : boo
 
     for page in range(1, maxPage+1):
 
-        hangarEmbed = makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items - page " + str(
+        hangarEmbed = bbUtil.makeEmbed(titleTxt="Hangar", desc=requestedUser.mention, col=bbData.factionColours["neutral"], footerTxt="All items - page " + str(
             page) + "/" + str(requestedBBUser.numInventoryPages("all", maxPerPage)), thumb=requestedUser.avatar_url_as(size=64))
         firstPlace = maxPerPage * (page - 1) + 1
 
@@ -5163,9 +5092,9 @@ async def on_ready():
 
 
 
+    bbGlobals.newBountiesTTDB = TimedTaskHeap.TimedTaskHeap()
     # Databases
     bbGlobals.usersDB = loadUsersDB(bbConfig.userDBPath)
-    bbGlobals.bountiesDB = loadBountiesDB(bbConfig.bountyDBPath)
     bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath)
 
     for guild in bbGlobals.guildsDB.getGuilds():
@@ -5190,15 +5119,15 @@ async def on_ready():
                                 "fixed-routeScale": bbConfig.newBountyFixedDelta,
                                 "random-routeScale": bbConfig.newBountyDelayRandomRange}
 
-    if bbConfig.newBountyDelayType == "fixed":
-        bbGlobals.newBountyTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
-    else:
-        try:
-            bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
-                bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
-        except KeyError:
-            raise ValueError(
-                "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
+    # if bbConfig.newBountyDelayType == "fixed":
+    #     bbGlobals.newBountiesTTDB.scheduleTask(TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty))
+    # else:
+    #     try:
+    #         bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
+    #             bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+    #     except KeyError:
+    #         raise ValueError(
+    #             "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
     bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
     bbGlobals.dbSaveTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.savePeriod), autoReschedule=True, expiryFunction=saveAllDBs)
