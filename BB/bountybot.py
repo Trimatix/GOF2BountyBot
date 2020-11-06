@@ -6124,20 +6124,20 @@ async def on_ready():
                                 "fixed-routeScale": bbConfig.newBountyFixedDelta,
                                 "random-routeScale": bbConfig.newBountyDelayRandomRange}
 
-    # if bbConfig.newBountyDelayType == "fixed":
-    #     bbGlobals.newBountyTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
-    # else:
-    #     try:
-    #         bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
-    #             bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
-    #     except KeyError:
-    #         raise ValueError(
-    #             "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
+    if bbConfig.newBountyDelayType == "fixed":
+        bbGlobals.newBountyTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+    else:
+        try:
+            bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
+                bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+        except KeyError:
+            raise ValueError(
+                "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
     
-    # bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
+    bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
     bbGlobals.dbSaveTT = TimedTask.TimedTask(expiryDelta=timeDeltaFromDict(bbConfig.savePeriod), autoReschedule=True, expiryFunction=saveAllDBs)
 
-    # bbGlobals.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
+    bbGlobals.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
 
     if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" +
@@ -6166,17 +6166,17 @@ async def on_ready():
             await asyncio.sleep(bbConfig.timedTaskLatenessThresholdSeconds)
         # elif bbConfig.timedTaskCheckingType == "dynamic":
 
-        # await bbGlobals.shopRefreshTT.doExpiryCheck()
+        await bbGlobals.shopRefreshTT.doExpiryCheck()
 
-        # if bbGlobals.newBountyDelayReset:
-        #     await bbGlobals.newBountyTT.forceExpire()
-        #     bbGlobals.newBountyDelayReset = False
-        # else:
-        #     await bbGlobals.newBountyTT.doExpiryCheck()
+        if bbGlobals.newBountyDelayReset:
+            await bbGlobals.newBountyTT.forceExpire()
+            bbGlobals.newBountyDelayReset = False
+        else:
+            await bbGlobals.newBountyTT.doExpiryCheck()
 
         await bbGlobals.dbSaveTT.doExpiryCheck()
 
-        # await bbGlobals.duelRequestTTDB.doTaskChecking()
+        await bbGlobals.duelRequestTTDB.doTaskChecking()
 
         await bbGlobals.reactionMenusTTDB.doTaskChecking()
 
