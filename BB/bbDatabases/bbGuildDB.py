@@ -135,7 +135,8 @@ class bbGuildDB:
         """Generate new stock for all shops belonging to the stored bbGuilds
         """
         for guild in self.guilds.values():
-            guild.shop.refreshStock()
+            if not guild.shopDisabled:
+                guild.shop.refreshStock()
 
     
     
