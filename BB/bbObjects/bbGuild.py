@@ -12,49 +12,6 @@ from ..logging import bbLogger
 from datetime import timedelta
 import random
 
-# TODO: Convert to random across two dicts
-def getRandomDelaySeconds(minmaxDict : Dict[str, int]) -> timedelta:
-    """Generate a random timedelta between the given minimum and maximum number of seconds, inclusive.
-    minMaxDict must contain keys "min" and "max" (case sensitive), with values of integers representing
-    the minimium and maximum number of seconds this function can generate (inclusive)
-    """
-    return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))
-
-
-def getRouteScaledBountyDelayFixed(baseDelayDict : Dict[str, int]) -> timedelta:
-    """New bounty delay generator, scaling a fixed delay by the length of the presently spawned bounty.
-
-    :param dict baseDelayDict: A bbUtil.timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
-    :return: A datetime.timedelta indicating the time to wait before spawning a new bounty
-    :rtype: datetime.timedelta
-    """
-    timeScale = bbConfig.fallbackRouteScale if bbGlobals.bountiesDB.latestBounty is None else len(bbGlobals.bountiesDB.latestBounty.route)
-    delay = bbUtil.timeDeltaFromDict(baseDelayDict) * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient
-    bbLogger.log("Main", "routeScaleBntyDelayFixed", "New bounty delay generated, " + \
-                                                    ("no latest criminal." if bbGlobals.bountiesDB.latestBounty is None else \
-                                                        ("latest criminal: '" + bbGlobals.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bbGlobals.bountiesDB.latestBounty.route)))) + \
-                                                    "\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bbGlobals.bountiesDB.latestBounty is None else "DELAY_GEN", noPrint=True)
-    return delay
-    
-
-def getRouteScaledBountyDelayRandom(baseDelayDict : Dict[str, int]) -> timedelta:
-    """New bounty delay generator, generating a random delay time between two points, scaled by the length of the presently spawned bounty.
-
-    :param dict baseDelayDict: A dictionary describing the minimum and maximum time in seconds to wait after a bounty is spawned with route length 1
-    :return: A datetime.timedelta indicating the time to wait before spawning a new bounty
-    :rtype: datetime.timedelta
-    """
-    timeScale = bbConfig.fallbackRouteScale if bbGlobals.bountiesDB.latestBounty is None else len(bbGlobals.bountiesDB.latestBounty.route)
-    delay = getRandomDelaySeconds({"min": baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient,
-                                    "max": baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient})
-    bbLogger.log("Main", "routeScaleBntyDelayRand", "New bounty delay generated, " + \
-                                                    ("no latest criminal." if bbGlobals.bountiesDB.latestBounty is None else \
-                                                        ("latest criminal: '" + bbGlobals.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(bbGlobals.bountiesDB.latestBounty.route)))) + \
-                                                    "\nRange: " + str((baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + "m - " + \
-                                                                    str((baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + \
-                                                    "m\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if bbGlobals.bountiesDB.latestBounty is None else "DELAY_GEN", noPrint=True)
-    return delay
-
 
 class bbGuild:
     """A class representing a guild in discord, and storing extra BountyBot-related information about it. 
@@ -82,7 +39,7 @@ class bbGuild:
     :var shopDisabled: Whether or not to disable this guild's bbShop and shop refreshing
     :vartype shopDisabled: bool
     :var dcGuild: This guild's corresponding discord.Guild object
-    :vartype dcGuild: None
+    :vartype dcGuild: discord.Guild
     """
 
     def __init__(self, id : int, bountiesDB: bbBountyDB.bbBountyDB, dcGuild: Guild, announceChannel=None, playChannel=None, shop=None, bountyBoardChannel=None, alertRoles={}, ownedRoleMenus=0, bountiesDisabled=False, shopDisabled=False):
@@ -121,13 +78,13 @@ class bbGuild:
                 self.alertRoles[alertID] = alertRoles[alertID] if alertID in alertRoles else -1
         
         self.ownedRoleMenus = ownedRoleMenus
-
+        self.dcGuild = dcGuild
         self.bountiesDB = bountiesDB
         self.bountiesDisabled = bountiesDisabled
 
-        bountyDelayGenerators = {"random": getRandomDelaySeconds,
-                                "fixed-routeScale": getRouteScaledBountyDelayFixed,
-                                "random-routeScale": getRouteScaledBountyDelayRandom}
+        bountyDelayGenerators = {"random": bbUtil.getRandomDelaySeconds,
+                                "fixed-routeScale": self.getRouteScaledBountyDelayFixed,
+                                "random-routeScale": self.getRouteScaledBountyDelayRandom}
 
         bountyDelayGeneratorArgs = {"random": bbConfig.newBountyDelayRandomRange,
                                     "fixed-routeScale": bbConfig.newBountyFixedDelta,
@@ -147,7 +104,7 @@ class bbGuild:
             else:
                 try:
                     bbGlobals.newBountyTT = TimedTask.DynamicRescheduleTask(
-                        bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=spawnAndAnnounceRandomBounty)
+                        bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
                 except KeyError:
                     raise ValueError(
                         "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
@@ -298,6 +255,41 @@ class bbGuild:
         self.bountyBoardChannel = None
         self.hasBountyBoardChannel = False
 
+
+    def getRouteScaledBountyDelayFixed(self, baseDelayDict : Dict[str, int]) -> timedelta:
+        """New bounty delay generator, scaling a fixed delay by the length of the presently spawned bounty.
+
+        :param dict baseDelayDict: A bbUtil.timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
+        :return: A datetime.timedelta indicating the time to wait before spawning a new bounty
+        :rtype: datetime.timedelta
+        """
+        timeScale = bbConfig.fallbackRouteScale if self.bountiesDB.latestBounty is None else len(self.bountiesDB.latestBounty.route)
+        delay = bbUtil.timeDeltaFromDict(baseDelayDict) * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient
+        bbLogger.log("Main", "routeScaleBntyDelayFixed", "New bounty delay generated, " + \
+                                                        ("no latest criminal." if self.bountiesDB.latestBounty is None else \
+                                                            ("latest criminal: '" + self.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(self.bountiesDB.latestBounty.route)))) + \
+                                                        "\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if self.bountiesDB.latestBounty is None else "DELAY_GEN", noPrint=True)
+        return delay
+        
+
+    def getRouteScaledBountyDelayRandom(self, baseDelayDict : Dict[str, int]) -> timedelta:
+        """New bounty delay generator, generating a random delay time between two points, scaled by the length of the presently spawned bounty.
+
+        :param dict baseDelayDict: A dictionary describing the minimum and maximum time in seconds to wait after a bounty is spawned with route length 1
+        :return: A datetime.timedelta indicating the time to wait before spawning a new bounty
+        :rtype: datetime.timedelta
+        """
+        timeScale = bbConfig.fallbackRouteScale if self.bountiesDB.latestBounty is None else len(self.bountiesDB.latestBounty.route)
+        delay = bbUtil.getRandomDelaySeconds({"min": baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient,
+                                        "max": baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient})
+        bbLogger.log("Main", "routeScaleBntyDelayRand", "New bounty delay generated, " + \
+                                                        ("no latest criminal." if self.bountiesDB.latestBounty is None else \
+                                                            ("latest criminal: '" + self.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(self.bountiesDB.latestBounty.route)))) + \
+                                                        "\nRange: " + str((baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + "m - " + \
+                                                                        str((baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient)/60) + \
+                                                        "m\nDelay picked: " + str(delay), category="newBounties", eventType="NONE_BTY" if self.bountiesDB.latestBounty is None else "DELAY_GEN", noPrint=True)
+        return delay
+
     
     async def announceNewBounty(self, newBounty : bbBounty.Bounty):
         """Announce the creation of a new bounty to this guild's announceChannel, if it has one
@@ -354,12 +346,49 @@ class bbGuild:
         """Generate a completely random bounty, spawn it, and announce it if this guild has
         an appropriate channel selected.
         """
+        if self.bountiesDisabled:
+            raise ValueError("Attempted to spawn a bounty into a guild where bounties are disabled")
         # ensure a new bounty can be created
         if self.bountiesDB.canMakeBounty():
             newBounty = bbBounty.Bounty(bountyDB=self.bountiesDB)
             # activate and announce the bounty
-            bbGlobals.bountiesDB.addBounty(newBounty)
-            await announceNewBounty(newBounty)
+            self.bountiesDB.addBounty(newBounty)
+            await self.announceNewBounty(newBounty)
+
+
+    async def announceBountyWon(self, bounty : bbBounty.Bounty, rewards : Dict[int, Dict[str, Union[int, bool]]], winningUserId : int):
+        """Announce the completion of a bounty
+        Messages will be sent to the playChannel if one is set
+
+        :param bbBounty bounty: the bounty to announce
+        :param dict rewards: the rewards dictionary as defined by bbBounty.calculateRewards
+        :param int winningUserId: the user ID of the discord user that won the bounty
+        """
+        if self.dcGuild is not None:
+            if self.hasPlayChannel():
+                # Create the announcement embed
+                rewardsEmbed = bbUtil.makeEmbed(titleTxt="Bounty Complete!", authorName=bbUtil.criminalNameOrDiscrim(bounty.criminal) + " Arrested",
+                                        icon=bounty.criminal.icon, col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
+
+                # Add the winning user to the embed
+                rewardsEmbed.add_field(name="1. 🏆 " + str(rewards[winningUserId]["reward"]) + " credits:", value="<@" + str(winningUserId) + "> checked " + str(
+                    int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
+
+                # The index of the current user in the embed
+                place = 2
+                # Loop over all non-winning users in the rewards dictionary
+                for userID in rewards:
+                    if not rewards[userID]["won"]:
+                        rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value="<@" + str(userID) + "> checked " + str(
+                            int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
+                        place += 1
+
+                # Send the announcement to the guild's playChannel
+                await self.getPlayChannel().send(":trophy: **You win!**\n**" + self.dcGuild.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+
+        else:
+            bbLogger.log("Main", "AnncBtyWn", "None dcGuild received when posting bounty won to guild " + bbGlobals.client.get_guild(
+                self.id).name + "#" + str(self.id) + " in channel ?#" + str(self.getPlayChannel().id), eventType="DCGUILD_NONE")
 
 
     def toDictNoId(self) -> dict:
