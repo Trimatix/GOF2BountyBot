@@ -305,6 +305,14 @@ class BountyBoardChannel:
             await self.removeBounty(bounty)
 
 
+    async def clear(self):
+        """Clear all bounty listings on the board.
+        """
+        for fac in self.bountyMessages:
+            for bounty in self.bountyMessages[fac]:
+                await self.removeBounty(bounty)
+
+
     def toDict(self) -> dict:
         """Serialise this BBC to dictionary format
 

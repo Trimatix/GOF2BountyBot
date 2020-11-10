@@ -41,7 +41,7 @@ class TimedTaskHeap:
         A task's 'gravestone' represents the task no longer being able to be called.
         I.e, it is expired (whether manually or through timeout) and does not auto-reschedule.
         """
-        while len(self.tasks) > 0 and self.tasksHeap[0].gravestone:
+        while len(self.tasksHeap) > 0 and self.tasksHeap[0].gravestone:
             heappop(self.tasksHeap)
 
 
