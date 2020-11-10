@@ -1,5 +1,9 @@
 from ..bbObjects import bbGuild
 from typing import List
+from . import bbBountyDB
+from ..bbConfig import bbData, bbConfig
+from .. import bbGlobals
+from ..logging import bbLogger
 
 
 class bbGuildDB:
@@ -103,7 +107,7 @@ class bbGuildDB:
         if self.guildIdExists(id):
             raise KeyError("Attempted to add a guild that already exists: " + id)
         # Create and return a bbGuild for the requested ID
-        self.guilds[id] = bbGuild.bbGuild(id)
+        self.guilds[id] = bbGuild.bbGuild(id, bbBountyDB.bbBountyDB(bbData.bountyFactions, bbConfig.maxBountiesPerFaction), bbGlobals.client.get_guild(id))
         return self.guilds[id]
 
     
@@ -176,5 +180,10 @@ def fromDict(guildsDBDict : dict, dbReload=False) -> bbGuildDB:
     for id in guildsDBDict.keys():
         # Instance new bbGuilds for each ID, with the provided data
         # JSON stores properties as strings, so ids must be converted to int first.
-        newDB.addGuildObj(bbGuild.fromDict(int(id), guildsDBDict[id], dbReload=dbReload))
+        try:
+            newDB.addGuildObj(bbGuild.fromDict(int(id), guildsDBDict[id], dbReload=dbReload))
+        # Ignore guilds that don't have a corresponding dcGuild
+        except bbGuild.NoneDCGuildObj:
+            bbLogger.log("bbGuildDB", "fromDict", "no corresponding discord guild found, guild removed from database",
+                 category="guildsDB", eventType="NULL_GLD")
     return newDB
