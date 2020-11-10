@@ -185,6 +185,6 @@ def fromDict(guildsDBDict : dict, dbReload=False) -> bbGuildDB:
             newDB.addGuildObj(bbGuild.fromDict(int(id), guildsDBDict[id], dbReload=dbReload))
         # Ignore guilds that don't have a corresponding dcGuild
         except bbGuild.NoneDCGuildObj:
-            bbLogger.log("bbGuildDB", "fromDict", "no corresponding discord guild found, guild removed from database",
+            bbLogger.log("bbGuildDB", "fromDict", "no corresponding discord guild found for ID " + id + ", guild removed from database",
                  category="guildsDB", eventType="NULL_GLD")
     return newDB

@@ -289,7 +289,7 @@ class bbGuild:
         :rtype: datetime.timedelta
         """
         timeScale = bbConfig.fallbackRouteScale if self.bountiesDB.latestBounty is None else len(self.bountiesDB.latestBounty.route)
-        delay = bblib.timeUtilUtil.getRandomDelaySeconds({"min": baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient,
+        delay = lib.timeUtil.getRandomDelaySeconds({"min": baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient,
                                         "max": baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient})
         bbLogger.log("Main", "routeScaleBntyDelayRand", "New bounty delay generated, " + \
                                                         ("no latest criminal." if self.bountiesDB.latestBounty is None else \
@@ -478,6 +478,9 @@ def fromDict(id : int, guildDict : dict, dbReload=False) -> bbGuild:
     :rtype: bbGuild
     """
     dcGuild = bbGlobals.client.get_guild(id)
+    if not isinstance(dcGuild, Guild):
+        raise NoneDCGuildObj("Could not get guild object for id " + str(id))
+
     announceChannel = None
     playChannel = None
 

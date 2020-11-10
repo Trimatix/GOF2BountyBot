@@ -1,4 +1,6 @@
 from datetime import timedelta
+import random
+from typing import Dict
 
 def td_format_noYM(td_object : timedelta) -> str:
     """Create a string describing the attributes of a given datetime.timedelta object, in a
@@ -43,3 +45,12 @@ def timeDeltaFromDict(timeDict : dict) -> timedelta:
                      seconds=timeDict["seconds"] if "seconds" in timeDict else 0,
                      microseconds=timeDict["microseconds"] if "microseconds" in timeDict else 0,
                      milliseconds=timeDict["milliseconds"] if "milliseconds" in timeDict else 0)
+
+
+# TODO: Convert to random across two dicts
+def getRandomDelaySeconds(minmaxDict : Dict[str, int]) -> timedelta:
+    """Generate a random timedelta between the given minimum and maximum number of seconds, inclusive.
+    minMaxDict must contain keys "min" and "max" (case sensitive), with values of integers representing
+    the minimium and maximum number of seconds this function can generate (inclusive)
+    """
+    return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))

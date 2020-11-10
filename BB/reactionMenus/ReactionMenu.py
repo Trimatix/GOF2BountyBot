@@ -258,7 +258,7 @@ class ReactionMenu:
     :var msg: the message where this menu is embedded
     :vartype msg: discord.Message
     :var options: A dictionary storing all of the menu's options and their behaviour
-    :vartype options: dict[bblib.emojisUtil.dumbEmoji, ReactionMenuOption]
+    :vartype options: dict[lib.emojis.dumbEmoji, ReactionMenuOption]
     :var titleTxt: The content of the embed title
     :vartype titleTxt: str
     :var desc: he content of the embed description; appears at the top below the title
@@ -346,7 +346,7 @@ class ReactionMenu:
         if member has targetRole.
         Both may be specified and required.
 
-        :param bbUtlib.emojisil.dumbEmoji emoji: The emoji that member reacted to the menu with
+        :param lib.emojis.dumbEmoji emoji: The emoji that member reacted to the menu with
         :param discord.Member member: The member that added the emoji reaction
         :return: The result of the corresponding menu option's addFunc, if any
         """

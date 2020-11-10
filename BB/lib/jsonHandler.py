@@ -1,5 +1,4 @@
 import json
-from ..bbDatabases import bbUserDB, bbGuildDB, bbBountyDB, reactionMenuDB
 from ..bbConfig import bbConfig
 
 
@@ -27,43 +26,6 @@ def writeJSON(dbFile : str, db : dict):
     f = open(dbFile, "w")
     txt = f.write(txt)
     f.close()
-
-
-def loadUsersDB(filePath : str) -> bbUserDB.bbUserDB:
-    """Build a bbUserDB from the specified JSON file.
-
-    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
-    :return: a bbUserDB as described by the dictionary-serialized representation stored in the file located in filePath.
-    """
-    return bbUserDB.fromDict(readJSON(filePath))
-
-
-def loadGuildsDB(filePath : str) -> bbGuildDB.bbGuildDB:
-    """Build a bbGuildDB from the specified JSON file.
-
-    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
-    :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
-    """
-    return bbGuildDB.fromDict(readJSON(filePath))
-
-
-def loadBountiesDB(filePath : str) -> bbBountyDB.bbBountyDB:
-    """Build a bbBountyDB from the specified JSON file.
-
-    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
-    :return: a bbBountyDB as described by the dictionary-serialized representation stored in the file located in filePath.
-    """
-    return bbBountyDB.fromDict(readJSON(filePath), bbConfig.maxBountiesPerFaction, dbReload=True)
-
-
-async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.reactionMenuDB:
-    """Build a reactionMenuDB from the specified JSON file.
-    This method must be called asynchronously, to allow awaiting of discord message fetching functions.
-
-    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
-    :return: a reactionMenuDB as described by the dictionary-serialized representation stored in the file located in filePath.
-    """
-    return await reactionMenuDB.fromDict(readJSON(filePath))
 
 
 def saveDB(dbPath : str, db):

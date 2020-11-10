@@ -103,7 +103,7 @@ async def fromDict(rmDict : dict) -> ReactionDuelChallengeMenu:
 
     reactionRoles = {}
     for reaction in rmDict["options"]:
-        reactionRoles[bblib.emojisUtil.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
+        reactionRoles[lib.emojis.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
 
     timeoutTT = None
     if "timeout" in rmDict:

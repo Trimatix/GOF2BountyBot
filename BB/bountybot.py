@@ -52,6 +52,39 @@ botLoggedIn = False
 
 
 
+####### DATABASE FUNCTIONS #####
+
+
+
+def loadUsersDB(filePath : str) -> bbUserDB.bbUserDB:
+    """Build a bbUserDB from the specified JSON file.
+
+    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
+    :return: a bbUserDB as described by the dictionary-serialized representation stored in the file located in filePath.
+    """
+    return bbUserDB.fromDict(lib.jsonHandler.readJSON(filePath))
+
+
+def loadGuildsDB(filePath : str) -> bbGuildDB.bbGuildDB:
+    """Build a bbGuildDB from the specified JSON file.
+
+    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
+    :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
+    """
+    return bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath))
+
+
+async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.reactionMenuDB:
+    """Build a reactionMenuDB from the specified JSON file.
+    This method must be called asynchronously, to allow awaiting of discord message fetching functions.
+
+    :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
+    :return: a reactionMenuDB as described by the dictionary-serialized representation stored in the file located in filePath.
+    """
+    return await reactionMenuDB.fromDict(lib.jsonHandler.readJSON(filePath))
+
+
+
 ####### UTIL FUNCTIONS #######
 
 
@@ -5036,8 +5069,8 @@ async def on_ready():
 
     bbGlobals.newBountiesTTDB = TimedTaskHeap.TimedTaskHeap()
     # Databases
-    bbGlobals.usersDB = lib.jsonHandler.loadUsersDB(bbConfig.userDBPath)
-    bbGlobals.guildsDB = lib.jsonHandler.loadGuildsDB(bbConfig.guildDBPath)
+    bbGlobals.usersDB = loadUsersDB(bbConfig.userDBPath)
+    bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath)
 
     for guild in bbGlobals.guildsDB.getGuilds():
         if guild.hasBountyBoardChannel:
@@ -5071,7 +5104,7 @@ async def on_ready():
         except IOError as e:
             bbLogger.log("main","on_ready","IOError creating reactionMenuDB save file: " + e.__class__.__name__, trace=traceback.format_exc())
 
-    bbGlobals.reactionMenusDB = await lib.jsonHandler.loadReactionMenusDB(bbConfig.reactionMenusDBPath)
+    bbGlobals.reactionMenusDB = await loadReactionMenusDB(bbConfig.reactionMenusDBPath)
 
     # bbGlobals.guildsDB.addGuildID(733652363235033088)
 
