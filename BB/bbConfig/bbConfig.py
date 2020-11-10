@@ -304,9 +304,6 @@ devTitle = "officer"
 adminTitle = "commander"
 userTitle = "pilot"
 
-# Servers where bountyBot commands are disabled. Currently this is just the emoji servers:
-disabledServers = [723704980246233219, 723702782640783361, 723708988830515231, 723704665560055848, 723705817764986900, 723703454635393056, 723708655031156742, 723706906517962814, 723704087962583131, 723704350131748935]
-
 
 
 ##### HANGARS #####
@@ -334,6 +331,8 @@ userAlertsIDsDefaults = {   "bounties_new": False,
                             "system_updates_minor": False,
                             "system_misc": False}
 
+homeGuildTransferCooldown = {"weeks":1}
+
 
 
 ##### REACTION MENUS #####
@@ -344,3 +343,4 @@ pollMenuDefaultTimeout = {"hours": 2}
 expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
+homeGuildTransferConfirmTimeoutSeconds = 60

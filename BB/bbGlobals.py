@@ -5,12 +5,11 @@ botLoggedIn = False
 
 # Databases
 usersDB = None
-bountiesDB = None
 guildsDB = None
 
 
 # Timed tasks
-newBountyTT = None
+newBountiesTTDB = None
 
 shopRefreshTT = None
 dbSaveTT = None
@@ -24,5 +23,4 @@ reactionMenusTTDB = None
 
 
 # Scheduling overrides
-newBountyDelayReset = False
 newBountyFixedDeltaChanged = False

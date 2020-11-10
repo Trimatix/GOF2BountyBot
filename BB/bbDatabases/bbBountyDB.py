@@ -5,6 +5,8 @@ class bbBountyDB:
     """A database of bbObject.bounties.bbBounty.
     Bounty criminal names and faction names must be unique within the database.
     Faction names are case sensitive.
+
+    TODO: Give factions and maxBountiesPerFaction default values
     
     :var bounties: Dictionary of faction name to list of bounties
     :vartype bounties: dict

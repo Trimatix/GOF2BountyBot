@@ -106,7 +106,7 @@ async def fightDuel(sourceUser : User, targetUser : User, duelReq : DuelRequest,
             if targetDCGuild is not None:
                 targetBBGuild = bbGlobals.guildsDB.getGuild(targetDCGuild.id)
                 if targetBBGuild.hasPlayChannel():
-                    await bbGlobals.client.get_channel(targetBBGuild.getPlayChannelId()).send(":crossed_swords: **Stalemate!** " + targetDCGuild.get_member(targetUser.id).mention + " and " + str(sourceUser) + " drew in a duel!")
+                    await targetBBGuild.getPlayChannel().send(":crossed_swords: **Stalemate!** " + targetDCGuild.get_member(targetUser.id).mention + " and " + str(sourceUser) + " drew in a duel!")
         else:
             await acceptMsg.channel.send(":crossed_swords: **Stalemate!** " + targetUser.mention + " and " + sourceUser.mention + " drew in a duel!")
     else:
@@ -140,7 +140,7 @@ async def fightDuel(sourceUser : User, targetUser : User, duelReq : DuelRequest,
             if winnerDCGuild is not None:
                 winnerBBGuild = bbGlobals.guildsDB.getGuild(winnerDCGuild.id)
                 if winnerBBGuild.hasPlayChannel():
-                    await bbGlobals.client.get_channel(winnerBBGuild.getPlayChannelId()).send(":crossed_swords: **Fight!** " + winnerDCGuild.get_member(winningBBUser.id).mention + " beat " + str(bbGlobals.client.get_user(losingBBUser.id)) + " in a duel!\n" + creditsMsg, embed=statsEmbed)
+                    await winnerBBGuild.getPlayChannel().send(":crossed_swords: **Fight!** " + winnerDCGuild.get_member(winningBBUser.id).mention + " beat " + str(bbGlobals.client.get_user(losingBBUser.id)) + " in a duel!\n" + creditsMsg, embed=statsEmbed)
         else:
             if acceptMsg.guild.get_member(losingBBUser.id) is None:
                 await acceptMsg.channel.send(":crossed_swords: **Fight!** " + bbGlobals.client.get_user(winningBBUser.id).mention + " beat " + str(bbGlobals.client.get_user(losingBBUser.id)) + " in a duel!\n" + creditsMsg, embed=statsEmbed)
@@ -148,7 +148,7 @@ async def fightDuel(sourceUser : User, targetUser : User, duelReq : DuelRequest,
                 if loserDCGuild is not None:
                     loserBBGuild = bbGlobals.guildsDB.getGuild(loserDCGuild.id)
                     if loserBBGuild.hasPlayChannel():
-                        await bbGlobals.client.get_channel(loserBBGuild.getPlayChannelId()).send(":crossed_swords: **Fight!** " + str(bbGlobals.client.get_user(winningBBUser.id)) + " beat " + loserDCGuild.get_member(losingBBUser.id).mention + " in a duel!\n" + creditsMsg, embed=statsEmbed)
+                        await loserBBGuild.getPlayChannel().send(":crossed_swords: **Fight!** " + str(bbGlobals.client.get_user(winningBBUser.id)) + " beat " + loserDCGuild.get_member(losingBBUser.id).mention + " in a duel!\n" + creditsMsg, embed=statsEmbed)
             else:
                 await acceptMsg.channel.send(":crossed_swords: **Fight!** " + bbGlobals.client.get_user(winningBBUser.id).mention + " beat " + bbGlobals.client.get_user(losingBBUser.id).mention + " in a duel!\n" + creditsMsg, embed=statsEmbed)
 
@@ -182,4 +182,4 @@ async def rejectDuel(duelReq : DuelRequest, rejectMsg : Message, challenger : Us
         if targetDCGuild is not None:
             targetBBGuild = bbGlobals.guildsDB.getGuild(targetDCGuild.id)
             if targetBBGuild.hasPlayChannel():
-                await bbGlobals.client.get_channel(targetBBGuild.getPlayChannelId()).send(":-1: <@" + str(duelReq.sourceBBUser.id) + ">, **" + str(recipient) + "** has rejected your duel request!")
+                await targetBBGuild.getPlayChannel().send(":-1: <@" + str(duelReq.sourceBBUser.id) + ">, **" + str(recipient) + "** has rejected your duel request!")

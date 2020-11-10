@@ -4,11 +4,12 @@ from typing import Union, List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from .bbObjects.items import bbShip
     from discord import PartialEmoji, Guild, User
-    from datetime import timedelta
     from .bbObjects import bbUser
+    from .bbObjects.bounties import bbCriminal
 
 from .bbObjects.bounties import bbSystem
 
+from datetime import timedelta
 import json
 import math
 import random
@@ -16,6 +17,8 @@ import inspect
 from emoji import UNICODE_EMOJI
 from . import bbGlobals
 from .logging import bbLogger
+
+from discord import Embed, Colour
 
 
 def readJSON(dbFile : str) -> dict:
@@ -379,7 +382,7 @@ class dumbEmoji:
         :return: True of this emoji is semantically equal to the given emoji, False otherwise
         :rtype: bool
         """
-        return type(other) == dumbEmoji and self.isID == other.isID and (self.id == other.id or self.unicode == other.unicode)
+        return type(other) == dumbEmoji and ((self.isID and other.isID and self.id == other.id) or (self.isUnicode and other.isUnicode and self.unicode == other.unicode))
 
     
     def __str__(self) -> str:
@@ -479,6 +482,23 @@ def dumbEmojiFromPartial(e : PartialEmoji) -> dumbEmoji:
         return dumbEmoji(unicode=e.name)
     else:
         return dumbEmoji(id=e.id)
+
+
+def timeDeltaFromDict(timeDict : dict) -> timedelta:
+    """Construct a datetime.timedelta from a dictionary,
+    transforming keys into keyword arguments for the timedelta constructor.
+
+    :param dict timeDict: dictionary containing measurements for each time interval. i.e weeks, days, hours, minutes, seconds, microseconds and milliseconds. all are optional and case sensitive.
+    :return: a timedelta with all of the attributes requested in the dictionary.
+    :rtype: datetime.timedelta
+    """
+    return timedelta(weeks=timeDict["weeks"] if "weeks" in timeDict else 0,
+                     days=timeDict["days"] if "days" in timeDict else 0,
+                     hours=timeDict["hours"] if "hours" in timeDict else 0,
+                     minutes=timeDict["minutes"] if "minutes" in timeDict else 0,
+                     seconds=timeDict["seconds"] if "seconds" in timeDict else 0,
+                     microseconds=timeDict["microseconds"] if "microseconds" in timeDict else 0,
+                     milliseconds=timeDict["milliseconds"] if "milliseconds" in timeDict else 0)
 
 
 def td_format_noYM(td_object : timedelta) -> str:
@@ -616,3 +636,71 @@ def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
             return userAttempt
     # Handle user names and user name+discrim combinations
     return dcGuild.get_member_named(uRef)
+
+
+def makeEmbed(titleTxt="", desc="", col=Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> Embed:
+    """Factory function building a simple discord embed from the provided arguments.
+
+    :param str titleTxt: The title of the embed (Default "")
+    :param str desc: The description of the embed; appears at the top below the title (Default "")
+    :param discord.Colour col: The colour of the side strip of the embed (Default discord.Colour.blue())
+    :param str footerTxt: Secondary description appearing at the bottom of the embed (Default "")
+    :param str img: Large icon appearing as the content of the embed, left aligned like a field (Default "")
+    :param str thumb: larger image appearing to the right of the title (Default "")
+    :param str authorName: Secondary title for the embed (Default "")
+    :param str icon: smaller image to the left of authorName. AuthorName is required for this to be displayed. (Default "")
+    :return: a new discord embed as described in the given parameters
+    :rtype: discord.Embed
+    """
+    embed = Embed(title=titleTxt, description=desc, colour=col)
+    if footerTxt != "":
+        embed.set_footer(text=footerTxt)
+    embed.set_image(url=img)
+    if thumb != "":
+        embed.set_thumbnail(url=thumb)
+    if icon != "":
+        embed.set_author(name=authorName, icon_url=icon)
+    return embed
+
+
+def userTagOrDiscrim(userID : str, guild=None) -> str:
+    """If a passed user mention or ID is valid and shares a common server with the bot,
+    return the user's name and discriminator. TODO: Should probably change this to display name
+    Otherwise, return the passed userID.
+
+    :param str userID: A user mention or ID in string form, to attempt to convert to name and discrim
+    :return: The user's name and discriminator if the user is reachable, userID otherwise
+    :rtype: str
+    """
+    if guild is None:
+        userObj = bbGlobals.client.get_user(int(userID.lstrip("<@!").rstrip(">")))
+    else:
+        userObj = guild.get_member(int(userID.lstrip("<@!").rstrip(">")))
+    if userObj is not None:
+        return userObj.name + "#" + userObj.discriminator
+    # Return the given mention as a fall back - might replace this with '#UNKNOWNUSER#' at some point.
+    bbLogger.log("Main", "uTgOrDscrm", "Unknown user requested." + (("Guild:" + guild.name + "#" + str(str(guild.id)))
+                                                                    if guild is not None else "Global/NoGuild") + ". uID:" + str(userID), eventType="UKNWN_USR")
+    return userID
+
+
+def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
+    """If a passed criminal is a player, attempt to return the user's name and discriminator.
+    Otherwise, return the passed criminal's name. TODO: Should probably change this to display name
+
+    :param bbCriminal criminal: criminal whose name to attempt to convert to name and discrim
+    :return: The user's name and discriminator if the criminal is a player, criminal.name otherwise
+    :rtype: str
+    """
+    if not criminal.isPlayer:
+        return criminal.name
+    return userTagOrDiscrim(criminal.name)
+
+
+# TODO: Convert to random across two dicts
+def getRandomDelaySeconds(minmaxDict : Dict[str, int]) -> timedelta:
+    """Generate a random timedelta between the given minimum and maximum number of seconds, inclusive.
+    minMaxDict must contain keys "min" and "max" (case sensitive), with values of integers representing
+    the minimium and maximum number of seconds this function can generate (inclusive)
+    """
+    return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))
