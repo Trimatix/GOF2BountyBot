@@ -18,7 +18,7 @@ from emoji import UNICODE_EMOJI
 from . import bbGlobals
 from .logging import bbLogger
 
-from discord import Embed
+from discord import Embed, Colour
 
 
 def readJSON(dbFile : str) -> dict:
@@ -638,7 +638,7 @@ def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
     return dcGuild.get_member_named(uRef)
 
 
-def makeEmbed(titleTxt="", desc="", col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> Embed:
+def makeEmbed(titleTxt="", desc="", col=Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> Embed:
     """Factory function building a simple discord embed from the provided arguments.
 
     :param str titleTxt: The title of the embed (Default "")
