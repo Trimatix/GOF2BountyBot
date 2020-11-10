@@ -36,17 +36,18 @@ class bbShop:
     :vartype turretsStock: bbInventory
     """
 
-    def __init__(self, maxShips=bbConfig.shopDefaultShipsNum, maxModules=bbConfig.shopDefaultModulesNum, maxWeapons=bbConfig.shopDefaultWeaponsNum, maxTurrets=bbConfig.shopDefaultTurretsNum, shipsStock=bbInventory.bbInventory(), weaponsStock=bbInventory.bbInventory(), modulesStock=bbInventory.bbInventory(), turretsStock=bbInventory.bbInventory(), currentTechLevel=bbConfig.minTechLevel):
+    def __init__(self, maxShips=bbConfig.shopDefaultShipsNum, maxModules=bbConfig.shopDefaultModulesNum, maxWeapons=bbConfig.shopDefaultWeaponsNum, maxTurrets=bbConfig.shopDefaultTurretsNum, shipsStock=bbInventory.bbInventory(), weaponsStock=bbInventory.bbInventory(), modulesStock=bbInventory.bbInventory(), turretsStock=bbInventory.bbInventory(), currentTechLevel=bbConfig.minTechLevel, noRefresh=False):
         """
         :param int maxShips: The maximum number of ships generated on every stock refresh. (Default bbConfig.shopDefaultShipsNum)
         :param int maxModules: The maximum number of modules generated on every stock refresh. (Default bbConfig.shopDefaultModulesNum)
         :param int maxWeapons: The maximum number of weapons generated on every stock refresh. (Default bbConfig.shopDefaultWeaponsNum)
         :param int maxTurrets: The maximum number of turrets generated on every stock refresh. (Default bbConfig.shopDefaultTurretsNum)
         :param int currentTechLevel: The current tech level of the shop, influencing the tech levels of the stock generated upon refresh. (Default empty bbInventory)
-        :param bbInventory shipsStock: [⚠ Currently ignored due to a bug] The shop's current stock of ships (Default empty bbInventory)
-        :param bbInventory weaponsStock: [⚠ Currently ignored due to a bug] The shop's current stock of weapons (Default empty bbInventory)
-        :param bbInventory modulesStock: [⚠ Currently ignored due to a bug] The shop's current stock of modules (Default empty bbInventory)
-        :param bbInventory turretsStock: [⚠ Currently ignored due to a bug] The shop's current stock of turrets (Default bbConfig.minTechLevel)
+        :param bbInventory shipsStock: The shop's current stock of ships (Default empty bbInventory)
+        :param bbInventory weaponsStock: The shop's current stock of weapons (Default empty bbInventory)
+        :param bbInventory modulesStock: The shop's current stock of modules (Default empty bbInventory)
+        :param bbInventory turretsStock: The shop's current stock of turrets (Default bbConfig.minTechLevel)
+        :param bool noRefresh: By default, if all shop stocks are empty, the shop will refresh. Give True here to disable this functionality and allow empty shops. (Default False)
         """
         
         self.maxShips = maxShips
@@ -61,7 +62,7 @@ class bbShop:
         self.modulesStock = bbInventory.bbInventory()
         self.turretsStock = bbInventory.bbInventory()
 
-        if shipsStock.isEmpty() and weaponsStock.isEmpty() and modulesStock.isEmpty() and turretsStock.isEmpty():
+        if (not noRefresh) and shipsStock.isEmpty() and weaponsStock.isEmpty() and modulesStock.isEmpty() and turretsStock.isEmpty():
             self.refreshStock()
         else:
             for itemListing in shipsStock.items.values():
