@@ -168,23 +168,22 @@ async def removeBountyBoardChannelMessage(guild : bbGuild.bbGuild, bounty : bbBo
         raise KeyError("The requested bbGuild (" + str(guild.id) + ") does not have a BountyBoardChannel listing for the given bounty: " + bounty.criminal.name)
 
 
-async def updateAllBountyBoardChannels(bounty : bbBounty.Bounty, bountyComplete=False):
-    """Update BBC listings for the given bounty across all joined servers.
+async def updateBountyBoardChannel(guild: bbGuild.bbGuild, bounty : bbBounty.Bounty, bountyComplete=False):
+    """Update the BBC listing for the given bounty in the given server.
 
+    :param bbGuild.bbGuild guild: The guild in which to update the listing
     :param bbBounty bounty: The bounty whose listings should be updated
     :param bool bountyComplete: Whether or not the bounty has now been completed. When True, bounty listings will be removed rather than updated. (Default False)
     """
-    newBountyMsg = "A new bounty is now available from **" + \
-        bounty.faction.title() + "** central command:"
-    for guild in bbGlobals.guildsDB.getGuilds():
-        if guild.hasBountyBoardChannel:
-            if bountyComplete and guild.bountyBoardChannel.hasMessageForBounty(bounty):
-                await removeBountyBoardChannelMessage(guild, bounty)
+    if guild.hasBountyBoardChannel:
+        if bountyComplete and guild.bountyBoardChannel.hasMessageForBounty(bounty):
+            await removeBountyBoardChannelMessage(guild, bounty)
+        else:
+            if not guild.bountyBoardChannel.hasMessageForBounty(bounty):
+                await makeBountyBoardChannelMessage(guild, bounty, "A new bounty is now available from **" + \
+                                                                    bounty.faction.title() + "** central command:")
             else:
-                if not guild.bountyBoardChannel.hasMessageForBounty(bounty):
-                    await makeBountyBoardChannelMessage(guild, bounty, newBountyMsg)
-                else:
-                    await guild.bountyBoardChannel.updateBountyMessage(bounty)
+                await guild.bountyBoardChannel.updateBountyMessage(bounty)
 
 
 async def announceNewShopStock(guildID=-1):
@@ -925,7 +924,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
 
                 if checkResult != 0:
                     systemInBountyRoute = True
-                    await updateAllBountyBoardChannels(bounty, bountyComplete=checkResult == 3)
+                    await updateBountyBoardChannel(callingBBGuild, bounty, bountyComplete=checkResult == 3)
 
             # remove all completed bounties
             for bounty in toPop:
@@ -948,26 +947,10 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
             requestedBBUser.bountyWins += 1
             await message.channel.send(sightedCriminalsStr + "\n" + ":moneybag: **" + message.author.display_name + "**, you now have **" + str(requestedBBUser.credits) + " Credits!**\n" +
                                        ("You have now reached the maximum number of bounty wins allowed for today! Please check back tomorrow." if dailyBountiesMaxReached else "You have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"))
-
-            if sightedCriminalsStr != "":
-                for currentGuild in bbGlobals.guildsDB.getGuilds():
-                    if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
-                        currentCh = currentGuild.getPlayChannel()
-                        if currentCh is not None:
-                            await currentCh.send(sightedCriminalsStr)
+                                       
         # If no bounty was won, print an error message
         else:
             await message.channel.send(":telescope: **" + message.author.display_name + "**, you did not find any criminals in **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
-
-            for currentGuild in bbGlobals.guildsDB.getGuilds():
-                if bbGlobals.client.get_guild(currentGuild.id) is not None:
-                    if currentGuild.id != message.guild.id and currentGuild.hasPlayChannel():
-                        currentCh = currentGuild.getPlayChannel()
-                        if currentCh is not None:
-                            await currentCh.send(":telescope: **" + str(message.author) + "** checked **" + requestedSystem.title() + "**!\n" + sightedCriminalsStr)
-                        else:
-                            bbLogger.log("Main", "cmd_chk", "None playchannel received when posting global failed check to guild " + bbGlobals.client.get_guild(
-                                currentGuild.id).name + "#" + str(currentGuild.id) + " in channel ?#" + str(currentGuild.getPlayChannel().id), eventType="PLCH_NONE")
 
         # Only put the calling user on checking cooldown and increment systemsChecked stat if the system checked is on an active bounty's route.
         if systemInBountyRoute:
