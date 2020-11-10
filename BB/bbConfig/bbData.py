@@ -74,13 +74,16 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "notify": ("**notify <type>** *[alert]*", "Subscribe to pings when events take place. Currently, **type** can be `bounties`, `shop`, `duels`, or `bot`.\n> `shop` requires the `refresh` option.\n> `duels` requires either `new` or `cancel`.\n> `bot` can take `updates` or `announcements`.\n> `bot updates` must be `major` or `minor`."),
                             "source": ("**source**", "Show links to the project's GitHub page and todo list, and some information about the people behind BountyBot.")},
             
+            "Home Servers":{"home": ("**home**", "Get the name of your home server, if one is set. This is the the only server where you may use certain commands, such as buying items from the shop, or fighting bounties."),
+                            "transfer": ("**transfer**", "Transfer your home server to the one where you sent this command. You will be asked for confirmation first, since this command has a long cooldown!")},
+            
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
                             "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
                             "make-route": ("**make-route <startSystem>, <endSystem>**", "Find the shortest route from startSystem to endSystem.")},
             
             "Bounties":{    "bounties": ("**bounties** *[faction]*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
                             "route": ("**route <criminal name>**", "Get the named criminal's current route."),
-                            "check": ("**check <system>**", "Check if any criminals are in the given system, arrest them, and get paid! 💰"),
+                            "check": ("**check <system>**", "Check if any criminals are in the given system, arrest them, and get paid! 💰\n🌎 This command must be used in your **home server**."),
                             "duel": ("**duel [action] [user]** *<stakes>*", "Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`. When challenging another user to a duel, you must give the amount of credits you will win - the 'stakes'.")},
             
             "Loadout":{     "hangar": ("**hangar** *[item-type]*", "Display the items in your hangar, or in the hangar of a tagged user. Give an item type (ship/weapon/turret/module) to only list items of that type."),
@@ -91,8 +94,8 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")},
 
             "Shopping":{    "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
-                            "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
-                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.")},
+                            "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship.\n🌎 This command must be used in your **home server**."),
+                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.\n🌎 This command must be used in your **home server**.")},
 
             "Credits":{     "total-value":("**total-value** *[user]*", "Get the total value of all of your items, including your credits balance. Give a user to check someone else's total inventory value."),
                             "balance": ("**balance** *[user]*", "Get the credits balance of yourself, or another user if one is given."),
@@ -110,7 +113,8 @@ adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display in
                                         "remove-notify-role": ("**remove-notify-role**", "Stop pinging the bounty notify role when new bounties are created."),
                                         "set-bounty-board-channel": ("**set-bounty-board-channel**", "Send from within a channel to set that channel as a *bountyboard*.\nBountyBoard channels show *all* information about active bounties, continuously update their listings (e.g cross through checked systems), and only show *active* bounties (listings for located bounties are removed)."),
                                         "remove-bounty-board-channel": ("**remove-bounty-board-channel**", "Send from any channel to remove the server's bountyboard channel, if one is set."),
-                                        "hangar": ("**hangar** *[user]* *[item-type]*", "Administrators have permission to view the hangars of other users.")}}
+                                        "hangar": ("**hangar** *[user]* *[item-type]*", "Administrators have permission to view the hangars of other users."),
+                                        "config": ("**config <setting> <value>**", "Set various settings for how bountybot will function in this server. Currently, `setting` can be either 'bounties' or 'shop', and `value` can either 'enable' or 'disable', all with a few handy aliases. This command is lets you enable or disable large amounts of functionality all together.")}}
 
 # string extensions for numbers, e.g 11th, 1st, 23rd...
 numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
