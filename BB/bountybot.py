@@ -5256,81 +5256,62 @@ async def on_message(message : discord.Message):
     if message.content == "printreactions":
         await message.channel.send(str(bbGlobals.reactionMenusDB.toDict()))
 
-    # if not bbGlobals.guildsDB.guildIdExists(message.guild.id):
-    #     bbGlobals.guildsDB.addGuildID(message.guild.id)
+    # For any messages beginning with bbConfig.commandPrefix
+    # New method without space-splitting to allow for prefixes that dont end in a space
+    if len(message.content) >= len(bbConfig.commandPrefix) and message.content[0:len(bbConfig.commandPrefix)].lower() == bbConfig.commandPrefix.lower():
+        # Old method with space-splitting
+        # if message.content.split(" ")[0].lower() == (bbConfig.commandPrefix.rstrip(" ")):
+        # replace special apostraphe characters with the universal '
+        msgContent = message.content.replace("‘", "'").replace("’", "'")
 
-    # x = await message.channel.fetch_message(723205500887498784)
-    # await x.delete()
+        # split the message into command and arguments
+        if len(msgContent[len(bbConfig.commandPrefix):]) > 0:
+            command = msgContent[len(bbConfig.commandPrefix):].split(" ")[
+                0]
+            args = msgContent[len(
+                bbConfig.commandPrefix) + len(command) + 1:]
 
-    # if message.channel.type == discord.ChannelType.private:
-    #     return
+        # if no command is given, ignore the message
+        else:
+            return
 
-    if message.author.id in bbConfig.developers or message.guild is None or not message.guild.id in bbConfig.disabledServers:
+        # Debug: Print the recognised command args strings
+        # print("COMMAND '" + command + "'")
+        # print("ARGS '" + args + "'")
 
-        """
-        # randomly send '!drink' to the same channel
-        bbConfig.randomDrinkNum -= 1
-        if bbConfig.randomDrinkNum == 0:
-            await message.channel.send("!drink")
-            bbConfig.randomDrinkNum = random.randint(bbConfig.randomDrinkFactor / 10, bbConfig.randomDrinkFactor)
-        """
+        # infer the message author's permissions
+        userIsDev = message.author.id in bbConfig.developers
+        # if message.channel.type == discord.ChannelType.text:
 
-        # For any messages beginning with bbConfig.commandPrefix
-        # New method without space-splitting to allow for prefixes that dont end in a space
-        if len(message.content) >= len(bbConfig.commandPrefix) and message.content[0:len(bbConfig.commandPrefix)].lower() == bbConfig.commandPrefix.lower():
-            # Old method with space-splitting
-            # if message.content.split(" ")[0].lower() == (bbConfig.commandPrefix.rstrip(" ")):
-            # replace special apostraphe characters with the universal '
-            msgContent = message.content.replace("‘", "'").replace("’", "'")
+        # infer the message author's permissions
+        userIsAdmin = message.author.permissions_in(
+            message.channel).administrator
 
-            # split the message into command and arguments
-            if len(msgContent[len(bbConfig.commandPrefix):]) > 0:
-                command = msgContent[len(bbConfig.commandPrefix):].split(" ")[
-                    0]
-                args = msgContent[len(
-                    bbConfig.commandPrefix) + len(command) + 1:]
+        # Chek whether the command was requested in DMs
+        isDM = message.channel.type in [
+            discord.ChannelType.private, discord.ChannelType.group]
 
-            # if no command is given, ignore the message
+        try:
+            # Call the requested command
+            if isDM:
+                commandFound = await dmCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
             else:
-                return
+                commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
+        except Exception as e:
+            await message.channel.send(":woozy_face: Uh oh, something went wrong! The error has been logged.\nThis command probably won't work until we've looked into it.")
+            bbLogger.log("Main", "on_message", "An unexpected error occured when calling command '" +
+                            command + "' with args '" + args + "': " + e.__class__.__name__, trace=traceback.format_exc())
+            commandFound = True
 
-            # Debug: Print the recognised command args strings
-            # print("COMMAND '" + command + "'")
-            # print("ARGS '" + args + "'")
+        # elif message.channel.type == discord.ChannelType.private:
+        #     # Call the requested command
+        #     commandFound = await dmCommands.call(command, message, args, isAdmin=False, isDev=userIsDev)
 
-            # infer the message author's permissions
-            userIsDev = message.author.id in bbConfig.developers
-            # if message.channel.type == discord.ChannelType.text:
-
-            # infer the message author's permissions
-            userIsAdmin = message.author.permissions_in(
-                message.channel).administrator
-
-            # Chek whether the command was requested in DMs
-            isDM = message.channel.type in [
-                discord.ChannelType.private, discord.ChannelType.group]
-
-            try:
-                # Call the requested command
-                if isDM:
-                    commandFound = await dmCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
-                else:
-                    commandFound = await bbCommands.call(command, message, args, isAdmin=userIsAdmin, isDev=userIsDev)
-            except Exception as e:
-                await message.channel.send(":woozy_face: Uh oh, something went wrong! The error has been logged.\nThis command probably won't work until we've looked into it.")
-                bbLogger.log("Main", "on_message", "An unexpected error occured when calling command '" +
-                             command + "' with args '" + args + "': " + e.__class__.__name__, trace=traceback.format_exc())
-                commandFound = True
-
-            # elif message.channel.type == discord.ChannelType.private:
-            #     # Call the requested command
-            #     commandFound = await dmCommands.call(command, message, args, isAdmin=False, isDev=userIsDev)
-
-            # Command not found, send an error message.
-            if not commandFound:
-                userTitle = bbConfig.devTitle if userIsDev else (
-                    bbConfig.adminTitle if userIsAdmin else bbConfig.userTitle)
-                await message.channel.send(""":question: Can't do that, """ + userTitle + """. Type `""" + bbConfig.commandPrefix + """help` for a list of commands! **o7**""")
+        # Command not found, send an error message.
+        if not commandFound:
+            userTitle = bbConfig.devTitle if userIsDev else (
+                bbConfig.adminTitle if userIsAdmin else bbConfig.userTitle)
+            await message.channel.send(""":question: Can't do that, """ + userTitle + """. Type `""" + bbConfig.commandPrefix + """help` for a list of commands! **o7**""")
 
 
 @bbGlobals.client.event
