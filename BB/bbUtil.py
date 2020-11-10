@@ -695,3 +695,12 @@ def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
     if not criminal.isPlayer:
         return criminal.name
     return userTagOrDiscrim(criminal.name)
+
+
+# TODO: Convert to random across two dicts
+def getRandomDelaySeconds(minmaxDict : Dict[str, int]) -> timedelta:
+    """Generate a random timedelta between the given minimum and maximum number of seconds, inclusive.
+    minMaxDict must contain keys "min" and "max" (case sensitive), with values of integers representing
+    the minimium and maximum number of seconds this function can generate (inclusive)
+    """
+    return timedelta(seconds=random.randint(minmaxDict["min"], minmaxDict["max"]))
