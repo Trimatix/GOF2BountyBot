@@ -2,7 +2,7 @@ from . import bbShop
 from ..bbDatabases import bbBountyDB
 from .bounties.bountyBoards import BountyBoardChannel
 from ..userAlerts import UserAlerts
-from discord import channel, Client, Forbidden, Guild
+from discord import channel, Client, Forbidden, Guild, Member
 from typing import List, Dict, Union
 from ..bbConfig import bbConfig, bbData
 from .. import bbGlobals, bbUtil
@@ -365,22 +365,23 @@ class bbGuild:
             await self.announceNewBounty(newBounty)
 
 
-    async def announceBountyWon(self, bounty : bbBounty.Bounty, rewards : Dict[int, Dict[str, Union[int, bool]]], winningUserId : int):
+    async def announceBountyWon(self, bounty : bbBounty.Bounty, rewards : Dict[int, Dict[str, Union[int, bool]]], winningUser : Member):
         """Announce the completion of a bounty
         Messages will be sent to the playChannel if one is set
 
         :param bbBounty bounty: the bounty to announce
         :param dict rewards: the rewards dictionary as defined by bbBounty.calculateRewards
-        :param int winningUserId: the user ID of the discord user that won the bounty
+        :param discord.Member winningUser: the guild member that won the bounty
         """
         if self.dcGuild is not None:
             if self.hasPlayChannel():
+                winningUserId = winningUser.id
                 # Create the announcement embed
                 rewardsEmbed = bbUtil.makeEmbed(titleTxt="Bounty Complete!", authorName=bbUtil.criminalNameOrDiscrim(bounty.criminal) + " Arrested",
                                         icon=bounty.criminal.icon, col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
 
                 # Add the winning user to the embed
-                rewardsEmbed.add_field(name="1. 🏆 " + str(rewards[winningUserId]["reward"]) + " credits:", value="<@" + str(winningUserId) + "> checked " + str(
+                rewardsEmbed.add_field(name="1. 🏆 " + str(rewards[winningUserId]["reward"]) + " credits:", value=winningUser.mention + " checked " + str(
                     int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
 
                 # The index of the current user in the embed
@@ -393,7 +394,7 @@ class bbGuild:
                         place += 1
 
                 # Send the announcement to the guild's playChannel
-                await self.getPlayChannel().send(":trophy: **You win!**\n**" + self.dcGuild.get_member(winningUserId).display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
+                await self.getPlayChannel().send(":trophy: **You win!**\n**" + winningUser.display_name + "** located and EMP'd **" + bounty.criminal.name + "**, who has been arrested by local security forces. :chains:", embed=rewardsEmbed)
 
         else:
             bbLogger.log("Main", "AnncBtyWn", "None dcGuild received when posting bounty won to guild " + bbGlobals.client.get_guild(

@@ -921,7 +921,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
                     # add this bounty to the list of bounties to be removed
                     toPop += [bounty]
                     # Announce the bounty has ben completed
-                    await callingBBGuild.announceBountyWon(bounty, rewards, message.author.id)
+                    await callingBBGuild.announceBountyWon(bounty, rewards, message.author)
 
                 if checkResult != 0:
                     systemInBountyRoute = True
