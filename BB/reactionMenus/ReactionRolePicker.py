@@ -88,7 +88,7 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
     TODO: replace dcGuild param with extracting msg.guild
     """
 
-    def __init__(self, msg : Message, reactionRoles : Dict[bbUtil.dumbEmoji, Role], dcGuild : Guild, titleTxt="**Role Menu**", desc="React for your desired role!", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+    def __init__(self, msg : Message, reactionRoles : Dict[bbUtil.dumbEmoji, Role], dcGuild : Guild, titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
         # TODO: Stop taking dcGuild, and instead extract dcGuild from msg.guild
         """
         :param discord.Message msg: the message where this menu is embedded
@@ -112,6 +112,11 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
         roleOptions = {}
         for reaction in reactionRoles:
             roleOptions[reaction] = ReactionRolePickerOption(reaction, reactionRoles[reaction], self)
+
+        if titleTxt == "":
+            titleTxt = "**Role Menu**"
+        if desc == "":
+            desc = "React for your desired role!"
 
         super(ReactionRolePicker, self).__init__(msg, options=roleOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
         self.saveable = True
