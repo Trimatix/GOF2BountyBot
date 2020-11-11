@@ -3,6 +3,7 @@
 from __future__ import annotations
 from ..bbObjects.bounties import bbSystem
 import math
+from ..bbConfig import bbData
 
 class AStarNode(bbSystem.System):
     """A node for use in a* pathfinding.
@@ -113,4 +114,4 @@ def makeRoute(start : str, end : str) -> List[str]:
     :return: list of string system names where the first element is start, the last element is end, and all intermediary systems are adjacent
     :rtype: list[str]
     """
-    return lib.pathfinding.bbAStar(start, end, bbData.builtInSystemObjs)
+    return bbAStar(start, end, bbData.builtInSystemObjs)
