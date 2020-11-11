@@ -3770,11 +3770,13 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     Users may not create more than one poll at a time, anywhere.
     Option reactions must be either unicode, or custom to the server where the poll is being created.
 
-    args must contain a comma-separated list of emoji-option pairs, where each pair is separated with a space.
-    For example: '0️⃣ option a, 1️⃣ my second option, 2️⃣ three' will produce three options:
+    args must contain a poll subject (question) and new line, followed by a newline-separated list of emoji-option pairs, where each pair is separated with a space.
+    For example: 'Which one?\n0️⃣ option a\n1️⃣ my second option\n2️⃣ three' will produce three options:
     - 'option a'         which participants vote for by adding the 0️⃣ reaction
     - 'my second option' which participants vote for by adding the 1️⃣ reaction
     - 'three'            which participants vote for by adding the 2️⃣ reaction
+    and the subject of the poll is 'Which one?'
+    The poll subject is optional. To not provide a subject, simply begin args with a new line.
 
     args may also optionally contain the following keyword arguments, given as argname=value
     - target         : A role or user to restrict participants by. Must be a user or role mention, not ID.
@@ -3802,14 +3804,18 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     kwArgs = {}
 
     argsSplit = args.split("\n")
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Invalid arguments! Please provide your poll subject, followed by a new line, then a new line-separated series of poll options.\nFor more info, see `" + bbConfig.commandPrefix + "help poll`")
+        return
+    pollSubject = argsSplit[0]
     argPos = 0
-    for arg in argsSplit:
+    for arg in argsSplit[1:]:
         if arg == "":
             continue
         argPos += 1
         try:
             optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
-        except ValueError:
+        except (ValueError, IndexError):
             for kwArg in ["target=", "days=", "hours=", "seconds=", "minutes=", "multiplechoice="]:
                 if arg.lower().startswith(kwArg):
                     kwArgs[kwArg[:-1]] = arg[len(kwArg):]
@@ -3897,7 +3903,7 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionPollMenu.printAndExpirePollResults, expiryFunctionArgs=menuMsg.id)
     bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
 
-    menu = ReactionPollMenu.ReactionPollMenu(menuMsg, pollOptions, timeoutTT, pollStarter=message.author, multipleChoice=multipleChoice, targetRole=targetRole, targetMember=targetMember, owningBBUser=bbGlobals.usersDB.getUser(message.author.id))
+    menu = ReactionPollMenu.ReactionPollMenu(menuMsg, pollOptions, timeoutTT, pollStarter=message.author, multipleChoice=multipleChoice, targetRole=targetRole, targetMember=targetMember, owningBBUser=bbGlobals.usersDB.getUser(message.author.id), desc=pollSubject)
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
     bbGlobals.usersDB.getUser(message.author.id).pollOwned = True
@@ -4141,11 +4147,13 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     Each guild may have a maximum of bbConfig.maxRoleMenusPerGuild role menus active at any one time.
     Option reactions must be either unicode, or custom to the server where the menu is being created.
 
-    args must contain a comma-separated list of emoji-option pairs, where each pair is separated with a space.
-    For example: '0️⃣ @Role-1, 1️⃣ @Role-2, 2️⃣ @Role-3' will produce three options:
+    args must contain a menu subject and new line, followed by a newline-separated list of emoji-option pairs, where each pair is separated with a space.
+    For example: 'Number Roles\n0️⃣ @Role-1\n1️⃣ @Role-2\n2️⃣ @Role-3' will produce three options:
     - Toggling the 0️⃣ reaction will toggle user ownership of @Role-1
     - Toggling the 1️⃣ reaction will toggle user ownership of @Role-2
     - Toggling the 2️⃣ reaction will toggle user ownership of @Role-3
+    Where the subject of the menu is 'Number Roles'.
+    The menu subject is optional. To not provide a subject, simply start args with a new line.
 
     args may also optionally contain the following keyword arguments, given as argname=value
     - target         : A role or user to restrict participants by. Must be a user or role mention, not ID.
@@ -4186,15 +4194,19 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     kwArgs = {}
 
     argsSplit = args.split("\n")
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Invalid arguments! Please provide your menu title, followed by a new line, then a new line-separated series of options.\nFor more info, see `" + bbConfig.commandPrefix + "admin-help`")
+        return
+    menuSubject = argsSplit[0]
     argPos = 0
 
-    for arg in argsSplit:
+    for arg in argsSplit[1:]:
         if arg == "":
             continue
         argPos += 1
         try:
             roleStr, dumbReact = arg.strip(" ").split(" ")[1], bbUtil.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
-        except ValueError:
+        except (ValueError, IndexError):
             for kwArg in ["target=", "days=", "hours=", "seconds=", "minutes=", "multiplechoice="]:
                 if arg.lower().startswith(kwArg):
                     kwArgs[kwArg[:-1]] = arg[len(kwArg):]
@@ -4288,7 +4300,7 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     else:
         timeoutTT = None
 
-    menu = ReactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, targetRole=targetRole, targetMember=targetMember, timeout=timeoutTT)
+    menu = ReactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, targetRole=targetRole, targetMember=targetMember, timeout=timeoutTT, titleTxt=menuSubject)
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
@@ -6249,10 +6261,11 @@ async def on_message(message : discord.Message):
 
             # split the message into command and arguments
             if len(msgContent[len(bbConfig.commandPrefix):]) > 0:
-                command = msgContent[len(bbConfig.commandPrefix):].split(" ")[
-                    0]
-                args = msgContent[len(
-                    bbConfig.commandPrefix) + len(command) + 1:]
+                command = msgContent[len(bbConfig.commandPrefix):].split(" ")[0]
+                args = msgContent[len(bbConfig.commandPrefix) + len(command) + 1:]
+                if "\n" in command:
+                    command = msgContent[len(bbConfig.commandPrefix):].split(" ")[0].split("\n")[0]
+                    args = msgContent[len(bbConfig.commandPrefix) + len(command):]
 
             # if no command is given, ignore the message
             else:

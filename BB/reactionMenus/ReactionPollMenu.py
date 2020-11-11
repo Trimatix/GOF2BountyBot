@@ -106,7 +106,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
     :var owningBBUser: The bbUser who started the poll
     :vartype owningBBUser: bbUser
     """
-    def __init__(self, msg : Message, pollOptions : dict, timeout : TimedTask.TimedTask, pollStarter=None, multipleChoice=False, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="Poll", targetMember=None, targetRole=None, owningBBUser=None):
+    def __init__(self, msg : Message, pollOptions : dict, timeout : TimedTask.TimedTask, pollStarter=None, multipleChoice=False, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None, owningBBUser=None):
         """
         :param discord.Message msg: the message where this menu is embedded
         :param options: A dictionary storing all of the poll options. Poll option behaviour functions are not called. TODO: Add reactionAdded/Removed overloads that just return and dont check anything
@@ -129,8 +129,21 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
         self.multipleChoice = multipleChoice
         self.owningBBUser = owningBBUser
 
-        if pollStarter is not None and desc == "":
-            desc = "__" + str(pollStarter) + " started a poll!__"
+        if pollStarter is not None and authorName == "":
+            authorName = str(pollStarter) + " started a poll!"
+        else:
+            authorName = authorName if authorName else "Poll"
+
+        if icon == "":
+            if pollStarter is not None:
+                icon = pollStarter.avatar_url_as(size=64)
+        else:
+            icon = icon if icon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/ballot-box-with-ballot_1f5f3.png"
+
+        if desc == "":
+            desc = "React to this message to vote!"
+        else:
+            desc = "*" + desc + "*"
 
         super(ReactionPollMenu, self).__init__(msg, options=pollOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
         self.saveable = True
