@@ -1,12 +1,13 @@
+from __future__ import annotations
 from typing import Union, List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from discord import Member, Guild, User
-    from .bbObjects import bbUser
+    from ..bbObjects import bbUser
 
 from ..logging import bbLogger
 from . import stringTyping
 from .. import bbGlobals
-from discord import Embed
+from discord import Embed, Colour
 
 
 def findBBUserDCGuild(user : bbUser.bbUser) -> Union[Guild, None]:
@@ -152,7 +153,7 @@ def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
     return userTagOrDiscrim(criminal.name)
 
 
-def makeEmbed(titleTxt="", desc="", col=discord.Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> discord.Embed:
+def makeEmbed(titleTxt="", desc="", col=Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> discord.Embed:
     """Factory function building a simple discord embed from the provided arguments.
 
     :param str titleTxt: The title of the embed (Default "")

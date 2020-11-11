@@ -1,2 +1,2 @@
-# TODO: For some reason, this module doesnt get recognised so i have to manually import it
-from . import jsonHandler, timeUtil
+# Make all lib modules available on package import
+from . import discordUtil, emojis, jsonHandler, pathfinding, stringTyping, timeUtil

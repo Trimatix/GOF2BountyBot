@@ -1,5 +1,6 @@
 # TODO: Look into third party library
 # TODO: Add failed route lookups to bbLogger (might already be done in bountybot.py)
+from __future__ import annotations
 from ..bbObjects.bounties import bbSystem
 import math
 
