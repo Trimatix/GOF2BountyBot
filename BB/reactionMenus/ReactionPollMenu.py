@@ -79,7 +79,7 @@ async def printAndExpirePollResults(msgID : int):
     if maxCount > 0:
         resultsStr = "```\n"
         for currentOption in results:
-            resultsStr += ("🏆" if len(results[currentOption]) == maxCount else "  ") + currentOption.name + (" " * (maxOptionLen - len(currentOption.name))) + " | " + ("=" * int((len(results[currentOption]) / maxCount) * bbConfig.pollMenuResultsBarLength)) + (" " if len(results[currentOption]) == 0 else "")+ " +" + str(len(results[currentOption])) + " Vote" + ("s" if len(results[currentOption]) != 1 else "") + "\n"
+            resultsStr += ("🏆" if len(results[currentOption]) == maxCount else "  ") + currentOption.name + (" " * (maxOptionLen - len(currentOption.name))) + " | " + ("=" * int((len(results[currentOption]) / maxCount) * bbConfig.pollMenuResultsBarLength)) + (" " if len(results[currentOption]) == 0 else "") + " +" + str(len(results[currentOption])) + " Vote" + ("s" if len(results[currentOption]) != 1 else "") + "\n"
         resultsStr += "```"
 
         pollEmbed.add_field(name="Results", value=resultsStr, inline=False)
@@ -136,7 +136,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
 
         if icon == "":
             if pollStarter is not None:
-                icon = pollStarter.avatar_url_as(size=64)
+                icon = str(pollStarter.avatar_url_as(size=64))
         else:
             icon = icon if icon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/ballot-box-with-ballot_1f5f3.png"
 
