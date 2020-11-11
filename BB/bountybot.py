@@ -6176,6 +6176,9 @@ async def on_ready():
     # newTaskAdded = False
     # nextTask
 
+    await bbGlobals.client.get_guild(226528541368385536).get_channel(226528541368385536).fetch_message(776079120391471114).delete()
+    await bbGlobals.client.get_guild(226528541368385536).get_channel(226528541368385536).fetch_message(776079130487291904).delete()
+
     # execute regular tasks while the bot is logged in
     while botLoggedIn:
         if bbConfig.timedTaskCheckingType == "fixed":
