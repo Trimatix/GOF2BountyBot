@@ -306,7 +306,7 @@ class ReactionMenu:
         """
 
         if footerTxt == "" and timeout is not None:
-            footerTxt = "This menu will expire in " + lib.discordUtil.td_format_noYM(timeout.expiryDelta) + "."
+            footerTxt = "This menu will expire in " + lib.timeUtil.td_format_noYM(timeout.expiryDelta) + "."
         
         # discord.message
         self.msg = msg
