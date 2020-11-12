@@ -2491,6 +2491,8 @@ async def cmd_unequip(message : discord.Message, args : str, isDM : bool):
         if itemNum < 1:
             await message.channel.send(":x: Invalid item number! Must be at least 1.")
             return
+    else:
+        itemNum = None
 
     if item == "weapon":
         if not requestedBBUser.activeShip.hasWeaponsEquipped():
