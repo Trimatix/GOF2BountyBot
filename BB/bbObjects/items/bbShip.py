@@ -1,6 +1,8 @@
 # Typing imports
 from __future__ import annotations
-from typing import List, Union
+from typing import List, Union, TYPE_CHECKING
+if TYPE_CHECKING:
+    from .modules import bbModule
 
 from .bbItem import bbItem
 from . import bbTurret, bbWeapon, bbShipUpgrade, bbModuleFactory
@@ -237,7 +239,7 @@ class bbShip(bbItem):
         return True
 
 
-    def equipModule(self, module : bbModule):
+    def equipModule(self, module : bbModule.bbModule):
         """Equip the given bbModule onto the ship.
 
         :param bbModule module: The bbModule object to equip
@@ -252,7 +254,7 @@ class bbShip(bbItem):
         self.modules.append(module)
     
 
-    def unequipModuleObj(self, module : bbModule):
+    def unequipModuleObj(self, module : bbModule.bbModule):
         """Unequip the given module object reference
 
         :param bbModule module: The module to unequip
@@ -260,7 +262,7 @@ class bbShip(bbItem):
         self.modules.remove(module)
 
 
-    def unequipModuleIndex(self, index : ind):
+    def unequipModuleIndex(self, index : int):
         """Unequip the module equipped at the given index in the modules array
 
         :param int index: The index of the module to unequip
@@ -268,7 +270,7 @@ class bbShip(bbItem):
         self.modules.pop(index)
 
 
-    def getModuleAtIndex(self, index : int) -> bbModule:
+    def getModuleAtIndex(self, index : int) -> bbModule.bbModule:
         """Fetch the bbModule object reference that is equipped at the given index
 
         :param int index: The index of the module to fetch
