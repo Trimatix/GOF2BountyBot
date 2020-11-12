@@ -2951,6 +2951,7 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
 
     argsSplit = args.split(",")
     argPos = 0
+    arg = ""
     for arg in argsSplit:
         argPos += 1
         optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], lib.emojis.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
