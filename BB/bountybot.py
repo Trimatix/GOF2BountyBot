@@ -546,10 +546,7 @@ async def cmd_how_to_play(message : discord.Message, args : str, isDM : bool):
         sendDM = True
 
     try:
-        if message.guild is None:
-            isDM = True
-        else:
-            isDM = False
+        if not isDM:
             if bbGlobals.guildsDB.guildIdExists(message.guild.id):
                 requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
             else:
@@ -3698,7 +3695,7 @@ async def dev_cmd_clear_bounties(message : discord.Message, args : str, isDM : b
                 guild.bountiesDB.clearBounties()
 
     elif args == "":
-        if message.guild is None:
+        if isDM:
             await message.channel.send("Give either an id or 'all', or call from within a guild")
             return
         callingBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
@@ -4132,7 +4129,7 @@ async def dev_cmd_resetnewbountycool(message : discord.Message, args : str, isDM
     guildStr = args
 
     if guildStr == "":
-        if message.guild is None:
+        if isDM:
             await message.channel.send("Either give a guild id or call from within a guild")
             return
         callingBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
@@ -4172,7 +4169,7 @@ async def dev_cmd_canmakebounty(message : discord.Message, args : str, isDM : bo
     guildStr = args.split(" ")[1] if len(args.split(" ")) > 1 else ""
 
     if guildStr == "":
-        if message.guild is None:
+        if isDM:
             await message.channel.send("Either give a guild id or call from within a guild")
             return
         callingBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
@@ -4488,7 +4485,7 @@ async def dev_cmd_make_bounty(message : discord.Message, args : str, isDM : bool
     guildStr = args.split("+")[0].strip()
     args = args[len(guildStr):].lstrip()
     if guildStr == "":
-        if message.guild is None:
+        if isDM:
             await message.channel.send("Either give a guild id or call from within a guild")
             return
         callingBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
@@ -4628,7 +4625,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
     guildStr = args.split("+")[0].strip()
     args = args[len(guildStr):].lstrip()
     if guildStr == "":
-        if message.guild is None:
+        if isDM:
             await message.channel.send("Either give a guild id or call from within a guild")
             return
         callingBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
