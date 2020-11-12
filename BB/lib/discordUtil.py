@@ -79,7 +79,7 @@ def isUserRef(uRef : str, dcGuild=None) -> bool:
     :param discord.Guild dcGuild: The guild in which to search for a user identified by uRef. Required if uRef is not a mention or ID. (Default None)
     :return: True if uRef identifies a discord.User or a discord.Member in dcGuild, False otherwise
     """
-    if isMention(uRef):
+    if stringTyping.isMention(uRef):
         return True
     
     if dcGuild is not None:
@@ -107,7 +107,7 @@ def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
     :rtype: discord.Member or None
     """
     # Handle user mentions
-    if isMention(uRef):
+    if stringTyping.isMention(uRef):
         return dcGuild.get_member(int(uRef.lstrip("<@!").rstrip(">")))
     # Handle IDs
     elif stringTyping.isInt(uRef):
