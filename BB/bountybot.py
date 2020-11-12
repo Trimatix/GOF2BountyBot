@@ -4574,6 +4574,7 @@ async def dev_cmd_make_bounty(message : discord.Message, args : str, isDM : bool
     # Report an error for invalid command syntax
     else:
         await message.channel.send("incorrect syntax. give +faction +name +route +start +end +answer +reward +endtime +icon")
+        return
 
     # activate and announce the new bounty
     callingBBGuild.bountiesDB.addBounty(newBounty)
