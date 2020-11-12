@@ -4,6 +4,7 @@ from __future__ import annotations
 from ..bbObjects.bounties import bbSystem
 import math
 from ..bbConfig import bbData
+from typing import Dict, List
 
 class AStarNode(bbSystem.System):
     """A node for use in a* pathfinding.
