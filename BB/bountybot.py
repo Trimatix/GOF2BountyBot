@@ -3673,7 +3673,8 @@ async def dev_cmd_clear_bounties(message : discord.Message, args : str, isDM : b
                 if guild.hasBountyBoardChannel:
                     await guild.bountyBoardChannel.clear()
                 guild.bountiesDB.clearBounties()
-
+        await message.channel.send(":ballot_box_with_check: All active bounties cleared.")
+        return
     elif args == "":
         if isDM:
             await message.channel.send("Give either an id or 'all', or call from within a guild")
