@@ -2204,6 +2204,8 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
             oldShipValue = activeShip.getValue(shipUpgradesOnly=transferItems)
             requestedBBUser.credits += oldShipValue
             shopItemStock.addItem(activeShip)
+        else:
+            oldShipValue = None
 
         requestedBBUser.equipShipObj(requestedItem, noSaveActive=sellOldShip)
         requestedBBUser.credits -= newShipValue
