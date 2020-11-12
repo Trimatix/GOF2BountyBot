@@ -3,6 +3,7 @@ from typing import Union, List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from discord import Member, Guild, User
     from ..bbObjects import bbUser
+    from ..bbObjects.bounties import bbCriminal
 
 from ..logging import bbLogger
 from . import stringTyping
@@ -153,7 +154,7 @@ def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
     return userTagOrDiscrim(criminal.name)
 
 
-def makeEmbed(titleTxt="", desc="", col=Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> discord.Embed:
+def makeEmbed(titleTxt="", desc="", col=Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> Embed:
     """Factory function building a simple discord embed from the provided arguments.
 
     :param str titleTxt: The title of the embed (Default "")
