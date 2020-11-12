@@ -1,6 +1,6 @@
 # Typing imports
 from __future__ import annotations
-from typing import List, Dict, Union
+from typing import List, Dict, Union, TYPE_CHECKING
 
 # Discord Imports
 
@@ -34,6 +34,9 @@ from . import lib, bbGlobals
 from .userAlerts import UserAlerts
 from .logging import bbLogger
 from .reactionMenus import ReactionMenu, ReactionInventoryPicker, ReactionRolePicker, ReactionDuelChallengeMenu, ReactionPollMenu
+
+if TYPE_CHECKING:
+    from .bbObjects import bbGuild
 
 
 
@@ -89,7 +92,7 @@ async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.reactionMenuDB:
 
 
 
-async def makeBountyBoardChannelMessage(guild : bbGuild.bbGuild, bounty : bbBounty.Bounty, msg="", embed=None) -> Message:
+async def makeBountyBoardChannelMessage(guild : bbGuild.bbGuild, bounty : bbBounty.Bounty, msg="", embed=None) -> discord.Message:
     """Create a new BountyBoardChannel listing for the given bounty, in the given guild.
     guild must own a BountyBoardChannel.
 
@@ -482,8 +485,8 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
                                       thumb=bbGlobals.client.user.avatar_url_as(size=64))
                 helpEmbed.set_footer(text="Page " + str(maxPage))
                 helpEmbed.add_field(name="‎", value="__" +
-                                    section + "__", inline=False)
-                for currentCommand in bbData.helpDict[section].values():
+                                    sectionNames[maxPage-1] + "__", inline=False)
+                for currentCommand in bbData.helpDict[sectionNames[maxPage-1]].values():
                     helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
                         "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
                 messagesToSend.append(("‎", helpEmbed))
