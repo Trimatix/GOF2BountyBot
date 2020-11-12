@@ -3517,16 +3517,13 @@ async def admin_cmd_config(message : discord.Message, args : str, isDM : bool):
     :param str args: A string containing a config setting id followed by a value
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    try:
-        setting, value = args.split(" ")
-    except ValueError:
-        splitFailed = True
-    else:
-        splitFailed = False
+    argsSplit = args.split(" ")
 
-    if splitFailed or not (setting and value):
+    if len(argsSplit) < 2 or not (argsSplit[0] and argsSplit[1]):
         await message.channel.send(":x: Please provide both a setting and a value! e.g: `" + bbConfig.commandPrefix + "config bounties enable`")
         return
+
+    setting, value = argsSplit[0], " ".join(argsSplit[1:])
 
     trueStrings = ["yes","true","on","enable","enabled"]
     falseStrings = ["no","false","off","disable","disabled"]
