@@ -4847,7 +4847,9 @@ async def dev_cmd_debug_hangar(message : discord.Message, args : str, isDM : boo
                     hangarEmbed.add_field(name=str(itemNum) + ". " + ("" if itemStored else "⚠ KEY NOT FOUND IN ITEMS DICT ") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItemName + "\n`" + repr(currentItem) + "`",
                                           value="unexpected type", inline=False)
 
-            for itemKey in itemInv.items:
+            expectedKeys = itemInv.items.keys()
+            for itemNum in range(len(expectedKeys)):
+                itemKey = itemInv.items.expectedKeys[itemNum]
                 if itemKey not in displayedItems:
                     currentItemCount = itemInv.items[itemKey].count
                     displayedItems.append(itemKey)
