@@ -3,6 +3,10 @@ from emoji import UNICODE_EMOJI
 from .. import bbGlobals
 from . import stringTyping
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from discord import PartialEmoji
+
 class dumbEmoji:
     """A class that really shouldnt be necessary, acting as a union over the str (unicode) and Emoji type emojis used and returned by discord.
     To instance this class, provide exactly one of the constructor's keyword arguments.
