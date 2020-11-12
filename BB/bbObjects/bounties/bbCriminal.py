@@ -140,7 +140,7 @@ class Criminal (bbAliasable.Aliasable):
             return {"builtIn":False, "isPlayer": self.isPlayer, "name":self.name, "icon":self.icon, "faction":self.faction, "aliases":self.aliases, "wiki":self.wiki}
 
 
-def fromDict(crimDict : dict, builtIn=False) -> bbCriminal:
+def fromDict(crimDict : dict, builtIn=False) -> Criminal:
     """Factory function that will either provide a reference to a builtIn bbCriminal if a builtIn criminal is requested, or construct a new bbCriminal object from the provided data.
 
     :param dict crimDict: A dictionary containing all data necessary to construct the desired bbCriminal. If the criminal is builtIn, this need only be their name, "builtIn": True, and possibly the equipped ship.
