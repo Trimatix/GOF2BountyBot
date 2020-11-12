@@ -828,26 +828,6 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
     maxPage = len(bbData.helpDict)
     sectionNames = list(bbData.helpDict.keys())
 
-    if args != "":
-        if bbUtil.isInt(args):
-            page = int(args)
-            if page > maxPage:
-                await message.channel.send(":x: There are only " + str(maxPage) + " help pages! Showing page " + str(maxPage) + ":")
-                page = maxPage
-        elif args.title() in sectionNames:
-            page = sectionNames.index(args.title()) + 1
-        elif args != "all":
-            for section in sectionNames:
-                if args in bbData.helpDict[section]:
-                    helpEmbed.add_field(
-                        name="‎", value="__" + section + "__", inline=False)
-                    helpEmbed.add_field(name=bbData.helpDict[section][args][0], value=bbData.helpDict[section][args][1].replace(
-                        "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
-                    await message.channel.send(embed=helpEmbed)
-                    return
-            await message.channel.send(":x: Unknown command!")
-            return
-
     sendChannel = None
     sendDM = False
 
@@ -861,6 +841,27 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
 
     # list of tuples, 0th element is message, 1st element is embed
     messagesToSend = []
+
+    if args != "":
+        if bbUtil.isInt(args):
+            page = int(args)
+            if page > maxPage:
+                messagesToSend.append((":x: There are only " + str(maxPage) + " help pages! Showing page " + str(maxPage) + ":", None))
+                page = maxPage
+        elif args.title() in sectionNames:
+            page = sectionNames.index(args.title()) + 1
+        elif args != "all":
+            for section in sectionNames:
+                if args in bbData.helpDict[section]:
+                    helpEmbed.add_field(
+                        name="‎", value="__" + section + "__", inline=False)
+                    helpEmbed.add_field(name=bbData.helpDict[section][args][0], value=bbData.helpDict[section][args][1].replace(
+                        "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
+                    messagesToSend.append(("", helpEmbed))
+                    page = -1
+            if page != -1:
+                await message.channel.send(":x: Unknown command!")
+                return
 
     if page == 0:
         for sectionNum in range(maxPage):
@@ -888,7 +889,7 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
                             "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
                 messagesToSend.append(("‎", helpEmbed))
 
-    else:
+    elif page != -1:
         helpEmbed.set_footer(text="Page " + str(page) + "/" + str(maxPage))
         section = list(bbData.helpDict.keys())[page - 1]
         helpEmbed.add_field(name="‎", value="__" +
