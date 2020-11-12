@@ -3383,6 +3383,7 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
 
     argsSplit = args.split(",")
     argPos = 0
+    arg = ""
     for arg in argsSplit:
         argPos += 1
         roleStr, dumbReact = arg.strip(" ").split(" ")[1], lib.emojis.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
