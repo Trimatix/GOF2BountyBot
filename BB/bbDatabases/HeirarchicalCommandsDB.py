@@ -5,6 +5,7 @@ from discord import Message
 
 class CommandRegistry:
     """Represents a registration of a command in a HeirarchicalCommandsDB.
+    TODO: Make allowDM so we dont have to make two HeirarchicalCommandsDBs to handle DM commands
 
     :var ident: The string command name by which this command is identified and called
     :type ident: str
@@ -69,7 +70,7 @@ class HeirarchicalCommandsDB:
         :raise NameError: When attempting to register a command identifier or alias that already exists at the requested access level
         """
         # Validate accessLevel
-        if accessLevel < 1 or accessLevel > self.numAccessLevels - 1:
+        if accessLevel < 0 or accessLevel > self.numAccessLevels - 1:
             raise IndexError("Access level out of range. Minimum: 0, maximum: " + str(self.numAccessLevels - 1) + ", given: " + str(accessLevel))
         
         # Generate a list of all command identifiers with respect to forceKeepCommandCasing
@@ -107,7 +108,7 @@ class HeirarchicalCommandsDB:
                 await self.commands[requiredAccess][command].call(message, args, isDM)
                 # Return true if a command was found
                 return True
-            elif commandLower in self.self.commands[requiredAccess]:
+            elif commandLower in self.commands[requiredAccess]:
                 await self.commands[requiredAccess][commandLower].call(message, args, isDM)
                 return True
         # Return false if no command could be matched
