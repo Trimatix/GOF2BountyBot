@@ -4297,7 +4297,7 @@ async def dev_cmd_broadcast(message : discord.Message, args : str, isDM : bool):
                     broadcastEmbed.add_field(name=msg[:nextNL].replace(
                         "{NL}", "\n"), value=msg[nextNL+1:closingNL+1].replace("{NL}", "\n"), inline=False)
                     msg = msg[closingNL+2:]
-                    
+
                 if not fieldsExist:
                     broadcastEmbed.add_field(name=msg[:nextNL].replace(
                         "{NL}", "\n"), value=msg[nextNL+1:].replace("{NL}", "\n"), inline=False)
@@ -4431,12 +4431,12 @@ async def dev_cmd_say(message : discord.Message, args : str, isDM : bool):
                     closingNL = nextNL + msg[nextNL+1:].index('\n')
                 except ValueError:
                     fieldsExist = False
-
-                if fieldsExist:
+                else:
                     broadcastEmbed.add_field(name=msg[:nextNL].replace(
                         "{NL}", "\n"), value=msg[nextNL+1:closingNL+1].replace("{NL}", "\n"), inline=False)
                     msg = msg[closingNL+2:]
-                else:
+                
+                if not fieldsExist:
                     broadcastEmbed.add_field(name=msg[:nextNL].replace(
                         "{NL}", "\n"), value=msg[nextNL+1:].replace("{NL}", "\n"), inline=False)
 
