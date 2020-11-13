@@ -93,11 +93,10 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "nameShip": ("**nameShip <nickname>**", "Give your active ship a nickname!"),
                             "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")},
 
-            "Shopping":{    "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+            "Economy":{     "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
                             "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship.\n🌎 This command must be used in your **home server**."),
-                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.\n🌎 This command must be used in your **home server**.")},
-
-            "Credits":{     "total-value":("**total-value** *[user]*", "Get the total value of all of your items, including your credits balance. Give a user to check someone else's total inventory value."),
+                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.\n🌎 This command must be used in your **home server**."),
+                            "total-value":("**total-value** *[user]*", "Get the total value of all of your items, including your credits balance. Give a user to check someone else's total inventory value."),
                             "balance": ("**balance** *[user]*", "Get the credits balance of yourself, or another user if one is given."),
                             "pay": ("**pay <user> <amount>**", "Pay the given user an amount of credits from your balance.")}}
 
