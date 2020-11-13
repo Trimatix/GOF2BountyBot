@@ -46,9 +46,9 @@ if TYPE_CHECKING:
 bbGlobals.client = commands.Bot(command_prefix=bbConfig.commandPrefix)
 
 # BountyBot commands DB
-bbCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB(bbConfig.numCommandAccessLevels)
-# Commands usable in DMs
-dmCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB(bbConfig.numCommandAccessLevels)
+# bbCommands = HeirarchicalCommandsDB.HeirarchicalCommandsDB(bbConfig.numCommandAccessLevels)
+from . import commands
+bbCommands = commands.loadCommands()
 
 # Do not change these!
 botLoggedIn = False
@@ -429,7 +429,6 @@ async def err_nodm(message : discord.Message, args : str, isDM : bool):
 
 
 
-# @bbGlobals.client.command(name='runHelp')
 async def cmd_help(message : discord.Message, args : str, isDM : bool):
     """Print the help strings defined in bbData as an embed.
     If a command is provided in args, the associated help string for just that command is printed.
@@ -526,8 +525,7 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji.sendable)
 
-bbCommands.register("help", cmd_help, 0)
-dmCommands.register("help", cmd_help, 0)
+bbCommands.register("help", cmd_help, 0, allowDM=True)
 
 
 async def cmd_how_to_play(message : discord.Message, args : str, isDM : bool):
@@ -576,8 +574,7 @@ async def cmd_how_to_play(message : discord.Message, args : str, isDM : bool):
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji.sendable)
 
-bbCommands.register("how-to-play", cmd_how_to_play, 0, aliases=["guide"])
-dmCommands.register("how-to-play", cmd_how_to_play, 0, aliases=["guide"])
+bbCommands.register("how-to-play", cmd_how_to_play, 0, aliases=["guide"], allowDM=True)
 
 
 async def cmd_hello(message : discord.Message, args : str, isDM : bool):
@@ -589,8 +586,7 @@ async def cmd_hello(message : discord.Message, args : str, isDM : bool):
     """
     await message.channel.send("Greetings, pilot! **o7**")
 
-bbCommands.register("hello", cmd_hello, 0)
-dmCommands.register("hello", cmd_hello, 0)
+bbCommands.register("hello", cmd_hello, 0, allowDM=True)
 
 
 async def cmd_balance(message : discord.Message, args : str, isDM : bool):
@@ -619,8 +615,7 @@ async def cmd_balance(message : discord.Message, args : str, isDM : bool):
         # send the user's balance
         await message.channel.send(":moneybag: **" + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + "** has **" + str(bbGlobals.usersDB.getUser(requestedUser.id).credits) + " Credits**.")
 
-bbCommands.register("balance", cmd_balance, 0, aliases=["bal", "credits"], forceKeepArgsCasing=True)
-dmCommands.register("balance", cmd_balance, 0, aliases=["bal", "credits"], forceKeepArgsCasing=True)
+bbCommands.register("balance", cmd_balance, 0, aliases=["bal", "credits"], forceKeepArgsCasing=True, allowDM=True)
 
 
 async def cmd_stats(message : discord.Message, args : str, isDM : bool):
@@ -743,8 +738,7 @@ async def cmd_stats(message : discord.Message, args : str, isDM : bool):
         # send the stats embed
         await message.channel.send(embed=statsEmbed)
 
-bbCommands.register("stats", cmd_stats, 0, aliases=["profile"], forceKeepArgsCasing=True)
-dmCommands.register("stats", cmd_stats, 0, aliases=["profile"], forceKeepArgsCasing=True)
+bbCommands.register("stats", cmd_stats, 0, aliases=["profile"], forceKeepArgsCasing=True, allowDM=True)
 
 
 async def cmd_map(message : discord.Message, args : str, isDM : bool):
@@ -761,8 +755,7 @@ async def cmd_map(message : discord.Message, args : str, isDM : bool):
     else:
         await message.channel.send(bbData.mapImageNoGraphLink)
 
-bbCommands.register("map", cmd_map, 0, aliases=["starmap"])
-dmCommands.register("map", cmd_map, 0, aliases=["starmap"])
+bbCommands.register("map", cmd_map, 0, aliases=["starmap"], allowDM=True)
 
 
 async def cmd_check(message : discord.Message, args : str, isDM : bool):
@@ -910,8 +903,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
         seconds = int(diff.total_seconds() % 60)
         await message.channel.send(":stopwatch: **" + message.author.display_name + "**, your *Khador Drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
 
-bbCommands.register("check", cmd_check, 0, aliases=["search"])
-dmCommands.register("check", cmd_check, 0, aliases=["search"])
+bbCommands.register("check", cmd_check, 0, aliases=["search"], allowDM=False)
 
 
 async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
@@ -1001,8 +993,7 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
                     maxBountiesMsg = "\nYou have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"
             await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!" + maxBountiesMsg)
 
-bbCommands.register("bounties", cmd_bounties, 0)
-dmCommands.register("bounties", err_nodm, 0)
+bbCommands.register("bounties", cmd_bounties, 0, allowDM=False)
 
 
 async def cmd_route(message : discord.Message, args : str, isDM : bool):
@@ -1045,8 +1036,7 @@ async def cmd_route(message : discord.Message, args : str, isDM : bool):
                 bbConfig.commandPrefix + "route Trimatix#2244`"
         await message.channel.send(outmsg)
 
-bbCommands.register("route", cmd_route, 0)
-dmCommands.register("route", cmd_route, 0)
+bbCommands.register("route", cmd_route, 0, allowDM=False)
 
 
 async def cmd_make_route(message : discord.Message, args : str, isDM : bool):
@@ -1110,8 +1100,7 @@ async def cmd_make_route(message : discord.Message, args : str, isDM : bool):
     else:
         await message.channel.send("Here's the shortest route from **" + startSyst + "** to **" + endSyst + "**:\n> " + routeStr[:-2] + " :rocket:")
 
-bbCommands.register("make-route", cmd_make_route, 0)
-dmCommands.register("make-route", cmd_make_route, 0)
+bbCommands.register("make-route", cmd_make_route, 0, allowDM=True)
 
 
 async def cmd_system(message : discord.Message, args : str, isDM : bool):
@@ -1551,8 +1540,7 @@ async def cmd_info(message : discord.Message, args : str, isDM : bool):
     else:
         await message.channel.send(":x: Unknown object type! (system/criminal/ship/weapon/module/turret/commodity)")
 
-bbCommands.register("info", cmd_info, 0)
-dmCommands.register("info", cmd_info, 0)
+bbCommands.register("info", cmd_info, 0, allowDM=True)
 
 
 async def cmd_leaderboard(message : discord.Message, args : str, isDM : bool):
@@ -1653,8 +1641,7 @@ async def cmd_leaderboard(message : discord.Message, args : str, isDM : bool):
     # send the embed
     await message.channel.send(embed=leaderboardEmbed)
 
-bbCommands.register("leaderboard", cmd_leaderboard, 0)
-dmCommands.register("leaderboard", err_nodm, 0)
+bbCommands.register("leaderboard", cmd_leaderboard, 0, allowDM=False)
 
 
 async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
@@ -1829,8 +1816,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
         except discord.Forbidden:
             await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
 
-bbCommands.register("hangar", cmd_hangar, 0, aliases=["hanger"], forceKeepArgsCasing=True)
-dmCommands.register("hangar", cmd_hangar, 0, aliases=["hanger"], forceKeepArgsCasing=True)
+bbCommands.register("hangar", cmd_hangar, 0, aliases=["hanger"], forceKeepArgsCasing=True, allowDM=True)
 
 
 async def cmd_shop(message : discord.Message, args : str, isDM : bool):
@@ -2005,8 +1991,7 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji.sendable)
 
-bbCommands.register("shop", cmd_shop, 0, aliases=["store"])
-dmCommands.register("shop", cmd_shop, 0, aliases=["store"])
+bbCommands.register("shop", cmd_shop, 0, aliases=["store"], allowDM=False)
 
 
 async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
@@ -2094,8 +2079,7 @@ async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
 
         await message.channel.send(embed=loadoutEmbed)
 
-bbCommands.register("loadout", cmd_loadout, 0, forceKeepArgsCasing=True)
-dmCommands.register("loadout", cmd_loadout, 0, forceKeepArgsCasing=True)
+bbCommands.register("loadout", cmd_loadout, 0, forceKeepArgsCasing=True, allowDM=True)
 
 
 async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
@@ -2238,8 +2222,7 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("buy", cmd_shop_buy, 0)
-dmCommands.register("buy", err_nodm, 0)
+bbCommands.register("buy", cmd_shop_buy, 0, allowDM=False)
 
 
 async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
@@ -2336,8 +2319,7 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("sell", cmd_shop_sell, 0)
-dmCommands.register("sell", err_nodm, 0)
+bbCommands.register("sell", cmd_shop_sell, 0, allowDM=False)
 
 
 async def cmd_equip(message : discord.Message, args : str, isDM : bool):
@@ -2443,8 +2425,7 @@ async def cmd_equip(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("equip", cmd_equip, 0)
-dmCommands.register("equip", cmd_equip, 0)
+bbCommands.register("equip", cmd_equip, 0, allowDM=True)
 
 
 async def cmd_unequip(message : discord.Message, args : str, isDM : bool):
@@ -2550,8 +2531,7 @@ async def cmd_unequip(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("unequip", cmd_unequip, 0)
-dmCommands.register("unequip", cmd_unequip, 0)
+bbCommands.register("unequip", cmd_unequip, 0, allowDM=True)
 
 
 async def cmd_nameship(message : discord.Message, args : str, isDM : bool):
@@ -2581,8 +2561,7 @@ async def cmd_nameship(message : discord.Message, args : str, isDM : bool):
     requestedBBUser.activeShip.changeNickname(args)
     await message.channel.send(":pencil: You named your " + requestedBBUser.activeShip.name + ": **" + args + "**.")
 
-bbCommands.register("nameship", cmd_nameship, 0, forceKeepArgsCasing=True)
-dmCommands.register("nameship", cmd_nameship, 0, forceKeepArgsCasing=True)
+bbCommands.register("nameship", cmd_nameship, 0, forceKeepArgsCasing=True, allowDM=True)
 
 
 async def cmd_unnameship(message : discord.Message, args : str, isDM : bool):
@@ -2608,8 +2587,7 @@ async def cmd_unnameship(message : discord.Message, args : str, isDM : bool):
     requestedBBUser.activeShip.removeNickname()
     await message.channel.send(":pencil: You reset your **" + requestedBBUser.activeShip.name + "**'s nickname.")
 
-bbCommands.register("unnameship", cmd_unnameship, 0)
-dmCommands.register("unnameship", cmd_unnameship, 0)
+bbCommands.register("unnameship", cmd_unnameship, 0, allowDM=True)
 
 
 async def cmd_pay(message : discord.Message, args : str, isDM : bool):
@@ -2653,8 +2631,7 @@ async def cmd_pay(message : discord.Message, args : str, isDM : bool):
 
     await message.channel.send(":moneybag: You paid " + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + " **" + str(amount) + "** credits!")
 
-bbCommands.register("pay", cmd_pay, 0, forceKeepArgsCasing=True)
-dmCommands.register("pay", cmd_pay, 0, forceKeepArgsCasing=True)
+bbCommands.register("pay", cmd_pay, 0, forceKeepArgsCasing=True, allowDM=True)
 
 
 async def cmd_notify(message : discord.Message, args : str, isDM : bool):
@@ -2702,8 +2679,7 @@ async def cmd_notify(message : discord.Message, args : str, isDM : bool):
             await message.channel.send(":thinking: Whoops! A connection error occurred, and the error has been logged. Could you try that again please?")
             bbLogger.log("main", "cmd_notify", "aiohttp.client_exceptions.ClientOSError occurred when attempting to grant " + message.author.name + "#" + str(message.author.id) + " alert " + alertID + "in guild " + message.guild.name + "#" + str(message.guild.id) + ".", category="userAlerts", eventType="ClientOSError", trace=traceback.format_exc())
 
-bbCommands.register("notify", cmd_notify, 0)
-dmCommands.register("notify", err_nodm, 0)
+bbCommands.register("notify", cmd_notify, 0, allowDM=False)
 
 
 async def cmd_total_value(message : discord.Message, args : str, isDM : bool):
@@ -2737,8 +2713,7 @@ async def cmd_total_value(message : discord.Message, args : str, isDM : bool):
         # send the user's balance
         await message.channel.send(":moneybag: **" + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + "**'s items and balance have a total value of **" + str(bbGlobals.usersDB.getUser(requestedUser.id).getStatByName("value")) + " Credits**.")
 
-bbCommands.register("total-value", cmd_total_value, 0, forceKeepArgsCasing=True)
-dmCommands.register("total-value", cmd_total_value, 0, forceKeepArgsCasing=True)
+bbCommands.register("total-value", cmd_total_value, 0, forceKeepArgsCasing=True, allowDM=True)
 
 
 async def cmd_duel(message : discord.Message, args : str, isDM : bool):
@@ -2890,8 +2865,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
 
         await DuelRequest.fightDuel(message.author, requestedUser, requestedDuel, message)
 
-bbCommands.register("duel", cmd_duel, 0, forceKeepArgsCasing=True)
-dmCommands.register("duel", err_nodm, 0)
+bbCommands.register("duel", cmd_duel, 0, forceKeepArgsCasing=True, allowDM=False)
 
 
 async def cmd_source(message : discord.Message, args : str, isDM : bool):
@@ -2910,8 +2884,7 @@ async def cmd_source(message : discord.Message, args : str, isDM : bool):
     srcEmbed.add_field(name="__Special Thanks__", value=" • **DeepSilver FishLabs**, for building the fantastic game franchise that this bot is dedicated to. I don't own any Galaxy on Fire assets intellectual property, nor rights to any assets the bot references.\n • **The BountyBot testing team** who have all been lovely and supportive since the beginning, and who will *always* find a way to break things ;)\n • **NovahKiin22**, for his upcoming major feature release, along with minor bug fixes and *brilliant* insight throughout development\n • **Poisonwasp**, for another minor bug fix, but mostly for his continuous support\n • **You!** The community is what makes developing this bot so fun :)", inline=False)
     await message.channel.send(embed=srcEmbed)
 
-bbCommands.register("source", cmd_source, 0)
-dmCommands.register("source", cmd_source, 0)
+bbCommands.register("source", cmd_source, 0, allowDM=True)
 
 
 async def cmd_poll(message : discord.Message, args : str, isDM : bool):
@@ -3076,8 +3049,7 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
     bbGlobals.usersDB.getUser(message.author.id).pollOwned = True
 
-bbCommands.register("poll", cmd_poll, 0, forceKeepArgsCasing=True)
-dmCommands.register("poll", err_nodm, 0)
+bbCommands.register("poll", cmd_poll, 0, forceKeepArgsCasing=True, allowDM=False)
 
 
 async def cmd_transfer(message : discord.Message, args : str, isDM : bool):
@@ -3118,8 +3090,7 @@ async def cmd_transfer(message : discord.Message, args : str, isDM : bool):
             else:
                 await message.channel.send("🛑 Home guild transfer cancelled.")
 
-bbCommands.register("transfer", cmd_transfer, 0)
-dmCommands.register("transfer", err_nodm, 0)
+bbCommands.register("transfer", cmd_transfer, 0, allowDM=False)
 
 
 async def cmd_home(message : discord.Message, args : str, isDM : bool):
@@ -3139,8 +3110,7 @@ async def cmd_home(message : discord.Message, args : str, isDM : bool):
             return
     await message.channel.send("🌑 Your home server has not yet been set.\nSet your home server by using the shop or bounty board, or with the `" + bbConfig.commandPrefix + "transfer` command.")
 
-bbCommands.register("home", cmd_home, 0)
-dmCommands.register("home", cmd_home, 0)
+bbCommands.register("home", cmd_home, 0, allowDM=True)
 
 
 
@@ -3580,8 +3550,7 @@ async def dev_cmd_sleep(message : discord.Message, args : str, isDM : bool):
     await message.channel.send("zzzz....")
     await shutdown()
 
-bbCommands.register("sleep", dev_cmd_sleep, 2)
-dmCommands.register("sleep", dev_cmd_sleep, 2)
+bbCommands.register("sleep", dev_cmd_sleep, 2, allowDM=True)
 
 
 async def dev_cmd_save(message : discord.Message, args : str, isDM : bool):
@@ -3601,8 +3570,7 @@ async def dev_cmd_save(message : discord.Message, args : str, isDM : bool):
     print(datetime.now().strftime("%H:%M:%S: Data saved manually!"))
     await message.channel.send("saved!")
 
-bbCommands.register("save", dev_cmd_save, 2)
-dmCommands.register("save", dev_cmd_save, 2)
+bbCommands.register("save", dev_cmd_save, 2, allowDM=True)
 
 
 async def dev_cmd_has_announce(message : discord.Message, args : str, isDM : bool):
@@ -3615,8 +3583,7 @@ async def dev_cmd_has_announce(message : discord.Message, args : str, isDM : boo
     guild = bbGlobals.guildsDB.getGuild(message.guild.id)
     await message.channel.send(":x: Unknown guild!" if guild is None else guild.hasAnnounceChannel())
 
-bbCommands.register("has-announce", dev_cmd_has_announce, 2)
-dmCommands.register("has-announce", err_nodm, 2)
+bbCommands.register("has-announce", dev_cmd_has_announce, 2, allowDM=False)
 
 
 async def dev_cmd_get_announce(message : discord.Message, args : str, isDM : bool):
@@ -3628,8 +3595,7 @@ async def dev_cmd_get_announce(message : discord.Message, args : str, isDM : boo
     """
     await message.channel.send("<#" + str(bbGlobals.guildsDB.getGuild(message.guild.id).getAnnounceChannel().id) + ">")
 
-bbCommands.register("get-announce", dev_cmd_get_announce, 2)
-dmCommands.register("get-announce", err_nodm, 2)
+bbCommands.register("get-announce", dev_cmd_get_announce, 2, allowDM=False)
 
 
 async def dev_cmd_has_play(message : discord.Message, args : str, isDM : bool):
@@ -3642,8 +3608,7 @@ async def dev_cmd_has_play(message : discord.Message, args : str, isDM : bool):
     guild = bbGlobals.guildsDB.getGuild(message.guild.id)
     await message.channel.send(":x: Unknown guild!" if guild is None else guild.hasPlayChannel())
 
-bbCommands.register("has-play", dev_cmd_has_play, 2)
-dmCommands.register("has-play", err_nodm, 2)
+bbCommands.register("has-play", dev_cmd_has_play, 2, allowDM=False)
 
 
 async def dev_cmd_get_play(message : discord.Message, args : str, isDM : bool):
@@ -3655,8 +3620,7 @@ async def dev_cmd_get_play(message : discord.Message, args : str, isDM : bool):
     """
     await message.channel.send("<#" + str(bbGlobals.guildsDB.getGuild(message.guild.id).getPlayChannel().id) + ">")
 
-bbCommands.register("get-play", dev_cmd_get_play, 2)
-dmCommands.register("get-play", err_nodm, 2)
+bbCommands.register("get-play", dev_cmd_get_play, 2, allowDM=False)
 
 
 async def dev_cmd_clear_bounties(message : discord.Message, args : str, isDM : bool):
@@ -3700,8 +3664,7 @@ async def dev_cmd_clear_bounties(message : discord.Message, args : str, isDM : b
     callingBBGuild.bountiesDB.clearBounties()
     await message.channel.send(":ballot_box_with_check: Active bounties cleared" + ((" for '" + callingBBGuild.dcGuild.name + "'.") if callingBBGuild.dcGuild is not None else "."))
 
-bbCommands.register("clear-bounties", dev_cmd_clear_bounties, 2)
-dmCommands.register("clear-bounties", dev_cmd_clear_bounties, 2)
+bbCommands.register("clear-bounties", dev_cmd_clear_bounties, 2, allowDM=True)
 
 
 async def dev_cmd_get_cooldown(message : discord.Message, args : str, isDM : bool):
@@ -3719,8 +3682,7 @@ async def dev_cmd_get_cooldown(message : discord.Message, args : str, isDM : boo
     await message.channel.send(datetime.utcfromtimestamp(bbGlobals.usersDB.getUser(message.author.id).bountyCooldownEnd).strftime("%Hh%Mm%Ss"))
     await message.channel.send(datetime.utcnow().strftime("%Hh%Mm%Ss"))
 
-bbCommands.register("get-cool", dev_cmd_get_cooldown, 2)
-dmCommands.register("get-cool", dev_cmd_get_cooldown, 2)
+bbCommands.register("get-cool", dev_cmd_get_cooldown, 2, allowDM=True)
 
 
 async def dev_cmd_reset_cooldown(message : discord.Message, args : str, isDM : bool):
@@ -3741,8 +3703,7 @@ async def dev_cmd_reset_cooldown(message : discord.Message, args : str, isDM : b
                         ).bountyCooldownEnd = datetime.utcnow().timestamp()
     await message.channel.send("Done!")
 
-bbCommands.register("reset-cool", dev_cmd_reset_cooldown, 2)
-dmCommands.register("reset-cool", dev_cmd_reset_cooldown, 2)
+bbCommands.register("reset-cool", dev_cmd_reset_cooldown, 2, allowDM=True)
 
 
 async def dev_cmd_reset_has_poll(message : discord.Message, args : str, isDM : bool):
@@ -3762,7 +3723,7 @@ async def dev_cmd_reset_has_poll(message : discord.Message, args : str, isDM : b
         bbGlobals.usersDB.getUser(int(args.lstrip("<@!").rstrip(">"))).pollOwned = False
     await message.channel.send("Done!")
 
-bbCommands.register("reset-has-poll", dev_cmd_reset_has_poll, 2)
+bbCommands.register("reset-has-poll", dev_cmd_reset_has_poll, 2, allowDM=True)
 
 
 async def dev_cmd_reset_daily_wins(message : discord.Message, args : str, isDM : bool):
@@ -3784,8 +3745,7 @@ async def dev_cmd_reset_daily_wins(message : discord.Message, args : str, isDM :
 
     await message.channel.send("Done!")
 
-bbCommands.register("reset-daily-wins", dev_cmd_reset_daily_wins, 2)
-dmCommands.register("reset-daily-wins", dev_cmd_reset_daily_wins, 2)
+bbCommands.register("reset-daily-wins", dev_cmd_reset_daily_wins, 2, allowDM=True)
 
 
 async def dev_cmd_give(message : discord.Message, args : str, isDM : bool):
@@ -3827,8 +3787,7 @@ async def dev_cmd_give(message : discord.Message, args : str, isDM : bool):
 
     await message.channel.send(":white_check_mark: Given one '" + newItem.name + "' to **" + lib.discordUtil.userOrMemberName(bbGlobals.client.get_user(requestedUser.id), message.guild) + "**!")
 
-bbCommands.register("give", dev_cmd_give, 2, forceKeepArgsCasing=True)
-dmCommands.register("give", dev_cmd_give, 2, forceKeepArgsCasing=True)
+bbCommands.register("give", dev_cmd_give, 2, forceKeepArgsCasing=True, allowDM=True)
 
 
 async def dev_cmd_del_item(message : discord.Message, args : str, isDM : bool):
@@ -3919,8 +3878,7 @@ async def dev_cmd_del_item(message : discord.Message, args : str, isDM : bool):
     await message.channel.send(":white_check_mark: One item deleted from " + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
     userItemInactives.removeItem(requestedItem)
 
-bbCommands.register("del-item", dev_cmd_del_item, 2)
-dmCommands.register("del-item", dev_cmd_del_item, 2)
+bbCommands.register("del-item", dev_cmd_del_item, 2, allowDM=True)
 
 
 async def dev_cmd_del_item_key(message : discord.Message, args : str, isDM : bool):
@@ -4019,8 +3977,7 @@ async def dev_cmd_del_item_key(message : discord.Message, args : str, isDM : boo
         userItemInactives.numKeys -= 1
         await message.channel.send(":white_check_mark: " + str(itemCount) + " item(s) deleted from " + lib.discordUtil.userOrMemberName(requestedUser, message.guild) + "'s inventory: " + itemName, embed=itemEmbed)
 
-bbCommands.register("del-item-key", dev_cmd_del_item_key, 2)
-dmCommands.register("del-item-key", dev_cmd_del_item_key, 2)
+bbCommands.register("del-item-key", dev_cmd_del_item_key, 2, allowDM=True)
 
 
 async def dev_cmd_setcheckcooldown(message : discord.Message, args : str, isDM : bool):
@@ -4043,8 +4000,7 @@ async def dev_cmd_setcheckcooldown(message : discord.Message, args : str, isDM :
     bbConfig.checkCooldown["minutes"] = int(args)
     await message.channel.send("Done! *you still need to update the file though* " + message.author.mention)
 
-bbCommands.register("setcheckcooldown", dev_cmd_setcheckcooldown, 2)
-dmCommands.register("setcheckcooldown", dev_cmd_setcheckcooldown, 2)
+bbCommands.register("setcheckcooldown", dev_cmd_setcheckcooldown, 2, allowDM=True)
 
 
 async def dev_cmd_setbountyperiodm(message : discord.Message, args : str, isDM : bool):
@@ -4069,8 +4025,7 @@ async def dev_cmd_setbountyperiodm(message : discord.Message, args : str, isDM :
     bbGlobals.newBountyFixedDeltaChanged = True
     await message.channel.send("Done! *you still need to update the file though* " + message.author.mention)
 
-bbCommands.register("setbountyperiodm", dev_cmd_setbountyperiodm, 2)
-dmCommands.register("setbountyperiodm", dev_cmd_setbountyperiodm, 2)
+bbCommands.register("setbountyperiodm", dev_cmd_setbountyperiodm, 2, allowDM=True)
 
 
 async def dev_cmd_setbountyperiodh(message : discord.Message, args : str, isDM : bool):
@@ -4095,8 +4050,7 @@ async def dev_cmd_setbountyperiodh(message : discord.Message, args : str, isDM :
     bbConfig.newBountyFixedDelta["hours"] = int(args)
     await message.channel.send("Done! *you still need to update the file though* " + message.author.mention)
 
-bbCommands.register("setbountyperiodh", dev_cmd_setbountyperiodh, 2)
-dmCommands.register("setbountyperiodh", dev_cmd_setbountyperiodh, 2)
+bbCommands.register("setbountyperiodh", dev_cmd_setbountyperiodh, 2, allowDM=True)
 
 
 async def dev_cmd_resetnewbountycool(message : discord.Message, args : str, isDM : bool):
@@ -4132,8 +4086,7 @@ async def dev_cmd_resetnewbountycool(message : discord.Message, args : str, isDM
     await callingBBGuild.newBountyTT.forceExpire()
     await message.channel.send(":ballot_box_with_check: New bounty cooldown reset for '" + callingBBGuild.dcGuild.name + "'")
 
-bbCommands.register("resetnewbountycool", dev_cmd_resetnewbountycool, 2)
-dmCommands.register("resetnewbountycool", dev_cmd_resetnewbountycool, 2)
+bbCommands.register("resetnewbountycool", dev_cmd_resetnewbountycool, 2, allowDM=True)
 
 
 async def dev_cmd_canmakebounty(message : discord.Message, args : str, isDM : bool):
@@ -4173,8 +4126,7 @@ async def dev_cmd_canmakebounty(message : discord.Message, args : str, isDM : bo
     else:
         await message.channel.send(callingBBGuild.bountiesDB.factionCanMakeBounty(newFaction.lower()))
 
-bbCommands.register("canmakebounty", dev_cmd_canmakebounty, 2)
-dmCommands.register("canmakebounty", dev_cmd_canmakebounty, 2)
+bbCommands.register("canmakebounty", dev_cmd_canmakebounty, 2, allowDM=False)
 
 
 async def dev_cmd_broadcast(message : discord.Message, args : str, isDM : bool):
@@ -4311,8 +4263,7 @@ async def dev_cmd_broadcast(message : discord.Message, args : str, isDM : bool):
                 if guild.hasPlayChannel():
                     await guild.getPlayChannel().send(msgText, embed=broadcastEmbed)
 
-bbCommands.register("broadcast", dev_cmd_broadcast, 2, forceKeepArgsCasing=True)
-dmCommands.register("broadcast", dev_cmd_broadcast, 2, forceKeepArgsCasing=True)
+bbCommands.register("broadcast", dev_cmd_broadcast, 2, forceKeepArgsCasing=True, allowDM=True)
 
 
 async def dev_cmd_say(message : discord.Message, args : str, isDM : bool):
@@ -4442,8 +4393,7 @@ async def dev_cmd_say(message : discord.Message, args : str, isDM : bool):
 
         await message.channel.send(msgText, embed=broadcastEmbed)
 
-bbCommands.register("say", dev_cmd_say, 2, forceKeepArgsCasing=True)
-dmCommands.register("say", dev_cmd_say, 2, forceKeepArgsCasing=True)
+bbCommands.register("say", dev_cmd_say, 2, forceKeepArgsCasing=True, allowDM=True)
 
 
 async def dev_cmd_make_bounty(message : discord.Message, args : str, isDM : bool):
@@ -4580,8 +4530,7 @@ async def dev_cmd_make_bounty(message : discord.Message, args : str, isDM : bool
     callingBBGuild.bountiesDB.addBounty(newBounty)
     await callingBBGuild.announceNewBounty(newBounty)
 
-bbCommands.register("make-bounty", dev_cmd_make_bounty, 2, forceKeepArgsCasing=True)
-dmCommands.register("make-bounty", dev_cmd_make_bounty, 2 , forceKeepArgsCasing=True)
+bbCommands.register("make-bounty", dev_cmd_make_bounty, 2, forceKeepArgsCasing=True, allowDM=True)
 
 
 async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM : bool):
@@ -4720,8 +4669,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
     callingBBGuild.bountiesDB.addBounty(newBounty)
     await callingBBGuild.announceNewBounty(newBounty)
 
-bbCommands.register("make-player-bounty", dev_cmd_make_player_bounty, 2, forceKeepArgsCasing=True)
-dmCommands.register("make-player-bounty", dev_cmd_make_player_bounty, 2, forceKeepArgsCasing=True)
+bbCommands.register("make-player-bounty", dev_cmd_make_player_bounty, 2, forceKeepArgsCasing=True, allowDM=True)
 
 
 async def dev_cmd_refreshshop(message : discord.Message, args : str, isDM : bool):
@@ -4746,8 +4694,7 @@ async def dev_cmd_refreshshop(message : discord.Message, args : str, isDM : bool
     # if guild.hasPlayChannel():
     #     await guild.getPlayChannel().send(":arrows_counterclockwise: The shop stock has been refreshed!\n**        **Now at tech level: **" + str(guild.shop.currentTechLevel) + "**")
 
-bbCommands.register("refreshshop", dev_cmd_refreshshop, 2)
-dmCommands.register("refreshshop", err_nodm, 2)
+bbCommands.register("refreshshop", dev_cmd_refreshshop, 2, allowDM=False)
 
 
 async def dev_cmd_setbalance(message : discord.Message, args : str, isDM : bool):
@@ -4780,8 +4727,7 @@ async def dev_cmd_setbalance(message : discord.Message, args : str, isDM : bool)
     requestedBBUser.credits = int(argsSplit[1])
     await message.channel.send("Done!")
 
-bbCommands.register("setbalance", dev_cmd_setbalance, 2)
-dmCommands.register("setbalance", dev_cmd_setbalance, 2)
+bbCommands.register("setbalance", dev_cmd_setbalance, 2, allowDM=True)
 
 
 async def dev_cmd_debug_hangar(message : discord.Message, args : str, isDM : bool):
@@ -4867,8 +4813,7 @@ async def dev_cmd_debug_hangar(message : discord.Message, args : str, isDM : boo
         await message.channel.send(embed=hangarEmbed)
 
 
-bbCommands.register("debug-hangar", dev_cmd_debug_hangar, 2)
-dmCommands.register("debug-hangar", dev_cmd_debug_hangar, 2)
+bbCommands.register("debug-hangar", dev_cmd_debug_hangar, 2, allowDM=True)
 
 
 async def dev_cmd_reset_transfer_cool(message : discord.Message, args : str, isDM : bool):
@@ -4890,8 +4835,7 @@ async def dev_cmd_reset_transfer_cool(message : discord.Message, args : str, isD
     await message.channel.send("Done!")
     
 
-bbCommands.register("reset-transfer-cool", dev_cmd_reset_transfer_cool, 2)
-dmCommands.register("reset-transfer-cool", dev_cmd_reset_transfer_cool, 2)
+bbCommands.register("reset-transfer-cool", dev_cmd_reset_transfer_cool, 2, allowDM=True)
 
 
 
@@ -4944,7 +4888,7 @@ async def on_ready():
 
     # Iterate over uninitiaizedEmoji attributes in bbConfig
     for varName, varValue in vars(bbConfig).items():
-        if isinstance(varValue, lib.emojis.uninitializedEmoji):
+        if isinstance(varValue, lib.emojis.UninitializedDumbEmoji):
             uninitEmoji = varValue.value
             # Create dumbEmoji instances based on the type of the uninitialized value
             if isinstance(uninitEmoji, int):
@@ -4955,11 +4899,11 @@ async def on_ready():
                 setattr(bbConfig, varName, lib.emojis.dumbEmojiFromDict(uninitEmoji))
             # Unrecognised uninitialized value
             else:
-                raise ValueError("Unrecognised uninitializedEmoji value type. Expecting int, str or dict, given '" + uninitEmoji.__class__.__name__ + "'")
+                raise ValueError("Unrecognised UninitializedDumbEmoji value type. Expecting int, str or dict, given '" + uninitEmoji.__class__.__name__ + "'")
     
     # Ensure all emojis have been initialized
     for varName, varValue in vars(bbConfig).items():
-        if isinstance(varValue, lib.emojis.uninitializedEmoji):
+        if isinstance(varValue, lib.emojis.UninitializedDumbEmoji):
             raise RuntimeError("Uninitialized emoji still remains in bbConfig after emoji initialization: '" + varName + "'")
 
 
@@ -5198,10 +5142,10 @@ async def on_message(message : discord.Message):
 
         try:
             # Call the requested command
-            if isDM:
-                commandFound = await dmCommands.call(command, message, args, accessLevel, isDM=True)
-            else:
-                commandFound = await bbCommands.call(command, message, args, accessLevel, isDM=False)
+            commandFound = await bbCommands.call(command, message, args, accessLevel, isDM=isDM)
+        except HeirarchicalCommandsDB.IncorrectCommandCallContext:
+            await err_nodm(message, "", isDM)
+            return
         except Exception as e:
             await message.channel.send(":woozy_face: Uh oh, something went wrong! The error has been logged.\nThis command probably won't work until we've looked into it.")
             bbLogger.log("Main", "on_message", "An unexpected error occured when calling command '" +
