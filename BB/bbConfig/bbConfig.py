@@ -25,7 +25,9 @@ def truncToRes(num : float) -> float:
 ##### COMMANDS #####
 
 # List of module names from BB.commands to import
-includedCommandModules = ["usr_misc"]
+includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_bounties", "usr_loadout", "usr_economy",
+                            "admn_channels", "admn_misc",
+                            "dev_misc", "dev_channels", "dev_bounties", "dev_items")
 
 
 
