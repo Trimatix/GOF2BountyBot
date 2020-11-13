@@ -9,6 +9,7 @@ from..bbObjects.battles import DuelRequest
 
 class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
     """A ReactionMenu allowing the recipient of a duel challenge to accept or reject the challenge through reactions.
+    TODO: Make this an inline reaction menu (base class in another branch currently)
 
     :var duelChallenge: The DuelRequest that this menu controls
     :vartype duelChallenge: DuelRequest
