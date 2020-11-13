@@ -186,7 +186,7 @@ def dumbEmojiFromPartial(e : PartialEmoji) -> dumbEmoji:
         return dumbEmoji(id=e.id)
 
 
-class uninitializedDumbEmoji:
+class UninitializedDumbEmoji:
     """A data class representing a dumbemoji waiting to be initialized.
     No instances of this class should be present after bountybot.on_ready
     has finished executing.
