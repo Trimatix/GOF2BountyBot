@@ -4940,6 +4940,29 @@ async def on_ready():
     TODO: Implement dynamic timedtask checking period
     TODO: Move item initialization to separate method
     """
+    ##### EMOJI INITIALIZATION #####
+
+    # Iterate over uninitiaizedEmoji attributes in bbConfig
+    for varName, varValue in vars(bbConfig).items():
+        if isinstance(varValue, lib.emojis.uninitializedEmoji):
+            uninitEmoji = varValue.value
+            # Create dumbEmoji instances based on the type of the uninitialized value
+            if isinstance(uninitEmoji, int):
+                setattr(bbConfig, varName, lib.emojis.dumbEmoji(id=uninitEmoji))
+            elif isinstance(uninitEmoji, str):
+                setattr(bbConfig, varName, lib.emojis.dumbEmojiFromStr(uninitEmoji))
+            elif isinstance(uninitEmoji, dict):
+                setattr(bbConfig, varName, lib.emojis.dumbEmojiFromDict(uninitEmoji))
+            # Unrecognised uninitialized value
+            else:
+                raise ValueError("Unrecognised uninitializedEmoji value type. Expecting int, str or dict, given '" + uninitEmoji.__class__.__name__ + "'")
+    
+    # Ensure all emojis have been initialized
+    for varName, varValue in vars(bbConfig).items():
+        if isinstance(varValue, lib.emojis.uninitializedEmoji):
+            raise RuntimeError("Uninitialized emoji still remains in bbConfig after emoji initialization: '" + varName + "'")
+
+
     ##### OBJECT SPAWNING #####
 
     # generate bbCriminal objects from data in bbData

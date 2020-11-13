@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import math, random, pprint
-from ..lib.emojis import dumbEmoji
+from ..lib.emojis import dumbEmoji, uninitializedDumbEmoji
 
 ##### UTIL #####
+
 
 # Number of decimal places to calculate itemTLSpawnChanceForShopTL values to
 tl_resolution = 3

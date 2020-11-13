@@ -184,3 +184,17 @@ def dumbEmojiFromPartial(e : PartialEmoji) -> dumbEmoji:
         return dumbEmoji(unicode=e.name)
     else:
         return dumbEmoji(id=e.id)
+
+
+class uninitializedDumbEmoji:
+    """A data class representing a dumbemoji waiting to be initialized.
+    No instances of this class should be present after bountybot.on_ready
+    has finished executing.
+
+    An example use case:
+    Custom emojis cannot be represented in bbConfig, as at the time of importing
+    this module into bountybot, bbGlobals.client is not defined.
+    TODO: Update bbConfig.defaultShipSkinToolEmoji once merged to the same branch
+    """
+    def __init__(self, value):
+        self.value = value
