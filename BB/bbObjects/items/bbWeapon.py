@@ -1,6 +1,6 @@
 from .bbItem import bbItem
 from ...bbConfig import bbData
-from ... import bbUtil
+from ... import lib
 from typing import List
 
 class bbWeapon(bbItem):
@@ -10,7 +10,7 @@ class bbWeapon(bbItem):
     :vartype dps: float
     """
 
-    def __init__(self, name : str, aliases : List[str], dps=0.0, value=0, wiki="", manufacturer="", icon="", emoji=bbUtil.EMPTY_DUMBEMOJI, techLevel=-1, builtIn=False):
+    def __init__(self, name : str, aliases : List[str], dps=0.0, value=0, wiki="", manufacturer="", icon="", emoji=lib.emojis.dumbEmoji.EMPTY, techLevel=-1, builtIn=False):
         """
         :param str name: The name of the weapon. Must be unique. (a model number is a good starting point)
         :param list[str] aliases: A list of alternative names this weapon may be referred to by.
@@ -19,7 +19,7 @@ class bbWeapon(bbItem):
         :param str wiki: A web page that is displayed as the wiki page for this weapon. (Default "")
         :param str manufacturer: The name of the manufacturer of this weapon (Default "")
         :param str icon: A URL pointing to an image to use for this weapon's icon (Default "")
-        :param bbUtil.dumbEmoji emoji: The emoji to use for this weapon's small icon (Default bbUtil.EMPTY_DUMBEMOJI)
+        :param lib.emojis.dumbEmoji emoji: The emoji to use for this weapon's small icon (Default lib.emojis.dumbEmoji.EMPTY)
         :param int techLevel: A rating from 1 to 10 of this weapon's technical advancement. Used as a measure for its effectiveness compared to other weapons of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard weapon (loaded in from bbData) or a custom spawned weapon (Default False)
         """
@@ -71,5 +71,5 @@ def fromDict(weaponDict):
     else:
         return bbWeapon(weaponDict["name"], weaponDict["aliases"], dps=weaponDict["dps"], value=weaponDict["value"],
         wiki=weaponDict["wiki"] if "wiki" in weaponDict else "", manufacturer=weaponDict["manufacturer"] if "manufacturer" in weaponDict else "",
-        icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=bbUtil.dumbEmojiFromStr(weaponDict["emoji"]) if "emoji" in weaponDict else bbUtil.EMPTY_DUMBEMOJI,
+        icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmojiFromStr(weaponDict["emoji"]) if "emoji" in weaponDict else lib.emojis.dumbEmoji.EMPTY,
         techLevel=weaponDict["techLevel"] if "techLevel" in weaponDict else -1, builtIn=False)

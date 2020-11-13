@@ -121,7 +121,7 @@ class logger:
                     # log strings first encoded to bytes (utf-8) to allow for unicode chars
                     files[category].write(log.encode())
                 except IOError as e:
-                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + currentFName + ":" + e.__class__.__name__ + "\n" + traceback.format_exc())
+                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + files[category].name + ":" + e.__class__.__name__ + "\n" + traceback.format_exc())
                 except UnicodeEncodeError as e:
                     print(e.start)
         

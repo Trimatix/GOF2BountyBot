@@ -13,7 +13,7 @@ from datetime import datetime
 from discord import Guild, Member
 from . import bbGuild
 from ..logging import bbLogger
-from .. import bbUtil
+from .. import lib
 
 
 # Dictionary-serialized bbShip to give to new players
@@ -622,12 +622,12 @@ class bbUser:
         """
         now = datetime.utcnow()
         if not self.canTransferGuild(now=now):
-            raise ValueError("This user cannot transfer guild again yet (" + bbUtil.td_format_noYM(self.guildTransferCooldownEnd) + " remaining)")
+            raise ValueError("This user cannot transfer guild again yet (" + lib.timeUtil.td_format_noYM(self.guildTransferCooldownEnd) + " remaining)")
         if await newGuild.fetch_member(self.id) is None:
             raise NameError("This user is not a member of the given guild '" + newGuild.name + "#" + str(newGuild.id) + "'")
         
         self.homeGuildID = newGuild.id
-        self.guildTransferCooldownEnd = now + bbUtil.timeDeltaFromDict(bbConfig.homeGuildTransferCooldown)
+        self.guildTransferCooldownEnd = now + lib.timeUtil.timeDeltaFromDict(bbConfig.homeGuildTransferCooldown)
 
 
     def __str__(self) -> str:

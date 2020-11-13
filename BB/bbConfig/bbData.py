@@ -93,11 +93,10 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
                             "nameShip": ("**nameShip <nickname>**", "Give your active ship a nickname!"),
                             "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")},
 
-            "Shopping":{    "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+            "Economy":{     "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
                             "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship.\n🌎 This command must be used in your **home server**."),
-                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.\n🌎 This command must be used in your **home server**.")},
-
-            "Credits":{     "total-value":("**total-value** *[user]*", "Get the total value of all of your items, including your credits balance. Give a user to check someone else's total inventory value."),
+                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.\n🌎 This command must be used in your **home server**."),
+                            "total-value":("**total-value** *[user]*", "Get the total value of all of your items, including your credits balance. Give a user to check someone else's total inventory value."),
                             "balance": ("**balance** *[user]*", "Get the credits balance of yourself, or another user if one is given."),
                             "pay": ("**pay <user> <amount>**", "Pay the given user an amount of credits from your balance.")}}
 
@@ -115,9 +114,6 @@ adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display in
                                         "remove-bounty-board-channel": ("**remove-bounty-board-channel**", "Send from any channel to remove the server's bountyboard channel, if one is set."),
                                         "hangar": ("**hangar** *[user]* *[item-type]*", "Administrators have permission to view the hangars of other users."),
                                         "config": ("**config <setting> <value>**", "Set various settings for how bountybot will function in this server. Currently, `setting` can be either 'bounties' or 'shop', and `value` can either 'enable' or 'disable', all with a few handy aliases. This command is lets you enable or disable large amounts of functionality all together.")}}
-
-# string extensions for numbers, e.g 11th, 1st, 23rd...
-numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
 
 # icons for factions
 terranIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013574331596850/terran.png"

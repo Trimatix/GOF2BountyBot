@@ -1,6 +1,6 @@
 from ...bbConfig import bbData
 from .modules import bbModule, bbArmourModule, bbBoosterModule, bbCabinModule, bbCloakModule, bbCompressorModule, bbGammaShieldModule, bbMiningDrillModule, bbRepairBeamModule, bbRepairBotModule, bbScannerModule, bbShieldModule, bbSpectralFilterModule, bbThrusterModule, bbTractorBeamModule, bbTransfusionBeamModule, bbWeaponModModule, bbJumpDriveModule, bbEmergencySystemModule, bbSignatureModule, bbShieldInjectorModule, bbTimeExtenderModule
-from ... import bbUtil
+from ... import lib
 
 typeConstructors = {"armour": bbArmourModule.fromDict,
                     "booster": bbBoosterModule.fromDict,

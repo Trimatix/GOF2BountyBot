@@ -1,7 +1,7 @@
 import discord
 from discord import Embed, HTTPException, Forbidden, NotFound, Client, Message
 from ....bbConfig import bbData, bbConfig
-from .... import bbUtil
+from .... import lib
 from .. import bbCriminal
 from ....logging import bbLogger
 import asyncio
@@ -18,7 +18,7 @@ def makeBountyEmbed(bounty : bbBounty.Bounty) -> Embed:
     embed = Embed(title=bounty.criminal.name, colour=bbData.factionColours[bounty.faction] if bounty.faction in bbData.factionColours else bbData.factionColours["neutral"])
     embed.set_footer(text=bounty.faction.title())
     embed.set_thumbnail(url=bounty.criminal.icon)
-    embed.add_field(name="**Reward:**", value=bbUtil.commaSplitNum(str(bounty.reward)) + " Credits")
+    embed.add_field(name="**Reward:**", value=lib.stringTyping.commaSplitNum(str(bounty.reward)) + " Credits")
     routeStr = ""
     for system in bounty.route:
         if bounty.systemChecked(system):

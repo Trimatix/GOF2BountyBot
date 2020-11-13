@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import math, random, pprint
-from ..bbUtil import dumbEmoji
+from ..lib.emojis import dumbEmoji, UninitializedDumbEmoji
 
 ##### UTIL #####
+
 
 # Number of decimal places to calculate itemTLSpawnChanceForShopTL values to
 tl_resolution = 3
@@ -18,6 +19,15 @@ def truncToRes(num : float) -> float:
     :rtype: float
     """
     return math.trunc(num * math.pow(10, tl_resolution)) / math.pow(10, tl_resolution)
+
+
+
+##### COMMANDS #####
+
+# List of module names from BB.commands to import
+includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_bounties", "usr_loadout", "usr_economy",
+                            "admn_channels", "admn_misc",
+                            "dev_misc", "dev_channels", "dev_bounties", "dev_items")
 
 
 
@@ -299,10 +309,13 @@ defaultRejectEmoji = dumbEmoji(unicode="👎")
 # discord user IDs of all developers
 developers = [188618589102669826, 448491245296418817]
 
+# The number of registerable command access levels.
+# E.g I use 3 to represent 0=user, 1=admin, 2=dev
+# TODO: Add a fourth, mod commands, with an admin-assignable role
+numCommandAccessLevels = 3
+
 # titles to give each type of user when reporting error messages etc
-devTitle = "officer"
-adminTitle = "commander"
-userTitle = "pilot"
+accessLevelTitles = ["pilot", "commander", "officer"]
 
 
 

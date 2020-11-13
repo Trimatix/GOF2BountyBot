@@ -2,10 +2,10 @@ from . import bbShop
 from ..bbDatabases import bbBountyDB
 from .bounties.bountyBoards import BountyBoardChannel
 from ..userAlerts import UserAlerts
-from discord import channel, Client, Forbidden, Guild, Member
+from discord import channel, Client, Forbidden, Guild, Member, Message, HTTPException, NotFound
 from typing import List, Dict, Union
 from ..bbConfig import bbConfig, bbData
-from .. import bbGlobals, bbUtil
+from .. import bbGlobals, lib
 from ..scheduling import TimedTask
 from .bounties import bbBounty
 from ..logging import bbLogger
@@ -89,7 +89,7 @@ class bbGuild:
         self.bountiesDB = bountiesDB
         self.bountiesDisabled = bountiesDisabled
 
-        bountyDelayGenerators = {"random": bbUtil.getRandomDelaySeconds,
+        bountyDelayGenerators = {"random": lib.timeUtil.getRandomDelaySeconds,
                                 "fixed-routeScale": self.getRouteScaledBountyDelayFixed,
                                 "random-routeScale": self.getRouteScaledBountyDelayRandom}
 
@@ -106,7 +106,7 @@ class bbGuild:
             self.hasBountyBoardChannel = bountyBoardChannel is not None
 
             if bbConfig.newBountyDelayType == "fixed":
-                self.newBountyTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+                self.newBountyTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
             else:
                 try:
                     self.newBountyTT = TimedTask.DynamicRescheduleTask(
@@ -265,15 +265,77 @@ class bbGuild:
         self.hasBountyBoardChannel = False
 
 
+    async def makeBountyBoardChannelMessage(self, bounty : bbBounty.Bounty, msg="", embed=None) -> Message:
+        """Create a new BountyBoardChannel listing for the given bounty, in the given guild.
+        guild must own a BountyBoardChannel.
+
+        :param bbBounty.Bounty bounty: The bounty for which to create a listing
+        :param str msg: The text to display in the listing message content (Default "")
+        :param discord.Embed embed: The embed to display in the listing message - this will be removed immediately in place of the embed generated during BountyBoardChannel.updateBountyMessage, so is only really useful in case updateBountyMessage fails. (Default None)
+        :return: The new discord message containing the BBC listing
+        :rtype: discord.Message
+        :raise ValueError: If guild does not own a BountyBoardChannel
+        """
+        if not self.hasBountyBoardChannel:
+            raise ValueError("The requested bbGuild has no bountyBoardChannel")
+        bountyListing = await self.bountyBoardChannel.channel.send(msg, embed=embed)
+        await self.bountyBoardChannel.addBounty(bounty, bountyListing)
+        await self.bountyBoardChannel.updateBountyMessage(bounty)
+        return bountyListing
+
+
+    async def removeBountyBoardChannelMessage(self, bounty : bbBounty.Bounty):
+        """Remove guild's BountyBoardChannel listing for bounty.
+
+        :param bbBounty bounty: The bounty whose BBC listing should be removed
+        :raise ValueError: If guild does not own a BBC
+        :raise KeyError: If the guild's BBC does not have a listing for bounty
+        """
+        if not self.hasBountyBoardChannel:
+            raise ValueError("The requested bbGuild has no bountyBoardChannel")
+        if self.bountyBoardChannel.hasMessageForBounty(bounty):
+            try:
+                await self.bountyBoardChannel.getMessageForBounty(bounty).delete()
+            except HTTPException:
+                bbLogger.log("Main", "rmBBCMsg", "HTTPException thrown when removing bounty listing message for criminal: " +
+                            bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-HTTPERR")
+            except Forbidden:
+                bbLogger.log("Main", "rmBBCMsg", "Forbidden exception thrown when removing bounty listing message for criminal: " +
+                            bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-FORBIDDENERR")
+            except NotFound:
+                bbLogger.log("Main", "rmBBCMsg", "Bounty listing message no longer exists, BBC entry removed: " +
+                            bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-NOT_FOUND")
+            await self.bountyBoardChannel.removeBounty(bounty)
+        else:
+            raise KeyError("The requested bbGuild (" + str(self.id) + ") does not have a BountyBoardChannel listing for the given bounty: " + bounty.criminal.name)
+
+
+    async def updateBountyBoardChannel(self, bounty : bbBounty.Bounty, bountyComplete=False):
+        """Update the BBC listing for the given bounty in the given server.
+
+        :param bbBounty bounty: The bounty whose listings should be updated
+        :param bool bountyComplete: Whether or not the bounty has now been completed. When True, bounty listings will be removed rather than updated. (Default False)
+        """
+        if self.hasBountyBoardChannel:
+            if bountyComplete and self.bountyBoardChannel.hasMessageForBounty(bounty):
+                await self.removeBountyBoardChannelMessage(bounty)
+            else:
+                if not self.bountyBoardChannel.hasMessageForBounty(bounty):
+                    await self.makeBountyBoardChannelMessage(bounty, "A new bounty is now available from **" + \
+                                                                        bounty.faction.title() + "** central command:")
+                else:
+                    await self.bountyBoardChannel.updateBountyMessage(bounty)
+
+
     def getRouteScaledBountyDelayFixed(self, baseDelayDict : Dict[str, int]) -> timedelta:
         """New bounty delay generator, scaling a fixed delay by the length of the presently spawned bounty.
 
-        :param dict baseDelayDict: A bbUtil.timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
+        :param dict baseDelayDict: A lib.timeUtil.timeDeltaFromDict-compliant dictionary describing the amount of time to wait after a bounty is spawned with route length 1
         :return: A datetime.timedelta indicating the time to wait before spawning a new bounty
         :rtype: datetime.timedelta
         """
         timeScale = bbConfig.fallbackRouteScale if self.bountiesDB.latestBounty is None else len(self.bountiesDB.latestBounty.route)
-        delay = bbUtil.timeDeltaFromDict(baseDelayDict) * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient
+        delay = lib.timeUtil.timeDeltaFromDict(baseDelayDict) * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient
         bbLogger.log("Main", "routeScaleBntyDelayFixed", "New bounty delay generated, " + \
                                                         ("no latest criminal." if self.bountiesDB.latestBounty is None else \
                                                             ("latest criminal: '" + self.bountiesDB.latestBounty.criminal.name + "'. Route Length " + str(len(self.bountiesDB.latestBounty.route)))) + \
@@ -289,7 +351,7 @@ class bbGuild:
         :rtype: datetime.timedelta
         """
         timeScale = bbConfig.fallbackRouteScale if self.bountiesDB.latestBounty is None else len(self.bountiesDB.latestBounty.route)
-        delay = bbUtil.getRandomDelaySeconds({"min": baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient,
+        delay = lib.timeUtil.getRandomDelaySeconds({"min": baseDelayDict["min"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient,
                                         "max": baseDelayDict["max"] * timeScale * bbConfig.newBountyDelayRouteScaleCoefficient})
         bbLogger.log("Main", "routeScaleBntyDelayRand", "New bounty delay generated, " + \
                                                         ("no latest criminal." if self.bountiesDB.latestBounty is None else \
@@ -306,13 +368,13 @@ class bbGuild:
         :param bbBounty newBounty: the bounty to announce
         """
         # Create the announcement embed
-        bountyEmbed = bbUtil.makeEmbed(titleTxt=bbUtil.criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
+        bountyEmbed = lib.discordUtil.makeEmbed(titleTxt=lib.discordUtil.criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
                                 col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
         bountyEmbed.add_field(name="Reward:", value=str(
             newBounty.reward) + " Credits")
         bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
         bountyEmbed.add_field(name="See the culprit's route with:", value="`" + bbConfig.commandPrefix +
-                            "route " + bbUtil.criminalNameOrDiscrim(newBounty.criminal) + "`", inline=False)
+                            "route " + lib.discordUtil.criminalNameOrDiscrim(newBounty.criminal) + "`", inline=False)
         # Create the announcement text
         msg = "A new bounty is now available from **" + \
             newBounty.faction.title() + "** central command:"
@@ -377,7 +439,7 @@ class bbGuild:
             if self.hasPlayChannel():
                 winningUserId = winningUser.id
                 # Create the announcement embed
-                rewardsEmbed = bbUtil.makeEmbed(titleTxt="Bounty Complete!", authorName=bbUtil.criminalNameOrDiscrim(bounty.criminal) + " Arrested",
+                rewardsEmbed = lib.discordUtil.makeEmbed(titleTxt="Bounty Complete!", authorName=lib.discordUtil.criminalNameOrDiscrim(bounty.criminal) + " Arrested",
                                         icon=bounty.criminal.icon, col=bbData.factionColours[bounty.faction], desc="`Suspect located in '" + bounty.answer + "'`")
 
                 # Add the winning user to the embed
@@ -402,9 +464,17 @@ class bbGuild:
 
 
     def enableBounties(self):
+        """Enable bounties for this guild.
+        Sets up a new bounties DB and bounty spawning TimedTask.
+
+        :raise ValueError: If bounties are already enabled in this guild
+        """
+        if not self.bountiesDisabled:
+            raise ValueError("Bounties are already enabled in this guild")
+
         self.bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions, bbConfig.maxBountiesPerFaction)
 
-        bountyDelayGenerators = {"random": bbUtil.getRandomDelaySeconds,
+        bountyDelayGenerators = {"random": lib.timeUtil.getRandomDelaySeconds,
                                 "fixed-routeScale": self.getRouteScaledBountyDelayFixed,
                                 "random-routeScale": self.getRouteScaledBountyDelayRandom}
 
@@ -413,7 +483,7 @@ class bbGuild:
                                     "random-routeScale": bbConfig.newBountyDelayRandomRange}
 
         if bbConfig.newBountyDelayType == "fixed":
-            self.newBountyTT = TimedTask.TimedTask(expiryDelta=bbUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+            self.newBountyTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
         else:
             try:
                 self.newBountyTT = TimedTask.DynamicRescheduleTask(
@@ -427,6 +497,14 @@ class bbGuild:
 
 
     def disableBounties(self):
+        """Disable bounties for this guild.
+        Removes any bountyboard if one is present, and removes the guild's bounties DB and bounty spawning TimedTask.
+        
+        :raise ValueError: If bounties are already disabled in this guild
+        """
+        if self.bountiesDisabled:
+            raise ValueError("Bounties are already disabled in this guild")
+
         if self.hasBountyBoardChannel:
             self.removeBountyBoardChannel()
         bbGlobals.newBountiesTTDB.unscheduleTask(self.newBountyTT)
@@ -436,13 +514,51 @@ class bbGuild:
 
 
     def enableShop(self):
+        """Enable the shop for this guild.
+        Creates a new bbShop object for this guild.
+        
+        :raise ValueError: If the shop is already enabled in this guild
+        """
+        if not self.shopDisabled:
+            raise ValueError("The shop is already enabled in this guild")
+
         self.shop = bbShop.bbShop(noRefresh=True)
         self.shopDisabled = False
 
 
     def disableShop(self):
+        """Disable the shop for this guild.
+        Removes the guild's bbShop object.
+        
+        :raise ValueError: If the shop is already disabled in this guild
+        """
+        if self.shopDisabled:
+            raise ValueError("The shop is already disabled in this guild")
+
         self.shop = None
         self.shopDisabled = True
+
+
+    async def announceNewShopStock(self):
+        """Announce to the guild's play channel that this guild's shop stock has been refreshed.
+        If no playChannel has been set, does nothing.
+
+        :raise ValueError: If this guild's shop is disabled
+        """
+        if self.shopDisabled:
+            raise ValueError("Attempted to announceNewShopStock on a guild where shop is disabled")
+        if self.hasPlayChannel():
+            playCh = self.getPlayChannel()
+            msg = "The shop stock has been refreshed!\n**        **Now at tech level: **" + \
+                str(self.shop.currentTechLevel) + "**"
+            try:
+                if self.hasUserAlertRoleID("shop_refresh"):
+                    # announce to the given channel
+                    await playCh.send(":arrows_counterclockwise: <@&" + str(self.getUserAlertRoleID("shop_refresh")) + "> " + msg)
+                else:
+                    await playCh.send(":arrows_counterclockwise: " + msg)
+            except Forbidden:
+                bbLogger.log("Main", "anncNwShp", "Failed to post shop stock announcement to " + self.dcGuild.name + "#" + str(self.id) + " in channel " + playCh.name + "#" + str(playCh.id), category="shop", eventType="PLCH_NONE")
 
 
     def toDictNoId(self) -> dict:
@@ -478,6 +594,9 @@ def fromDict(id : int, guildDict : dict, dbReload=False) -> bbGuild:
     :rtype: bbGuild
     """
     dcGuild = bbGlobals.client.get_guild(id)
+    if not isinstance(dcGuild, Guild):
+        raise NoneDCGuildObj("Could not get guild object for id " + str(id))
+
     announceChannel = None
     playChannel = None
 

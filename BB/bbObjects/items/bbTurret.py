@@ -1,6 +1,6 @@
 from .bbItem import bbItem
 from ...bbConfig import bbData
-from ... import bbUtil
+from ... import lib
 from typing import List
 
 class bbTurret(bbItem):
@@ -10,7 +10,7 @@ class bbTurret(bbItem):
     :vartype dps: float
     """
 
-    def __init__(self, name : str, aliases : List[str], dps=0.0, value=0, wiki="", manufacturer="", icon="", emoji=bbUtil.EMPTY_DUMBEMOJI, techLevel=-1, builtIn=False):
+    def __init__(self, name : str, aliases : List[str], dps=0.0, value=0, wiki="", manufacturer="", icon="", emoji=lib.emojis.dumbEmoji.EMPTY, techLevel=-1, builtIn=False):
         """
         :param str name: The name of the turret. Must be unique. (a model number is a good starting point)
         :param list[str] aliases: A list of alternative names this turret may be referred to by.
@@ -19,7 +19,7 @@ class bbTurret(bbItem):
         :param str wiki: A web page that is displayed as the wiki page for this turret. (Default "")
         :param str manufacturer: The name of the manufacturer of this turret (Default "")
         :param str icon: A URL pointing to an image to use for this turret's icon (Default "")
-        :param bbUtil.dumbEmoji emoji: The emoji to use for this turret's small icon (Default bbUtil.EMPTY_DUMBEMOJI)
+        :param lib.emojis.dumbEmoji emoji: The emoji to use for this turret's small icon (Default lib.emojis.dumbEmoji.EMPTY)
         :param int techLevel: A rating from 1 to 10 of this turret's technical advancement. Used as a measure for its effectiveness compared to other turrets of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard turret (loaded in from bbData) or a custom spawned turret (Default False)
         """
@@ -71,5 +71,5 @@ def fromDict(turretDict : dict) -> bbTurret:
     else:
         return bbTurret(turretDict["name"], turretDict["aliases"], dps=turretDict["dps"], value=turretDict["value"],
                         wiki=turretDict["wiki"] if "wiki" in turretDict else "", manufacturer=turretDict["manufacturer"] if "manufacturer" in turretDict else "",
-                        icon=turretDict["icon"] if "icon" in turretDict else bbData.rocketIcon, emoji=bbUtil.dumbEmojiFromStr(turretDict["emoji"]) if "emoji" in turretDict else bbUtil.EMPTY_DUMBEMOJI,
+                        icon=turretDict["icon"] if "icon" in turretDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmojiFromStr(turretDict["emoji"]) if "emoji" in turretDict else lib.emojis.dumbEmoji.EMPTY,
                         techLevel=turretDict["techLevel"] if "techLevel" in turretDict else -1, builtIn=False)
