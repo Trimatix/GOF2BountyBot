@@ -3,6 +3,13 @@ from types import FunctionType
 from discord import Message
 
 
+class IncorrectCommandCallContext(Exception):
+    """Exception used to indicate when a non-DMable command is called from DMs.
+    May be used in the future to indicate the opposite; a command that can only be called from DMs is called from outside of DMs.
+    """
+    pass
+
+
 class CommandRegistry:
     """Represents a registration of a command in a HeirarchicalCommandsDB.
     TODO: Make allowDM so we dont have to make two HeirarchicalCommandsDBs to handle DM commands
@@ -15,18 +22,22 @@ class CommandRegistry:
     :type forceKeepArgsCasing: bool
     :var forceKeepCommandCasing: Whether the command must be called with exactly the correct casing
     :type forceKeepCommandCasing: bool
+    :var allowDM: Allow calling of this command from DMs.
+    :type allowDM: bool
     """
-    def __init__(self, ident : str, func: FunctionType, forceKeepArgsCasing : bool, forceKeepCommandCasing : bool):
+    def __init__(self, ident : str, func: FunctionType, forceKeepArgsCasing : bool, forceKeepCommandCasing : bool, allowDM : bool):
         """
         :param str ident: The string command name by which this command is identified and called
         :param FunctionType func: A reference to the function to call upon calling this CommandRegistry
         :param bool forceKeepArgsCasing: Whether to pass arguments to the function with their original casing. If False, arguments will be transformed to lower case before passing.
         :param bool forceKeepCommandCasing: Whether the command must be called with exactly the correct casing
+        :param bool allowDM: Allow calling of this command from DMs
         """
         self.ident = ident
         self.func = func
         self.forceKeepArgsCasing = forceKeepArgsCasing
         self.forceKeepCommandCasing = forceKeepCommandCasing
+        self.allowDM = allowDM
 
 
     async def call(self, message : Message, args : str, isDM : bool):
@@ -35,7 +46,10 @@ class CommandRegistry:
         :param discord.message message: the discord message calling the command. This is required for referencing the author and sending responses
         :param str args: string containing arguments to pass to the command
         :param bool isDM: Whether the command was called from DMs or not
+        :raise IncorrectCommandCallContext: When attempting to call a non-DMable command from DMs
         """
+        if isDM and not self.allowDM:
+            raise IncorrectCommandCallContext("Attempted to call command '" + self.ident + "' from DMs, but command is not allowed in DMs.")
         await self.func(message, args if self.forceKeepArgsCasing else args.lower(), isDM)
 
 
@@ -51,13 +65,11 @@ class HeirarchicalCommandsDB:
     def __init__(self, numAccessLevels : int):
         if numAccessLevels < 1:
             raise ValueError("Cannot create a HeirarchicalCommandsDB with less than one access level")
-        self.commands = []
         self.numAccessLevels = numAccessLevels
-        for i in range(numAccessLevels):
-            self.commands.append({})
+        self.clear()
 
     
-    def register(self, command : str, function : FunctionType, accessLevel : int, aliases=[], forceKeepArgsCasing=False, forceKeepCommandCasing=False):
+    def register(self, command : str, function : FunctionType, accessLevel : int, aliases=[], forceKeepArgsCasing=False, forceKeepCommandCasing=False, allowDM=True):
         """Register a command in the database.
 
         :param str command: the text name users should call the function by. Commands are case sensitive.
@@ -66,6 +78,7 @@ class HeirarchicalCommandsDB:
         :param List[str] aliases: List of alternative commands which may be used to call this one. The same accessLevel will be required for all aliases. (Default []) 
         :param bool forceKeepArgsCasing: Whether to pass arguments to the function with their original casing. If False, arguments will be transformed to lower case before passing. (Default False)
         :param bool forceKeepCommandCasing: Whether the command must be called with exactly the correct casing (Default False)
+        :param bool allowDM: Allow calling of this command from DMs. (Default True)
         :raise IndexError: When attempting to register at an unsupported access level
         :raise NameError: When attempting to register a command identifier or alias that already exists at the requested access level
         """
@@ -85,7 +98,7 @@ class HeirarchicalCommandsDB:
                 raise NameError("A command at access level " + str(accessLevel) + " already exists with the name " + currentIdent)
         
         # Register all identifiers for this command to the same command registry
-        newRegistry = CommandRegistry(cmdIdent, function, forceKeepArgsCasing, forceKeepCommandCasing)
+        newRegistry = CommandRegistry(cmdIdent, function, forceKeepArgsCasing, forceKeepCommandCasing, allowDM)
         for currentIdent in allIdents:
             self.commands[accessLevel][currentIdent] = newRegistry
 
@@ -113,3 +126,9 @@ class HeirarchicalCommandsDB:
                 return True
         # Return false if no command could be matched
         return False
+
+
+    def clear(self):
+        """Remove all command registrations from the database.
+        """
+        self.commands = [{} for i in range(self.numAccessLevels)]
