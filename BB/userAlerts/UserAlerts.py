@@ -1,10 +1,11 @@
 # Typing imports
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union, List
 if TYPE_CHECKING:
     from ..bbObjects import bbGuild
 
 from discord import utils, Guild, Member
 from abc import ABC, abstractmethod
+from ..bbConfig import bbConfig
 
 class UABase(ABC):
     """A base class representing a subscription to a single type of
@@ -291,3 +292,69 @@ userAlertsTypesNames = {UA_Bounties: "new bounties",
                         UA_System_Updates_Major: "BountyBot major updates",
                         UA_System_Updates_Minor: "BountyBot minor updates",
                         UA_System_Misc: "BountyBot misc. announcements"}
+
+
+def getAlertIDFromHeirarchicalAliases(alertName : Union[str, List[str]]) -> List[str]:
+    """Look up a given multi-levelled alert reference, and return a list of associated UserAlert IDs.
+    This function implements:
+    - user friendly alert names
+    - user alert heirarchical referencing
+    - multi-alert references TODO: Currently unused and/or broken. Implement bot updates all
+    - aliases at every level of the alert reference
+
+    ⚠ If the given string could not be deferenced to UserAlerts, then the 0th element of the returned list
+    will be 'ERR'. Before handling the returned list, check to make sure this is not the case.
+
+    TODO: Replace with a LUT implementation
+
+    # :param alertName: A reference to an alert. Heirarchy levels can be given as a space-separated string, or ordered list elements. E.g: 'bot patches major' or ['bot', 'patches', 'major']
+    :type alertName: list[str] or str
+    :return: A list of UserAlert IDs in accordance with UserAlerts.userAlertsIDsTypes, that are associated with the requested alert reference.
+    :rtype: list[str]
+    """
+    if type(alertName) != list:
+        alertName = alertName.split(" ")
+
+    if alertName[0] in ["bounty", "bounties"]:
+        return ["bounties_new"]
+
+    elif alertName[0] in ["duel", "duels", "fight", "fights"]:
+        if len(alertName) < 2:
+            return ["ERR", ":x: Please provide the type of duel notification you would like. E.g: `duels new`"]
+        if alertName[1] in ["new", "challenge", "me", "incoming"]:
+            return ["duels_challenge_incoming_new"]
+        elif alertName[1] in ["cancel", "cancelled", "expire", "expired", "end", "ended"]:
+            return ["duels_challenge_incoming_cancel"]
+        else:
+            return ["ERR", ":x: Unknown duel notification type! Valid types include `new` or `cancel`."]
+
+    elif alertName[0] in ["shop", "shops"]:
+        if len(alertName) < 2:
+            return ["ERR", ":x: Please provide the type of shop notification you would like. E.g: `shop refresh`"]
+        if alertName[1] in ["refresh", "new", "reset", "stock"]:
+            return ["shop_refresh"]
+        else:
+            return ["ERR", ":x: Unknown shop notification type! Valid types include `refresh`."]
+
+    elif alertName[0] in ["bot", "system", "sys"]:
+        if len(alertName) < 2:
+            return ["ERR", ":x: Please provide the type of system notification you would like. E.g: `bot updates major`"]
+        if alertName[1] in ["update", "updates", "patch", "patches", "version", "versions"]:
+            if len(alertName) < 3:
+                return ["ERR", ":x: Please provide the type of updates pings you would like! Valid types include `major` and `minor`."]
+            elif alertName[2] in ["major", "big", "large"]:
+                return ["system_updates_major"]
+            elif alertName[2] in ["minor", "small", "bug", "fix"]:
+                return ["system_updates_minor"]
+            else:
+                return ["ERR", ":x: Unknown system updates notification type! Valid types include `major` and `minor`."]
+
+        elif alertName[1] in ["misc", "misc.", "announce", "announcement", "announcements", "announces", "miscellaneous"]:
+            return ["system_misc"]
+        else:
+            return ["ERR", ":x: Unknown system notification type! Valid types include `updates` and `misc`."]
+
+    # elif alertName[0] in bbConfig.validItemNames and alertName[0] != "all":
+    #     return ["ERR", "Item notifications have not been implemented yet! \:("]
+    else:
+        return ["ERR", ":x: Unknown notification type! Please refer to `" + bbConfig.commandPrefix + "help notify`"]
