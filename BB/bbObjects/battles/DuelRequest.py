@@ -276,3 +276,18 @@ async def rejectDuel(duelReq : DuelRequest, rejectMsg : Message, challenger : Us
             targetBBGuild = bbGlobals.guildsDB.getGuild(targetDCGuild.id)
             if targetBBGuild.hasPlayChannel():
                 await targetBBGuild.getPlayChannel().send(":-1: <@" + str(duelReq.sourceBBUser.id) + ">, **" + str(recipient) + "** has rejected your duel request!")
+
+
+async def expireAndAnnounceDuelReq(duelReqDict : DuelRequest):
+    """Foce the expiry of a given DuelRequest. The duel expiry will be announced to the issuing user.
+    TODO: Announce duel expiry to target user, if they have the UA.
+
+    :param DuelRequest duelReqDict: The duel request to expire
+    """
+    duelReq = duelReqDict["duelReq"]
+    await duelReq.duelTimeoutTask.forceExpire(callExpiryFunc=False)
+    if duelReq.sourceBBGuild.hasPlayChannel():
+        playCh = duelReq.sourceBBGuild.getPlayChannel()
+        if playCh is not None:
+            await playCh.send(":stopwatch: <@" + str(duelReq.sourceBBUser.id) + ">, your duel challenge for **" + str(bbGlobals.client.get_user(duelReq.targetBBUser.id)) + "** has now expired.")
+    duelReq.sourceBBUser.removeDuelChallengeObj(duelReq)
