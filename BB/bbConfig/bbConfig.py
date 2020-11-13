@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import math, random, pprint
-from ..lib.emojis import dumbEmoji, uninitializedDumbEmoji
+from ..lib.emojis import dumbEmoji, UninitializedDumbEmoji
 
 ##### UTIL #####
 
@@ -19,6 +19,13 @@ def truncToRes(num : float) -> float:
     :rtype: float
     """
     return math.trunc(num * math.pow(10, tl_resolution)) / math.pow(10, tl_resolution)
+
+
+
+##### COMMANDS #####
+
+# List of module names from BB.commands to import
+includedCommandModules = ["usr_misc"]
 
 
 
