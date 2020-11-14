@@ -2,10 +2,19 @@ from __future__ import annotations
 from emoji import UNICODE_EMOJI
 from .. import bbGlobals
 from . import stringTyping
+from ..logging import bbLogger
+import traceback
 
 from typing import Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from discord import PartialEmoji, Emoji
+
+
+class UnrecognisedCustomEmoji(Exception):
+    def __init__(self, comment, id):
+        super().__init__(comment)
+        self.id = id
+
 
 class dumbEmoji:
     """A class that really shouldnt be necessary, acting as a union over the str (unicode) and Emoji type emojis used and returned by discord.
@@ -36,12 +45,20 @@ class dumbEmoji:
             raise ValueError("At least one of id or unicode is required")
         elif id != -1 and unicode != "":
             raise ValueError("Can only accept one of id or unicode, not both")
+        if type(id) != int:
+            raise TypeError("Given incorrect type for dumbEmoji ID: " + id.__class__.__name__)
+        if type(unicode) != str:
+            raise TypeError("Given incorrect type for dumbEmoji unicode: " + unicode.__class__.__name__)
+        
         
         self.id = id
         self.unicode = unicode
         self.isID = id != -1
         self.isUnicode = not self.isID
         self.sendable = self.unicode if self.isUnicode else str(bbGlobals.client.get_emoji(self.id))
+        if self.sendable == "None":
+            # raise UnrecognisedCustomEmoji("Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id),self.id)
+            bbLogger.log("dumbEmoji", "init", "Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id), trace=traceback.format_exc())
         # if self.sendable is None:
         #     self.sendable = '❓'
 

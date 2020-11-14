@@ -97,13 +97,14 @@ def loadUsersDB(filePath : str) -> bbUserDB.bbUserDB:
     return bbUserDB.fromDict(lib.jsonHandler.readJSON(filePath))
 
 
-def loadGuildsDB(filePath : str) -> bbGuildDB.bbGuildDB:
+def loadGuildsDB(filePath : str, dbReload=False) -> bbGuildDB.bbGuildDB:
     """Build a bbGuildDB from the specified JSON file.
 
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
+    :param bool dbReload: Whether or not this DB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
     :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
-    return bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath))
+    return bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath), dbReload=dbReload)
 
 
 async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.ReactionMenuDB:
@@ -389,7 +390,7 @@ async def on_ready():
     bbGlobals.newBountiesTTDB = TimedTaskHeap.TimedTaskHeap()
     # Databases
     bbGlobals.usersDB = loadUsersDB(bbConfig.userDBPath)
-    bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath)
+    bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath, dbReload=True)
 
     for guild in bbGlobals.guildsDB.getGuilds():
         if guild.hasBountyBoardChannel:

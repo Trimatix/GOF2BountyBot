@@ -534,7 +534,13 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
                 if arg.lower().startswith(kwArg):
                     kwArgs[kwArg[:-1]] = arg[len(kwArg):]
                     break
+        # except lib.emojis.UnrecognisedCustomEmoji:
+            # await message.channel.send(":x: I don't know your " + str(argPos) + lib.stringTyping.getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+            # return
         else:
+            if dumbReact.sendable == "None":
+                await message.channel.send(":x: I don't know your " + str(argPos) + lib.stringTyping.getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+                return
             if dumbReact is None:
                 await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
                 return
@@ -543,6 +549,7 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
                 for localEmoji in message.guild.emojis:
                     if localEmoji.id == dumbReact.id:
                         localEmoji = True
+                        print("EMOJI FOUND")
                         break
                 if not localEmoji:
                     await message.channel.send(":x: I don't know your " + str(argPos) + lib.stringTyping.getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
