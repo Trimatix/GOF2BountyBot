@@ -1,6 +1,7 @@
 # Typing imports
 from types import FunctionType
 from discord import Message
+from typing import List
 
 
 class IncorrectCommandCallContext(Exception):
@@ -69,7 +70,7 @@ class HeirarchicalCommandsDB:
         self.clear()
 
     
-    def register(self, command : str, function : FunctionType, accessLevel : int, aliases=[], forceKeepArgsCasing=False, forceKeepCommandCasing=False, allowDM=True):
+    def register(self, command : str, function : FunctionType, accessLevel : int, aliases : List[str] = [], forceKeepArgsCasing : bool = False, forceKeepCommandCasing : bool = False, allowDM : bool = True):
         """Register a command in the database.
 
         :param str command: the text name users should call the function by. Commands are case sensitive.
@@ -103,7 +104,7 @@ class HeirarchicalCommandsDB:
             self.commands[accessLevel][currentIdent] = newRegistry
 
     
-    async def call(self, command : str, message : Message, args : str, accessLevel : int, isDM=False):
+    async def call(self, command : str, message : Message, args : str, accessLevel : int, isDM : bool = False):
         """Call a command or send an error message.
 
         :param str command: the text name of the command to attempt to call. Commands may be case sensitive, depending on their forceKeepCommandCasing option
