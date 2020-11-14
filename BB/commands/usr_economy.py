@@ -5,6 +5,8 @@ from .. import bbGlobals, lib
 from ..bbConfig import bbConfig
 from ..logging import bbLogger
 
+from . import util_tempdisabled
+
 
 async def cmd_balance(message : discord.Message, args : str, isDM : bool):
     """print the balance of the specified user, use the calling user if no user is specified.
@@ -207,8 +209,8 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji.sendable)
 
-bbCommands.register("shop", cmd_shop, 0, aliases=["store"], allowDM=False)
-
+# bbCommands.register("shop", cmd_shop, 0, aliases=["store"], allowDM=False)
+bbCommands.register("shop", util_tempdisabled.err_tempDisabled, 0, aliases=["store"], allowDM=False)
 
 async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
     """Buy the item of the given item type, at the given index, from the guild's shop.
@@ -350,8 +352,8 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("buy", cmd_shop_buy, 0, allowDM=False)
-
+# bbCommands.register("buy", cmd_shop_buy, 0, allowDM=False)
+bbCommands.register("buy", util_tempdisabled.err_tempDisabled, 0, allowDM=False)
 
 async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     """Sell the item of the given item type, at the given index, from the user's inactive items, to the guild's shop.
@@ -447,8 +449,8 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("sell", cmd_shop_sell, 0, allowDM=False)
-
+# bbCommands.register("sell", cmd_shop_sell, 0, allowDM=False)
+bbCommands.register("sell", util_tempdisabled.err_tempDisabled, 0, allowDM=False)
 
 async def cmd_pay(message : discord.Message, args : str, isDM : bool):
     """Pay a givne user the given number of credits from your balance.

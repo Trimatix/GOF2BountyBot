@@ -8,6 +8,8 @@ from ..bbObjects.battles import DuelRequest
 from ..scheduling import TimedTask
 from ..reactionMenus import ReactionMenu, ReactionDuelChallengeMenu
 
+from . import util_tempdisabled
+
 
 async def cmd_check(message : discord.Message, args : str, isDM : bool):
     """⚠ WARNING: MARKED FOR CHANGE ⚠
@@ -154,8 +156,8 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
         seconds = int(diff.total_seconds() % 60)
         await message.channel.send(":stopwatch: **" + message.author.display_name + "**, your *Khador Drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
 
-bbCommands.register("check", cmd_check, 0, aliases=["search"], allowDM=False)
-
+# bbCommands.register("check", cmd_check, 0, aliases=["search"], allowDM=False)
+bbCommands.register("check", util_tempdisabled.err_tempDisabled, 0, aliases=["search"], allowDM=False)
 
 async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
     """List a summary of all currently active bounties.
@@ -244,8 +246,8 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
                     maxBountiesMsg = "\nYou have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"
             await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!" + maxBountiesMsg)
 
-bbCommands.register("bounties", cmd_bounties, 0, allowDM=False)
-
+# bbCommands.register("bounties", cmd_bounties, 0, allowDM=False)
+bbCommands.register("bounties", util_tempdisabled.err_tempDisabled, 0, allowDM=False)
 
 async def cmd_route(message : discord.Message, args : str, isDM : bool):
     """Display the current route of the requested criminal
@@ -287,8 +289,8 @@ async def cmd_route(message : discord.Message, args : str, isDM : bool):
                 bbConfig.commandPrefix + "route Trimatix#2244`"
         await message.channel.send(outmsg)
 
-bbCommands.register("route", cmd_route, 0, allowDM=False)
-
+# bbCommands.register("route", cmd_route, 0, allowDM=False)
+bbCommands.register("route", util_tempdisabled.err_tempDisabled, 0, allowDM=False)
 
 async def cmd_duel(message : discord.Message, args : str, isDM : bool):
     """⚠ WARNING: MARKED FOR CHANGE ⚠
@@ -439,8 +441,8 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
 
         await DuelRequest.fightDuel(message.author, requestedUser, requestedDuel, message)
 
-bbCommands.register("duel", cmd_duel, 0, forceKeepArgsCasing=True, allowDM=False)
-
+# bbCommands.register("duel", cmd_duel, 0, forceKeepArgsCasing=True, allowDM=False)
+bbCommands.register("duel", util_tempdisabled.err_tempDisabled, 0, forceKeepArgsCasing=True, allowDM=False)
 
 async def cmd_use(message : discord.Message, args : str, isDM : bool):
     """Use the specified tool from the user's inventory.

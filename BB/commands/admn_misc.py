@@ -12,6 +12,8 @@ from ..bbObjects.items import bbShip
 from ..logging import bbLogger
 from ..shipRenderer import shipRenderer
 
+from . import util_tempdisabled
+
 
 CWD = os.getcwd()
 
@@ -543,5 +545,6 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
     return
     
 
-bbCommands.register("showmehd", admin_cmd_showmeHD, 1, allowDM=False)
+# bbCommands.register("showmehd", admin_cmd_showmeHD, 1, allowDM=False)
+bbCommands.register("showmehd", util_tempdisabled.err_tempPerfDisabled, 1, allowDM=False)
 bbCommands.register("showmehd", admin_cmd_showmeHD, 2, allowDM=True)

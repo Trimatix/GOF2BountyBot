@@ -4,6 +4,8 @@ from . import commandsDB as bbCommands
 from .. import bbGlobals
 from ..bbConfig import bbConfig, bbData
 
+from . import util_tempdisabled
+
 
 async def admin_cmd_set_announce_channel(message : discord.Message, args : str, isDM : bool):
     """admin command for setting the current guild's announcements channel
@@ -42,7 +44,8 @@ async def admin_cmd_set_bounty_board_channel(message : discord.Message, args : s
     await guild.addBountyBoardChannel(message.channel, bbGlobals.client, bbData.bountyFactions)
     await message.channel.send(":ballot_box_with_check: Bounty board channel set!")
 
-bbCommands.register("set-bounty-board-channel", admin_cmd_set_bounty_board_channel, 1)
+# bbCommands.register("set-bounty-board-channel", admin_cmd_set_bounty_board_channel, 1)
+bbCommands.register("set-bounty-board-channel", util_tempdisabled.err_tempDisabled, 1)
 
 
 async def admin_cmd_remove_bounty_board_channel(message : discord.Message, args : str, isDM : bool):
