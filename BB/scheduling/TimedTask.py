@@ -205,6 +205,9 @@ class TimedTask:
         # Call expiryFunction and reschedule if specified
         if callExpiryFunc and self.hasExpiryFunction:
             expiryFuncResults = await self.callExpiryFunction()
+        else:
+            expiryFuncResults = None
+
         if self.autoReschedule:
             await self.reschedule()
         # Mark for removal if not rescheduled

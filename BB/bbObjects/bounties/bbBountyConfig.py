@@ -8,7 +8,7 @@ import random
 from datetime import datetime, timedelta
 
 from ...bbConfig import bbData, bbConfig
-from ... import bbUtil
+from ... import lib
 
 class BountyConfig:
     """
@@ -167,7 +167,7 @@ class BountyConfig:
             elif self.end not in bbData.builtInSystemObjs:
                 raise KeyError("BountyConfig: Invalid end system requested '" + self.end + "'")
             # self.route = makeRoute(self.start, self.end)
-            self.route = bbUtil.bbAStar(self.start, self.end, bbData.builtInSystemObjs)
+            self.route = lib.pathfinding.bbAStar(self.start, self.end, bbData.builtInSystemObjs)
         else:
             for system in self.route:
                 if system not in bbData.builtInSystemObjs:

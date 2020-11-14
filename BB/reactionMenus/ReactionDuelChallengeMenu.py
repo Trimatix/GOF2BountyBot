@@ -1,7 +1,7 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
-from .. import bbGlobals, bbUtil
-from discord import Colour, NotFound, HTTPException, Forbidden, Message, Embed
+from .. import bbGlobals, lib
+from discord import Colour, Message, Embed
 from datetime import datetime
 from ..scheduling import TimedTask
 from..bbObjects.battles import DuelRequest
@@ -9,6 +9,7 @@ from..bbObjects.battles import DuelRequest
 
 class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
     """A ReactionMenu allowing the recipient of a duel challenge to accept or reject the challenge through reactions.
+    TODO: Make this an inline reaction menu (base class in another branch currently)
 
     :var duelChallenge: The DuelRequest that this menu controls
     :vartype duelChallenge: DuelRequest
@@ -103,7 +104,7 @@ async def fromDict(rmDict : dict) -> ReactionDuelChallengeMenu:
 
     reactionRoles = {}
     for reaction in rmDict["options"]:
-        reactionRoles[bbUtil.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
+        reactionRoles[lib.emojis.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
 
     timeoutTT = None
     if "timeout" in rmDict:

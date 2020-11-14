@@ -138,7 +138,7 @@ class Bounty:
         return {"faction": self.faction, "route": self.route, "answer": self.answer, "checked": self.checked, "reward": self.reward, "issueTime": self.issueTime, "endTime": self.endTime, "criminal": self.criminal.toDict()}
 
 
-def fromDict(bounty : dict, dbReload=False) -> bbBounty:
+def fromDict(bounty : dict, dbReload=False) -> Bounty:
     """Factory function constructing a new bbBounty from a dictionary serialized description - the opposite of bbBounty.toDict
 
     :param dict bounty: Dictionary containing all information needed to construct the desired bbBounty

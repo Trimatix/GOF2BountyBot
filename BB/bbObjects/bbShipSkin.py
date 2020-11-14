@@ -1,9 +1,8 @@
 from ..bbConfig import bbData, bbConfig
 import os
 from ..shipRenderer import shipRenderer
-from .. import bbUtil
+from .. import lib
 from discord import File
-from .items import bbItem
 from typing import Dict
 
 def _saveShip(ship):
@@ -13,7 +12,7 @@ def _saveShip(ship):
     del shipData["techLevel"]
     del shipData["path"]
     shipData["builtIn"] = False
-    bbUtil.writeJSON(shipPath + os.sep + "META.json", shipData, prettyPrint=True)
+    lib.jsonHandler.writeJSON(shipPath + os.sep + "META.json", shipData, prettyPrint=True)
     shipData["builtIn"] = True
     shipData["techLevel"] = shipTL
     shipData["saveDue"] = False
@@ -47,7 +46,7 @@ class bbShipSkin:
 
 
     def _save(self):
-        bbUtil.writeJSON(self.path + os.sep + "META.json", self.toDict(), prettyPrint=True)
+        lib.jsonHandler.writeJSON(self.path + os.sep + "META.json", self.toDict(), prettyPrint=True)
 
 
     async def addShip(self, ship, rendersChannel):

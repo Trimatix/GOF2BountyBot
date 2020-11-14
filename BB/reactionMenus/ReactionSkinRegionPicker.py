@@ -1,7 +1,6 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
-from discord import Colour, Message, User, Member
-from ..scheduling import TimedTask
+from discord import Message, User, Member
 from typing import Union
     
 

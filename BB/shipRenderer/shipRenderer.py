@@ -6,7 +6,6 @@ Written by Trimatix
 """
 from PIL import Image, ImageChops, ImageOps
 import subprocess
-import ntpath
 # import sys
 from typing import List, Dict
 import os

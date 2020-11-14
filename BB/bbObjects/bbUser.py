@@ -5,15 +5,15 @@ if TYPE_CHECKING:
     from .battles import DuelRequest
 
 from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
-from .items.modules import bbModule
 from .items.tools import bbToolItemFactory
 from ..bbConfig import bbConfig
-from . import bbInventory, bbInventoryListing
+from . import bbInventory
 from ..userAlerts import UserAlerts
 from datetime import datetime
 from discord import Guild, Member
 from . import bbGuild
 from ..logging import bbLogger
+from .. import lib
 
 
 # Dictionary-serialized bbShip to give to new players
@@ -76,6 +76,10 @@ class bbUser:
     :vartype dailyBountyWinsReset: datetime.datetime
     :var pollOwned: Whether or not this user has a running ReactionPollMenu
     :vartype pollOwned: bool
+    :var homeGuildID: The id of this user's 'home guild' - the only guild from which they may use several commands e.g buy and check.
+    :vartype homeGuildID: int
+    :var guildTransferCooldownEnd: A timestamp after which this user is allowed to transfer their homeGuildID.
+    :vartype guildTransferCooldownEnd: datetime.datetime
     """
 
     def __init__(self, id : int, credits=0, lifetimeCredits=0, 
@@ -83,7 +87,8 @@ class bbUser:
                     inactiveShips=bbInventory.bbInventory(), inactiveModules=bbInventory.bbInventory(),
                     inactiveWeapons=bbInventory.bbInventory(), inactiveTurrets=bbInventory.bbInventory(), inactiveTools=bbInventory.bbInventory(),
                     lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0,
-                    alerts={}, bountyWinsToday=0, dailyBountyWinsReset=datetime.utcnow(), pollOwned=False):
+                    alerts={}, bountyWinsToday=0, dailyBountyWinsReset=datetime.utcnow(), pollOwned=False,
+                    homeGuildID=-1, guildTransferCooldownEnd=datetime.utcnow()):
         """
         :param int id: The user's unique ID. The same as their unique discord ID.
         :param int credits: The amount of credits (currency) this user has (Default 0)
@@ -107,6 +112,8 @@ class bbUser:
         :param int bountyWinsToday: The number of bounties the user has won today (Default 0)
         :param datetime.datetime dailyBountyWinsReset: A datetime.datetime representing the time at which the user's bountyWinsToday should be reset to zero (Default datetime.utcnow())
         :param bool pollOwned: Whether or not this user has a running ReactionPollMenu (Default False)
+        :param Guild homeGuildID: The ID of this user's 'home guild' - the only guild from which they may use several commands e.g buy and check.
+        :param datetime.datetime guildTransferCooldownEnd: A timestamp after which this user is allowed to transfer their homeGuildID.
         :raise TypeError: When given an argument of incorrect type
         """
         if type(id) == float:
@@ -142,6 +149,7 @@ class bbUser:
         self.id = id
         self.credits = credits
         self.lifetimeCredits = lifetimeCredits
+        # TODO: Should probably change this to a datetime, like guildTransferCooldownEnd etc
         self.bountyCooldownEnd = bountyCooldownEnd
         self.systemsChecked = systemsChecked
         self.bountyWins = bountyWins
@@ -191,6 +199,9 @@ class bbUser:
 
         self.pollOwned = pollOwned
 
+        self.homeGuildID = homeGuildID
+        self.guildTransferCooldownEnd = guildTransferCooldownEnd
+
     
     def resetUser(self):
         """Reset the user's attributes back to their default values.
@@ -211,6 +222,8 @@ class bbUser:
         self.duelCreditsWins = 0
         self.duelCreditsLosses = 0
         self.pollOwned = False
+        self.homeGuildID = -1
+        self.guildTransferCooldownEnd = datetime.utcnow()
 
 
     def numInventoryPages(self, item : str, maxPerPage : int) -> int:
@@ -409,7 +422,8 @@ class bbUser:
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "inactiveTools": inactiveToolsDict,
                 "lastSeenGuildId":self.lastSeenGuildId, "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins,
-                "duelCreditsLosses": self.duelCreditsLosses, "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "pollOwned": self.pollOwned}
+                "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "pollOwned": self.pollOwned,
+                "duelCreditsLosses": self.duelCreditsLosses, "homeGuildID": self.homeGuildID, "guildTransferCooldownEnd": self.guildTransferCooldownEnd.timestamp()}
 
 
     def userDump(self) -> str:
@@ -608,13 +622,51 @@ class bbUser:
         return self.isAlertedForType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
 
 
-    def __str__(self) -> str:
-        """Get a short string summary of this bbUser. Currently only contains the user ID.
+    def hasHomeGuild(self) -> bool:
+        """Decide whether or not this user has a home guild set.
 
-        :return: A string summar of the user, containing the user ID
+        :return: True if this user has a home guild, False otherwise
+        :rtype: bool
+        """
+        return self.homeGuildID != -1
+
+
+    def canTransferGuild(self, now=datetime.utcnow()) -> bool:
+        """Decide whether this user is allowed to transfer their homeGuildID.
+        This is decided based on the time passed since their last guild transfer.
+
+        :param datetime.datetime now: The current time, if known. This optional parameter is included for increasing efficiency in the case where the current time has already been calculated.
+        :return: True if this user has no home guild, or their guild transfer cooldown has completed, false otherwise
+        :rtype: bool
+        """
+        return (not self.hasHomeGuild()) or datetime.utcnow() > self.guildTransferCooldownEnd
+
+    
+    async def transferGuild(self, newGuild : Guild):
+        """Transfer the user's homeGuildID to the given guild.
+        The user must not be on guild transfer cooldown.
+
+        :param discord.Guild newGuild: The new discord.Guild to set this user's homeGuildID to. This user must be a member of newGuild.
+        :raise ValueError: When this user is still in guild transfer cooldown
+        :raise NameError: When this user is not a member of newGuild
+        """
+        now = datetime.utcnow()
+        if not self.canTransferGuild(now=now):
+            raise ValueError("This user cannot transfer guild again yet (" + lib.timeUtil.td_format_noYM(self.guildTransferCooldownEnd) + " remaining)")
+        if await newGuild.fetch_member(self.id) is None:
+            raise NameError("This user is not a member of the given guild '" + newGuild.name + "#" + str(newGuild.id) + "'")
+        
+        self.homeGuildID = newGuild.id
+        self.guildTransferCooldownEnd = now + lib.timeUtil.timeDeltaFromDict(bbConfig.homeGuildTransferCooldown)
+
+
+    def __str__(self) -> str:
+        """Get a short string summary of this bbUser. Currently only contains the user ID and home guild ID.
+
+        :return: A string summar of the user, containing the user ID and home guild ID.
         :rtype: str
         """
-        return "<bbUser #" + str(self.id) + ">"
+        return "<bbUser #" + str(self.id) + ((" @" + str(self.homeGuildID)) if self.hasHomeGuildID() else "") + ">"
 
 
 def fromDict(id : int, userDict : dict) -> bbUser:
@@ -655,6 +707,15 @@ def fromDict(id : int, userDict : dict) -> bbUser:
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
                     bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
-                    inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, inactiveTools=inactiveTools, lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
-                    duelWins=userDict["duelWins"] if "duelWins" in userDict else 0, duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0, duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0, duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0,
-                    alerts=userDict["alerts"] if "alerts" in userDict else {}, bountyWinsToday=userDict["bountyWinsToday"] if "bountyWinsToday" in userDict else 0, dailyBountyWinsReset=datetime.utcfromtimestamp(userDict["dailyBountyWinsReset"]) if "dailyBountyWinsReset" in userDict else datetime.utcnow(), pollOwned=userDict["pollOwned"] if "pollOwned" in userDict else False)
+                    inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, inactiveTools=inactiveTools,
+                    lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
+                    duelWins=userDict["duelWins"] if "duelWins" in userDict else 0,
+                    duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0,
+                    duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0,
+                    duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0,
+                    alerts=userDict["alerts"] if "alerts" in userDict else {},
+                    bountyWinsToday=userDict["bountyWinsToday"] if "bountyWinsToday" in userDict else 0,
+                    dailyBountyWinsReset=datetime.utcfromtimestamp(userDict["dailyBountyWinsReset"]) if "dailyBountyWinsReset" in userDict else datetime.utcnow(),
+                    pollOwned=userDict["pollOwned"] if "pollOwned" in userDict else False,
+                    homeGuildID=userDict["homeGuildID"] if "homeGuildID" in userDict else -1,
+                    guildTransferCooldownEnd=datetime.utcfromtimestamp(userDict["guildTransferCooldownEnd"]) if "guildTransferCooldownEnd" in userDict else datetime.utcnow())
