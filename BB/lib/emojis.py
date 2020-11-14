@@ -11,7 +11,16 @@ if TYPE_CHECKING:
 
 
 class UnrecognisedCustomEmoji(Exception):
-    def __init__(self, comment, id):
+    """Exception raised when creating a dumbEmoji instance, but the client could not match an emoji to the given ID.
+
+    :var id: The ID that coult not be matched
+    :vartype id: int
+    """
+    def __init__(self, comment : str, id : int):
+        """
+        :param str comment: Description of the exception
+        :param int id: The ID that coult not be matched
+        """
         super().__init__(comment)
         self.id = id
 
@@ -35,7 +44,7 @@ class dumbEmoji:
     """
     EMPTY = None
 
-    def __init__(self, id=-1, unicode=""):
+    def __init__(self, id : int = -1, unicode : str = ""):
         """
         :param int id: The ID of the custom emoji that this object should represent.
         :param str unicode: The unicode emoji that this object should represent.
@@ -235,4 +244,7 @@ class UninitializedDumbEmoji:
     TODO: Update bbConfig.defaultShipSkinToolEmoji once merged to the same branch
     """
     def __init__(self, value):
+        """
+        :param value: The data to attempt to initialize an emoji with. For example, an integer ID, or a string unicode character.
+        """
         self.value = value
