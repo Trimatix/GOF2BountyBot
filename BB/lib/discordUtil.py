@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Union, List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from discord import Member, Guild, User, Message
-    from ..bbObjects import bbUser
+    from ..bbObjects import bbUser, bbGuild
     from ..bbObjects.bounties import bbCriminal
 
 from ..logging import bbLogger
@@ -90,12 +90,13 @@ def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
     return dcGuild.get_member_named(uRef)
 
 
-def userTagOrDiscrim(userID : str, guild=None) -> str:
+def userTagOrDiscrim(userID : str, guild : Guild = None) -> str:
     """If a passed user mention or ID is valid and shares a common server with the bot,
     return the user's name and discriminator. TODO: Should probably change this to display name
     Otherwise, return the passed userID.
 
     :param str userID: A user mention or ID in string form, to attempt to convert to name and discrim
+    :param discord.Guild guild: Optional guild in which to search for the user rather than searching over the client, improving efficiency.
     :return: The user's name and discriminator if the user is reachable, userID otherwise
     :rtype: str
     """
@@ -111,7 +112,7 @@ def userTagOrDiscrim(userID : str, guild=None) -> str:
     return userID
 
 
-def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
+def criminalNameOrDiscrim(criminal : bbCriminal.Criminal) -> str:
     """If a passed criminal is a player, attempt to return the user's name and discriminator.
     Otherwise, return the passed criminal's name. TODO: Should probably change this to display name
 
@@ -124,7 +125,8 @@ def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
     return userTagOrDiscrim(criminal.name)
 
 
-def makeEmbed(titleTxt="", desc="", col=Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> Embed:
+def makeEmbed(titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), footerTxt : str = "",
+        img : str = "", thumb : str = "", authorName : str = "", icon : str = "") -> Embed:
     """Factory function building a simple discord embed from the provided arguments.
 
     :param str titleTxt: The title of the embed (Default "")
@@ -149,7 +151,7 @@ def makeEmbed(titleTxt="", desc="", col=Colour.blue(), footerTxt="", img="", thu
     return embed
 
 
-def getMemberByRefOverDB(uRef : str, dcGuild=None) -> User:
+def getMemberByRefOverDB(uRef : str, dcGuild : Guild = None) -> User:
     """Attempt to get a user object from a given string user reference.
     a user reference can be one of:
     - A user mention <@123456> or <@!123456>
@@ -177,7 +179,8 @@ def getMemberByRefOverDB(uRef : str, dcGuild=None) -> User:
     return userAttempt
 
 
-def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None) -> str:
+def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser : Union[User, Member] = None,
+        bbUser : bbUser.bbUser = None, bbGuild : bbGuild.bbGuild = None, dcGuild : Guild = None) -> str:
     """If the given user has subscribed to the given alert type, return the user's mention. Otherwise, return their display name and discriminator.
     At least one of dcUser or bbUser must be provided.
     bbGuild and dcGuild are both optional. If neither are provided then the joined guilds will be searched for the given user.
@@ -216,7 +219,8 @@ def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser=None, bbU
     return guildMember.display_name + "#" + str(guildMember.discriminator)
 
 
-def IDAlertedUserMentionOrName(alertID : str, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None) -> str:
+def IDAlertedUserMentionOrName(alertID : str, dcUser : Union[Member, User] = None, bbUser : bbUser.bbUser = None,
+        bbGuild : bbGuild.bbGuild = None, dcGuild : Guild = None) -> str:
     """If the given user has subscribed to the alert type of the given ID, return the user's mention. Otherwise, return their display name and discriminator.
     At least one of dcUser or bbUser must be provided.
     bbGuild and dcGuild are both optional. If neither are provided then the joined guilds will be searched for the given user.
