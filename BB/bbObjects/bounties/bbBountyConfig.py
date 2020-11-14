@@ -1,8 +1,9 @@
 # Typing imports
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Dict
 if TYPE_CHECKING:
     from ...bbDatabases import bbBountyDB
+    from ..items import bbShip
 
 import random
 from datetime import datetime, timedelta
@@ -50,7 +51,11 @@ class BountyConfig:
     :vartype ship: bbShip
     """
 
-    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki="", ship=None):
+    def __init__(self, faction : str = "", name : str = "", isPlayer : bool = None,
+                    route : List[str] = [], start : str = "", end : str = "",
+                    answer : str = "", checked : Dict[str, int] = {}, reward : int = -1,
+                    issueTime : float = -1.0, endTime : float = -1.0, icon : str = "",
+                    aliases : List[str] = [], wiki : str = "", ship : bbShip.bbShip = None):
         """All parameters are optional. If a parameter is not given, it will be randomly generated.
 
         :param faction: The faction owning this bounty
@@ -110,7 +115,7 @@ class BountyConfig:
         self.ship = ship
         
     
-    def generate(self, bountyDB : bbBountyDB.bbBountyDB, noCriminal=True, forceKeepChecked=False, forceNoDBCheck=False):
+    def generate(self, bountyDB : bbBountyDB.bbBountyDB, noCriminal : bool = True, forceKeepChecked : bool = False, forceNoDBCheck : bool = False):
         """Validate all given config data, and randomly generate missing data.
 
         :param bbBountyDB bountyDB: Database containing all currently active bounties. When forceNoDBCheck is True, this is ignored.
