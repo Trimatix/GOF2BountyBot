@@ -23,9 +23,9 @@ class bbGuild:
     :var id: The ID of the guild, directly corresponding to a discord guild's ID.
     :vartype id: int
     :var announceChannel: The discord.channel object for this guild's announcements chanel. None when no announce channel is set for this guild.
-    :vartype announceChannel: discord.channel
+    :vartype announceChannel: discord.channel.TextChannel
     :var playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
-    :vartype playChannel: discord.channel
+    :vartype playChannel: discord.channel.TextChannel
     :var shop: This guild's bbShop object
     :vartype shop: bbShop
     :var alertRoles: A dictionary of user alert IDs to guild role IDs.
@@ -126,7 +126,7 @@ class bbGuild:
         """Get the discord channel object of the guild's announcements channel.
 
         :return: the discord.channel of the guild's announcements channel
-        :rtype: discord.channel
+        :rtype: discord.channel.TextChannel
         :raise ValueError: If this guild does not have an announcements channel
         """
         if not self.hasAnnounceChannel():
@@ -139,7 +139,7 @@ class bbGuild:
 
         :return: the discord channel object of the guild's bounty playing channel
         :raise ValueError: If this guild does not have a play channel
-        :rtype: discord.channel
+        :rtype: discord.channel.TextChannel
         """
         if not self.hasPlayChannel():
             raise ValueError("This guild has no play channel set")
