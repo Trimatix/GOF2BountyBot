@@ -36,7 +36,13 @@ class bbShop:
     :vartype turretsStock: bbInventory
     """
 
-    def __init__(self, maxShips=bbConfig.shopDefaultShipsNum, maxModules=bbConfig.shopDefaultModulesNum, maxWeapons=bbConfig.shopDefaultWeaponsNum, maxTurrets=bbConfig.shopDefaultTurretsNum, shipsStock=bbInventory.bbInventory(), weaponsStock=bbInventory.bbInventory(), modulesStock=bbInventory.bbInventory(), turretsStock=bbInventory.bbInventory(), currentTechLevel=bbConfig.minTechLevel, noRefresh=False):
+    def __init__(self, maxShips : int = bbConfig.shopDefaultShipsNum, maxModules : int = bbConfig.shopDefaultModulesNum,
+            maxWeapons : int = bbConfig.shopDefaultWeaponsNum, maxTurrets : int = bbConfig.shopDefaultTurretsNum,
+            shipsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
+            weaponsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
+            modulesStock : bbInventory.bbInventory = bbInventory.bbInventory(),
+            turretsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
+            currentTechLevel : int = bbConfig.minTechLevel, noRefresh : bool = False):
         """
         :param int maxShips: The maximum number of ships generated on every stock refresh. (Default bbConfig.shopDefaultShipsNum)
         :param int maxModules: The maximum number of modules generated on every stock refresh. (Default bbConfig.shopDefaultModulesNum)
@@ -75,7 +81,7 @@ class bbShop:
                 self.turretsStock.addItem(itemListing.item, itemListing.count)
 
 
-    def refreshStock(self, level=-1):
+    def refreshStock(self, level : int = -1):
         """Refresh the stock of the shop by picking random items according to the given tech level. All previous stock is deleted.
         If level = -1 is given, a new shop tech level is generated at random.
 
