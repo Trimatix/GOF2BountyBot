@@ -5,6 +5,8 @@ from .. import bbGlobals, lib
 from ..bbConfig import bbConfig
 from ..logging import bbLogger
 
+from . import util_tempdisabled
+
 
 bbCommands.addHelpSection(0, "economy")
 
@@ -210,7 +212,9 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji.sendable)
 
-bbCommands.register("shop", cmd_shop, 0, aliases=["store"], allowDM=False, helpSection="economy", signatureStr="**shop** *[item-type]*", shortHelp="Display all items currently for sale. Shop stock is refreshed every six hours. Give an item type to only list items of that type.", longHelp="Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module/tool) to only list items of that type.")
+
+# bbCommands.register("shop", cmd_shop, 0, aliases=["store"], allowDM=False, helpSection="economy", signatureStr="**shop** *[item-type]*", shortHelp="Display all items currently for sale. Shop stock is refreshed every six hours. Give an item type to only list items of that type.", longHelp="Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module/tool) to only list items of that type.")
+bbCommands.register("shop", util_tempdisabled.err_tempDisabled, 0, aliases=["store"], allowDM=False, helpSection="economy", signatureStr="**shop** *[item-type]*", shortHelp="Display all items currently for sale. Shop stock is refreshed every six hours. Give an item type to only list items of that type.", longHelp="Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module/tool) to only list items of that type.")
 
 
 async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
@@ -353,7 +357,9 @@ async def cmd_shop_buy(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("buy", cmd_shop_buy, 0, allowDM=False, helpSection="economy", signatureStr="**buy <item-type> <item-number>** *[transfer] [sell]*", shortHelp="Buy the requested item from the shop. Item numbers can be seen in the `$COMMANDPREFIX$shop`.\n🌎 This command must be used in your **home server**.", longHelp="Buy the requested item from the shop. Item numbers are shown next to items in the `$COMMANDPREFIX$shop`.\nWhen buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship. I.e, *to sell your active ship without selling the items on the ship, use:* `$COMMANDPREFIX$buy ship <ship number> sell transfer`.*\n🌎 This command must be used in your **home server**.")
+
+# bbCommands.register("buy", cmd_shop_buy, 0, allowDM=False, helpSection="economy", signatureStr="**buy <item-type> <item-number>** *[transfer] [sell]*", shortHelp="Buy the requested item from the shop. Item numbers can be seen in the `$COMMANDPREFIX$shop`.\n🌎 This command must be used in your **home server**.", longHelp="Buy the requested item from the shop. Item numbers are shown next to items in the `$COMMANDPREFIX$shop`.\nWhen buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship. I.e, *to sell your active ship without selling the items on the ship, use:* `$COMMANDPREFIX$buy ship <ship number> sell transfer`.*\n🌎 This command must be used in your **home server**.")
+bbCommands.register("buy", util_tempdisabled.err_tempDisabled, 0, allowDM=False, helpSection="economy", signatureStr="**buy <item-type> <item-number>** *[transfer] [sell]*", shortHelp="Buy the requested item from the shop. Item numbers can be seen in the `$COMMANDPREFIX$shop`.\n🌎 This command must be used in your **home server**.", longHelp="Buy the requested item from the shop. Item numbers are shown next to items in the `$COMMANDPREFIX$shop`.\nWhen buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship. I.e, *to sell your active ship without selling the items on the ship, use:* `$COMMANDPREFIX$buy ship <ship number> sell transfer`.*\n🌎 This command must be used in your **home server**.")
 
 
 async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
@@ -450,7 +456,9 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("sell", cmd_shop_sell, 0, allowDM=False, helpSection="economy", signatureStr="**sell <item-type> <item-number>** *[clear]*", shortHelp="Sell the requested item from your hangar. Item numbers can be gotten from `$COMMANDPREFIX$hangar`.\n🌎 This command must be used in your **home server**.", longHelp="Sell the requested item from your hangar to the shop. Item numbers are shown next to items in your `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship. See `$COMMANDPREFIX$help buy` for how to sell your active ship.\n🌎 This command must be used in your **home server**.")
+
+# bbCommands.register("sell", cmd_shop_sell, 0, allowDM=False, helpSection="economy", signatureStr="**sell <item-type> <item-number>** *[clear]*", shortHelp="Sell the requested item from your hangar. Item numbers can be gotten from `$COMMANDPREFIX$hangar`.\n🌎 This command must be used in your **home server**.", longHelp="Sell the requested item from your hangar to the shop. Item numbers are shown next to items in your `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship. See `$COMMANDPREFIX$help buy` for how to sell your active ship.\n🌎 This command must be used in your **home server**.")
+bbCommands.register("sell", util_tempdisabled.err_tempDisabled, 0, allowDM=False, helpSection="economy", signatureStr="**sell <item-type> <item-number>** *[clear]*", shortHelp="Sell the requested item from your hangar. Item numbers can be gotten from `$COMMANDPREFIX$hangar`.\n🌎 This command must be used in your **home server**.", longHelp="Sell the requested item from your hangar to the shop. Item numbers are shown next to items in your `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship. See `$COMMANDPREFIX$help buy` for how to sell your active ship.\n🌎 This command must be used in your **home server**.")
 
 
 async def cmd_pay(message : discord.Message, args : str, isDM : bool):

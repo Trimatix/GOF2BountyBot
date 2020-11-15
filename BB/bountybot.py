@@ -160,26 +160,6 @@ async def err_nodm(message : discord.Message, args : str, isDM : bool):
     await message.channel.send(":x: This command can only be used from inside of a server!")
 
 
-async def err_tempDisabled(message : discord.Message, args : str, isDM : bool):
-    """Send an error message when a bounties command is requested - all bounty and shop related behaviour is currently disabled.
-
-    :param discord.Message message: the discord message calling the command
-    :param str args: ignored
-    :param bool isDM: ignored
-    """
-    await message.channel.send(":x: All bounty/shop behaviour is currently disabled while I work on new features \:)")
-
-
-async def err_tempPerfDisabled(message : discord.Message, args : str, isDM : bool):
-    """Send an error message when a command is requested that is disabled for perfornance reasons.
-
-    :param discord.Message message: the discord message calling the command
-    :param str args: ignored
-    :param bool isDM: ignored
-    """
-    await message.channel.send(":x: This command has been temporarily disabled as it requires too much processing power. It may return in the future once hosting hardware has been upgraded! \:)")
-
-
 async def dummy_command(message : discord.Message, args : str, isDM : bool):
     """Dummy command doing nothing at all.
     Useful when waiting for commands with client.wait_for from a non-blocking process.
@@ -387,7 +367,7 @@ async def on_ready():
 
 
 
-    bbGlobals.newBountiesTTDB = TimedTaskHeap.TimedTaskHeap()
+    # bbGlobals.newBountiesTTDB = TimedTaskHeap.TimedTaskHeap()
     # Databases
     bbGlobals.usersDB = loadUsersDB(bbConfig.userDBPath)
     bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath, dbReload=True)
@@ -413,10 +393,10 @@ async def on_ready():
     # bot is now logged in
     bbGlobals.client.bb_loggedIn = True
     
-    bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
+    # bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
     bbGlobals.dbSaveTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.savePeriod), autoReschedule=True, expiryFunction=bbGlobals.client.bb_saveAllDBs)
 
-    bbGlobals.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
+    # bbGlobals.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
 
     if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" +
@@ -446,13 +426,13 @@ async def on_ready():
             await asyncio.sleep(bbConfig.timedTaskLatenessThresholdSeconds)
         # elif bbConfig.timedTaskCheckingType == "dynamic":
 
-        await bbGlobals.shopRefreshTT.doExpiryCheck()
+        # await bbGlobals.shopRefreshTT.doExpiryCheck()
 
-        await bbGlobals.newBountiesTTDB.doTaskChecking()
+        # await bbGlobals.newBountiesTTDB.doTaskChecking()
 
         await bbGlobals.dbSaveTT.doExpiryCheck()
 
-        await bbGlobals.duelRequestTTDB.doTaskChecking()
+        # await bbGlobals.duelRequestTTDB.doTaskChecking()
 
         await bbGlobals.reactionMenusTTDB.doTaskChecking()
 

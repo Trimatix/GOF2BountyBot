@@ -12,7 +12,10 @@ from ..bbObjects.items import bbShip
 from ..logging import bbLogger
 from ..shipRenderer import shipRenderer
 
+
 from . import util_help
+from . import util_tempdisabled
+
 
 CWD = os.getcwd()
 
@@ -516,5 +519,8 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
     return
     
 
-bbCommands.register("showmehd", admin_cmd_showmeHD, 1, allowDM=False, signatureStr="**showmeHD <ship-name>** *[-full]*", shortHelp="Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME.", longHelp="You must attach a 2048x2048 jpg to your message. Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME. Give `-full` to disable autoskin and render exactly your provided image, with no additional texturing.")
+# bbCommands.register("showmehd", admin_cmd_showmeHD, 1, allowDM=False, signatureStr="**showmeHD <ship-name>** *[-full]*", shortHelp="Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME.", longHelp="You must attach a 2048x2048 jpg to your message. Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME. Give `-full` to disable autoskin and render exactly your provided image, with no additional texturing.")
+# bbCommands.register("showmehd", admin_cmd_showmeHD, 2, allowDM=True, signatureStr="**showmeHD <ship-name>** *[-full]*", shortHelp="Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME.", longHelp="You must attach a 2048x2048 jpg to your message. Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME. Give `-full` to disable autoskin and render exactly your provided image, with no additional texturing.")
+
+bbCommands.register("showmehd", util_tempdisabled.err_tempPerfDisabled, 1, allowDM=False, signatureStr="**showmeHD <ship-name>** *[-full]*", shortHelp="Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME.", longHelp="You must attach a 2048x2048 jpg to your message. Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME. Give `-full` to disable autoskin and render exactly your provided image, with no additional texturing.")
 bbCommands.register("showmehd", admin_cmd_showmeHD, 2, allowDM=True, signatureStr="**showmeHD <ship-name>** *[-full]*", shortHelp="Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME.", longHelp="You must attach a 2048x2048 jpg to your message. Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME. Give `-full` to disable autoskin and render exactly your provided image, with no additional texturing.")

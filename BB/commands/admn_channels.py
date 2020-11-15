@@ -5,6 +5,7 @@ from .. import bbGlobals
 from ..bbConfig import bbConfig, bbData
 
 bbCommands.addHelpSection(1, "channels")
+from . import util_tempdisabled
 
 
 async def admin_cmd_set_announce_channel(message : discord.Message, args : str, isDM : bool):
@@ -67,7 +68,9 @@ async def admin_cmd_set_bounty_board_channel(message : discord.Message, args : s
     await guild.addBountyBoardChannel(message.channel, bbGlobals.client, bbData.bountyFactions)
     await message.channel.send(":ballot_box_with_check: Bounty board channel set!")
 
-bbCommands.register("set-bounty-board-channel", admin_cmd_set_bounty_board_channel, 1, allowDM=False, helpSection="channels", signatureStr="**set-bounty-board-channel**", longHelp="Send from within a channel to set that channel as a *bountyboard*.\nBountyBoard channels show *all* information about active bounties, continuously update their listings (e.g cross through checked systems), and only show *active* bounties (listings for located bounties are removed).")
+
+# bbCommands.register("set-bounty-board-channel", admin_cmd_set_bounty_board_channel, 1, allowDM=False, helpSection="channels", signatureStr="**set-bounty-board-channel**", longHelp="Send from within a channel to set that channel as a *bountyboard*.\nBountyBoard channels show *all* information about active bounties, continuously update their listings (e.g cross through checked systems), and only show *active* bounties (listings for located bounties are removed).")
+bbCommands.register("set-bounty-board-channel", util_tempdisabled.err_tempDisabled, 1, allowDM=False, helpSection="channels", signatureStr="**set-bounty-board-channel**", longHelp="Send from within a channel to set that channel as a *bountyboard*.\nBountyBoard channels show *all* information about active bounties, continuously update their listings (e.g cross through checked systems), and only show *active* bounties (listings for located bounties are removed).")
 
 
 async def admin_cmd_remove_bounty_board_channel(message : discord.Message, args : str, isDM : bool):

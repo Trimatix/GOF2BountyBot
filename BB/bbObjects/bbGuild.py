@@ -609,14 +609,16 @@ def fromDict(id : int, guildDict : dict, dbReload : bool = False) -> bbGuild:
         playChannel = dcGuild.get_channel(guildDict["playChannel"])
 
 
-    if "bountiesDisabled" in guildDict and guildDict["bountiesDisabled"]:
-        bountiesDB = None
-    else:
-        if "bountiesDB" in guildDict:
-            bountiesDB = bbBountyDB.fromDict(guildDict["bountiesDB"], bbConfig.maxBountiesPerFaction, dbReload=dbReload)
-        else:
-            bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions, bbConfig.maxBountiesPerFaction)
-    
+    # if "bountiesDisabled" in guildDict and guildDict["bountiesDisabled"]:
+    #     bountiesDB = None
+    # else:
+    #     if "bountiesDB" in guildDict:
+    #         bountiesDB = bbBountyDB.fromDict(guildDict["bountiesDB"], bbConfig.maxBountiesPerFaction, dbReload=dbReload)
+    #     else:
+    #         bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions, bbConfig.maxBountiesPerFaction)
+    bountiesDB = None
+    guildDict["bountiesDisabled"] = True
+
 
     return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel,
                     shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
