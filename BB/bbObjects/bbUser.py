@@ -9,7 +9,7 @@ from .items.tools import bbToolItemFactory
 from ..bbConfig import bbConfig
 from . import bbInventory
 from ..userAlerts import UserAlerts
-from datetime import datetime
+from datetime import date, datetime
 from discord import Guild, Member
 from . import bbGuild
 from ..logging import bbLogger
@@ -82,13 +82,17 @@ class bbUser:
     :vartype guildTransferCooldownEnd: datetime.datetime
     """
 
-    def __init__(self, id : int, credits=0, lifetimeCredits=0, 
-                    bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None,
-                    inactiveShips=bbInventory.bbInventory(), inactiveModules=bbInventory.bbInventory(),
-                    inactiveWeapons=bbInventory.bbInventory(), inactiveTurrets=bbInventory.bbInventory(), inactiveTools=bbInventory.bbInventory(),
-                    lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0,
-                    alerts={}, bountyWinsToday=0, dailyBountyWinsReset=datetime.utcnow(), pollOwned=False,
-                    homeGuildID=-1, guildTransferCooldownEnd=datetime.utcnow()):
+    def __init__(self, id : int, credits : int = 0, lifetimeCredits : int = 0, 
+                    bountyCooldownEnd : int = -1, systemsChecked : int = 0, bountyWins : int = 0, activeShip : bool = None,
+                    inactiveShips : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    inactiveModules : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    inactiveWeapons : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    inactiveTurrets : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    inactiveTools : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
+                    duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[UserAlerts.UABase or bool]] = {},
+                    bountyWinsToday : int = 0, dailyBountyWinsReset : datetime.datetime = datetime.utcnow(), pollOwned : bool = False,
+                    homeGuildID : int = -1, guildTransferCooldownEnd : datetime.datetime = datetime.utcnow()):
         """
         :param int id: The user's unique ID. The same as their unique discord ID.
         :param int credits: The amount of credits (currency) this user has (Default 0)
@@ -107,8 +111,8 @@ class bbUser:
         :param int duelLosses: The total number of duels the user has lost (Default 0)
         :param int duelCreditsWins: The total amount of credits the user has won through fighting duels (Default 0)
         :param int duelCreditsLosses: The total amount of credits the user has lost through fighting duels (Default 0)
-        :param userAlerts: A dictionary mapping either (UserAlerts.UABase subtypes or string UA ids from UserAlerts.userAlertsIDsTypes) to either (instances of that subtype or booleans representing the alert state) (Default {})
-        :type userAlerts: dict[type or str, UserAlerts.UABase or bool]
+        :param alerts: A dictionary mapping either (UserAlerts.UABase subtypes or string UA ids from UserAlerts.userAlertsIDsTypes) to either (instances of that subtype or booleans representing the alert state) (Default {})
+        :type alerts: dict[type or str, UserAlerts.UABase or bool]
         :param int bountyWinsToday: The number of bounties the user has won today (Default 0)
         :param datetime.datetime dailyBountyWinsReset: A datetime.datetime representing the time at which the user's bountyWinsToday should be reset to zero (Default datetime.utcnow())
         :param bool pollOwned: Whether or not this user has a running ReactionPollMenu (Default False)
@@ -355,7 +359,7 @@ class bbUser:
         return self.activeShip is ship or ship in self.inactiveShips
 
 
-    def equipShipObj(self, ship : bbShip.bbShip, noSaveActive=False):
+    def equipShipObj(self, ship : bbShip.bbShip, noSaveActive : bool = False):
         """Equip the given ship, replacing the active ship.
         Give noSaveActive=True to delete the currently equipped ship.
 
@@ -631,7 +635,7 @@ class bbUser:
         return self.homeGuildID != -1
 
 
-    def canTransferGuild(self, now=datetime.utcnow()) -> bool:
+    def canTransferGuild(self, now : datetime = datetime.utcnow()) -> bool:
         """Decide whether this user is allowed to transfer their homeGuildID.
         This is decided based on the time passed since their last guild transfer.
 
@@ -639,7 +643,7 @@ class bbUser:
         :return: True if this user has no home guild, or their guild transfer cooldown has completed, false otherwise
         :rtype: bool
         """
-        return (not self.hasHomeGuild()) or datetime.utcnow() > self.guildTransferCooldownEnd
+        return (not self.hasHomeGuild()) or now > self.guildTransferCooldownEnd
 
     
     async def transferGuild(self, newGuild : Guild):

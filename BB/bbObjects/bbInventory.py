@@ -25,7 +25,7 @@ class bbInventory:
 
     
     
-    def addItem(self, item : object, quantity=1):
+    def addItem(self, item : object, quantity : int = 1):
         """Add one or more of an item to the inventory.
         If at least one of item is already in the inventory, that item's bbInventoryListing count will be incremented.
         Otherwise, a new bbInventoryListing is created for item.
@@ -51,7 +51,7 @@ class bbInventory:
 
 
     
-    def removeItem(self, item : object, quantity=1):
+    def removeItem(self, item : object, quantity : int = 1):
         """Remove one or more of an item from the inventory.
         If the amount of item stored in the inventory is now zero, the bbInventoryListing is removed from the inventory.
         At least quantity of item must already be stored in the inventory. 

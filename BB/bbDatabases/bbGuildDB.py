@@ -167,7 +167,7 @@ class bbGuildDB:
 
 
 
-def fromDict(guildsDBDict : dict, dbReload=False) -> bbGuildDB:
+def fromDict(guildsDBDict : dict, dbReload : bool = False) -> bbGuildDB:
     """Construct a bbGuildDB object from dictionary-serialised format; the reverse of bbGuildDB.todict()
 
     :param dict bountyDBDict: The dictionary representation of the bbGuildDB to create

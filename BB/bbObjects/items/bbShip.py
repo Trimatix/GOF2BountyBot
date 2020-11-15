@@ -44,13 +44,13 @@ class bbShip(bbItem):
     """
 
     def __init__(self, name : str, maxPrimaries : int, maxTurrets : int,
-                    maxModules : int, manufacturer="", armour=0.0,
-                    cargo=0, numSecondaries=0, handling=0,
-                    value=0, aliases=[], weapons=[],
-                    modules=[], turrets=[], wiki="",
-                    upgradesApplied=[], nickname="", icon="",
-                    emoji=lib.emojis.dumbEmoji.EMPTY, techLevel=-1, shopSpawnRate=0,
-                    builtIn=False, skin=""):
+                    maxModules : int, manufacturer : str = "", armour : int = 0,
+                    cargo : int = 0, numSecondaries : int = 0, handling : int = 0,
+                    value : int = 0, aliases : List[str] = [], weapons : List[bbWeapon.bbWeapon] = [],
+                    modules : List[bbModule.bbModule] = [], turrets : List[bbTurret.bbTurret] = [], wiki : str = "",
+                    upgradesApplied : List[bbShipUpgrade.bbShipUpgrade] = [], nickname : str = "", icon : str = "",
+                    emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1, shopSpawnRate : float = 0,
+                    builtIn : bool = False, skin : str = ""):
         """
         :param str name: A name to uniquely identify this model of ship.
         :param str nickname: A custom name for this ship, assigned by the owning player
@@ -332,7 +332,7 @@ class bbShip(bbItem):
 
     
     # TODO: All of these 'get total' functions could probably be consolidated into a single function, making use of getActivesByName etc
-    def getDPS(self, shipUpgradesOnly=False) -> int:
+    def getDPS(self, shipUpgradesOnly : bool = False) -> int:
         """Get the total DPS provided by the equipped items and upgrades.
         If shipUpgradesOnly is given as True, then only applied shipUpgrades will be included in the calculation.
         This is used to give a 'base' measurement, as ship upgrades cannot be removed and are considered part of the ship once applied.
@@ -358,7 +358,7 @@ class bbShip(bbItem):
         return total * multiplier
 
     
-    def getShield(self, shipUpgradesOnly=False) -> int:
+    def getShield(self, shipUpgradesOnly : bool = False) -> int:
         """Get the total Shield provided by the equipped items and upgrades.
         If shipUpgradesOnly is given as True, then only applied shipUpgrades will be included in the calculation.
         This is used to give a 'base' measurement, as ship upgrades cannot be removed and are considered part of the ship once applied.
@@ -380,7 +380,7 @@ class bbShip(bbItem):
         return int(total * multiplier)
 
 
-    def getArmour(self, shipUpgradesOnly=False) -> int:
+    def getArmour(self, shipUpgradesOnly : bool = False) -> int:
         """Get the total Armour provided by the equipped items and upgrades.
         If shipUpgradesOnly is given as True, then only applied shipUpgrades will be included in the calculation.
         This is used to give a 'base' measurement, as ship upgrades cannot be removed and are considered part of the ship once applied.
@@ -402,7 +402,7 @@ class bbShip(bbItem):
         return int(total * multiplier)
 
 
-    def getCargo(self, shipUpgradesOnly=False) -> int:
+    def getCargo(self, shipUpgradesOnly : bool = False) -> int:
         """Get the total Cargo provided by the equipped items and upgrades.
         If shipUpgradesOnly is given as True, then only applied shipUpgrades will be included in the calculation.
         This is used to give a 'base' measurement, as ship upgrades cannot be removed and are considered part of the ship once applied.
@@ -424,7 +424,7 @@ class bbShip(bbItem):
         return int(total * multiplier)
 
 
-    def getHandling(self, shipUpgradesOnly=False) -> int:
+    def getHandling(self, shipUpgradesOnly : bool = False) -> int:
         """Get the total Handling provided by the equipped items and upgrades.
         If shipUpgradesOnly is given as True, then only applied shipUpgrades will be included in the calculation.
         This is used to give a 'base' measurement, as ship upgrades cannot be removed and are considered part of the ship once applied.
@@ -446,7 +446,7 @@ class bbShip(bbItem):
         return int(total * multiplier)
 
 
-    def getNumSecondaries(self, shipUpgradesOnly=False) -> int:
+    def getNumSecondaries(self, shipUpgradesOnly : bool = False) -> int:
         """Get the total NumSecondaries provided by the equipped items and upgrades.
         If shipUpgradesOnly is given as True, then only applied shipUpgrades will be included in the calculation.
         This is used to give a 'base' measurement, as ship upgrades cannot be removed and are considered part of the ship once applied.
@@ -464,7 +464,7 @@ class bbShip(bbItem):
         return int(total * multiplier)
 
 
-    def getMaxPrimaries(self, shipUpgradesOnly=False) -> int:
+    def getMaxPrimaries(self, shipUpgradesOnly : bool = False) -> int:
         """Get the total MaxPrimaries provided by the equipped items and upgrades.
         If shipUpgradesOnly is given as True, then only applied shipUpgrades will be included in the calculation.
         This is used to give a 'base' measurement, as ship upgrades cannot be removed and are considered part of the ship once applied.
@@ -482,7 +482,7 @@ class bbShip(bbItem):
         return int(total * multiplier)
 
 
-    def getMaxTurrets(self, shipUpgradesOnly=False) -> int:
+    def getMaxTurrets(self, shipUpgradesOnly : bool = False) -> int:
         """Get the total MaxTurrets provided by the equipped items and upgrades.
         If shipUpgradesOnly is given as True, then only applied shipUpgrades will be included in the calculation.
         This is used to give a 'base' measurement, as ship upgrades cannot be removed and are considered part of the ship once applied.
@@ -500,7 +500,7 @@ class bbShip(bbItem):
         return int(total * multiplier)
 
 
-    def getMaxModules(self, shipUpgradesOnly=False) -> int:
+    def getMaxModules(self, shipUpgradesOnly : bool = False) -> int:
         """Get the total MaxModules provided by the equipped items and upgrades.
         If shipUpgradesOnly is given as True, then only applied shipUpgrades will be included in the calculation.
         This is used to give a 'base' measurement, as ship upgrades cannot be removed and are considered part of the ship once applied.
@@ -518,7 +518,7 @@ class bbShip(bbItem):
         return int(total * multiplier)
 
 
-    def getValue(self, shipUpgradesOnly=False) -> int:
+    def getValue(self, shipUpgradesOnly : bool = False) -> int:
         """Get the total Value provided by the equipped items and upgrades.
         If shipUpgradesOnly is given as True, then only applied shipUpgrades will be included in the calculation.
         This is used to give a 'base' measurement, as ship upgrades cannot be removed and are considered part of the ship once applied.

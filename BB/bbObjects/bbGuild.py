@@ -1,3 +1,4 @@
+from discord.embeds import Embed
 from . import bbShop
 from ..bbDatabases import bbBountyDB
 from .bounties.bountyBoards import BountyBoardChannel
@@ -22,9 +23,9 @@ class bbGuild:
     :var id: The ID of the guild, directly corresponding to a discord guild's ID.
     :vartype id: int
     :var announceChannel: The discord.channel object for this guild's announcements chanel. None when no announce channel is set for this guild.
-    :vartype announceChannel: discord.channel
+    :vartype announceChannel: discord.channel.TextChannel
     :var playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
-    :vartype playChannel: discord.channel
+    :vartype playChannel: discord.channel.TextChannel
     :var shop: This guild's bbShop object
     :vartype shop: bbShop
     :var alertRoles: A dictionary of user alert IDs to guild role IDs.
@@ -45,7 +46,10 @@ class bbGuild:
     :vartype dcGuild: discord.Guild
     """
 
-    def __init__(self, id : int, bountiesDB: bbBountyDB.bbBountyDB, dcGuild: Guild, announceChannel=None, playChannel=None, shop=None, bountyBoardChannel=None, alertRoles={}, ownedRoleMenus=0, bountiesDisabled=False, shopDisabled=False):
+    def __init__(self, id : int, bountiesDB: bbBountyDB.bbBountyDB, dcGuild: Guild, announceChannel : channel.TextChannel = None,
+            playChannel : channel.TextChannel = None, shop : bbShop.bbShop = None,
+            bountyBoardChannel : BountyBoardChannel.BountyBoardChannel = None, alertRoles : Dict[str, int] = {},
+            ownedRoleMenus : int = 0, bountiesDisabled : bool = False, shopDisabled : bool = False):
         """
         :param int id: The ID of the guild, directly corresponding to a discord guild's ID.
         :param bbBountyDB.bbBountyDB bountiesDB: This guild's active bounties
@@ -122,7 +126,7 @@ class bbGuild:
         """Get the discord channel object of the guild's announcements channel.
 
         :return: the discord.channel of the guild's announcements channel
-        :rtype: discord.channel
+        :rtype: discord.channel.TextChannel
         :raise ValueError: If this guild does not have an announcements channel
         """
         if not self.hasAnnounceChannel():
@@ -135,14 +139,14 @@ class bbGuild:
 
         :return: the discord channel object of the guild's bounty playing channel
         :raise ValueError: If this guild does not have a play channel
-        :rtype: discord.channel
+        :rtype: discord.channel.TextChannel
         """
         if not self.hasPlayChannel():
             raise ValueError("This guild has no play channel set")
         return self.playChannel
 
 
-    def setAnnounceChannel(self, announceChannel : channel):
+    def setAnnounceChannel(self, announceChannel : channel.TextChannel):
         """Set the discord channel object of the guild's announcements channel.
 
         :param int announceChannel: The discord channel object of the guild's new announcements channel
@@ -150,7 +154,7 @@ class bbGuild:
         self.announceChannel = announceChannel
 
 
-    def setPlayChannel(self, playChannel : channel):
+    def setPlayChannel(self, playChannel : channel.TextChannel):
         """Set the discord channel of the guild's bounty playing channel.
 
         :param int playChannel: The discord channel object of the guild's new bounty playing channel
@@ -238,7 +242,7 @@ class bbGuild:
 
 
     
-    async def addBountyBoardChannel(self, channel : channel, client : Client, factions : List[str]):
+    async def addBountyBoardChannel(self, channel : channel.TextChannel, client : Client, factions : List[str]):
         """Set this guild's bounty board channel.
 
         :param discord.Channel channel: The channel where bounty listings should be posted
@@ -264,7 +268,7 @@ class bbGuild:
         self.hasBountyBoardChannel = False
 
 
-    async def makeBountyBoardChannelMessage(self, bounty : bbBounty.Bounty, msg="", embed=None) -> Message:
+    async def makeBountyBoardChannelMessage(self, bounty : bbBounty.Bounty, msg : str = "", embed : Embed = None) -> Message:
         """Create a new BountyBoardChannel listing for the given bounty, in the given guild.
         guild must own a BountyBoardChannel.
 
@@ -309,7 +313,7 @@ class bbGuild:
             raise KeyError("The requested bbGuild (" + str(self.id) + ") does not have a BountyBoardChannel listing for the given bounty: " + bounty.criminal.name)
 
 
-    async def updateBountyBoardChannel(self, bounty : bbBounty.Bounty, bountyComplete=False):
+    async def updateBountyBoardChannel(self, bounty : bbBounty.Bounty, bountyComplete : bool = False):
         """Update the BBC listing for the given bounty in the given server.
 
         :param bbBounty bounty: The bounty whose listings should be updated
@@ -583,7 +587,7 @@ class bbGuild:
         return data
 
 
-def fromDict(id : int, guildDict : dict, dbReload=False) -> bbGuild:
+def fromDict(id : int, guildDict : dict, dbReload : bool = False) -> bbGuild:
     """Factory function constructing a new bbGuild object from the information in the provided guildDict - the opposite of bbGuild.toDictNoId
 
     :param int id: The discord ID of the guild

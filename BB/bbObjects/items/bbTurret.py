@@ -10,7 +10,9 @@ class bbTurret(bbItem):
     :vartype dps: float
     """
 
-    def __init__(self, name : str, aliases : List[str], dps=0.0, value=0, wiki="", manufacturer="", icon="", emoji=lib.emojis.dumbEmoji.EMPTY, techLevel=-1, builtIn=False):
+    def __init__(self, name : str, aliases : List[str], dps : float = 0.0, value : int = 0,
+            wiki : str = "", manufacturer : str = "", icon : str = "",
+            emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1, builtIn : bool = False):
         """
         :param str name: The name of the turret. Must be unique. (a model number is a good starting point)
         :param list[str] aliases: A list of alternative names this turret may be referred to by.

@@ -7,11 +7,14 @@ class bbThrusterModule(bbModule.bbModule):
     """A module providing a ship with a boost to its handling.
     """
 
-    def __init__(self, name : str, aliases : List[str], handlingMultiplier=1, value=0, wiki="", manufacturer="", icon="", emoji=lib.emojis.dumbEmoji.EMPTY, techLevel=-1, builtIn=False):
+    def __init__(self, name : str, aliases : List[str], handlingMultiplier : float = 1, value : int = 0,
+            wiki : str = "", manufacturer : str = "", icon : str = "",
+            emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1,
+            builtIn : bool = False):
         """
         :param str name: The name of the module. Must be unique.
         :param list[str] aliases: Alternative names by which this module may be referred to
-        :param int handlingMultiplier: The multiplier to apply to the ship's handling (Default 1)
+        :param float handlingMultiplier: The multiplier to apply to the ship's handling (Default 1)
         :param int value: The number of credits this module may be sold or bought or at a shop (Default 0)
         :param str wiki: A web page that is displayed as the wiki page for this module. (Default "")
         :param str manufacturer: The name of the manufacturer of this module (Default "")

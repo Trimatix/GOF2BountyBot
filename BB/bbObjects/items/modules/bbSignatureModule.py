@@ -7,7 +7,10 @@ class bbSignatureModule(bbModule.bbModule):
     """A module allowing a the owner to disguise themselves as a member of th faction that manufactured this signature. 
     """
 
-    def __init__(self, name : str, aliases : List[str], manufacturer : str, value=0, wiki="", icon="", emoji=lib.emojis.dumbEmoji.EMPTY, techLevel=-1, builtIn=False):
+    def __init__(self, name : str, aliases : List[str], manufacturer : str, value : int = 0,
+            wiki : str = "", icon : str = "",
+            emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1,
+            builtIn : bool = False):
         """
         :param str name: The name of the module. Must be unique.
         :param list[str] aliases: Alternative names by which this module may be referred to

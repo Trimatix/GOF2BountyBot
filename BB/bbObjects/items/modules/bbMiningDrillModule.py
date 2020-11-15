@@ -12,7 +12,10 @@ class bbMiningDrillModule(bbModule.bbModule):
     :vartype handling: float
     """
 
-    def __init__(self, name : str, aliases : List[str], oreYield=0, handling=0, value=0, wiki="", manufacturer="", icon="", emoji=lib.emojis.dumbEmoji.EMPTY, techLevel=-1, builtIn=False):
+    def __init__(self, name : str, aliases : List[str], oreYield : int = 0, handling : int = 0, value : int = 0,
+            wiki : str = "", manufacturer : str = "", icon : str = "",
+            emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1,
+            builtIn : bool = False):
         """
         :param str name: The name of the module. Must be unique.
         :param list[str] aliases: Alternative names by which this module may be referred to

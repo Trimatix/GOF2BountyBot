@@ -132,7 +132,8 @@ class logger:
         self.clearLogs()
 
 
-    def log(self, classStr : str, funcStr : str, event : str, category="misc", eventType="MISC_ERR", trace="", noPrintEvent=False, noPrint=False):
+    def log(self, classStr : str, funcStr : str, event : str, category : str = "misc",
+            eventType : str = "MISC_ERR", trace : str = "", noPrintEvent : bool = False, noPrint : bool = False):
         """Log an event, queueing the log to be saved to a file.
         
         :param str classStr: The class in which the event occurred

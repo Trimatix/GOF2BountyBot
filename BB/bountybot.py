@@ -97,7 +97,7 @@ def loadUsersDB(filePath : str) -> bbUserDB.bbUserDB:
     return bbUserDB.fromDict(lib.jsonHandler.readJSON(filePath))
 
 
-def loadGuildsDB(filePath : str, dbReload=False) -> bbGuildDB.bbGuildDB:
+def loadGuildsDB(filePath : str, dbReload : bool = False) -> bbGuildDB.bbGuildDB:
     """Build a bbGuildDB from the specified JSON file.
 
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
@@ -120,7 +120,7 @@ async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.ReactionMenuDB:
 
 ####### UTIL FUNCTIONS #######
 
-async def announceNewShopStock(guildID=-1):
+async def announceNewShopStock(guildID : int = -1):
     """Announce the refreshing of shop stocks to one or all joined guilds.
     Messages will be sent to the playChannels of all guilds in the bbGlobals.guildsDB, if they have one
 
