@@ -11,6 +11,7 @@ from ..logging import bbLogger
 from ..shipRenderer import shipRenderer
 
 
+bbCommands.addHelpSection(0, "gof2 info")
 CWD = os.getcwd()
 
 
@@ -28,7 +29,7 @@ async def cmd_map(message : discord.Message, args : str, isDM : bool):
     else:
         await message.channel.send(bbData.mapImageNoGraphLink)
 
-bbCommands.register("map", cmd_map, 0, aliases=["starmap"], allowDM=True)
+bbCommands.register("map", cmd_map, 0, aliases=["starmap"], allowDM=True, helpSection="gof2 info", signatureStr="**map**", shortHelp="Send the complete GOF2 starmap.", longHelp="Send the complete GOF2 starmap with jumpgate routes, including all secret and DLC systems.")
 
 
 async def cmd_make_route(message : discord.Message, args : str, isDM : bool):
@@ -92,7 +93,7 @@ async def cmd_make_route(message : discord.Message, args : str, isDM : bool):
     else:
         await message.channel.send("Here's the shortest route from **" + startSyst + "** to **" + endSyst + "**:\n> " + routeStr[:-2] + " :rocket:")
 
-bbCommands.register("make-route", cmd_make_route, 0, allowDM=True)
+bbCommands.register("make-route", cmd_make_route, 0, allowDM=True, helpSection="gof2 info", signatureStr="**make-route <startSystem>, <endSystem>**", shortHelp="Find the shortest route from `startSystem` to `endSystem`.", longHelp="Find the shortest route from `startSystem` to `endSystem`. Both systems must have jump gates. To find out if a system has a jump gate, use `$COMMANDPREFIX$info`.")
 
 
 async def cmd_info_system(message : discord.Message, args : str, isDM : bool):
@@ -573,7 +574,7 @@ async def cmd_info(message : discord.Message, args : str, isDM : bool):
     else:
         await message.channel.send(":x: Unknown object type! (system/criminal/ship/weapon/module/turret/commodity/skin)")
 
-bbCommands.register("info", cmd_info, 0, allowDM=True)
+bbCommands.register("info", cmd_info, 0, allowDM=True, helpSection="gof2 info", signatureStr="**info <object-type> <name>**", shortHelp="Display information about something from GOF2. Also gives useful aliases for things.", longHelp="Display information about something from GOF2. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the a list of aliases that can be used to refer to your object in commands.")
 
 
 async def cmd_showme_criminal(message : discord.Message, args : str, isDM : bool):	
@@ -970,4 +971,4 @@ async def cmd_showme(message : discord.Message, args : str, isDM : bool):
     else:	
         await message.channel.send(":x: Unknown object type! (criminal/ship/weapon/module/turret/commodity)")	
 
-bbCommands.register("showme", cmd_showme, 0, allowDM=True, aliases=["show", "render"])
+bbCommands.register("showme", cmd_showme, 0, allowDM=True, aliases=["show", "render"], helpSection="gof2 info", signatureStr="**showme <object-type> <name>** *[[full]+ [skinName]]*", shortHelp="Get an image of the named item. This command can also render ships with a given skin.", longHelp="Get a larger image of the requested item. If your item is a ship, you may also specify a skin name, prefaced by a `+` symbol.\nAlternatively, give a `+` and no ship name, and attach your own 2048x2048 jpg image, and I will render it onto your ship! Give `full+` instead of `+` to disable autoskin and render exactly your provided image, with no additional texturing.")

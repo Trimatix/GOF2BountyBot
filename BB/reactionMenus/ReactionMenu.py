@@ -17,8 +17,12 @@ async def deleteReactionMenu(menuID : int):
     :param int menuID: The ID of the menu, corresponding with the discord ID of the menu's message
     """
     menu = bbGlobals.reactionMenusDB[menuID]
-    await menu.msg.delete()
-    del bbGlobals.reactionMenusDB[menu.msg.id]
+    try:
+        await menu.msg.delete()
+    except NotFound:
+        pass
+    if menu.msg.id in bbGlobals.reactionMenusDB:
+        del bbGlobals.reactionMenusDB[menu.msg.id]
 
 
 async def removeEmbedAndOptions(menuID : int):
@@ -54,6 +58,26 @@ async def markExpiredMenu(menuID : int):
         pass
     if menuID in bbGlobals.reactionMenusDB:
         del bbGlobals.reactionMenusDB[menuID]
+
+
+async def markExpiredMenuAndRemoveOptions(menuID : int):
+    """Remove all option reactions from the menu message, replace the message content of the given menu with bbConfig.expiredMenuMsg,
+    and remove the menu from the active reaction menus DB.
+
+    :param int menuID: The ID of the menu, corresponding with the discord ID of the menu's message
+    """
+    menu = bbGlobals.reactionMenusDB[menuID]
+    menu.msg = await menu.msg.channel.fetch_message(menu.msg.id)
+    try:
+        await menu.msg.clear_reactions()
+    except Forbidden:
+        for reaction in menu.msg.reactions:
+            try:
+                await reaction.remove(bbGlobals.client.user)
+            except (HTTPException, NotFound):
+                pass
+        
+    await markExpiredMenu(menuID)
 
 
 class ReactionMenuOption:
@@ -410,22 +434,26 @@ class ReactionMenu:
         return menuEmbed
     
 
-    async def updateMessage(self):
+    async def updateMessage(self, noRefreshOptions=False):
         """Update the menu message by removing all reactions, replacing any existing embed with
         up to date embed content, and readd all of the menu's option reactions.
         """
-        try:
-            await self.msg.clear_reactions()
-        except Forbidden:
-            for reaction in self.msg.reactions:
-                try:
-                    await reaction.remove(bbGlobals.client.user)
-                except (HTTPException, NotFound):
-                    pass
-
         await self.msg.edit(embed=self.getMenuEmbed())
-        for option in self.options:
-            await self.msg.add_reaction(option.sendable)
+        
+        if not noRefreshOptions:
+            self.msg = await self.msg.channel.fetch_message(self.msg.id)
+
+            try:
+                await self.msg.clear_reactions()
+            except Forbidden:
+                for reaction in self.msg.reactions:
+                    try:
+                        await reaction.remove(bbGlobals.client.user)
+                    except (HTTPException, NotFound):
+                        pass
+
+            for option in self.options:
+                await self.msg.add_reaction(option.sendable)
 
 
     async def delete(self):
