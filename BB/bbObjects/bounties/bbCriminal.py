@@ -1,5 +1,6 @@
 # Typing imports
 from __future__ import annotations
+from typing import List
 
 from ...bbConfig import bbData
 from .. import bbAliasable
@@ -29,7 +30,8 @@ class Criminal (bbAliasable.Aliasable):
     :vartype hasShip: bool
     """
 
-    def __init__(self, name : str, faction : str, icon : icon, builtIn=False, isPlayer=False, aliases=[], wiki="", ship=None):
+    def __init__(self, name : str, faction : str, icon : str, builtIn : bool = False,
+            isPlayer : bool = False, aliases : List[str] = [], wiki : str = "", ship : bool = None):
         """
         :param str name: The name of the criminal
         :param str faction: the faction that this criminal is wanted by
@@ -140,7 +142,7 @@ class Criminal (bbAliasable.Aliasable):
             return {"builtIn":False, "isPlayer": self.isPlayer, "name":self.name, "icon":self.icon, "faction":self.faction, "aliases":self.aliases, "wiki":self.wiki}
 
 
-def fromDict(crimDict : dict, builtIn=False) -> bbCriminal:
+def fromDict(crimDict : dict, builtIn : bool = False) -> Criminal:
     """Factory function that will either provide a reference to a builtIn bbCriminal if a builtIn criminal is requested, or construct a new bbCriminal object from the provided data.
 
     :param dict crimDict: A dictionary containing all data necessary to construct the desired bbCriminal. If the criminal is builtIn, this need only be their name, "builtIn": True, and possibly the equipped ship.

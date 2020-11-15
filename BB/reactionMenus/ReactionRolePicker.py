@@ -1,13 +1,14 @@
+from discord.member import Member
 from . import ReactionMenu
 from ..bbConfig import bbConfig
-from .. import bbGlobals, bbUtil
-from discord import Colour, NotFound, HTTPException, Forbidden, Guild, Role, Message
+from .. import bbGlobals, lib
+from discord import Colour, NotFound, HTTPException, Forbidden, Guild, Role, Message, User
 from datetime import datetime
 from ..scheduling import TimedTask
 from typing import List, Union, Dict
 
 
-async def giveRole(args : List[Union[Guild, Role, int]], reactingUser=None) -> bool:
+async def giveRole(args : List[Union[Guild, Role, int]], reactingUser : Union[User, Member] = None) -> bool:
     """Grant the given user the role described in args.
     if reactingUser already has the requested role, do nothing.
 
@@ -26,7 +27,7 @@ async def giveRole(args : List[Union[Guild, Role, int]], reactingUser=None) -> b
     return True
 
 
-async def removeRole(args : List[Union[Guild, Role, int]], reactingUser=None) -> bool:
+async def removeRole(args : List[Union[Guild, Role, int]], reactingUser : Union[User, Member] = None) -> bool:
     """remove the role described in args from the given user.
     if reactingUser already lacks the requested role, do nothing.
 
@@ -63,7 +64,7 @@ class ReactionRolePickerOption(ReactionMenu.ReactionMenuOption):
     :vartype role: discord.Role 
     """
 
-    def __init__(self, emoji : bbUtil.dumbEmoji, role : Role, menu : ReactionMenu.ReactionMenu):
+    def __init__(self, emoji : lib.emojis.dumbEmoji, role : Role, menu : ReactionMenu.ReactionMenu):
         self.role = role
         super(ReactionRolePickerOption, self).__init__(self.role.name, emoji, addFunc=giveRole, addArgs=(menu.dcGuild, self.role, menu.msg.id), removeFunc=removeRole, removeArgs=(menu.dcGuild, self.role, menu.msg.id))
 
@@ -88,12 +89,15 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
     TODO: replace dcGuild param with extracting msg.guild
     """
 
-    def __init__(self, msg : Message, reactionRoles : Dict[bbUtil.dumbEmoji, Role], dcGuild : Guild, titleTxt="**Role Menu**", desc="React for your desired role!", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+    def __init__(self, msg : Message, reactionRoles : Dict[lib.emojis.dumbEmoji, Role], dcGuild : Guild,
+            titleTxt : str = "", desc : str = "", col : Colour = Colour.default, timeout : TimedTask.TimedTask = None,
+            footerTxt : str = "", img : str = "", thumb : str = "", icon : str = "", authorName : str = "",
+            targetMember : Member = None, targetRole : Role = None):
         # TODO: Stop taking dcGuild, and instead extract dcGuild from msg.guild
         """
         :param discord.Message msg: the message where this menu is embedded
         :param reactionRoles: A dictionary where keys are emojis and values are the roles to grant/remove when adding/removing the emoji 
-        :type reactionRoles: dict[bbUtil.dumbEmoji, discord.Role]
+        :type reactionRoles: dict[lib.emojis.dumbEmoji, discord.Role]
         :param discord.Guild dcGuild: The guild where this menu is contained TODO: Remove and replace with extracting msg.guild
         :param str titleTxt: The content of the embed title (Default "**Role Menu**")
         :param str desc: he content of the embed description; appears at the top below the title (Default "React for your desired role!")
@@ -112,6 +116,11 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
         roleOptions = {}
         for reaction in reactionRoles:
             roleOptions[reaction] = ReactionRolePickerOption(reaction, reactionRoles[reaction], self)
+
+        if titleTxt == "":
+            titleTxt = "**Role Menu**"
+        if desc == "":
+            desc = "React for your desired role!"
 
         super(ReactionRolePicker, self).__init__(msg, options=roleOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
         self.saveable = True
@@ -141,7 +150,7 @@ async def fromDict(rmDict : dict) -> ReactionRolePicker:
 
     reactionRoles = {}
     for reaction in rmDict["options"]:
-        reactionRoles[bbUtil.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
+        reactionRoles[lib.emojis.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
 
     timeoutTT = None
     if "timeout" in rmDict:

@@ -71,60 +71,7 @@ mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/7006835441037475
 mapImageNoGraphLink = 'https://i.imgur.com/TmPgPd3.png'
 
 # intro for help commands
-helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
-**[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
-
-# help strings for bb commands
-helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short introduction on how to play bounties!"),
-                            "help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently six pages, and six sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Loadout`, `Shopping` and `Credits`."),
-                            "stats": ("**stats** *[user]*", "Get various credits and bounty statistics about yourself, or another user."),
-                            "leaderboard": ("**leaderboard** *[-g|-c|-s|-w]*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
-                            "notify": ("**notify <type>** *[alert]*", "Subscribe to pings when events take place. Currently, **type** can be `bounties`, `shop`, `duels`, or `bot`.\n> `shop` requires the `refresh` option.\n> `duels` requires either `new` or `cancel`.\n> `bot` can take `updates` or `announcements`.\n> `bot updates` must be `major` or `minor`."),
-                            "source": ("**source**", "Show links to the project's GitHub page and todo list, and some information about the people behind BountyBot."),
-                            "poll": ("**poll <option1 emoji> <option1 name>** \n*[<option2 emoji> <option2 name>]*\n*[...]*\n*[multiplechoice=<yes/no>]*\n*[target=<@role mention>]*\n*[seconds=<poll length seconds>]*\n*[minutes=<poll length minutes>]*\n*[...]*", "Start a reaction-based poll. Each option you give must be an emoji, followed by a space, followed by the option name. Poll options must be given on new lines.\nGive multiplechoice=no to only allow one vote per person (default: yes).\nGive target=@role mention to limit poll participants only to users with the specified role.\nYou may specify the length of the poll, with each time division on a new line (default: 5 minutes). Acceptable time divisions are: seconds, minutes, hours, days.")},
-            
-            "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
-                            "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
-                            "make-route": ("**make-route <startSystem>, <endSystem>**", "Find the shortest route from startSystem to endSystem."),
-                            "showme": ("**showme <object-type> <name>** *[[full]+ [skinName]]*", "Get an image of the requested item. If your item is a ship, you may also specify a skin name, prefaced by a `+` symbol.\nAlternatively, give a `+` and no ship name, and attach your own 2048x2048 jpg image, and I will render it onto your ship! Give `full+` instead of `+` to disable autoskin and render exactly your provided image, with no additional texturing.")},
-            
-            "Bounties":{    "bounties": ("**bounties** *[faction]*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
-                            "route": ("**route <criminal name>**", "Get the named criminal's current route."),
-                            "check": ("**check <system>**", "Check if any criminals are in the given system, arrest them, and get paid! 💰"),
-                            "duel": ("**duel [action] [user]** *<stakes>*", "Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`. When challenging another user to a duel, you must give the amount of credits you will win - the 'stakes'.")},
-            
-            "Loadout":{     "hangar": ("**hangar** *[item-type]*", "Display the items in your hangar, or in the hangar of a tagged user. Give an item type (ship/weapon/turret/module) to only list items of that type."),
-                            "loadout": ("**loadout** *[user]*", "Display your current ship and the items equipped onto it, or those equipped by another player."),
-                            "equip": ("**equip <item-type> <item-num>** *[transfer]*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When equipping a ship, specify `transfer` to move all items to the new ship."),
-                            "unequip": ("**unequip <item-type> <item-num>**", "Unequip the requested item from your active ship, into your hangar. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),
-                            "nameShip": ("**nameShip <nickname>**", "Give your active ship a nickname!"),
-                            "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")},
-
-            "Shopping":{    "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
-                            "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
-                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.")},
-
-            "Credits":{     "total-value":("**total-value** *[user]*", "Get the total value of all of your items, including your credits balance. Give a user to check someone else's total inventory value."),
-                            "balance": ("**balance** *[user]*", "Get the credits balance of yourself, or another user if one is given."),
-                            "pay": ("**pay <user> <amount>**", "Pay the given user an amount of credits from your balance.")}}
-
-# intro for admin help commands
-adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help how-to-play`
-**[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
-
-# help strings for admin bb commands
-adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display information about admin-only commands."),
-                                        "set-announce-channel": ("**set-announce-channel** *[off]*", "Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements."),
-                                        "set-play-channel": ("**set-play-channel** *[off]*", "Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements."),
-                                        "set-notify-role": ("**set-notify-role <type>** *[alert]* **<role>**", "Set a role to ping when various events occur. **<type>** and/or *[alert]]* must specify a type of notification. **<role>** can be either a role mention, or a role ID. For valid notification types, see `$COMMANDPREFIX$help notify`."),
-                                        "remove-notify-role": ("**remove-notify-role**", "Stop pinging the bounty notify role when new bounties are created."),
-                                        "set-bounty-board-channel": ("**set-bounty-board-channel**", "Send from within a channel to set that channel as a *bountyboard*.\nBountyBoard channels show *all* information about active bounties, continuously update their listings (e.g cross through checked systems), and only show *active* bounties (listings for located bounties are removed)."),
-                                        "remove-bounty-board-channel": ("**remove-bounty-board-channel**", "Send from any channel to remove the server's bountyboard channel, if one is set."),
-                                        "hangar": ("**hangar** *[user]* *[item-type]*", "Administrators have permission to view the hangars of other users."),
-                                        "showmeHD": ("**showmeHD <ship-name>** *[-full]*", "You must attach a 2048x2048 jpg to your message. Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME. Give `-full` to disable autoskin and render exactly your provided image, with no additional texturing.")}}
-
-# string extensions for numbers, e.g 11th, 1st, 23rd...
-numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
+helpIntro = "**[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments.\n"
 
 # icons for factions
 terranIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013574331596850/terran.png"
@@ -299,7 +246,7 @@ builtInModuleData = {   # armour
 
                         # repair bots
                         "Ketar Repair Bot": {"type": "repair bot", "name": "Ketar Repair Bot", "aliases": ["Repair Bot", "Ketar Bot"], "techLevel": 4, "HPps": 7, "value": 15285, "wiki": "https://galaxyonfire.fandom.com/wiki/Ketar_Repair_Bot", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723475310175322132/ketar_repair_bot.png", "emoji": "<:ketarrepairbot:723706704373481543>"},
-                        "Ketar Repair Bot II": {"type": "repair bot", "name": "Ketar Repair Bot II", "aliases": ["Katar Repair Bot 2", "Repair Bot 2", "Repair Bot II", "Ketar Bot 2", "Ketar Bot II"], "techLevel": 7, "HPps": 15, "value": 141949, "wiki": "https://galaxyonfire.fandom.com/wiki/Ketar_Repair_Bot_II", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723475300582686800/ketar_repair_bot_ii.png", "emoji": "<:ketarrepairbotii:723706703975284737>"},
+                        "Ketar Repair Bot II": {"type": "repair bot", "name": "Ketar Repair Bot II", "aliases": ["Ketar Repair Bot 2", "Repair Bot 2", "Repair Bot II", "Ketar Bot 2", "Ketar Bot II"], "techLevel": 7, "HPps": 15, "value": 141949, "wiki": "https://galaxyonfire.fandom.com/wiki/Ketar_Repair_Bot_II", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723475300582686800/ketar_repair_bot_ii.png", "emoji": "<:ketarrepairbotii:723706703975284737>"},
 
                         # scanners
                         "Telta Quickscan": {"type": "scanner", "name": "Telta Quickscan", "aliases": ["Quickscan"], "techLevel": 2, "timeToLock": 4, "showClassAAsteroids": False, "showCargo": False, "value": 2438, "wiki": "https://galaxyonfire.fandom.com/wiki/Telta_Quickscan", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723475379397984267/telta_quickscan.png", "emoji": "<:teltaquickscan:723706726079135764>"},

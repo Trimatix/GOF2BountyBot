@@ -57,9 +57,9 @@ class bbShipUpgrade:
     """
     
     def __init__(self, name : str, shipToUpgradeValueMult : float,
-                    armour=0.0, armourMultiplier=1.0, cargo=0, cargoMultiplier=1.0, numSecondaries=0, numSecondariesMultiplier=1.0,
-                    handling=0, handlingMultiplier=1.0, maxPrimaries=0, maxPrimariesMultiplier=1.0, maxTurrets=0, maxTurretsMultiplier=1.0,
-                    maxModules=0, maxModulesMultiplier=1.0, vendor="", wiki="", techLevel=-1, builtIn=False):
+                    armour : int = 0.0, armourMultiplier : float = 1.0, cargo : int = 0, cargoMultiplier : float = 1.0, numSecondaries : int = 0, numSecondariesMultiplier : float = 1.0,
+                    handling : int = 0, handlingMultiplier : float = 1.0, maxPrimaries : int = 0, maxPrimariesMultiplier : float = 1.0, maxTurrets : int = 0, maxTurretsMultiplier : float = 1.0,
+                    maxModules : int = 0, maxModulesMultiplier : float = 1.0, vendor : str = "", wiki : str = "", techLevel : int = -1, builtIn : bool = False):
         """
         :param str name: The name of the upgrade. This must be unique.
         :param float shipToUpgradeValueMult: upgrades do not have a value, their value is calculated as a percentage of the value of the ship to be applied to. shipToUpgradeValueMult is that percentage multiplier.

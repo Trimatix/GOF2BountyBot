@@ -1,5 +1,4 @@
 from .bbConfig import bbConfig
-import os.path
 from os import path
 from datetime import datetime
 import traceback
@@ -121,7 +120,7 @@ class logger:
                     # log strings first encoded to bytes (utf-8) to allow for unicode chars
                     files[category].write(log.encode())
                 except IOError as e:
-                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + currentFName + ":" + e.__class__.__name__ + "\n" + traceback.format_exc())
+                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + files[category].name + ":" + e.__class__.__name__ + "\n" + traceback.format_exc())
                 except UnicodeEncodeError as e:
                     print(e.start)
         
@@ -133,7 +132,8 @@ class logger:
         self.clearLogs()
 
 
-    def log(self, classStr : str, funcStr : str, event : str, category="misc", eventType="MISC_ERR", trace="", noPrintEvent=False, noPrint=False):
+    def log(self, classStr : str, funcStr : str, event : str, category : str = "misc",
+            eventType : str = "MISC_ERR", trace : str = "", noPrintEvent : bool = False, noPrint : bool = False):
         """Log an event, queueing the log to be saved to a file.
         
         :param str classStr: The class in which the event occurred

@@ -1,12 +1,15 @@
 from . import bbModule
 from ....bbConfig import bbData
-from .... import bbUtil
+from .... import lib
 from typing import List
 
 class bbArmourModule(bbModule.bbModule):
     """A module providing a ship with an extra layer of defense.
     """
-    def __init__(self, name : str, aliases : List[str], armour=0, value=0, wiki="", manufacturer="", icon="", emoji=bbUtil.EMPTY_DUMBEMOJI, techLevel=-1, builtIn=False):
+    def __init__(self, name : str, aliases : List[str], armour : int = 0, value : int = 0,
+            wiki : str = "", manufacturer : str = "", icon : str = "",
+            emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1,
+            builtIn : bool = False):
         """
         :param str name: The name of the module. Must be unique.
         :param list[str] aliases: Alternative names by which this module may be referred to
@@ -15,7 +18,7 @@ class bbArmourModule(bbModule.bbModule):
         :param str wiki: A web page that is displayed as the wiki page for this module. (Default "")
         :param str manufacturer: The name of the manufacturer of this module (Default "")
         :param str icon: A URL pointing to an image to use for this module's icon (Default "")
-        :param bbUtil.dumbEmoji emoji: The emoji to use for this module's small icon (Default bbUtil.EMPTY_DUMBEMOJI)
+        :param lib.emojis.dumbEmoji emoji: The emoji to use for this module's small icon (Default lib.emojis.dumbEmoji.EMPTY)
         :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other modules of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard module (loaded in from bbData) or a custom spawned module (Default False)
         """
@@ -53,4 +56,4 @@ def fromDict(moduleDict : dict) -> bbArmourModule:
     return bbArmourModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], armour=moduleDict["armour"] if "armour" in moduleDict else 0,
                             value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
                             manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
-                            emoji=bbUtil.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else bbUtil.EMPTY_DUMBEMOJI, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)
+                            emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)

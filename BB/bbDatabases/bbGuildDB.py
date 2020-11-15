@@ -1,5 +1,9 @@
 from ..bbObjects import bbGuild
 from typing import List
+from . import bbBountyDB
+from ..bbConfig import bbData, bbConfig
+from .. import bbGlobals
+from ..logging import bbLogger
 
 
 class bbGuildDB:
@@ -103,7 +107,7 @@ class bbGuildDB:
         if self.guildIdExists(id):
             raise KeyError("Attempted to add a guild that already exists: " + id)
         # Create and return a bbGuild for the requested ID
-        self.guilds[id] = bbGuild.bbGuild(id)
+        self.guilds[id] = bbGuild.bbGuild(id, bbBountyDB.bbBountyDB(bbData.bountyFactions, bbConfig.maxBountiesPerFaction), bbGlobals.client.get_guild(id))
         return self.guilds[id]
 
     
@@ -131,7 +135,8 @@ class bbGuildDB:
         """Generate new stock for all shops belonging to the stored bbGuilds
         """
         for guild in self.guilds.values():
-            guild.shop.refreshStock()
+            if not guild.shopDisabled:
+                guild.shop.refreshStock()
 
     
     
@@ -162,10 +167,11 @@ class bbGuildDB:
 
 
 
-def fromDict(guildsDBDict : dict) -> bbGuildDB:
+def fromDict(guildsDBDict : dict, dbReload : bool = False) -> bbGuildDB:
     """Construct a bbGuildDB object from dictionary-serialised format; the reverse of bbGuildDB.todict()
 
     :param dict bountyDBDict: The dictionary representation of the bbGuildDB to create
+    :param bool dbReload: Whether or not this DB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
     :return: The new bbGuildDB
     :rtype: bbGuildDB
     """
@@ -175,5 +181,10 @@ def fromDict(guildsDBDict : dict) -> bbGuildDB:
     for id in guildsDBDict.keys():
         # Instance new bbGuilds for each ID, with the provided data
         # JSON stores properties as strings, so ids must be converted to int first.
-        newDB.addGuildObj(bbGuild.fromDict(int(id), guildsDBDict[id]))
+        try:
+            newDB.addGuildObj(bbGuild.fromDict(int(id), guildsDBDict[id], dbReload=dbReload))
+        # Ignore guilds that don't have a corresponding dcGuild
+        except bbGuild.NoneDCGuildObj:
+            bbLogger.log("bbGuildDB", "fromDict", "no corresponding discord guild found for ID " + id + ", guild removed from database",
+                 category="guildsDB", eventType="NULL_GLD")
     return newDB

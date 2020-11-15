@@ -1,14 +1,16 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
-from discord import Colour, Message, User, Member
-from ..scheduling import TimedTask
-from typing import Union
+from discord import Message, User, Member, Colour
+from typing import Union, List
     
 
 class ReactionSkinRegionPicker(ReactionMenu.SingleUserReactionMenu):
     """An unsaveable menu allowing users to choose autoskin layer indices that they want to provide.
     """
-    def __init__(self, msg : Message, owningUser : Union[User, Member], timeoutSeconds : int, numRegions=0, possibleRegions=[], titleTxt="Custom Skin Renderer", desc="", col=None, footerTxt="", img="", thumb="", icon=bbConfig.defaultShipSkinToolIcon, authorName=""):
+    def __init__(self, msg : Message, owningUser : Union[User, Member], timeoutSeconds : int,
+            numRegions : int = 0, possibleRegions : List[int] = [], titleTxt : str = "",
+            desc : str = "", col : Colour = Colour.default, footerTxt : str = "", img : str = "",
+            thumb : str = "", icon : str = bbConfig.defaultShipSkinToolIcon, authorName : str = ""):
         """
         :param discord.Message msg: the message where this menu is embedded
         :param owningUser: The user choosing skin layers
@@ -37,6 +39,8 @@ class ReactionSkinRegionPicker(ReactionMenu.SingleUserReactionMenu):
         
         if desc == "":
             desc = "This ship has **" + str(numRegions) + "** optional texture region" + ("" if numRegions == 1 else "s") + ".\nWhich regions would you like to change?"
+        if not titleTxt:
+            titleTxt = "Custom Skin Renderer"
 
 
         regionOptions = {bbConfig.spiralEmoji: ReactionMenu.DummyReactionMenuOption("Select all", bbConfig.spiralEmoji)}

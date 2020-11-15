@@ -4,7 +4,7 @@ from typing import List
 
 from .. import bbAliasable
 from abc import abstractmethod
-from ... import bbUtil
+from ... import lib
 
 class bbItem(bbAliasable.Aliasable):
     """A game item, with a value, a manufacturer, a wiki page, an icon, an emoji, and a tech level.
@@ -37,7 +37,10 @@ class bbItem(bbAliasable.Aliasable):
     :vartype builtIn: bool
     """
 
-    def __init__(self, name : str, aliases : List[str], value=0, wiki="", manufacturer="", icon="", emoji=bbUtil.EMPTY_DUMBEMOJI, techLevel=-1, builtIn=False):
+    def __init__(self, name : str, aliases : List[str], value : int = 0,
+            wiki : str = "", manufacturer : str = "", icon : str = "",
+            emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1,
+            builtIn : bool = False):
         """
         :param str name: The name of the item. Must be unique. (a model number is a good starting point)
         :param list[str] aliases: A list of alternative names this item may be referred to by.
@@ -45,7 +48,7 @@ class bbItem(bbAliasable.Aliasable):
         :param str wiki: A web page that is displayed as the wiki page for this item. (Default "")
         :param str manufacturer: The name of the manufacturer of this item (Default "")
         :param str icon: A URL pointing to an image to use for this item's icon (Default "")
-        :param bbUtil.dumbEmoji emoji: The emoji to use for this item's small icon (Default bbUtil.EMPTY_DUMBEMOJI)
+        :param lib.emojis.dumbEmoji emoji: The emoji to use for this item's small icon (Default lib.emojis.dumbEmoji.EMPTY)
         :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other items of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard item (loaded in from bbData) or a custom spawned item (Default False)
         """

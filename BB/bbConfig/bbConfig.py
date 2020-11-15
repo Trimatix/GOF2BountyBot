@@ -1,10 +1,11 @@
 # Typing imports
 from __future__ import annotations
 
-import math, random, pprint
-from ..bbUtil import dumbEmoji, EMPTY_DUMBEMOJI
+import math, random
+from ..lib.emojis import dumbEmoji, UninitializedDumbEmoji
 
 ##### UTIL #####
+
 
 # Number of decimal places to calculate itemTLSpawnChanceForShopTL values to
 tl_resolution = 3
@@ -18,6 +19,18 @@ def truncToRes(num : float) -> float:
     :rtype: float
     """
     return math.trunc(num * math.pow(10, tl_resolution)) / math.pow(10, tl_resolution)
+
+
+
+##### COMMANDS #####
+
+# List of module names from BB.commands to import
+includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_bounties", "usr_loadout", "usr_economy",
+                            "admn_channels", "admn_misc",
+                            "dev_misc", "dev_channels", "dev_bounties", "dev_items", "dev_skins")
+
+maxCommandsPerHelpPage = 5
+helpEmbedTimeout = {"minutes": 5}
 
 
 
@@ -311,13 +324,15 @@ spiralEmoji = dumbEmoji(unicode="🌀")
 defaultErrEmoji = dumbEmoji(unicode="❓")
 defaultAcceptEmoji = dumbEmoji(unicode="👍")
 defaultRejectEmoji = dumbEmoji(unicode="👎")
+defaultNextEmoji = dumbEmoji(unicode='⏩')
+defaultPreviousEmoji = dumbEmoji(unicode='⏪')
 
 # Path to the directory to use when temporarily saving textures downloaded from showme commands.
 tempRendersDir = "rendering-temp"
 
 # Default graphics to use for ship skin application tool items
 defaultShipSkinToolIcon = "https://cdn.discordapp.com/attachments/700683544103747594/723472334362771536/documents.png"
-defaultShipSkinToolEmoji = EMPTY_DUMBEMOJI # client is not yet initialized, move this to bountybot.py
+defaultShipSkinToolEmoji = UninitializedDumbEmoji(777166858516299786)
 
 def shipSkinValueForTL(averageTL : int) -> int:
     """Calculate how skins are valued with respect to their average compatible ship techlevel.
@@ -338,13 +353,16 @@ maxConcurrentRenders = 1
 # discord user IDs of all developers
 developers = [188618589102669826, 448491245296418817]
 
-# titles to give each type of user when reporting error messages etc
-devTitle = "officer"
-adminTitle = "commander"
-userTitle = "pilot"
+# Names to assign to each access level
+accessLevelNames = ["User", "Administrator", "Developer"]
 
-# Servers where bountyBot commands are disabled. Currently this is just the emoji servers:
-disabledServers = [723704980246233219, 723702782640783361, 723708988830515231, 723704665560055848, 723705817764986900, 723703454635393056, 723708655031156742, 723706906517962814, 723704087962583131, 723704350131748935]
+# The number of registerable command access levels.
+# E.g I use 3 to represent 0=user, 1=admin, 2=dev
+# TODO: Add a fourth, mod commands, with an admin-assignable role
+numCommandAccessLevels = len(accessLevelNames)
+
+# titles to give each type of user when reporting error messages etc
+accessLevelTitles = ["pilot", "commander", "officer"]
 
 
 
@@ -373,6 +391,8 @@ userAlertsIDsDefaults = {   "bounties_new": False,
                             "system_updates_minor": False,
                             "system_misc": False}
 
+homeGuildTransferCooldown = {"weeks":1}
+
 
 
 ##### REACTION MENUS #####
@@ -384,3 +404,4 @@ expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
 skinApplyConfirmTimeoutSeconds = 60
+homeGuildTransferConfirmTimeoutSeconds = 60

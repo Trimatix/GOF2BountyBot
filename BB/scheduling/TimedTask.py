@@ -1,8 +1,9 @@
 # Typing imports
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import inspect
+from types import FunctionType
 
 
 class TimedTask:
@@ -19,7 +20,7 @@ class TimedTask:
     :var expiryDelta: The timedelta to add to issueTime, to find the expiryTime.
     :vartype expiryDelta: datetime.timedelta
     :var expiryFunction: The function to call once expiryTime has been reached/surpassed.
-    :vartype expiryFunction: function
+    :vartype expiryFunction: FunctionType
     :var hasExpiryFunction: Whether or not the task has an expiry function to call
     :vartype hasExpiryFunction: bool
     :var expiryFunctionArgs: The data to pass to the expiryFunction. There is no type requirement, but a dictionary is recommended as a close representation of KWArgs.
@@ -33,7 +34,8 @@ class TimedTask:
     :vartype asyncExpiryFunction: bool
     """
 
-    def __init__(self, issueTime=None, expiryTime=None, expiryDelta=None, expiryFunction=None, expiryFunctionArgs={}, autoReschedule=False):
+    def __init__(self, issueTime : datetime = None, expiryTime : datetime = None, expiryDelta : timedelta = None,
+            expiryFunction : FunctionType = None, expiryFunctionArgs={}, autoReschedule : bool = False):
         """
         :param datetime.datetime issueTime: The datetime when this task was created. (Default now)
         :param datetime.datetime expiryTime: The datetime when this task should expire. (Default None)
@@ -155,7 +157,7 @@ class TimedTask:
 
 
     
-    async def doExpiryCheck(self, callExpiryFunc=True) -> bool:
+    async def doExpiryCheck(self, callExpiryFunc : bool = True) -> bool:
         """Function to be called regularly, that handles the expiry of this task.
         Handles calling of the task's expiry function if specified, and rescheduling of the task if specified.
 
@@ -174,7 +176,7 @@ class TimedTask:
 
     
     
-    async def reschedule(self, expiryTime=None, expiryDelta=None):
+    async def reschedule(self, expiryTime : datetime = None, expiryDelta : timedelta = None):
         """Reschedule this task, with the timedelta given/calculated on the task's creation, or to a given expiryTime/Delta.
         Rescheduling will update the task's issueTime to now. TODO: A firstIssueTime may be useful in the future to represent creation time.
         Giving an expiryTime or expiryDelta will not update the task's stored expiryDelta. I.e, if the task is rescheduled again without giving an expiryDelta,
@@ -193,7 +195,7 @@ class TimedTask:
 
 
     
-    async def forceExpire(self, callExpiryFunc=True):
+    async def forceExpire(self, callExpiryFunc : bool = True):
         """Force the expiry of this task.
         Handles calling of this task's expiryFunction, and rescheduling if specified. Set's the task's expiryTime to now.
 
@@ -205,6 +207,9 @@ class TimedTask:
         # Call expiryFunction and reschedule if specified
         if callExpiryFunc and self.hasExpiryFunction:
             expiryFuncResults = await self.callExpiryFunction()
+        else:
+            expiryFuncResults = None
+
         if self.autoReschedule:
             await self.reschedule()
         # Mark for removal if not rescheduled

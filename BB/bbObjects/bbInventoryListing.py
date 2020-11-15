@@ -7,7 +7,7 @@ class bbInventoryListing():
     :vartype count: int
     """
 
-    def __init__(self, item, count=0):
+    def __init__(self, item, count : int = 0):
         """
         :param item: The item to store
         :param int quantity: The amount of item to store (Default 0)
