@@ -29,6 +29,9 @@ includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_
                             "admn_channels", "admn_misc",
                             "dev_misc", "dev_channels", "dev_bounties", "dev_items", "dev_skins")
 
+maxCommandsPerHelpPage = 5
+helpEmbedTimeout = {"minutes": 5}
+
 
 
 ##### DUELS #####
@@ -321,6 +324,8 @@ spiralEmoji = dumbEmoji(unicode="🌀")
 defaultErrEmoji = dumbEmoji(unicode="❓")
 defaultAcceptEmoji = dumbEmoji(unicode="👍")
 defaultRejectEmoji = dumbEmoji(unicode="👎")
+defaultNextEmoji = dumbEmoji(unicode='⏩')
+defaultPreviousEmoji = dumbEmoji(unicode='⏪')
 
 # Path to the directory to use when temporarily saving textures downloaded from showme commands.
 tempRendersDir = "rendering-temp"
@@ -348,10 +353,13 @@ maxConcurrentRenders = 1
 # discord user IDs of all developers
 developers = [188618589102669826, 448491245296418817]
 
+# Names to assign to each access level
+accessLevelNames = ["User", "Administrator", "Developer"]
+
 # The number of registerable command access levels.
 # E.g I use 3 to represent 0=user, 1=admin, 2=dev
 # TODO: Add a fourth, mod commands, with an admin-assignable role
-numCommandAccessLevels = 3
+numCommandAccessLevels = len(accessLevelNames)
 
 # titles to give each type of user when reporting error messages etc
 accessLevelTitles = ["pilot", "commander", "officer"]
