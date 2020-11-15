@@ -190,7 +190,7 @@ async def dummy_command(message : discord.Message, args : str, isDM : bool):
     """
     pass
 
-bbCommands.register("cancel", dummy_command, 0, allowDM=True)
+bbCommands.register("cancel", dummy_command, 0, allowDM=True, noHelp=True)
 
 
 
@@ -398,6 +398,12 @@ async def on_ready():
                 guild.removeBountyBoardChannel()
             else:
                 await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
+
+    # Set help embed thumbnails
+    for levelSection in bbCommands.helpSectionEmbeds:
+        for helpSection in levelSection.values():
+            for embed in helpSection:
+                embed.set_thumbnail(url=bbGlobals.client.user.avatar_url_as(size=64))
 
     # for currentUser in bbGlobals.usersDB.users.values():
     #     currentUser.validateLoadout()

@@ -6,6 +6,9 @@ from ..bbObjects.items import bbShip
 from .. import lib, bbGlobals
 
 
+bbCommands.addHelpSection(2, "skins")
+
+
 async def dev_cmd_addSkin(message : discord.Message, args : str, isDM : bool):
     """Make the specified ship compatible with the specified skin.
 
@@ -62,7 +65,7 @@ async def dev_cmd_addSkin(message : discord.Message, args : str, isDM : bool):
     else:
         await message.channel.send(":x: Please provide a skin, prefaced by a `+`!")
 
-bbCommands.register("addSkin", dev_cmd_addSkin, 2)
+bbCommands.register("addSkin", dev_cmd_addSkin, 2, helpSection="skins", useDoc=True)
 
 
 async def dev_cmd_delSkin(message : discord.Message, args : str, isDM : bool):
@@ -119,7 +122,7 @@ async def dev_cmd_delSkin(message : discord.Message, args : str, isDM : bool):
     else:
         await message.channel.send(":x: Please provide a skin, prefaced by a `+`!")
 
-bbCommands.register("delSkin", dev_cmd_delSkin, 2)
+bbCommands.register("delSkin", dev_cmd_delSkin, 2, helpSection="skins", useDoc=True)
 
 
 async def dev_cmd_makeSkin(message : discord.Message, args : str, isDM : bool):
@@ -176,7 +179,7 @@ async def dev_cmd_makeSkin(message : discord.Message, args : str, isDM : bool):
     else:
         await message.channel.send(":x: Please provide a skin, prefaced by a `+`!")
 
-bbCommands.register("makeSkin", dev_cmd_makeSkin, 2)
+bbCommands.register("makeSkin", dev_cmd_makeSkin, 2, helpSection="skins", useDoc=True)
 
 
 async def dev_cmd_applySkin(message : discord.Message, args : str, isDM : bool):
@@ -211,7 +214,7 @@ async def dev_cmd_applySkin(message : discord.Message, args : str, isDM : bool):
             activeShip.applySkin(bbData.builtInShipSkins[skin])
             await message.channel.send("Done!")
 
-bbCommands.register("applySkin", dev_cmd_applySkin, 2)
+bbCommands.register("applySkin", dev_cmd_applySkin, 2, helpSection="skins", useDoc=True)
 
 
 async def dev_cmd_unapplySkin(message : discord.Message, args : str, isDM : bool):
@@ -233,4 +236,4 @@ async def dev_cmd_unapplySkin(message : discord.Message, args : str, isDM : bool
         activeShip.isSkinned = False
         await message.channel.send("Done!")
 
-bbCommands.register("unApplySkin", dev_cmd_unapplySkin, 2)
+bbCommands.register("unApplySkin", dev_cmd_unapplySkin, 2, helpSection="skins", useDoc=True)

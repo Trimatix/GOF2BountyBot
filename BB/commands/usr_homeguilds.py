@@ -7,6 +7,9 @@ from .. import bbGlobals, lib
 from ..bbConfig import bbConfig
 
 
+bbCommands.addHelpSection(0, "home servers")
+
+
 async def cmd_transfer(message : discord.Message, args : str, isDM : bool):
     """Transfer the calling user's home guild to the guild where the message was sent.
 
@@ -45,7 +48,7 @@ async def cmd_transfer(message : discord.Message, args : str, isDM : bool):
             else:
                 await message.channel.send("🛑 Home guild transfer cancelled.")
 
-bbCommands.register("transfer", cmd_transfer, 0, allowDM=False)
+bbCommands.register("transfer", cmd_transfer, 0, allowDM=False, helpSection="home servers", signatureStr="**transfer**", shortHelp="Change your home server. This command has a long cooldown!", longHelp="Transfer your home server to the one where you sent this command. You will be asked for confirmation first, since this command has a long cooldown!")
 
 
 async def cmd_home(message : discord.Message, args : str, isDM : bool):
@@ -65,4 +68,4 @@ async def cmd_home(message : discord.Message, args : str, isDM : bool):
             return
     await message.channel.send("🌑 Your home server has not yet been set.\nSet your home server by using the shop or bounty board, or with the `" + bbConfig.commandPrefix + "transfer` command.")
 
-bbCommands.register("home", cmd_home, 0, allowDM=True)
+bbCommands.register("home", cmd_home, 0, allowDM=True, helpSection="home servers", signatureStr="**home**", shortHelp="Get the name of your home server, if one is set.", longHelp="Get the name of your home server, if one is set. This is the the only server where you may use certain commands, such as buying items from the shop, or fighting bounties.")

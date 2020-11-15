@@ -4,6 +4,9 @@ from . import commandsDB as bbCommands
 from .. import bbGlobals
 
 
+bbCommands.addHelpSection(2, "channels")
+
+
 async def dev_cmd_has_announce(message : discord.Message, args : str, isDM : bool):
     """developer command printing whether or not the current guild has an announcements channel set
 
@@ -14,7 +17,7 @@ async def dev_cmd_has_announce(message : discord.Message, args : str, isDM : boo
     guild = bbGlobals.guildsDB.getGuild(message.guild.id)
     await message.channel.send(":x: Unknown guild!" if guild is None else guild.hasAnnounceChannel())
 
-bbCommands.register("has-announce", dev_cmd_has_announce, 2, allowDM=False)
+bbCommands.register("has-announce", dev_cmd_has_announce, 2, allowDM=False, helpSection="channels", useDoc=True)
 
 
 async def dev_cmd_get_announce(message : discord.Message, args : str, isDM : bool):
@@ -26,7 +29,7 @@ async def dev_cmd_get_announce(message : discord.Message, args : str, isDM : boo
     """
     await message.channel.send("<#" + str(bbGlobals.guildsDB.getGuild(message.guild.id).getAnnounceChannel().id) + ">")
 
-bbCommands.register("get-announce", dev_cmd_get_announce, 2, allowDM=False)
+bbCommands.register("get-announce", dev_cmd_get_announce, 2, allowDM=False, helpSection="channels", useDoc=True)
 
 
 async def dev_cmd_has_play(message : discord.Message, args : str, isDM : bool):
@@ -39,7 +42,7 @@ async def dev_cmd_has_play(message : discord.Message, args : str, isDM : bool):
     guild = bbGlobals.guildsDB.getGuild(message.guild.id)
     await message.channel.send(":x: Unknown guild!" if guild is None else guild.hasPlayChannel())
 
-bbCommands.register("has-play", dev_cmd_has_play, 2, allowDM=False)
+bbCommands.register("has-play", dev_cmd_has_play, 2, allowDM=False, helpSection="channels", useDoc=True)
 
 
 async def dev_cmd_get_play(message : discord.Message, args : str, isDM : bool):
@@ -51,4 +54,4 @@ async def dev_cmd_get_play(message : discord.Message, args : str, isDM : bool):
     """
     await message.channel.send("<#" + str(bbGlobals.guildsDB.getGuild(message.guild.id).getPlayChannel().id) + ">")
 
-bbCommands.register("get-play", dev_cmd_get_play, 2, allowDM=False)
+bbCommands.register("get-play", dev_cmd_get_play, 2, allowDM=False, helpSection="channels", useDoc=True)
