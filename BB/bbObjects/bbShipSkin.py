@@ -20,7 +20,7 @@ def _saveShip(ship):
 
 
 class bbShipSkin:
-    def __init__(self, name : str, textureRegions : int, shipRenders : Dict[str, str], path : str, designer : str, wiki=""):
+    def __init__(self, name : str, textureRegions : int, shipRenders : Dict[str, str], path : str, designer : str, wiki : str = ""):
         self.name = name
         self.textureRegions = textureRegions
         self.compatibleShips = list(shipRenders.keys())

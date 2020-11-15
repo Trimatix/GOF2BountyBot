@@ -2,7 +2,9 @@ from . import ReactionMenu
 from ..bbConfig import bbConfig
 from ..bbObjects.items import bbItem
 from ..bbObjects import bbInventory
-from discord import Message
+from discord import Message, Colour, Member, Role
+from .. import lib
+from ..scheduling import TimedTask
 
 # The maximum number of bbItems displayable per menu page
 maxItemsPerPage = len(bbConfig.defaultMenuEmojis)
@@ -16,7 +18,7 @@ class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
     :vartype item: bbItem
     """
 
-    def __init__(self, item : bbItem.bbItem, menu : ReactionMenu.ReactionMenu, emoji=None, name=None):
+    def __init__(self, item : bbItem.bbItem, menu : ReactionMenu.ReactionMenu, emoji : lib.emojis.dumbEmoji = None, name : str = None):
         """
         :param bbItem item: The bbItem that this option represents
         :param ReactionMenu menu: The ReactionMenu where this option is active
@@ -64,7 +66,10 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
     :vartype page: int
     """
 
-    def __init__(self, msg : Message, bbInventory : bbInventory.bbInventory, itemsPerPage=maxItemsPerPage, titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):        
+    def __init__(self, msg : Message, bbInventory : bbInventory.bbInventory, itemsPerPage : int = maxItemsPerPage,
+            titleTxt : str = "", desc : str = "", col : Colour = None, timeout : TimedTask.TimedTask = None,
+            footerTxt : str = "", img : str = "", thumb : str = "", icon : str = "", authorName : str = "",
+            targetMember : Member = None, targetRole : Role = None):        
         """
         :param discord.Message msg: The discord message where this menu should be embedded
         :param bbInventory bbInventory: The bbInventory to display and select from (TODO: Rename)

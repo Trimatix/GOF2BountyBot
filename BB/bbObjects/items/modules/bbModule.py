@@ -29,8 +29,13 @@ class bbModule(bbItem):
     :vartype handlingMultiplier: float
     """
 
-    def __init__(self, name: str, aliases : List[str], armour=0, armourMultiplier=1.0, shield=0, shieldMultiplier=1.0, dps=0,
-                    dpsMultiplier=1.0, cargo=0, cargoMultiplier=1.0, handling=0, handlingMultiplier=1.0, value=0, wiki="", manufacturer="", icon="", emoji=lib.emojis.dumbEmoji.EMPTY, techLevel=-1, builtIn=False):
+    def __init__(self, name: str, aliases : List[str], armour : int = 0,
+            armourMultiplier : float = 1.0, shield : int = 0, shieldMultiplier : float = 1.0,
+            dps : int = 0, dpsMultiplier : float = 1.0, cargo : int = 0,
+            cargoMultiplier : float = 1.0, handling : int = 0, handlingMultiplier : float = 1.0,
+            value : int = 0, wiki : str = "", manufacturer : str = "", icon : str = "",
+            emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1,
+            builtIn : bool = False):
         """
         :param str name: The name of the module. Must be unique. (a model number is a good starting point)
         :param list[str] aliases: A list of alternative names this module may be referred to by.
