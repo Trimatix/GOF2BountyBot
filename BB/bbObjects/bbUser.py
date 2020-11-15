@@ -76,6 +76,8 @@ class bbUser:
     :vartype dailyBountyWinsReset: datetime.datetime
     :var pollOwned: Whether or not this user has a running ReactionPollMenu
     :vartype pollOwned: bool
+    :var helpMenuOwned: Whether or not this user has a running reaction help menu
+    :vartype helpMenuOwned: bool
     :var homeGuildID: The id of this user's 'home guild' - the only guild from which they may use several commands e.g buy and check.
     :vartype homeGuildID: int
     :var guildTransferCooldownEnd: A timestamp after which this user is allowed to transfer their homeGuildID.
@@ -202,6 +204,7 @@ class bbUser:
         self.dailyBountyWinsReset = dailyBountyWinsReset
 
         self.pollOwned = pollOwned
+        self.helpMenuOwned = False
 
         self.homeGuildID = homeGuildID
         self.guildTransferCooldownEnd = guildTransferCooldownEnd
