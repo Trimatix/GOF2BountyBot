@@ -12,6 +12,7 @@ from ..bbObjects.items import bbShip
 from ..logging import bbLogger
 from ..shipRenderer import shipRenderer
 
+from . import util_help
 
 CWD = os.getcwd()
 
@@ -23,35 +24,9 @@ async def admin_cmd_admin_help(message : discord.Message, args : str, isDM : boo
     :param str args: ignored
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    sendChannel = None
-    sendDM = False
+    await util_help.util_autohelp(message, args, isDM, 1)
 
-    if message.author.dm_channel is None:
-        await message.author.create_dm()
-    if message.author.dm_channel is None:
-        sendChannel = message.channel
-    else:
-        sendChannel = message.author.dm_channel
-        sendDM = True
-
-    helpEmbed = lib.discordUtil.makeEmbed(titleTxt="BB Administrator Commands",
-                          thumb=bbGlobals.client.user.avatar_url_as(size=64))
-    for section in bbData.adminHelpDict.keys():
-        helpEmbed.add_field(name="‎", value="__" +
-                            section + "__", inline=False)
-        for currentCommand in bbData.adminHelpDict[section].values():
-            helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
-                "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
-
-    try:
-        await sendChannel.send(bbData.adminHelpIntro.replace("$COMMANDPREFIX$", bbConfig.commandPrefix), embed=helpEmbed)
-    except discord.Forbidden:
-        await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
-        return
-    if sendDM:
-        await message.add_reaction(bbConfig.dmSentEmoji.sendable)
-
-bbCommands.register("admin-help", admin_cmd_admin_help, 1)
+bbCommands.register("admin-help", admin_cmd_admin_help, 1, signatureStr="**admin-help** *[page number, section or command]*", shortHelp="Display information about admin-only commands.\nGive a specific command for detailed info about it, or give a page number or give a section name for brief info.", longHelp="Display information about admin-only commands.\nGive a specific command for detailed info about it, or give a page number or give a section name for brief info about a set of commands. These are the currently valid section names:\n- Channels\n- Miscellaneous")
 
 
 async def admin_cmd_config(message : discord.Message, args : str, isDM : bool):
@@ -107,8 +82,7 @@ async def admin_cmd_config(message : discord.Message, args : str, isDM : bool):
     else:
         await message.channel.send(":x: Unknown setting!")
 
-
-bbCommands.register("config", admin_cmd_config, 1)
+bbCommands.register("config", admin_cmd_config, 1, signatureStr="**config <setting> <value>**", shortHelp="Set various settings for how bountybot will function in this server.", longHelp="Set various settings for how bountybot will function in this server. Currently, `setting` can be either 'bounties' or 'shop', and `value` can either 'enable' or 'disable', all with a few handy aliases. This command is lets you enable or disable large amounts of functionality all together.")
 
 
 async def admin_cmd_del_reaction_menu(message : discord.Message, args : str, isDM : bool):
@@ -124,8 +98,7 @@ async def admin_cmd_del_reaction_menu(message : discord.Message, args : str, isD
     else:
         await message.channel.send(":x: Unrecognised reaction menu!")
 
-
-bbCommands.register("del-reaction-menu", admin_cmd_del_reaction_menu, 1)
+bbCommands.register("del-reaction-menu", admin_cmd_del_reaction_menu, 1, signatureStr="**del-reaction-menu <id>**", longHelp="Remove the specified reaction menu. You can also just delete the message, if you have permissions.\nTo get the ID of a reaction menu, enable discord's developer mode, right click on the menu, and click Copy ID.")
 
 
 async def admin_cmd_set_notify_role(message : discord.Message, args : str, isDM : bool):
@@ -165,7 +138,7 @@ async def admin_cmd_set_notify_role(message : discord.Message, args : str, isDM 
         requestedBBGuild.setUserAlertRoleID(alertID, requestedRole.id)
         await message.channel.send(":white_check_mark: Role set for " + UserAlerts.userAlertsTypesNames[alertType] + " notifications!")
 
-bbCommands.register("set-notify-role", admin_cmd_set_notify_role, 1)
+bbCommands.register("set-notify-role", admin_cmd_set_notify_role, 1, signatureStr="**set-notify-role <type>** *[alert]* **<role>**", shortHelp="Set a role to ping when various events occur. For valid notification types, see `$COMMANDPREFIX$help notify`.", longHelp="Set a role to ping when various events occur. **<type>** and/or *[alert]* must specify a type of notification. **<role>** can be either a role mention, or a role ID. For valid notification types, see `$COMMANDPREFIX$help notify`.")
 
 
 async def admin_cmd_remove_notify_role(message : discord.Message, args : str, isDM : bool):
@@ -192,7 +165,7 @@ async def admin_cmd_remove_notify_role(message : discord.Message, args : str, is
         requestedBBGuild.removeUserAlertRoleID(alertID)
         await message.channel.send(":white_check_mark: Role pings disabled for " + UserAlerts.userAlertsTypesNames[alertType] + " notifications.")
 
-bbCommands.register("remove-notify-role", admin_cmd_remove_notify_role, 1)
+bbCommands.register("remove-notify-role", admin_cmd_remove_notify_role, 1, signatureStr="**remove-notify-role <type>** *[alert]*", shortHelp="Disable role pings for various events. For valid notification types, see `$COMMANDPREFIX$help notify`.", longHelp="Disable role pings for various events. **<type>** and/or *[alert]* must specify a type of notification. For valid notification types, see `$COMMANDPREFIX$help notify`.")
 
 
 async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM : bool):
@@ -363,7 +336,7 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
-bbCommands.register("make-role-menu", admin_cmd_make_role_menu, 1, forceKeepArgsCasing=True)
+bbCommands.register("make-role-menu", admin_cmd_make_role_menu, 1, forceKeepArgsCasing=True, signatureStr="**make-role-menu** *<title>*\n**<option1 emoji> <@option1 role>**\n...    ...\n*[kwargs]*", shortHelp="Create a reaction role menu. Each option must be on its own new line, as an emoji, followed by a space, followed by a mention of the role to grant.", longHelp="Create a reaction role menu. Each option must be on its own new line, as an emoji, followed by a space, followed by a mention of the role to grant. The `title` is displayed at the top of the meny and is optional, to exclude your title simply give a new line. \n__kwargs__\n- Give target=@role mention to limit use of the menu only to users with the specified role.\n- You may set expiry time for your menu, with each time division on a new line. Acceptable time divisions are: seconds, minutes, hours, days. To force the menu to never expire, give **all** time divisions as `off`.(default: minutes=5)")
 
 
 async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool):
@@ -543,5 +516,5 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
     return
     
 
-bbCommands.register("showmehd", admin_cmd_showmeHD, 1, allowDM=False)
-bbCommands.register("showmehd", admin_cmd_showmeHD, 2, allowDM=True)
+bbCommands.register("showmehd", admin_cmd_showmeHD, 1, allowDM=False, signatureStr="**showmeHD <ship-name>** *[-full]*", shortHelp="Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME.", longHelp="You must attach a 2048x2048 jpg to your message. Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME. Give `-full` to disable autoskin and render exactly your provided image, with no additional texturing.")
+bbCommands.register("showmehd", admin_cmd_showmeHD, 2, allowDM=True, signatureStr="**showmeHD <ship-name>** *[-full]*", shortHelp="Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME.", longHelp="You must attach a 2048x2048 jpg to your message. Render your specified ship with the given skin, in full HD 1080p! ⚠ WARNING: THIS WILL TAKE A LONG TIME. Give `-full` to disable autoskin and render exactly your provided image, with no additional texturing.")
