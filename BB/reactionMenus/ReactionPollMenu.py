@@ -6,9 +6,7 @@ from datetime import datetime
 from ..scheduling import TimedTask
 from ..logging import bbLogger
 from typing import Dict, Union, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ..bbObjects import bbUser
+from ..bbObjects import bbUser
 
 
 async def printAndExpirePollResults(msgID : int):
