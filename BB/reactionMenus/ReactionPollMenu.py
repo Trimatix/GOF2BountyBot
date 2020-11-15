@@ -1,11 +1,14 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from .. import bbGlobals, lib
-from discord import Colour, Emoji, PartialEmoji, Message, Embed
+from discord import Colour, Emoji, PartialEmoji, Message, Embed, User, Member, Role
 from datetime import datetime
 from ..scheduling import TimedTask
 from ..logging import bbLogger
-from typing import Dict
+from typing import Dict, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..bbObjects import bbUser
 
 
 async def printAndExpirePollResults(msgID : int):
@@ -106,7 +109,10 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
     :var owningBBUser: The bbUser who started the poll
     :vartype owningBBUser: bbUser
     """
-    def __init__(self, msg : Message, pollOptions : dict, timeout : TimedTask.TimedTask, pollStarter=None, multipleChoice=False, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None, owningBBUser=None):
+    def __init__(self, msg : Message, pollOptions : dict, timeout : TimedTask.TimedTask, pollStarter : Union[User, Member] = None,
+            multipleChoice : bool = False, titleTxt : str = "", desc : str = "", col : Colour = Colour.default, footerTxt : str = "",
+            img : str = "", thumb : str = "", icon : str = "", authorName : str = "", targetMember : Member = None,
+            targetRole : Role = None, owningBBUser : bbUser.bbUser = None):
         """
         :param discord.Message msg: the message where this menu is embedded
         :param options: A dictionary storing all of the poll options. Poll option behaviour functions are not called. TODO: Add reactionAdded/Removed overloads that just return and dont check anything
