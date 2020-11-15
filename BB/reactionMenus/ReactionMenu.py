@@ -1,12 +1,14 @@
 # TODO: Write a targettable ReactionMenuOption subclass, that implements targetMember and targetRole on a per-option basis. Use this to write ReactionRolePickers with multipleChoice=False!
 
+from BB.scheduling.TimedTask import TimedTask
 import inspect
-from discord import Embed, Colour, NotFound, HTTPException, Forbidden, Member, User, Message
+from discord import Embed, Colour, NotFound, HTTPException, Forbidden, Member, User, Message, Role
 from ..bbConfig import bbConfig
 from .. import bbGlobals, lib
 from abc import abstractmethod
-from typing import Union
+from typing import Union, Dict, List
 import asyncio
+from types import FunctionType
 
 
 async def deleteReactionMenu(menuID : int):
@@ -66,9 +68,9 @@ class ReactionMenuOption:
     :var emoji: The emoji that a user must react with to trigger this option
     :vartype emoji: lib.emojis.dumbEmoji
     :var addFunc: The function to call when this option is added by a user
-    :vartype addFunc: function
+    :vartype addFunc: FunctionType
     :var removeFunc: The function to call when this option is removed by a user
-    :vartype removeFunc: function
+    :vartype removeFunc: FunctionType
     :var addArgs: The arguments to pass to addFunc. No type checking is done on this parameter, but a dict is recommended as a close replacement for keyword args.
     :var removeArgs: The arguments to pass to removeFunc.
     :var addIsCoroutine: Whether or not addFuc is a coroutine and must be awaited
@@ -85,7 +87,7 @@ class ReactionMenuOption:
     :vartype removeHasArgs: bool
     """
 
-    def __init__(self, name : str, emoji : lib.emojis.dumbEmoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
+    def __init__(self, name : str, emoji : lib.emojis.dumbEmoji, addFunc : FunctionType = None, addArgs=None, removeFunc : FunctionType = None, removeArgs=None):
         """
         :param str name: The name of this option, as displayed in the menu embed.
         :param lib.emojis.dumbEmoji emoji: The emoji that a user must react with to trigger this option
@@ -188,7 +190,7 @@ class NonSaveableReactionMenuOption(ReactionMenuOption):
     Instead, inherit directly from ReactionMenuOption or another suitable subclass that is not marked as unsaveable.
     """
 
-    def __init__(self, name : str, emoji : lib.emojis.dumbEmoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
+    def __init__(self, name : str, emoji : lib.emojis.dumbEmoji, addFunc : FunctionType = None, addArgs=None, removeFunc : FunctionType = None, removeArgs=None):
         """
         :param str name: The name of this option, as displayed in the menu embed.
         :param lib.emojis.dumbEmoji emoji: The emoji that a user must react with to trigger this option
@@ -288,8 +290,10 @@ class ReactionMenu:
     """
     saveable = False
 
-    def __init__(self, msg : Message, options={}, 
-                    titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+    def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, 
+                    titleTxt : str = "", desc : str ="", col : Colour = Colour.default, timeout : TimedTask = None,
+                    footerTxt : str = "", img : str = "", thumb : str = "", icon : str = "",
+                    authorName : str = "", targetMember : Member = None, targetRole : Role = None):
         """
         :param discord.Message msg: the message where this menu is embedded
         :param options: A dictionary storing all of the menu's options and their behaviour (Default {})
@@ -500,8 +504,9 @@ class CancellableReactionMenu(ReactionMenu):
     :var cancelEmoji: The emoji used for the menu's cancel button.
     :vartype cancelEmoji: lib.emojis.dumbEmoji
     """
-    def __init__(self, msg : Message, options={}, cancelEmoji=bbConfig.defaultCancelEmoji,
-                    titleTxt="", desc="", col=Embed.Empty, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+    def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, cancelEmoji : lib.emojis.dumbEmoji = bbConfig.defaultCancelEmoji,
+                    titleTxt : str = "", desc : str = "", col : Colour = Colour.default, timeout : TimedTask = None, footerTxt : str = "", img : str = "", thumb : str = "",
+                    icon : str = "", authorName : str = "", targetMember : Member = None, targetRole : Role = None):
         """
         :param discord.Message msg: the message where this menu is embedded
         :param options: A dictionary storing all of the menu's options and their behaviour (Default {})
@@ -545,8 +550,10 @@ class SingleUserReactionMenu(ReactionMenu):
     """
     An in-place menu solution
     """
-    def __init__(self, msg : Message, targetMember : Union[Member, User], timeoutSeconds : int, options={}, returnTriggers=[], 
-                    titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName=""):
+    def __init__(self, msg : Message, targetMember : Union[Member, User], timeoutSeconds : int,
+                    options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, returnTriggers : List[lib.emojis.dumbEmoji] = [], 
+                    titleTxt : str = "", desc : str = "", col : Colour = Colour.default, footerTxt : str = "", img : str = "",
+                    thumb : str = "", icon : str = "", authorName : str = ""):
         """
         :param returnTriggers: List of menu options that trigger the returning of the menu
         :type returnTriggers: List[lib.emojis.dumbEmoji]

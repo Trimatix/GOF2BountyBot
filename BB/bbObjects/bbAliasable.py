@@ -16,7 +16,7 @@ class Aliasable (ABC):
     :vartype aliases: list[str]
     """
 
-    def __init__(self, name : str, aliases : List[str], forceAllowEmpty=False):
+    def __init__(self, name : str, aliases : List[str], forceAllowEmpty : bool = False):
         """
         :param str name: The main identifier for the object
         :param list[str] aliases: A list of alternative identifiers for the object

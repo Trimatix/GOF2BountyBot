@@ -14,7 +14,8 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
     The manufacturer is set to the skin designer.
     This tool is single use. If a calling user is given, the tool is removed from that user's inventory after use.
     """
-    def __init__(self, shipSkin : bbShipSkin, value=0, wiki="", icon=bbConfig.defaultShipSkinToolIcon, emoji=None, techLevel=-1, builtIn=False):
+    def __init__(self, shipSkin : bbShipSkin, value : int = 0, wiki : str = "", icon : str = bbConfig.defaultShipSkinToolIcon,
+            emoji : lib.emojis.dumbEmoji = None, techLevel : int = -1, builtIn : bool = False):
         """
         :param bbShipSkin shipSkin: The skin that this tool applies.
         :param int value: The number of credits that this item can be bought/sold for at a shop. (Default 0)

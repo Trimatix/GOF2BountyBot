@@ -1,7 +1,7 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from .. import bbGlobals, lib
-from discord import Colour, Message, Embed
+from discord import Colour, Message, Embed, Member, Role
 from datetime import datetime
 from ..scheduling import TimedTask
 from..bbObjects.battles import DuelRequest
@@ -14,7 +14,11 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
     :var duelChallenge: The DuelRequest that this menu controls
     :vartype duelChallenge: DuelRequest
     """
-    def __init__(self, msg : Message, duelChallenge : DuelRequest, titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/crossed-swords_2694.png", authorName="", targetMember=None, targetRole=None):
+    def __init__(self, msg : Message, duelChallenge : DuelRequest, titleTxt : str = "", desc : str = "",
+            col : Colour = None, timeout : TimedTask.TimedTask = None,
+            footerTxt : str = "", img : str = "", thumb : str = "",
+            icon : str = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/crossed-swords_2694.png",
+            authorName : str = "", targetMember : Member = None, targetRole : Role = None):
         """
         :param discord.Message msg: The discord message where this menu should be embedded
         :param DuelRequest duelChallenge: The DuelRequest that this menu controls

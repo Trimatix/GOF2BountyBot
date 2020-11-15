@@ -28,7 +28,8 @@ class System (bbAliasable.Aliasable):
     :vartype hasTechLevel: bool
     """
 
-    def __init__(self, name : str, faction : str, neighbours : List[str], security : int, coordinates : Tuple[int, int], aliases=[], wiki="", techLevel=-1):
+    def __init__(self, name : str, faction : str, neighbours : List[str], security : int,
+            coordinates : Tuple[int, int], aliases : List[str] = [], wiki : str = "", techLevel : int = -1):
         """
         :param str name: The name of this system
         :param str faction: The faction that owns the system, if any

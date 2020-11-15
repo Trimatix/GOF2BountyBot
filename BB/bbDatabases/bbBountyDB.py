@@ -68,7 +68,7 @@ class bbBountyDB:
 
 
     
-    def clearBounties(self, faction=None):
+    def clearBounties(self, faction : str = None):
         """Clear all bounties stored under a faction, or under all factions if none is specified
         
         :param str faction: The faction whose bounties to clear. All factions' bounties are cleared if None is given. (default None)
@@ -136,7 +136,7 @@ class bbBountyDB:
 
 
     
-    def getBounty(self, name : str, faction=None) -> bbBounty.Bounty:
+    def getBounty(self, name : str, faction : str = None) -> bbBounty.Bounty:
         """Get the bbBounty object for a given bbCriminal name or alias.
         This process is much more efficient when given the faction that the criminal is wanted by.
 
@@ -198,7 +198,7 @@ class bbBountyDB:
 
 
     
-    def bountyNameExists(self, name : str, faction=None) -> bool:
+    def bountyNameExists(self, name : str, faction : str = None) -> bool:
         """Check whether a criminal with the given name or alias exists in the DB
         The process is much more efficient if the faction where the bbCriminal should reside is known.
 
@@ -264,7 +264,7 @@ class bbBountyDB:
 
     
     
-    def removeBountyName(self, name : str, faction=None):
+    def removeBountyName(self, name : str, faction : str = None):
         """Find the bbBounty associated with the given bbCriminal name or alias, and remove it from the database.
         This process is much more efficient if the faction under which the bounty is wanted is given.
 
@@ -303,7 +303,7 @@ class bbBountyDB:
 
 
     
-    def hasBounties(self, faction=None) -> bool:
+    def hasBounties(self, faction : str = None) -> bool:
         """Check whether the given faction has any bounties stored, or if ANY faction has bounties stored if none is given.
         
         :param str faction: The faction whose bounties to check. Give None to check all factions for bounties. (default None)
@@ -337,7 +337,7 @@ class bbBountyDB:
 
 
 
-def fromDict(bountyDBDict : dict, maxBountiesPerFaction : int, dbReload=False) -> bbBountyDB:
+def fromDict(bountyDBDict : dict, maxBountiesPerFaction : int, dbReload : bool = False) -> bbBountyDB:
     """Build a bbBountyDB object from a serialised dictionary format - the reverse of bbBountyDB.toDict.
 
     :param dict bountyDBDict: a dictionary representation of the bbBountyDB, to convert to an object

@@ -15,20 +15,20 @@ class AStarNode(bbSystem.System):
     :var parent: The previous AStarNode in the generated path
     :vartype parent: AStarNode
     :var g: The total distance travelled to get to this node
-    :vartype g: int
+    :vartype g: float
     :var h: The estimated distance from this node to the nearest goal
-    :vartype h: int
+    :vartype h: float
     :var f: The node's estimated "value" when picking the next node in the route, equal to g + h
-    :vartype f: int
+    :vartype f: float
     """
     
-    def __init__(self, syst : bbSystem.System, parent : AStarNode, g=0, h=0, f=0):
+    def __init__(self, syst : bbSystem.System, parent : AStarNode, g : float = 0, h : float = 0):
         """
         :param bbSystem syst: this node's associated bbSystem object.
         :param AStarNode parent: The previous AStarNode in the generated path
-        :param int g: The total distance travelled to get to this node (Default 0)
-        :param int h: The estimated distance from this node to the nearest goal (Default 0)
-        :param int f: The node's estimated "value" when picking the next node in the route, equal to g + h (Default g + h)
+        :param float g: The total distance travelled to get to this node (Default 0)
+        :param float h: The estimated distance from this node to the nearest goal (Default 0)
+        :param float f: The node's estimated "value" when picking the next node in the route, equal to g + h (Default g + h)
         """
         self.syst = syst
         self.parent = parent

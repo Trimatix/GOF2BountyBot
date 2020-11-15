@@ -1,6 +1,8 @@
 # Typing imports
 from __future__ import annotations
-from typing import Dict, Union
+from typing import Dict, Union, TYPE_CHECKING
+if TYPE_CHECKING:
+    from ...bbDatabases import bbBountyDB
 
 from . import bbBountyConfig
 from ...bbConfig import bbData
@@ -27,7 +29,7 @@ class Bounty:
     :vartype answer: str
     """
 
-    def __init__(self, criminalObj=None, config=None, bountyDB=None, dbReload=False):
+    def __init__(self, criminalObj : bbCriminal = None, config : bbBountyConfig = None, bountyDB : bbBountyDB.bbBountyDB = None, dbReload : bool = False):
         """
         :param criminalObj: The criminal to be wanted. Give None to randomly generate a criminal. (Default None)
         :type criminalObj: bbCriminal or None
@@ -138,7 +140,7 @@ class Bounty:
         return {"faction": self.faction, "route": self.route, "answer": self.answer, "checked": self.checked, "reward": self.reward, "issueTime": self.issueTime, "endTime": self.endTime, "criminal": self.criminal.toDict()}
 
 
-def fromDict(bounty : dict, dbReload=False) -> Bounty:
+def fromDict(bounty : dict, dbReload : bool = False) -> Bounty:
     """Factory function constructing a new bbBounty from a dictionary serialized description - the opposite of bbBounty.toDict
 
     :param dict bounty: Dictionary containing all information needed to construct the desired bbBounty
