@@ -75,6 +75,6 @@ class bbToolItem(bbItem.bbItem):
         :rtype: dict
         """
         data = super().toDict()
-        data["type"] = type(self).__name__
+        data["itemType"] = "bbToolItem"
         return data
     
