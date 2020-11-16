@@ -405,3 +405,9 @@ pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
 skinApplyConfirmTimeoutSeconds = 60
 homeGuildTransferConfirmTimeoutSeconds = 60
+
+
+
+##### SKINS #####
+
+defaultSkinCrateEmoji = UninitializedDumbEmoji(723709178736017419)
