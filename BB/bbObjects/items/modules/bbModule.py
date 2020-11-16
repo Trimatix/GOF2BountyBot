@@ -121,6 +121,8 @@ class bbModule(bbItem):
         :rtype: dict
         """
         itemDict = super(bbModule, self).toDict()
+        itemDict["itemtype"] = "bbModule"
+        itemDict["type"] = type(self).__name__
         if not self.builtIn:
             if self.armour != 0.0:
                 itemDict["armour"] = self.armour
