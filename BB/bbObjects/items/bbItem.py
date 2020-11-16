@@ -113,9 +113,9 @@ class bbItem(bbAliasable.Aliasable):
         :rtype: dict
         """
         if self.builtIn:
-            return {"name": self.name, "builtIn": True}
+            return {"name": self.name, "builtIn": True, "itemType": type(self).__name__, "type": type(self).__name__}
         else:
-            return {"name": self.name, "aliases": self.aliases, "value":self.value, "wiki":self.wiki, "manufacturer":self.manufacturer, "icon":self.icon, "emoji":self.emoji.toDict(), "techLevel":self.techLevel, "builtIn":False}
+            return {"name": self.name, "aliases": self.aliases, "value":self.value, "wiki":self.wiki, "manufacturer":self.manufacturer, "icon":self.icon, "emoji":self.emoji.toDict(), "techLevel":self.techLevel, "builtIn":False, "itemType": type(self).__name__, "type": type(self).__name__}
 
     
     def __hash__(self) -> int:
