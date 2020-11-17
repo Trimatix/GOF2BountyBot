@@ -108,7 +108,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
     :vartype owningBBUser: bbUser
     """
     def __init__(self, msg : Message, pollOptions : dict, timeout : TimedTask.TimedTask, pollStarter : Union[User, Member] = None,
-            multipleChoice : bool = False, titleTxt : str = "", desc : str = "", col : Colour = Colour.default, footerTxt : str = "",
+            multipleChoice : bool = False, titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), footerTxt : str = "",
             img : str = "", thumb : str = "", icon : str = "", authorName : str = "", targetMember : Member = None,
             targetRole : Role = None, owningBBUser : bbUser.bbUser = None):
         """
@@ -204,7 +204,7 @@ async def fromDict(rmDict : dict) -> ReactionPollMenu:
     return ReactionPollMenu(msg, options, timeoutTT, multipleChoice=rmDict["multipleChoice"] if "multipleChoice" in rmDict else False,
                                 titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
                                 desc=rmDict["desc"] if "desc" in rmDict else "",
-                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.default(),
+                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.blue(),
                                 footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
                                 img=rmDict["img"] if "img" in rmDict else "",
                                 thumb=rmDict["thumb"] if "thumb" in rmDict else "",

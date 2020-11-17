@@ -119,7 +119,7 @@ async def fromDict(rmDict : dict) -> ReactionDuelChallengeMenu:
     return ReactionDuelChallengeMenu(msg, reactionRoles, dcGuild,
                                 titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
                                 desc=rmDict["desc"] if "desc" in rmDict else "",
-                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.default(),
+                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.blue(),
                                 footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
                                 img=rmDict["img"] if "img" in rmDict else "",
                                 thumb=rmDict["thumb"] if "thumb" in rmDict else "",

@@ -90,7 +90,7 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
     """
 
     def __init__(self, msg : Message, reactionRoles : Dict[lib.emojis.dumbEmoji, Role], dcGuild : Guild,
-            titleTxt : str = "", desc : str = "", col : Colour = Colour.default, timeout : TimedTask.TimedTask = None,
+            titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), timeout : TimedTask.TimedTask = None,
             footerTxt : str = "", img : str = "", thumb : str = "", icon : str = "", authorName : str = "",
             targetMember : Member = None, targetRole : Role = None):
         # TODO: Stop taking dcGuild, and instead extract dcGuild from msg.guild
@@ -161,7 +161,7 @@ async def fromDict(rmDict : dict) -> ReactionRolePicker:
     return ReactionRolePicker(msg, reactionRoles, dcGuild,
                                 titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
                                 desc=rmDict["desc"] if "desc" in rmDict else "",
-                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.default(),
+                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.blue(),
                                 footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
                                 img=rmDict["img"] if "img" in rmDict else "",
                                 thumb=rmDict["thumb"] if "thumb" in rmDict else "",
