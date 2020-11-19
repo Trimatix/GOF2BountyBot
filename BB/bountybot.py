@@ -68,13 +68,13 @@ def loadUsersDB(filePath : str) -> bbUserDB.bbUserDB:
     return bbUserDB.fromDict(lib.jsonHandler.readJSON(filePath))
 
 
-def loadGuildsDB(filePath : str) -> bbGuildDB.bbGuildDB:
+def loadGuildsDB(filePath : str, dbReload : bool = False) -> bbGuildDB.bbGuildDB:
     """Build a bbGuildDB from the specified JSON file.
 
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
     :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
-    return bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath))
+    return bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath), dbReload=dbReload)
 
 
 async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.reactionMenuDB:
@@ -5056,7 +5056,7 @@ async def on_ready():
     bbGlobals.newBountiesTTDB = TimedTaskHeap.TimedTaskHeap()
     # Databases
     bbGlobals.usersDB = loadUsersDB(bbConfig.userDBPath)
-    bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath)
+    bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath, dbReload=True)
 
     # for currentUser in bbGlobals.usersDB.users.values():
     #     currentUser.validateLoadout()
