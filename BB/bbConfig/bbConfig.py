@@ -22,10 +22,10 @@ def truncToRes(num : float) -> float:
 
 
 # List of module names from BB.commands to import
-includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_bounties", "usr_loadout", "usr_economy",
-                            "admn_channels", "admn_misc",
-                            "dev_misc", "dev_channels", "dev_bounties", "dev_items")
-
+# includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_bounties", "usr_loadout", "usr_economy",
+#                             "admn_channels", "admn_misc",
+#                             "dev_misc", "dev_channels", "dev_bounties", "dev_items")
+includedCommandModules = ()
 
 
 ##### USER LEVELING #####
@@ -53,6 +53,8 @@ def bountyHuntingXPForLevel(level):
 
 # https://www.desmos.com/calculator/ljkio5xyfz
 def calculateUserBountyHuntingLevel(xp):
+    if xp <= 0:
+        return 1
     return max(1, int(BHLa * math.log10((xp + BHLc)/BHLb) + BHLd))
 
 
