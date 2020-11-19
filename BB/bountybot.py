@@ -864,7 +864,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
                             await message.channel.send(levelUpMsg)
 
                         # Announce the bounty has been completed
-                        await callingBBGuild.announceBountyWon(bounty, rewards, message.author.id)
+                        await callingBBGuild.announceBountyWon(bounty, rewards, message.author)
                         await message.channel.send("__Duel Statistics__",embed=statsEmbed)
 
                         # criminal ship unequip is delayed until now rather than handled in bounty.check
