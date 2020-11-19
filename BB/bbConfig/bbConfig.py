@@ -1,13 +1,30 @@
+# Typing imports
+from __future__ import annotations
+
 import math, random, pprint
-from ..bbUtil import dumbEmoji
+from ..lib.emojis import dumbEmoji, UninitializedDumbEmoji
 
 ##### UTIL #####
+
 
 # Number of decimal places to calculate itemTLSpawnChanceForShopTL values to
 tl_resolution = 3
 
-def truncToRes(num):
+
+def truncToRes(num : float) -> float:
+    """Truncate the passed float to tl_resolution decimal places.
+
+    :param float num: Float number to truncate
+    :return: num, truncated to tl_resolution decimal places
+    :rtype: float
+    """
     return math.trunc(num * math.pow(10, tl_resolution)) / math.pow(10, tl_resolution)
+
+
+# List of module names from BB.commands to import
+includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_bounties", "usr_loadout", "usr_economy",
+                            "admn_channels", "admn_misc",
+                            "dev_misc", "dev_channels", "dev_bounties", "dev_items")
 
 
 
@@ -54,6 +71,7 @@ def calculateUserBountyHuntingLevel(xp):
 
 # def calculateUserBountyHuntingLevel(xp):
 #     return 4 * xp - 30001
+##### COMMANDS #####
 
 
 
@@ -129,12 +147,18 @@ for shopTL in range(minTechLevel, maxTechLevel + 1):
         currentSum += currentChance
 
 
-def pickRandomShopTL():
+def pickRandomShopTL() -> int:
+    """Pick a random shop techlevel, with probabilities calculated previously in bbConfig.
+
+    :return: An integer between 1 and 10 representing a shop tech level
+    :rtype: int    
+    """
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
     for shopTL in range(len(cumulativeShopTLChance)):
         if cumulativeShopTLChance[shopTL] >= tlChance:
             return shopTL + 1
     return maxTechLevel
+
 
 # Price ranges by which ships should be ranked into tech levels. 0th index = tech level 1
 shipMaxPriceTechLevels = [50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 7000000, 7500000, 999999999]
@@ -159,9 +183,17 @@ tl_o = 2.3
     outer = tl_s * mid - (h / 2)
     return truncToRes(outer if outer > 0 else 0)"""
 
-def tl_u(x, t):
+def tl_u(x : int, t : int) -> float:
+    """mathematical function used when calculating item spawn probabilities.
+
+    :param int x: int representing the item's tech level
+    :param int t: int representing the owning shop's tech level
+    :return: A partial probability for use in probability generation
+    :rtype: float
+    """
     chance = truncToRes(1 - math.pow((x - t)/1.4,2))
     return chance if chance > 0 else 0
+
 
 # Loop through shop TLs
 for shopTL in range(minTechLevel, maxTechLevel + 1):
@@ -201,7 +233,13 @@ for shopTL in range(len(itemTLSpawnChanceForShopTL)):
     print()
 
 
-def pickRandomItemTL(shopTL):
+def pickRandomItemTL(shopTL : int) -> int:
+    """Pick a random item techlevel, with probabilities calculated previously in bbConfig.
+
+    :param int shopTL: int representing the tech level of the shop owning the item
+    :return: An integer between 1 and 10 representing a item tech level
+    :rtype: int
+    """
     tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
     for itemTL in range(len(cumulativeItemTLSpawnChanceForShopTL[shopTL - 1])):
         if cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL] >= tlChance:
@@ -310,6 +348,11 @@ level0CrimLoadout = {"name": "Betty", "builtIn":True,
                     "weapons":[{"name": "Nirai Impulse EX 1", "builtIn": True}],
                     "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "ZMI Optistore", "builtIn": True}, {"name": "IMT Extract 2.7", "builtIn": True}]}
 
+# The number of times to retry BBC listing updates when HTTP exceptions are thrown
+bbcHTTPErrRetries = 3
+
+# The number of seconds to wait between BBC listing update retries upon HTTP exception catching
+bbcHTTPErrRetryDelaySeconds = 1
 
 
 ##### SAVING #####
@@ -369,13 +412,13 @@ defaultRejectEmoji = dumbEmoji(unicode="👎")
 # discord user IDs of all developers
 developers = [188618589102669826, 448491245296418817]
 
-# titles to give each type of user when reporting error messages etc
-devTitle = "officer"
-adminTitle = "commander"
-userTitle = "pilot"
+# The number of registerable command access levels.
+# E.g I use 3 to represent 0=user, 1=admin, 2=dev
+# TODO: Add a fourth, mod commands, with an admin-assignable role
+numCommandAccessLevels = 3
 
-# Servers where bountyBot commands are disabled. Currently this is just the emoji servers:
-disabledServers = [723704980246233219, 723702782640783361, 723708988830515231, 723704665560055848, 723705817764986900, 723703454635393056, 723708655031156742, 723706906517962814, 723704087962583131, 723704350131748935]
+# titles to give each type of user when reporting error messages etc
+accessLevelTitles = ["pilot", "commander", "officer"]
 
 
 
@@ -384,7 +427,7 @@ disabledServers = [723704980246233219, 723702782640783361, 723708988830515231, 7
 # The maximum number of items that will be displayed per page of a user's hangar, when all item types are requested
 maxItemsPerHangarPageAll = 3
 # The maximum number of items that will be displayed per page of a user's hangar, when a single item type is requested
-maxItemsPerHangarPageIndividual = 5
+maxItemsPerHangarPageIndividual = 10
 
 # Names to be used when checking input to !bb hangar and bbUser.numInventoryPages
 validItemNames = ["ship", "weapon", "module", "turret", "all"]
@@ -404,6 +447,8 @@ userAlertsIDsDefaults = {   "bounties_new": False,
                             "system_updates_minor": False,
                             "system_misc": False}
 
+homeGuildTransferCooldown = {"weeks":1}
+
 
 
 ##### REACTION MENUS #####
@@ -414,10 +459,4 @@ pollMenuDefaultTimeout = {"hours": 2}
 expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
-
-
-
-##### INTERNAL #####
-# Do not touch these!
-newBountyDelayReset = False
-newBountyFixedDeltaChanged = False
+homeGuildTransferConfirmTimeoutSeconds = 60

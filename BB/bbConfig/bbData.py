@@ -1,3 +1,5 @@
+# TODO: Move items etc into JSON files
+
 # Shame, but i'd rather this than keep factionColours in bountybot.py
 from discord import Colour
 
@@ -67,10 +69,13 @@ helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX
 # help strings for bb commands
 helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short introduction on how to play bounties!"),
                             "help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently six pages, and six sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Loadout`, `Shopping` and `Credits`."),
-                            "stats": ("**stats** *[userTag]*", "Get various credits and bounty statistics about yourself, or a tagged user."),
+                            "stats": ("**stats** *[user]*", "Get various credits and bounty statistics about yourself, or another user."),
                             "leaderboard": ("**leaderboard** *[-g|-c|-s|-w]*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
                             "notify": ("**notify <type>** *[alert]*", "Subscribe to pings when events take place. Currently, **type** can be `bounties`, `shop`, `duels`, or `bot`.\n> `shop` requires the `refresh` option.\n> `duels` requires either `new` or `cancel`.\n> `bot` can take `updates` or `announcements`.\n> `bot updates` must be `major` or `minor`."),
                             "source": ("**source**", "Show links to the project's GitHub page and todo list, and some information about the people behind BountyBot.")},
+            
+            "Home Servers":{"home": ("**home**", "Get the name of your home server, if one is set. This is the the only server where you may use certain commands, such as buying items from the shop, or fighting bounties."),
+                            "transfer": ("**transfer**", "Transfer your home server to the one where you sent this command. You will be asked for confirmation first, since this command has a long cooldown!")},
             
             "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
                             "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
@@ -78,23 +83,22 @@ helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short int
             
             "Bounties":{    "bounties": ("**bounties** *[faction]*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
                             "route": ("**route <criminal name>**", "Get the named criminal's current route."),
-                            "check": ("**check <system>**", "Check if any criminals are in the given system, arrest them, and get paid! 💰"),
+                            "check": ("**check <system>**", "Check if any criminals are in the given system, arrest them, and get paid! 💰\n🌎 This command must be used in your **home server**."),
                             "duel": ("**duel [action] [user]** *<stakes>*", "Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`. When challenging another user to a duel, you must give the amount of credits you will win - the 'stakes'.")},
             
-            "Loadout":{     "hangar": ("**hangar** *[user]* *[item-type]*", "Display the items in your hangar, or in the hangar of a tagged user. Give an item type (ship/weapon/turret/module) to only list items of that type."),
-                            "loadout": ("**loadout**", "Display your current ship and the items equipped onto it."),
+            "Loadout":{     "hangar": ("**hangar** *[item-type]*", "Display the items in your hangar, or in the hangar of a tagged user. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+                            "loadout": ("**loadout** *[user]*", "Display your current ship and the items equipped onto it, or those equipped by another player."),
                             "equip": ("**equip <item-type> <item-num>** *[transfer]*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When equipping a ship, specify `transfer` to move all items to the new ship."),
                             "unequip": ("**unequip <item-type> <item-num>**", "Unequip the requested item from your active ship, into your hangar. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),
                             "nameShip": ("**nameShip <nickname>**", "Give your active ship a nickname!"),
                             "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")},
 
-            "Shopping":{    "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
-                            "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship."),
-                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.")},
-
-            "Credits":{     "total-value":("**total-value** *[userTag]*", "Get the total value of all of your items, including your credits balance. Give a user mention to check someone else's total inventory value."),
-                            "balance": ("**balance** *[userTag]*", "Get the credits balance of yourself, or a tagged user if one is given."),
-                            "pay": ("**pay <user> <amount>**", "Pay the mentioned user an amount of credits from your balance.")}}
+            "Economy":{     "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
+                            "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship.\n🌎 This command must be used in your **home server**."),
+                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.\n🌎 This command must be used in your **home server**."),
+                            "total-value":("**total-value** *[user]*", "Get the total value of all of your items, including your credits balance. Give a user to check someone else's total inventory value."),
+                            "balance": ("**balance** *[user]*", "Get the credits balance of yourself, or another user if one is given."),
+                            "pay": ("**pay <user> <amount>**", "Pay the given user an amount of credits from your balance.")}}
 
 # intro for admin help commands
 adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help how-to-play`
@@ -107,10 +111,9 @@ adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display in
                                         "set-notify-role": ("**set-notify-role <type>** *[alert]* **<role>**", "Set a role to ping when various events occur. **<type>** and/or *[alert]]* must specify a type of notification. **<role>** can be either a role mention, or a role ID. For valid notification types, see `$COMMANDPREFIX$help notify`."),
                                         "remove-notify-role": ("**remove-notify-role**", "Stop pinging the bounty notify role when new bounties are created."),
                                         "set-bounty-board-channel": ("**set-bounty-board-channel**", "Send from within a channel to set that channel as a *bountyboard*.\nBountyBoard channels show *all* information about active bounties, continuously update their listings (e.g cross through checked systems), and only show *active* bounties (listings for located bounties are removed)."),
-                                        "remove-bounty-board-channel": ("**remove-bounty-board-channel**", "Send from any channel to remove the server's bountyboard channel, if one is set.")}}
-
-# string extensions for numbers, e.g 11th, 1st, 23rd...
-numExtensions = ["th","st","nd","rd","th","th","th","th","th","th"]
+                                        "remove-bounty-board-channel": ("**remove-bounty-board-channel**", "Send from any channel to remove the server's bountyboard channel, if one is set."),
+                                        "hangar": ("**hangar** *[user]* *[item-type]*", "Administrators have permission to view the hangars of other users."),
+                                        "config": ("**config <setting> <value>**", "Set various settings for how bountybot will function in this server. Currently, `setting` can be either 'bounties' or 'shop', and `value` can either 'enable' or 'disable', all with a few handy aliases. This command is lets you enable or disable large amounts of functionality all together.")}}
 
 # icons for factions
 terranIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013574331596850/terran.png"
@@ -150,7 +153,7 @@ builtInShipData = {# Terran
                     
                     # Vossk
                     "H'Soc": {"name": "H'Soc", "manufacturer": "vossk", "maxPrimaries": 2, "maxTurrets": 0, "maxModules": 7, "armour": 210, "cargo": 45, "numSecondaries": 2, "handling": 140, "value": 150000, "aliases": ["Soc", "HSoc"], "wiki": "https://galaxyonfire.fandom.com/wiki/H%27Soc", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694188659966022/hsoc.png", "emoji":"<:hsoc:723705306684588043>"},
-                    "Ni'Tirrk": {"name": "Ni'Tirrk", "manufacturer": "vossk", "maxPrimaries": 2, "maxTurrets": 0, "maxModules": 8, "armour": 280, "cargo": 80, "numSecondaries": 4, "handling": 128, "value": 250000, "aliases": ["Tirrk", "NTirrk"], "wiki": "https://galaxyonfire.fandom.com/wiki/N%27Tirrk", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720784330632200322/ntirrk.png", "emoji":"<:ntirrk:723705307078983700>"},
+                    "N'Tirrk": {"name": "N'Tirrk", "manufacturer": "vossk", "maxPrimaries": 2, "maxTurrets": 0, "maxModules": 8, "armour": 280, "cargo": 80, "numSecondaries": 4, "handling": 128, "value": 250000, "aliases": ["Tirrk", "NTirrk"], "wiki": "https://galaxyonfire.fandom.com/wiki/N%27Tirrk", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720784330632200322/ntirrk.png", "emoji":"<:ntirrk:723705307078983700>"},
                     "K'Suuk": {"name": "K'Suuk", "manufacturer": "vossk", "maxPrimaries": 3, "maxTurrets": 0, "maxModules": 12, "armour": 255, "cargo": 55, "numSecondaries": 2, "handling": 125, "value": 1950000, "aliases": ["Suuk", "KSuuk"], "wiki": "https://galaxyonfire.fandom.com/wiki/K%27Suukk", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694205990568055/ksuukk.png", "emoji":"<:ksuukk:723705306827194449>"},
                     "S'Kanarr": {"name": "S'Kanarr", "manufacturer": "vossk", "maxPrimaries": 4, "maxTurrets": 1, "maxModules": 11, "armour": 315, "cargo": 150, "numSecondaries": 2, "handling": 70, "value": 7250000, "aliases": ["Kanarr", "SKanarr"], "wiki": "https://galaxyonfire.fandom.com/wiki/S%27Kanarr", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694223308980314/skanarr.png", "emoji":"<:skanarr:723705306722467852>"},
                     "Na'Srrk": {"name": "Na'Srrk", "manufacturer": "vossk", "maxPrimaries": 4, "maxTurrets": 0, "maxModules": 12, "armour": 280, "cargo": 70, "numSecondaries": 4, "handling": 145, "value": 5400000, "aliases": ["srrk", "Nasrrk"], "wiki": "https://galaxyonfire.fandom.com/wiki/Na%27srrk", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720785069672890408/nasrrk.png", "emoji":"<:nasrrk:723705306894565407>"},
@@ -259,7 +262,7 @@ builtInModuleData = {   # armour
 
                         # repair bots
                         "Ketar Repair Bot": {"type": "repair bot", "name": "Ketar Repair Bot", "aliases": ["Repair Bot", "Ketar Bot"], "techLevel": 4, "HPps": 7, "value": 15285, "wiki": "https://galaxyonfire.fandom.com/wiki/Ketar_Repair_Bot", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723475310175322132/ketar_repair_bot.png", "emoji": "<:ketarrepairbot:723706704373481543>"},
-                        "Ketar Repair Bot II": {"type": "repair bot", "name": "Ketar Repair Bot II", "aliases": ["Katar Repair Bot 2", "Repair Bot 2", "Repair Bot II", "Ketar Bot 2", "Ketar Bot II"], "techLevel": 7, "HPps": 15, "value": 141949, "wiki": "https://galaxyonfire.fandom.com/wiki/Ketar_Repair_Bot_II", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723475300582686800/ketar_repair_bot_ii.png", "emoji": "<:ketarrepairbotii:723706703975284737>"},
+                        "Ketar Repair Bot II": {"type": "repair bot", "name": "Ketar Repair Bot II", "aliases": ["Ketar Repair Bot 2", "Repair Bot 2", "Repair Bot II", "Ketar Bot 2", "Ketar Bot II"], "techLevel": 7, "HPps": 15, "value": 141949, "wiki": "https://galaxyonfire.fandom.com/wiki/Ketar_Repair_Bot_II", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723475300582686800/ketar_repair_bot_ii.png", "emoji": "<:ketarrepairbotii:723706703975284737>"},
 
                         # scanners
                         "Telta Quickscan": {"type": "scanner", "name": "Telta Quickscan", "aliases": ["Quickscan"], "techLevel": 2, "timeToLock": 4, "showClassAAsteroids": False, "showCargo": False, "value": 2438, "wiki": "https://galaxyonfire.fandom.com/wiki/Telta_Quickscan", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723475379397984267/telta_quickscan.png", "emoji": "<:teltaquickscan:723706726079135764>"},

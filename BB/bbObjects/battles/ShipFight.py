@@ -2,26 +2,49 @@ from .BattleShip import BattleShip
 from .BattleShipState import BattleShipState
 import random
 from ...bbConfig import bbConfig
+from ..items import bbShip
+
+# ⚠⚠ This file is currently unused and a work in progress
 
 class ShipFight:
-    ship1 = None
-    ship2 = None
-    battleLog = []
-    battleState = []
+    """
+    A class representing a simulation of two ships fighting.
 
-    def __init__(self, bbShip1, bbShip2):
+    :var ship1: One of the BattleShips partaking in this fight
+    :vartype ship1: BattleShip
+    :var ship2: One of the BattleShips partaking in this fight
+    :vartype ship2: BattleShip
+    :var battleLog: String descriptions of the events that occurred during this simulation, given in a list
+    :vartype battleLog: list[str]
+    :var battleState: Snapshots of the state of the fight at regular time quanta during the simulation, given in a list
+    :vartype battleState: list[BattleShipState]
+    """
+
+    def __init__(self, bbShip1 : bbShip.bbShip, bbShip2 : bbShip.bbShip):
+        """
+        :param bbShip bbShip1: One of the bbShips participating in this fight
+        :param bbShip bbShip2: One of the bbShips participating in this fight
+        """
         self.ship1 = BattleShip(bbShip1)
         self.ship2 = BattleShip(bbShip2)
         self.battleLog = []
         self.battleState = []
 
 
-    def fightShips(self, variancePercent):
+    def fightShips(self, variancePercent : float) -> dict:
+        """
+        Simulate the fight.
+        Returns a dictionary containing a reference to the winning bbShip, as well as the battleLog.
+
+        :param float variancePercent: The percentage to vary ship statistics by, e.g 0.5 for 50% random stat variance
+        :return: A dictionary containing the winning bbShip and the battleLog
+        :rtype: dict
+        """
         # Fetch ship total DPSs
         ship1DPS = self.ship1.dps
         ship2DPS = self.ship2.dps
 
-        # Vary DPSs by +=variancePercent
+        # Vary DPSs by +-variancePercent
         ship1DPSVariance = ship1DPS * variancePercent
         ship2DPSVariance = ship2DPS * variancePercent
 

@@ -1,10 +1,18 @@
 from . import bbInventoryListing
 
-"""
-A database of bbInventoryListings.
-Aside from the use of bbInventoryListing for the purpose of item quantities, this class is type unaware.
-"""
 class bbInventory:
+    """A database of bbInventoryListings.
+    Aside from the use of bbInventoryListing for the purpose of item quantities, this class is type unaware.
+
+    :var items: The actual item listings
+    :vartype items: dict[object, bbInventoryListing]
+    :var keys: The item types stored
+    :vartype keys: ist[object]
+    :var totalItems: The total number of items stored; the sum of all item quantities
+    :vartype totalItems: int
+    :var numKeys: The number of item types stored; the length of self.keys
+    :vartype numKeys: int
+    """
     def __init__(self):
         # The actual item listings
         self.items = {}
@@ -16,15 +24,16 @@ class bbInventory:
         self.numKeys = 0
 
     
-    """
-    Add one or more of an item to the inventory.
-    If at least one of item is already in the inventory, that item's bbInventoryListing count will be incremented.
-    Otherwise, a new bbInventoryListing is created for item.
+    
+    def addItem(self, item : object, quantity=1):
+        """Add one or more of an item to the inventory.
+        If at least one of item is already in the inventory, that item's bbInventoryListing count will be incremented.
+        Otherwise, a new bbInventoryListing is created for item.
 
-    @param item -- The item to add to the inventory
-    @param quantity -- Integer amount of item to add to the inventory. Must be at least 1. Default: 1
-    """
-    def addItem(self, item, quantity=1):
+        :param object item: The item to add to the inventory
+        :param int quantity: Integer amount of item to add to the inventory. Must be at least 1. (Default 1)
+        :raise ValueError: If quantity is less than 1
+        """
         if quantity < 0:
             raise ValueError("Quantity must be at least 1")
         
@@ -41,15 +50,16 @@ class bbInventory:
             self.numKeys += 1
 
 
-    """
-    Remove one or more of an item from the inventory.
-    If the amount of item stored in the inventory is now zero, the bbInventoryListing is removed from the inventory.
-    At least quantity of item must already be stored in the inventory. 
+    
+    def removeItem(self, item : object, quantity=1):
+        """Remove one or more of an item from the inventory.
+        If the amount of item stored in the inventory is now zero, the bbInventoryListing is removed from the inventory.
+        At least quantity of item must already be stored in the inventory. 
 
-    @param item -- The item to remove from the inventory
-    @param quantity -- Integer amount of item to remove from the inventory. Must be between 1 and the amount of item currently stored, both inclusive. Default: 1
-    """
-    def removeItem(self, item, quantity=1):
+        :param object item: The item to remove from the inventory
+        :param int quantity: Integer amount of item to remove from the inventory. Must be between 1 and the amount of item currently stored, both inclusive. (Default 1)
+        :raise ValueError: When attempting to remove more of an item than is in the inventory
+        """
         # Ensure enough of item is stored to remove quantity of it
         if item in self.items and self.items[item].count >= quantity:
             # Update item's count and inventory's totalItems tracker
@@ -69,27 +79,30 @@ class bbInventory:
             raise ValueError("Attempted to remove " + str(quantity) + " " + str(item) + "(s) when " + (str(self.items[item].count) if item in self.items else "0") + " are in inventory")
 
     
-    """
-    Get the number of pages of items in the inventory, for a given max number of items per page
-    E.g, where 3 keys are in the inventory: numPages(1) gives 3. numPages(2) gives 2.
+    
+    def numPages(self, itemsPerPage : int) -> int:
+        """Get the number of pages of items in the inventory, for a given max number of items per page
+        E.g, where 3 keys are in the inventory: numPages(1) gives 3. numPages(2) gives 2.
 
-    @param itemsPerPage -- The maximum number of items per page
-    @return -- The number of pages required to list all items in the inventory
-    """
-    def numPages(self, itemsPerPage):
+        :param int itemsPerPage: The maximum number of items per page
+        :return: The number of pages required to list all items in the inventory
+        :rtype: int
+        """
         return int(self.numKeys/itemsPerPage) + (0 if self.numKeys % itemsPerPage == 0 else 1)
 
     
-    """
-    Get a list of the bbItemListings on the requested page.
-    pageNum is 1 index-based; the first page is 1.
-    pageNum must be between 1 and numPages(itemsPerPage).
+    
+    def getPage(self, pageNum : int, itemsPerPage : int) -> list:
+        """Get a list of the bbItemListings on the requested page.
+        pageNum is 1 index-based; the first page is 1.
+        pageNum must be between 1 and numPages(itemsPerPage).
 
-    @param pageNum -- The number of the page to fetch
-    @param itemsPerPage -- The max number of items that can be contained in a single page
-    @return -- A list containing the bbInventoryListings contained in the requested inventory page
-    """
-    def getPage(self, pageNum, itemsPerPage):
+        :param int pageNum: The number of the page to fetch
+        :param int itemsPerPage: The max number of items that can be contained in a single page
+        :return: A list containing the bbInventoryListings contained in the requested inventory page
+        :rtype: list[bbInventoryListings]
+        :raise IndexError: When attempting to get a page out of range of this inventory
+        """
         # Validate the requested pageNum
         if pageNum < 1 or pageNum > self.numPages(itemsPerPage):
             raise IndexError("pageNum out of range. min=1 max=" + str(self.numPages(itemsPerPage)))
@@ -103,54 +116,60 @@ class bbInventory:
         return page
 
 
-    """
-    Decide whether a given item is stored in this inventory.
+    
+    def stores(self, item) -> bool:
+        """Decide whether a given item is stored in this inventory.
 
-    @param item -- The item to check for membership
-    @return -- True if at least one of item is in this inventory, False otherwise
-    """
-    def stores(self, item):
+        :param object item: The item to check for membership
+        :return: True if at least one of item is in this inventory, False otherwise
+        :rtype: bool
+        """
         return item in self.keys
 
     
-    """
-    Get the amount stored of a given item.
+    
+    def numStored(self, item) -> int:
+        """Get the amount stored of a given item.
 
-    @param item -- The item to count
-    @return -- Integer count of number of items in this inventory. 0 if it is not stored in this inventory.
-    """
-    def numStored(self, item):
+        :param object item: The item to count
+        :return: Integer count of number of items in this inventory. 0 if it is not stored in this inventory.
+        :rtype: int
+        """
         return self.items[item].count if self.stores(item) else 0
 
 
-    """
-    Decide whether or not this bbInventory currently stores any items.
+    
+    def isEmpty(self) -> bool:
+        """Decide whether or not this bbInventory currently stores any items.
 
-    @return -- True if no items are stored, False if at least one item is stored currently
-    """
-    def isEmpty(self):
+        :return: True if no items are stored, False if at least one item is stored currently
+        :rtype: bool
+        """
         return self.totalItems == 0
 
 
-    """
-    Remove all items from the inventory.
-
-    """
+    
     def clear(self):
+        """Remove all items from the inventory.
+        """
         self.items = {}
         self.keys = []
         self.totalItems = 0
         self.numKeys = 0
 
 
-    """
-    Override [subscript] operator for reading values.
-    Currently returns the bbInventoryListing for the item at position key in self.keys.
+    
+    def __getitem__(self, key : int) -> bbInventoryListing:
+        """Override [subscript] operator for reading values.
+        Currently returns the bbInventoryListing for the item at position key in self.keys.
 
-    @param key -- The index of the key to dereference
-    @return -- The bbInventoryListing for the item at the requested index
-    """
-    def __getitem__(self, key):
+        :param int key: The index of the key to dereference
+        :return: The bbInventoryListing for the item at the requested index
+        :rtype: bbInventoryListing
+        :raise KeyError: When the given index is in range of the inventory, but the key at the requested position in the keys array does not exist in the items dictionary
+        :raise IndexError: When given an index that isn't an int, or the given index is out of range
+        :raise ValueError: When the inventory is empty
+        """
         if bool(self.keys): 
             if key in range(len(self.keys)):
                 if self.keys[key] in self.items:
@@ -160,21 +179,22 @@ class bbInventory:
         raise ValueError("Attempted to fetch key " + str(key) + ", but keys list is empty")
 
 
-    """
-    Disallow assignment through the [subscript] operator.
-
-    @param key -- ignored
-    @param value -- ignored
-    """
+    
     def __setitem__(self, key, value):
+        """Disallow assignment through the [subscript] operator.
+
+        :param key: ignored
+        :param value: ignored
+        :raise NotImplementedError: Always.
+        """
         raise NotImplementedError("Cannot use [subscript] assignment for class bbInventory. use addItem/removeItem instead.")
         # self.items[self.keys[key]] = value
 
 
-    """
-    Override the 'in' operator.
+    
+    def __contains__(self, item) -> bool:
+        """Override the 'in' operator.
 
-    @param item -- The object to test for membership
-    """
-    def __contains__(self, item):
+        :param object item: The object to test for membership
+        """
         return item in self.keys

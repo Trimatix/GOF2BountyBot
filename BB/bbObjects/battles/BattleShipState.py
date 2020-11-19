@@ -1,11 +1,13 @@
-"""
-Class representing the state of a BattleShip at a given moment in time.
-TODO: Move to BattleShip.py
+from . import BattleShip
 
-@param battleShip -- the BattleShip to record the stats of
-"""
 class BattleShipState:
-    def __init__(self, battleShip):
+    """Class representing the state of a BattleShip at a given moment in time.
+    TODO: Move to BattleShip.py"""
+
+    def __init__(self, battleShip : BattleShip.BattleShip):
+        """
+        :param BattleShip battleShip: the BattleShip to record the stats of
+        """
         self.hull = battleShip.hull
         self.armour = battleShip.armour
         self.shield = battleShip.shield

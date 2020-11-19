@@ -1,17 +1,25 @@
-import discord
-from discord import Embed, HTTPException, Forbidden, NotFound
-from ....bbConfig import bbConfig, bbData
-from .... import bbUtil
+from discord import Embed, HTTPException, Forbidden, NotFound, Client, Message, Colour
+from ....bbConfig import bbData, bbConfig
+from .... import lib
 from .. import bbCriminal
 from ....logging import bbLogger
+import asyncio
+from .. import bbBounty
+from typing import Dict, Union, List
 
-def makeBountyEmbed(bounty):
+def makeBountyEmbed(bounty : bbBounty.Bounty) -> Embed:
+    """Construct a discord.Embed for listing in a BountyBoardChannel
+
+    :param Bounty bounty: The bounty to describe in this embed
+    :return: A discord.Embed describing statistics about the passed bounty
+    :rtype: discord.Embed
+    """
     embed = Embed(title=bounty.criminal.name, colour=bbData.factionColours[bounty.faction] if bounty.faction in bbData.factionColours else bbData.factionColours["neutral"])
     embed.set_footer(text=bounty.faction.title(), icon_url=bbData.factionIcons[bounty.faction] if bounty.faction in bbData.factionIcons else "")
     embed.set_thumbnail(url=bounty.criminal.icon)
-    embed.add_field(name="**Reward:**", value=bbUtil.commaSplitNum(str(bounty.reward)) + " Credits")
+    embed.add_field(name="**Reward:**", value=lib.stringTyping.commaSplitNum(str(bounty.reward)) + " Credits")
     embed.add_field(name="**Difficulty:**", value=str(bounty.criminal.techLevel))
-    # embed = bbUtil.fillLoadoutEmbed(bounty.criminal.activeShip, embed, shipEmoji=True)
+    # embed = bounty.criminal.activeShip.fillLoadoutEmbed(embed, shipEmoji=True)
     embed.add_field(name="**See the culprit's loadout with:**", value="`" + bbConfig.commandPrefix + "loadout criminal " + bounty.criminal.name + "`")
     routeStr = ""
     for system in bounty.route:
@@ -30,14 +38,40 @@ def makeBountyEmbed(bounty):
     embed.add_field(name="-", value="> ~~Already checked systems~~\n> **Criminal spotted here recently**")
     return embed
 
-noBountiesEmbed = Embed(description='> Please check back later, or use the `$notify bounties` command to be notified when they spawn!', colour=discord.Colour.dark_orange())
+noBountiesEmbed = Embed(description='> Please check back later, or use the `$notify bounties` command to be notified when they spawn!', colour=Colour.dark_orange())
 noBountiesEmbed.set_author(name='No Bounties Available', icon_url='https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/stopwatch_23f1.png')
 
+
 class BountyBoardChannel:
-    def __init__(self, channelIDToBeLoaded, messagesToBeLoaded, noBountiesMsg):
+    """A channel which stores a continuously updating listing message for every active bounty.
+
+    Initialisation atts: These attributes are used only when loading in the BBC from dictionary-serialised format. They must be used to initialise the BBC before the BBC can be used.
+    :var messagesToBeLoaded: A dictionary of bounty listings to be loaded into the BBC, where keys are message IDs, and values are bbCriminal dicts
+    :vartype messagesToBeLoaded: dict[int, dict]
+    :var channelIDToBeLoaded: The discord channel ID of the channel where this BBC is active, to be loaded into the BBC
+    :vartype channelIDToBeLoaded: int
+    :var noBountiesMsgToBeLoaded: The id of the message to be loaded indicating that the BBC is empty, if one exists
+    :vartype noBountiesMsgToBeLoaded: int
+
+    Runtime atts: These are the attributes that contribute to the BBC's runtime functionality, unlike initialisation atts.
+    :var bountyMessages: A dictionary associating faction names with the bounty listings associated with that faction. Listings are stored as a dictionary of the listing's bbCriminal to the message ID of the listing message.
+    :vartype bountyMessages: dict[str, dict[bbCriminal, int]]
+    :var noBountiesMessage: Either a reference to a discord.message indicating that the BBC is empty, or None if no empty board message exists 
+    :vartype noBountiesMessage: discord.message or None
+    :var channel: The channel where this BBC's listings are to be posted
+    :vartype channel: discord.TextChannel
+    """
+
+    def __init__(self, channelIDToBeLoaded : int, messagesToBeLoaded : Dict[int, dict], noBountiesMsgToBeLoaded : Union[int, None]):
+        """
+        :param int channelIDToBeLoaded: The discord channel ID of the channel where this BBC is active, to be loaded into the BBC
+        :param messagesToBeLoaded: A dictionary of bounty listings to be loaded into the BBC, where keys are message IDs, and values are bbCriminal dicts
+        :type messagesToBeLoaded: dict[int, dict]
+        :param int noBountiesMsgToBeLoaded: The id of the message to be loaded indicating that the BBC is empty, if one exists
+        """
         self.messagesToBeLoaded = messagesToBeLoaded
         self.channelIDToBeLoaded = channelIDToBeLoaded
-        self.noBountiesMsgToBeLoaded = noBountiesMsg
+        self.noBountiesMsgToBeLoaded = noBountiesMsgToBeLoaded
 
         # dict of "faction": {criminal: int message ID}
         self.bountyMessages = {}
@@ -47,7 +81,13 @@ class BountyBoardChannel:
         self.channel = None
 
 
-    async def init(self, client, factions):
+    async def init(self, client : Client, factions : List[str]):
+        """Initialise the BBC's attributes to allow it to function.
+        Initialisation is done here rather than in the constructor as initialisation can only be done asynchronously.
+
+        :param discord.Client client: A logged in client instance used to fetch the BBC's message and channel instances
+        :param list[str] factions: A list of faction names with which bounties can be associated
+        """
         for fac in factions:
             self.bountyMessages[fac] = {}
 
@@ -60,7 +100,18 @@ class BountyBoardChannel:
                 msg = await self.channel.fetch_message(id)
                 self.bountyMessages[criminal.faction][criminal] = msg
             except HTTPException:
-                bbLogger.log("BBC", "init", "HTTPException thrown when fetching listing for criminal: " + criminal.name, category='bountyBoards', eventType="LISTING_LOAD-HTTPERR")
+                succeeded = False
+                for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                    try:
+                        msg = await self.channel.fetch_message(id)
+                        self.bountyMessages[criminal.faction][criminal] = msg
+                        succeeded = True
+                    except HTTPException:
+                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        continue
+                    break
+                if not succeeded:
+                    bbLogger.log("BBC", "init", "HTTPException thrown when fetching listing for criminal: " + criminal.name, category='bountyBoards', eventType="LISTING_LOAD-HTTPERR")
             except Forbidden:
                 bbLogger.log("BBC", "init", "Forbidden exception thrown when fetching listing for criminal: " + criminal.name, category='bountyBoards', eventType="LISTING_LOAD-FORBIDDENERR")
             except NotFound:
@@ -68,12 +119,43 @@ class BountyBoardChannel:
 
         if self.noBountiesMsgToBeLoaded == -1:
             self.noBountiesMessage = None
+            if self.isEmpty():
+                try:
+                    # self.noBountiesMessage = await self.channel.send(bbConfig.bbcNoBountiesMsg)
+                    self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
+
+                except HTTPException:
+                    succeeded = False
+                    for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                        try:
+                            self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
+                            succeeded = True
+                        except HTTPException:
+                            await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                            continue
+                        break
+                    if not succeeded:
+                        bbLogger.log("BBC", "init", "HTTPException thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
+                    self.noBountiesMessage = None
+                except Forbidden:
+                    bbLogger.log("BBC", "init", "Forbidden exception thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-FORBIDDENERR")
+                    self.noBountiesMessage = None
             
         else:
             try:
                 self.noBountiesMessage = await self.channel.fetch_message(self.noBountiesMsgToBeLoaded)
             except HTTPException:
-                bbLogger.log("BBC", "init", "HTTPException thrown when fetching no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
+                succeeded = False
+                for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                    try:
+                        self.noBountiesMessage = await self.channel.fetch_message(self.noBountiesMsgToBeLoaded)
+                        succeeded = True
+                    except HTTPException:
+                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        continue
+                    break
+                if not succeeded:
+                    bbLogger.log("BBC", "init", "HTTPException thrown when fetching no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
             except Forbidden:
                 bbLogger.log("BBC", "init", "Forbidden exception thrown when fetching no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-FORBIDDENERR")
             except NotFound:
@@ -84,22 +166,46 @@ class BountyBoardChannel:
         # del self.noBountiesMsgToBeLoaded
 
 
-    def hasMessageForBounty(self, bounty):
+    def hasMessageForBounty(self, bounty : bbBounty.Bounty) -> bool:
+        """Decide whether this BBC stores a listing for the given bounty 
+
+        :param Bounty bounty: The bounty to check for listing existence
+        :return: True if this BBC stores a listing for bounty, False otherwise
+        :rtype: bool
+        """
         return bounty.criminal in self.bountyMessages[bounty.criminal.faction]
 
 
-    def getMessageForBounty(self, bounty):
+    def getMessageForBounty(self, bounty : bbBounty.Bounty) -> Message:
+        """Return the message acting as a listing for the given bounty
+
+        :param Bounty bounty: The bounty to fetch a listing for
+        :return: This BBC's message listing the given bounty
+        :rtype: discord.Message
+        """
         return self.bountyMessages[bounty.criminal.faction][bounty.criminal]
 
 
-    def isEmpty(self):
+    def isEmpty(self) -> bool:
+        """Decide whether this BBC stores any bounty listings
+
+        :return: False if this BBC stores any bounty listings, True otherwise
+        :rtype: bool
+        """
         for faction in self.bountyMessages:
             if bool(self.bountyMessages[faction]):
                 return False
         return True
 
     
-    async def addBounty(self, bounty, message):
+    async def addBounty(self, bounty : bbBounty.Bounty, message : Message):
+        """Treat the given message as a listing for the given bounty, and store it in the database.
+        If the BBC was previously empty, remove the empty bounty board message if one exists.
+        If a HTTP error is thrown when attempting to remove the empty board message, wait and retry the removal for the number of times defined in bbConfig
+
+        :param Bounty bounty: The bounty to associate with the given message
+        :param discord.Message message: The message acting as a listing for the given bounty
+        """
         removeMsg = False
         if self.isEmpty():
             removeMsg = True
@@ -113,14 +219,31 @@ class BountyBoardChannel:
             try:
                 await self.noBountiesMessage.delete()
             except HTTPException:
-                print("addBounty HTTPException")
+                succeeded = False
+                for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                    try:
+                        await self.noBountiesMessage.delete()
+                        succeeded = True
+                    except HTTPException:
+                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        continue
+                    break
+                if not succeeded:
+                    print("addBounty HTTPException")
             except Forbidden:
                 print("addBounty Forbidden")
             except AttributeError:
                 print("addBounty no message")
     
 
-    async def removeBounty(self, bounty):
+    async def removeBounty(self, bounty : bbBounty.Bounty):
+        """Remove the listing message stored for the given bounty from the database. This does not attempt to delete the message from discord.
+        If the BBC is now empty, send an empty bounty board message.
+        If a HTTP error is thrown when sending the empty BBC message, wait and retry the removal for the number of times defined in bbConfig
+
+        :param Bounty bounty: The bounty whose listing should be removed from the database
+        :raise KeyError: If the database does not store a listing for the given bounty
+        """
         if not self.hasMessageForBounty(bounty):
             raise KeyError("BNTY_BRD_CH-REM-BNTY_NOT_EXST: Attempted to remove a bounty from a bountyboardchannel, but the bounty is not listed")
             bbLogger.log("BBC", "remBty", "Attempted to remove a bounty from a bountyboardchannel, but the bounty is not listed: " + bounty.criminal.name, category='bountyBoards', eventType="LISTING_REM-NO_EXST")
@@ -132,14 +255,30 @@ class BountyBoardChannel:
                 self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
 
             except HTTPException:
-                bbLogger.log("BBC", "remBty", "HTTPException thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
+                succeeded = False
+                for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                    try:
+                        self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
+                        succeeded = True
+                    except HTTPException:
+                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        continue
+                    break
+                if not succeeded:
+                    bbLogger.log("BBC", "remBty", "HTTPException thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-HTTPERR")
                 self.noBountiesMessage = None
             except Forbidden:
                 bbLogger.log("BBC", "remBty", "Forbidden exception thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-FORBIDDENERR")
                 self.noBountiesMessage = None
 
 
-    async def updateBountyMessage(self, bounty):
+    async def updateBountyMessage(self, bounty : bbBounty.Bounty):
+        """Update the embed for the listing associated with the given bounty. This includes newly checked and near-correct systems along the route.
+        If a HTTP error is thrown when updating the listing, wait and retry the edit for the number of times defined in bbConfig
+        
+        :param Bounty bounty: The bounty whose listing should be updated
+        :raise KeyError: If the database does not store a listing for the given bounty
+        """
         if not self.hasMessageForBounty(bounty):
             raise KeyError("BNTY_BRD_CH-UPD-BNTY_NOT_EXST: Attempted to update a BBC message for a criminal that is not listed")
             bbLogger.log("BBC", "remBty", "Attempted to update a BBC message for a criminal that is not listed: " + bounty.criminal.name, category='bountyBoards', eventType="LISTING_UPD-NO_EXST")
@@ -148,7 +287,17 @@ class BountyBoardChannel:
         try:
             await self.bountyMessages[bounty.criminal.faction][bounty.criminal].edit(content=content, embed=makeBountyEmbed(bounty))
         except HTTPException:
-            bbLogger.log("BBC", "updBtyMsg", "HTTPException thrown when updating bounty listing for criminal: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-HTTPERR")
+            succeeded = False
+            for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                try:
+                    await self.bountyMessages[bounty.criminal.faction][bounty.criminal].edit(content=content, embed=makeBountyEmbed(bounty))
+                    succeeded = True
+                except HTTPException:
+                    await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                    continue
+                break
+            if not succeeded:
+                bbLogger.log("BBC", "updBtyMsg", "HTTPException thrown when updating bounty listing for criminal: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-HTTPERR")
         except Forbidden:
             bbLogger.log("BBC", "updBtyMsg", "Forbidden exception thrown when updating bounty listing for criminal: " + bounty.criminal.name, category='bountyBoards', eventType="UPD_LSTING-FORBIDDENERR")
         except NotFound:
@@ -156,7 +305,20 @@ class BountyBoardChannel:
             await self.removeBounty(bounty)
 
 
-    def toDict(self):
+    async def clear(self):
+        """Clear all bounty listings on the board.
+        """
+        for fac in self.bountyMessages:
+            for bounty in self.bountyMessages[fac]:
+                await self.removeBounty(bounty)
+
+
+    def toDict(self) -> dict:
+        """Serialise this BBC to dictionary format
+
+        :return: A dictionary containing all data needed to recreate this BBC
+        :rtype: dict
+        """
         # dict of message id: criminal dict
         listings = {}
         for fac in self.bountyMessages:
@@ -165,7 +327,13 @@ class BountyBoardChannel:
         return {"channel":self.channel.id, "listings":listings, "noBountiesMsg": self.noBountiesMessage.id if self.noBountiesMessage is not None else -1}
 
 
-def fromDict(BBCDict):
+def fromDict(BBCDict : dict) -> BountyBoardChannel:
+    """Factory function constructing a new BBC from the information in the provided dictionary - the opposite of BountyBoardChannel.toDict
+
+    :param dict BBCDict: a dictionary representation of the BBC, to convert to an object
+    :return: The new BountyBoardChannel object
+    :rtype: BountyBoardChannel
+    """
     if BBCDict is None:
         return None
     return BountyBoardChannel(BBCDict["channel"], BBCDict["listings"], BBCDict["noBountiesMsg"] if "noBountiesMsg" in BBCDict else -1)
