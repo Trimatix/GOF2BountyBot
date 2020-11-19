@@ -106,11 +106,11 @@ class bbGuild:
             self.hasBountyBoardChannel = bountyBoardChannel is not None
 
             if bbConfig.newBountyDelayType == "fixed":
-                self.newBountyTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+                self.newBountyTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
             else:
                 try:
                     self.newBountyTT = TimedTask.DynamicRescheduleTask(
-                        bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+                        bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=self.spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
                 except KeyError:
                     raise ValueError(
                         "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
@@ -507,11 +507,11 @@ class bbGuild:
                                     "random-routeScale": bbConfig.newBountyDelayRandomRange}
 
         if bbConfig.newBountyDelayType == "fixed":
-            self.newBountyTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+            self.newBountyTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
         else:
             try:
                 self.newBountyTT = TimedTask.DynamicRescheduleTask(
-                    bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+                    bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=self.spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
             except KeyError:
                 raise ValueError(
                     "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
