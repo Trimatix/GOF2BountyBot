@@ -220,7 +220,7 @@ class BountyConfig:
                         if tries == 0:
                             break
                     if tries == 0:
-                            break
+                        break
                     self.activeShip.equipWeapon(random.choice(bbData.weaponObjsByTL[itemTL]))
 
                 armourEquipped = True
