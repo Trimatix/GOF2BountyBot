@@ -857,7 +857,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
 
                             newLevel = bbConfig.calculateUserBountyHuntingLevel(currentBBUser.bountyHuntingXP)
                             # TODO: Move level management to outside of this loop to support users from different servers
-                            if newLevel > oldLevel and message.guild.get_member(currentBBUser.id) is not None:
+                            if newLevel > oldLevel:
                                 levelUpMsg += "\n:arrow_up: **Level Up!**\n" + lib.discordUtil.userOrMemberName(bbGlobals.client.get_user(currentBBUser.id), message.guild) + " reached **Bounty Hunter Level " + str(newLevel) + "!** :partying_face:"
                         
                         if levelUpMsg != "":
