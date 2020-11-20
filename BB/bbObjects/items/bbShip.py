@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import List, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from .modules import bbModule
+    from discord import Embed
 
 from .bbItem import bbItem
 from . import bbTurret, bbWeapon, bbShipUpgrade, bbModuleFactory
@@ -717,6 +718,32 @@ class bbShip(bbItem):
         stats += "Handling: " + str(self.getHandling(shipUpgradesOnly=True)) + ("(+)" if self.getHandling(shipUpgradesOnly=True) > self.handling else "") + ", "
         stats += "Max secondaries: " + str(self.getNumSecondaries(shipUpgradesOnly=True)) + ("(+)" if self.getNumSecondaries(shipUpgradesOnly=True) > self.numSecondaries else "") + "*"
         return stats
+
+
+    def fillLoadoutEmbed(self, baseEmbed : Embed, shipEmoji : bool = False):
+        """Populate a discord.embed with information describing the ship.
+
+        :param discord.Embed baseEmbed: The embed to add fields to
+        :param bool shipEmoji: whether or not to use the ship's emoji next to its name. You may wish to leave this as false and instead use the ship's icon in the embed icon (Default False)
+        """
+        baseEmbed.add_field(name="Active Ship:", value=(self.emoji.sendable if shipEmoji and self.hasEmoji else "") + self.getNameAndNick() + "\n" + self.statsStringNoItems(), inline=False)
+
+        if self.getMaxPrimaries() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(self.weapons)) + "/" + str(self.getMaxPrimaries()) + "*", inline=False)
+            for weaponNum in range(1, len(self.weapons) + 1):
+                baseEmbed.add_field(name=str(weaponNum) + ". " + self.weapons[weaponNum - 1].name, value=(self.weapons[weaponNum - 1].emoji.sendable if self.weapons[weaponNum - 1].hasEmoji else "") + self.weapons[weaponNum - 1].statsStringShort(), inline=True)
+
+        if self.getMaxModules() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(self.modules)) + "/" + str(self.getMaxModules()) + "*", inline=False)
+            for moduleNum in range(1, len(self.modules) + 1):
+                baseEmbed.add_field(name=str(moduleNum) + ". " + self.modules[moduleNum - 1].name, value=(self.modules[moduleNum - 1].emoji.sendable if self.modules[moduleNum - 1].hasEmoji else "") + self.modules[moduleNum - 1].statsStringShort(), inline=True)
+        
+        if self.getMaxTurrets() > 0:
+            baseEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(self.turrets)) + "/" + str(self.getMaxTurrets()) + "*", inline=False)
+            for turretNum in range(1, len(self.turrets) + 1):
+                baseEmbed.add_field(name=str(turretNum) + ". " + self.turrets[turretNum - 1].name, value=(self.turrets[turretNum - 1].emoji.sendable if self.turrets[turretNum - 1].hasEmoji else "") + self.turrets[turretNum - 1].statsStringShort(), inline=True)
+
+        return baseEmbed
     
 
     def getType(self) -> type:

@@ -1,5 +1,4 @@
-import discord
-from discord import Embed, HTTPException, Forbidden, NotFound, Client, Message
+from discord import Embed, HTTPException, Forbidden, NotFound, Client, Message, Colour
 from ....bbConfig import bbData, bbConfig
 from .... import lib
 from .. import bbCriminal
@@ -16,9 +15,12 @@ def makeBountyEmbed(bounty : bbBounty.Bounty) -> Embed:
     :rtype: discord.Embed
     """
     embed = Embed(title=bounty.criminal.name, colour=bbData.factionColours[bounty.faction] if bounty.faction in bbData.factionColours else bbData.factionColours["neutral"])
-    embed.set_footer(text=bounty.faction.title())
+    embed.set_footer(text=bounty.faction.title(), icon_url=bbData.factionIcons[bounty.faction] if bounty.faction in bbData.factionIcons else "")
     embed.set_thumbnail(url=bounty.criminal.icon)
-    embed.add_field(name="**Reward:**", value=lib.stringTyping.commaSplitNum(str(bounty.reward)) + " Credits")
+    embed.add_field(name="**Reward Pool:**", value=lib.stringTyping.commaSplitNum(str(bounty.reward)) + " Credits")
+    embed.add_field(name="**Difficulty:**", value=str(bounty.criminal.techLevel))
+    # embed = bounty.criminal.activeShip.fillLoadoutEmbed(embed, shipEmoji=True)
+    embed.add_field(name="**See the culprit's loadout with:**", value="`" + bbConfig.commandPrefix + "loadout criminal " + bounty.criminal.name + "`")
     routeStr = ""
     for system in bounty.route:
         if bounty.systemChecked(system):
@@ -31,14 +33,12 @@ def makeBountyEmbed(bounty : bbBounty.Bounty) -> Embed:
         else:
             routeStr += system
         routeStr += ", "
+    
     embed.add_field(name="**Route:**", value=routeStr[:-2], inline=False)
-    embed.add_field(name="-", value="> ~~Already checked systems~~\n> **Criminal spotted here recently**") #"‎"
-    # embed.add_field(value="`Stars indicate systems where the criminal has recently been spotted.`", name="`Crossed-through systems have already been checked.`")
-    # embed.add_field(name="**Difficulty:**", value=str(bounty.criminal.techLevel))
-    # embed.add_field(name="**See the culprit's loadout with:**", value="`" + bbConfig.commandPrefix + "loadout criminal " + bounty.criminal.name + "`")
+    embed.add_field(name="-", value="> ~~Already checked systems~~\n> **Criminal spotted here recently**")
     return embed
 
-noBountiesEmbed = Embed(description='> Please check back later, or use the `$notify bounties` command to be notified when they spawn!', colour=discord.Colour.dark_orange())
+noBountiesEmbed = Embed(description='> Please check back later, or use the `$notify bounties` command to be notified when they spawn!', colour=Colour.dark_orange())
 noBountiesEmbed.set_author(name='No Bounties Available', icon_url='https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/stopwatch_23f1.png')
 
 

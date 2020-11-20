@@ -1,5 +1,4 @@
 # Discord Imports
-
 import discord
 from discord.ext.commands import Bot as ClientBaseClass
 
@@ -14,7 +13,7 @@ import os
 
 from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .bbObjects import bbShipSkin
-from .bbObjects.bounties import bbCriminal, bbSystem
+from .bbObjects.bounties import bbCriminal, bbSystem, bbBountyConfig, bbBounty
 from .bbObjects.items import bbModuleFactory, bbShipUpgrade, bbTurret, bbWeapon
 from .bbObjects.items.tools import bbShipSkinTool, bbToolItemFactory
 from .scheduling import TimedTask
@@ -392,13 +391,6 @@ async def on_ready():
     bbGlobals.usersDB = loadUsersDB(bbConfig.userDBPath)
     bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath, dbReload=True)
 
-    for guild in bbGlobals.guildsDB.getGuilds():
-        if guild.hasBountyBoardChannel:
-            if bbGlobals.client.get_channel(guild.bountyBoardChannel.channelIDToBeLoaded) is None:
-                guild.removeBountyBoardChannel()
-            else:
-                await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
-
     # Set help embed thumbnails
     for levelSection in bbCommands.helpSectionEmbeds:
         for helpSection in levelSection.values():
@@ -413,11 +405,30 @@ async def on_ready():
     # bot is now logged in
     bbGlobals.client.bb_loggedIn = True
     
+    # Create the escaped bounties rescheduler. If a player locatesa criminal but is unable to beat them in a duel, the bounty reappears later.
+    bbGlobals.escapedBountiesRespawnTTDB = TimedTaskHeap.TimedTaskHeap()
+    
+    for guild in bbGlobals.guildsDB.getGuilds():
+        if guild.hasBountyBoardChannel:
+            await guild.bountyBoardChannel.init(bbGlobals.client, bbData.bountyFactions)
+        if not guild.bountiesDisabled:
+            for crim in guild.bountiesDB.escapedCriminalTimeouts:
+                respawnTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict({"minutes": guild.bountiesDB.escapedCriminalTimeouts[crim]}), 
+                                                expiryFunction=guild.spawnAndAnnounceBounty,
+                                                expiryFunctionArgs={"newBounty": bbBounty.Bounty(criminalObj=crim, config=bbBountyConfig.BountyConfig(faction=crim.faction), dbReload=True), "newConfig": None},
+                                                rescheduleOnExpiryFuncFailure=True)
+                bbGlobals.escapedBountiesRespawnTTDB.scheduleTask(respawnTT)
+        
+    # Create the shop stock refresh TimedTask, refresh the stock of all shops according to the period in bbConfig.
     bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
+    # Create the database saving TimedTask, to save all data to JSON periodically as defined in bbConfig.
     bbGlobals.dbSaveTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.savePeriod), autoReschedule=True, expiryFunction=bbGlobals.client.bb_saveAllDBs)
-
+    # Create the duel requests timeout database. To save memory, duels should not last forever. This database will be used to remove duel requests older than the period defined in bbConfig.
     bbGlobals.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()
 
+    # Validate the TimedTask scheduling method.
+    # 'fixed' mode waits a set amount of time before checking if any timedtasks are due to expire.
+    # 'dynamic' mode [UNIMPLEMENTED] waits the amount of time given in the soonest expiring TimedTask, avoiding busy-waiting.
     if bbConfig.timedTaskCheckingType not in ["fixed", "dynamic"]:
         raise ValueError("bbConfig: Invalid timedTaskCheckingType '" +
                          bbConfig.timedTaskCheckingType + "'")
@@ -452,9 +463,12 @@ async def on_ready():
 
         await bbGlobals.dbSaveTT.doExpiryCheck()
 
+        # Save data to file
+        await bbGlobals.dbSaveTT.doExpiryCheck()
+        # Expire old duel requests
         await bbGlobals.duelRequestTTDB.doTaskChecking()
-
-        await bbGlobals.reactionMenusTTDB.doTaskChecking()
+        # Respawn escaped bounties
+        await bbGlobals.escapedBountiesRespawnTTDB.doTaskChecking()
 
 
 @bbGlobals.client.event

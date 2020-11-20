@@ -197,20 +197,52 @@ bbCommands.register("hangar", cmd_hangar, 1, aliases=["hanger"], forceKeepArgsCa
 
 
 async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
-    """list the requested user's currently equipped items.
+    """list the requested user or criminal's currently equipped items.
 
     :param discord.Message message: the discord message calling the command
-    :param str args: either empty string, or a user mention
+    :param str args: either empty string, a user mention, or 'criminal' followed by a criminal alias.
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
+    callingBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
+
     requestedUser = message.author
     useDummyData = False
     userFound = False
 
-    if len(args.split(" ")) > 1:
-        await message.channel.send(":x: Too many arguments! I can only take a target user!")
+    if len(args.split(" ")) > 1 and args.split(" ")[0] != "criminal":
+        await message.channel.send(":x: Too many arguments! I can only take a target user/criminal!")
+        return
+    elif len(args.split(" ")) == 1 and args == "criminal":
+        await message.channel.send(":x: Not enough arguments! Please give the criminal name.")
         return
 
+    if args.split(" ")[0] == "criminal":
+        if callingBBGuild.bountiesDisabled:
+            await message.channel.send(":x: This server has bounties disabled!")
+            return
+
+        # look up the criminal object
+        criminalName = args[9:].title()
+
+        # report unrecognised criminal names
+        if not callingBBGuild.bountiesDB.bountyNameExists(criminalName, noEscapedCrim=True):
+            errmsg = ":x: That pilot is not currently wanted!"
+            
+            if lib.stringTyping.isMention(criminalName):
+                errmsg += "\n:warning: **Don't tag users**, use their name and ID number like so: `" + bbConfig.commandPrefix + "loadout criminal Trimatix#2244`"
+            
+            await message.channel.send(errmsg)
+            return
+
+        criminalObj = callingBBGuild.bountiesDB.getBounty(criminalName).criminal
+        
+        activeShip = criminalObj.activeShip
+        loadoutEmbed = lib.discordUtil.makeEmbed(titleTxt="Loadout", desc=criminalObj.name.title() + "\n`Difficulty: " + str(criminalObj.techLevel) + "`", col=bbData.factionColours[criminalObj.faction] if criminalObj.faction in bbData.factionColours else bbData.factionColours["neutral"], thumb=criminalObj.icon)
+        loadoutEmbed = activeShip.fillLoadoutEmbed(loadoutEmbed, shipEmoji=True)
+        
+        await message.channel.send(embed=loadoutEmbed)
+        return
+    
     if args != "":
         requestedUser = lib.discordUtil.getMemberByRefOverDB(args, dcGuild=message.guild)
         if requestedUser is None:
@@ -225,27 +257,9 @@ async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
 
     if useDummyData:
         activeShip = bbShip.fromDict(bbUser.defaultShipLoadoutDict)
-        loadoutEmbed = lib.discordUtil.makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours[activeShip.manufacturer] if activeShip.manufacturer in bbData.factionColours else bbData.factionColours[
-                                 "neutral"], thumb=activeShip.icon if activeShip.hasIcon else requestedUser.avatar_url_as(size=64))
-        loadoutEmbed.add_field(name="Active Ship:", value=activeShip.name +
-                               "\n" + activeShip.statsStringNoItems(), inline=False)
-
-        loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
-            activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + ("(+)" if activeShip.getMaxPrimaries(shipUpgradesOnly=True) > activeShip.maxPrimaries else "") + "*", inline=False)
-        for weaponNum in range(1, len(activeShip.weapons) + 1):
-            loadoutEmbed.add_field(name=str(weaponNum) + ". " + (activeShip.weapons[weaponNum - 1].emoji.sendable + " " if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].name, value=activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
-
-        loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
-            activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + ("(+)" if activeShip.getMaxModules(shipUpgradesOnly=True) > activeShip.maxModules else "") + "*", inline=False)
-        for moduleNum in range(1, len(activeShip.modules) + 1):
-            loadoutEmbed.add_field(name=str(moduleNum) + ". " + (activeShip.modules[moduleNum - 1].emoji.sendable + " " if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].name, value=activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
-
-        loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
-            activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + ("(+)" if activeShip.getMaxTurrets(shipUpgradesOnly=True) > activeShip.maxTurrets else "") + "*", inline=False)
-        for turretNum in range(1, len(activeShip.turrets) + 1):
-            loadoutEmbed.add_field(name=str(turretNum) + ". " + (activeShip.turrets[turretNum - 1].emoji.sendable + " " if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].name, value=activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
-
-        await message.channel.send(embed=loadoutEmbed)
+        loadoutEmbed = lib.discordUtil.makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours[activeShip.manufacturer] if activeShip.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], thumb=activeShip.icon if activeShip.hasIcon else requestedUser.avatar_url_as(size=64))
+        
+        await message.channel.send(embed=activeShip.fillLoadoutEmbed(loadoutEmbed))
         return
 
     else:
@@ -258,27 +272,8 @@ async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
             loadoutEmbed.add_field(name="Active Ship:",
                                    value="None", inline=False)
         else:
-            loadoutEmbed.add_field(name="Active Ship:", value=activeShip.getNameAndNick(
-            ) + "\n" + activeShip.statsStringNoItems(), inline=False)
-
-            if activeShip.getMaxPrimaries() > 0:
-                loadoutEmbed.add_field(name="‎", value="__**Equipped Weapons**__ *" + str(len(
-                    activeShip.weapons)) + "/" + str(activeShip.getMaxPrimaries()) + ("(+)" if activeShip.getMaxPrimaries(shipUpgradesOnly=True) > activeShip.maxPrimaries else "") + "*", inline=False)
-                for weaponNum in range(1, len(activeShip.weapons) + 1):
-                    loadoutEmbed.add_field(name=str(weaponNum) + ". " + (activeShip.weapons[weaponNum - 1].emoji.sendable + " " if activeShip.weapons[weaponNum - 1].hasEmoji else "") + activeShip.weapons[weaponNum - 1].name, value=activeShip.weapons[weaponNum - 1].statsStringShort(), inline=True)
-
-            if activeShip.getMaxModules() > 0:
-                loadoutEmbed.add_field(name="‎", value="__**Equipped Modules**__ *" + str(len(
-                    activeShip.modules)) + "/" + str(activeShip.getMaxModules()) + ("(+)" if activeShip.getMaxModules(shipUpgradesOnly=True) > activeShip.maxModules else "") + "*", inline=False)
-                for moduleNum in range(1, len(activeShip.modules) + 1):
-                    loadoutEmbed.add_field(name=str(moduleNum) + ". " + (activeShip.modules[moduleNum - 1].emoji.sendable + " " if activeShip.modules[moduleNum - 1].hasEmoji else "") + activeShip.modules[moduleNum - 1].name, value=activeShip.modules[moduleNum - 1].statsStringShort(), inline=True)
-
-            if activeShip.getMaxTurrets() > 0:
-                loadoutEmbed.add_field(name="‎", value="__**Equipped Turrets**__ *" + str(len(
-                    activeShip.turrets)) + "/" + str(activeShip.getMaxTurrets()) + ("(+)" if activeShip.getMaxTurrets(shipUpgradesOnly=True) > activeShip.maxTurrets else "") + "*", inline=False)
-                for turretNum in range(1, len(activeShip.turrets) + 1):
-                    loadoutEmbed.add_field(name=str(turretNum) + ". " + (activeShip.turrets[turretNum - 1].emoji.sendable + " " if activeShip.turrets[turretNum - 1].hasEmoji else "") + activeShip.turrets[turretNum - 1].name, value=activeShip.turrets[turretNum - 1].statsStringShort(), inline=True)
-
+            loadoutEmbed = activeShip.fillLoadoutEmbed(loadoutEmbed)
+        
         await message.channel.send(embed=loadoutEmbed)
 
 bbCommands.register("loadout", cmd_loadout, 0, forceKeepArgsCasing=True, allowDM=True, helpSection="loadout", signatureStr="**loadout** *[user]*", shortHelp="Display your current ship and the items equipped onto it, or those equipped by another player.")

@@ -24,14 +24,15 @@ class Criminal (bbAliasable.Aliasable):
     :vartype isPlayer: bool
     :var builtIn: If this criminal is an NPC, are they built in or custom?
     :vartype builtIn: bool
-    :var ship: The ship equipped by this criminal
-    :vartype ship: bbShip
+    :var activeShip: The ship equipped by this criminal
+    :vartype activeShip: bbShip
     :var hasShip: Whether this criminal has a ship equipped or not
     :vartype hasShip: bool
     """
 
     def __init__(self, name : str, faction : str, icon : str, builtIn : bool = False,
-            isPlayer : bool = False, aliases : List[str] = [], wiki : str = "", ship : bool = None):
+            isPlayer : bool = False, aliases : List[str] = [], wiki : str = "",
+            activeShip : bool = None, techLevel : int = -1):
         """
         :param str name: The name of the criminal
         :param str faction: the faction that this criminal is wanted by
@@ -39,7 +40,7 @@ class Criminal (bbAliasable.Aliasable):
         :param str wiki: A URL pointing to a web page to use as this criminal's wiki page in their info embed
         :param bool isPlayer: Whether this criminal is a player or an NPC
         :param bool builtIn: If this criminal is an NPC, are they built in or custom?
-        :param bbShip ship: The ship equipped by this criminal
+        :param bbShip activeShip: The ship equipped by this criminal
         :param list[str] aliases: Alias names that can be used to refer to this criminal
         """
         super(Criminal, self).__init__(name, aliases)
@@ -58,11 +59,13 @@ class Criminal (bbAliasable.Aliasable):
         self.isPlayer = isPlayer
         self.builtIn = builtIn
 
-        if ship is not None:
-            self.ship = bbShip.fromDict(ship.toDict())
+        if activeShip is not None:
+            self.activeShip = bbShip.fromDict(activeShip.toDict())
             self.hasShip = True
         else:
             self.hasShip = False
+
+        self.techLevel = techLevel
 
     
     def clearShip(self):
@@ -72,8 +75,9 @@ class Criminal (bbAliasable.Aliasable):
         """
         if not self.hasShip:
             raise RuntimeError("CRIM_CLEARSH_NOSHIP: Attempted to clearShip on a Criminal with no active ship")
-        del self.ship
+        del self.activeShip
         self.hasShip = False
+        self.techLevel = -1
 
 
     def unequipShip(self):
@@ -83,31 +87,32 @@ class Criminal (bbAliasable.Aliasable):
         """
         if not self.hasShip:
             raise RuntimeError("CRIM_UNEQSH_NOSHIP: Attempted to unequipShip on a Criminal with no active ship")
-        self.ship = None
+        self.activeShip = None
         self.hasShip = False
+        self.techLevel = -1
 
 
-    def equipShip(self, ship : bbShip):
+    def equipShip(self, newShip : bbShip):
         """Equip the given ship, by reference to the given object
 
-        :param bbShip ship: The ship to equip
+        :param bbShip newShip: The ship to equip
         :raise RuntimeError: If the criminal already has a ship equipped
         """
         if self.hasShip:
             raise RuntimeError("CRIM_EQUIPSH_HASSH: Attempted to equipShip on a Criminal that already has an active ship")
-        self.ship = ship
+        self.activeShip = newShip
         self.hasShip = True
 
     
-    def copyShip(self, ship : bbShip):
+    def copyShip(self, newShip : bbShip):
         """Equip the given ship, by taking a deep copy of the given object
 
-        :param bbShip ship: The ship to equip
+        :param bbShip newShip: The ship to equip
         :raise RuntimeError: If the criminal already has a ship equipped
         """
         if self.hasShip:
             raise RuntimeError("CRIM_COPYSH_HASSH: Attempted to copyShip on a Criminal that already has an active ship")
-        self.ship = bbShip.fromDict(ship.toDict())
+        self.activeShip = bbShip.fromDict(newShip.toDict())
         self.hasShip = True
         
 
@@ -137,9 +142,19 @@ class Criminal (bbAliasable.Aliasable):
         :rtype: dict
         """
         if self.builtIn:
-            return {"builtIn":True, "name":self.name}
+            data = {"builtIn":True, "name":self.name}
         else:
-            return {"builtIn":False, "isPlayer": self.isPlayer, "name":self.name, "icon":self.icon, "faction":self.faction, "aliases":self.aliases, "wiki":self.wiki}
+            data = {"builtIn":False, "isPlayer": self.isPlayer, "name":self.name, "icon":self.icon, "faction":self.faction, "aliases":self.aliases, "wiki":self.wiki}
+
+        if self.hasShip:
+            data["activeShip"] = self.activeShip.toDict()
+            data["techLevel"] = self.techLevel
+        
+        return data
+
+    
+    def __hash__(self):
+        return hash(self.name)
 
 
 def fromDict(crimDict : dict, builtIn : bool = False) -> Criminal:
@@ -151,6 +166,15 @@ def fromDict(crimDict : dict, builtIn : bool = False) -> Criminal:
     """
     if "builtIn" in crimDict:
         if crimDict["builtIn"]:
-            return bbData.builtInCriminalObjs[crimDict["name"]]
-        return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=crimDict["builtIn"] or builtIn)
-    return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)
+            crimObj = bbData.builtInCriminalObjs[crimDict["name"]]
+        else:
+            crimObj = Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=crimDict["builtIn"] or builtIn)
+    else:
+        crimObj = Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)
+
+    if "activeShip" in crimDict and not crimObj.hasShip:
+        crimObj.equipShip(bbShip.fromDict(crimDict["activeShip"]))
+    if "techLevel" in crimDict and crimObj.techLevel == -1:
+        crimObj.techLevel = crimDict["techLevel"] if "techLevel" in crimDict else crimObj.activeShip.techLevel
+    
+    return crimObj

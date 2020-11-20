@@ -1,4 +1,4 @@
-from ..bbObjects.bounties import bbBounty
+from ..bbObjects.bounties import bbBounty, bbCriminal
 from typing import List
 
 class bbBountyDB:
@@ -30,11 +30,57 @@ class bbBountyDB:
 
         # Useable faction names for this bbBountyDB
         self.factions = factions
-        for fac in factions:
-            self.bounties[fac] = []
-
         # the maximum length a faction's self.bounties dict can be
         self.maxBountiesPerFaction = maxBountiesPerFaction
+        # dictionary of faction: list of bbCriminals which should not be spawned.
+        # Currently used for escaped criminals
+        self.escapedCriminals = {}
+        # dictionary of bbCriminal: number of minutes until the bounty should respawn.
+        # Currently used only for saving.
+        self.escapedCriminalTimeouts = {}
+
+        for fac in factions:
+            self.bounties[fac] = []
+            self.escapedCriminals[fac] = []
+
+        self.latestBounty = None
+
+
+    """
+    Add a criminal to the record of escaped criminals.
+    crim must not yet be recorded in the escaped criminals database.
+
+    @param crim -- The criminal to record
+    @param time -- Integer number of minutes used for scheduling this criminal's respawn
+    """
+    def addEscapedCriminal(self, crim, time):
+        if crim in self.escapedCriminals[crim.faction]:
+            raise KeyError("criminal already on record: " + crim.name)
+        self.escapedCriminalTimeouts[crim] = time
+        self.escapedCriminals[crim.faction].append(crim)
+
+    
+    """
+    Remove a criminal from the record of escaped criminals.
+    crim must already be recorded in the escaped criminals database.
+
+    @param crim -- The criminal to remove from the record
+    """
+    def removeEscapedCriminal(self, crim):
+        if crim not in self.escapedCriminals[crim.faction]:
+            raise KeyError("criminal not found: " + crim.name)
+        self.escapedCriminals[crim.faction].remove(crim)
+        del self.escapedCriminalTimeouts[crim]
+
+
+    """
+    Decide whether a bbCriminal is recorded in the escaped criminals database.
+
+    @param crim -- The bbCriminal to check for existence
+    @return -- True if crim is in this database's escaped criminals record, False otherwise
+    """
+    def escapedCriminalExists(self, crim):
+        return crim in self.escapedCriminals[crim.faction]
 
         self.latestBounty = None
 
@@ -51,6 +97,7 @@ class bbBountyDB:
             raise KeyError("Attempted to add a faction that already exists: " + faction)
         # Initialise faction's database to empty
         self.bounties[faction] = []
+        self.escapedCriminals[faction] = []
 
 
     
@@ -64,7 +111,8 @@ class bbBountyDB:
         if not self.factionExists(faction):
             raise KeyError("Unrecognised faction: " + faction)
         # Remove the faction name from the DB
-        self.bounties.pop(faction)
+        del self.bounties[faction]
+        del self.escapedCriminals[faction]
 
 
     
@@ -80,6 +128,7 @@ class bbBountyDB:
                 raise KeyError("Unrecognised faction: " + faction)
             # Empty the faction's bounties
             self.bounties[faction] = []
+            self.escapedCriminals[faction] = []
         # If no faction is given
         else:
             # clearBounties for each faction in the DB
@@ -167,6 +216,36 @@ class bbBountyDB:
         # The criminal was not recognised, raise an error
         raise KeyError("Bounty not found: " + name)
 
+    
+    """
+    Get the bbCriminal object for a given name or alias, from the list of escaped criminals.
+    This process is much more efficient when given the faction that the criminal is wanted by.
+
+    @param name -- A name or alias for the bbCriminal to be fetched.
+    @param faction -- The faction by which the bbCriminal is wanted. Give None if this is not known, to search all factions. Default: None
+    @return -- the the named bbCriminal
+    @throws KeyError -- If the requested criminal name does not exist in the escapedCriminals list
+    """
+    def getEscapedCriminal(self, name, faction=None):
+        # If the criminal's faction is known
+        if faction is not None:
+            # Search the given faction's bounties
+            for crim in self.escapedCriminals[faction]:
+                # Return the named criminal's bbBounty if the name is found
+                if crim.isCalled(name):
+                    return crim
+
+        # If the criminal's faction is not known, search all factions
+        else:
+            for fac in self.getFactions():
+                # Return the named criminal's bbBounty if the name is found
+                for crim in self.escapedCriminals[fac]:
+                    if crim.isCalled(name):
+                        return crim
+        
+        # The criminal was not recognised, raise an error
+        raise KeyError("Bounty not found: " + name)
+
 
     
     def canMakeBounty(self) -> bbBounty.Bounty:
@@ -198,7 +277,8 @@ class bbBountyDB:
 
 
     
-    def bountyNameExists(self, name : str, faction : str = None) -> bool:
+
+    def bountyNameExists(self, name : str, faction : str = None, noEscapedCrim : bool = True) -> bool:
         """Check whether a criminal with the given name or alias exists in the DB
         The process is much more efficient if the faction where the bbCriminal should reside is known.
 
@@ -213,7 +293,13 @@ class bbBountyDB:
             self.getBounty(name, faction)
         # Return False if the name was not found, True otherwise
         except KeyError:
-            return False
+            if not noEscapedCrim:
+                try:
+                    self.getEscapedCriminal(name, faction)
+                except KeyError:
+                    return False
+            else:
+                return False
         return True
 
     
@@ -255,8 +341,8 @@ class bbBountyDB:
             raise OverflowError("Requested faction's bounty DB is full")
 
         # ensure the given bounty does not already exist
-        if self.bountyNameExists(bounty.criminal.name):
-            raise ValueError("Attempted to add a bounty whose name already exists: " + bounty.name)
+        if self.bountyNameExists(bounty.criminal.name, noEscapedCrim=False):
+            raise ValueError("Attempted to add a bounty whose name already exists: " + bounty.criminal.name)
 
         # Add the bounty to the database
         self.bounties[bounty.faction].append(bounty)
@@ -292,13 +378,16 @@ class bbBountyDB:
         :return: A dictionary containing all data needed to recreate this bbBountyDB.
         :rtype: dict
         """
-        data = {}
+        data = {"escapedCriminals": []}
         # Serialise all factions into name : list of serialised bbBounty
         for fac in self.getFactions():
             data[fac] = []
             # Serialise all of the current faction's bounties into dictionary
             for bounty in self.getFactionBounties(fac):
                 data[fac].append(bounty.toDict())
+
+            for crim in self.escapedCriminals[fac]:
+                data["escapedCriminals"].append([crim.toDict(), self.escapedCriminalTimeouts[crim]])
         return data
 
 
@@ -351,7 +440,11 @@ def fromDict(bountyDBDict : dict, maxBountiesPerFaction : int, dbReload : bool =
     newDB = bbBountyDB(bountyDBDict.keys(), maxBountiesPerFaction)
     # Iterate over all factions in the DB
     for fac in bountyDBDict.keys():
-        # Convert each serialised bbBounty into a bbBounty object
-        for bountyDict in bountyDBDict[fac]:
-            newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
+        if fac == "escapedCriminals":
+            for crim in bountyDBDict[fac]:
+                newDB.addEscapedCriminal(bbCriminal.fromDict(crim[0]), crim[1])
+        else:
+            # Convert each serialised bbBounty into a bbBounty object
+            for bountyDict in bountyDBDict[fac]:
+                newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
     return newDB

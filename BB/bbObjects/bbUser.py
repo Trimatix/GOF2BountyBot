@@ -22,8 +22,8 @@ defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
                         "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}, {"name": "IMT Extract 1.3", "builtIn": True}]}
 
 # Default attributes to give to new players
-defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"item": {"name": "Nirai Impulse EX 1", "builtIn": True}, "count": 1}]}
-# Reference value not pre-calculated from defaultUserDict. This is not used in the game's code, but provides a reference for game design.
+defaultUserDict = {"bountyHuntingXP": bbConfig.bountyHuntingXPForLevel(1), "credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "systemsChecked":0, "bountyWins":0, "activeShip": defaultShipLoadoutDict, "inactiveWeapons":[{"item": {"name": "Nirai Impulse EX 1", "builtIn": True}, "count": 1}]}
+# Reference value pre-calculated from defaultUserDict. This is not used in the game's code, but provides a reference for game design.
 defaultUserValue = 28970
 
 
@@ -36,6 +36,8 @@ class bbUser:
     :vartype credits: int
     :var lifetimeCredits: The total amount of credits this user has earned through hunting bounties (TODO: rename)
     :vartype lifetimeCredits: int
+    :var bountyHuntingXP: The amount of XP this user has gained through bounty hunting
+    :vartype bountyHuntingXP: int
     :var bountyCooldownEnd: A utc timestamp representing when the user's cmd_check cooldown is due to expire
     :vartype bountyCooldownEnd: float
     :var systemsChecked: The total number of space systems this user has checked
@@ -84,7 +86,7 @@ class bbUser:
     :vartype guildTransferCooldownEnd: datetime.datetime
     """
 
-    def __init__(self, id : int, credits : int = 0, lifetimeCredits : int = 0, 
+    def __init__(self, id : int, credits : int = 0, lifetimeCredits : int = 0, bountyHuntingXP : int = bbConfig.bountyHuntingXPForLevel(1), 
                     bountyCooldownEnd : int = -1, systemsChecked : int = 0, bountyWins : int = 0, activeShip : bool = None,
                     inactiveShips : bbInventory.bbInventory = bbInventory.bbInventory(),
                     inactiveModules : bbInventory.bbInventory = bbInventory.bbInventory(),
@@ -99,6 +101,7 @@ class bbUser:
         :param int id: The user's unique ID. The same as their unique discord ID.
         :param int credits: The amount of credits (currency) this user has (Default 0)
         :param int lifetimeCredits: The total amount of credits this user has earned through hunting bounties (TODO: rename) (Default 0)
+        :param int bountyHuntingXP: The amount of XP this user has gained through bounty hunting (Default level 1)
         :param float bountyCooldownEnd: A utc timestamp representing when the user's cmd_check cooldown is due to expire (Default -1)
         :param int systemsChecked: The total number of space systems this user has checked (Default 0)
         :param int bountyWins: The total number of bounties this user has won (Default 0)
@@ -200,6 +203,7 @@ class bbUser:
             else:
                 self.userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
 
+        self.bountyHuntingXP = bountyHuntingXP
         self.bountyWinsToday = bountyWinsToday
         self.dailyBountyWinsReset = dailyBountyWinsReset
 
@@ -229,6 +233,7 @@ class bbUser:
         self.duelCreditsWins = 0
         self.duelCreditsLosses = 0
         self.pollOwned = False
+        self.bountyHuntingXP = bbConfig.bountyHuntingXPForLevel(1)
         self.homeGuildID = -1
         self.guildTransferCooldownEnd = datetime.utcnow()
 
@@ -429,7 +434,7 @@ class bbUser:
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "inactiveTools": inactiveToolsDict,
                 "lastSeenGuildId":self.lastSeenGuildId, "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins,
-                "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "pollOwned": self.pollOwned,
+                "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "bountyHuntingXP": self.bountyHuntingXP, "pollOwned": self.pollOwned,
                 "duelCreditsLosses": self.duelCreditsLosses, "homeGuildID": self.homeGuildID, "guildTransferCooldownEnd": self.guildTransferCooldownEnd.timestamp()}
 
 
@@ -710,6 +715,13 @@ def fromDict(id : int, userDict : dict) -> bbUser:
     if "inactiveTools" in userDict:
         for toolListingDict in userDict["inactiveTools"]:
             inactiveTools.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
+            
+    if "bountyHuntingXP" in userDict:
+        bountyHuntingXP = userDict["bountyHuntingXP"]
+    else:
+        # bountyHuntingXP = bbConfig.hunterXPPerSysCheck * userDict["systemsChecked"]
+        # Convert pre-bountyShips savedata to bounty hunter XP by calculating XP directly from total credits earned from bounties
+        bountyHuntingXP = bbConfig.bountyHuntingXPForLevel(1) if "lifetimeCredits" not in userDict else int(userDict["lifetimeCredits"] * bbConfig.bountyRewardToXPGainMult)
 
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
@@ -725,4 +737,5 @@ def fromDict(id : int, userDict : dict) -> bbUser:
                     dailyBountyWinsReset=datetime.utcfromtimestamp(userDict["dailyBountyWinsReset"]) if "dailyBountyWinsReset" in userDict else datetime.utcnow(),
                     pollOwned=userDict["pollOwned"] if "pollOwned" in userDict else False,
                     homeGuildID=userDict["homeGuildID"] if "homeGuildID" in userDict else -1,
-                    guildTransferCooldownEnd=datetime.utcfromtimestamp(userDict["guildTransferCooldownEnd"]) if "guildTransferCooldownEnd" in userDict else datetime.utcnow())
+                    guildTransferCooldownEnd=datetime.utcfromtimestamp(userDict["guildTransferCooldownEnd"]) if "guildTransferCooldownEnd" in userDict else datetime.utcnow(),
+                    bountyHuntingXP=bountyHuntingXP)

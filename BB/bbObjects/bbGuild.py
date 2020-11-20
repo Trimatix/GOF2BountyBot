@@ -109,11 +109,11 @@ class bbGuild:
             self.hasBountyBoardChannel = bountyBoardChannel is not None
 
             if bbConfig.newBountyDelayType == "fixed":
-                self.newBountyTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+                self.newBountyTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
             else:
                 try:
                     self.newBountyTT = TimedTask.DynamicRescheduleTask(
-                        bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+                        bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=self.spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
                 except KeyError:
                     raise ValueError(
                         "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")
@@ -370,17 +370,16 @@ class bbGuild:
 
         :param bbBounty newBounty: the bounty to announce
         """
+        print("Difficulty",newBounty.criminal.techLevel,"New bounty with value:",newBounty.criminal.activeShip.getValue())
         # Create the announcement embed
-        bountyEmbed = lib.discordUtil.makeEmbed(titleTxt=lib.discordUtil.criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
-                                col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
-        bountyEmbed.add_field(name="Reward:", value=str(
-            newBounty.reward) + " Credits")
-        bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
-        bountyEmbed.add_field(name="See the culprit's route with:", value="`" + bbConfig.commandPrefix +
-                            "route " + lib.discordUtil.criminalNameOrDiscrim(newBounty.criminal) + "`", inline=False)
+        bountyEmbed = lib.discordUtil.makeEmbed(titleTxt=lib.discordUtil.criminalNameOrDiscrim(newBounty.criminal), desc=bbConfig.newBountyEmoji.sendable + " __New Bounty Available__", col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
+        bountyEmbed.add_field(name="**Reward Pool:**", value=str(newBounty.reward) + " Credits")
+        bountyEmbed.add_field(name="**Difficulty:**", value=str(newBounty.criminal.techLevel))
+        bountyEmbed.add_field(name="**See the culprit's loadout with:**", value="`" + bbConfig.commandPrefix + "loadout criminal " + newBounty.criminal.name + "`")
+        bountyEmbed.add_field(name="**Route:**", value=", ".join(newBounty.route), inline=False)
         # Create the announcement text
         msg = "A new bounty is now available from **" + \
-            newBounty.faction.title() + "** central command:"
+        newBounty.faction.title() + "** central command:"
 
         if self.hasBountyBoardChannel:
             try:
@@ -416,18 +415,42 @@ class bbGuild:
             # TODO: may wish to add handling for invalid announceChannels - e.g remove them from the bbGuild object
 
 
-    async def spawnAndAnnounceRandomBounty(self):
-        """Generate a completely random bounty, spawn it, and announce it if this guild has
-        an appropriate channel selected.
+    async def spawnAndAnnounceBounty(self, newBountyData):
+        """Generate a new bounty, either at random or by the given bbBountyConfig, spawn it,
+        and announce it if this guild has an appropriate channel selected.
         """
+
         if self.bountiesDisabled:
-            raise ValueError("Attempted to spawn a bounty into a guild where bounties are disabled")
+            bbLogger.log("bbGuild", "spwnAndAnncBty", "Attempted to spawn a bounty into a guild where bounties are disabled: " + (self.dcGuild.name if self.dcGuild is not None else "") + "#" + str(self.id), eventType="BTYS_DISABLED")
+            return
+
         # ensure a new bounty can be created
         if self.bountiesDB.canMakeBounty():
-            newBounty = bbBounty.Bounty(bountyDB=self.bountiesDB)
+            newBounty = newBountyData["newBounty"]
+            if newBounty is None:
+                newBounty = bbBounty.Bounty(bountyDB=self.bountiesDB, config=newBountyData["newConfig"] if "newConfig" in newBountyData else None)
+            else:
+                if self.bountiesDB.escapedCriminalExists(newBounty.criminal):
+                    self.bountiesDB.removeEscapedCriminal(newBounty.criminal)
+
+                if "newConfig" in newBountyData and newBountyData["newConfig"] is not None:
+                    newConfig = newBountyData["newConfig"]
+                    if not newConfig.generated:
+                        newConfig.generate(self.bountiesDB)
+                    newBounty.route = newConfig.route
+                    newBounty.start = newConfig.start
+                    newBounty.end = newConfig.end
+                    newBounty.answer = newConfig.answer
+                    newBounty.checked = newConfig.checked
+                    newBounty.reward = newConfig.reward
+                    newBounty.issueTime = newConfig.issueTime
+                    newBounty.endTime = newConfig.endTime
+
             # activate and announce the bounty
             self.bountiesDB.addBounty(newBounty)
             await self.announceNewBounty(newBounty)
+        else:
+            raise OverflowError("Attempted to spawnAndAnnounceBounty when no more space is available for bounties in the bountiesDB")
 
 
     async def announceBountyWon(self, bounty : bbBounty.Bounty, rewards : Dict[int, Dict[str, Union[int, bool]]], winningUser : Member):
@@ -447,7 +470,7 @@ class bbGuild:
 
                 # Add the winning user to the embed
                 rewardsEmbed.add_field(name="1. 🏆 " + str(rewards[winningUserId]["reward"]) + " credits:", value=winningUser.mention + " checked " + str(
-                    int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else ""), inline=False)
+                    int(rewards[winningUserId]["checked"])) + " system" + ("s" if int(rewards[winningUserId]["checked"]) != 1 else "") + "\n*+" + str(rewards[winningUserId]["xp"]) + "xp*", inline=False)
 
                 # The index of the current user in the embed
                 place = 2
@@ -455,7 +478,7 @@ class bbGuild:
                 for userID in rewards:
                     if not rewards[userID]["won"]:
                         rewardsEmbed.add_field(name=str(place) + ". " + str(rewards[userID]["reward"]) + " credits:", value="<@" + str(userID) + "> checked " + str(
-                            int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else ""), inline=False)
+                            int(rewards[userID]["checked"])) + " system" + ("s" if int(rewards[userID]["checked"]) != 1 else "") + "\n*+" + str(rewards[winningUserId]["xp"]) + "xp*", inline=False)
                         place += 1
 
                 # Send the announcement to the guild's playChannel
@@ -486,11 +509,11 @@ class bbGuild:
                                     "random-routeScale": bbConfig.newBountyDelayRandomRange}
 
         if bbConfig.newBountyDelayType == "fixed":
-            self.newBountyTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+            self.newBountyTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.newBountyFixedDelta), autoReschedule=True, expiryFunction=self.spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
         else:
             try:
                 self.newBountyTT = TimedTask.DynamicRescheduleTask(
-                    bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=self.spawnAndAnnounceRandomBounty)
+                    bountyDelayGenerators[bbConfig.newBountyDelayType], delayTimeGeneratorArgs=bountyDelayGeneratorArgs[bbConfig.newBountyDelayType], autoReschedule=True, expiryFunction=self.spawnAndAnnounceBounty, expiryFunctionArgs={"newBounty": None})
             except KeyError:
                 raise ValueError(
                     "bbConfig: Unrecognised newBountyDelayType '" + bbConfig.newBountyDelayType + "'")

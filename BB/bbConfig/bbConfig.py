@@ -21,9 +21,6 @@ def truncToRes(num : float) -> float:
     return math.trunc(num * math.pow(10, tl_resolution)) / math.pow(10, tl_resolution)
 
 
-
-##### COMMANDS #####
-
 # List of module names from BB.commands to import
 includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_bounties", "usr_loadout", "usr_economy",
                             "admn_channels", "admn_misc",
@@ -31,6 +28,54 @@ includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_
 
 maxCommandsPerHelpPage = 5
 helpEmbedTimeout = {"minutes": 5}
+
+
+##### USER LEVELING #####
+
+# Old method: Amount of XP to award users per system check
+# hunterXPPerSysCheck = 10
+# New method: Apply a multiplier to all rewards gained from a bounty. bounty hunter xp is thus a measure of total earnings from bounty hunting.
+bountyRewardToXPGainMult = 0.1
+
+# Amount of XP to award users per bounty win
+# ⚠ DEPRECATED
+hunterXPPerWin = 0
+
+
+BHLa = 4
+BHLb = 2300000
+BHLc = 0
+BHLd = 13.55
+
+
+# Inverse of calculateUserBountyHuntingLevel
+def bountyHuntingXPForLevel(level):
+    return max(0, int(BHLb * math.pow(10, (level - BHLd) / BHLa) - BHLc))
+
+
+# https://www.desmos.com/calculator/ljkio5xyfz
+def calculateUserBountyHuntingLevel(xp):
+    if xp <= 0:
+        return 1
+    return max(1, int(BHLa * math.log10((xp + BHLc)/BHLb) + BHLd))
+
+
+# def bountyHuntingXPForLevel(level):
+#     return int(1000 * math.exp((level - 1)/3.74) - 1000)
+
+
+# def calculateUserBountyHuntingLevel(xp):
+#     return int(1 + 3.74 * math.log((xp/1000)+1))
+
+
+
+# def bountyHuntingXPForLevel(level):
+#     return int((level + 30001)/4)
+
+
+# def calculateUserBountyHuntingLevel(xp):
+#     return 4 * xp - 30001
+##### COMMANDS #####
 
 
 
@@ -54,7 +99,7 @@ duelCloakChance = 20
 ##### SHOPS #####
 
 # Amount of time to wait between refreshing stock of all shops
-shopRefreshStockPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
+shopRefreshStockPeriod = {"days":0, "hours":0, "minutes":15, "seconds":0}
 
 # The number of ranks to use when randomly picking shop stock
 numShipRanks = 10
@@ -129,6 +174,7 @@ itemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)]
 cumulativeItemTLSpawnChanceForShopTL = [[0 for i in range(minTechLevel, maxTechLevel + 1)] for i in range(minTechLevel, maxTechLevel + 1)]
 
 # Parameters for itemTLSpawnChanceForShopTL values, using quadratic function: https://www.desmos.com/calculator/n2xfxf8taj
+# u function: https://www.desmos.com/calculator/orct5tkn9x
 # Original u function by Novahkiin22: https://www.desmos.com/calculator/tnldodey5u
 # Original function by Novahkiin22: https://www.desmos.com/calculator/nrshikfmxc
 tl_s = 7
@@ -229,7 +275,8 @@ newBountyFixedDelta = {"days":0, "hours":0, "minutes":1, "seconds":0}
 ### random delay config
 # when using random delay generation, use these min and max points
 # when using random-routeScale generation, use these min and max points for bounties of route length 1
-newBountyDelayRandomRange = {"min": 5 * 60, "max": 7 * 60}
+# newBountyDelayRandomRange = {"min": 5 * 60, "max": 7 * 60}
+newBountyDelayRandomRange = {"min": 60, "max": 5 * 60}
 
 ### routeScale config
 newBountyDelayRouteScaleCoefficient = 1
@@ -239,20 +286,79 @@ fallbackRouteScale = 5
 # The number of credits to award for each bPoint (each system in a criminal route)
 bPointsToCreditsRatio = 1000
 
+# The number of credits to award for each system check of a bounty
+def rewardPerSysCheck(techLevel, loadoutValue):
+    return int((loadoutValue * (1.3 if techLevel == 1 else 1)) / (2*(techLevel+(1 if techLevel == 1 else 2)) * 10))
+
+# The percentage of a criminal's ship value to award to the winner
+shipValueRewardPercentage = 0.01
+
 # time to put users on cooldown between using !bb check
 checkCooldown = {"minutes":3}
 
 # number of bounties ahead of a checked system in a route to report a recent criminal spotting (+1)
 closeBountyThreshold = 4
 
+# The probability of a criminal equipping a turret, should their ship have space for one
+criminalEquipTurretChance = 30
+
+# The maximum total-value a player may have before being disallowed from hunting a tech-level of bounty. 0th index = tech level 1
+# I.e, to hunt level 1 bounties, a player must be worth no more than bountyTLMaxPlayerValues[0] credits.
+bountyTLMaxPlayerValues = [50000, 75000, 100000, 200000, 450000, 600000, 800000, 1000000, 2000000, 3000000, 999999999]
+
+# The probability of a shop spawning with a given tech level. Tech level = index + 1
+cumulativeCriminalTLChance = [0 for tl in range(minTechLevel-1, maxTechLevel + 1)]
+criminalTLChance = [0 for tl in range(minTechLevel-1, maxTechLevel + 1)]
+
+itemChanceSum = 0
+
+
+
+# Calculate spawn chance for each criminal TL
+for criminalTL in range(minTechLevel-1, maxTechLevel + 1):
+    itemChance = truncToRes(1 - math.exp((criminalTL - 10.5) / 5))
+    cumulativeCriminalTLChance[criminalTL - 1] = itemChance
+    itemChanceSum += itemChance
+
+# Scale criminal TL probabilities so that they add up to 1
+for criminalTL in range(minTechLevel-1, maxTechLevel + 1):
+    currentChance = cumulativeCriminalTLChance[criminalTL - 1]
+    if currentChance != 0:
+        cumulativeCriminalTLChance[criminalTL - 1] = truncToRes(currentChance / itemChanceSum)
+
+# Save non-cumulative probabilities
+for i in range(len(cumulativeCriminalTLChance)):
+    criminalTLChance[i] = cumulativeCriminalTLChance
+
+# Sum probabilities to give cumulative scale
+currentSum = 0
+for criminalTL in range(minTechLevel-1, maxTechLevel + 1):
+    currentChance = cumulativeCriminalTLChance[criminalTL - 1]
+    if currentChance != 0:
+        cumulativeCriminalTLChance[criminalTL - 1] = truncToRes(currentSum + currentChance)
+        currentSum += currentChance
+
+def pickRandomCriminalTL():
+    tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
+    for criminalTL in range(len(cumulativeCriminalTLChance)):
+        if cumulativeCriminalTLChance[criminalTL] >= tlChance:
+            return criminalTL
+    return maxTechLevel
+    
 # Text to send to a BountyBoardChannel when no bounties are currently active
 bbcNoBountiesMsg = "```css\n[ NO ACTIVE BOUNTIES ]\n\nThere are currently no active bounty listings.\nPlease check back later, or use [ $notify bounties ] to be pinged when new ones become available!\n```"
+
+level0CrimLoadout = {"name": "Betty", "builtIn":True,
+                    "weapons":[{"name": "Nirai Impulse EX 1", "builtIn": True}],
+                    "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "ZMI Optistore", "builtIn": True}, {"name": "IMT Extract 2.7", "builtIn": True}]}
 
 # The number of times to retry BBC listing updates when HTTP exceptions are thrown
 bbcHTTPErrRetries = 3
 
 # The number of seconds to wait between BBC listing update retries upon HTTP exception catching
 bbcHTTPErrRetryDelaySeconds = 1
+
+newBountyEmoji = UninitializedDumbEmoji(723709178589347921)
 
 
 ##### SAVING #####
