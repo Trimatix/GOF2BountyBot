@@ -22,10 +22,9 @@ def truncToRes(num : float) -> float:
 
 
 # List of module names from BB.commands to import
-# includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_bounties", "usr_loadout", "usr_economy",
-#                             "admn_channels", "admn_misc",
-#                             "dev_misc", "dev_channels", "dev_bounties", "dev_items")
-includedCommandModules = ()
+includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_bounties", "usr_loadout", "usr_economy",
+                            "admn_channels", "admn_misc",
+                            "dev_misc", "dev_channels", "dev_bounties", "dev_items")
 
 
 ##### USER LEVELING #####
@@ -355,6 +354,8 @@ bbcHTTPErrRetries = 3
 
 # The number of seconds to wait between BBC listing update retries upon HTTP exception catching
 bbcHTTPErrRetryDelaySeconds = 1
+
+newBountyEmoji = UninitializedDumbEmoji(723709178589347921)
 
 
 ##### SAVING #####

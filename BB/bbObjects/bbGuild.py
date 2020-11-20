@@ -369,12 +369,11 @@ class bbGuild:
         """
         print("Difficulty",newBounty.criminal.techLevel,"New bounty with value:",newBounty.criminal.activeShip.getValue())
         # Create the announcement embed
-        bountyEmbed = lib.discordUtil.makeEmbed(titleTxt=lib.discordUtil.criminalNameOrDiscrim(newBounty.criminal), desc="<:documents:723709178589347921> __New Bounty Available__", col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
-        bountyEmbed.add_field(name="Difficulty:", value=str(newBounty.criminal.techLevel))
-        bountyEmbed.add_field(name="Reward:", value=str(newBounty.reward) + " Credits")
-        bountyEmbed.add_field(name="Possible Systems:", value=len(newBounty.route))
-        bountyEmbed.add_field(name="See the culprit's route with:", value="`" + bbConfig.commandPrefix +
-                            "route " + lib.discordUtil.criminalNameOrDiscrim(newBounty.criminal) + "`", inline=False)
+        bountyEmbed = lib.discordUtil.makeEmbed(titleTxt=lib.discordUtil.criminalNameOrDiscrim(newBounty.criminal), desc=bbConfig.newBountyEmoji.sendable + " __New Bounty Available__", col=bbData.factionColours[newBounty.faction], thumb=newBounty.criminal.icon, footerTxt=newBounty.faction.title())
+        bountyEmbed.add_field(name="**Reward Pool:**", value=str(newBounty.reward) + " Credits")
+        bountyEmbed.add_field(name="**Difficulty:**", value=str(newBounty.criminal.techLevel))
+        bountyEmbed.add_field(name="**See the culprit's loadout with:**", value="`" + bbConfig.commandPrefix + "loadout criminal " + newBounty.criminal.name + "`")
+        bountyEmbed.add_field(name="**Route:**", value=", ".join(newBounty.route), inline=False)
         # Create the announcement text
         msg = "A new bounty is now available from **" + \
         newBounty.faction.title() + "** central command:"

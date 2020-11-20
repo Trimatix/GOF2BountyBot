@@ -377,7 +377,7 @@ class bbBountyDB:
         :return: A dictionary containing all data needed to recreate this bbBountyDB.
         :rtype: dict
         """
-        data = {}
+        data = {"escapedCriminals": []}
         # Serialise all factions into name : list of serialised bbBounty
         for fac in self.getFactions():
             data[fac] = []
