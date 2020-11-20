@@ -1,10 +1,14 @@
 # TODO: Write a targettable ReactionMenuOption subclass, that implements targetMember and targetRole on a per-option basis. Use this to write ReactionRolePickers with multipleChoice=False!
 
+from BB.scheduling.TimedTask import TimedTask
 import inspect
-from discord import Embed, Colour, NotFound, HTTPException, Forbidden, Member, Message
+from discord import Embed, Colour, NotFound, HTTPException, Forbidden, Member, User, Message, Role
 from ..bbConfig import bbConfig
 from .. import bbGlobals, lib
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from typing import Union, Dict, List
+import asyncio
+from types import FunctionType
 
 
 async def deleteReactionMenu(menuID : int):
@@ -13,8 +17,12 @@ async def deleteReactionMenu(menuID : int):
     :param int menuID: The ID of the menu, corresponding with the discord ID of the menu's message
     """
     menu = bbGlobals.reactionMenusDB[menuID]
-    await menu.msg.delete()
-    del bbGlobals.reactionMenusDB[menu.msg.id]
+    try:
+        await menu.msg.delete()
+    except NotFound:
+        pass
+    if menu.msg.id in bbGlobals.reactionMenusDB:
+        del bbGlobals.reactionMenusDB[menu.msg.id]
 
 
 async def removeEmbedAndOptions(menuID : int):
@@ -52,6 +60,26 @@ async def markExpiredMenu(menuID : int):
         del bbGlobals.reactionMenusDB[menuID]
 
 
+async def markExpiredMenuAndRemoveOptions(menuID : int):
+    """Remove all option reactions from the menu message, replace the message content of the given menu with bbConfig.expiredMenuMsg,
+    and remove the menu from the active reaction menus DB.
+
+    :param int menuID: The ID of the menu, corresponding with the discord ID of the menu's message
+    """
+    menu = bbGlobals.reactionMenusDB[menuID]
+    menu.msg = await menu.msg.channel.fetch_message(menu.msg.id)
+    try:
+        await menu.msg.clear_reactions()
+    except Forbidden:
+        for reaction in menu.msg.reactions:
+            try:
+                await reaction.remove(bbGlobals.client.user)
+            except (HTTPException, NotFound):
+                pass
+        
+    await markExpiredMenu(menuID)
+
+
 class ReactionMenuOption:
     """An abstract class representing an option in a reaction menu.
     Reaction menu options must have a name and emoji. They may optionally have a function to call when added,
@@ -64,9 +92,9 @@ class ReactionMenuOption:
     :var emoji: The emoji that a user must react with to trigger this option
     :vartype emoji: lib.emojis.dumbEmoji
     :var addFunc: The function to call when this option is added by a user
-    :vartype addFunc: function
+    :vartype addFunc: FunctionType
     :var removeFunc: The function to call when this option is removed by a user
-    :vartype removeFunc: function
+    :vartype removeFunc: FunctionType
     :var addArgs: The arguments to pass to addFunc. No type checking is done on this parameter, but a dict is recommended as a close replacement for keyword args.
     :var removeArgs: The arguments to pass to removeFunc.
     :var addIsCoroutine: Whether or not addFuc is a coroutine and must be awaited
@@ -83,7 +111,7 @@ class ReactionMenuOption:
     :vartype removeHasArgs: bool
     """
 
-    def __init__(self, name : str, emoji : lib.emojis.dumbEmoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
+    def __init__(self, name : str, emoji : lib.emojis.dumbEmoji, addFunc : FunctionType = None, addArgs=None, removeFunc : FunctionType = None, removeArgs=None):
         """
         :param str name: The name of this option, as displayed in the menu embed.
         :param lib.emojis.dumbEmoji emoji: The emoji that a user must react with to trigger this option
@@ -109,7 +137,7 @@ class ReactionMenuOption:
         self.removeHasArgs = removeFunc is not None and len(inspect.signature(removeFunc).parameters) != (1 if self.removeIncludeUser else 0)
     
 
-    async def add(self, member : Member):
+    async def add(self, member : Union[Member, User]):
         """Invoke this option's 'reaction added' functionality.
         This method is called by the owning reaction menu whenever this option is added by any user
         that matches the menu's restrictions, if any apply (e.g targetMember, targetRole)
@@ -127,7 +155,7 @@ class ReactionMenuOption:
             return await self.addFunc() if self.addIsCoroutine else self.addFunc()
 
 
-    async def remove(self, member : Member):
+    async def remove(self, member : Union[Member, User]):
         """Invoke this option's 'reaction removed' functionality.
         This method is called by the owning reaction menu whenever this option is removed by any user
         that matches the menu's restrictions, if any apply (e.g targetMember, targetRole)
@@ -186,7 +214,7 @@ class NonSaveableReactionMenuOption(ReactionMenuOption):
     Instead, inherit directly from ReactionMenuOption or another suitable subclass that is not marked as unsaveable.
     """
 
-    def __init__(self, name : str, emoji : lib.emojis.dumbEmoji, addFunc=None, addArgs=None, removeFunc=None, removeArgs=None):
+    def __init__(self, name : str, emoji : lib.emojis.dumbEmoji, addFunc : FunctionType = None, addArgs=None, removeFunc : FunctionType = None, removeArgs=None):
         """
         :param str name: The name of this option, as displayed in the menu embed.
         :param lib.emojis.dumbEmoji emoji: The emoji that a user must react with to trigger this option
@@ -286,8 +314,10 @@ class ReactionMenu:
     """
     saveable = False
 
-    def __init__(self, msg : Message, options={}, 
-                    titleTxt="", desc="", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+    def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, 
+                    titleTxt : str = "", desc : str ="", col : Colour = Colour.blue(), timeout : TimedTask = None,
+                    footerTxt : str = "", img : str = "", thumb : str = "", icon : str = "",
+                    authorName : str = "", targetMember : Member = None, targetRole : Role = None):
         """
         :param discord.Message msg: the message where this menu is embedded
         :param options: A dictionary storing all of the menu's options and their behaviour (Default {})
@@ -315,7 +345,7 @@ class ReactionMenu:
 
         self.titleTxt = titleTxt
         self.desc = desc
-        self.col = col if col is not None else Colour.default()
+        self.col = col if col is not None else Colour.blue()
         self.footerTxt = footerTxt
         self.img = img
         self.thumb = thumb
@@ -336,7 +366,7 @@ class ReactionMenu:
         return emoji in self.options
 
 
-    async def reactionAdded(self, emoji : lib.emojis.dumbEmoji, member : Member):
+    async def reactionAdded(self, emoji : lib.emojis.dumbEmoji, member : Union[Member, User]):
         """Invoke an option's behaviour when it is selected by a user.
         This method should be called during your discord client's on_reaction_add or on_raw_reaction_add event.
         
@@ -360,7 +390,7 @@ class ReactionMenu:
         return await self.options[emoji].add(member)
 
     
-    async def reactionRemoved(self, emoji : lib.emojis.dumbEmoji, member : Member):
+    async def reactionRemoved(self, emoji : lib.emojis.dumbEmoji, member : Union[Member, User]):
         """Invoke an option's behaviour when it is deselected by a user.
         This method should be called during your discord client's on_reaction_remove or on_raw_reaction_remove event.
         
@@ -404,14 +434,26 @@ class ReactionMenu:
         return menuEmbed
     
 
-    async def updateMessage(self):
+    async def updateMessage(self, noRefreshOptions=False):
         """Update the menu message by removing all reactions, replacing any existing embed with
         up to date embed content, and readd all of the menu's option reactions.
         """
-        await self.msg.clear_reactions()
         await self.msg.edit(embed=self.getMenuEmbed())
-        for option in self.options:
-            await self.msg.add_reaction(option.sendable)
+        
+        if not noRefreshOptions:
+            self.msg = await self.msg.channel.fetch_message(self.msg.id)
+
+            try:
+                await self.msg.clear_reactions()
+            except Forbidden:
+                for reaction in self.msg.reactions:
+                    try:
+                        await reaction.remove(bbGlobals.client.user)
+                    except (HTTPException, NotFound):
+                        pass
+
+            for option in self.options:
+                await self.msg.add_reaction(option.sendable)
 
 
     async def delete(self):
@@ -447,7 +489,7 @@ class ReactionMenu:
         if self.desc != "":
             data["desc"] = self.desc
 
-        if self.col != Colour.default():
+        if self.col != Colour.blue():
             data["col"] = self.col.to_rgb()
 
         if self.footerTxt != "":
@@ -490,8 +532,9 @@ class CancellableReactionMenu(ReactionMenu):
     :var cancelEmoji: The emoji used for the menu's cancel button.
     :vartype cancelEmoji: lib.emojis.dumbEmoji
     """
-    def __init__(self, msg : Message, options={}, cancelEmoji=bbConfig.defaultCancelEmoji,
-                    titleTxt="", desc="", col=Embed.Empty, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+    def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, cancelEmoji : lib.emojis.dumbEmoji = bbConfig.defaultCancelEmoji,
+                    titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), timeout : TimedTask = None, footerTxt : str = "", img : str = "", thumb : str = "",
+                    icon : str = "", authorName : str = "", targetMember : Member = None, targetRole : Role = None):
         """
         :param discord.Message msg: the message where this menu is embedded
         :param options: A dictionary storing all of the menu's options and their behaviour (Default {})
@@ -530,3 +573,42 @@ class CancellableReactionMenu(ReactionMenu):
 
         return baseDict
 
+
+class SingleUserReactionMenu(ReactionMenu):
+    """
+    An in-place menu solution
+    """
+    def __init__(self, msg : Message, targetMember : Union[Member, User], timeoutSeconds : int,
+                    options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, returnTriggers : List[lib.emojis.dumbEmoji] = [], 
+                    titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), footerTxt : str = "", img : str = "",
+                    thumb : str = "", icon : str = "", authorName : str = ""):
+        """
+        :param returnTriggers: List of menu options that trigger the returning of the menu
+        :type returnTriggers: List[lib.emojis.dumbEmoji]
+        :param int timeoutSeconds: The number of seconds that this menu should last before timing out
+        """
+        if footerTxt == "":
+            footerTxt = "This menu will expire in " + str(timeoutSeconds) + " seconds."
+        super().__init__(msg, targetMember=targetMember, options=options, 
+                    titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName)
+        self.returnTriggers = returnTriggers
+        self.timeoutSeconds = timeoutSeconds
+
+
+    def reactionClosesMenu(self, reactPL):
+        return (reactPL.message_id == self.msg.id and reactPL.user_id == self.targetMember.id) and (not self.returnTriggers or lib.emojis.dumbEmojiFromPartial(reactPL.emoji) in self.returnTriggers)
+
+
+    async def doMenu(self):
+        await self.updateMessage()
+        try:
+            reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=self.reactionClosesMenu, timeout=self.timeoutSeconds)
+            currentEmbed = self.msg.embeds[0]
+            currentEmbed.set_footer(text="This menu has now expired.")
+            await self.msg.edit(embed=currentEmbed)
+        except asyncio.TimeoutError:
+            await self.msg.edit(content="This menu has now expired. Please try the command again.")
+            return []
+        else:
+            updatedMsg = await self.msg.channel.fetch_message(self.msg.id)
+            return [lib.emojis.dumbEmojiFromReaction(react.emoji) for react in updatedMsg.reactions if self.targetMember in await react.users().flatten() and lib.emojis.dumbEmojiFromReaction(react.emoji) in self.options]

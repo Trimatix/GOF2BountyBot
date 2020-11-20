@@ -7,13 +7,15 @@ from discord.ext.commands import Bot as ClientBaseClass
 from datetime import datetime
 import asyncio
 import traceback
-from os import path
+import os
 
 # BountyBot Imports
 
 from .bbConfig import bbConfig, bbData, bbPRIVATE
+from .bbObjects import bbShipSkin
 from .bbObjects.bounties import bbCriminal, bbSystem, bbBountyConfig, bbBounty
 from .bbObjects.items import bbModuleFactory, bbShipUpgrade, bbTurret, bbWeapon
+from .bbObjects.items.tools import bbShipSkinTool, bbToolItemFactory
 from .scheduling import TimedTask
 from .bbDatabases import bbGuildDB, bbUserDB, HeirarchicalCommandsDB, reactionMenuDB
 from .scheduling import TimedTaskHeap
@@ -79,6 +81,8 @@ bbGlobals.client = bbClient()
 from . import commands
 bbCommands = commands.loadCommands()
 
+CWD = os.getcwd()
+
 
 
 ####### DATABASE FUNCTIONS #####
@@ -92,10 +96,11 @@ def loadUsersDB(filePath : str) -> bbUserDB.bbUserDB:
     return bbUserDB.fromDict(lib.jsonHandler.readJSON(filePath))
 
 
-def loadGuildsDB(filePath : str, dbReload=False) -> bbGuildDB.bbGuildDB:
+def loadGuildsDB(filePath : str, dbReload : bool = False) -> bbGuildDB.bbGuildDB:
     """Build a bbGuildDB from the specified JSON file.
 
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
+    :param bool dbReload: Whether or not this DB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
     :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
     return bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath), dbReload=dbReload)
@@ -114,7 +119,7 @@ async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.ReactionMenuDB:
 
 ####### UTIL FUNCTIONS #######
 
-async def announceNewShopStock(guildID=-1):
+async def announceNewShopStock(guildID : int = -1):
     """Announce the refreshing of shop stocks to one or all joined guilds.
     Messages will be sent to the playChannels of all guilds in the bbGlobals.guildsDB, if they have one
 
@@ -152,6 +157,39 @@ async def err_nodm(message : discord.Message, args : str, isDM : bool):
     :param bool isDM: ignored
     """
     await message.channel.send(":x: This command can only be used from inside of a server!")
+
+
+async def err_tempDisabled(message : discord.Message, args : str, isDM : bool):
+    """Send an error message when a bounties command is requested - all bounty and shop related behaviour is currently disabled.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: ignored
+    """
+    await message.channel.send(":x: All bounty/shop behaviour is currently disabled while I work on new features \:)")
+
+
+async def err_tempPerfDisabled(message : discord.Message, args : str, isDM : bool):
+    """Send an error message when a command is requested that is disabled for perfornance reasons.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: ignored
+    """
+    await message.channel.send(":x: This command has been temporarily disabled as it requires too much processing power. It may return in the future once hosting hardware has been upgraded! \:)")
+
+
+async def dummy_command(message : discord.Message, args : str, isDM : bool):
+    """Dummy command doing nothing at all.
+    Useful when waiting for commands with client.wait_for from a non-blocking process.
+
+    :param discord.Message message: ignored
+    :param str args: ignored
+    :param bool isDM: ignored
+    """
+    pass
+
+bbCommands.register("cancel", dummy_command, 0, allowDM=True, noHelp=True)
 
 
 
@@ -272,6 +310,31 @@ async def on_ready():
                 break
 
 
+    ##### SHIP SKIN GENERATION #####
+
+    # generate bbShipSkin objects from data stored on file
+    for subdir, dirs, files in os.walk(bbData.skinsDir):
+        for dirname in dirs:
+            dirpath = subdir + os.sep + dirname
+
+            if dirname.lower().endswith(".bbshipskin"):
+                skinData = lib.jsonHandler.readJSON(dirpath + os.sep + "META.json")
+                skinData["path"] = CWD + os.sep + dirpath
+                bbData.builtInShipSkins[skinData["name"].lower()] = bbShipSkin.fromDict(skinData)
+
+    # generate bbToolItem objects from data stored on file
+    for toolDict in bbData.builtInToolData.values():
+        bbData.builtInToolObjs[toolDict["name"]] = bbToolItemFactory.fromDict(toolDict)
+        bbData.builtInToolData[toolDict["name"]]["builtIn"] = True
+        bbData.builtInToolObjs[toolDict["name"]].builtIn = True
+    
+    # generate bbShipSkinTool objects for each bbShipSkin
+    for shipSkin in bbData.builtInShipSkins.values():
+        # if len(shipSkin.compatibleShips) > 0:
+        toolName = lib.stringTyping.shipSkinNameToToolName(shipSkin.name)
+        if toolName not in bbData.builtInToolObjs:
+            bbData.builtInToolObjs[toolName] = bbShipSkinTool.bbShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=True)
+
 
     ##### SORT ITEMS BY TECHLEVEL #####
 
@@ -328,6 +391,12 @@ async def on_ready():
     bbGlobals.usersDB = loadUsersDB(bbConfig.userDBPath)
     bbGlobals.guildsDB = loadGuildsDB(bbConfig.guildDBPath, dbReload=True)
 
+    # Set help embed thumbnails
+    for levelSection in bbCommands.helpSectionEmbeds:
+        for helpSection in levelSection.values():
+            for embed in helpSection:
+                embed.set_thumbnail(url=bbGlobals.client.user.avatar_url_as(size=64))
+
     # for currentUser in bbGlobals.usersDB.users.values():
     #     currentUser.validateLoadout()
 
@@ -367,7 +436,7 @@ async def on_ready():
 
     bbGlobals.reactionMenusTTDB = TimedTaskHeap.TimedTaskHeap()
 
-    if not path.exists(bbConfig.reactionMenusDBPath):
+    if not os.path.exists(bbConfig.reactionMenusDBPath):
         try:
             f = open(bbConfig.reactionMenusDBPath, 'x')
             f.write("{}")
@@ -425,7 +494,7 @@ async def on_message(message : discord.Message):
         pass
 
     # For any messages beginning with bbConfig.commandPrefix
-    if len(message.content) >= len(bbConfig.commandPrefix) and message.content[0:len(bbConfig.commandPrefix)].lower() == bbConfig.commandPrefix.lower():
+    if message.content.startswith(bbConfig.commandPrefix) and len(message.content) > len(bbConfig.commandPrefix):
         # replace special apostraphe characters with the universal '
         msgContent = message.content.replace("‘", "'").replace("’", "'")
 
@@ -482,8 +551,20 @@ async def on_raw_reaction_add(payload : discord.RawReactionActionEvent):
         if emoji.sendable is None:
             return
 
-        message = await bbGlobals.client.get_guild(payload.guild_id).get_channel(payload.channel_id).fetch_message(payload.message_id)
-        member = payload.member
+        guild = bbGlobals.client.get_guild(payload.guild_id)
+        if guild is None:
+            message = await bbGlobals.client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+        else:
+            message = await guild.get_channel(payload.channel_id).fetch_message(payload.message_id)
+        if message is None:
+            return
+        
+        if guild is None:
+            member = bbGlobals.client.get_user(payload.user_id)
+        else:
+            member = payload.member
+        if member is None:
+            return
 
         if message.id in bbGlobals.reactionMenusDB and \
                 bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):
@@ -502,8 +583,20 @@ async def on_raw_reaction_remove(payload : discord.RawReactionActionEvent):
         if emoji.sendable is None:
             return
 
-        message = await bbGlobals.client.get_guild(payload.guild_id).get_channel(payload.channel_id).fetch_message(payload.message_id)
-        member = message.guild.get_member(payload.user_id)
+        guild = bbGlobals.client.get_guild(payload.guild_id)
+        if guild is None:
+            message = await bbGlobals.client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+        else:
+            message = await guild.get_channel(payload.channel_id).fetch_message(payload.message_id)
+        if message is None:
+            return
+        
+        if guild is None:
+            member = bbGlobals.client.get_user(payload.user_id)
+        else:
+            member = message.guild.get_member(payload.user_id)
+        if member is None:
+            return
 
         if message.id in bbGlobals.reactionMenusDB and \
                 bbGlobals.reactionMenusDB[message.id].hasEmojiRegistered(emoji):

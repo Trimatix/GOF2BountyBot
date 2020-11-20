@@ -7,10 +7,11 @@ from . import commandsDB as bbCommands
 from .. import lib, bbGlobals
 from ..bbConfig import bbConfig, bbData
 from ..bbObjects import bbUser
-from ..reactionMenus import ReactionMenu, ReactionPollMenu
+from ..reactionMenus import ReactionMenu, ReactionPollMenu, PagedReactionMenu
 from ..scheduling import TimedTask
 from ..userAlerts import UserAlerts
 from ..logging import bbLogger
+from . import util_help
 
 
 async def cmd_help(message : discord.Message, args : str, isDM : bool):
@@ -21,95 +22,12 @@ async def cmd_help(message : discord.Message, args : str, isDM : bool):
     :param str args: empty, or a single command name
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    helpEmbed = lib.discordUtil.makeEmbed(titleTxt="BountyBot Commands",
-                          thumb=bbGlobals.client.user.avatar_url_as(size=64))
-    page = 0
-    maxPage = len(bbData.helpDict)
-    sectionNames = list(bbData.helpDict.keys())
+    await util_help.util_autohelp(message, args, isDM, 0)
 
-    if args != "":
-        if lib.stringTyping.isInt(args):
-            page = int(args)
-            if page > maxPage:
-                await message.channel.send(":x: There are only " + str(maxPage) + " help pages! Showing page " + str(maxPage) + ":")
-                page = maxPage
-        elif args.title() in sectionNames:
-            page = sectionNames.index(args.title()) + 1
-        elif args != "all":
-            for section in sectionNames:
-                if args in bbData.helpDict[section]:
-                    helpEmbed.add_field(
-                        name="‎", value="__" + section + "__", inline=False)
-                    helpEmbed.add_field(name=bbData.helpDict[section][args][0], value=bbData.helpDict[section][args][1].replace(
-                        "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
-                    await message.channel.send(embed=helpEmbed)
-                    return
-            await message.channel.send(":x: Help: Command not found!")
-            return
-
-    sendChannel = None
-    sendDM = False
-
-    if message.author.dm_channel is None:
-        await message.author.create_dm()
-    if message.author.dm_channel is None:
-        sendChannel = message.channel
-    else:
-        sendChannel = message.author.dm_channel
-        sendDM = True
-
-    # list of tuples, 0th element is message, 1st element is embed
-    messagesToSend = []
-
-    if page == 0:
-        for sectionNum in range(maxPage):
-            if sectionNum == maxPage - 1 and maxPage % 2 != 0:
-                helpEmbed = lib.discordUtil.makeEmbed(titleTxt="BountyBot Commands",
-                                      thumb=bbGlobals.client.user.avatar_url_as(size=64))
-                helpEmbed.set_footer(text="Page " + str(maxPage))
-                helpEmbed.add_field(name="‎", value="__" +
-                                    sectionNames[maxPage-1] + "__", inline=False)
-                for currentCommand in bbData.helpDict[sectionNames[maxPage-1]].values():
-                    helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
-                        "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
-                messagesToSend.append(("‎", helpEmbed))
-            elif sectionNum % 2 == 0:
-                helpEmbed = lib.discordUtil.makeEmbed(titleTxt="BountyBot Commands",
-                                      thumb=bbGlobals.client.user.avatar_url_as(size=64))
-                helpEmbed.set_footer(
-                    text="Pages " + str(sectionNum + 1) + " - " + str(sectionNum + 2))
-                for section in sectionNames[sectionNum:sectionNum + 2]:
-                    # section = sectionNames[page - 1]
-                    helpEmbed.add_field(name="‎", value="__" +
-                                        section + "__", inline=False)
-                    for currentCommand in bbData.helpDict[section].values():
-                        helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
-                            "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
-                messagesToSend.append(("‎", helpEmbed))
-
-    else:
-        helpEmbed.set_footer(text="Page " + str(page) + "/" + str(maxPage))
-        section = list(bbData.helpDict.keys())[page - 1]
-        helpEmbed.add_field(name="‎", value="__" +
-                            section + "__", inline=False)
-        for currentCommand in bbData.helpDict[section].values():
-            helpEmbed.add_field(name=currentCommand[0], value=currentCommand[1].replace(
-                "$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
-        messagesToSend.append(("‎", helpEmbed))
-
-    try:
-        if page in [0, 1]:
-            await sendChannel.send(bbData.helpIntro.replace("$COMMANDPREFIX$", bbConfig.commandPrefix))
-        for msg in messagesToSend:
-            await sendChannel.send(msg[0], embed=msg[1])
-    except discord.Forbidden:
-        await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
-        return
-
-    if sendDM:
-        await message.add_reaction(bbConfig.dmSentEmoji.sendable)
-
-bbCommands.register("help", cmd_help, 0, allowDM=True)
+bbCommands.register("help", cmd_help, 0, allowDM=True, signatureStr="**help** *[page number, section or command]*",
+    shortHelp="Show usage information for available commands.\nGive a specific command for detailed info about it, or give a page number or give a section name for brief info.",
+    longHelp="Show usage information for available commands.\nGive a specific command for detailed info about it, or give a page number or give a section name for brief info about a set of commands. These are the currently valid section names:\n- Bounties\n- Economy\n- GOF2 Info\n- Home Servers\n- Loadout\n- Miscellaneous",
+    useDoc=False)
 
 
 async def cmd_how_to_play(message : discord.Message, args : str, isDM : bool):
@@ -158,7 +76,7 @@ async def cmd_how_to_play(message : discord.Message, args : str, isDM : bool):
     if sendDM:
         await message.add_reaction(bbConfig.dmSentEmoji.sendable)
 
-bbCommands.register("how-to-play", cmd_how_to_play, 0, aliases=["guide"], allowDM=True)
+bbCommands.register("how-to-play", cmd_how_to_play, 0, aliases=["guide"], allowDM=True, signatureStr="**how-to-play**", shortHelp="Get a short introduction on how to play bounties!")
 
 
 async def cmd_hello(message : discord.Message, args : str, isDM : bool):
@@ -170,7 +88,7 @@ async def cmd_hello(message : discord.Message, args : str, isDM : bool):
     """
     await message.channel.send("Greetings, pilot! **o7**")
 
-bbCommands.register("hello", cmd_hello, 0, allowDM=True)
+bbCommands.register("hello", cmd_hello, 0, allowDM=True, noHelp=True)
 
 
 async def cmd_stats(message : discord.Message, args : str, isDM : bool):
@@ -302,7 +220,7 @@ async def cmd_stats(message : discord.Message, args : str, isDM : bool):
         # send the stats embed
         await message.channel.send(embed=statsEmbed)
 
-bbCommands.register("stats", cmd_stats, 0, aliases=["profile"], forceKeepArgsCasing=True, allowDM=True)
+bbCommands.register("stats", cmd_stats, 0, aliases=["profile"], forceKeepArgsCasing=True, allowDM=True, signatureStr="**stats** *[user]*", shortHelp="Get various credits and bounty statistics about yourself, or another user.")
 
 
 async def cmd_leaderboard(message : discord.Message, args : str, isDM : bool):
@@ -403,7 +321,7 @@ async def cmd_leaderboard(message : discord.Message, args : str, isDM : bool):
     # send the embed
     await message.channel.send(embed=leaderboardEmbed)
 
-bbCommands.register("leaderboard", cmd_leaderboard, 0, allowDM=False)
+bbCommands.register("leaderboard", cmd_leaderboard, 0, allowDM=False, signatureStr="**leaderboard** *[-g|-c|-s|-w]*", longHelp="Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`")
 
 
 async def cmd_notify(message : discord.Message, args : str, isDM : bool):
@@ -451,7 +369,7 @@ async def cmd_notify(message : discord.Message, args : str, isDM : bool):
             await message.channel.send(":thinking: Whoops! A connection error occurred, and the error has been logged. Could you try that again please?")
             bbLogger.log("main", "cmd_notify", "aiohttp.client_exceptions.ClientOSError occurred when attempting to grant " + message.author.name + "#" + str(message.author.id) + " alert " + alertID + "in guild " + message.guild.name + "#" + str(message.guild.id) + ".", category="userAlerts", eventType="ClientOSError", trace=traceback.format_exc())
 
-bbCommands.register("notify", cmd_notify, 0, allowDM=False)
+bbCommands.register("notify", cmd_notify, 0, allowDM=False, signatureStr="**notify <type>** *[alert]*", longHelp="Subscribe to pings when events take place. Currently, **type** can be `bounties`, `shop`, `duels`, or `bot`.\n> `shop` requires the `refresh` option.\n> `duels` requires either `new` or `cancel`.\n> `bot` can take `updates` or `announcements`.\n> `bot updates` must be `major` or `minor`.")
 
 
 async def cmd_source(message : discord.Message, args : str, isDM : bool):
@@ -470,7 +388,7 @@ async def cmd_source(message : discord.Message, args : str, isDM : bool):
     srcEmbed.add_field(name="__Special Thanks__", value=" • **DeepSilver FishLabs**, for building the fantastic game franchise that this bot is dedicated to. I don't own any Galaxy on Fire assets intellectual property, nor rights to any assets the bot references.\n • **The BountyBot testing team** who have all been lovely and supportive since the beginning, and who will *always* find a way to break things ;)\n • **NovahKiin22**, for his upcoming major feature release, along with minor bug fixes and *brilliant* insight throughout development\n • **Poisonwasp**, for another minor bug fix, but mostly for his continuous support\n • **You!** The community is what makes developing this bot so fun :)", inline=False)
     await message.channel.send(embed=srcEmbed)
 
-bbCommands.register("source", cmd_source, 0, allowDM=True)
+bbCommands.register("source", cmd_source, 0, allowDM=True, signatureStr="**source**", shortHelp="Show links to the project's GitHub page and todo list, and some information about the people behind BountyBot.")
 
 
 async def cmd_poll(message : discord.Message, args : str, isDM : bool):
@@ -478,11 +396,13 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     Users may not create more than one poll at a time, anywhere.
     Option reactions must be either unicode, or custom to the server where the poll is being created.
 
-    args must contain a comma-separated list of emoji-option pairs, where each pair is separated with a space.
-    For example: '0️⃣ option a, 1️⃣ my second option, 2️⃣ three' will produce three options:
+    args must contain a poll subject (question) and new line, followed by a newline-separated list of emoji-option pairs, where each pair is separated with a space.
+    For example: 'Which one?\n0️⃣ option a\n1️⃣ my second option\n2️⃣ three' will produce three options:
     - 'option a'         which participants vote for by adding the 0️⃣ reaction
     - 'my second option' which participants vote for by adding the 1️⃣ reaction
     - 'three'            which participants vote for by adding the 2️⃣ reaction
+    and the subject of the poll is 'Which one?'
+    The poll subject is optional. To not provide a subject, simply begin args with a new line.
 
     args may also optionally contain the following keyword arguments, given as argname=value
     - target         : A role or user to restrict participants by. Must be a user or role mention, not ID.
@@ -507,35 +427,51 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
         return
 
     pollOptions = {}
+    kwArgs = {}
 
-    argsSplit = args.split(",")
+    argsSplit = args.split("\n")
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Invalid arguments! Please provide your poll subject, followed by a new line, then a new line-separated series of poll options.\nFor more info, see `" + bbConfig.commandPrefix + "help poll`")
+        return
+    pollSubject = argsSplit[0]
     argPos = 0
-    arg = ""
-    for arg in argsSplit:
+    for arg in argsSplit[1:]:
+        if arg == "":
+            continue
         argPos += 1
-        optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" "):], lib.emojis.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
-        if dumbReact is None:
-            await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
-            return
-        elif dumbReact.isID:
-            localEmoji = False
-            for localEmoji in message.guild.emojis:
-                if localEmoji.id == dumbReact.id:
-                    localEmoji = True
+        try:
+            optionName, dumbReact = arg.strip(" ")[arg.strip(" ").index(" ")+1:], lib.emojis.dumbEmojiFromStr(arg.strip(" ").split(" ")[0])
+        except (ValueError, IndexError):
+            for kwArg in ["target=", "days=", "hours=", "seconds=", "minutes=", "multiplechoice="]:
+                if arg.lower().startswith(kwArg):
+                    kwArgs[kwArg[:-1]] = arg[len(kwArg):]
                     break
-            if not localEmoji:
+        # except lib.emojis.UnrecognisedCustomEmoji:
+            # await message.channel.send(":x: I don't know your " + str(argPos) + lib.stringTyping.getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+            # return
+        else:
+            if dumbReact.sendable == "None":
                 await message.channel.send(":x: I don't know your " + str(argPos) + lib.stringTyping.getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
                 return
+            if dumbReact is None:
+                await message.channel.send(":x: Invalid emoji: " + arg.strip(" ").split(" ")[1])
+                return
+            elif dumbReact.isID:
+                localEmoji = False
+                for localEmoji in message.guild.emojis:
+                    if localEmoji.id == dumbReact.id:
+                        localEmoji = True
+                        print("EMOJI FOUND")
+                        break
+                if not localEmoji:
+                    await message.channel.send(":x: I don't know your " + str(argPos) + lib.stringTyping.getNumExtension(argPos) + " emoji!\nYou can only use built in emojis, or custom emojis that are in this server.")
+                    return
 
-        if dumbReact in pollOptions:
-            await message.channel.send(":x: Cannot use the same emoji for two options!")
-            return
+            if dumbReact in pollOptions:
+                await message.channel.send(":x: Cannot use the same emoji for two options!")
+                return
 
-        for kwArg in [" target=", " days=", " hours=", " seconds=", " minutes=", " multiplechoice="]:
-            if kwArg in optionName.lower():
-                optionName = optionName[:optionName.lower().index(kwArg)]
-
-        pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
+            pollOptions[dumbReact] = ReactionMenu.DummyReactionMenuOption(optionName, dumbReact)
 
     if len(pollOptions) == 0:
         await message.channel.send(":x: No options given!")
@@ -543,25 +479,15 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
 
     targetRole = None
     targetMember = None
-    if "target=" in arg.lower():
-        argIndex = arg.lower().index("target=") + len("target=")
-        try:
-            arg[argIndex:].index(" ")
-        except ValueError:
-            endIndex = len(arg)
-        else:
-            endIndex = arg[argIndex:].index(" ") + argIndex + 1
-
-        targetStr = arg[argIndex:endIndex]
-
-        if lib.stringTyping.isRoleMention(targetStr):
-            targetRole = message.guild.get_role(int(targetStr.lstrip("<@&").rstrip(">")))
+    if "target" in kwArgs:
+        if lib.stringTyping.isRoleMention(kwArgs["target"]):
+            targetRole = message.guild.get_role(int(kwArgs["target"].lstrip("<@&").rstrip(">")))
             if targetRole is None:
                 await message.channel.send(":x: Unknown target role!")
                 return
         
-        elif lib.stringTyping.isMention(targetStr):
-            targetMember = message.guild.get_member(int(targetStr.lstrip("<@!").rstrip(">")))
+        elif lib.stringTyping.isMention(kwArgs["target"]):
+            targetMember = message.guild.get_member(int(kwArgs["target"].lstrip("<@!").rstrip(">")))
             if targetMember is None:
                 await message.channel.send(":x: Unknown target user!")
                 return
@@ -573,44 +499,24 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     timeoutDict = {}
 
     for timeName in ["days", "hours", "minutes", "seconds"]:
-        if timeName + "=" in arg.lower():
-            argIndex = arg.lower().index(timeName + "=") + len(timeName + "=")
-            try:
-                arg[argIndex:].index(" ")
-            except ValueError:
-                endIndex = len(arg)
-            else:
-                endIndex = arg[argIndex:].index(" ") + argIndex + 1
-
-            targetStr = arg[argIndex:endIndex]
-
-            if targetStr == "off":
+        if timeName in kwArgs:
+            if kwArgs[timeName].lower() == "off":
                 timeoutDict[timeName] = -1
             else:
-                if not lib.stringTyping.isInt(targetStr) or int(targetStr) < 1:
+                if not lib.stringTyping.isInt(kwArgs[timeName]) or int(kwArgs[timeName]) < 1:
                     await message.channel.send(":x: Invalid number of " + timeName + " before timeout!")
                     return
 
-                timeoutDict[timeName] = int(targetStr)
+                timeoutDict[timeName] = int(kwArgs[timeName])
 
 
     multipleChoice = True
 
-    if "multiplechoice=" in arg.lower():
-        argIndex = arg.lower().index("multiplechoice=") + len("multiplechoice=")
-        try:
-            arg[argIndex:].index(" ")
-        except ValueError:
-            endIndex = len(arg)
-        else:
-            endIndex = arg[argIndex:].index(" ") + argIndex
-
-        targetStr = arg[argIndex:endIndex]
-
-        if targetStr.lower() in ["off", "no", "false", "single", "one"]:
+    if "multiplechoice" in kwArgs:
+        if kwArgs["multiplechoice"].lower() in ["off", "no", "false", "single", "one"]:
             multipleChoice = False
-        elif targetStr.lower() not in ["on", "yes", "true", "multiple", "many"]:
-            await message.channel.send("Invalid `multiplechoice` argument '" + targetStr + "'! Please use either `multiplechoice=yes` or `multiplechoice=no`")
+        elif kwArgs["multiplechoice"].lower() not in ["on", "yes", "true", "multiple", "many"]:
+            await message.channel.send("Invalid `multiplechoice` argument '" + kwArgs["multiplechoice"] + "'! Please use either `multiplechoice=yes` or `multiplechoice=no`")
             return
 
 
@@ -630,9 +536,9 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionPollMenu.printAndExpirePollResults, expiryFunctionArgs=menuMsg.id)
     bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
 
-    menu = ReactionPollMenu.ReactionPollMenu(menuMsg, pollOptions, timeoutTT, pollStarter=message.author, multipleChoice=multipleChoice, targetRole=targetRole, targetMember=targetMember, owningBBUser=bbGlobals.usersDB.getUser(message.author.id))
+    menu = ReactionPollMenu.ReactionPollMenu(menuMsg, pollOptions, timeoutTT, pollStarter=message.author, multipleChoice=multipleChoice, targetRole=targetRole, targetMember=targetMember, owningBBUser=bbGlobals.usersDB.getUser(message.author.id), desc=pollSubject)
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
     bbGlobals.usersDB.getUser(message.author.id).pollOwned = True
 
-bbCommands.register("poll", cmd_poll, 0, forceKeepArgsCasing=True, allowDM=False)
+bbCommands.register("poll", cmd_poll, 0, forceKeepArgsCasing=True, allowDM=False, signatureStr="**poll** *<subject>*\n**<option1 emoji> <option1 name>**\n...    ...\n*[kwargs]*", shortHelp="Start a reaction-based poll. Each option must be on its own new line, as an emoji, followed by a space, followed by the option name.", longHelp="Start a reaction-based poll. Each option must be on its own new line, as an emoji, followed by a space, followed by the option name. The `subject` is the question that users answer in the poll and is optional, to exclude your subject simply give a new line.\n\n__Optional Arguments__\nOptional arguments should be given by `name=value`, with each arg on a new line.\n- Give `multiplechoice=no` to only allow one vote per person (default: yes).\n- Give `target=@role mention` to limit poll participants only to users with the specified role.\n- You may specify the length of the poll, with each time division on a new line. Acceptable time divisions are: `seconds`, `minutes`, `hours`, `days`. (default: minutes=5)")

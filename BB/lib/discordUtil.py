@@ -1,15 +1,17 @@
 from __future__ import annotations
 from typing import Union, List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
-    from discord import Member, Guild, User
-    from ..bbObjects import bbUser
+    from discord import Member, Guild, User, Message
+    from ..bbObjects import bbUser, bbGuild
     from ..bbObjects.bounties import bbCriminal
 
 from ..logging import bbLogger
 from . import stringTyping
 from .. import bbGlobals
-from discord import Embed, Colour
+from discord import Embed, Colour, HTTPException, Forbidden
 from ..userAlerts import UserAlerts
+import random
+from ..bbConfig import bbConfig
 
 
 def findBBUserDCGuild(user : bbUser.bbUser) -> Union[Guild, None]:
@@ -60,39 +62,6 @@ def userOrMemberName(dcUser : User, dcGuild : Guild) -> str:
     return guildMember.display_name
 
 
-# Use of this method is discouraged. It would be just as efficient to check that getMemberFromRef is not None, and that would require only one function call!
-def isUserRef(uRef : str, dcGuild=None) -> bool:
-    """Decide whether the given string is a valid user reference, pointing to a user.
-    #TODO: if uRef is a mention or ID, validate that getUser doesnt return None
-    If this method is to be used before a call to getMemberFromRef, you should instead consider
-    calling getMemberRef and checking whether the result is None. Both functions perform similar
-    calculations, and this method of uRef validation will use one function call rather than two.
-
-    uRef can be one of:
-    - A user mention <@123456> or <@!123456>
-    - A user ID 123456
-    - A user name Carl
-    - A user name and discriminator Carl#0324
-
-    If uRef is not a user mention or ID, dcGuild must be provided, to be searched for the given name.
-    When validating a name uRef, the process is much more efficient when also given the user's discriminator.
-
-    :param str uRef: The string to test
-    :param discord.Guild dcGuild: The guild in which to search for a user identified by uRef. Required if uRef is not a mention or ID. (Default None)
-    :return: True if uRef identifies a discord.User or a discord.Member in dcGuild, False otherwise
-    """
-    if stringTyping.isMention(uRef):
-        return True
-    
-    if dcGuild is not None:
-        if stringTyping.isInt(uRef):
-            return dcGuild.get_member(uRef) is not None
-        else:
-            return dcGuild.get_member_named(uRef) is not None
-
-    return False
-
-
 def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
     """Attempt to find a member of a given discord guild object from a string or integer.
     uRef can be one of:
@@ -121,12 +90,13 @@ def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
     return dcGuild.get_member_named(uRef)
 
 
-def userTagOrDiscrim(userID : str, guild=None) -> str:
+def userTagOrDiscrim(userID : str, guild : Guild = None) -> str:
     """If a passed user mention or ID is valid and shares a common server with the bot,
     return the user's name and discriminator. TODO: Should probably change this to display name
     Otherwise, return the passed userID.
 
     :param str userID: A user mention or ID in string form, to attempt to convert to name and discrim
+    :param discord.Guild guild: Optional guild in which to search for the user rather than searching over the client, improving efficiency.
     :return: The user's name and discriminator if the user is reachable, userID otherwise
     :rtype: str
     """
@@ -142,7 +112,7 @@ def userTagOrDiscrim(userID : str, guild=None) -> str:
     return userID
 
 
-def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
+def criminalNameOrDiscrim(criminal : bbCriminal.Criminal) -> str:
     """If a passed criminal is a player, attempt to return the user's name and discriminator.
     Otherwise, return the passed criminal's name. TODO: Should probably change this to display name
 
@@ -155,7 +125,8 @@ def criminalNameOrDiscrim(criminal : bbCriminal.bbCriminal) -> str:
     return userTagOrDiscrim(criminal.name)
 
 
-def makeEmbed(titleTxt="", desc="", col=Colour.blue(), footerTxt="", img="", thumb="", authorName="", icon="") -> Embed:
+def makeEmbed(titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), footerTxt : str = "",
+        img : str = "", thumb : str = "", authorName : str = "", icon : str = "") -> Embed:
     """Factory function building a simple discord embed from the provided arguments.
 
     :param str titleTxt: The title of the embed (Default "")
@@ -180,7 +151,7 @@ def makeEmbed(titleTxt="", desc="", col=Colour.blue(), footerTxt="", img="", thu
     return embed
 
 
-def getMemberByRefOverDB(uRef : str, dcGuild=None) -> User:
+def getMemberByRefOverDB(uRef : str, dcGuild : Guild = None) -> User:
     """Attempt to get a user object from a given string user reference.
     a user reference can be one of:
     - A user mention <@123456> or <@!123456>
@@ -208,7 +179,8 @@ def getMemberByRefOverDB(uRef : str, dcGuild=None) -> User:
     return userAttempt
 
 
-def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None) -> str:
+def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser : Union[User, Member] = None,
+        bbUser : bbUser.bbUser = None, bbGuild : bbGuild.bbGuild = None, dcGuild : Guild = None) -> str:
     """If the given user has subscribed to the given alert type, return the user's mention. Otherwise, return their display name and discriminator.
     At least one of dcUser or bbUser must be provided.
     bbGuild and dcGuild are both optional. If neither are provided then the joined guilds will be searched for the given user.
@@ -247,7 +219,8 @@ def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser=None, bbU
     return guildMember.display_name + "#" + str(guildMember.discriminator)
 
 
-def IDAlertedUserMentionOrName(alertID : str, dcUser=None, bbUser=None, bbGuild=None, dcGuild=None) -> str:
+def IDAlertedUserMentionOrName(alertID : str, dcUser : Union[Member, User] = None, bbUser : bbUser.bbUser = None,
+        bbGuild : bbGuild.bbGuild = None, dcGuild : Guild = None) -> str:
     """If the given user has subscribed to the alert type of the given ID, return the user's mention. Otherwise, return their display name and discriminator.
     At least one of dcUser or bbUser must be provided.
     bbGuild and dcGuild are both optional. If neither are provided then the joined guilds will be searched for the given user.
@@ -263,3 +236,34 @@ def IDAlertedUserMentionOrName(alertID : str, dcUser=None, bbUser=None, bbGuild=
     :rtype: str
     """
     return typeAlertedUserMentionOrName(UserAlerts.userAlertsIDsTypes[alertID], dcUser=dcUser, bbUser=bbUser, bbGuild=bbGuild, dcGuild=dcGuild)
+
+
+async def startLongProcess(message : Message):
+    """Indicates that a long process is starting, by adding a reaction to the given message.
+
+    :param discord.Message message: The message to react to
+    """
+    try:
+        await message.add_reaction(bbConfig.longProcessEmoji.sendable)
+    except (HTTPException, Forbidden):
+        pass
+
+
+async def endLongProcess(message : Message):
+    """Indicates that a long process has finished, by removing a reaction from the given message.
+
+    :param discord.Message message: The message to remove the reaction from
+    """
+    try:
+        await message.remove_reaction(bbConfig.longProcessEmoji.sendable, bbGlobals.client.user)
+    except (HTTPException, Forbidden):
+        pass
+
+
+def randomColour():
+    """Generate a completely random discord.Colour.
+
+    :return: A discord.Colour with randomized r, g and b components.
+    :rtype: discord.Colour
+    """
+    return Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))

@@ -2,10 +2,28 @@ from __future__ import annotations
 from emoji import UNICODE_EMOJI
 from .. import bbGlobals
 from . import stringTyping
+from ..logging import bbLogger
+import traceback
 
-from typing import TYPE_CHECKING
+from typing import Union, TYPE_CHECKING
 if TYPE_CHECKING:
-    from discord import PartialEmoji
+    from discord import PartialEmoji, Emoji
+
+
+class UnrecognisedCustomEmoji(Exception):
+    """Exception raised when creating a dumbEmoji instance, but the client could not match an emoji to the given ID.
+
+    :var id: The ID that coult not be matched
+    :vartype id: int
+    """
+    def __init__(self, comment : str, id : int):
+        """
+        :param str comment: Description of the exception
+        :param int id: The ID that coult not be matched
+        """
+        super().__init__(comment)
+        self.id = id
+
 
 class dumbEmoji:
     """A class that really shouldnt be necessary, acting as a union over the str (unicode) and Emoji type emojis used and returned by discord.
@@ -26,7 +44,7 @@ class dumbEmoji:
     """
     EMPTY = None
 
-    def __init__(self, id=-1, unicode=""):
+    def __init__(self, id : int = -1, unicode : str = ""):
         """
         :param int id: The ID of the custom emoji that this object should represent.
         :param str unicode: The unicode emoji that this object should represent.
@@ -36,12 +54,20 @@ class dumbEmoji:
             raise ValueError("At least one of id or unicode is required")
         elif id != -1 and unicode != "":
             raise ValueError("Can only accept one of id or unicode, not both")
+        if type(id) != int:
+            raise TypeError("Given incorrect type for dumbEmoji ID: " + id.__class__.__name__)
+        if type(unicode) != str:
+            raise TypeError("Given incorrect type for dumbEmoji unicode: " + unicode.__class__.__name__)
+        
         
         self.id = id
         self.unicode = unicode
         self.isID = id != -1
         self.isUnicode = not self.isID
         self.sendable = self.unicode if self.isUnicode else str(bbGlobals.client.get_emoji(self.id))
+        if self.sendable == "None":
+            # raise UnrecognisedCustomEmoji("Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id),self.id)
+            bbLogger.log("dumbEmoji", "init", "Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id), trace=traceback.format_exc())
         # if self.sendable is None:
         #     self.sendable = '❓'
 
@@ -186,6 +212,27 @@ def dumbEmojiFromPartial(e : PartialEmoji) -> dumbEmoji:
         return dumbEmoji(id=e.id)
 
 
+def dumbEmojiFromReaction(e : Union[Emoji, PartialEmoji, str]) -> dumbEmoji:
+    """Construct a new dumbEmoji object from a given discord.PartialEmoji, discord.Emoji, or string.
+
+    :return: A dumbEmoji representing e
+    :rtype: dumbEmoji
+    """
+    if type(e) == dumbEmoji:
+        return e
+    if type(e) == str:
+        if isUnicodeEmoji(e):
+            return dumbEmoji(unicode=e)
+        elif isCustomEmoji(e):
+            return dumbEmojiFromStr(e)
+        else:
+            raise ValueError("Given a string that does not match any emoji format: " + e)
+    if type(e) == PartialEmoji:
+        return dumbEmojiFromPartial(e)
+    else:
+        return dumbEmoji(id=e.id)
+
+
 class UninitializedDumbEmoji:
     """A data class representing a dumbemoji waiting to be initialized.
     No instances of this class should be present after bountybot.on_ready
@@ -197,4 +244,7 @@ class UninitializedDumbEmoji:
     TODO: Update bbConfig.defaultShipSkinToolEmoji once merged to the same branch
     """
     def __init__(self, value):
+        """
+        :param value: The data to attempt to initialize an emoji with. For example, an integer ID, or a string unicode character.
+        """
         self.value = value

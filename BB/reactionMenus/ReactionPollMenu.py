@@ -1,11 +1,12 @@
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from .. import bbGlobals, lib
-from discord import Colour, NotFound, HTTPException, Forbidden, Emoji, PartialEmoji, Message, Embed
+from discord import Colour, Emoji, PartialEmoji, Message, Embed, User, Member, Role
 from datetime import datetime
 from ..scheduling import TimedTask
 from ..logging import bbLogger
-from typing import Dict
+from typing import Dict, Union, TYPE_CHECKING
+from ..bbObjects import bbUser
 
 
 async def printAndExpirePollResults(msgID : int):
@@ -79,7 +80,7 @@ async def printAndExpirePollResults(msgID : int):
     if maxCount > 0:
         resultsStr = "```\n"
         for currentOption in results:
-            resultsStr += ("🏆" if len(results[currentOption]) == maxCount else "  ") + currentOption.name + (" " * (maxOptionLen - len(currentOption.name))) + " | " + ("=" * int((len(results[currentOption]) / maxCount) * bbConfig.pollMenuResultsBarLength)) + (" " if len(results[currentOption]) == 0 else "")+ " +" + str(len(results[currentOption])) + " Vote" + ("s" if len(results[currentOption]) != 1 else "") + "\n"
+            resultsStr += ("🏆" if len(results[currentOption]) == maxCount else "  ") + currentOption.name + (" " * (maxOptionLen - len(currentOption.name))) + " | " + ("=" * int((len(results[currentOption]) / maxCount) * bbConfig.pollMenuResultsBarLength)) + (" " if len(results[currentOption]) == 0 else "") + " +" + str(len(results[currentOption])) + " Vote" + ("s" if len(results[currentOption]) != 1 else "") + "\n"
         resultsStr += "```"
 
         pollEmbed.add_field(name="Results", value=resultsStr, inline=False)
@@ -106,7 +107,10 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
     :var owningBBUser: The bbUser who started the poll
     :vartype owningBBUser: bbUser
     """
-    def __init__(self, msg : Message, pollOptions : dict, timeout : TimedTask.TimedTask, pollStarter=None, multipleChoice=False, titleTxt="", desc="", col=None, footerTxt="", img="", thumb="", icon="", authorName="Poll", targetMember=None, targetRole=None, owningBBUser=None):
+    def __init__(self, msg : Message, pollOptions : dict, timeout : TimedTask.TimedTask, pollStarter : Union[User, Member] = None,
+            multipleChoice : bool = False, titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), footerTxt : str = "",
+            img : str = "", thumb : str = "", icon : str = "", authorName : str = "", targetMember : Member = None,
+            targetRole : Role = None, owningBBUser : bbUser.bbUser = None):
         """
         :param discord.Message msg: the message where this menu is embedded
         :param options: A dictionary storing all of the poll options. Poll option behaviour functions are not called. TODO: Add reactionAdded/Removed overloads that just return and dont check anything
@@ -129,8 +133,21 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
         self.multipleChoice = multipleChoice
         self.owningBBUser = owningBBUser
 
-        if pollStarter is not None and desc == "":
-            desc = "__" + str(pollStarter) + " started a poll!__"
+        if pollStarter is not None and authorName == "":
+            authorName = str(pollStarter) + " started a poll!"
+        else:
+            authorName = authorName if authorName else "Poll"
+
+        if icon == "":
+            if pollStarter is not None:
+                icon = str(pollStarter.avatar_url_as(size=64))
+        else:
+            icon = icon if icon else "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/ballot-box-with-ballot_1f5f3.png"
+
+        if desc == "":
+            desc = "React to this message to vote!"
+        else:
+            desc = "*" + desc + "*"
 
         super(ReactionPollMenu, self).__init__(msg, options=pollOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
         self.saveable = True
@@ -187,7 +204,7 @@ async def fromDict(rmDict : dict) -> ReactionPollMenu:
     return ReactionPollMenu(msg, options, timeoutTT, multipleChoice=rmDict["multipleChoice"] if "multipleChoice" in rmDict else False,
                                 titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
                                 desc=rmDict["desc"] if "desc" in rmDict else "",
-                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.default(),
+                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.blue(),
                                 footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
                                 img=rmDict["img"] if "img" in rmDict else "",
                                 thumb=rmDict["thumb"] if "thumb" in rmDict else "",

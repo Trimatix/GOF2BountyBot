@@ -1,6 +1,7 @@
 from . import TimedTask
 from heapq import heappop, heappush
 import inspect
+from types import FunctionType
 
 class TimedTaskHeap:
     """A min-heap of TimedTasks, sorted by task expiration time.
@@ -9,7 +10,7 @@ class TimedTaskHeap:
     :var tasksHeap: The heap, stored as an array. tasksHeap[0] is always the TimedTask with the closest expiry time.
     :vartype tasksHeap: list[TimedTask]
     :var expiryFunction: function reference to call upon the expiry of any TimedTask managed by this heap.
-    :vartype expiryFunction: function
+    :vartype expiryFunction: FunctionType
     :var hasExpiryFunction: Whether or not this heap has an expiry function to call
     :vartype hasExpiryFunction: bool
     :var expiryFunctionArgs: an object to pass to expiryFunction when calling. There is no type requirement, but a dictionary is recommended as a close representation of KWArgs.
@@ -19,7 +20,7 @@ class TimedTaskHeap:
     :vartype asyncExpiryFunction: bool
     """
 
-    def __init__(self, expiryFunction=None, expiryFunctionArgs={}):
+    def __init__(self, expiryFunction : FunctionType = None, expiryFunctionArgs={}):
         """
         :param function expiryFunction: function reference to call upon the expiry of any TimedTask managed by this heap. (Default None)
         :param expiryFunctionArgs: an object to pass to expiryFunction when calling. There is no type requirement, but a dictionary is recommended as a close representation of KWArgs. (Default {})

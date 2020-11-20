@@ -1,4 +1,5 @@
 from ..reactionMenus import ReactionMenu, ReactionRolePicker, ReactionInventoryPicker, ReactionDuelChallengeMenu, ReactionPollMenu
+from .. import bbGlobals
 
 # ReactionMenu subclasses that cannot be saved to dictionary
 # TODO: change to a class-variable reference e.g menu.__class__.SAVEABLE
@@ -33,6 +34,8 @@ async def fromDict(dbDict : dict) -> ReactionMenuDB:
     newDB = ReactionMenuDB()
 
     for msgID in dbDict:
+        if bbGlobals.client.get_channel(dbDict[msgID]["channel"]) is None:
+            continue
         if "type" in dbDict[msgID]:
             if dbDict[msgID]["type"] == "ReactionInventoryPicker":
                 newDB[int(msgID)] = ReactionInventoryPicker.fromDict(dbDict[msgID])

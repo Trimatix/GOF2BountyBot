@@ -2,6 +2,14 @@
 
 # Shame, but i'd rather this than keep factionColours in bountybot.py
 from discord import Colour
+# Used for importing items
+import os
+import json
+
+shipsDir = "items" + os.sep + "ships"
+skinsDir = "items" + os.sep + "ship skins"
+CWD = os.getcwd()
+
 
 # all factions recognised by BB
 factions = ["terran", "vossk", "midorian", "nivelian", "neutral"]
@@ -63,57 +71,7 @@ mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/7006835441037475
 mapImageNoGraphLink = 'https://i.imgur.com/TmPgPd3.png'
 
 # intro for help commands
-helpIntro = """:star: Here are my commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help 2`
-**[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
-
-# help strings for bb commands
-helpDict = {"Miscellaneous":{"how-to-play": ("**how-to-play**", "Get a short introduction on how to play bounties!"),
-                            "help": ("**help** *[page number, section or command]*", "Display information available commands. Give a specific command for info about it, or give a page number, or give a section name. There are currently six pages, and six sections being `Miscellaneous`, `GOF2 Info`, `Bounties` and `Loadout`, `Shopping` and `Credits`."),
-                            "stats": ("**stats** *[user]*", "Get various credits and bounty statistics about yourself, or another user."),
-                            "leaderboard": ("**leaderboard** *[-g|-c|-s|-w]*", "Show the leaderboard for total player value. Give `-g` for the global leaderboard, not just this server.\n> Give `-c` for the current credits balance leaderboard.\n> Give `-s` for the 'systems checked' leaderboard.\n> Give `-w` for the 'bounties won' leaderboard.\nE.g: `$COMMANDPREFIX$leaderboard -gs`"),
-                            "notify": ("**notify <type>** *[alert]*", "Subscribe to pings when events take place. Currently, **type** can be `bounties`, `shop`, `duels`, or `bot`.\n> `shop` requires the `refresh` option.\n> `duels` requires either `new` or `cancel`.\n> `bot` can take `updates` or `announcements`.\n> `bot updates` must be `major` or `minor`."),
-                            "source": ("**source**", "Show links to the project's GitHub page and todo list, and some information about the people behind BountyBot.")},
-            
-            "Home Servers":{"home": ("**home**", "Get the name of your home server, if one is set. This is the the only server where you may use certain commands, such as buying items from the shop, or fighting bounties."),
-                            "transfer": ("**transfer**", "Transfer your home server to the one where you sent this command. You will be asked for confirmation first, since this command has a long cooldown!")},
-            
-            "GOF2 Info":{   "map": ("**map**","Send the complete GOF2 starmap."),
-                            "info": ("**info <object-type> <name>**", "Display information about something. object-type must be criminal, system, ship, weapon, module, or turret. Also gives the usable aliases for an object."),
-                            "make-route": ("**make-route <startSystem>, <endSystem>**", "Find the shortest route from startSystem to endSystem.")},
-            
-            "Bounties":{    "bounties": ("**bounties** *[faction]*", "If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties."),
-                            "route": ("**route <criminal name>**", "Get the named criminal's current route."),
-                            "check": ("**check <system>**", "Check if any criminals are in the given system, arrest them, and get paid! 💰\n🌎 This command must be used in your **home server**."),
-                            "duel": ("**duel [action] [user]** *<stakes>*", "Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`. When challenging another user to a duel, you must give the amount of credits you will win - the 'stakes'.")},
-            
-            "Loadout":{     "hangar": ("**hangar** *[item-type]*", "Display the items in your hangar, or in the hangar of a tagged user. Give an item type (ship/weapon/turret/module) to only list items of that type."),
-                            "loadout": ("**loadout** *[user]*", "Display your current ship and the items equipped onto it, or those equipped by another player."),
-                            "equip": ("**equip <item-type> <item-num>** *[transfer]*", "Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When equipping a ship, specify `transfer` to move all items to the new ship."),
-                            "unequip": ("**unequip <item-type> <item-num>**", "Unequip the requested item from your active ship, into your hangar. Item numbers can be gotten from `$COMMANDPREFIX$loadout`."),
-                            "nameShip": ("**nameShip <nickname>**", "Give your active ship a nickname!"),
-                            "unnameShip": ("**unnameShip**", "Reset your active ship's nickname.")},
-
-            "Economy":{     "shop": ("**shop** *[item-type]*", "Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module) to only list items of that type."),
-                            "buy": ("**buy <item-type> <item-number>** *[transfer] [sell]*", "Buy the requested item from the shop. Item numbers can be gotten from `$COMMANDPREFIX$shop`. When buying a ship, specify `sell` to sell your active ship, and/or `transfer` to move your active items to the new ship.\n🌎 This command must be used in your **home server**."),
-                            "sell": ("**sell <item-type> <item-number>** *[clear]*", "Sell the requested item from your hangar to the shop. Item numbers can be gotten from `$COMMANDPREFIX$hangar`. When selling a ship, specify `clear` to first remove all items from the ship.\n🌎 This command must be used in your **home server**."),
-                            "total-value":("**total-value** *[user]*", "Get the total value of all of your items, including your credits balance. Give a user to check someone else's total inventory value."),
-                            "balance": ("**balance** *[user]*", "Get the credits balance of yourself, or another user if one is given."),
-                            "pay": ("**pay <user> <amount>**", "Pay the given user an amount of credits from your balance.")}}
-
-# intro for admin help commands
-adminHelpIntro = """:star: Here are my administrator commands! Prefix commands with `$COMMANDPREFIX$` - for example: `$COMMANDPREFIX$help how-to-play`
-**[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments."""
-
-# help strings for admin bb commands
-adminHelpDict = {"Miscellaneous":{  "admin-help": ("**admin-help**", "Display information about admin-only commands."),
-                                        "set-announce-channel": ("**set-announce-channel** *[off]*", "Set the channel where BountyBot will send announcements (e.g new bounties)\n> Use `$COMMANDPREFIX$set-announce-channel off` to disable announcements."),
-                                        "set-play-channel": ("**set-play-channel** *[off]*", "Set the channel where BountyBot will send info about completed bounties\n> Use `$COMMANDPREFIX$set-play-channel off` to disable completed bounty announcements."),
-                                        "set-notify-role": ("**set-notify-role <type>** *[alert]* **<role>**", "Set a role to ping when various events occur. **<type>** and/or *[alert]]* must specify a type of notification. **<role>** can be either a role mention, or a role ID. For valid notification types, see `$COMMANDPREFIX$help notify`."),
-                                        "remove-notify-role": ("**remove-notify-role**", "Stop pinging the bounty notify role when new bounties are created."),
-                                        "set-bounty-board-channel": ("**set-bounty-board-channel**", "Send from within a channel to set that channel as a *bountyboard*.\nBountyBoard channels show *all* information about active bounties, continuously update their listings (e.g cross through checked systems), and only show *active* bounties (listings for located bounties are removed)."),
-                                        "remove-bounty-board-channel": ("**remove-bounty-board-channel**", "Send from any channel to remove the server's bountyboard channel, if one is set."),
-                                        "hangar": ("**hangar** *[user]* *[item-type]*", "Administrators have permission to view the hangars of other users."),
-                                        "config": ("**config <setting> <value>**", "Set various settings for how bountybot will function in this server. Currently, `setting` can be either 'bounties' or 'shop', and `value` can either 'enable' or 'disable', all with a few handy aliases. This command is lets you enable or disable large amounts of functionality all together.")}}
+helpIntro = "**[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments.\n"
 
 # icons for factions
 terranIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013574331596850/terran.png"
@@ -134,7 +92,32 @@ factionColours = {"terran":Colour.gold(), "vossk":Colour.dark_green(), "midorian
 
 # Data representing all ship items in the game. These are used to create bbShip objects, which are stored in builtInShipObjs in a similar dict format.
 # Ships to not have tech levels in GOF2, so tech levels will be automaticaly generated for the sake of the bot during bbConfig package init.
-builtInShipData = {# Terran
+builtInShipData = {}
+
+for subdir, dirs, files in os.walk(shipsDir):
+    for dirname in dirs:
+        dirpath = subdir + os.sep + dirname
+
+        if dirname.lower().endswith(".bbship"):
+            with open(dirpath + os.sep + "META.json", "r") as f:
+                currentShipData = json.loads(f.read())
+                currentShipData["path"] = CWD + os.sep + dirpath
+                if "skinnable" not in currentShipData or "model" not in currentShipData:
+                    currentShipData["skinnable"] = False
+                builtInShipData[currentShipData["name"]] = currentShipData
+
+                if "compatibleSkins" not in currentShipData:
+                    currentShipData["compatibleSkins"] = []
+
+
+# Objects representing all ship skins in the game.
+builtInShipSkins = {}
+
+
+
+
+# Old Hardcoded version
+"""builtInShipData = {# Terran
                     "Inflict": {"name": "Inflict", "manufacturer": "terran", "maxPrimaries": 2, "maxTurrets": 0, "maxModules": 4, "armour": 150, "cargo": 45, "numSecondaries": 1, "handling": 125, "value": 30900, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Inflict", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694046057824296/inflict.png", "emoji":"<:inflict:723705238091202650>"},
                     "Furious": {"name": "Furious", "manufacturer": "terran", "maxPrimaries": 1, "maxTurrets": 1, "maxModules": 6, "armour": 176, "cargo": 108, "numSecondaries": 2, "handling": 112, "value": 75800, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Furious", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694028752126162/furious.png", "emoji":"<:furious:723705236958609520>"},
                     "Taipan": {"name": "Taipan", "manufacturer": "terran", "maxPrimaries": 3, "maxTurrets": 0, "maxModules": 5, "armour": 176, "cargo": 50, "numSecondaries": 2, "handling": 113, "value": 100100, "aliases": [], "wiki": "https://galaxyonfire.fandom.com/wiki/Taipan", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720694066626691082/taipan.png", "emoji":"<:taipan:723705237088501781>"},
@@ -212,7 +195,8 @@ builtInShipData = {# Terran
                     "Phantom XT": {"name": "Phantom XT", "manufacturer": "kaamo club", "maxPrimaries": 4, "maxTurrets": 0, "maxModules": 14, "armour": 425, "cargo": 60, "numSecondaries": 1, "handling": 150, "value": 7430000, "aliases": ["PhantomXT"], "wiki": "https://galaxyonfire.fandom.com/wiki/Phantom_XT", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720787685035212830/phantom_xt.png", "emoji":"<:phantomxt:723705998660862064>"},
                     "Teneta R.E.D.": {"name": "Teneta R.E.D.", "manufacturer": "kaamo club", "maxPrimaries": 4, "maxTurrets": 1, "maxModules": 13, "armour": 545, "cargo": 70, "numSecondaries": 2, "handling": 117, "value": 7610000, "aliases": ["Teneta RED", "Teneta R.E.D"], "wiki": "https://galaxyonfire.fandom.com/wiki/Teneta_R.E.D.", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/720787774328012840/teneta_r.e.d..png", "emoji":"<:tenetared:723705999277686814>"},
                     "Kinzer RS": {"name": "Kinzer RS", "manufacturer": "kaamo club", "maxPrimaries": 4, "maxTurrets": 0, "maxModules": 15, "armour": 420, "cargo": 65, "numSecondaries": 4, "handling": 125, "value": 8930000, "aliases": ["KinzerRS"], "wiki": "https://galaxyonfire.fandom.com/wiki/Kinzer_RS", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/720787863171629056/kinzer_rs.png", "emoji":"<:kinzerrs:723705998723907615>"}}
-                    
+"""
+
 # Data representing all module items in the game. These are used to create bbModule objects, which are stored in builtInModuleObjs in a similar dict format.
 builtInModuleData = {   # armour
                         "E2 Exoclad": {"type": "armour", "name": "E2 Exoclad", "aliases": ["E2", "Exoclad", "Exoclad E2"], "techLevel": 1, "armour": 40, "value": 1070, "wiki": "https://galaxyonfire.fandom.com/wiki/E2_Exoclad", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723474328687214612/e2_exoclad.png", "emoji": "<:e2exoclad:723706394716536842>"},
@@ -484,6 +468,9 @@ builtInTurretData = { # Manual
 builtInCommodityData = {
             # 
 }
+
+builtInToolData = {}
+builtInToolObjs = {}
 
 # TO BE COMPLETED
 builtInSecondariesData = {

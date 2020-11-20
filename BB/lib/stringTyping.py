@@ -63,3 +63,12 @@ def getNumExtension(num : int) -> str:
     :rtype: str
     """
     return numExtensions[int(str(num)[-1])] if not (num > 10 and num < 20) else "th"
+
+
+def shipSkinNameToToolName(skinName : str) -> str:
+    """Construct a name of a bbShipSkinTool from the name of the skin of the skin.
+
+    :param str skinName: The name of the skin this tool name should reference
+    :return: The name that should be given to a bbShipSkinTool that applies the named shipSkin
+    """
+    return "Ship Skin: " + skinName

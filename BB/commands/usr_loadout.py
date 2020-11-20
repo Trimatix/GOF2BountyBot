@@ -7,6 +7,9 @@ from ..bbObjects import bbUser
 from ..bbObjects.items import bbShip
 
 
+bbCommands.addHelpSection(0, "loadout")
+
+
 async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
     """return a page listing the calling user's items. Administrators may view the hangar of any user.
     can apply to a specified user, or the calling user if none is specified.
@@ -41,7 +44,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
         argNum = 1
         for arg in argsSplit:
             if arg != "":
-                if lib.discordUtil.isUserRef(arg, dcGuild=message.guild):
+                if lib.discordUtil.getMemberByRefOverDB(arg, dcGuild=message.guild) is not None:
                     if foundUser:
                         await message.channel.send(":x: I can only take one user!")
                         return
@@ -172,6 +175,16 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
                 hangarEmbed.add_field(name=str(turretNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name,
                                       value=currentItem.statsStringShort(), inline=False)
 
+        if item in ["all", "tool"]:	
+            for toolNum in range(firstPlace, requestedBBUser.lastItemNumberOnPage("tool", page, maxPerPage) + 1):	
+                if toolNum == firstPlace:	
+                    hangarEmbed.add_field(	
+                        name="‎", value="__**Stored Tools**__", inline=False)	
+                currentItem = requestedBBUser.inactiveTools[toolNum - 1].item	
+                currentItemCount = requestedBBUser.inactiveTools.items[currentItem].count	
+                hangarEmbed.add_field(name=str(toolNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + currentItem.name,	
+                                      value=currentItem.statsStringShort(), inline=False)
+
         try:
             await sendChannel.send(embed=hangarEmbed)
             if sendDM:
@@ -179,7 +192,8 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
         except discord.Forbidden:
             await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
 
-bbCommands.register("hangar", cmd_hangar, 0, aliases=["hanger"], forceKeepArgsCasing=True, allowDM=True)
+bbCommands.register("hangar", cmd_hangar, 0, aliases=["hanger"], forceKeepArgsCasing=True, allowDM=True, helpSection="loadout", signatureStr="**hangar** *[item-type]*", longHelp="Display the items stored in your hangar. Give an item type (ship/weapon/turret/module) to only list items of that type.")
+bbCommands.register("hangar", cmd_hangar, 1, aliases=["hanger"], forceKeepArgsCasing=True, allowDM=True, signatureStr="**hangar** *[user]* *[item-type]*", shortHelp="Administrators have permission to view the hangars of other users.", longHelp="Display the items stored in your hangar. Give an item type (ship/weapon/turret/module) to only list items of that type.\nAdministrators have permission to view the hangars of other users.")
 
 
 async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
@@ -262,7 +276,7 @@ async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
         
         await message.channel.send(embed=loadoutEmbed)
 
-bbCommands.register("loadout", cmd_loadout, 0, forceKeepArgsCasing=True, allowDM=True)
+bbCommands.register("loadout", cmd_loadout, 0, forceKeepArgsCasing=True, allowDM=True, helpSection="loadout", signatureStr="**loadout** *[user]*", shortHelp="Display your current ship and the items equipped onto it, or those equipped by another player.")
 
 
 async def cmd_equip(message : discord.Message, args : str, isDM : bool):
@@ -283,7 +297,7 @@ async def cmd_equip(message : discord.Message, args : str, isDM : bool):
         return
 
     item = argsSplit[0].rstrip("s")
-    if item == "all" or item not in bbConfig.validItemNames:
+    if item in ["all", "tool"] or item not in bbConfig.validItemNames:
         await message.channel.send(":x: Invalid item name! Please choose from: ship, weapon, module or turret.")
         return
 
@@ -368,7 +382,7 @@ async def cmd_equip(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("equip", cmd_equip, 0, allowDM=True)
+bbCommands.register("equip", cmd_equip, 0, allowDM=True, helpSection="loadout", signatureStr="**equip <item-type> <item-num>** *[transfer]*", shortHelp="Equip the requested item from your hangar onto your active ship. Item numbers can be gotten from `$COMMANDPREFIX$hangar`.", longHelp="Equip the requested item from your hangar onto your active ship. Item numbers are shown next to items in your `$COMMANDPREFIX$hangar`. When equipping a ship, specify `transfer` to move all items to the new ship.")
 
 
 async def cmd_unequip(message : discord.Message, args : str, isDM : bool):
@@ -474,7 +488,7 @@ async def cmd_unequip(message : discord.Message, args : str, isDM : bool):
     else:
         raise NotImplementedError("Valid but unsupported item name: " + item)
 
-bbCommands.register("unequip", cmd_unequip, 0, allowDM=True)
+bbCommands.register("unequip", cmd_unequip, 0, allowDM=True, helpSection="loadout", signatureStr="**unequip <item-type> <item-num>**", shortHelp="Move an item from your active ship to your hangar. Item numbers can be gotten from `$COMMANDPREFIX$loadout`.", longHelp="Unequip the requested item from your active ship, into your hangar. Item numbers are shown next to items in your `$COMMANDPREFIX$loadout`.")
 
 
 async def cmd_nameship(message : discord.Message, args : str, isDM : bool):
@@ -504,7 +518,7 @@ async def cmd_nameship(message : discord.Message, args : str, isDM : bool):
     requestedBBUser.activeShip.changeNickname(args)
     await message.channel.send(":pencil: You named your " + requestedBBUser.activeShip.name + ": **" + args + "**.")
 
-bbCommands.register("nameship", cmd_nameship, 0, forceKeepArgsCasing=True, allowDM=True)
+bbCommands.register("nameship", cmd_nameship, 0, forceKeepArgsCasing=True, allowDM=True, helpSection="loadout", signatureStr="**nameShip <nickname>**", shortHelp="Give your active ship a nickname!", longHelp="Give your active ship a nickname! The character limit for ship nicknames is 30.")
 
 
 async def cmd_unnameship(message : discord.Message, args : str, isDM : bool):
@@ -530,4 +544,4 @@ async def cmd_unnameship(message : discord.Message, args : str, isDM : bool):
     requestedBBUser.activeShip.removeNickname()
     await message.channel.send(":pencil: You reset your **" + requestedBBUser.activeShip.name + "**'s nickname.")
 
-bbCommands.register("unnameship", cmd_unnameship, 0, allowDM=True)
+bbCommands.register("unnameship", cmd_unnameship, 0, allowDM=True, helpSection="loadout", signatureStr="**unnameShip**", shortHelp="Reset your active ship's nickname.")

@@ -1,5 +1,4 @@
 import json
-from ..bbConfig import bbConfig
 
 
 def readJSON(dbFile : str) -> dict:

@@ -10,6 +10,9 @@ from ..scheduling import TimedTask
 from ..reactionMenus import ReactionMenu, ReactionDuelChallengeMenu
 
 
+bbCommands.addHelpSection(0, "bounties")
+
+
 async def cmd_check(message : discord.Message, args : str, isDM : bool):
     """⚠ WARNING: MARKED FOR CHANGE ⚠
     The following function is provisional and marked as planned for overhaul.
@@ -197,7 +200,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
         seconds = int(diff.total_seconds() % 60)
         await message.channel.send(":stopwatch: **" + message.author.display_name + "**, your *Khador Drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
 
-bbCommands.register("check", cmd_check, 0, aliases=["search"], allowDM=False)
+bbCommands.register("check", cmd_check, 0, aliases=["search"], allowDM=False, helpSection="bounties", signatureStr="**check <system>**", shortHelp="Check if any criminals are in the given system, arrest them, and get paid! 💰\n🌎 This command must be used in your **home server**.")
 
 
 async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
@@ -287,7 +290,7 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
                     maxBountiesMsg = "\nYou have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"
             await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!" + maxBountiesMsg)
 
-bbCommands.register("bounties", cmd_bounties, 0, allowDM=False)
+bbCommands.register("bounties", cmd_bounties, 0, allowDM=False, helpSection="bounties", signatureStr="**bounties** *[faction]*", shortHelp="List all active bounties, in detail if a faction is specified.", longHelp="If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties.")
 
 
 async def cmd_route(message : discord.Message, args : str, isDM : bool):
@@ -330,7 +333,7 @@ async def cmd_route(message : discord.Message, args : str, isDM : bool):
                 bbConfig.commandPrefix + "route Trimatix#2244`"
         await message.channel.send(outmsg)
 
-bbCommands.register("route", cmd_route, 0, allowDM=False)
+bbCommands.register("route", cmd_route, 0, allowDM=False, helpSection="bounties", signatureStr="**route <criminal name>**", shortHelp="Get the named criminal's current route.", longHelp="Get the named criminal's current route.\nFor a list of aliases for a given criminal, see `$COMMANDPREFIX$info criminal`.")
 
 
 async def cmd_duel(message : discord.Message, args : str, isDM : bool):
@@ -482,4 +485,31 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
 
         await DuelRequest.fightDuel(message.author, requestedUser, requestedDuel, message)
 
-bbCommands.register("duel", cmd_duel, 0, forceKeepArgsCasing=True, allowDM=False)
+bbCommands.register("duel", cmd_duel, 0, forceKeepArgsCasing=True, allowDM=False, helpSection="bounties", signatureStr="**duel [action] [user]** *<stakes>*", shortHelp="Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`.", longHelp="Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`. When challenging another user to a duel, you must give the amount of credits you will win - the 'stakes'.")
+
+
+async def cmd_use(message : discord.Message, args : str, isDM : bool):
+    """Use the specified tool from the user's inventory.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: a single integer indicating the index of the tool to use
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    callingBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
+
+    if not lib.stringTyping.isInt(args):
+        await message.channel.send(":x: Please give the number of the tool you would like to use! e.g: `" + bbConfig.commandPrefix + "use 1`")
+    else:
+        toolNum = int(args)
+        if toolNum < 1:
+            await message.channel.send(":x: Tool number must be at least 1!")
+        elif callingBBUser.inactiveTools.isEmpty():
+            await message.channel.send(":x: You don't have any tools to use!")
+        elif toolNum > callingBBUser.inactiveTools.numKeys:
+            await message.channel.send(":x: Tool number too big - you only have " + str(callingBBUser.inactiveTools.numKeys) + " tool" + ("" if callingBBUser.inactiveTools.numKeys == 1 else "s") + "!")
+        else:
+            result = await callingBBUser.inactiveTools[toolNum - 1].item.userFriendlyUse(message, ship=callingBBUser.activeShip, callingBBUser=callingBBUser)
+            await message.channel.send(result)
+
+
+bbCommands.register("use", cmd_use, 0, allowDM=False, helpSection="bounties", signatureStr="**use [tool number]**", shortHelp="Use the tool in your hangar with the given number. See `$COMMANDPREFIX$hangar` for tool numbers.", longHelp="Use the tool in your hangar with the given number. Tool numbers can be seen next your items in `$COMMANDPREFIX$hangar tool`. For example, if tool number `1` is a ship skin, `$COMMANDPREFIX$use 1` will apply the skin to your active ship.")

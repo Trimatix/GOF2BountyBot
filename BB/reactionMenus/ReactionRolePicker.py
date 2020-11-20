@@ -1,13 +1,14 @@
+from discord.member import Member
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from .. import bbGlobals, lib
-from discord import Colour, NotFound, HTTPException, Forbidden, Guild, Role, Message
+from discord import Colour, NotFound, HTTPException, Forbidden, Guild, Role, Message, User
 from datetime import datetime
 from ..scheduling import TimedTask
 from typing import List, Union, Dict
 
 
-async def giveRole(args : List[Union[Guild, Role, int]], reactingUser=None) -> bool:
+async def giveRole(args : List[Union[Guild, Role, int]], reactingUser : Union[User, Member] = None) -> bool:
     """Grant the given user the role described in args.
     if reactingUser already has the requested role, do nothing.
 
@@ -26,7 +27,7 @@ async def giveRole(args : List[Union[Guild, Role, int]], reactingUser=None) -> b
     return True
 
 
-async def removeRole(args : List[Union[Guild, Role, int]], reactingUser=None) -> bool:
+async def removeRole(args : List[Union[Guild, Role, int]], reactingUser : Union[User, Member] = None) -> bool:
     """remove the role described in args from the given user.
     if reactingUser already lacks the requested role, do nothing.
 
@@ -88,7 +89,10 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
     TODO: replace dcGuild param with extracting msg.guild
     """
 
-    def __init__(self, msg : Message, reactionRoles : Dict[lib.emojis.dumbEmoji, Role], dcGuild : Guild, titleTxt="**Role Menu**", desc="React for your desired role!", col=None, timeout=None, footerTxt="", img="", thumb="", icon="", authorName="", targetMember=None, targetRole=None):
+    def __init__(self, msg : Message, reactionRoles : Dict[lib.emojis.dumbEmoji, Role], dcGuild : Guild,
+            titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), timeout : TimedTask.TimedTask = None,
+            footerTxt : str = "", img : str = "", thumb : str = "", icon : str = "", authorName : str = "",
+            targetMember : Member = None, targetRole : Role = None):
         # TODO: Stop taking dcGuild, and instead extract dcGuild from msg.guild
         """
         :param discord.Message msg: the message where this menu is embedded
@@ -112,6 +116,11 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
         roleOptions = {}
         for reaction in reactionRoles:
             roleOptions[reaction] = ReactionRolePickerOption(reaction, reactionRoles[reaction], self)
+
+        if titleTxt == "":
+            titleTxt = "**Role Menu**"
+        if desc == "":
+            desc = "React for your desired role!"
 
         super(ReactionRolePicker, self).__init__(msg, options=roleOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
         self.saveable = True
@@ -152,7 +161,7 @@ async def fromDict(rmDict : dict) -> ReactionRolePicker:
     return ReactionRolePicker(msg, reactionRoles, dcGuild,
                                 titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
                                 desc=rmDict["desc"] if "desc" in rmDict else "",
-                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.default(),
+                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.blue(),
                                 footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
                                 img=rmDict["img"] if "img" in rmDict else "",
                                 thumb=rmDict["thumb"] if "thumb" in rmDict else "",

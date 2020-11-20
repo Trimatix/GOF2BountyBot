@@ -1,7 +1,7 @@
 # Typing imports
 from __future__ import annotations
 
-import math, random, pprint
+import math, random
 from ..lib.emojis import dumbEmoji, UninitializedDumbEmoji
 
 ##### UTIL #####
@@ -24,7 +24,10 @@ def truncToRes(num : float) -> float:
 # List of module names from BB.commands to import
 includedCommandModules = (  "usr_misc", "usr_homeguilds", "usr_gof2-info", "usr_bounties", "usr_loadout", "usr_economy",
                             "admn_channels", "admn_misc",
-                            "dev_misc", "dev_channels", "dev_bounties", "dev_items")
+                            "dev_misc", "dev_channels", "dev_bounties", "dev_items", "dev_skins")
+
+maxCommandsPerHelpPage = 5
+helpEmbedTimeout = {"minutes": 5}
 
 
 ##### USER LEVELING #####
@@ -372,6 +375,21 @@ reactionMenusDBPath = "saveData/reactionMenus.json"
 # path to folder to save log txts to
 loggingFolderPath = "saveData/logs"
 
+# Discord server containing the skinRendersChannel
+mediaServer = 699744305274945650
+# Channel to send ship skin renders to and link from
+skinRendersChannel = 770036783026667540
+# Channel to send showme-prompted ship skin renders to and link from
+showmeSkinRendersChannel = 771368555019108352
+# Resolution of skin render icons
+skinRenderIconResolution = [600, 600]
+# Resolution of skin render emojis (currently unused)
+skinRenderEmojiResolution = [400, 400]
+# Resolution of skin renders from cmd_showme_ship calls
+skinRenderShowmeResolution = [352, 240]
+# Resolution of skin renders from admin_cmd_showmeHD calls
+skinRenderShowmeHDResolution = [1920, 1080]
+
 
 
 ##### SCHEDULING #####
@@ -394,6 +412,9 @@ commandPrefix = "$"
 # When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
 dmSentEmoji = dumbEmoji(unicode="📬")
 
+# When a message prompts a process that will take a long time (e.g rendering), this will be added to the message reactions. It will be removed when the long process is finished.
+longProcessEmoji = dumbEmoji(unicode="⏳")
+
 # max number of characters accepted by nameShip
 maxShipNickLength = 30
 
@@ -404,9 +425,32 @@ maxDevShipNickLength = 100
 numberEmojis = [dumbEmoji(unicode="0️⃣"), dumbEmoji(unicode="1️⃣"), dumbEmoji(unicode="2️⃣"), dumbEmoji(unicode="3️⃣"), dumbEmoji(unicode="4️⃣"), dumbEmoji(unicode="5️⃣"), dumbEmoji(unicode="6️⃣"), dumbEmoji(unicode="7️⃣"), dumbEmoji(unicode="8️⃣"), dumbEmoji(unicode="9️⃣"), dumbEmoji(unicode="🔟")]
 defaultMenuEmojis = numberEmojis
 defaultCancelEmoji = dumbEmoji(unicode="🇽")
+defaultSubmitEmoji = dumbEmoji(unicode="✅")
+spiralEmoji = dumbEmoji(unicode="🌀")
 defaultErrEmoji = dumbEmoji(unicode="❓")
 defaultAcceptEmoji = dumbEmoji(unicode="👍")
 defaultRejectEmoji = dumbEmoji(unicode="👎")
+defaultNextEmoji = dumbEmoji(unicode='⏩')
+defaultPreviousEmoji = dumbEmoji(unicode='⏪')
+
+# Path to the directory to use when temporarily saving textures downloaded from showme commands.
+tempRendersDir = "rendering-temp"
+
+# Default graphics to use for ship skin application tool items
+defaultShipSkinToolIcon = "https://cdn.discordapp.com/attachments/700683544103747594/723472334362771536/documents.png"
+defaultShipSkinToolEmoji = UninitializedDumbEmoji(777166858516299786)
+
+def shipSkinValueForTL(averageTL : int) -> int:
+    """Calculate how skins are valued with respect to their average compatible ship techlevel.
+
+    :param int averageTL: The average techLevel of the ships that this skin is compatible with
+    :return: The value to assign to the ship skin
+    :rtype: int
+    """
+    return averageTL * 10000
+
+# The maximum number of rendering threads that may be dispatched simultaneously
+maxConcurrentRenders = 1
 
 
 
@@ -415,10 +459,13 @@ defaultRejectEmoji = dumbEmoji(unicode="👎")
 # discord user IDs of all developers
 developers = [188618589102669826, 448491245296418817]
 
+# Names to assign to each access level
+accessLevelNames = ["User", "Administrator", "Developer"]
+
 # The number of registerable command access levels.
 # E.g I use 3 to represent 0=user, 1=admin, 2=dev
 # TODO: Add a fourth, mod commands, with an admin-assignable role
-numCommandAccessLevels = 3
+numCommandAccessLevels = len(accessLevelNames)
 
 # titles to give each type of user when reporting error messages etc
 accessLevelTitles = ["pilot", "commander", "officer"]
@@ -433,7 +480,7 @@ maxItemsPerHangarPageAll = 3
 maxItemsPerHangarPageIndividual = 10
 
 # Names to be used when checking input to !bb hangar and bbUser.numInventoryPages
-validItemNames = ["ship", "weapon", "module", "turret", "all"]
+validItemNames = ["ship", "weapon", "module", "turret", "all", "tool"]
 
 
 
@@ -458,8 +505,9 @@ homeGuildTransferCooldown = {"weeks":1}
 
 roleMenuDefaultTimeout = {"days": 1}
 duelChallengeMenuDefaultTimeout = {"hours": 2}
-pollMenuDefaultTimeout = {"hours": 2}
+pollMenuDefaultTimeout = {"minutes": 5}
 expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
+skinApplyConfirmTimeoutSeconds = 60
 homeGuildTransferConfirmTimeoutSeconds = 60

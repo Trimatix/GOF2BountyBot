@@ -5,11 +5,11 @@ if TYPE_CHECKING:
     from .battles import DuelRequest
 
 from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
-from .items.modules import bbModule
+from .items.tools import bbToolItemFactory
 from ..bbConfig import bbConfig
-from . import bbInventory, bbInventoryListing
+from . import bbInventory
 from ..userAlerts import UserAlerts
-from datetime import datetime
+from datetime import date, datetime
 from discord import Guild, Member
 from . import bbGuild
 from ..logging import bbLogger
@@ -54,6 +54,8 @@ class bbUser:
     :vartype inactiveWeapons: bbInventory
     :var inactiveTurrets: The bbTurrets currently in this user's inventory (unequipped)
     :vartype inactiveTurrets: bbInventory
+    :var inactiveTools: the bbToolItems currently in this user's inventory
+    :vartype inactiveTools: bbInventory
     :var lastSeenGuildId: The ID of the guild where this user was last active. Not guaranteed to be present.
     :vartype lastSeenGuildId: int
     :var hasLastSeenGuildId: Whether or not the user currently has a lastSeenGuildId
@@ -76,18 +78,25 @@ class bbUser:
     :vartype dailyBountyWinsReset: datetime.datetime
     :var pollOwned: Whether or not this user has a running ReactionPollMenu
     :vartype pollOwned: bool
+    :var helpMenuOwned: Whether or not this user has a running reaction help menu
+    :vartype helpMenuOwned: bool
     :var homeGuildID: The id of this user's 'home guild' - the only guild from which they may use several commands e.g buy and check.
     :vartype homeGuildID: int
     :var guildTransferCooldownEnd: A timestamp after which this user is allowed to transfer their homeGuildID.
     :vartype guildTransferCooldownEnd: datetime.datetime
     """
 
-    def __init__(self, id : int, credits=0, lifetimeCredits=0, bountyHuntingXP=bbConfig.bountyHuntingXPForLevel(1), 
-                    bountyCooldownEnd=-1, systemsChecked=0, bountyWins=0, activeShip=None,
-                    inactiveShips=bbInventory.bbInventory(), inactiveModules=bbInventory.bbInventory(), inactiveWeapons=bbInventory.bbInventory(), inactiveTurrets=bbInventory.bbInventory(),
-                    lastSeenGuildId=-1, duelWins=0, duelLosses=0, duelCreditsWins=0, duelCreditsLosses=0,
-                    alerts={}, bountyWinsToday=0, dailyBountyWinsReset=datetime.utcnow(), pollOwned=False,
-                    homeGuildID=-1, guildTransferCooldownEnd=datetime.utcnow()):
+    def __init__(self, id : int, credits : int = 0, lifetimeCredits : int = 0, bountyHuntingXP : int = bbConfig.bountyHuntingXPForLevel(1), 
+                    bountyCooldownEnd : int = -1, systemsChecked : int = 0, bountyWins : int = 0, activeShip : bool = None,
+                    inactiveShips : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    inactiveModules : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    inactiveWeapons : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    inactiveTurrets : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    inactiveTools : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
+                    duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[UserAlerts.UABase or bool]] = {},
+                    bountyWinsToday : int = 0, dailyBountyWinsReset : datetime.datetime = datetime.utcnow(), pollOwned : bool = False,
+                    homeGuildID : int = -1, guildTransferCooldownEnd : datetime.datetime = datetime.utcnow()):
         """
         :param int id: The user's unique ID. The same as their unique discord ID.
         :param int credits: The amount of credits (currency) this user has (Default 0)
@@ -101,13 +110,14 @@ class bbUser:
         :param bbInventory inactiveModules: The bbModules currently in this user's inventory (unequipped) (Default empty bbInventory)
         :param bbInventory inactiveWeapons: The bbWeapons currently in this user's inventory (unequipped) (Default empty bbInventory)
         :param bbInventory inactiveTurrets: The bbTurrets currently in this user's inventory (unequipped) (Default empty bbInventory)
+        :param bbInventory inactiveTools: The bbToolItems currently in this user's inventory (Default empty bbInventory)
         :param int lastSeenGuildId: The ID of the guild where this user was last active. Not guaranteed to be present. (Default -1)
         :param int duelWins: The total number of duels the user has won (Default 0)
         :param int duelLosses: The total number of duels the user has lost (Default 0)
         :param int duelCreditsWins: The total amount of credits the user has won through fighting duels (Default 0)
         :param int duelCreditsLosses: The total amount of credits the user has lost through fighting duels (Default 0)
-        :param userAlerts: A dictionary mapping either (UserAlerts.UABase subtypes or string UA ids from UserAlerts.userAlertsIDsTypes) to either (instances of that subtype or booleans representing the alert state) (Default {})
-        :type userAlerts: dict[type or str, UserAlerts.UABase or bool]
+        :param alerts: A dictionary mapping either (UserAlerts.UABase subtypes or string UA ids from UserAlerts.userAlertsIDsTypes) to either (instances of that subtype or booleans representing the alert state) (Default {})
+        :type alerts: dict[type or str, UserAlerts.UABase or bool]
         :param int bountyWinsToday: The number of bounties the user has won today (Default 0)
         :param datetime.datetime dailyBountyWinsReset: A datetime.datetime representing the time at which the user's bountyWinsToday should be reset to zero (Default datetime.utcnow())
         :param bool pollOwned: Whether or not this user has a running ReactionPollMenu (Default False)
@@ -158,6 +168,7 @@ class bbUser:
         self.inactiveModules = inactiveModules
         self.inactiveWeapons = inactiveWeapons
         self.inactiveTurrets = inactiveTurrets
+        self.inactiveTools = inactiveTools
 
         self.lastSeenGuildId = lastSeenGuildId
         self.hasLastSeenGuildId = lastSeenGuildId != -1
@@ -197,6 +208,7 @@ class bbUser:
         self.dailyBountyWinsReset = dailyBountyWinsReset
 
         self.pollOwned = pollOwned
+        self.helpMenuOwned = False
 
         self.homeGuildID = homeGuildID
         self.guildTransferCooldownEnd = guildTransferCooldownEnd
@@ -215,6 +227,7 @@ class bbUser:
         self.inactiveShips.clear()
         self.inactiveWeapons.clear()
         self.inactiveTurrets.clear()
+        self.inactiveTools.clear()
         self.duelWins = 0
         self.duelLosses = 0
         self.duelCreditsWins = 0
@@ -242,11 +255,12 @@ class bbUser:
         numModules = self.inactiveModules.numKeys
         numTurrets = self.inactiveTurrets.numKeys
         numShips = self.inactiveShips.numKeys
+        numTools = self.inactiveTools.numKeys
 
         itemsNum = 0
 
         if item == "all":
-            itemsNum = max(numWeapons, numModules, numTurrets, numShips)
+            itemsNum = max(numWeapons, numModules, numTurrets, numShips, numTools)
         elif item == "module":
             itemsNum = numModules
         elif item == "weapon":
@@ -255,6 +269,8 @@ class bbUser:
             itemsNum = numTurrets
         elif item == "ship":
             itemsNum = numShips
+        elif item == "tool":
+            itemsNum = numTools
         else:
             raise NotImplementedError("Valid but unsupported item name: " + item)
         
@@ -285,6 +301,8 @@ class bbUser:
             return self.inactiveModules.numKeys
         elif item == "turret":
             return self.inactiveTurrets.numKeys
+        elif item == "tool":
+            return self.inactiveTools.numKeys
         else:
             raise NotImplementedError("Valid but unsupported item name: " + item)
 
@@ -300,7 +318,7 @@ class bbUser:
         if not type(ship) == bbShip.bbShip:
             raise TypeError("Can only unequipAll from a bbShip. Given " + str(type(ship)))
 
-        if not (self.activeShip == ship or ship in self.inactiveShips):
+        if not self.ownsShip(ship):
             raise RuntimeError("Attempted to unequipAll on a ship that isnt owned by this bbUser")
 
         for weapon in ship.weapons:
@@ -337,9 +355,19 @@ class bbUser:
         
         for currentModule in finalModules:
             self.inactiveModules.addItem(currentModule)
+            
+
+    def ownsShip(self, ship : bbShip.bbShip):
+        """Decide whether or not this user owns the given bbShip.
+
+        :param bbShip ship: The ship to test for ownership
+        :return: True if ship is either equipped or in this user's hanger. False otherwise
+        :rtype: bool
+        """
+        return self.activeShip is ship or ship in self.inactiveShips
 
 
-    def equipShipObj(self, ship : bbShip.bbShip, noSaveActive=False):
+    def equipShipObj(self, ship : bbShip.bbShip, noSaveActive : bool = False):
         """Equip the given ship, replacing the active ship.
         Give noSaveActive=True to delete the currently equipped ship.
 
@@ -347,7 +375,7 @@ class bbUser:
         :param bool noSaveActive: Give True to delete the currently equipped ship. Give False to move the active ship to the hangar. (Default False)
         :raise RuntimeError: When given a bbShip that is not owned by this user
         """
-        if not (self.activeShip == ship or ship in self.inactiveShips):
+        if not self.ownsShip(ship):
             raise RuntimeError("Attempted to equip a ship that isnt owned by this bbUser")
         if not noSaveActive and self.activeShip is not None:
             self.inactiveShips.addItem(self.activeShip)
@@ -392,6 +420,10 @@ class bbUser:
         for turret in self.inactiveTurrets.keys:
             inactiveTurretsDict.append(self.inactiveTurrets.items[turret].toDict())
 
+        inactiveToolsDict = []
+        for tool in self.inactiveTools.keys:
+            inactiveToolsDict.append(self.inactiveTools.items[tool].toDict())
+
         alerts = {}
         for alertID in self.userAlerts.keys():
             if isinstance(self.userAlerts[alertID], UserAlerts.StateUserAlert):
@@ -400,10 +432,10 @@ class bbUser:
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
-                "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "lastSeenGuildId":self.lastSeenGuildId,
-                "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins, "duelCreditsLosses": self.duelCreditsLosses,
+                "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "inactiveTools": inactiveToolsDict,
+                "lastSeenGuildId":self.lastSeenGuildId, "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins,
                 "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "bountyHuntingXP": self.bountyHuntingXP, "pollOwned": self.pollOwned,
-                "homeGuildID": self.homeGuildID, "guildTransferCooldownEnd": self.guildTransferCooldownEnd.timestamp()}
+                "duelCreditsLosses": self.duelCreditsLosses, "homeGuildID": self.homeGuildID, "guildTransferCooldownEnd": self.guildTransferCooldownEnd.timestamp()}
 
 
     def userDump(self) -> str:
@@ -451,6 +483,9 @@ class bbUser:
             shipsValue = 0
             for ship in self.inactiveShips.keys:
                 shipsValue += self.inactiveShips.items[ship].count * ship.getValue()
+            toolsValue = 0
+            for tool in self.inactiveTools.keys:
+                toolsValue += self.inactiveTools.items[tool].count * tool.getValue()
 
             return modulesValue + turretsValue + weaponsValue + shipsValue + self.activeShip.getValue() + self.credits
         else:
@@ -469,14 +504,16 @@ class bbUser:
         """
         if item == "all" or item not in bbConfig.validItemNames:
             raise ValueError("Invalid item type: " + item)
-        if item == "ship":
+        elif item == "ship":
             return self.inactiveShips
-        if item == "weapon":
+        elif item == "weapon":
             return self.inactiveWeapons
-        if item == "module":
+        elif item == "module":
             return self.inactiveModules
-        if item == "turret":
+        elif item == "turret":
             return self.inactiveTurrets
+        elif item == "tool":
+            return self.inactiveTools
         else:
             raise NotImplementedError("Valid, but unrecognised item type: " + item)
 
@@ -606,7 +643,7 @@ class bbUser:
         return self.homeGuildID != -1
 
 
-    def canTransferGuild(self, now=datetime.utcnow()) -> bool:
+    def canTransferGuild(self, now : datetime = datetime.utcnow()) -> bool:
         """Decide whether this user is allowed to transfer their homeGuildID.
         This is decided based on the time passed since their last guild transfer.
 
@@ -614,7 +651,7 @@ class bbUser:
         :return: True if this user has no home guild, or their guild transfer cooldown has completed, false otherwise
         :rtype: bool
         """
-        return (not self.hasHomeGuild()) or datetime.utcnow() > self.guildTransferCooldownEnd
+        return (not self.hasHomeGuild()) or now > self.guildTransferCooldownEnd
 
     
     async def transferGuild(self, newGuild : Guild):
@@ -674,6 +711,11 @@ def fromDict(id : int, userDict : dict) -> bbUser:
         for turretListingDict in userDict["inactiveTurrets"]:
             inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
+    inactiveTools = bbInventory.bbInventory()
+    if "inactiveTools" in userDict:
+        for toolListingDict in userDict["inactiveTools"]:
+            inactiveTools.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
+            
     if "bountyHuntingXP" in userDict:
         bountyHuntingXP = userDict["bountyHuntingXP"]
     else:
@@ -684,7 +726,7 @@ def fromDict(id : int, userDict : dict) -> bbUser:
     return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                     bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
                     bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
-                    inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets,
+                    inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, inactiveTools=inactiveTools,
                     lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
                     duelWins=userDict["duelWins"] if "duelWins" in userDict else 0,
                     duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0,

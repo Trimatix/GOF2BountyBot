@@ -5,6 +5,21 @@ from datetime import datetime
 from . import commandsDB as bbCommands
 from .. import bbGlobals, lib
 
+from . import util_help
+
+
+async def dev_cmd_dev_help(message : discord.Message, args : str, isDM : bool):
+    """dev command printing help strings for dev commands as defined in bbData
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    await util_help.util_autohelp(message, args, isDM, 2)
+
+bbCommands.register("dev-help", dev_cmd_dev_help, 2, signatureStr="**dev-help** *[page number, section or command]*", shortHelp="Display information about developer-only commands.\nGive a specific command for detailed info about it, or give a page number or give a section name for brief info.", longHelp="Display information about developer-only commands.\nGive a specific command for detailed info about it, or give a page number or give a section name for brief info about a set of commands. These are the currently valid section names:\n- Bounties\n- Miscellaneous\n- Items\n- Channels\n- Skins")
+
+
 
 async def dev_cmd_sleep(message : discord.Message, args : str, isDM : bool):
     """developer command saving all data to JSON and then shutting down the bot
@@ -13,10 +28,13 @@ async def dev_cmd_sleep(message : discord.Message, args : str, isDM : bool):
     :param str args: ignored
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    await message.channel.send("zzzz....")
-    await bbGlobals.client.bb_shutdown()
+    if len(bbGlobals.currentRenders) > 0 and "-f" not in args:
+        await message.channel.send(":x: A render is currently in progress!")	
+    else:
+        await message.channel.send("zzzz....")
+        await bbGlobals.client.bb_shutdown()
 
-bbCommands.register("sleep", dev_cmd_sleep, 2, allowDM=True)
+bbCommands.register("sleep", dev_cmd_sleep, 2, allowDM=True, useDoc=True)
 
 
 async def dev_cmd_save(message : discord.Message, args : str, isDM : bool):
@@ -36,7 +54,7 @@ async def dev_cmd_save(message : discord.Message, args : str, isDM : bool):
     print(datetime.now().strftime("%H:%M:%S: Data saved manually!"))
     await message.channel.send("saved!")
 
-bbCommands.register("save", dev_cmd_save, 2, allowDM=True)
+bbCommands.register("save", dev_cmd_save, 2, allowDM=True, useDoc=True)
 
 
 async def dev_cmd_reset_has_poll(message : discord.Message, args : str, isDM : bool):
@@ -56,7 +74,7 @@ async def dev_cmd_reset_has_poll(message : discord.Message, args : str, isDM : b
         bbGlobals.usersDB.getUser(int(args.lstrip("<@!").rstrip(">"))).pollOwned = False
     await message.channel.send("Done!")
 
-bbCommands.register("reset-has-poll", dev_cmd_reset_has_poll, 2, allowDM=True)
+bbCommands.register("reset-has-poll", dev_cmd_reset_has_poll, 2, allowDM=True, useDoc=True)
 
 
 async def dev_cmd_broadcast(message : discord.Message, args : str, isDM : bool):
@@ -193,7 +211,7 @@ async def dev_cmd_broadcast(message : discord.Message, args : str, isDM : bool):
                 if guild.hasPlayChannel():
                     await guild.getPlayChannel().send(msgText, embed=broadcastEmbed)
 
-bbCommands.register("broadcast", dev_cmd_broadcast, 2, forceKeepArgsCasing=True, allowDM=True)
+bbCommands.register("broadcast", dev_cmd_broadcast, 2, forceKeepArgsCasing=True, allowDM=True, useDoc=True)
 
 
 async def dev_cmd_say(message : discord.Message, args : str, isDM : bool):
@@ -323,7 +341,7 @@ async def dev_cmd_say(message : discord.Message, args : str, isDM : bool):
 
         await message.channel.send(msgText, embed=broadcastEmbed)
 
-bbCommands.register("say", dev_cmd_say, 2, forceKeepArgsCasing=True, allowDM=True)
+bbCommands.register("say", dev_cmd_say, 2, forceKeepArgsCasing=True, allowDM=True, useDoc=True)
 
 
 async def dev_cmd_setbalance(message : discord.Message, args : str, isDM : bool):
@@ -356,7 +374,7 @@ async def dev_cmd_setbalance(message : discord.Message, args : str, isDM : bool)
     requestedBBUser.credits = int(argsSplit[1])
     await message.channel.send("Done!")
 
-bbCommands.register("setbalance", dev_cmd_setbalance, 2, allowDM=True)
+bbCommands.register("setbalance", dev_cmd_setbalance, 2, allowDM=True, useDoc=True)
 
 
 async def dev_cmd_reset_transfer_cool(message : discord.Message, args : str, isDM : bool):
@@ -378,4 +396,4 @@ async def dev_cmd_reset_transfer_cool(message : discord.Message, args : str, isD
     await message.channel.send("Done!")
     
 
-bbCommands.register("reset-transfer-cool", dev_cmd_reset_transfer_cool, 2, allowDM=True)
+bbCommands.register("reset-transfer-cool", dev_cmd_reset_transfer_cool, 2, allowDM=True, useDoc=True)

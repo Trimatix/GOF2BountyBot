@@ -1,8 +1,9 @@
 # Typing imports
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Dict
 if TYPE_CHECKING:
     from ...bbDatabases import bbBountyDB
+    from ..items import bbShip
 
 import random
 from datetime import datetime, timedelta
@@ -48,11 +49,16 @@ class BountyConfig:
     :vartype builtIn: bool
     :var generated: whether or not this config is ready to be used. The config must verify and generate its attributes before they can be used in a bbBounty.
     :vartype generated: bool
-    :var ship: The bbShip this criminal should equip
-    :vartype ship: bbShip
+    :var activeShip: The bbShip this criminal should equip
+    :vartype activeShip: bbShip
     """
 
-    def __init__(self, faction="", name="", isPlayer=None, route=[], start="", end="", answer="", checked={}, reward=-1, issueTime=-1.0, endTime=-1.0, icon="", aliases=[], wiki="", activeShip=None, techLevel=-1, rewardPerSys=-1):
+    def __init__(self, faction : str = "", name : str = "", isPlayer : bool = None,
+                    route : List[str] = [], start : str = "", end : str = "",
+                    answer : str = "", checked : Dict[str, int] = {}, reward : int = -1,
+                    issueTime : float = -1.0, endTime : float = -1.0, icon : str = "",
+                    aliases : List[str] = [], wiki : str = "", ship : bbShip.bbShip = None,
+                    activeShip : bbShip.bbShip = None, techLevel : int = -1, rewardPerSys : int = -1):
         """All parameters are optional. If a parameter is not given, it will be randomly generated.
 
         :param faction: The faction owning this bounty
@@ -83,8 +89,8 @@ class BountyConfig:
         :type aliases: list[str]
         :param wiki: The page to link to as the criminal's wiki, in their info embed
         :type wiki: str
-        :param ship: The bbShip this criminal should equip
-        :type ship: bbShip
+        :param activeShip: The bbShip this criminal should equip
+        :type activeShip: bbShip
         """
         self.faction = faction.lower()
         self.name = name.title()
@@ -116,7 +122,7 @@ class BountyConfig:
         self.techLevel = techLevel
         
     
-    def generate(self, bountyDB : bbBountyDB.bbBountyDB, noCriminal=True, forceKeepChecked=False, forceNoDBCheck=False):
+    def generate(self, bountyDB : bbBountyDB.bbBountyDB, noCriminal : bool = True, forceKeepChecked : bool = False, forceNoDBCheck : bool = False):
         """Validate all given config data, and randomly generate missing data.
 
         :param bbBountyDB bountyDB: Database containing all currently active bounties. When forceNoDBCheck is True, this is ignored.
