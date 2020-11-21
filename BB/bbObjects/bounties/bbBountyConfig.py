@@ -201,33 +201,38 @@ class BountyConfig:
                 self.activeShip = bbShip.fromDict(bbConfig.level0CrimLoadout)
             # Otherwise, generate one based on difficulty
             else:
-                shipHasPrimary = False
-                while not shipHasPrimary:
-                    shipTL = self.techLevel - 1
-                    # shipTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
-                    while len(bbData.shipKeysByTL[shipTL]) == 0:
-                        shipTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
-                    
-                    self.activeShip = bbShip.fromDict(bbData.builtInShipData[random.choice(list(bbData.shipKeysByTL[shipTL]))])
-                    shipHasPrimary = self.activeShip.maxPrimaries > 0
-
-                # if self.techLevel < self.activeShip.maxPrimaries:
-                #     numWeapons = random.randint(self.techLevel, self.activeShip.maxPrimaries)
-                # else:
-                #     numWeapons = self.activeShip.maxPrimaries
-                numWeapons = random.randint(max(1, self.activeShip.maxPrimaries - 1), self.activeShip.maxPrimaries)
-                for i in range(numWeapons):
-                    itemTL = self.techLevel - 1
-                    # itemTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
-                    tries = 5
-                    while len(bbData.weaponObjsByTL[itemTL]) == 0:
-                        itemTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
-                        tries -= 1
-                        if tries == 0:
-                            break
-                    if tries == 0:
+                itemTL = self.techLevel - 1
+                if len(bbData.shipKeysByTL[itemTL]) < 1:
+                    raise RuntimeError("Attempted to spawn a bounty at level " + str(self.techLevel) + ", but no ships exist at this level")
+                shipWithPrimaryExists = False
+                for shipKey in bbData.shipKeysByTL[itemTL]:
+                    shipData = bbData.builtInShipData[shipKey]
+                    if "maxPrimaries" in shipData and shipData["maxPrimaries"] > 0:
+                        shipWithPrimaryExists = True
                         break
-                    self.activeShip.equipWeapon(random.choice(bbData.weaponObjsByTL[itemTL]))
+
+                if shipWithPrimaryExists:
+                    shipHasPrimary = False
+                    shipKey = ""
+                    while not shipHasPrimary:
+                        shipKey = random.choice(bbData.shipKeysByTL[itemTL])
+                        shipHasPrimary = "maxPrimaries" in bbData.builtInShipData[shipKey] and bbData.builtInShipData[shipKey]["maxPrimaries"] > 0
+
+                    if shipHasPrimary:
+                        self.activeShip = bbShip.fromDict(bbData.builtInShipData[shipKey])
+                    else:
+                        self.activeShip = bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL])])
+
+                    # if self.techLevel < self.activeShip.maxPrimaries:
+                    #     numWeapons = random.randint(self.techLevel, self.activeShip.maxPrimaries)
+                    # else:
+                    #     numWeapons = self.activeShip.maxPrimaries
+                    numWeapons = random.randint(max(1, self.activeShip.maxPrimaries - 1), self.activeShip.maxPrimaries)
+                    for i in range(numWeapons):
+                        self.activeShip.equipWeapon(random.choice(bbData.weaponObjsByTL[itemTL]))
+                
+                else:
+                    self.activeShip = bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL])])
 
                 armourEquipped = True
                 shieldEquipped = True
@@ -242,35 +247,35 @@ class BountyConfig:
                     reservedSlots += 1
 
                 while not armourEquipped:
-                    itemTL = -1
+                    armourTL = -1
                     itemTLHasArmour = False
                     while not itemTLHasArmour:
-                        itemTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
-                        for item in bbData.moduleObjsByTL[itemTL]:
+                        armourTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
+                        for item in bbData.moduleObjsByTL[armourTL]:
                             if isinstance(item, bbArmourModule.bbArmourModule):
                                 itemTLHasArmour = True
                                 break
 
-                    itemToEquip = random.choice(bbData.moduleObjsByTL[itemTL])
+                    itemToEquip = random.choice(bbData.moduleObjsByTL[armourTL])
                     while not isinstance(itemToEquip, bbArmourModule.bbArmourModule):
-                        itemToEquip = random.choice(bbData.moduleObjsByTL[itemTL])
+                        itemToEquip = random.choice(bbData.moduleObjsByTL[armourTL])
                         
                     self.activeShip.equipModule(itemToEquip)
                     armourEquipped = True
 
                 while not shieldEquipped:
-                    itemTL = -1
+                    shieldTL = -1
                     itemTLHasShield = False
                     while not itemTLHasShield:
-                        itemTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
-                        for item in bbData.moduleObjsByTL[itemTL]:
+                        shieldTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
+                        for item in bbData.moduleObjsByTL[shieldTL]:
                             if isinstance(item, bbShieldModule.bbShieldModule):
                                 itemTLHasShield = True
                                 break
 
-                    itemToEquip = random.choice(bbData.moduleObjsByTL[itemTL])
+                    itemToEquip = random.choice(bbData.moduleObjsByTL[shieldTL])
                     while not isinstance(itemToEquip, bbShieldModule.bbShieldModule):
-                        itemToEquip = random.choice(bbData.moduleObjsByTL[itemTL])
+                        itemToEquip = random.choice(bbData.moduleObjsByTL[shieldTL])
                         
                     self.activeShip.equipModule(itemToEquip)
                     shieldEquipped = True
@@ -278,33 +283,33 @@ class BountyConfig:
                 if self.activeShip.maxModules > reservedSlots:
                     for i in range(random.randint(1, self.activeShip.maxModules - reservedSlots)):
                         # itemTL = self.techLevel - 1
-                        itemTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
+                        moduleTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
                         tries = 5
-                        while len(bbData.moduleObjsByTL[itemTL]) == 0:
-                            itemTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
+                        while len(bbData.moduleObjsByTL[moduleTL]) == 0:
+                            moduleTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
                             tries -= 1
                             if tries == 0:
                                 break
                         if tries == 0:
                                 break
-                        newModule = random.choice(bbData.moduleObjsByTL[itemTL])
+                        newModule = random.choice(bbData.moduleObjsByTL[moduleTL])
                         if self.activeShip.canEquipModuleType(type(newModule)):
                             self.activeShip.equipModule(newModule)
 
                 for i in range(self.activeShip.maxTurrets):
                     equipTurret = random.randint(1,100)
                     if equipTurret <= bbConfig.criminalEquipTurretChance:
-                        # itemTL = self.techLevel - 1
-                        itemTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
+                        # turretTL = self.techLevel - 1
+                        turretTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
                         tries = 5
-                        while len(bbData.turretObjsByTL[itemTL]) == 0:
-                            itemTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
+                        while len(bbData.turretObjsByTL[turretTL]) == 0:
+                            turretTL = bbConfig.pickRandomItemTL(self.techLevel) - 1
                             tries -= 1
                             if tries == 0:
                                 break
                         if tries == 0:
                                 break
-                        self.activeShip.equipTurret(random.choice(bbData.turretObjsByTL[itemTL]))
+                        self.activeShip.equipTurret(random.choice(bbData.turretObjsByTL[turretTL]))
 
             # Purely random loadout generation
             # self.activeShip = bbShip.fromDict(random.choice(list(bbData.builtInShipData.values())))
