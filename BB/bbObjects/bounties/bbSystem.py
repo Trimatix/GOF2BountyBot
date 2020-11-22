@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import List, Tuple
 
-from .. import bbAliasable
+from ...baseClasses import bbAliasable
 import math
 
 class System (bbAliasable.Aliasable):

@@ -11,13 +11,14 @@ from ..scheduling import TimedTask
 from .bounties import bbBounty
 from ..logging import bbLogger
 from datetime import timedelta
+from ..baseClasses import bbSerializable
 
 
 class NoneDCGuildObj(Exception):
     pass
 
 
-class bbGuild:
+class bbGuild(bbSerializable.bbSerializable):
     """A class representing a guild in discord, and storing extra BountyBot-related information about it. 
     
     :var id: The ID of the guild, directly corresponding to a discord guild's ID.

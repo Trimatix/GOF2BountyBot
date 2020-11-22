@@ -4,9 +4,10 @@ from . import bbBountyDB
 from ..bbConfig import bbData, bbConfig
 from .. import bbGlobals
 from ..logging import bbLogger
+from ..baseClasses import bbSerializable
 
 
-class bbGuildDB:
+class bbGuildDB(bbSerializable.bbSerializable):
     """A database of bbGuilds.
     
     :var guilds: Dictionary of guild.id to guild, where guild is a bbGuild

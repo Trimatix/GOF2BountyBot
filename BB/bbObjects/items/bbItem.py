@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import List
 
-from .. import bbAliasable
+from ...baseClasses import bbAliasable
 from abc import abstractmethod
 from ... import lib
 

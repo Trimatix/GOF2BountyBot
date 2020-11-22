@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List
 
 from ...bbConfig import bbData
-from .. import bbAliasable
+from ...baseClasses import bbAliasable
 from ..items import bbShip
 
 class Criminal (bbAliasable.Aliasable):

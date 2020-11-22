@@ -10,8 +10,10 @@ from .items.modules import bbModule
 from . import bbInventory
 import random
 from ..logging import bbLogger
+from ..baseClasses import bbSerializable
 
-class bbShop:
+
+class bbShop(bbSerializable.bbSerializable):
     """A shop containing a random selection of items which players can buy.
     Items can be sold to the shop to the shop's inventory and listed for sale.
     Shops are assigned a random tech level, which influences ths stock generated.

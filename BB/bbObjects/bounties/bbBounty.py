@@ -7,8 +7,10 @@ if TYPE_CHECKING:
 from . import bbBountyConfig
 from ...bbConfig import bbData
 from . import bbCriminal
+from ...baseClasses import bbSerializable
 
-class Bounty:
+
+class Bounty(bbSerializable.bbSerializable):
     """A bounty listing for a criminal, to be hunted down by players.
 
     :var criminal: The criminal who is being hunted

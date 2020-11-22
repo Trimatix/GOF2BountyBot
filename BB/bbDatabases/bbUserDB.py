@@ -3,8 +3,10 @@ from .. import lib
 from ..logging import bbLogger
 import traceback
 from typing import List
+from ..baseClasses import bbSerializable
 
-class bbUserDB:
+
+class bbUserDB(bbSerializable.bbSerializable):
     """A database of bbUser objects.
     
     :var users: Dictionary of users in the database, where values are the bbUser objects and keys are the ids of their respective bbUser

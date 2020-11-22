@@ -7,6 +7,8 @@ from ....logging import bbLogger
 import asyncio
 from .. import bbBounty
 from typing import Dict, Union, List
+from ....baseClasses import bbSerializable
+
 
 def makeBountyEmbed(bounty : bbBounty.Bounty) -> Embed:
     """Construct a discord.Embed for listing in a BountyBoardChannel
@@ -42,7 +44,7 @@ noBountiesEmbed = Embed(description='> Please check back later, or use the `$not
 noBountiesEmbed.set_author(name='No Bounties Available', icon_url='https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/stopwatch_23f1.png')
 
 
-class BountyBoardChannel:
+class BountyBoardChannel(bbSerializable.bbSerializable):
     """A channel which stores a continuously updating listing message for every active bounty.
 
     Initialisation atts: These attributes are used only when loading in the BBC from dictionary-serialised format. They must be used to initialise the BBC before the BBC can be used.
