@@ -5,13 +5,14 @@ from __future__ import annotations
 class bbSerializable(ABC):
 
     @abstractmethod
-    def toDict(self) -> dict:
+    def toDict(self, saveType : bool = False) -> dict:
         """Serialize this object into dictionary format, to be recreated completely.
 
+        :param bool saveType: When true, include the string name of the object type in the output. (Default False)
         :return: A dictionary containing all information needed to recreate this object
         :rtype: dict
         """
-        pass
+        return {"type": type(self).__name__} if saveType else {}
 
 
     @abstractclassmethod
