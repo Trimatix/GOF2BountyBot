@@ -49,13 +49,14 @@ class bbWeapon(bbItem):
         return bbWeapon
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this item into dictionary format, for saving to file.
 
+        :param bool saveType: When true, include the string name of the object type in the output.
         :return: A dictionary containing all information needed to reconstruct this weapon. If the weapon is builtIn, this is only its name.
         :rtype: dict
         """
-        itemDict = super(bbWeapon, self).toDict()
+        itemDict = super(bbWeapon, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["dps"] = self.dps
         return itemDict

@@ -139,7 +139,7 @@ class bbShipUpgrade(bbSerializable.bbSerializable):
         return ship.value * self.shipToUpgradeValueMult
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this bbShipUpgrade into a dictionary for saving to file
         Contains all information needed to reconstruct this upgrade. If the upgrade is builtIn, this includes only the upgrade name.
 
