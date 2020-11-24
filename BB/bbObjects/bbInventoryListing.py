@@ -65,7 +65,7 @@ class bbInventoryListing():
         return str(self.count) + " in inventory. " + str(self.item.value) + " credits each"
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Return a dictionary description of this inventory listing.
         ⚠ This function assumes that the object storeed in the listing has a toDict method.
 

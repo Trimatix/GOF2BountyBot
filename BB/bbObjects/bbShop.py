@@ -427,7 +427,7 @@ class bbShop(bbSerializable.bbSerializable):
 
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Get a dictionary containing all information needed to reconstruct this shop instance.
         This includes maximum item counts, current tech level, and current stocks.
 

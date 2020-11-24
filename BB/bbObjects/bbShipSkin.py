@@ -40,7 +40,7 @@ class bbShipSkin(bbSerializable.bbSerializable):
         self.hasWiki = wiki != ""
 
 
-    def toDict(self):
+    def toDict(self, **kwargs) -> dict:
         data = {"name": self.name, "textureRegions": self.textureRegions, "ships": self.shipRenders, "designer": self.designer}
         if self.hasWiki:
             data["wiki"] = self.wiki
