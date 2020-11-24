@@ -133,7 +133,7 @@ class Bounty(bbSerializable.bbSerializable):
                     rewards[self.checked[system]]["reward"] += int(self.reward / len(self.route))
         return rewards
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this bounty to dictionary, to be saved to file.
 
         :return: A dictionary representation of this bounty.

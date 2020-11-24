@@ -130,7 +130,7 @@ class Criminal (bbAliasable.Aliasable):
         return hash(repr(self))
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this criminal into dictionary format, for saving to file.
         
         :return: A dictionary containing all data necessary to replicate this object
