@@ -243,12 +243,12 @@ class bbShip(bbItem):
         :return: True if at least one module slot is free for the given bbModule type, False otherwise.
         :rtype: bool
         """
-        if moduleType in bbModuleFactory.maxModuleTypeEquips and bbModuleFactory.maxModuleTypeEquips[moduleType] != -1:
+        if moduleType.__name__ in bbConfig.maxModuleTypeEquips and bbConfig.maxModuleTypeEquips[moduleType.__name__] != -1:
             numFound = 1
             for equippedModule in self.modules:
                 if equippedModule.getType() == moduleType:
                     numFound += 1
-                    if numFound > bbModuleFactory.maxModuleTypeEquips[moduleType]:
+                    if numFound > bbConfig.maxModuleTypeEquips[moduleType.__name__]:
                         return False
         return True
 
@@ -729,13 +729,14 @@ class bbShip(bbItem):
         return bbShip
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this bbShip into dictionary format, for saving to file. Includes all equiped items and upgrades
 
+        :param bool saveType: When true, include the string name of the object type in the output.
         :return: A dictionary containing all information needed to reconstruct this ship. If the module is builtIn, several statistics are omitted to save space.
         :rtype: dict
         """
-        itemDict = super(bbShip, self).toDict()
+        itemDict = super(bbShip, self).toDict(**kwargs)
 
         weaponsList = []
         for weapon in self.weapons:
