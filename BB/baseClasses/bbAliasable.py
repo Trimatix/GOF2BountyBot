@@ -81,7 +81,7 @@ class Aliasable (bbSerializable.bbSerializable):
         :return: A dictionary containing all information needed to recreate this object
         :rtype: dict
         """
-        pass
+        return {"name": self.name, "aliases": self.aliases}
 
 
     @abstractclassmethod
