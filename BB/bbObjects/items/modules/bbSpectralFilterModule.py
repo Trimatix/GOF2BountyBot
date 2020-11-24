@@ -50,14 +50,14 @@ class bbSpectralFilterModule(bbModule.bbModule):
         return bbSpectralFilterModule
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbSpectralFilterModule, self).toDict()
+        itemDict = super(bbSpectralFilterModule, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["showOnRadar"] = self.showOnRadar
             itemDict["showInfo"] = self.showInfo
@@ -71,6 +71,9 @@ def fromDict(moduleDict : dict) -> bbSpectralFilterModule:
     :return: The new module object as described in moduleDict
     :rtype: dict
     """
+    if "builtIn" in moduleDict and moduleDict["builtIn"]:
+        return bbData.builtInModuleObjs[moduleDict["name"]]
+        
     return bbSpectralFilterModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], showInfo=moduleDict["showInfo"] if "showInfo" in moduleDict else False,
                             showOnRadar=moduleDict["showOnRadar"] if "showOnRadar" in moduleDict else False, 
                             value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",

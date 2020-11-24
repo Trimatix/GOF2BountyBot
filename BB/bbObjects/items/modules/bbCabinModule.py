@@ -45,14 +45,14 @@ class bbCabinModule(bbModule.bbModule):
         return "*Cabin Size: " + str(self.cabinSize) + "*"
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbCabinModule, self).toDict()
+        itemDict = super(bbCabinModule, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["cabinSize"] = self.cabinSize
         return itemDict
@@ -65,6 +65,9 @@ def fromDict(moduleDict : dict) -> bbCabinModule:
     :return: The new module object as described in moduleDict
     :rtype: dict
     """
+    if "builtIn" in moduleDict and moduleDict["builtIn"]:
+        return bbData.builtInModuleObjs[moduleDict["name"]]
+        
     return bbCabinModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], cabinSize=moduleDict["cabinSize"] if "cabinSize" in moduleDict else 0,
                             value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
                             manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,

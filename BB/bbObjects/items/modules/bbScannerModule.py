@@ -54,14 +54,14 @@ class bbScannerModule(bbModule.bbModule):
         return bbScannerModule
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbScannerModule, self).toDict()
+        itemDict = super(bbScannerModule, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["timeToLock"] = self.timeToLock
             itemDict["showClassAAsteroids"] = self.showClassAAsteroids
@@ -76,6 +76,9 @@ def fromDict(moduleDict : dict) -> bbScannerModule:
     :return: The new module object as described in moduleDict
     :rtype: dict
     """
+    if "builtIn" in moduleDict and moduleDict["builtIn"]:
+        return bbData.builtInModuleObjs[moduleDict["name"]]
+        
     return bbScannerModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], timeToLock=moduleDict["timeToLock"] if "timeToLock" in moduleDict else 0,
                             showClassAAsteroids=moduleDict["showClassAAsteroids"] if "showClassAAsteroids" in moduleDict else False, showCargo=moduleDict["showCargo"] if "showCargo" in moduleDict else 0,
                             value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",

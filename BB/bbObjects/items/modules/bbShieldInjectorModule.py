@@ -45,14 +45,14 @@ class bbShieldInjectorModule(bbModule.bbModule):
         return bbShieldInjectorModule
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbShieldInjectorModule, self).toDict()
+        itemDict = super(bbShieldInjectorModule, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["plasmaConsumption"] = self.plasmaConsumption
         return itemDict
@@ -64,7 +64,10 @@ def fromDict(moduleDict : dict) -> bbShieldInjectorModule:
     :param moduleDict: A dictionary containing all information needed to construct the requested module
     :return: The new module object as described in moduleDict
     :rtype: dict
-    """ 
+    """
+    if "builtIn" in moduleDict and moduleDict["builtIn"]:
+        return bbData.builtInModuleObjs[moduleDict["name"]]
+        
     return bbShieldInjectorModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], plasmaConsumption=moduleDict["plasmaConsumption"] if "plasmaConsumption" in moduleDict else 1,
                             value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
                             manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,

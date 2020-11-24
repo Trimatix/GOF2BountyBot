@@ -42,14 +42,14 @@ class bbSignatureModule(bbModule.bbModule):
         return bbSignatureModule
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         No extra attributes implemented by this class, so just eses the base bbModule toDict method.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbSignatureModule, self).toDict()
+        itemDict = super(bbSignatureModule, self).toDict(**kwargs)
         return itemDict
 
 
@@ -60,6 +60,9 @@ def fromDict(moduleDict : dict) -> bbSignatureModule:
     :return: The new module object as described in moduleDict
     :rtype: dict
     """
+    if "builtIn" in moduleDict and moduleDict["builtIn"]:
+        return bbData.builtInModuleObjs[moduleDict["name"]]
+        
     return bbSignatureModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], moduleDict["manufacturer"],
                             value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
                             icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,

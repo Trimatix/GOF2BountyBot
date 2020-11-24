@@ -112,15 +112,16 @@ class bbModule(bbItem):
         return bbModule
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this bbModule into dictionary format, for saving to file.
         This method should be overriden and used as a base in any modules that implement custom behaviour, outside of simple stat boosts.
         For an example of using this toDict implementation as a base for an overriden implementation, please see a bbModule class (e.g bbMiningDrillModule.py)
 
+        :param bool saveType: When true, include the string name of the object type in the output.
         :return: A dictionary containing all information needed to reconstruct this module. If the module is builtIn, this is only its name.
         :rtype: dict
         """
-        itemDict = super(bbModule, self).toDict()
+        itemDict = super(bbModule, self).toDict(**kwargs)
         if not self.builtIn:
             if self.armour != 0.0:
                 itemDict["armour"] = self.armour

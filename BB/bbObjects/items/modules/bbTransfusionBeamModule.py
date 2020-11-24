@@ -49,14 +49,14 @@ class bbTransfusionBeamModule(bbModule.bbModule):
         return bbTransfusionBeamModule
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbTransfusionBeamModule, self).toDict()
+        itemDict = super(bbTransfusionBeamModule, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["HPps"] = self.HPps
             itemDict["count"] = self.count
@@ -70,6 +70,9 @@ def fromDict(moduleDict : dict) -> bbTransfusionBeamModule:
     :return: The new module object as described in moduleDict
     :rtype: dict
     """
+    if "builtIn" in moduleDict and moduleDict["builtIn"]:
+        return bbData.builtInModuleObjs[moduleDict["name"]]
+        
     return bbTransfusionBeamModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], HPps=moduleDict["HPps"] if "HPps" in moduleDict else 0,
                             count=moduleDict["count"] if "count" in moduleDict else 0,
                             value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",

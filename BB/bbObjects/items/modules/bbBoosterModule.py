@@ -49,14 +49,14 @@ class bbBoosterModule(bbModule.bbModule):
                 "%, Duration: " + ("+" if self.duration > 0 else "-") + str(self.duration) + "s*"
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbBoosterModule, self).toDict()
+        itemDict = super(bbBoosterModule, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["effect"] = self.effect
             itemDict["duration"] = self.duration
@@ -70,6 +70,9 @@ def fromDict(moduleDict : dict) -> bbBoosterModule:
     :return: The new module object as described in moduleDict
     :rtype: dict
     """
+    if "builtIn" in moduleDict and moduleDict["builtIn"]:
+        return bbData.builtInModuleObjs[moduleDict["name"]]
+        
     return bbBoosterModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], effect=moduleDict["effect"] if "effect" in moduleDict else 0,
                             duration=moduleDict["duration"] if "duration" in moduleDict else 0, value=moduleDict["value"] if "value" in moduleDict else 0,
                             wiki=moduleDict["wiki"] if "wiki" in moduleDict else "", manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "",
