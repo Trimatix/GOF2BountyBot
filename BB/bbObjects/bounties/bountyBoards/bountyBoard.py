@@ -21,7 +21,7 @@ class BountyBoard(bbSerializable.bbSerializable):
         self.bountiesDB = bountiesDB
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialise this BountyBoard into dictionary format for saving to file
 
         :return: A dictionary containing all data needed to reload this BountyBoard

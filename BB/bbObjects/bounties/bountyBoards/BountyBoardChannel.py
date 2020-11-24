@@ -315,7 +315,7 @@ class BountyBoardChannel(bbSerializable.bbSerializable):
                 await self.removeBounty(bounty)
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialise this BBC to dictionary format
 
         :return: A dictionary containing all data needed to recreate this BBC
