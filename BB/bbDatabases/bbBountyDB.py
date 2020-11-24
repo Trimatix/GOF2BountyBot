@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from ..bbObjects.bounties import bbBounty
 from typing import List
 from ..baseClasses import bbSerializable
+from ..bbConfig import bbConfig
 
 
 class bbBountyDB(bbSerializable.bbSerializable):
@@ -8,22 +11,19 @@ class bbBountyDB(bbSerializable.bbSerializable):
     Bounty criminal names and faction names must be unique within the database.
     Faction names are case sensitive.
 
-    TODO: Give factions and maxBountiesPerFaction default values
+    TODO: Give factions default values
     
     :var bounties: Dictionary of faction name to list of bounties
     :vartype bounties: dict
     :var factions: List of str faction names, to be used in self.bounties keys
     :vartype factions: list
-    :var maxBountiesPerFaction: Maximum number of bounties that can be contained in each bounty's list in self.bounties[faction]
-    :vartype maxBountiesPerFaction: int
     :var latestBounty: The most recent bounty to be added to this db.As of writing, this is only used when scaling new bounty delays by the most recent length
     :vartype latestBounty: bbObjects.bounties.bbBounty.Bounty
     """
 
-    def __init__(self, factions: str, maxBountiesPerFaction: int):
+    def __init__(self, factions: str):
         """
         :param list factions: list of unique faction names useable in this db's bounties
-        :param int maxBountiesPerFaction: The maximum number of bounties each faction may store
         """
         # Dictionary of faction name : list of bounties
         # TODO: add bbCriminal.__hash__, and change bbBountyDB.bounties into dict of faction:{criminal:bounty}
@@ -33,9 +33,6 @@ class bbBountyDB(bbSerializable.bbSerializable):
         self.factions = factions
         for fac in factions:
             self.bounties[fac] = []
-
-        # the maximum length a faction's self.bounties dict can be
-        self.maxBountiesPerFaction = maxBountiesPerFaction
 
         self.latestBounty = None
 
@@ -185,7 +182,7 @@ class bbBountyDB(bbSerializable.bbSerializable):
         :return: True if the requested faction has space for more bounties, False otherwise
         :rtype: bool
         """
-        return self.getFactionNumBounties(faction) < self.maxBountiesPerFaction
+        return self.getFactionNumBounties(faction) < bbConfig.maxBountiesPerFaction
 
     
     def bountyNameExists(self, name : str, faction : str = None) -> bool:
@@ -303,7 +300,7 @@ class bbBountyDB(bbSerializable.bbSerializable):
         return "<bbBountyDB: " + str(len(self.bounties)) + " factions>"
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialise the bbBountyDB and all of its bbBounties into dictionary format.
 
         :return: A dictionary containing all data needed to recreate this bbBountyDB.
@@ -329,21 +326,23 @@ class bbBountyDB(bbSerializable.bbSerializable):
         pass
 
 
-def fromDict(bountyDBDict : dict, maxBountiesPerFaction : int, dbReload : bool = False) -> bbBountyDB:
-    """Build a bbBountyDB object from a serialised dictionary format - the reverse of bbBountyDB.toDict.
+    @classmethod
+    def fromDict(cls, bountyDBDict : dict, **kwargs) -> bbBountyDB:
+        """Build a bbBountyDB object from a serialised dictionary format - the reverse of bbBountyDB.toDict.
 
-    :param dict bountyDBDict: a dictionary representation of the bbBountyDB, to convert to an object
-    :param int maxBountiesPerFaction: The maximum number of bounties each faction may store
-    :param bool dbReload: Whether or not this bbBountyDB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
-    
-    :return: The new bbBountyDB object
-    :rtype: bbBountyDB
-    """
-    # Instanciate a new bbBountyDB
-    newDB = bbBountyDB(bountyDBDict.keys(), maxBountiesPerFaction)
-    # Iterate over all factions in the DB
-    for fac in bountyDBDict.keys():
-        # Convert each serialised bbBounty into a bbBounty object
-        for bountyDict in bountyDBDict[fac]:
-            newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
-    return newDB
+        :param dict bountyDBDict: a dictionary representation of the bbBountyDB, to convert to an object
+        :param bool dbReload: Whether or not this bbBountyDB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
+        
+        :return: The new bbBountyDB object
+        :rtype: bbBountyDB
+        """
+        dbReload = kwargs["dbReload"] if "dbReload" in kwargs else False
+
+        # Instanciate a new bbBountyDB
+        newDB = bbBountyDB(bountyDBDict.keys())
+        # Iterate over all factions in the DB
+        for fac in bountyDBDict.keys():
+            # Convert each serialised bbBounty into a bbBounty object
+            for bountyDict in bountyDBDict[fac]:
+                newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
+        return newDB
