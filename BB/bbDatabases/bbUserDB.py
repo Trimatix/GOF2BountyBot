@@ -156,7 +156,7 @@ class bbUserDB(bbSerializable.bbSerializable):
         return list(self.users.keys())
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialise this bbUserDB into dictionary format.
 
         :return: A dictionary containing all data needed to recreate this bbUserDB
