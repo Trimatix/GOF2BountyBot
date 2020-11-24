@@ -75,7 +75,7 @@ class Aliasable (bbSerializable.bbSerializable):
 
 
     @abstractmethod
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this object into dictionary format, to be recreated completely.
 
         :return: A dictionary containing all information needed to recreate this object
