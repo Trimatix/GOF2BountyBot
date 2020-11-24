@@ -1,22 +1,21 @@
-from abc import ABC, abstractmethod, abstractclassmethod
 from __future__ import annotations
+from abc import ABC, abstractmethod, abstractclassmethod
 
 
 class bbSerializable(ABC):
 
     @abstractmethod
-    def toDict(self, saveType : bool = False) -> dict:
+    def toDict(self) -> dict:
         """Serialize this object into dictionary format, to be recreated completely.
 
-        :param bool saveType: When true, include the string name of the object type in the output. (Default False)
         :return: A dictionary containing all information needed to recreate this object
         :rtype: dict
         """
-        return {"type": type(self).__name__} if saveType else {}
+        return {}
 
 
     @abstractclassmethod
-    def fromDict(cls, data : dict) -> bbSerializable:
+    def fromDict(cls, data : dict, **kwargs) -> bbSerializable:
         """Recreate a dictionary-serialized bbSerializable object 
         
         :param dict data: A dictionary containing all information needed to recreate the serialized object
