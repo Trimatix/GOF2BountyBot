@@ -185,7 +185,7 @@ class ReactionMenuOption(bbSerializable.bbSerializable):
 
 
     @abstractmethod
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this menu option into dictionary format for saving to file.
         This is a base, abstract definition that does not encode option functionality (i.e function calls and arguments).
 
@@ -227,7 +227,7 @@ class NonSaveableReactionMenuOption(ReactionMenuOption):
         super(NonSaveableReactionMenuOption, self).__init__(name, emoji, addFunc=addFunc, addArgs=addArgs, removeFunc=removeFunc, removeArgs=removeArgs)
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Unimplemented.
         This class should only be used for reaction menu options that will not be saved to file.
 
@@ -248,7 +248,7 @@ class DummyReactionMenuOption(ReactionMenuOption):
         super(DummyReactionMenuOption, self).__init__(name, emoji)
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this menu option into dictionary format for saving to file.
         Since dummy reaction menu options have no on-toggle functionality, the resulting base dictionary contains all information needed to 
         reconstruct this option instance.
@@ -256,7 +256,7 @@ class DummyReactionMenuOption(ReactionMenuOption):
         :return: A dictionary containing all necessary information to reconstruct this option instance
         :rtype: dict
         """
-        return super(DummyReactionMenuOption, self).toDict()
+        return super(DummyReactionMenuOption, self).toDict(**kwargs)
 
 
 class ReactionMenu(bbSerializable.bbSerializable):
@@ -469,7 +469,7 @@ class ReactionMenu(bbSerializable.bbSerializable):
             await self.timeout.forceExpire()
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this ReactionMenu into dictionary format for saving to file.
         This is a base, concrete implementation that saves all information required to recreate a ReactionMenu instance;
         when extending ReactionMenu, you will likely wish to overload this method, using super.toDict as a base for your
@@ -558,7 +558,7 @@ class CancellableReactionMenu(ReactionMenu):
         super(CancellableReactionMenu, self).__init__(msg, options=options, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serializes the reaction menu to a dictionary representation.
         This currently does not add any information on top of ReactionMenu.toDict, but ensures that the cancel option
         is not included in the dictionary for space efficiency purposes.
@@ -568,7 +568,7 @@ class CancellableReactionMenu(ReactionMenu):
         :return: A dictionary containing information about this menu, to be used when configuring a recreation of this object.
         :rtype: dict
         """
-        baseDict = super(CancellableReactionMenu, self).toDict()
+        baseDict = super(CancellableReactionMenu, self).toDict(**kwargs)
         # TODO: Make sure the option is in there?
         del baseDict["options"][self.cancelEmoji.sendable]
 
