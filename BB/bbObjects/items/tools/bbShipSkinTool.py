@@ -132,8 +132,12 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         return bbShipSkinTool
 
     
-    def toDict(self):
-        data = super().toDict()
+    def toDict(self, **kwargs):
+        """
+        
+        :param bool saveType: When true, include the string name of the object type in the output.
+        """
+        data = super().toDict(**kwargs)
         data["skin"] = self.shipSkin.toDict()
         return data
         # raise RuntimeError("Attempted to save a non-builtIn bbShipSkinTool")
