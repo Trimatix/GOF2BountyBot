@@ -170,13 +170,13 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
         return baseEmbed
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this menu to dictionary format for saving.
 
         :return: A dictionary containing all information needed to recreate this menu
         :rtype: dict
         """
-        baseDict = super(ReactionPollMenu, self).toDict()
+        baseDict = super(ReactionPollMenu, self).toDict(**kwargs)
         baseDict["multipleChoice"] = self.multipleChoice
         baseDict["owningBBUser"] = self.owningBBUser.id
         return baseDict
