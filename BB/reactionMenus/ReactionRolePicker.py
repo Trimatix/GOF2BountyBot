@@ -69,14 +69,14 @@ class ReactionRolePickerOption(ReactionMenu.ReactionMenuOption):
         super(ReactionRolePickerOption, self).__init__(self.role.name, emoji, addFunc=giveRole, addArgs=(menu.dcGuild, self.role, menu.msg.id), removeFunc=removeRole, removeArgs=(menu.dcGuild, self.role, menu.msg.id))
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize the option into dictionary format for saving.
         Since reaction menu options are saved alongside their emojis, this dictionary need not contain the option emoji.
 
         :return: A dictionary containing all information needed to reconstruct this menu option
         :rtype: dict
         """
-        # baseDict = super(ReactionRolePickerOption, self).toDict()
+        # baseDict = super(ReactionRolePickerOption, self).toDict(**kwargs)
         # baseDict["role"] = self.role.id
         
         # return baseDict
@@ -126,14 +126,14 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
         self.saveable = True
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this menu to dictionary format for saving to file.
 
         :return: A dictionary containing all information needed to reconstruct this menu object
         :rtype: dict
         """
         # TODO: Remove this method. The guild is already saved in ReactionMenu.toDict
-        baseDict = super(ReactionRolePicker, self).toDict()
+        baseDict = super(ReactionRolePicker, self).toDict(**kwargs)
         baseDict["guild"] = self.dcGuild.id
         return baseDict
 
