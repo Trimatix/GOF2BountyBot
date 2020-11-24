@@ -335,7 +335,6 @@ class bbUser(bbSerializable.bbSerializable):
         This method was written as a transferal measure when maxModuleTypeEquips was first released, and should seldom be used
         """
         incompatibleModules = []
-        allModulesChecked = False
 
         for currentModule in self.activeShip.modules:
             if not self.activeShip.canEquipModuleType(currentModule.getType()):
