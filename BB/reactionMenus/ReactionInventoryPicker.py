@@ -41,13 +41,13 @@ class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
         super(ReactionInventoryPickerOption, self).__init__(name, emoji, addFunc=menu.selectItem, addArgs=self.item, removeFunc=menu.deselectItem, removeArgs=self.item)
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this menu option to dictionary format for saving.
 
         :return: A dictionary containing all information needed to reconstruct this menu option instance - the item it represents
         :rtype: dict
         """
-        baseDict = super(ReactionInventoryPickerOption, self).toDict()
+        baseDict = super(ReactionInventoryPickerOption, self).toDict(**kwargs)
         baseDict["item"] = self.item.toDict()
 
         return baseDict
@@ -129,7 +129,7 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
         return item
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """⚠ ReactionInventoryPickers are not currently saveable. Do not use this method.
         Dummy method, once implemented this method will serialize this reactionMenu to dictionary format.
 
@@ -138,7 +138,7 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
         :raise NotImplementedError: Always.
         """
         raise NotImplementedError("Attempted to call toDict on an unsaveable reaction menu type")
-        baseDict = super(ReactionInventoryPicker, self).toDict()
+        baseDict = super(ReactionInventoryPicker, self).toDict(**kwargs)
 
 
 # ⚠ unfinished. idk how to save to file a reference to the inventory because idk what or where it will be. might just close all inventory menus on shutdown

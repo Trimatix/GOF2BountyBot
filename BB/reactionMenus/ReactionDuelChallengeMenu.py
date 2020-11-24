@@ -82,7 +82,7 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
         await DuelRequest.rejectDuel(self.duelChallenge, self.msg, bbGlobals.client.get_user(self.duelChallenge.sourceBBUser.id), bbGlobals.client.get_user(self.duelChallenge.targetBBUser.id))
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """⚠ ReactionDuelChallengeMenus are not currently saveable. Do not use this method.
         Dummy method, once implemented this method will serialize this reactionMenu to dictionary format.
 
@@ -91,7 +91,7 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
         :raise NotImplementedError: Always.
         """
         raise NotImplementedError("Attempted to call toDict on a non-saveable reaction menu")
-        baseDict = super(ReactionDuelChallengeMenu, self).toDict()
+        baseDict = super(ReactionDuelChallengeMenu, self).toDict(**kwargs)
         return baseDict
 
 

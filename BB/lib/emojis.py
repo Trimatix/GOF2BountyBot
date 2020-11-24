@@ -72,7 +72,7 @@ class dumbEmoji:
         #     self.sendable = '❓'
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this emoji to dictionary format for saving to file.
 
         :return: A dictionary containing all information needed to reconstruct this emoji.
