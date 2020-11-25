@@ -11,6 +11,14 @@ class bbWorkshop(bbSerializable.bbSerializable):
     def addListing(self, itemType, listing):
         self.items[itemType].append(listing)
 
+    
+    def addItem(self, itemType, item, bbCreator, creationDate=None):
+        if creationDate is None:
+            now = datetime.utcnow()
+            creationDate = datetime(year=now.year, month=now.month, day=now.day)
+
+        self.addListing(itemType, bbWorkshopListing.bbWorkshopListing(item, creationDate, bbCreator))
+
 
     def toDict(self, **kwargs):
         data = super().toDict(**kwargs)
