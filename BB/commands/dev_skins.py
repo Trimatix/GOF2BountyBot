@@ -33,7 +33,7 @@ async def dev_cmd_addSkin(message : discord.Message, args : str, isDM : bool):
     itemName = args.rstrip(" ").title()
     itemObj = None
     for ship in bbData.builtInShipData.values():
-        shipObj = bbShip.fromDict(ship)
+        shipObj = bbShip.bbShip.fromDict(ship)
         if shipObj.isCalled(itemName):
             itemObj = shipObj
 
@@ -92,7 +92,7 @@ async def dev_cmd_delSkin(message : discord.Message, args : str, isDM : bool):
     itemName = args.rstrip(" ").title()
     itemObj = None
     for ship in bbData.builtInShipData.values():
-        shipObj = bbShip.fromDict(ship)
+        shipObj = bbShip.bbShip.fromDict(ship)
         if shipObj.isCalled(itemName):
             itemObj = shipObj
 
@@ -149,7 +149,7 @@ async def dev_cmd_makeSkin(message : discord.Message, args : str, isDM : bool):
     itemName = args.rstrip(" ").title()
     itemObj = None
     for ship in bbData.builtInShipData.values():
-        shipObj = bbShip.fromDict(ship)
+        shipObj = bbShip.bbShip.fromDict(ship)
         if shipObj.isCalled(itemName):
             itemObj = shipObj
 

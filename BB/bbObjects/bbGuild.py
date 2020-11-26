@@ -1,4 +1,6 @@
-from discord.embeds import Embed
+from __future__ import annotations
+
+from discord import Embed
 from . import bbShop
 from ..bbDatabases import bbBountyDB
 from .bounties.bountyBoards import BountyBoardChannel
@@ -11,13 +13,14 @@ from ..scheduling import TimedTask
 from .bounties import bbBounty
 from ..logging import bbLogger
 from datetime import timedelta
+from ..baseClasses import bbSerializable
 
 
 class NoneDCGuildObj(Exception):
     pass
 
 
-class bbGuild:
+class bbGuild(bbSerializable.bbSerializable):
     """A class representing a guild in discord, and storing extra BountyBot-related information about it. 
     
     :var id: The ID of the guild, directly corresponding to a discord guild's ID.
@@ -475,7 +478,7 @@ class bbGuild:
         if not self.bountiesDisabled:
             raise ValueError("Bounties are already enabled in this guild")
 
-        self.bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions, bbConfig.maxBountiesPerFaction)
+        self.bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions)
 
         bountyDelayGenerators = {"random": lib.timeUtil.getRandomDelaySeconds,
                                 "fixed-routeScale": self.getRouteScaledBountyDelayFixed,
@@ -564,7 +567,7 @@ class bbGuild:
                 bbLogger.log("Main", "anncNwShp", "Failed to post shop stock announcement to " + self.dcGuild.name + "#" + str(self.id) + " in channel " + playCh.name + "#" + str(playCh.id), category="shop", eventType="PLCH_NONE")
 
 
-    def toDictNoId(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this bbGuild into dictionary format to be saved to file.
 
         :return: A dictionary containing all information needed to reconstruct this bbGuild
@@ -578,48 +581,54 @@ class bbGuild:
                     "shopDisabled": self.shopDisabled
                     }
         if not self.bountiesDisabled:
-            data["bountyBoardChannel"] = self.bountyBoardChannel.toDict() if self.hasBountyBoardChannel else None
-            data["bountiesDB"] = self.bountiesDB.toDict()
+            data["bountyBoardChannel"] = self.bountyBoardChannel.toDict(**kwargs) if self.hasBountyBoardChannel else None
+            data["bountiesDB"] = self.bountiesDB.toDict(**kwargs)
 
         if not self.shopDisabled:
-            data["shop"] = self.shop.toDict()
+            data["shop"] = self.shop.toDict(**kwargs)
         
         return data
 
 
-def fromDict(id : int, guildDict : dict, dbReload : bool = False) -> bbGuild:
-    """Factory function constructing a new bbGuild object from the information in the provided guildDict - the opposite of bbGuild.toDictNoId
+    @classmethod
+    def fromDict(cls, guildDict : dict, **kwargs) -> bbGuild:
+        """Factory function constructing a new bbGuild object from the information in the provided guildDict - the opposite of bbGuild.toDict
 
-    :param int id: The discord ID of the guild
-    :param dict guildDict: A dictionary containing all information required to build the bbGuild object
-    :param bool dbReload: Whether or not this guild is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
-    :return: A bbGuild according to the information in guildDict
-    :rtype: bbGuild
-    """
-    dcGuild = bbGlobals.client.get_guild(id)
-    if not isinstance(dcGuild, Guild):
-        raise NoneDCGuildObj("Could not get guild object for id " + str(id))
+        :param int id: The discord ID of the guild
+        :param dict guildDict: A dictionary containing all information required to build the bbGuild object
+        :param bool dbReload: Whether or not this guild is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
+        :return: A bbGuild according to the information in guildDict
+        :rtype: bbGuild
+        """
+        dbReload = kwargs["dbReload"] if "dbReload" in kwargs else False
+        if "id" not in kwargs:
+            raise NameError("Required kwarg missing: id")
+        id = kwargs["id"]
 
-    announceChannel = None
-    playChannel = None
+        dcGuild = bbGlobals.client.get_guild(id)
+        if not isinstance(dcGuild, Guild):
+            raise NoneDCGuildObj("Could not get guild object for id " + str(id))
 
-    if "announceChannel" in guildDict and guildDict["announceChannel"] != -1:
-        announceChannel = dcGuild.get_channel(guildDict["announceChannel"])
-    if "playChannel" in guildDict and guildDict["playChannel"] != -1:
-        playChannel = dcGuild.get_channel(guildDict["playChannel"])
+        announceChannel = None
+        playChannel = None
+
+        if "announceChannel" in guildDict and guildDict["announceChannel"] != -1:
+            announceChannel = dcGuild.get_channel(guildDict["announceChannel"])
+        if "playChannel" in guildDict and guildDict["playChannel"] != -1:
+            playChannel = dcGuild.get_channel(guildDict["playChannel"])
 
 
-    if "bountiesDisabled" in guildDict and guildDict["bountiesDisabled"]:
-        bountiesDB = None
-    else:
-        if "bountiesDB" in guildDict:
-            bountiesDB = bbBountyDB.fromDict(guildDict["bountiesDB"], bbConfig.maxBountiesPerFaction, dbReload=dbReload)
+        if "bountiesDisabled" in guildDict and guildDict["bountiesDisabled"]:
+            bountiesDB = None
         else:
-            bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions, bbConfig.maxBountiesPerFaction)
-    
+            if "bountiesDB" in guildDict:
+                bountiesDB = bbBountyDB.bbBountyDB.fromDict(guildDict["bountiesDB"], dbReload=dbReload)
+            else:
+                bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions)
+        
 
-    return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel,
-                    shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
-                    bountyBoardChannel=BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
-                    alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0,
-                    bountiesDisabled=guildDict["bountiesDisabled"] if "bountiesDisabled" in guildDict else False)
+        return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel,
+                        shop=bbShop.bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
+                        bountyBoardChannel=BountyBoardChannel.BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
+                        alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0,
+                        bountiesDisabled=guildDict["bountiesDisabled"] if "bountiesDisabled" in guildDict else False)

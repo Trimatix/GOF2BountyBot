@@ -45,27 +45,31 @@ class bbCloakModule(bbModule.bbModule):
         return bbCloakModule
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbCloakModule, self).toDict()
+        itemDict = super(bbCloakModule, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["duration"] = self.duration
         return itemDict
 
 
-def fromDict(moduleDict : dict) -> bbCloakModule:
-    """Factory function building a new module object from the information in the provided dictionary. The opposite of this class's toDict function.
+    @classmethod
+    def fromDict(cls, moduleDict : dict, **kwargs):
+        """Factory function building a new module object from the information in the provided dictionary. The opposite of this class's toDict function.
 
-    :param moduleDict: A dictionary containing all information needed to construct the requested module
-    :return: The new module object as described in moduleDict
-    :rtype: dict
-    """
-    return bbCloakModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], duration=moduleDict["duration"] if "duration" in moduleDict else 0,
-                            value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
-                            manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
-                            emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)
+        :param moduleDict: A dictionary containing all information needed to construct the requested module
+        :return: The new module object as described in moduleDict
+        :rtype: dict
+        """
+        if "builtIn" in moduleDict and moduleDict["builtIn"]:
+            return bbData.builtInModuleObjs[moduleDict["name"]]
+            
+        return bbCloakModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], duration=moduleDict["duration"] if "duration" in moduleDict else 0,
+                                value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
+                                manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
+                                emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)

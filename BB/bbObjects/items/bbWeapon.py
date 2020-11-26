@@ -49,29 +49,31 @@ class bbWeapon(bbItem):
         return bbWeapon
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this item into dictionary format, for saving to file.
 
+        :param bool saveType: When true, include the string name of the object type in the output.
         :return: A dictionary containing all information needed to reconstruct this weapon. If the weapon is builtIn, this is only its name.
         :rtype: dict
         """
-        itemDict = super(bbWeapon, self).toDict()
+        itemDict = super(bbWeapon, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["dps"] = self.dps
         return itemDict
 
 
-def fromDict(weaponDict):
-    """Factory function constructing a new bbWeapon object from a dictionary serialised representation - the opposite of bbWeapon.toDict.
-    
-    :param dict weaponDict: A dictionary containing all information needed to construct the desired bbWeapon
-    :return: A new bbWeapon object as described in weaponDict
-    :rtype: bbWeapon
-    """
-    if weaponDict["builtIn"]:
-        return bbData.builtInWeaponObjs[weaponDict["name"]]
-    else:
-        return bbWeapon(weaponDict["name"], weaponDict["aliases"], dps=weaponDict["dps"], value=weaponDict["value"],
-        wiki=weaponDict["wiki"] if "wiki" in weaponDict else "", manufacturer=weaponDict["manufacturer"] if "manufacturer" in weaponDict else "",
-        icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmojiFromStr(weaponDict["emoji"]) if "emoji" in weaponDict else lib.emojis.dumbEmoji.EMPTY,
-        techLevel=weaponDict["techLevel"] if "techLevel" in weaponDict else -1, builtIn=False)
+    @classmethod
+    def fromDict(cls, weaponDict, **kwargs):
+        """Factory function constructing a new bbWeapon object from a dictionary serialised representation - the opposite of bbWeapon.toDict.
+        
+        :param dict weaponDict: A dictionary containing all information needed to construct the desired bbWeapon
+        :return: A new bbWeapon object as described in weaponDict
+        :rtype: bbWeapon
+        """
+        if weaponDict["builtIn"]:
+            return bbData.builtInWeaponObjs[weaponDict["name"]]
+        else:
+            return bbWeapon(weaponDict["name"], weaponDict["aliases"], dps=weaponDict["dps"], value=weaponDict["value"],
+            wiki=weaponDict["wiki"] if "wiki" in weaponDict else "", manufacturer=weaponDict["manufacturer"] if "manufacturer" in weaponDict else "",
+            icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmojiFromStr(weaponDict["emoji"]) if "emoji" in weaponDict else lib.emojis.dumbEmoji.EMPTY,
+            techLevel=weaponDict["techLevel"] if "techLevel" in weaponDict else -1, builtIn=False)
