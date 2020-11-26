@@ -5,7 +5,8 @@ if TYPE_CHECKING:
     from .battles import DuelRequest
 
 from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
-from .items.tools import bbToolItemFactory
+from .items.tools import bbToolItemFactory, bbToolItem
+from .items.modules import bbModule
 from ..bbConfig import bbConfig
 from . import bbInventory
 from ..userAlerts import UserAlerts
@@ -87,11 +88,11 @@ class bbUser(bbSerializable.bbSerializable):
 
     def __init__(self, id : int, credits : int = 0, lifetimeCredits : int = 0, 
                     bountyCooldownEnd : int = -1, systemsChecked : int = 0, bountyWins : int = 0, activeShip : bool = None,
-                    inactiveShips : bbInventory.bbInventory = bbInventory.bbInventory(),
-                    inactiveModules : bbInventory.bbInventory = bbInventory.bbInventory(),
-                    inactiveWeapons : bbInventory.bbInventory = bbInventory.bbInventory(),
-                    inactiveTurrets : bbInventory.bbInventory = bbInventory.bbInventory(),
-                    inactiveTools : bbInventory.bbInventory = bbInventory.bbInventory(),
+                    inactiveShips : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbShip.bbShip),
+                    inactiveModules : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbModule.bbModule),
+                    inactiveWeapons : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbWeapon.bbWeapon),
+                    inactiveTurrets : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbTurret.bbTurret),
+                    inactiveTools : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbToolItem.bbToolItem),
                     lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
                     duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[UserAlerts.UABase or bool]] = {},
                     bountyWinsToday : int = 0, dailyBountyWinsReset : datetime.datetime = datetime.utcnow(), pollOwned : bool = False,
