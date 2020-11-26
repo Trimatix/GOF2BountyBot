@@ -1,4 +1,5 @@
 # CURRENTLY UNUSED FILE
+from __future__ import annotations
 from ....bbDatabases import bbBountyDB
 from ....baseClasses import bbSerializable
 
@@ -30,11 +31,12 @@ class BountyBoard(bbSerializable.bbSerializable):
         return {"msgID": self.msgID}
 
 
-def fromDict(bountyBoardDict : dict) -> BountyBoard:
-    """Factory function constructing a BountyBoard from the data contained in the given dictionary. The opposite of BountyBoard.toDict
+    @classmethod
+    def fromDict(bountyBoardDict : dict, **kwargs) -> BountyBoard:
+        """Factory function constructing a BountyBoard from the data contained in the given dictionary. The opposite of BountyBoard.toDict
 
-    :param dict bountyBoardDict: A dict containing all information needed to reconstruct the desired BountyBoard
-    :return: The new BountyBoard object
-    :rtype: BountyBoard
-    """
-    return BountyBoard(bountyBoardDict["msgID"])
+        :param dict bountyBoardDict: A dict containing all information needed to reconstruct the desired BountyBoard
+        :return: The new BountyBoard object
+        :rtype: BountyBoard
+        """
+        return BountyBoard(bountyBoardDict["msgID"])
