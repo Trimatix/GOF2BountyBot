@@ -68,6 +68,8 @@ class dumbEmoji:
         if self.sendable == "None":
             # raise UnrecognisedCustomEmoji("Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id),self.id)
             bbLogger.log("dumbEmoji", "init", "Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id), trace=traceback.format_exc())
+            pass
+        
         # if self.sendable is None:
         #     self.sendable = '❓'
 
@@ -80,8 +82,7 @@ class dumbEmoji:
         """
         if self.isUnicode:
             return {"unicode":self.unicode}
-        else:
-            return {"id":self.id}
+        return {"id":self.id}
 
 
     def __repr__(self) -> str:
