@@ -75,10 +75,5 @@ class bbToolItem(bbItem.bbItem):
         :return: The default bbItem toDict implementation, with an added 'type' field
         :rtype: dict
         """
-        if "saveType" in kwargs:
-            data = super().toDict(**kwargs)
-        else:
-            data = super().toDict(saveType=True, **kwargs)
-        data = super().toDict(True)
-        return data
+        return super().toDict(**kwargs)
     
