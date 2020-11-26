@@ -219,7 +219,7 @@ class bbUser(bbSerializable.bbSerializable):
         self.bountyCooldownEnd = -1
         self.systemsChecked = 0
         self.bountyWins = 0
-        self.activeShip = bbShip.fromDict(defaultShipLoadoutDict)
+        self.activeShip = bbShip.bbShip.fromDict(defaultShipLoadoutDict)
         self.inactiveModules.clear()
         self.inactiveShips.clear()
         self.inactiveWeapons.clear()
@@ -393,7 +393,7 @@ class bbUser(bbSerializable.bbSerializable):
         self.inactiveShips.removeItem(self.activeShip)
 
 
-    def toDictNoId(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this bbUser to a dictionary representation for saving to file.
 
         :return: A dictionary containing all information needed to recreate this user
@@ -401,23 +401,26 @@ class bbUser(bbSerializable.bbSerializable):
         """
         inactiveShipsDict = []
         for ship in self.inactiveShips.keys:
-            inactiveShipsDict.append(self.inactiveShips.items[ship].toDict())
+            inactiveShipsDict.append(self.inactiveShips.items[ship].toDict(**kwargs))
 
         inactiveModulesDict = []
         for module in self.inactiveModules.keys:
-            inactiveModulesDict.append(self.inactiveModules.items[module].toDict())
+            inactiveModulesDict.append(self.inactiveModules.items[module].toDict(**kwargs))
 
         inactiveWeaponsDict = []
         for weapon in self.inactiveWeapons.keys:
-            inactiveWeaponsDict.append(self.inactiveWeapons.items[weapon].toDict())
+            inactiveWeaponsDict.append(self.inactiveWeapons.items[weapon].toDict(**kwargs))
 
         inactiveTurretsDict = []
         for turret in self.inactiveTurrets.keys:
-            inactiveTurretsDict.append(self.inactiveTurrets.items[turret].toDict())
+            inactiveTurretsDict.append(self.inactiveTurrets.items[turret].toDict(**kwargs))
 
         inactiveToolsDict = []
         for tool in self.inactiveTools.keys:
-            inactiveToolsDict.append(self.inactiveTools.items[tool].toDict())
+            if "saveType" not in kwargs:
+                inactiveToolsDict.append(self.inactiveTools.items[tool].toDict(saveType=True, **kwargs))
+            else:
+                inactiveToolsDict.append(self.inactiveTools.items[tool].toDict(**kwargs))
 
         alerts = {}
         for alertID in self.userAlerts.keys():
@@ -426,7 +429,7 @@ class bbUser(bbSerializable.bbSerializable):
 
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
-                "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(), "inactiveShips":inactiveShipsDict,
+                "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(**kwargs), "inactiveShips":inactiveShipsDict,
                 "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "inactiveTools": inactiveToolsDict,
                 "lastSeenGuildId":self.lastSeenGuildId, "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins,
                 "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "pollOwned": self.pollOwned,
@@ -676,53 +679,58 @@ class bbUser(bbSerializable.bbSerializable):
         return "<bbUser #" + str(self.id) + ((" @" + str(self.homeGuildID)) if self.hasHomeGuildID() else "") + ">"
 
 
-def fromDict(id : int, userDict : dict) -> bbUser:
-    """Construct a new bbUser object from the given ID and the information in the given dictionary - The opposite of bbUser.toDict
+    @classmethod
+    def fromDict(cls, userDict : dict, **kwargs) -> bbUser:
+        """Construct a new bbUser object from the given ID and the information in the given dictionary - The opposite of bbUser.toDict
 
-    :param int id: The discord ID of the user
-    :param dict userDict: A dictionary containing all information necessary to construct the bbUser object, other than their ID.
-    :return: A bbUser object as described in userDict
-    :rtype: bbUser 
-    """
-    activeShip = bbShip.fromDict(userDict["activeShip"])
+        :param int id: The discord ID of the user
+        :param dict userDict: A dictionary containing all information necessary to construct the bbUser object, other than their ID.
+        :return: A bbUser object as described in userDict
+        :rtype: bbUser 
+        """
+        if "id" not in kwargs:
+            raise NameError("Required kwarg not given: id")
+        id = kwargs["id"]
 
-    inactiveShips = bbInventory.bbInventory()
-    if "inactiveShips" in userDict:
-        for shipListingDict in userDict["inactiveShips"]:
-            inactiveShips.addItem(bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
+        activeShip = bbShip.bbShip.fromDict(userDict["activeShip"])
 
-    inactiveWeapons = bbInventory.bbInventory()
-    if "inactiveWeapons" in userDict:
-        for weaponListingDict in userDict["inactiveWeapons"]:
-            inactiveWeapons.addItem(bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
+        inactiveShips = bbInventory.bbInventory()
+        if "inactiveShips" in userDict:
+            for shipListingDict in userDict["inactiveShips"]:
+                inactiveShips.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-    inactiveModules = bbInventory.bbInventory()
-    if "inactiveModules" in userDict:
-        for moduleListingDict in userDict["inactiveModules"]:
-            inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
+        inactiveWeapons = bbInventory.bbInventory()
+        if "inactiveWeapons" in userDict:
+            for weaponListingDict in userDict["inactiveWeapons"]:
+                inactiveWeapons.addItem(bbWeapon.bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-    inactiveTurrets = bbInventory.bbInventory()
-    if "inactiveTurrets" in userDict:
-        for turretListingDict in userDict["inactiveTurrets"]:
-            inactiveTurrets.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
+        inactiveModules = bbInventory.bbInventory()
+        if "inactiveModules" in userDict:
+            for moduleListingDict in userDict["inactiveModules"]:
+                inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
-    inactiveTools = bbInventory.bbInventory()
-    if "inactiveTools" in userDict:
-        for toolListingDict in userDict["inactiveTools"]:
-            inactiveTools.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
+        inactiveTurrets = bbInventory.bbInventory()
+        if "inactiveTurrets" in userDict:
+            for turretListingDict in userDict["inactiveTurrets"]:
+                inactiveTurrets.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-    return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
-                    bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
-                    bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
-                    inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, inactiveTools=inactiveTools,
-                    lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
-                    duelWins=userDict["duelWins"] if "duelWins" in userDict else 0,
-                    duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0,
-                    duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0,
-                    duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0,
-                    alerts=userDict["alerts"] if "alerts" in userDict else {},
-                    bountyWinsToday=userDict["bountyWinsToday"] if "bountyWinsToday" in userDict else 0,
-                    dailyBountyWinsReset=datetime.utcfromtimestamp(userDict["dailyBountyWinsReset"]) if "dailyBountyWinsReset" in userDict else datetime.utcnow(),
-                    pollOwned=userDict["pollOwned"] if "pollOwned" in userDict else False,
-                    homeGuildID=userDict["homeGuildID"] if "homeGuildID" in userDict else -1,
-                    guildTransferCooldownEnd=datetime.utcfromtimestamp(userDict["guildTransferCooldownEnd"]) if "guildTransferCooldownEnd" in userDict else datetime.utcnow())
+        inactiveTools = bbInventory.bbInventory()
+        if "inactiveTools" in userDict:
+            for toolListingDict in userDict["inactiveTools"]:
+                inactiveTools.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
+
+        return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
+                        bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
+                        bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
+                        inactiveModules=inactiveModules, inactiveWeapons=inactiveWeapons, inactiveTurrets=inactiveTurrets, inactiveTools=inactiveTools,
+                        lastSeenGuildId=userDict["lastSeenGuildId"] if "lastSeenGuildId" in userDict else -1,
+                        duelWins=userDict["duelWins"] if "duelWins" in userDict else 0,
+                        duelLosses=userDict["duelLosses"] if "duelLosses" in userDict else 0,
+                        duelCreditsWins=userDict["duelCreditsWins"] if "duelCreditsWins" in userDict else 0,
+                        duelCreditsLosses=userDict["duelCreditsLosses"] if "duelCreditsLosses" in userDict else 0,
+                        alerts=userDict["alerts"] if "alerts" in userDict else {},
+                        bountyWinsToday=userDict["bountyWinsToday"] if "bountyWinsToday" in userDict else 0,
+                        dailyBountyWinsReset=datetime.utcfromtimestamp(userDict["dailyBountyWinsReset"]) if "dailyBountyWinsReset" in userDict else datetime.utcnow(),
+                        pollOwned=userDict["pollOwned"] if "pollOwned" in userDict else False,
+                        homeGuildID=userDict["homeGuildID"] if "homeGuildID" in userDict else -1,
+                        guildTransferCooldownEnd=datetime.utcfromtimestamp(userDict["guildTransferCooldownEnd"]) if "guildTransferCooldownEnd" in userDict else datetime.utcnow())
