@@ -567,7 +567,7 @@ class bbGuild(bbSerializable.bbSerializable):
                 bbLogger.log("Main", "anncNwShp", "Failed to post shop stock announcement to " + self.dcGuild.name + "#" + str(self.id) + " in channel " + playCh.name + "#" + str(playCh.id), category="shop", eventType="PLCH_NONE")
 
 
-    def toDictNoId(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this bbGuild into dictionary format to be saved to file.
 
         :return: A dictionary containing all information needed to reconstruct this bbGuild
@@ -581,18 +581,18 @@ class bbGuild(bbSerializable.bbSerializable):
                     "shopDisabled": self.shopDisabled
                     }
         if not self.bountiesDisabled:
-            data["bountyBoardChannel"] = self.bountyBoardChannel.toDict() if self.hasBountyBoardChannel else None
-            data["bountiesDB"] = self.bountiesDB.toDict()
+            data["bountyBoardChannel"] = self.bountyBoardChannel.toDict(**kwargs) if self.hasBountyBoardChannel else None
+            data["bountiesDB"] = self.bountiesDB.toDict(**kwargs)
 
         if not self.shopDisabled:
-            data["shop"] = self.shop.toDict()
+            data["shop"] = self.shop.toDict(**kwargs)
         
         return data
 
 
     @classmethod
     def fromDict(cls, guildDict : dict, **kwargs) -> bbGuild:
-        """Factory function constructing a new bbGuild object from the information in the provided guildDict - the opposite of bbGuild.toDictNoId
+        """Factory function constructing a new bbGuild object from the information in the provided guildDict - the opposite of bbGuild.toDict
 
         :param int id: The discord ID of the guild
         :param dict guildDict: A dictionary containing all information required to build the bbGuild object
@@ -622,13 +622,13 @@ class bbGuild(bbSerializable.bbSerializable):
             bountiesDB = None
         else:
             if "bountiesDB" in guildDict:
-                bountiesDB = bbBountyDB.fromDict(guildDict["bountiesDB"], bbConfig.maxBountiesPerFaction, dbReload=dbReload)
+                bountiesDB = bbBountyDB.bbBountyDB.fromDict(guildDict["bountiesDB"], dbReload=dbReload)
             else:
                 bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions)
         
 
         return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel,
-                        shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
-                        bountyBoardChannel=BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
+                        shop=bbShop.bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
+                        bountyBoardChannel=BountyBoardChannel.BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
                         alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0,
                         bountiesDisabled=guildDict["bountiesDisabled"] if "bountiesDisabled" in guildDict else False)
