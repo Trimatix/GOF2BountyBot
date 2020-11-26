@@ -67,7 +67,7 @@ class bbItem(bbAliasable.Aliasable):
         self.hasIcon = icon != ""
 
         self.emoji = emoji
-        self.hasEmoji = emoji != ""
+        self.hasEmoji = emoji is not None and emoji != lib.emojis.dumbEmoji.EMPTY
 
         self.value = value
         self.shopSpawnRate = 0
@@ -120,19 +120,22 @@ class bbItem(bbAliasable.Aliasable):
         :return: A dictionary containing all information needed to reconstruct this item. If the item is builtIn, this is only its name.
         :rtype: dict
         """
-        saveType = kwargs["saveType"] if "saveType" in kwargs else False
-        del kwargs["saveType"]
+        if "saveType" in kwargs:
+            saveType = kwargs["saveType"]
+            del kwargs["saveType"]
+        else:
+            saveType = False
 
         if self.builtIn:
             data = {"name": self.name, "builtIn": True}
         else:
             data = super().toDict(**kwargs)
-            data["value"] = self.value, 
-            data["wiki"] = self.wiki, 
-            data["manufacturer"] = self.manufacturer, 
-            data["icon"] = self.icon, 
-            data["emoji"] = self.emoji.toDict(), 
-            data["techLevel"] = self.techLevel, 
+            data["value"] = self.value
+            data["wiki"] = self.wiki
+            data["manufacturer"] = self.manufacturer
+            data["icon"] = self.icon
+            data["emoji"] = self.emoji.toDict(**kwargs)
+            data["techLevel"] = self.techLevel
             data["builtIn"] = False
         
         if saveType:
