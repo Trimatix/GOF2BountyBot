@@ -137,7 +137,6 @@ class bbInventory(bbSerializable.bbSerializable):
 
         return page
 
-
     
     def stores(self, item) -> bool:
         """Decide whether a given item is stored in this inventory.
@@ -227,8 +226,11 @@ class bbInventory(bbSerializable.bbSerializable):
         data["items"] = []
         for listing in self.items.values():
             data["items"].append(listing.toDict(**kwargs))
+        
+        return data
 
 
+    @classmethod
     def fromDict(cls, invDict, **kwargs) -> bbInventory:
         newInv = bbInventory()
         if "items" in invDict:
@@ -250,7 +252,7 @@ class TypeRestrictedInventory(bbInventory):
         self.itemType = itemType
 
     
-    def addItem(self, item: object, quantity: int):
+    def addItem(self, item: object, quantity : int = 1):
         if not isinstance(item, self.itemType):
             raise TypeError("Given item does not match this inventory's item type restriction. Expected '" + self.itemType.__name__ + "', given '" + type(item).__name__ + "'")
         super().addItem(item, quantity=quantity)
