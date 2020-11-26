@@ -400,28 +400,15 @@ class bbUser(bbSerializable.bbSerializable):
         :return: A dictionary containing all information needed to recreate this user
         :rtype: dict
         """
-        inactiveShipsDict = []
-        for ship in self.inactiveShips.keys:
-            inactiveShipsDict.append(self.inactiveShips.items[ship].toDict(**kwargs))
+        inactiveShipsDict = self.inactiveShips.toDict(**kwargs)["items"]
+        inactiveModulesDict = self.inactiveModules.toDict(**kwargs)["items"]
+        inactiveWeaponsDict = self.inactiveWeapons.toDict(**kwargs)["items"]
+        inactiveTurretsDict = self.inactiveTurrets.toDict(**kwargs)["items"]
 
-        inactiveModulesDict = []
-        for module in self.inactiveModules.keys:
-            inactiveModulesDict.append(self.inactiveModules.items[module].toDict(**kwargs))
-
-        inactiveWeaponsDict = []
-        for weapon in self.inactiveWeapons.keys:
-            inactiveWeaponsDict.append(self.inactiveWeapons.items[weapon].toDict(**kwargs))
-
-        inactiveTurretsDict = []
-        for turret in self.inactiveTurrets.keys:
-            inactiveTurretsDict.append(self.inactiveTurrets.items[turret].toDict(**kwargs))
-
-        inactiveToolsDict = []
-        for tool in self.inactiveTools.keys:
-            if "saveType" not in kwargs:
-                inactiveToolsDict.append(self.inactiveTools.items[tool].toDict(saveType=True, **kwargs))
-            else:
-                inactiveToolsDict.append(self.inactiveTools.items[tool].toDict(**kwargs))
+        if "saveType" not in kwargs:
+            inactiveToolsDict = self.inactiveTools.toDict(saveType=True, **kwargs)["items"]
+        else:
+            inactiveToolsDict = self.inactiveTools.toDict(**kwargs)["items"]
 
         alerts = {}
         for alertID in self.userAlerts.keys():
@@ -695,27 +682,27 @@ class bbUser(bbSerializable.bbSerializable):
 
         activeShip = bbShip.bbShip.fromDict(userDict["activeShip"])
 
-        inactiveShips = bbInventory.bbInventory()
+        inactiveShips = bbInventory.TypeRestrictedInventory(bbShip.bbShip)
         if "inactiveShips" in userDict:
             for shipListingDict in userDict["inactiveShips"]:
                 inactiveShips.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-        inactiveWeapons = bbInventory.bbInventory()
+        inactiveWeapons = bbInventory.TypeRestrictedInventory(bbWeapon.bbWeapon)
         if "inactiveWeapons" in userDict:
             for weaponListingDict in userDict["inactiveWeapons"]:
                 inactiveWeapons.addItem(bbWeapon.bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-        inactiveModules = bbInventory.bbInventory()
+        inactiveModules = bbInventory.TypeRestrictedInventory(bbModule.bbModule)
         if "inactiveModules" in userDict:
             for moduleListingDict in userDict["inactiveModules"]:
                 inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
-        inactiveTurrets = bbInventory.bbInventory()
+        inactiveTurrets = bbInventory.TypeRestrictedInventory(bbTurret.bbTurret)
         if "inactiveTurrets" in userDict:
             for turretListingDict in userDict["inactiveTurrets"]:
                 inactiveTurrets.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-        inactiveTools = bbInventory.bbInventory()
+        inactiveTools = bbInventory.TypeRestrictedInventory(bbToolItem.bbToolItem)
         if "inactiveTools" in userDict:
             for toolListingDict in userDict["inactiveTools"]:
                 inactiveTools.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
