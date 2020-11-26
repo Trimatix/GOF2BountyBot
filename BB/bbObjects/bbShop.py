@@ -105,7 +105,7 @@ class bbShop(bbSerializable.bbSerializable):
         for i in range(self.maxShips):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.shipKeysByTL[itemTL - 1]) != 0:
-                self.shipsStock.addItem(bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL - 1])]))
+                self.shipsStock.addItem(bbShip.bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL - 1])]))
 
         for i in range(self.maxModules):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
@@ -437,28 +437,28 @@ class bbShop(bbSerializable.bbSerializable):
         shipsStockDict = []
         for ship in self.shipsStock.keys:
             if ship in self.shipsStock.items:
-                shipsStockDict.append(self.shipsStock.items[ship].toDict())
+                shipsStockDict.append(self.shipsStock.items[ship].toDict(**kwargs))
             else:
                 bbLogger.log("bbShp", "toDict", "Failed to save invalid ship key '" + str(ship) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
 
         weaponsStockDict = []
         for weapon in self.weaponsStock.keys:
             if weapon in self.weaponsStock.items:
-                weaponsStockDict.append(self.weaponsStock.items[weapon].toDict())
+                weaponsStockDict.append(self.weaponsStock.items[weapon].toDict(**kwargs))
             else:
                 bbLogger.log("bbShp", "toDict", "Failed to save invalid weapon key '" + str(weapon) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
 
         modulesStockDict = []
         for module in self.modulesStock.keys:
             if module in self.modulesStock.items:
-                modulesStockDict.append(self.modulesStock.items[module].toDict())
+                modulesStockDict.append(self.modulesStock.items[module].toDict(**kwargs))
             else:
                 bbLogger.log("bbShp", "toDict", "Failed to save invalid module key '" + str(module) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
 
         turretsStockDict = []
         for turret in self.turretsStock.keys:
             if turret in self.turretsStock.items:
-                turretsStockDict.append(self.turretsStock.items[turret].toDict())
+                turretsStockDict.append(self.turretsStock.items[turret].toDict(**kwargs))
             else:
                 bbLogger.log("bbShp", "toDict", "Failed to save invalid turret key '" + str(turret) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
 
@@ -466,28 +466,29 @@ class bbShop(bbSerializable.bbSerializable):
                     "shipsStock":shipsStockDict, "weaponsStock":weaponsStockDict, "modulesStock":modulesStockDict, "turretsStock":turretsStockDict}
 
 
-def fromDict(shopDict : dict) -> bbShop:
-    """Recreate a bbShop instance from its dictionary-serialized representation - the opposite of bbShop.toDict
-    
-    :param dict shopDict: A dictionary containing all information needed to construct the shop
-    :return: A new bbShop object as described by shopDict
-    :rtype: bbShop
-    """
-    shipsStock = bbInventory.bbInventory()
-    for shipListingDict in shopDict["shipsStock"]:
-        shipsStock.addItem(bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
+    @classmethod
+    def fromDict(cls, shopDict : dict, **kwargs) -> bbShop:
+        """Recreate a bbShop instance from its dictionary-serialized representation - the opposite of bbShop.toDict
+        
+        :param dict shopDict: A dictionary containing all information needed to construct the shop
+        :return: A new bbShop object as described by shopDict
+        :rtype: bbShop
+        """
+        shipsStock = bbInventory.bbInventory()
+        for shipListingDict in shopDict["shipsStock"]:
+            shipsStock.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-    weaponsStock = bbInventory.bbInventory()
-    for weaponListingDict in shopDict["weaponsStock"]:
-        weaponsStock.addItem(bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
+        weaponsStock = bbInventory.bbInventory()
+        for weaponListingDict in shopDict["weaponsStock"]:
+            weaponsStock.addItem(bbWeapon.bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-    modulesStock = bbInventory.bbInventory()
-    for moduleListingDict in shopDict["modulesStock"]:
-        modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
+        modulesStock = bbInventory.bbInventory()
+        for moduleListingDict in shopDict["modulesStock"]:
+            modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
-    turretsStock = bbInventory.bbInventory()
-    for turretListingDict in shopDict["turretsStock"]:
-        turretsStock.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
+        turretsStock = bbInventory.bbInventory()
+        for turretListingDict in shopDict["turretsStock"]:
+            turretsStock.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-    return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"], currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
-                    shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)
+        return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"], currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
+                        shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)
