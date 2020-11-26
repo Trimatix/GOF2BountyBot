@@ -1,8 +1,10 @@
-from .bbItem import bbItem
+from .bbItem import bbItem, spawnableItem
 from ...bbConfig import bbData
 from ... import lib
 from typing import List
 
+
+@spawnableItem
 class bbWeapon(bbItem):
     """A primary weapon that can be equipped onto a bbShip for use in duels.
 

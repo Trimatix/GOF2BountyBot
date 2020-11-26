@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbSignatureModule(bbModule.bbModule):
     """A module allowing a the owner to disguise themselves as a member of th faction that manufactured this signature. 
     """

@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbSpectralFilterModule(bbModule.bbModule):
     """A module allowing the user to see plasma clouds in space.
 

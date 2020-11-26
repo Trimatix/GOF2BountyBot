@@ -1,9 +1,11 @@
 from __future__ import annotations
-from .bbItem import bbItem
+from .bbItem import bbItem, spawnableItem
 from ...bbConfig import bbData
 from ... import lib
 from typing import List
 
+
+@spawnableItem
 class bbTurret(bbItem):
     """A turret that can be equipped onto a bbShip for use in duels.
 

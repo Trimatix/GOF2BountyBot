@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbTransfusionBeamModule(bbModule.bbModule):
     """A module that slowly steals health from nearby ships, and adds the stolen heath to this ship's health.
 

@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbShieldModule(bbModule.bbModule):
     """A module providing a ship with a self-repairing layer of protection, over the ship's hull and armour (if equipped)
     """

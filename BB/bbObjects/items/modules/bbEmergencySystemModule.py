@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbEmergencySystemModule(bbModule.bbModule):
     """"A module providing a ship with a short period of invincibility just before dying
 

@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbTractorBeamModule(bbModule.bbModule):
     """A module providing a ship with the ability to pull nearby debris and items into the ship's cargo hold
 

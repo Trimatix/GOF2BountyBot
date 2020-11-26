@@ -7,8 +7,10 @@ from ..bbShip import bbShip
 from discord import Message
 from .... import bbGlobals
 import asyncio
+from ..bbItem import spawnableItem
 
 
+@spawnableItem
 class bbShipSkinTool(bbToolItem.bbToolItem):
     """A tool that can be used to apply a skin to a ship.
     This item is named after the skin it applies.

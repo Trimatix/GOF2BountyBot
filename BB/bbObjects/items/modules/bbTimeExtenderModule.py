@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbTimeExtenderModule(bbModule.bbModule):
     """A module that will slow down time around the ship. The ship remains unaffected.
 

@@ -4,12 +4,13 @@ from typing import List, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from .modules import bbModule
 
-from .bbItem import bbItem
+from .bbItem import bbItem, spawnableItem
 from . import bbTurret, bbWeapon, bbShipUpgrade, bbModuleFactory
 from .. import bbShipSkin
 from ...bbConfig import bbConfig, bbData
 from ... import lib
 
+@spawnableItem
 class bbShip(bbItem):
     """An equippable and customisable ship for use by players and NPCs.
 

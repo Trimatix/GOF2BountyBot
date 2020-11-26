@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbRepairBotModule(bbModule.bbModule):
     """A module providing a ship with a slow health point increase to its hull and armour
 

@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbShieldInjectorModule(bbModule.bbModule):
     """A module providing a ship with the ability to instantly refill their shield capacity, in exchange for blue plasma
 

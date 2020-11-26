@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbGammaShieldModule(bbModule.bbModule):
     """"A module providing a ship with protection agains gamma radiation
 
