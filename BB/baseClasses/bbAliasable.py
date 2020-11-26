@@ -85,7 +85,7 @@ class Aliasable (bbSerializable.bbSerializable):
 
 
     @abstractclassmethod
-    def fromDict(cls, data : dict) -> Aliasable:
+    def fromDict(cls, data : dict, **kwargs) -> Aliasable:
         """Recreate a dictionary-serialized bbAliasable object 
         
         :param dict data: A dictionary containing all information needed to recreate the serialized object
