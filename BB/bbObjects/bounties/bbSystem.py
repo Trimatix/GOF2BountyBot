@@ -92,12 +92,28 @@ class System (bbAliasable.Aliasable):
         return System
 
 
-def fromDict(sysDict : dict) -> System:
-    """Factory function constructing a new System object from the information in the given dictionary.
+    def toDict(self, **kwargs) -> dict:
+        data = super().toDict(**kwargs)
+        data["faction"] = self.faction
+        data["neighbours"] = self.neighbours
+        data["security"] = self.security
+        data["coordinates"] = self.coordinates
+        
+        if self.hasWiki:
+            data["wiki"] = self.wiki
+        if self.hasTechLevel:
+            data["techLevel"] = self.techLevel
 
-    :param dict sysDict: A dictionary containing all information needed to construct the required System.
-    :return: The requested System object
-    :rtype: System
-    """
-    return System(sysDict["name"], sysDict["faction"], sysDict["neighbours"], sysDict["security"], sysDict["coordinates"],
-                                aliases=sysDict["aliases"] if "aliases" in sysDict else [], wiki=sysDict["wiki"] if "wiki" in sysDict else "")
+        return data
+
+
+    @classmethod
+    def fromDict(cls, sysDict : dict, **kwargs) -> System:
+        """Factory function constructing a new System object from the information in the given dictionary.
+
+        :param dict sysDict: A dictionary containing all information needed to construct the required System.
+        :return: The requested System object
+        :rtype: System
+        """
+        return System(sysDict["name"], sysDict["faction"], sysDict["neighbours"], sysDict["security"], sysDict["coordinates"],
+                                    aliases=sysDict["aliases"] if "aliases" in sysDict else [], wiki=sysDict["wiki"] if "wiki" in sysDict else "")
