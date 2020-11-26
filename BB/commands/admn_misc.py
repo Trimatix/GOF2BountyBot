@@ -360,7 +360,7 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
     itemName = args.rstrip(" ").title()
     itemObj = None
     for ship in bbData.builtInShipData.values():
-        shipObj = bbShip.fromDict(ship)
+        shipObj = bbShip.bbShip.fromDict(ship)
         if shipObj.isCalled(itemName):
             itemObj = shipObj
 
