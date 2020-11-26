@@ -312,18 +312,8 @@ class bbBountyDB(bbSerializable.bbSerializable):
             data[fac] = []
             # Serialise all of the current faction's bounties into dictionary
             for bounty in self.getFactionBounties(fac):
-                data[fac].append(bounty.toDict())
+                data[fac].append(bounty.toDict(**kwargs))
         return data
-
-
-    def fromDict(cls, data : dict):
-        """Recreate a dictionary-serialized bbAliasable object 
-        
-        :param dict data: A dictionary containing all information needed to recreate the serialized object
-        :return: A new object as specified by the attributes in data
-        :rtype: bbAliasable
-        """
-        pass
 
 
     @classmethod
@@ -344,5 +334,5 @@ class bbBountyDB(bbSerializable.bbSerializable):
         for fac in bountyDBDict.keys():
             # Convert each serialised bbBounty into a bbBounty object
             for bountyDict in bountyDBDict[fac]:
-                newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
+                newDB.addBounty(bbBounty.Bounty.fromDict(bountyDict, dbReload=dbReload))
         return newDB
