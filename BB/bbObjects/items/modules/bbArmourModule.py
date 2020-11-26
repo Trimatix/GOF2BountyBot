@@ -1,3 +1,4 @@
+from __future__ import annotations
 from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
@@ -46,17 +47,18 @@ class bbArmourModule(bbModule.bbModule):
         return itemDict
 
 
-def fromDict(moduleDict : dict) -> bbArmourModule:
-    """Factory function building a new module object from the information in the provided dictionary. The opposite of this class's toDict function.
+    @classmethod
+    def fromDict(cls, moduleDict : dict, **kwargs) -> bbArmourModule:
+        """Factory function building a new module object from the information in the provided dictionary. The opposite of this class's toDict function.
 
-    :param moduleDict: A dictionary containing all information needed to construct the requested module
-    :return: The new module object as described in moduleDict
-    :rtype: dict
-    """
-    if "builtIn" in moduleDict and moduleDict["builtIn"]:
-        return bbData.builtInModuleObjs[moduleDict["name"]]
-        
-    return bbArmourModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], armour=moduleDict["armour"] if "armour" in moduleDict else 0,
-                            value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
-                            manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
-                            emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)
+        :param moduleDict: A dictionary containing all information needed to construct the requested module
+        :return: The new module object as described in moduleDict
+        :rtype: dict
+        """
+        if "builtIn" in moduleDict and moduleDict["builtIn"]:
+            return bbData.builtInModuleObjs[moduleDict["name"]]
+            
+        return bbArmourModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], armour=moduleDict["armour"] if "armour" in moduleDict else 0,
+                                value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
+                                manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
+                                emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)
