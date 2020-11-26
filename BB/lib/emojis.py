@@ -9,6 +9,8 @@ from typing import Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from discord import PartialEmoji, Emoji
 
+err_UnknownEmoji = "<:BB_ERR:779632588243075072>"
+
 
 class UnrecognisedCustomEmoji(Exception):
     """Exception raised when creating a dumbEmoji instance, but the client could not match an emoji to the given ID.
@@ -68,8 +70,7 @@ class dumbEmoji:
         if self.sendable == "None":
             # raise UnrecognisedCustomEmoji("Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id),self.id)
             bbLogger.log("dumbEmoji", "init", "Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id), trace=traceback.format_exc())
-            pass
-        
+            self.sendable = err_UnknownEmoji
         # if self.sendable is None:
         #     self.sendable = '❓'
 

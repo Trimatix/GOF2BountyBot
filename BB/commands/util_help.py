@@ -84,7 +84,7 @@ async def util_autohelp(message : discord.Message, args : str, isDM : bool, user
                 bbGlobals.reactionMenusDB[menuMsg.id] = helpMenu
 
         elif args in bbCommands.commands[userAccessLevel] and bbCommands.commands[userAccessLevel][args].allowHelp:
-            helpEmbed = lib.discordUtil.makeEmbed(titleTxt="BB " + bbConfig.accessLevelNames[userAccessLevel] + " Commands", desc=bbData.helpIntro + "\n__" + bbCommands.commands[userAccessLevel][args].helpSection.title() + "__", col=discord.Colour.default(), thumb=bbGlobals.client.user.avatar_url_as(size=64))
+            helpEmbed = lib.discordUtil.makeEmbed(titleTxt="BB " + bbConfig.accessLevelNames[userAccessLevel] + " Commands", desc=bbData.helpIntro + "\n__" + bbCommands.commands[userAccessLevel][args].helpSection.title() + "__", col=discord.Colour.blue(), thumb=bbGlobals.client.user.avatar_url_as(size=64))
             helpEmbed.add_field(name=bbCommands.commands[userAccessLevel][args].signatureStr, value=bbCommands.commands[userAccessLevel][args].longHelp.replace("$COMMANDPREFIX$", bbConfig.commandPrefix), inline=False)
             helpEmbed.add_field(name="DMable", value="Yes" if bbCommands.commands[userAccessLevel][args].allowDM else "No")
             if bbCommands.commands[userAccessLevel][args].aliases:

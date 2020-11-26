@@ -321,7 +321,7 @@ class ReactionMenu(bbSerializable.bbSerializable):
     saveable = False
 
     def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, 
-                    titleTxt : str = "", desc : str ="", col : Colour = Colour.default, timeout : TimedTask = None,
+                    titleTxt : str = "", desc : str ="", col : Colour = Colour.blue(), timeout : TimedTask = None,
                     footerTxt : str = "", img : str = "", thumb : str = "", icon : str = "",
                     authorName : str = "", targetMember : Member = None, targetRole : Role = None):
         """
@@ -351,7 +351,7 @@ class ReactionMenu(bbSerializable.bbSerializable):
 
         self.titleTxt = titleTxt
         self.desc = desc
-        self.col = col if col is not None else Colour.default()
+        self.col = col if col is not None else Colour.blue()
         self.footerTxt = footerTxt
         self.img = img
         self.thumb = thumb
@@ -495,7 +495,7 @@ class ReactionMenu(bbSerializable.bbSerializable):
         if self.desc != "":
             data["desc"] = self.desc
 
-        if self.col != Colour.default():
+        if self.col != Colour.blue():
             data["col"] = self.col.to_rgb()
 
         if self.footerTxt != "":
@@ -544,7 +544,7 @@ class CancellableReactionMenu(ReactionMenu):
     :vartype cancelEmoji: lib.emojis.dumbEmoji
     """
     def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, cancelEmoji : lib.emojis.dumbEmoji = bbConfig.defaultCancelEmoji,
-                    titleTxt : str = "", desc : str = "", col : Colour = Colour.default, timeout : TimedTask = None, footerTxt : str = "", img : str = "", thumb : str = "",
+                    titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), timeout : TimedTask = None, footerTxt : str = "", img : str = "", thumb : str = "",
                     icon : str = "", authorName : str = "", targetMember : Member = None, targetRole : Role = None):
         """
         :param discord.Message msg: the message where this menu is embedded
@@ -591,7 +591,7 @@ class SingleUserReactionMenu(ReactionMenu):
     """
     def __init__(self, msg : Message, targetMember : Union[Member, User], timeoutSeconds : int,
                     options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, returnTriggers : List[lib.emojis.dumbEmoji] = [], 
-                    titleTxt : str = "", desc : str = "", col : Colour = Colour.default, footerTxt : str = "", img : str = "",
+                    titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), footerTxt : str = "", img : str = "",
                     thumb : str = "", icon : str = "", authorName : str = ""):
         """
         :param returnTriggers: List of menu options that trigger the returning of the menu

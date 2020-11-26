@@ -94,3 +94,8 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
         raise NotImplementedError("Attempted to call toDict on a non-saveable reaction menu")
         baseDict = super(ReactionDuelChallengeMenu, self).toDict(**kwargs)
         return baseDict
+
+    
+    @classmethod
+    def fromDict(cls, data: dict, **kwargs) -> ReactionDuelChallengeMenu:
+        raise NotImplementedError("Attempted to call fromDict on a non-saveable reaction menu")

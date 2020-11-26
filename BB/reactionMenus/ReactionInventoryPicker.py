@@ -164,7 +164,7 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
         if self.desc != "":
             data["desc"] = self.desc
 
-        if self.col != Colour.default():
+        if self.col != Colour.blue():
             data["col"] = self.col
 
         if self.footerTxt != "":
