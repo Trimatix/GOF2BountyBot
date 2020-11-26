@@ -1,6 +1,8 @@
+from __future__ import annotations
 from . import bbInventoryListing
+from ..baseClasses import bbSerializable
 
-class bbInventory:
+class bbInventory(bbSerializable.bbSerializable):
     """A database of bbInventoryListings.
     Aside from the use of bbInventoryListing for the purpose of item quantities, this class is type unaware.
 
@@ -47,6 +49,26 @@ class bbInventory:
             self.items[item] = bbInventoryListing.bbInventoryListing(item, quantity)
             # Update keys and numKeys trackers
             self.keys.append(item)
+            self.numKeys += 1
+
+
+    def _addListing(self, newListing : bbInventoryListing.bbInventoryListing):
+        """Add an inventory listing to the inventory, including item and acount.
+        If at least one of item is already in the inventory, that item's bbInventoryListing count will be incremented.
+        Otherwise, a reference to the given bbInventoryListing is stored. The listing is not copied and remains mutable.
+
+        :param bbInventoryListing newListing: The inventory listing to add to the inventory
+        """
+        # update total items count
+        self.totalItems += newListing.count
+        # if item is already stored, increment its listing count
+        if newListing.item in self.items:
+            self.items[newListing.item].count += newListing.count
+        # otherwise, store a reference to the given listing
+        else:
+            self.items[newListing.item] = newListing
+            self.keys.append(newListing.item)
+            # update keys counter
             self.numKeys += 1
 
 
@@ -198,3 +220,43 @@ class bbInventory:
         :param object item: The object to test for membership
         """
         return item in self.keys
+
+    
+    def toDict(self, **kwargs) -> dict:
+        data = super().toDict(**kwargs)
+        data["items"] = []
+        for listing in self.items.values():
+            data["items"].append(listing.toDict(**kwargs))
+
+
+    def fromDict(cls, invDict, **kwargs) -> bbInventory:
+        newInv = bbInventory()
+        if "items" in invDict:
+            for listingDict in invDict["items"]:
+                newInv._addListing(bbInventoryListing.bbInventoryListing.fromDict(listingDict))
+        
+        return newInv
+
+
+class TypeRestrictedInventory(bbInventory):
+    """An inventory where the item listings are guaranteed to be of a given type.
+
+    :var itemType: The type by which listings are restricted
+    :vartype itemType: type
+    """
+
+    def __init__(self, itemType : type):
+        super().__init__()
+        self.itemType = itemType
+
+    
+    def addItem(self, item: object, quantity: int):
+        if not isinstance(item, self.itemType):
+            raise TypeError("Given item does not match this inventory's item type restriction. Expected '" + self.itemType.__name__ + "', given '" + type(item).__name__ + "'")
+        super().addItem(item, quantity=quantity)
+
+    
+    def _addListing(self, newListing: bbInventoryListing.bbInventoryListing):
+        if not isinstance(newListing.item, self.itemType):
+            raise TypeError("Given item does not match this inventory's item type restriction. Expected '" + self.itemType.__name__ + "', given '" + type(newListing.item).__name__ + "'")
+        super()._addListing(newListing)
