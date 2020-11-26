@@ -154,7 +154,7 @@ class bbGuildDB(bbSerializable.bbSerializable):
         for guild in self.getGuilds():
             # Serialise and then store each guild
             # JSON stores properties as strings, so ids must be converted to str first.
-            data[str(guild.id)] = guild.toDictNoId()
+            data[str(guild.id)] = guild.toDict(**kwargs)
         return data
 
 
@@ -187,7 +187,7 @@ class bbGuildDB(bbSerializable.bbSerializable):
             # Instance new bbGuilds for each ID, with the provided data
             # JSON stores properties as strings, so ids must be converted to int first.
             try:
-                newDB.addGuildObj(bbGuild.fromDict(int(id), guildsDBDict[id], dbReload=dbReload))
+                newDB.addGuildObj(bbGuild.bbGuild.fromDict(guildsDBDict[id], id=int(id), dbReload=dbReload))
             # Ignore guilds that don't have a corresponding dcGuild
             except bbGuild.NoneDCGuildObj:
                 bbLogger.log("bbGuildDB", "fromDict", "no corresponding discord guild found for ID " + id + ", guild removed from database",
