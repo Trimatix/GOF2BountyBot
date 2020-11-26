@@ -108,16 +108,6 @@ class Criminal (bbAliasable.Aliasable):
             raise RuntimeError("CRIM_COPYSH_HASSH: Attempted to copyShip on a Criminal that already has an active ship")
         self.ship = bbShip.bbShip.fromDict(ship.toDict())
         self.hasShip = True
-        
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object
-
-        :return: The Criminal class
-        :rtype: type
-        """
-        return Criminal
 
 
     def __hash__(self) -> int:

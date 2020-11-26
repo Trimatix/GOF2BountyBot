@@ -42,16 +42,6 @@ class bbTransfusionBeamModule(bbModule.bbModule):
         return "*HP/s: " + str(self.HPps) + ", Count: " + str(self.count) + "*"
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbTransfusionBeamModule
-
-    
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.

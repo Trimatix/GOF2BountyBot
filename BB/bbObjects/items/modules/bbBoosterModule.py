@@ -37,16 +37,6 @@ class bbBoosterModule(bbModule.bbModule):
         self.duration = duration
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbBoosterModule
-
-
     def statsStringShort(self):
         return "*Effect: " + ("+" if self.effect >= 1 else "-") + str(round(((self.effect - 1) * 100) if self.effect > 1 else (self.effect * 100))) + \
                 "%, Duration: " + ("+" if self.duration > 0 else "-") + str(self.duration) + "s*"

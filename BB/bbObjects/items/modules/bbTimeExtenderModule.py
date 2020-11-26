@@ -42,16 +42,6 @@ class bbTimeExtenderModule(bbModule.bbModule):
         return "*Effect: " + ("+" if self.effect >= 1 else "-") + str(round(((self.effect - 1) * 100) if self.effect > 1 else (self.effect * 100))) + \
                 "%, Duration: " + str(self.duration) + "s*"
 
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbTimeExtenderModule
-
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.

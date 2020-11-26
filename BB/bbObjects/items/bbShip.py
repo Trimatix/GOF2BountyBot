@@ -247,7 +247,7 @@ class bbShip(bbItem):
         if moduleType.__name__ in bbConfig.maxModuleTypeEquips and bbConfig.maxModuleTypeEquips[moduleType.__name__] != -1:
             numFound = 1
             for equippedModule in self.modules:
-                if equippedModule.getType() == moduleType:
+                if type(equippedModule) == moduleType:
                     numFound += 1
                     if numFound > bbConfig.maxModuleTypeEquips[moduleType.__name__]:
                         return False
@@ -263,7 +263,7 @@ class bbShip(bbItem):
         """
         if not self.canEquipMoreModules():
             raise OverflowError("Attempted to equip a module but all module slots are full")
-        if not self.canEquipModuleType(module.getType()):
+        if not self.canEquipModuleType(type(module)):
             raise ValueError("Attempted to equip a module of a type that is already at its maximum capacity: " + str(module))
 
         self.modules.append(module)
@@ -605,7 +605,7 @@ class bbShip(bbItem):
 
         leftoverModules = []
         while self.hasModulesEquipped() and other.canEquipMoreModules():
-            if other.canEquipModuleType(self.modules[0].getType()):
+            if other.canEquipModuleType(type(self.modules[0])):
                 other.equipModule(self.modules.pop(0))
             else:
                 leftoverModules.append(self.modules.pop(0))
@@ -718,16 +718,6 @@ class bbShip(bbItem):
         stats += "Handling: " + str(self.getHandling(shipUpgradesOnly=True)) + ("(+)" if self.getHandling(shipUpgradesOnly=True) > self.handling else "") + ", "
         stats += "Max secondaries: " + str(self.getNumSecondaries(shipUpgradesOnly=True)) + ("(+)" if self.getNumSecondaries(shipUpgradesOnly=True) > self.numSecondaries else "") + "*"
         return stats
-    
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The bbShip class
-        :rtype: type
-        """
-        return bbShip
 
 
     def toDict(self, **kwargs) -> dict:

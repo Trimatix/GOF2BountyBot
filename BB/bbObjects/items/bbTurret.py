@@ -42,16 +42,6 @@ class bbTurret(bbItem):
         return "*Dps: " + str(self.dps) + "*"
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The bbTurret class
-        :rtype: type
-        """
-        return bbTurret
-
-
     def toDict(self, **kwargs) -> dict:
         """Serialize this item into dictionary format, for saving to file.
 

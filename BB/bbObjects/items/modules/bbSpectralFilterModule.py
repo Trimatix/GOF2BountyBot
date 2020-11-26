@@ -43,16 +43,6 @@ class bbSpectralFilterModule(bbModule.bbModule):
         return "*Show Info? " + ("Yes" if self.showInfo else "No") + ", Show On Radar? " + ("Yes" if self.showOnRadar else "No") + "*"
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbSpectralFilterModule
-
-    
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.

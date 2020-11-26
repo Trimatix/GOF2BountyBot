@@ -43,7 +43,7 @@ class Aliasable (bbSerializable.bbSerializable):
 
         :param
         """
-        return type(other) == self.getType() and self.isCalled(other.name) or other.isCalled(self.name)
+        return type(other) == type(self) and self.isCalled(other.name) or other.isCalled(self.name)
 
 
     def isCalled(self, name : str) -> bool:
@@ -82,14 +82,3 @@ class Aliasable (bbSerializable.bbSerializable):
         :rtype: dict
         """
         return {"name": self.name, "aliases": self.aliases}
-
-
-    @abstractclassmethod
-    def fromDict(cls, data : dict, **kwargs) -> Aliasable:
-        """Recreate a dictionary-serialized bbAliasable object 
-        
-        :param dict data: A dictionary containing all information needed to recreate the serialized object
-        :return: A new object as specified by the attributes in data
-        :rtype: bbAliasable
-        """
-        pass

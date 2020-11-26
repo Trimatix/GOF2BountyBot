@@ -28,16 +28,6 @@ class bbThrusterModule(bbModule.bbModule):
         """
         super(bbThrusterModule, self).__init__(name, aliases, handlingMultiplier=handlingMultiplier, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbThrusterModule
-
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.

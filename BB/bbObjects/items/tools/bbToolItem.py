@@ -56,17 +56,6 @@ class bbToolItem(bbItem.bbItem):
 
 
     @abstractmethod
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The bbItem class
-        :rtype: type
-        """
-        return bbItem
-
-    
-    @abstractmethod
     def toDict(self, **kwargs) -> dict:
         """Serialize this tool into dictionary format.
         This step of implementation adds a 'type' string indicating the name of this tool's subclass.

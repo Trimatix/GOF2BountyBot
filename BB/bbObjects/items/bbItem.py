@@ -87,17 +87,6 @@ class bbItem(bbAliasable.Aliasable):
         """
         return "*No effect*"
 
-
-    @abstractmethod
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The bbItem class
-        :rtype: type
-        """
-        return bbItem
-
     
     def getValue(self) -> int:
         """Get the base value of this item with no additions or modifications.

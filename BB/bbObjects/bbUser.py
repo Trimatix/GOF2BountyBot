@@ -338,13 +338,13 @@ class bbUser(bbSerializable.bbSerializable):
         incompatibleModules = []
 
         for currentModule in self.activeShip.modules:
-            if not self.activeShip.canEquipModuleType(currentModule.getType()):
+            if not self.activeShip.canEquipModuleType(type(currentModule)):
                 incompatibleModules.append(currentModule)
                 self.activeShip.unequipModuleObj(currentModule)
 
         finalModules = []
         for currentModule in incompatibleModules:
-            if self.activeShip.canEquipModuleType(currentModule.getType()):
+            if self.activeShip.canEquipModuleType(type(currentModule)):
                 self.activeShip.equipModule(currentModule)
             else:
                 finalModules.append(currentModule)

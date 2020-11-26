@@ -42,16 +42,6 @@ class bbMiningDrillModule(bbModule.bbModule):
         return "*Yield: " + ("+" if self.oreYield >= 1 else "-") + str(round(((self.oreYield - 1) * 100) if self.oreYield > 1 else (self.oreYield * 100))) + \
                 "%, Handling: " + str(round(((self.handling - 1) * 100) if self.handling > 1 else (self.handling * 100))) + "%*"
 
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbMiningDrillModule
-
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.

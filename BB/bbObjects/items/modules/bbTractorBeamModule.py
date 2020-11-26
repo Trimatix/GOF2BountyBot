@@ -38,16 +38,6 @@ class bbTractorBeamModule(bbModule.bbModule):
         return "*Time To Lock: " + str(self.timeToLock) + "s*"
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbTractorBeamModule
-
-    
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.

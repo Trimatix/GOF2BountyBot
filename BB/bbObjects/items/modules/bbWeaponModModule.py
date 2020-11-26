@@ -29,16 +29,6 @@ class bbWeaponModModule(bbModule.bbModule):
         super(bbWeaponModModule, self).__init__(name, aliases, dpsMultiplier=dpsMultiplier, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbWeaponModModule
-
-    
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         No extra attributes implemented by this class, so just eses the base bbModule toDict method.

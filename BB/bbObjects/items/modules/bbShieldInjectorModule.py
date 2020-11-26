@@ -37,16 +37,6 @@ class bbShieldInjectorModule(bbModule.bbModule):
     def statsStringShort(self):
         return "*Plasma Consumption: " + str(self.plasmaConsumption) + "*"
 
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbShieldInjectorModule
-
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.

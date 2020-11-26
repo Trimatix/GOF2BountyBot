@@ -82,16 +82,6 @@ class System (bbAliasable.Aliasable):
         return bool(self.neighbours)
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get this object's __class__
-
-        :return: The System class
-        :rtype: type
-        """
-        return System
-
-
     def toDict(self, **kwargs) -> dict:
         data = super().toDict(**kwargs)
         data["faction"] = self.faction

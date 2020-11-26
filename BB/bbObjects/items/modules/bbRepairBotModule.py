@@ -37,16 +37,6 @@ class bbRepairBotModule(bbModule.bbModule):
     def statsStringShort(self):
         return "*HP/s: " + str(self.HPps) + "*"
 
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbRepairBotModule
-
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.

@@ -125,16 +125,6 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
             return "*Designer: user #" + str(self.manufacturer) + "*"
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The bbItem class
-        :rtype: type
-        """
-        return bbShipSkinTool
-
-    
     def toDict(self, **kwargs):
         """
         

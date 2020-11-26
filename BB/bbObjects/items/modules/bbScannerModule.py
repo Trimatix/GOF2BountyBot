@@ -47,16 +47,6 @@ class bbScannerModule(bbModule.bbModule):
         return "*Time To Lock: " + str(self.timeToLock) + "s, Show Class A Asteroids: " + ("Yes" if self.showClassAAsteroids else "No") + ", Show Cargo: " + ("Yes" if self.showCargo else "No") + "*"
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbScannerModule
-
-    
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.

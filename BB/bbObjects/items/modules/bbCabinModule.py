@@ -34,16 +34,6 @@ class bbCabinModule(bbModule.bbModule):
         self.cabinSize = cabinSize
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbCabinModule
-
-
     def statsStringShort(self):
         return "*Cabin Size: " + str(self.cabinSize) + "*"
 

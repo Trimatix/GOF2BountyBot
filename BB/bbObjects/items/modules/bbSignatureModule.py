@@ -34,16 +34,6 @@ class bbSignatureModule(bbModule.bbModule):
     def statsStringShort(self):
         return "*Faction: " + self.manufacturer + "*"
 
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbSignatureModule
-
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.

@@ -102,16 +102,6 @@ class bbModule(bbItem):
         return (stats[:-2] + "*") if stats != "*" else "*No effect*"
 
     
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The bbModule class
-        :rtype: type
-        """
-        return bbModule
-
-    
     def toDict(self, **kwargs) -> dict:
         """Serialize this bbModule into dictionary format, for saving to file.
         This method should be overriden and used as a base in any modules that implement custom behaviour, outside of simple stat boosts.

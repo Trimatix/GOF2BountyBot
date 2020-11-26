@@ -41,16 +41,6 @@ class bbWeapon(bbItem):
         return "*Dps: " + str(self.dps) + "*"
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The bbWeapon class
-        :rtype: type
-        """
-        return bbWeapon
-
-
     def toDict(self, **kwargs) -> dict:
         """Serialize this item into dictionary format, for saving to file.
 

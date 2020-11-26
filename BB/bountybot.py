@@ -16,7 +16,7 @@ from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .bbObjects import bbShipSkin
 from .bbObjects.bounties import bbCriminal, bbSystem
 from .bbObjects.items import bbModuleFactory, bbShipUpgrade, bbTurret, bbWeapon
-from .bbObjects.items.tools import bbShipSkinTool, bbToolItemFactory
+from .bbObjects.items.tools import bbShipSkinTool, bbToolItemFactory, bbShipUpgradeTool
 from .scheduling import TimedTask
 from .bbDatabases import bbGuildDB, bbUserDB, HeirarchicalCommandsDB, reactionMenuDB
 from .scheduling import TimedTaskHeap

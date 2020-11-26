@@ -29,16 +29,6 @@ class bbShieldModule(bbModule.bbModule):
         super(bbShieldModule, self).__init__(name, aliases, shield=shield, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbShieldModule
-
-    
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         No extra attributes implemented by this class, so just eses the base bbModule toDict method.

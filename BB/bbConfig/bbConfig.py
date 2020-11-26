@@ -334,6 +334,9 @@ tempRendersDir = "rendering-temp"
 defaultShipSkinToolIcon = "https://cdn.discordapp.com/attachments/700683544103747594/723472334362771536/documents.png"
 defaultShipSkinToolEmoji = UninitializedDumbEmoji(777166858516299786)
 
+defaultShipUpgradeToolIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/toolbox_1f9f0.png"
+defaultShipUpgradeToolEmoji = dumbEmoji(unicode="🧰")
+
 def shipSkinValueForTL(averageTL : int) -> int:
     """Calculate how skins are valued with respect to their average compatible ship techlevel.
 
