@@ -1,3 +1,4 @@
+from __future__ import annotations
 from ..bbObjects import bbUser
 from .. import lib
 from ..logging import bbLogger
@@ -87,7 +88,7 @@ class bbUserDB(bbSerializable.bbSerializable):
         if self.userIDExists(id):
             raise KeyError("Attempted to add a user that is already in this bbUserDB")
         # Create and return a new user
-        newUser = bbUser.fromDict(id, bbUser.defaultUserDict)
+        newUser = bbUser.bbUser.fromDict(bbUser.defaultUserDict, id=id)
         self.users[id] = newUser
         return newUser
 
@@ -168,7 +169,7 @@ class bbUserDB(bbSerializable.bbSerializable):
             # Serialise each bbUser in the database and save it, along with its ID to dict 
             # JSON stores properties as strings, so ids must be converted to str first.
             try:
-                data[str(id)] = self.users[id].toDictNoId()
+                data[str(id)] = self.users[id].toDict(**kwargs)
             except Exception as e:
                 bbLogger.log("UserDB", "toDict", "Error serialising bbUser: " + e.__class__.__name__, trace=traceback.format_exc(), eventType="USERERR")
         return data
@@ -184,18 +185,19 @@ class bbUserDB(bbSerializable.bbSerializable):
         return "<bbUserDB: " + str(len(self.users)) + " users>"
 
 
-def fromDict(userDBDict : dict) -> bbUserDB:
-    """Construct a bbUserDB from a dictionary-serialised representation - the reverse of bbUserDB.toDict()
+    @classmethod
+    def fromDict(cls, userDBDict : dict, **kwargs) -> bbUserDB:
+        """Construct a bbUserDB from a dictionary-serialised representation - the reverse of bbUserDB.toDict()
 
-    :param dict userDBDict: a dictionary-serialised representation of the bbUserDB to construct
-    :return: the new bbUserDB
-    :rtype: bbUserDB
-    """
-    # Instance the new bbUserDB
-    newDB = bbUserDB()
-    # iterate over all user IDs to spawn
-    for id in userDBDict.keys():
-        # Construct new bbUsers for each ID in the database
-        # JSON stores properties as strings, so ids must be converted to int first.
-        newDB.addUserObj(bbUser.fromDict(int(id), userDBDict[id]))
-    return newDB
+        :param dict userDBDict: a dictionary-serialised representation of the bbUserDB to construct
+        :return: the new bbUserDB
+        :rtype: bbUserDB
+        """
+        # Instance the new bbUserDB
+        newDB = bbUserDB()
+        # iterate over all user IDs to spawn
+        for id in userDBDict.keys():
+            # Construct new bbUsers for each ID in the database
+            # JSON stores properties as strings, so ids must be converted to int first.
+            newDB.addUserObj(bbUser.bbUser.fromDict(userDBDict[id], id=int(id)))
+        return newDB
