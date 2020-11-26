@@ -1,6 +1,6 @@
 from . import bbToolItem, bbShipSkinTool
 
-toolTypeConstructors = {"bbShipSkinTool": bbShipSkinTool.fromDict}
+toolTypeConstructors = {"bbShipSkinTool": bbShipSkinTool.bbShipSkinTool.fromDict}
 
 def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
     """Construct a bbToolItem from its dictionary-serialized representation.
