@@ -1,3 +1,4 @@
+from __future__ import annotations
 import discord
 from discord import Embed, HTTPException, Forbidden, NotFound, Client, Message
 from ....bbConfig import bbData, bbConfig
@@ -96,7 +97,7 @@ class BountyBoardChannel(bbSerializable.bbSerializable):
         self.channel = client.get_channel(self.channelIDToBeLoaded)
 
         for id in self.messagesToBeLoaded:
-            criminal = bbCriminal.fromDict(self.messagesToBeLoaded[id])
+            criminal = bbCriminal.Criminal.fromDict(self.messagesToBeLoaded[id])
 
             try:
                 msg = await self.channel.fetch_message(id)
@@ -325,17 +326,18 @@ class BountyBoardChannel(bbSerializable.bbSerializable):
         listings = {}
         for fac in self.bountyMessages:
             for crim in self.bountyMessages[fac]:
-                listings[self.bountyMessages[fac][crim].id] = crim.toDict()
+                listings[self.bountyMessages[fac][crim].id] = crim.toDict(**kwargs)
         return {"channel":self.channel.id, "listings":listings, "noBountiesMsg": self.noBountiesMessage.id if self.noBountiesMessage is not None else -1}
 
 
-def fromDict(BBCDict : dict) -> BountyBoardChannel:
-    """Factory function constructing a new BBC from the information in the provided dictionary - the opposite of BountyBoardChannel.toDict
+    @classmethod
+    def fromDict(cls, BBCDict : dict, **kwargs) -> BountyBoardChannel:
+        """Factory function constructing a new BBC from the information in the provided dictionary - the opposite of BountyBoardChannel.toDict
 
-    :param dict BBCDict: a dictionary representation of the BBC, to convert to an object
-    :return: The new BountyBoardChannel object
-    :rtype: BountyBoardChannel
-    """
-    if BBCDict is None:
-        return None
-    return BountyBoardChannel(BBCDict["channel"], BBCDict["listings"], BBCDict["noBountiesMsg"] if "noBountiesMsg" in BBCDict else -1)
+        :param dict BBCDict: a dictionary representation of the BBC, to convert to an object
+        :return: The new BountyBoardChannel object
+        :rtype: BountyBoardChannel
+        """
+        if BBCDict is None:
+            return None
+        return BountyBoardChannel(BBCDict["channel"], BBCDict["listings"], BBCDict["noBountiesMsg"] if "noBountiesMsg" in BBCDict else -1)
