@@ -1,6 +1,6 @@
 # Typing imports
 from __future__ import annotations
-from typing import List
+from typing import List, Type
 
 from ...baseClasses import bbAliasable
 from abc import abstractmethod
@@ -77,9 +77,6 @@ class bbItem(bbAliasable.Aliasable):
 
         self.builtIn = builtIn
 
-        if type(self).__name__ not in subClassNames:
-            subClassNames[type(self).__name__] = type(self)
-
 
     @abstractmethod
     def statsStringShort(self) -> str:
@@ -151,6 +148,14 @@ class bbItem(bbAliasable.Aliasable):
         :rtype: int
         """
         return hash(repr(self))
+
+
+def spawnableItem(cls):
+    if not issubclass(cls, bbItem):
+        raise TypeError("Invalid use of spawnableItem decorator: " + cls.__name__ + " is not a bbItem subtype")
+    if cls.__name__ not in subClassNames:
+        subClassNames[cls.__name__] = cls
+    return cls
 
 
 def spawnItem(data : dict) -> bbItem:
