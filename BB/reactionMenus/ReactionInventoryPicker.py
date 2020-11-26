@@ -1,3 +1,4 @@
+from __future__ import annotations
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from ..bbObjects.items import bbItem
@@ -48,7 +49,7 @@ class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
         :rtype: dict
         """
         baseDict = super(ReactionInventoryPickerOption, self).toDict(**kwargs)
-        baseDict["item"] = self.item.toDict()
+        baseDict["item"] = self.item.toDict(**kwargs)
 
         return baseDict
 
@@ -142,43 +143,44 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
 
 
 # ⚠ unfinished. idk how to save to file a reference to the inventory because idk what or where it will be. might just close all inventory menus on shutdown
-def fromDict(rmDict : dict) -> ReactionInventoryPicker:
-    """⚠ ReactionInventoryPickers are not currently saveable. Do not use this method.
-    When implemented, this function will construct a new ReactionInventoryPicker from a dictionary-serialized representation - The opposite of ReactionInventoryPicker.toDict.
+    @classmethod
+    def fromDict(cls, rmDict : dict, **kwargs) -> ReactionInventoryPicker:
+        """⚠ ReactionInventoryPickers are not currently saveable. Do not use this method.
+        When implemented, this function will construct a new ReactionInventoryPicker from a dictionary-serialized representation - The opposite of ReactionInventoryPicker.toDict.
 
-    :param dict rmDict: A dictionary containg all information needed to construct the required ReactionInventoryPicker
-    :raise NotImplementedError: Always.
-    """
-    raise NotImplementedError("Attempted to call fromDict on an unsaveable reaction menu type")
-    # options = {}
-    # for option in rmDict["options"]:
+        :param dict rmDict: A dictionary containg all information needed to construct the required ReactionInventoryPicker
+        :raise NotImplementedError: Always.
+        """
+        raise NotImplementedError("Attempted to call fromDict on an unsaveable reaction menu type")
+        # options = {}
+        # for option in rmDict["options"]:
 
 
-    data = {"channel": self.msg.channel.id, "msg": self.msg.id, "options": optionsDict}
-        
-    if self.titleTxt != "":
-        data["titleTxt"] = self.titleTxt
+        data = {"channel": self.msg.channel.id, "msg": self.msg.id, "options": optionsDict}
+            
+        if self.titleTxt != "":
+            data["titleTxt"] = self.titleTxt
 
-    if self.desc != "":
-        data["desc"] = self.desc
+        if self.desc != "":
+            data["desc"] = self.desc
 
-    if self.col != Colour.default():
-        data["col"] = self.col
+        if self.col != Colour.default():
+            data["col"] = self.col
 
-    if self.footerTxt != "":
-        data["footerTxt"] = self.footerTxt
+        if self.footerTxt != "":
+            data["footerTxt"] = self.footerTxt
 
-    if self.img != "":
-        data["img"] = self.img
+        if self.img != "":
+            data["img"] = self.img
 
-    if self.thumb != "":
-        data["thumb"] = self.thumb
+        if self.thumb != "":
+            data["thumb"] = self.thumb
 
-    if self.icon != "":
-        data["icon"] = self.icon
+        if self.icon != "":
+            data["icon"] = self.icon
 
-    if self.authorName != "":
-        data["authorName"] = self.authorName
+        if self.authorName != "":
+            data["authorName"] = self.authorName
 
-    if self.timeout != None:
-        data["timeout"] = self.timeout.timestamp
+        if self.timeout != None:
+            data["timeout"] = self.timeout.timestamp

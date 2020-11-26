@@ -181,7 +181,7 @@ class ReactionMenuOption(bbSerializable.bbSerializable):
         :return: A hash of this menu option
         :rtype: int
         """
-        return hash(repr(self)) 
+        return hash(repr(self))
 
 
     @abstractmethod
@@ -206,7 +206,12 @@ class ReactionMenuOption(bbSerializable.bbSerializable):
         :return: A dictionary containing rudimentary information about the menu option, to be used in conjunction with other type-specific information when reconstructing this menu option.
         :rtype: dict
         """
-        return {"name":self.name, "emoji": self.emoji.toDict()}
+        return {"name":self.name, "emoji": self.emoji.toDict(**kwargs)}
+
+
+    @classmethod
+    def fromDict(cls, data: dict, **kwargs):
+        raise NotImplementedError("Attempted to fromDict an unserializable menu option type: " + cls.__name__)
 
 
 class NonSaveableReactionMenuOption(ReactionMenuOption):
@@ -480,7 +485,7 @@ class ReactionMenu(bbSerializable.bbSerializable):
         """
         optionsDict = {}
         for reaction in self.options:
-            optionsDict[reaction.sendable] = self.options[reaction].toDict()
+            optionsDict[reaction.sendable] = self.options[reaction].toDict(**kwargs)
 
         data = {"channel": self.msg.channel.id, "msg": self.msg.id, "options": optionsDict, "type": self.__class__.__name__, "guild": self.msg.channel.guild.id}
         
@@ -518,6 +523,11 @@ class ReactionMenu(bbSerializable.bbSerializable):
             data["targetRole"] = self.targetRole.id
         
         return data
+
+
+    @classmethod
+    def fromDict(cls, data: dict, **kwargs):
+        raise NotImplementedError("Attempted to fromDict an unserializable menu type: " + cls.__name__)
 
 
 class CancellableReactionMenu(ReactionMenu):

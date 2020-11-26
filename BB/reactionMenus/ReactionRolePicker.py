@@ -1,3 +1,4 @@
+from __future__ import annotations
 from discord.member import Member
 from . import ReactionMenu
 from ..bbConfig import bbConfig
@@ -138,35 +139,39 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
         return baseDict
 
 
-async def fromDict(rmDict : dict) -> ReactionRolePicker:
-    """Reconstruct a ReactionRolePicker from its dictionary-serialized representation.
+    @classmethod
+    def fromDict(cls, rmDict : dict, **kwargs) -> ReactionRolePicker:
+        """Reconstruct a ReactionRolePicker from its dictionary-serialized representation.
 
-    :param dict rmDict: A dictionary containing all information needed to construct the desired ReactionRolePicker
-    :return: A new ReactionRolePicker object as described in rmDict
-    :rtype: ReactionRolePicker
-    """
-    dcGuild = bbGlobals.client.get_guild(rmDict["guild"])
-    msg = await dcGuild.get_channel(rmDict["channel"]).fetch_message(rmDict["msg"])
+        :param dict rmDict: A dictionary containing all information needed to construct the desired ReactionRolePicker
+        :return: A new ReactionRolePicker object as described in rmDict
+        :rtype: ReactionRolePicker
+        """
+        if "msg" in kwargs:
+            raise NameError("Required kwarg not given: msg")
+        msg = kwargs["msg"]
 
-    reactionRoles = {}
-    for reaction in rmDict["options"]:
-        reactionRoles[lib.emojis.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
+        dcGuild = msg.guild
 
-    timeoutTT = None
-    if "timeout" in rmDict:
-        expiryTime = datetime.utcfromtimestamp(rmDict["timeout"])
-        bbGlobals.reactionMenusTTDB.scheduleTask(TimedTask.TimedTask(expiryTime=expiryTime, expiryFunction=ReactionMenu.markExpiredMenu, expiryFunctionArgs=msg.id))
+        reactionRoles = {}
+        for reaction in rmDict["options"]:
+            reactionRoles[lib.emojis.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
+
+        timeoutTT = None
+        if "timeout" in rmDict:
+            expiryTime = datetime.utcfromtimestamp(rmDict["timeout"])
+            bbGlobals.reactionMenusTTDB.scheduleTask(TimedTask.TimedTask(expiryTime=expiryTime, expiryFunction=ReactionMenu.markExpiredMenu, expiryFunctionArgs=msg.id))
 
 
-    return ReactionRolePicker(msg, reactionRoles, dcGuild,
-                                titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
-                                desc=rmDict["desc"] if "desc" in rmDict else "",
-                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.default(),
-                                footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
-                                img=rmDict["img"] if "img" in rmDict else "",
-                                thumb=rmDict["thumb"] if "thumb" in rmDict else "",
-                                icon=rmDict["icon"] if "icon" in rmDict else "",
-                                authorName=rmDict["authorName"] if "authorName" in rmDict else "",
-                                timeout=timeoutTT,
-                                targetMember=dcGuild.get_member(rmDict["targetMember"]) if "targetMember" in rmDict else None,
-                                targetRole=dcGuild.get_role(rmDict["targetRole"]) if "targetRole" in rmDict else None)
+        return ReactionRolePicker(msg, reactionRoles, dcGuild,
+                                    titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
+                                    desc=rmDict["desc"] if "desc" in rmDict else "",
+                                    col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.default(),
+                                    footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
+                                    img=rmDict["img"] if "img" in rmDict else "",
+                                    thumb=rmDict["thumb"] if "thumb" in rmDict else "",
+                                    icon=rmDict["icon"] if "icon" in rmDict else "",
+                                    authorName=rmDict["authorName"] if "authorName" in rmDict else "",
+                                    timeout=timeoutTT,
+                                    targetMember=dcGuild.get_member(rmDict["targetMember"]) if "targetMember" in rmDict else None,
+                                    targetRole=dcGuild.get_role(rmDict["targetRole"]) if "targetRole" in rmDict else None)
