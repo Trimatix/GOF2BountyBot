@@ -1,3 +1,4 @@
+from __future__ import annotations
 from .bbItem import bbItem
 from ...bbConfig import bbData
 from ... import lib
@@ -62,17 +63,18 @@ class bbTurret(bbItem):
         return itemDict
 
 
-def fromDict(turretDict : dict) -> bbTurret:
-    """Factory function constructing a new bbTurret object from a dictionary serialised representation - the opposite of bbTurret.toDict.
-    
-    :param dict turretDict: A dictionary containing all information needed to construct the desired bbTurret
-    :return: A new bbTurret object as described in turretDict
-    :rtype: bbTurret
-    """
-    if turretDict["builtIn"]:
-        return bbData.builtInTurretObjs[turretDict["name"]]
-    else:
-        return bbTurret(turretDict["name"], turretDict["aliases"], dps=turretDict["dps"], value=turretDict["value"],
-                        wiki=turretDict["wiki"] if "wiki" in turretDict else "", manufacturer=turretDict["manufacturer"] if "manufacturer" in turretDict else "",
-                        icon=turretDict["icon"] if "icon" in turretDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmojiFromStr(turretDict["emoji"]) if "emoji" in turretDict else lib.emojis.dumbEmoji.EMPTY,
-                        techLevel=turretDict["techLevel"] if "techLevel" in turretDict else -1, builtIn=False)
+    @classmethod
+    def fromDict(cls, turretDict : dict, **kwargs) -> bbTurret:
+        """Factory function constructing a new bbTurret object from a dictionary serialised representation - the opposite of bbTurret.toDict.
+        
+        :param dict turretDict: A dictionary containing all information needed to construct the desired bbTurret
+        :return: A new bbTurret object as described in turretDict
+        :rtype: bbTurret
+        """
+        if turretDict["builtIn"]:
+            return bbData.builtInTurretObjs[turretDict["name"]]
+        else:
+            return bbTurret(turretDict["name"], turretDict["aliases"], dps=turretDict["dps"], value=turretDict["value"],
+                            wiki=turretDict["wiki"] if "wiki" in turretDict else "", manufacturer=turretDict["manufacturer"] if "manufacturer" in turretDict else "",
+                            icon=turretDict["icon"] if "icon" in turretDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmojiFromStr(turretDict["emoji"]) if "emoji" in turretDict else lib.emojis.dumbEmoji.EMPTY,
+                            techLevel=turretDict["techLevel"] if "techLevel" in turretDict else -1, builtIn=False)
