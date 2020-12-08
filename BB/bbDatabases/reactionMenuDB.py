@@ -1,5 +1,7 @@
 from ..reactionMenus import ReactionMenu, ReactionRolePicker, ReactionInventoryPicker, ReactionDuelChallengeMenu, ReactionPollMenu
 from .. import bbGlobals
+from discord import NotFound, HTTPException, Forbidden
+
 
 # ReactionMenu subclasses that cannot be saved to dictionary
 # TODO: change to a class-variable reference e.g menu.__class__.SAVEABLE
@@ -37,19 +39,22 @@ async def fromDict(dbDict : dict) -> ReactionMenuDB:
         if bbGlobals.client.get_channel(dbDict[msgID]["channel"]) is None:
             continue
         if "type" in dbDict[msgID]:
-            if dbDict[msgID]["type"] == "ReactionInventoryPicker":
-                newDB[int(msgID)] = ReactionInventoryPicker.fromDict(dbDict[msgID])
-                
-            elif dbDict[msgID]["type"] == "ReactionRolePicker":
-                newDB[int(msgID)] = await ReactionRolePicker.fromDict(dbDict[msgID])
+            try:
+                if dbDict[msgID]["type"] == "ReactionInventoryPicker":
+                    newDB[int(msgID)] = ReactionInventoryPicker.fromDict(dbDict[msgID])
+                    
+                elif dbDict[msgID]["type"] == "ReactionRolePicker":
+                    newDB[int(msgID)] = await ReactionRolePicker.fromDict(dbDict[msgID])
 
-            elif dbDict[msgID]["type"] == "ReactionDuelChallengeMenu":
+                elif dbDict[msgID]["type"] == "ReactionDuelChallengeMenu":
+                    continue
+
+                elif dbDict[msgID]["type"] == "ReactionPollMenu":
+                    newDB[int(msgID)] = await ReactionPollMenu.fromDict(dbDict[msgID])
+
+                else:
+                    newDB[int(msgID)] = ReactionMenu.fromDict(dbDict[msgID])
+            except (NotFound, HTTPException, Forbidden):
                 continue
-
-            elif dbDict[msgID]["type"] == "ReactionPollMenu":
-                newDB[int(msgID)] = await ReactionPollMenu.fromDict(dbDict[msgID])
-
-            else:
-                newDB[int(msgID)] = ReactionMenu.fromDict(dbDict[msgID])
     
     return newDB
