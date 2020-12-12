@@ -20,8 +20,12 @@ def writeJSON(dbFile : str, db : dict, prettyPrint=False):
 
     :param str dbFile: Path to the file which db should be written to
     :param dict db: The json-serializable dictionary to write
+    :param bool prettyPrint: When False, write minified JSON. When true, write JSON with basic pretty printing (indentation)
     """
-    txt = json.dumps(db)
+    if prettyPrint:
+        txt = json.dumps(db, indent=4, sort_keys=True)
+    else:
+        txt = json.dumps(db)
     f = open(dbFile, "w")
     txt = f.write(txt)
     f.close()

@@ -122,6 +122,7 @@ class bbModule(bbItem):
         :rtype: dict
         """
         itemDict = super(bbModule, self).toDict(**kwargs)
+        
         if not self.builtIn:
             if self.armour != 0.0:
                 itemDict["armour"] = self.armour
