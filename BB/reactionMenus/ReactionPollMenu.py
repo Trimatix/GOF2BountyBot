@@ -1,3 +1,4 @@
+from __future__ import annotations
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from .. import bbGlobals, lib
@@ -108,7 +109,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
     :vartype owningBBUser: bbUser
     """
     def __init__(self, msg : Message, pollOptions : dict, timeout : TimedTask.TimedTask, pollStarter : Union[User, Member] = None,
-            multipleChoice : bool = False, titleTxt : str = "", desc : str = "", col : Colour = Colour.default, footerTxt : str = "",
+            multipleChoice : bool = False, titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), footerTxt : str = "",
             img : str = "", thumb : str = "", icon : str = "", authorName : str = "", targetMember : Member = None,
             targetRole : Role = None, owningBBUser : bbUser.bbUser = None):
         """
@@ -170,46 +171,49 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
         return baseEmbed
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this menu to dictionary format for saving.
 
         :return: A dictionary containing all information needed to recreate this menu
         :rtype: dict
         """
-        baseDict = super(ReactionPollMenu, self).toDict()
+        baseDict = super(ReactionPollMenu, self).toDict(**kwargs)
         baseDict["multipleChoice"] = self.multipleChoice
         baseDict["owningBBUser"] = self.owningBBUser.id
         return baseDict
     
 
-async def fromDict(rmDict : dict) -> ReactionPollMenu:
-    """Reconstruct a ReactionPollMenu object from its dictionary-serialized representation - the opposite of ReactionPollMenu.toDict
+    @classmethod
+    def fromDict(cls, rmDict : dict, **kwargs) -> ReactionPollMenu:
+        """Reconstruct a ReactionPollMenu object from its dictionary-serialized representation - the opposite of ReactionPollMenu.toDict
 
-    :param dict rmDict: A dictionary containing all information needed to recreate the desired ReactionPollMenu
-    :return: A new ReactionPollMenu object as described in rmDict
-    :rtype: ReactionPollMenu
-    """
-    options = {}
-    for emojiName in rmDict["options"]:
-        emoji = lib.emojis.dumbEmojiFromStr(emojiName)
-        options[emoji] = ReactionMenu.DummyReactionMenuOption(rmDict["options"][emojiName], emoji)
+        :param dict rmDict: A dictionary containing all information needed to recreate the desired ReactionPollMenu
+        :return: A new ReactionPollMenu object as described in rmDict
+        :rtype: ReactionPollMenu
+        """
+        if "msg" in kwargs:
+            raise NameError("Required kwarg not given: msg")
+        msg = kwargs["msg"]
 
-    msg = await bbGlobals.client.get_guild(rmDict["guild"]).get_channel(rmDict["channel"]).fetch_message(rmDict["msg"])
+        options = {}
+        for emojiName in rmDict["options"]:
+            emoji = lib.emojis.dumbEmojiFromStr(emojiName)
+            options[emoji] = ReactionMenu.DummyReactionMenuOption(rmDict["options"][emojiName], emoji)
 
-    timeoutTT = None
-    if "timeout" in rmDict:
-        expiryTime = datetime.utcfromtimestamp(rmDict["timeout"])
-        bbGlobals.reactionMenusTTDB.scheduleTask(TimedTask.TimedTask(expiryTime=expiryTime, expiryFunction=printAndExpirePollResults, expiryFunctionArgs=msg.id))
+        timeoutTT = None
+        if "timeout" in rmDict:
+            expiryTime = datetime.utcfromtimestamp(rmDict["timeout"])
+            bbGlobals.reactionMenusTTDB.scheduleTask(TimedTask.TimedTask(expiryTime=expiryTime, expiryFunction=printAndExpirePollResults, expiryFunctionArgs=msg.id))
 
-    return ReactionPollMenu(msg, options, timeoutTT, multipleChoice=rmDict["multipleChoice"] if "multipleChoice" in rmDict else False,
-                                titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
-                                desc=rmDict["desc"] if "desc" in rmDict else "",
-                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.default(),
-                                footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
-                                img=rmDict["img"] if "img" in rmDict else "",
-                                thumb=rmDict["thumb"] if "thumb" in rmDict else "",
-                                icon=rmDict["icon"] if "icon" in rmDict else "",
-                                authorName=rmDict["authorName"] if "authorName" in rmDict else "",
-                                targetMember=msg.guild.get_member(rmDict["targetMember"]) if "targetMember" in rmDict else None,
-                                targetRole=msg.guild.get_role(rmDict["targetRole"]) if "targetRole" in rmDict else None,
-                                owningBBUser=bbGlobals.usersDB.getUser(rmDict["owningBBUser"]) if "owningBBUser" in rmDict and bbGlobals.usersDB.userIDExists(rmDict["owningBBUser"]) else None)
+        return ReactionPollMenu(msg, options, timeoutTT, multipleChoice=rmDict["multipleChoice"] if "multipleChoice" in rmDict else False,
+                                    titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
+                                    desc=rmDict["desc"] if "desc" in rmDict else "",
+                                    col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.blue(),
+                                    footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
+                                    img=rmDict["img"] if "img" in rmDict else "",
+                                    thumb=rmDict["thumb"] if "thumb" in rmDict else "",
+                                    icon=rmDict["icon"] if "icon" in rmDict else "",
+                                    authorName=rmDict["authorName"] if "authorName" in rmDict else "",
+                                    targetMember=msg.guild.get_member(rmDict["targetMember"]) if "targetMember" in rmDict else None,
+                                    targetRole=msg.guild.get_role(rmDict["targetRole"]) if "targetRole" in rmDict else None,
+                                    owningBBUser=bbGlobals.usersDB.getUser(rmDict["owningBBUser"]) if "owningBBUser" in rmDict and bbGlobals.usersDB.userIDExists(rmDict["owningBBUser"]) else None)

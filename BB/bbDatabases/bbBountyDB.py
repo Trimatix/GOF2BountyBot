@@ -1,28 +1,29 @@
+from __future__ import annotations
+
 from ..bbObjects.bounties import bbBounty
 from typing import List
+from ..baseClasses import bbSerializable
+from ..bbConfig import bbConfig
 
-class bbBountyDB:
+
+class bbBountyDB(bbSerializable.bbSerializable):
     """A database of bbObject.bounties.bbBounty.
     Bounty criminal names and faction names must be unique within the database.
     Faction names are case sensitive.
 
-    TODO: Give factions and maxBountiesPerFaction default values
+    TODO: Give factions default values
     
     :var bounties: Dictionary of faction name to list of bounties
     :vartype bounties: dict
     :var factions: List of str faction names, to be used in self.bounties keys
     :vartype factions: list
-    :var maxBountiesPerFaction: Maximum number of bounties that can be contained in each bounty's list in self.bounties[faction]
-    :vartype maxBountiesPerFaction: int
     :var latestBounty: The most recent bounty to be added to this db.As of writing, this is only used when scaling new bounty delays by the most recent length
     :vartype latestBounty: bbObjects.bounties.bbBounty.Bounty
     """
 
-
-    def __init__(self, factions: str, maxBountiesPerFaction: int):
+    def __init__(self, factions: str):
         """
         :param list factions: list of unique faction names useable in this db's bounties
-        :param int maxBountiesPerFaction: The maximum number of bounties each faction may store
         """
         # Dictionary of faction name : list of bounties
         # TODO: add bbCriminal.__hash__, and change bbBountyDB.bounties into dict of faction:{criminal:bounty}
@@ -33,11 +34,7 @@ class bbBountyDB:
         for fac in factions:
             self.bounties[fac] = []
 
-        # the maximum length a faction's self.bounties dict can be
-        self.maxBountiesPerFaction = maxBountiesPerFaction
-
         self.latestBounty = None
-
 
     
     def addFaction(self, faction: str):
@@ -52,7 +49,6 @@ class bbBountyDB:
         # Initialise faction's database to empty
         self.bounties[faction] = []
 
-
     
     def removeFaction(self, faction: str):
         """Remove a faction name from this DB
@@ -65,7 +61,6 @@ class bbBountyDB:
             raise KeyError("Unrecognised faction: " + faction)
         # Remove the faction name from the DB
         self.bounties.pop(faction)
-
 
     
     def clearBounties(self, faction : str = None):
@@ -89,7 +84,6 @@ class bbBountyDB:
         self.latestBounty = None
 
     
-    
     def getFactions(self) -> List[bbBounty.Bounty]:
         """Get the list of useable faction names for this DB
 
@@ -97,7 +91,6 @@ class bbBountyDB:
         :rtype: list
         """
         return self.factions
-
 
     
     def factionExists(self, faction : str) -> bool:
@@ -111,7 +104,6 @@ class bbBountyDB:
         return faction in self.getFactions()
 
     
-    
     def getFactionBounties(self, faction : str) -> List[bbBounty.Bounty]:
         """Get a list of all bbBounty objects stored under a given faction.
 
@@ -121,7 +113,6 @@ class bbBountyDB:
         :rtype: list
         """
         return self.bounties[faction]
-
 
     
     def getFactionNumBounties(self, faction : str) -> int:
@@ -133,7 +124,6 @@ class bbBountyDB:
         :rtype: int
         """
         return len(self.bounties[faction])
-
 
     
     def getBounty(self, name : str, faction : str = None) -> bbBounty.Bounty:
@@ -168,7 +158,6 @@ class bbBountyDB:
         raise KeyError("Bounty not found: " + name)
 
 
-    
     def canMakeBounty(self) -> bbBounty.Bounty:
         """Check whether this DB has space for more bounties
 
@@ -183,7 +172,6 @@ class bbBountyDB:
 
         # No faction found with space remaining
         return False
-    
 
     
     def factionCanMakeBounty(self, faction : str) -> bool:
@@ -194,8 +182,7 @@ class bbBountyDB:
         :return: True if the requested faction has space for more bounties, False otherwise
         :rtype: bool
         """
-        return self.getFactionNumBounties(faction) < self.maxBountiesPerFaction
-
+        return self.getFactionNumBounties(faction) < bbConfig.maxBountiesPerFaction
 
     
     def bountyNameExists(self, name : str, faction : str = None) -> bool:
@@ -217,7 +204,6 @@ class bbBountyDB:
         return True
 
     
-    
     def bountyObjExists(self, bounty : bbBounty.Bounty) -> bool:
         """Check whether a given bbBounty object exists in the DB.
         Existence is checked by the bbBounty __eq__ method, which is currently object equality (i.e physical memory address equality)
@@ -238,7 +224,6 @@ class bbBountyDB:
     # def getBountyNameIndex(self, name, faction=None):
     #     return self.getBountyObjIndex(self.getBounty(name, faction=faction))
     """
-
 
     
     def addBounty(self, bounty : bbBounty.Bounty):
@@ -263,7 +248,6 @@ class bbBountyDB:
         self.latestBounty = bounty
 
     
-    
     def removeBountyName(self, name : str, faction : str = None):
         """Find the bbBounty associated with the given bbCriminal name or alias, and remove it from the database.
         This process is much more efficient if the faction under which the bounty is wanted is given.
@@ -272,7 +256,6 @@ class bbBountyDB:
         :param str faction: The faction whose bounties to check for the named criminal. Use None if the faction is not known. (default None)
         """
         self.removeBountyObj(self.getBounty(name, faction=faction))
-
 
     
     def removeBountyObj(self, bounty : bbBounty.Bounty):
@@ -284,25 +267,7 @@ class bbBountyDB:
             self.latestBounty = None
         self.bounties[bounty.faction].remove(bounty)
 
-    
-    
-    def toDict(self) -> dict:
-        """Serialise the bbBountyDB and all of its bbBounties into dictionary format.
 
-        :return: A dictionary containing all data needed to recreate this bbBountyDB.
-        :rtype: dict
-        """
-        data = {}
-        # Serialise all factions into name : list of serialised bbBounty
-        for fac in self.getFactions():
-            data[fac] = []
-            # Serialise all of the current faction's bounties into dictionary
-            for bounty in self.getFactionBounties(fac):
-                data[fac].append(bounty.toDict())
-        return data
-
-
-    
     def hasBounties(self, faction : str = None) -> bool:
         """Check whether the given faction has any bounties stored, or if ANY faction has bounties stored if none is given.
         
@@ -324,7 +289,6 @@ class bbBountyDB:
         # no bounties found, return false
         return False 
 
-
     
     def __str__(self) -> str:
         """Return summarising info about this bbBountyDB in string format.
@@ -336,22 +300,39 @@ class bbBountyDB:
         return "<bbBountyDB: " + str(len(self.bounties)) + " factions>"
 
 
+    def toDict(self, **kwargs) -> dict:
+        """Serialise the bbBountyDB and all of its bbBounties into dictionary format.
 
-def fromDict(bountyDBDict : dict, maxBountiesPerFaction : int, dbReload : bool = False) -> bbBountyDB:
-    """Build a bbBountyDB object from a serialised dictionary format - the reverse of bbBountyDB.toDict.
+        :return: A dictionary containing all data needed to recreate this bbBountyDB.
+        :rtype: dict
+        """
+        data = {}
+        # Serialise all factions into name : list of serialised bbBounty
+        for fac in self.getFactions():
+            data[fac] = []
+            # Serialise all of the current faction's bounties into dictionary
+            for bounty in self.getFactionBounties(fac):
+                data[fac].append(bounty.toDict(**kwargs))
+        return data
 
-    :param dict bountyDBDict: a dictionary representation of the bbBountyDB, to convert to an object
-    :param int maxBountiesPerFaction: The maximum number of bounties each faction may store
-    :param bool dbReload: Whether or not this bbBountyDB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
-    
-    :return: The new bbBountyDB object
-    :rtype: bbBountyDB
-    """
-    # Instanciate a new bbBountyDB
-    newDB = bbBountyDB(bountyDBDict.keys(), maxBountiesPerFaction)
-    # Iterate over all factions in the DB
-    for fac in bountyDBDict.keys():
-        # Convert each serialised bbBounty into a bbBounty object
-        for bountyDict in bountyDBDict[fac]:
-            newDB.addBounty(bbBounty.fromDict(bountyDict, dbReload=dbReload))
-    return newDB
+
+    @classmethod
+    def fromDict(cls, bountyDBDict : dict, **kwargs) -> bbBountyDB:
+        """Build a bbBountyDB object from a serialised dictionary format - the reverse of bbBountyDB.toDict.
+
+        :param dict bountyDBDict: a dictionary representation of the bbBountyDB, to convert to an object
+        :param bool dbReload: Whether or not this bbBountyDB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
+        
+        :return: The new bbBountyDB object
+        :rtype: bbBountyDB
+        """
+        dbReload = kwargs["dbReload"] if "dbReload" in kwargs else False
+
+        # Instanciate a new bbBountyDB
+        newDB = bbBountyDB(bountyDBDict.keys())
+        # Iterate over all factions in the DB
+        for fac in bountyDBDict.keys():
+            # Convert each serialised bbBounty into a bbBounty object
+            for bountyDict in bountyDBDict[fac]:
+                newDB.addBounty(bbBounty.Bounty.fromDict(bountyDict, dbReload=dbReload))
+        return newDB

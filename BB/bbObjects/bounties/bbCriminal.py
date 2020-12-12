@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List
 
 from ...bbConfig import bbData
-from .. import bbAliasable
+from ...baseClasses import bbAliasable
 from ..items import bbShip
 
 class Criminal (bbAliasable.Aliasable):
@@ -59,8 +59,7 @@ class Criminal (bbAliasable.Aliasable):
         self.builtIn = builtIn
 
         if ship is not None:
-            self.ship = bbShip.fromDict(ship.toDict())
-            self.hasShip = True
+            self.copyShip(ship)
         else:
             self.hasShip = False
 
@@ -107,7 +106,7 @@ class Criminal (bbAliasable.Aliasable):
         """
         if self.hasShip:
             raise RuntimeError("CRIM_COPYSH_HASSH: Attempted to copyShip on a Criminal that already has an active ship")
-        self.ship = bbShip.fromDict(ship.toDict())
+        self.ship = bbShip.bbShip.fromDict(ship.toDict())
         self.hasShip = True
         
 
@@ -130,7 +129,7 @@ class Criminal (bbAliasable.Aliasable):
         return hash(repr(self))
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this criminal into dictionary format, for saving to file.
         
         :return: A dictionary containing all data necessary to replicate this object
@@ -142,15 +141,17 @@ class Criminal (bbAliasable.Aliasable):
             return {"builtIn":False, "isPlayer": self.isPlayer, "name":self.name, "icon":self.icon, "faction":self.faction, "aliases":self.aliases, "wiki":self.wiki}
 
 
-def fromDict(crimDict : dict, builtIn : bool = False) -> Criminal:
-    """Factory function that will either provide a reference to a builtIn bbCriminal if a builtIn criminal is requested, or construct a new bbCriminal object from the provided data.
+    @classmethod
+    def fromDict(cls, crimDict : dict, **kwargs) -> Criminal:
+        """Factory function that will either provide a reference to a builtIn bbCriminal if a builtIn criminal is requested, or construct a new bbCriminal object from the provided data.
 
-    :param dict crimDict: A dictionary containing all data necessary to construct the desired bbCriminal. If the criminal is builtIn, this need only be their name, "builtIn": True, and possibly the equipped ship.
-    :return: The requested bbCriminal object reference
-    :rtype: bbCriminal
-    """
-    if "builtIn" in crimDict:
-        if crimDict["builtIn"]:
-            return bbData.builtInCriminalObjs[crimDict["name"]]
-        return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=crimDict["builtIn"] or builtIn)
-    return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)
+        :param dict crimDict: A dictionary containing all data necessary to construct the desired bbCriminal. If the criminal is builtIn, this need only be their name, "builtIn": True, and possibly the equipped ship.
+        :return: The requested bbCriminal object reference
+        :rtype: bbCriminal
+        """
+        builtIn = kwargs["builtIn"] if "builtIn" in kwargs else False
+        if "builtIn" in crimDict:
+            if crimDict["builtIn"]:
+                return bbData.builtInCriminalObjs[crimDict["name"]]
+            return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=crimDict["builtIn"] or builtIn)
+        return Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)

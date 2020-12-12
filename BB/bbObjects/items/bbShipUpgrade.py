@@ -3,8 +3,10 @@ from __future__ import annotations
 
 from ...bbConfig import bbData
 from . import bbShip
+from ...baseClasses import bbSerializable
 
-class bbShipUpgrade:
+
+class bbShipUpgrade(bbSerializable.bbSerializable):
     """A ship upgrade that can be applied to bbShips, but cannot be unapplied again.
     There is no technical reason why a ship upgrade could not be removed, but from a game design perspective, it adds extra value and strategy to the decision to apply an upgrade.
 
@@ -137,7 +139,7 @@ class bbShipUpgrade:
         return ship.value * self.shipToUpgradeValueMult
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this bbShipUpgrade into a dictionary for saving to file
         Contains all information needed to reconstruct this upgrade. If the upgrade is builtIn, this includes only the upgrade name.
 
@@ -243,30 +245,31 @@ class bbShipUpgrade:
         return (stats[:-2] + "*") if stats != "*" else "*No effect*"
 
 
-def fromDict(upgradeDict : dict) -> bbShipUpgrade:
-    """Factory function reconstructing a bbShipUpgrade object from its dictionary-serialized representation. The opposite of bbShipUpgrade.toDict
-    If the upgrade is builtIn, return a reference to the pre-constructed upgrade object.
+    @classmethod
+    def fromDict(cls, upgradeDict : dict, **kwargs) -> bbShipUpgrade:
+        """Factory function reconstructing a bbShipUpgrade object from its dictionary-serialized representation. The opposite of bbShipUpgrade.toDict
+        If the upgrade is builtIn, return a reference to the pre-constructed upgrade object.
 
-    :param dict upgradeDict: A dictionary containing all information needed to produce the required bbShipUpgrade
-    :return: A bbShipUpgrade object as described by upgradeDict
-    :rtype: bbShipUpgrade
-    """
-    if upgradeDict["builtIn"]:
-        return bbData.builtInUpgradeObjs[upgradeDict["name"]]
-    else:
-        return bbShipUpgrade(upgradeDict["name"], upgradeDict["shipToUpgradeValueMult"], armour=upgradeDict["armour"] if "armour" in upgradeDict else 0.0,
-                                armourMultiplier=upgradeDict["armourMultiplier"] if "armourMultiplier" in upgradeDict else 1.0,
-                                cargo=upgradeDict["cargo"] if "cargo" in upgradeDict else 0,
-                                cargoMultiplier=upgradeDict["cargoMultiplier"] if "cargoMultiplier" in upgradeDict else 1.0,
-                                numSecondaries=upgradeDict["numSecondaries"] if "numSecondaries" in upgradeDict else 0,
-                                numSecondariesMultiplier=upgradeDict["numSecondariesMultiplier"] if "numSecondariesMultiplier" in upgradeDict else 1.0,
-                                handling=upgradeDict["handling"] if "handling" in upgradeDict else 0,
-                                handlingMultiplier=upgradeDict["handlingMultiplier"] if "handlingMultiplier" in upgradeDict else 1.0,
-                                maxPrimaries=upgradeDict["maxPrimaries"] if "maxPrimaries" in upgradeDict else 0,
-                                maxPrimariesMultiplier=upgradeDict["maxPrimariesMultiplier"] if "maxPrimariesMultiplier" in upgradeDict else 1.0,
-                                maxTurrets=upgradeDict["maxTurrets"] if "maxTurrets" in upgradeDict else 0,
-                                maxTurretsMultiplier=upgradeDict["maxTurretsMultiplier"] if "maxTurretsMultiplier" in upgradeDict else 1.0,
-                                maxModules=upgradeDict["maxModules"] if "maxModules" in upgradeDict else 0,
-                                maxModulesMultiplier=upgradeDict["maxModulesMultiplier"] if "maxModulesMultiplier" in upgradeDict else 1.0,
-                                vendor=upgradeDict["vendor"] if "vendor" in upgradeDict else "",
-                                builtIn=False)
+        :param dict upgradeDict: A dictionary containing all information needed to produce the required bbShipUpgrade
+        :return: A bbShipUpgrade object as described by upgradeDict
+        :rtype: bbShipUpgrade
+        """
+        if upgradeDict["builtIn"]:
+            return bbData.builtInUpgradeObjs[upgradeDict["name"]]
+        else:
+            return bbShipUpgrade(upgradeDict["name"], upgradeDict["shipToUpgradeValueMult"], armour=upgradeDict["armour"] if "armour" in upgradeDict else 0.0,
+                                    armourMultiplier=upgradeDict["armourMultiplier"] if "armourMultiplier" in upgradeDict else 1.0,
+                                    cargo=upgradeDict["cargo"] if "cargo" in upgradeDict else 0,
+                                    cargoMultiplier=upgradeDict["cargoMultiplier"] if "cargoMultiplier" in upgradeDict else 1.0,
+                                    numSecondaries=upgradeDict["numSecondaries"] if "numSecondaries" in upgradeDict else 0,
+                                    numSecondariesMultiplier=upgradeDict["numSecondariesMultiplier"] if "numSecondariesMultiplier" in upgradeDict else 1.0,
+                                    handling=upgradeDict["handling"] if "handling" in upgradeDict else 0,
+                                    handlingMultiplier=upgradeDict["handlingMultiplier"] if "handlingMultiplier" in upgradeDict else 1.0,
+                                    maxPrimaries=upgradeDict["maxPrimaries"] if "maxPrimaries" in upgradeDict else 0,
+                                    maxPrimariesMultiplier=upgradeDict["maxPrimariesMultiplier"] if "maxPrimariesMultiplier" in upgradeDict else 1.0,
+                                    maxTurrets=upgradeDict["maxTurrets"] if "maxTurrets" in upgradeDict else 0,
+                                    maxTurretsMultiplier=upgradeDict["maxTurretsMultiplier"] if "maxTurretsMultiplier" in upgradeDict else 1.0,
+                                    maxModules=upgradeDict["maxModules"] if "maxModules" in upgradeDict else 0,
+                                    maxModulesMultiplier=upgradeDict["maxModulesMultiplier"] if "maxModulesMultiplier" in upgradeDict else 1.0,
+                                    vendor=upgradeDict["vendor"] if "vendor" in upgradeDict else "",
+                                    builtIn=False)

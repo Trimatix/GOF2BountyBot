@@ -1,3 +1,4 @@
+from __future__ import annotations
 from . import bbToolItem
 from .... import lib
 from ....bbConfig import bbConfig, bbData
@@ -6,8 +7,10 @@ from ..bbShip import bbShip
 from discord import Message
 from .... import bbGlobals
 import asyncio
+from ..bbItem import spawnableItem
 
 
+@spawnableItem
 class bbShipSkinTool(bbToolItem.bbToolItem):
     """A tool that can be used to apply a skin to a ship.
     This item is named after the skin it applies.
@@ -132,21 +135,27 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         return bbShipSkinTool
 
     
-    def toDict(self):
-        data = super().toDict()
-        data["skin"] = self.shipSkin.toDict()
+    def toDict(self, **kwargs):
+        """
+        
+        :param bool saveType: When true, include the string name of the object type in the output.
+        """
+        data = super().toDict(**kwargs)
+        data["name"] = self.shipSkin.name
+        data["skin"] = self.shipSkin.toDict(**kwargs)
         return data
         # raise RuntimeError("Attempted to save a non-builtIn bbShipSkinTool")
             
 
-def fromDict(toolDict : dict) -> bbShipSkinTool:
-    """Construct a bbShipSkinTool from its dictionary-serialized representation.
+    @classmethod
+    def fromDict(cls, toolDict : dict, **kwargs) -> bbShipSkinTool:
+        """Construct a bbShipSkinTool from its dictionary-serialized representation.
 
-    :param dict toolDict: A dictionary containing all information needed to construct the required bbShipSkinTool. Critically, a name, type, and builtIn specifier.
-    :return: A new bbShipSkinTool object as described in toolDict
-    :rtype: bbShipSkinTool
-    """
-    shipSkin = bbData.builtInShipSkins[toolDict["name"].lower()] if toolDict["builtIn"] else bbShipSkin.fromDict(toolDict["skin"])
-    if toolDict["builtIn"]:
-        return bbData.builtInToolObjs[lib.stringTyping.shipSkinNameToToolName(shipSkin.name)]
-    return bbShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=False)
+        :param dict toolDict: A dictionary containing all information needed to construct the required bbShipSkinTool. Critically, a name, type, and builtIn specifier.
+        :return: A new bbShipSkinTool object as described in toolDict
+        :rtype: bbShipSkinTool
+        """
+        shipSkin = bbData.builtInShipSkins[toolDict["name"]] if toolDict["builtIn"] else bbShipSkin.bbShipSkin.fromDict(toolDict["skin"])
+        if toolDict["builtIn"]:
+            return bbData.builtInToolObjs[lib.stringTyping.shipSkinNameToToolName(shipSkin.name)]
+        return bbShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=False)

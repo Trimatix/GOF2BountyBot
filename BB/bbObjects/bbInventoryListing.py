@@ -1,6 +1,12 @@
-class bbInventoryListing():
+from typing import Type
+from ..baseClasses import bbSerializable
+
+
+class bbInventoryListing(bbSerializable.bbSerializable):
     """A listing representing an object and a quantity of that object stored.
-    This class is type unaware and, as such, does not have an associated fromDict function.
+    To ensure serializability, inventorylistings can only store bbSerializable objects.
+
+    bbSerializable deserializing is not defined in the general case, so bbInventoryListing does not have a general case fromDict function.
 
     :var item: The item this inventory listing represents
     :var count: The quantity of item stored
@@ -12,6 +18,8 @@ class bbInventoryListing():
         :param item: The item to store
         :param int quantity: The amount of item to store (Default 0)
         """
+        if not isinstance(item, bbSerializable.bbSerializable):
+            raise TypeError("bbInventoryListing can only store bbSerializables to ensure serializability. Given: " + type(item).__name__)
         self.item = item
         self.count = count
 
@@ -65,11 +73,15 @@ class bbInventoryListing():
         return str(self.count) + " in inventory. " + str(self.item.value) + " credits each"
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Return a dictionary description of this inventory listing.
-        ⚠ This function assumes that the object storeed in the listing has a toDict method.
 
         :return: A dictionary identifying the object stored, and the amount
         :rtype: int
         """
-        return {"item": self.item.toDict(), "count": self.count}
+        return {"item": self.item.toDict(**kwargs), "count": self.count}
+
+    
+    @classmethod
+    def fromDict(cls, listingDict : dict, **kwargs):
+        raise NotImplementedError("Cannot fromDict on bbInventoryListing in the general case. Instead instance bbInventoryListing with your fromDict-ed item object.")

@@ -2,7 +2,10 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
+from ..bbItem import spawnableItem
 
+
+@spawnableItem
 class bbSignatureModule(bbModule.bbModule):
     """A module allowing a the owner to disguise themselves as a member of th faction that manufactured this signature. 
     """
@@ -42,25 +45,29 @@ class bbSignatureModule(bbModule.bbModule):
         return bbSignatureModule
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
         No extra attributes implemented by this class, so just eses the base bbModule toDict method.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbSignatureModule, self).toDict()
+        itemDict = super(bbSignatureModule, self).toDict(**kwargs)
         return itemDict
 
 
-def fromDict(moduleDict : dict) -> bbSignatureModule:
-    """Factory function building a new module object from the information in the provided dictionary. The opposite of this class's toDict function.
+    @classmethod
+    def fromDict(cls, moduleDict : dict, **kwargs):
+        """Factory function building a new module object from the information in the provided dictionary. The opposite of this class's toDict function.
 
-    :param moduleDict: A dictionary containing all information needed to construct the requested module
-    :return: The new module object as described in moduleDict
-    :rtype: dict
-    """
-    return bbSignatureModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], moduleDict["manufacturer"],
-                            value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
-                            icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
-                            emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)
+        :param moduleDict: A dictionary containing all information needed to construct the requested module
+        :return: The new module object as described in moduleDict
+        :rtype: dict
+        """
+        if "builtIn" in moduleDict and moduleDict["builtIn"]:
+            return bbData.builtInModuleObjs[moduleDict["name"]]
+            
+        return bbSignatureModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], moduleDict["manufacturer"],
+                                value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
+                                icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
+                                emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)

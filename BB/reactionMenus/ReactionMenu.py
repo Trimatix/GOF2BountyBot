@@ -5,10 +5,11 @@ import inspect
 from discord import Embed, Colour, NotFound, HTTPException, Forbidden, Member, User, Message, Role
 from ..bbConfig import bbConfig
 from .. import bbGlobals, lib
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from typing import Union, Dict, List
 import asyncio
 from types import FunctionType
+from ..baseClasses import bbSerializable
 
 
 async def deleteReactionMenu(menuID : int):
@@ -80,7 +81,7 @@ async def markExpiredMenuAndRemoveOptions(menuID : int):
     await markExpiredMenu(menuID)
 
 
-class ReactionMenuOption:
+class ReactionMenuOption(bbSerializable.bbSerializable):
     """An abstract class representing an option in a reaction menu.
     Reaction menu options must have a name and emoji. They may optionally have a function to call when added,
     a function to call when removed, and arguments for each.
@@ -180,11 +181,11 @@ class ReactionMenuOption:
         :return: A hash of this menu option
         :rtype: int
         """
-        return hash(repr(self)) 
+        return hash(repr(self))
 
 
     @abstractmethod
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this menu option into dictionary format for saving to file.
         This is a base, abstract definition that does not encode option functionality (i.e function calls and arguments).
 
@@ -205,7 +206,12 @@ class ReactionMenuOption:
         :return: A dictionary containing rudimentary information about the menu option, to be used in conjunction with other type-specific information when reconstructing this menu option.
         :rtype: dict
         """
-        return {"name":self.name, "emoji": self.emoji.toDict()}
+        return {"name":self.name, "emoji": self.emoji.toDict(**kwargs)}
+
+
+    @classmethod
+    def fromDict(cls, data: dict, **kwargs):
+        raise NotImplementedError("Attempted to fromDict an unserializable menu option type: " + cls.__name__)
 
 
 class NonSaveableReactionMenuOption(ReactionMenuOption):
@@ -226,7 +232,7 @@ class NonSaveableReactionMenuOption(ReactionMenuOption):
         super(NonSaveableReactionMenuOption, self).__init__(name, emoji, addFunc=addFunc, addArgs=addArgs, removeFunc=removeFunc, removeArgs=removeArgs)
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Unimplemented.
         This class should only be used for reaction menu options that will not be saved to file.
 
@@ -247,7 +253,7 @@ class DummyReactionMenuOption(ReactionMenuOption):
         super(DummyReactionMenuOption, self).__init__(name, emoji)
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this menu option into dictionary format for saving to file.
         Since dummy reaction menu options have no on-toggle functionality, the resulting base dictionary contains all information needed to 
         reconstruct this option instance.
@@ -255,10 +261,10 @@ class DummyReactionMenuOption(ReactionMenuOption):
         :return: A dictionary containing all necessary information to reconstruct this option instance
         :rtype: dict
         """
-        return super(DummyReactionMenuOption, self).toDict()
+        return super(DummyReactionMenuOption, self).toDict(**kwargs)
 
 
-class ReactionMenu:
+class ReactionMenu(bbSerializable.bbSerializable):
     """A versatile class implementing emoji reaction menus.
     This class can be used as-is, to create unsaveable reaction menus of any type, with vast possibilities for behaviour.
     ReactionMenu need only be extended in the following cases:
@@ -315,7 +321,7 @@ class ReactionMenu:
     saveable = False
 
     def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, 
-                    titleTxt : str = "", desc : str ="", col : Colour = Colour.default, timeout : TimedTask = None,
+                    titleTxt : str = "", desc : str ="", col : Colour = Colour.blue(), timeout : TimedTask = None,
                     footerTxt : str = "", img : str = "", thumb : str = "", icon : str = "",
                     authorName : str = "", targetMember : Member = None, targetRole : Role = None):
         """
@@ -345,7 +351,7 @@ class ReactionMenu:
 
         self.titleTxt = titleTxt
         self.desc = desc
-        self.col = col if col is not None else Colour.default()
+        self.col = col if col is not None else Colour.blue()
         self.footerTxt = footerTxt
         self.img = img
         self.thumb = thumb
@@ -468,7 +474,7 @@ class ReactionMenu:
             await self.timeout.forceExpire()
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this ReactionMenu into dictionary format for saving to file.
         This is a base, concrete implementation that saves all information required to recreate a ReactionMenu instance;
         when extending ReactionMenu, you will likely wish to overload this method, using super.toDict as a base for your
@@ -479,7 +485,7 @@ class ReactionMenu:
         """
         optionsDict = {}
         for reaction in self.options:
-            optionsDict[reaction.sendable] = self.options[reaction].toDict()
+            optionsDict[reaction.sendable] = self.options[reaction].toDict(**kwargs)
 
         data = {"channel": self.msg.channel.id, "msg": self.msg.id, "options": optionsDict, "type": self.__class__.__name__, "guild": self.msg.channel.guild.id}
         
@@ -489,7 +495,7 @@ class ReactionMenu:
         if self.desc != "":
             data["desc"] = self.desc
 
-        if self.col != Colour.default():
+        if self.col != Colour.blue():
             data["col"] = self.col.to_rgb()
 
         if self.footerTxt != "":
@@ -519,6 +525,11 @@ class ReactionMenu:
         return data
 
 
+    @classmethod
+    def fromDict(cls, data: dict, **kwargs):
+        raise NotImplementedError("Attempted to fromDict an unserializable menu type: " + cls.__name__)
+
+
 class CancellableReactionMenu(ReactionMenu):
     """A simple ReactionMenu extension that adds an extra 'cancel' option to your given options dictionary.
     The 'cancel' option will call the menu's delete method. No extra restrictions beyond targetMember/targetRole are placed
@@ -533,7 +544,7 @@ class CancellableReactionMenu(ReactionMenu):
     :vartype cancelEmoji: lib.emojis.dumbEmoji
     """
     def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, cancelEmoji : lib.emojis.dumbEmoji = bbConfig.defaultCancelEmoji,
-                    titleTxt : str = "", desc : str = "", col : Colour = Colour.default, timeout : TimedTask = None, footerTxt : str = "", img : str = "", thumb : str = "",
+                    titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), timeout : TimedTask = None, footerTxt : str = "", img : str = "", thumb : str = "",
                     icon : str = "", authorName : str = "", targetMember : Member = None, targetRole : Role = None):
         """
         :param discord.Message msg: the message where this menu is embedded
@@ -557,7 +568,7 @@ class CancellableReactionMenu(ReactionMenu):
         super(CancellableReactionMenu, self).__init__(msg, options=options, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serializes the reaction menu to a dictionary representation.
         This currently does not add any information on top of ReactionMenu.toDict, but ensures that the cancel option
         is not included in the dictionary for space efficiency purposes.
@@ -567,7 +578,7 @@ class CancellableReactionMenu(ReactionMenu):
         :return: A dictionary containing information about this menu, to be used when configuring a recreation of this object.
         :rtype: dict
         """
-        baseDict = super(CancellableReactionMenu, self).toDict()
+        baseDict = super(CancellableReactionMenu, self).toDict(**kwargs)
         # TODO: Make sure the option is in there?
         del baseDict["options"][self.cancelEmoji.sendable]
 
@@ -580,7 +591,7 @@ class SingleUserReactionMenu(ReactionMenu):
     """
     def __init__(self, msg : Message, targetMember : Union[Member, User], timeoutSeconds : int,
                     options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, returnTriggers : List[lib.emojis.dumbEmoji] = [], 
-                    titleTxt : str = "", desc : str = "", col : Colour = Colour.default, footerTxt : str = "", img : str = "",
+                    titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), footerTxt : str = "", img : str = "",
                     thumb : str = "", icon : str = "", authorName : str = ""):
         """
         :param returnTriggers: List of menu options that trigger the returning of the menu

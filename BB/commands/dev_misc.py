@@ -31,8 +31,8 @@ async def dev_cmd_sleep(message : discord.Message, args : str, isDM : bool):
     if len(bbGlobals.currentRenders) > 0 and "-f" not in args:
         await message.channel.send(":x: A render is currently in progress!")	
     else:
-        await bbGlobals.client.bb_shutdown()
         await message.channel.send("zzzz....")
+        await bbGlobals.client.bb_shutdown()
 
 bbCommands.register("sleep", dev_cmd_sleep, 2, allowDM=True, useDoc=True)
 

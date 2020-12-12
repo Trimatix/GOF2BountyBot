@@ -112,17 +112,17 @@ class bbModule(bbItem):
         return bbModule
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this bbModule into dictionary format, for saving to file.
         This method should be overriden and used as a base in any modules that implement custom behaviour, outside of simple stat boosts.
         For an example of using this toDict implementation as a base for an overriden implementation, please see a bbModule class (e.g bbMiningDrillModule.py)
 
+        :param bool saveType: When true, include the string name of the object type in the output.
         :return: A dictionary containing all information needed to reconstruct this module. If the module is builtIn, this is only its name.
         :rtype: dict
         """
-        itemDict = super(bbModule, self).toDict()
-        itemDict["itemtype"] = "bbModule"
-        itemDict["type"] = type(self).__name__
+        itemDict = super(bbModule, self).toDict(**kwargs)
+        
         if not self.builtIn:
             if self.armour != 0.0:
                 itemDict["armour"] = self.armour
@@ -157,20 +157,21 @@ class bbModule(bbItem):
         return itemDict
 
 
-def fromDict(moduleDict : dict) -> bbModule:
-    """Factory function constructing a new bbModule object from a dictionary serialised representation - the opposite of bbModule.toDict.
-    This generic module factory function is unlikely to ever be called, your module type-specific fromDict should be used instead.
-    Except of course, in the case of custom-spawned, custom-typed modules which do not correspond to a BountyBot-known module type.
-    
-    :param dict moduleDict: A dictionary containing all information needed to construct the desired bbModule
-    :return: A new bbModule object as described in moduleDict
-    :rtype: bbModule
-    """
-    return bbModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], armour=moduleDict["armour"] if "armour" in moduleDict else 0,
-                    armourMultiplier=moduleDict["armourMultiplier"] if "armourMultiplier" in moduleDict else 1, shield=moduleDict["shield"] if "shield" in moduleDict else 0,
-                    shieldMultiplier=moduleDict["shieldMultiplier"] if "shieldMultiplier" in moduleDict else 1, dps=moduleDict["dps"] if "dps" in moduleDict else 0,
-                    dpsMultiplier=moduleDict["dpsMultiplier"] if "dpsMultiplier" in moduleDict else 1, cargo=moduleDict["cargo"] if "cargo" in moduleDict else 0,
-                    cargoMultiplier=moduleDict["cargoMultiplier"] if "cargoMultiplier" in moduleDict else 1, handling=moduleDict["handling"] if "handling" in moduleDict else 0,
-                    handlingMultiplier=moduleDict["handlingMultiplier"] if "handlingMultiplier" in moduleDict else 1, value=moduleDict["value"] if "value" in moduleDict else 0,
-                    wiki=moduleDict["wiki"] if "wiki" in moduleDict else "", manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
-                    emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)
+    @classmethod
+    def fromDict(cls, moduleDict : dict, **kwargs):
+        """Factory function constructing a new bbModule object from a dictionary serialised representation - the opposite of bbModule.toDict.
+        This generic module factory function is unlikely to ever be called, your module type-specific fromDict should be used instead.
+        Except of course, in the case of custom-spawned, custom-typed modules which do not correspond to a BountyBot-known module type.
+        
+        :param dict moduleDict: A dictionary containing all information needed to construct the desired bbModule
+        :return: A new bbModule object as described in moduleDict
+        :rtype: bbModule
+        """
+        return bbModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], armour=moduleDict["armour"] if "armour" in moduleDict else 0,
+                        armourMultiplier=moduleDict["armourMultiplier"] if "armourMultiplier" in moduleDict else 1, shield=moduleDict["shield"] if "shield" in moduleDict else 0,
+                        shieldMultiplier=moduleDict["shieldMultiplier"] if "shieldMultiplier" in moduleDict else 1, dps=moduleDict["dps"] if "dps" in moduleDict else 0,
+                        dpsMultiplier=moduleDict["dpsMultiplier"] if "dpsMultiplier" in moduleDict else 1, cargo=moduleDict["cargo"] if "cargo" in moduleDict else 0,
+                        cargoMultiplier=moduleDict["cargoMultiplier"] if "cargoMultiplier" in moduleDict else 1, handling=moduleDict["handling"] if "handling" in moduleDict else 0,
+                        handlingMultiplier=moduleDict["handlingMultiplier"] if "handlingMultiplier" in moduleDict else 1, value=moduleDict["value"] if "value" in moduleDict else 0,
+                        wiki=moduleDict["wiki"] if "wiki" in moduleDict else "", manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
+                        emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)

@@ -2,6 +2,7 @@ from . import bbToolItem, bbShipSkinTool, bbCrate
 from .. import bbShip, bbWeapon, bbModuleFactory, bbTurret
 from .... import lib
 
+
 def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
     """Construct a bbToolItem from its dictionary-serialized representation.
     This method decodes which tool constructor is appropriate based on the 'type' attribute of the given dictionary.
