@@ -33,7 +33,8 @@ class bbCrate(bbToolItem.bbToolItem):
             raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " + kwargs["callingBBUser"].__class__.__name__)
         
         callingBBUser = kwargs["callingBBUser"]
-        callingBBUser.inactiveTools.addItem(random.choice(self.itemPool))
+        newItem = random.choice(self.itemPool)
+        callingBBUser.getInventoryForItem(newItem).addItem(newItem)
         callingBBUser.inactiveTools.removeItem(self)
 
 
@@ -64,7 +65,7 @@ class bbCrate(bbToolItem.bbToolItem):
         else:
             if lib.emojis.dumbEmojiFromPartial(reactPL.emoji) == bbConfig.defaultAcceptEmoji:
                 newItem = random.choice(self.itemPool)
-                callingBBUser.inactiveTools.addItem(random.choice(self.itemPool))
+                callingBBUser.getInventoryForItem(newItem).addItem(newItem)
                 callingBBUser.inactiveTools.removeItem(self)
                 
                 return "🎉 Success! You got a " + newItem.name + "!"
@@ -79,6 +80,10 @@ class bbCrate(bbToolItem.bbToolItem):
         :rtype: str
         """
         return "*" + str(len(self.itemPool)) + " possible items*"
+
+
+    def getType(self):
+        return type(self)
 
     
     def toDict(self, **kwargs) -> dict:
