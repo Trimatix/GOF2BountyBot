@@ -8,6 +8,7 @@ from discord import Message
 from .... import bbGlobals
 import asyncio
 from ..bbItem import spawnableItem
+from ....reactionMenus.ConfirmationReactionMenu import InlineConfirmationMenu
 
 
 @spawnableItem
@@ -93,24 +94,18 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         if ship.name not in self.shipSkin.compatibleShips:
             return ":x: Your ship is not compatible with this skin! Please equip a different ship, or use `" + bbConfig.commandPrefix + "info skin " + self.name + "` to see what ships are compatible with this skin."
         
-        confirmMsg = await message.channel.send("Are you sure you want to apply the " + self.shipSkin.name + " skin to your " + ship.getNameAndNick() + "? Please react to this message to confirm:\n" + bbConfig.defaultAcceptEmoji.sendable + " : Yes\n" + bbConfig.defaultRejectEmoji.sendable + " : Cancel\n\n*This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + "seconds.*") 
+        callingBBUser = kwargs["callingBBUser"]
+        confirmMsg = await message.channel.send("Are you sure you want to apply the " + self.shipSkin.name + " skin to your " + ship.getNameAndNick() + "?") 
+        confirmation = await InlineConfirmationMenu(confirmMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds).doMenu()
         
-        def useConfirmCheck(reactPL):
-            return reactPL.message_id == confirmMsg.id and reactPL.user_id == message.author.id and lib.emojis.dumbEmojiFromPartial(reactPL.emoji) in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji]
-
-        try:
-            reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=useConfirmCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
-        except asyncio.TimeoutError:
-            await confirmMsg.edit(content="This menu has now expired. Please use `" + bbConfig.commandPrefix + "use` again.")
-        else:
-            if lib.emojis.dumbEmojiFromPartial(reactPL.emoji) == bbConfig.defaultAcceptEmoji:
-                ship.applySkin(self.shipSkin)
-                if self in callingBBUser.inactiveTools:
-                    callingBBUser.inactiveTools.removeItem(self)
-                
-                return "🎨 Success! Your skin has been applied."
-            else:
-                return "🛑 Skin application cancelled."
+        if bbConfig.defaultRejectEmoji in confirmation:
+            return "🛑 Skin application cancelled."
+        elif bbConfig.defaultAcceptEmoji in confirmation:
+            ship.applySkin(self.shipSkin)
+            if self in callingBBUser.inactiveTools:
+                callingBBUser.inactiveTools.removeItem(self)
+            
+            return "🎨 Success! Your skin has been applied."
 
 
     def statsStringShort(self) -> str:

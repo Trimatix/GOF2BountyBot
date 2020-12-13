@@ -66,7 +66,11 @@ class dumbEmoji:
         self.unicode = unicode
         self.isID = id != -1
         self.isUnicode = not self.isID
-        self.sendable = self.unicode if self.isUnicode else str(bbGlobals.client.get_emoji(self.id))
+        if id == 0:
+            self.sendable = ""
+            self.isID = False
+        else:
+            self.sendable = self.unicode if self.isUnicode else str(bbGlobals.client.get_emoji(self.id))
         if self.sendable == "None":
             # raise UnrecognisedCustomEmoji("Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id),self.id)
             bbLogger.log("dumbEmoji", "init", "Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id), trace=traceback.format_exc())
@@ -112,7 +116,7 @@ class dumbEmoji:
         :return: True of this emoji is semantically equal to the given emoji, False otherwise
         :rtype: bool
         """
-        return type(other) == dumbEmoji and self.isID == other.isID and (self.id == other.id or self.unicode == other.unicode)
+        return type(other) == dumbEmoji and self.sendable == other.sendable
 
     
     def __str__(self) -> str:
@@ -125,10 +129,7 @@ class dumbEmoji:
 
 
 # 'static' object representing an empty/lack of emoji
-dumbEmoji.EMPTY = dumbEmoji(unicode=" ")
-dumbEmoji.EMPTY.isUnicode = False
-dumbEmoji.EMPTY.unicode = ""
-dumbEmoji.EMPTY.sendable = ""
+dumbEmoji.EMPTY = dumbEmoji(id=0)
 
 
 def dumbEmojiFromDict(emojiDict : dict) -> dumbEmoji:
@@ -144,7 +145,10 @@ def dumbEmojiFromDict(emojiDict : dict) -> dumbEmoji:
     if type(emojiDict) == dumbEmoji:
         return emojiDict
     if "id" in emojiDict:
-        return dumbEmoji(id=emojiDict["id"])
+        if emojiDict["id"] == 0:
+            return dumbEmoji.EMPTY
+        else:
+            return dumbEmoji(id=emojiDict["id"])
     else:
         return dumbEmoji(unicode=emojiDict["unicode"])
 

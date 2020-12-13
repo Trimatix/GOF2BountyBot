@@ -409,7 +409,7 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
         layerIndices = [i for i in range(1, shipData["textureRegions"] + 1)]
 
         layersPickerMsg = await message.channel.send("** **")
-        layersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.skinApplyConfirmTimeoutSeconds, numRegions=shipData["textureRegions"])
+        layersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, numRegions=shipData["textureRegions"])
         pickedLayers = []
         menuOutput = await layersPickerMenu.doMenu()
         if bbConfig.spiralEmoji in menuOutput:
@@ -430,7 +430,7 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
         remainingIndices = [i for i in layerIndices if i not in pickedLayers]
 
         if remainingIndices:
-            disabledLayersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.skinApplyConfirmTimeoutSeconds, possibleRegions=remainingIndices, desc="Would you like to disable any regions?")
+            disabledLayersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, possibleRegions=remainingIndices, desc="Would you like to disable any regions?")
             menuOutput = await disabledLayersPickerMenu.doMenu()
             if bbConfig.spiralEmoji in menuOutput:
                 disabledLayers = remainingIndices
@@ -451,9 +451,9 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
             return newMessage.author is message.author and (newMessage.content.lower().startswith(bbConfig.commandPrefix + "cancel") or len(newMessage.attachments) > 0)
 
         for regionNum in pickedLayers:
-            nextLayerMsg = await message.channel.send("Please send your image for texture region #" + str(regionNum) + ", or `" + bbConfig.commandPrefix + "cancel` to cancel the render, within " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")
+            nextLayerMsg = await message.channel.send("Please send your image for texture region #" + str(regionNum) + ", or `" + bbConfig.commandPrefix + "cancel` to cancel the render, within " + str(bbConfig.toolUseConfirmTimeoutSeconds) + " seconds.")
             try:
-                imgMsg = await bbGlobals.client.wait_for("message", check=showmeAdditionalMessageCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
+                imgMsg = await bbGlobals.client.wait_for("message", check=showmeAdditionalMessageCheck, timeout=bbConfig.toolUseConfirmTimeoutSeconds)
             except asyncio.TimeoutError:
                 await nextLayerMsg.edit(content="This menu has now expired. Please try the command again.")
             else:
