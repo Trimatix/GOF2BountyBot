@@ -8,6 +8,7 @@ from ... import lib
 
 
 subClassNames = {}
+nameSubClasses = {}
 
 
 class bbItem(bbAliasable.Aliasable):
@@ -153,6 +154,8 @@ class bbItem(bbAliasable.Aliasable):
 def spawnableItem(cls):
     if not issubclass(cls, bbItem):
         raise TypeError("Invalid use of spawnableItem decorator: " + cls.__name__ + " is not a bbItem subtype")
+    if cls not in nameSubClasses:
+        nameSubClasses[cls] = cls.__name__
     if cls.__name__ not in subClassNames:
         subClassNames[cls.__name__] = cls
     return cls
@@ -165,3 +168,11 @@ def spawnItem(data : dict) -> bbItem:
         raise KeyError("Unrecognised item type: " + str(data["type"]))
     
     return subClassNames[data["type"]].fromDict(data)
+
+
+def isSpawnableItemClass(cls):
+    return issubclass(cls, bbItem) and cls in nameSubClasses
+
+
+def isSpawnableItemInstance(o):
+    return isinstance(o, bbItem) and type(o) in nameSubClasses
