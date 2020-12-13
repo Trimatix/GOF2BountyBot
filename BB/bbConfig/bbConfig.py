@@ -426,7 +426,7 @@ pollMenuDefaultTimeout = {"minutes": 5}
 expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
-skinApplyConfirmTimeoutSeconds = 60
+toolUseConfirmTimeoutSeconds = 60
 homeGuildTransferConfirmTimeoutSeconds = 60
 
 
