@@ -658,6 +658,17 @@ class bbUser(bbSerializable.bbSerializable):
         self.guildTransferCooldownEnd = now + lib.timeUtil.timeDeltaFromDict(bbConfig.homeGuildTransferCooldown)
 
 
+    def getInventoryForItem(self, item):
+        if isinstance(item, bbShip.bbShip):
+            return self.inactiveShips
+        elif isinstance(item, bbWeapon.bbWeapon):
+            return self.inactiveWeapons
+        elif isinstance(item, bbTurret.bbTurret):
+            return self.inactiveTurrets
+        elif isinstance(item, bbToolItem.bbToolItem):
+            return self.inactiveTools
+
+
     def __str__(self) -> str:
         """Get a short string summary of this bbUser. Currently only contains the user ID and home guild ID.
 
