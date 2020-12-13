@@ -6,6 +6,7 @@ import asyncio
 from ....bbConfig import bbConfig
 from .. import bbItem
 from ....logging import bbLogger
+from ....reactionMenus.ConfirmationReactionMenu import InlineConfirmationMenu
 
 
 @bbItem.spawnableItem
@@ -52,25 +53,17 @@ class bbCrate(bbToolItem.bbToolItem):
             raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " + kwargs["callingBBUser"].__class__.__name__)
         
         callingBBUser = kwargs["callingBBUser"]
+        confirmMsg = await message.channel.send("Are you sure you want to open this crate?") 
+        confirmation = await InlineConfirmationMenu(confirmMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds).doMenu()
 
-        confirmMsg = await message.channel.send("Are you sure you want to open this crate? Please react to this message to confirm:\n" + bbConfig.defaultAcceptEmoji.sendable + " : Yes\n" + bbConfig.defaultRejectEmoji.sendable + " : Cancel\n\n*This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + "seconds.*") 
-        
-        def useConfirmCheck(reactPL):
-            return reactPL.message_id == confirmMsg.id and reactPL.user_id == message.author.id and lib.emojis.dumbEmojiFromPartial(reactPL.emoji) in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji]
-
-        try:
-            reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=useConfirmCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
-        except asyncio.TimeoutError:
-            await confirmMsg.edit(content="This menu has now expired. Please use `" + bbConfig.commandPrefix + "use` again.")
-        else:
-            if lib.emojis.dumbEmojiFromPartial(reactPL.emoji) == bbConfig.defaultAcceptEmoji:
-                newItem = random.choice(self.itemPool)
-                callingBBUser.getInventoryForItem(newItem).addItem(newItem)
-                callingBBUser.inactiveTools.removeItem(self)
-                
-                return "🎉 Success! You got a " + newItem.name + "!"
-            else:
-                return "🛑 Crate open cancelled."
+        if bbConfig.defaultRejectEmoji in confirmation:
+            return "🛑 Crate open cancelled."
+        elif bbConfig.defaultAcceptEmoji in confirmation:
+            newItem = random.choice(self.itemPool)
+            callingBBUser.getInventoryForItem(newItem).addItem(newItem)
+            callingBBUser.inactiveTools.removeItem(self)
+            
+            return "🎉 Success! You got a " + newItem.name + "!"
 
     
     def statsStringShort(self) -> str:
