@@ -116,7 +116,7 @@ class dumbEmoji:
         :return: True of this emoji is semantically equal to the given emoji, False otherwise
         :rtype: bool
         """
-        return type(other) == dumbEmoji and self.isID == other.isID and (self.id == other.id or self.unicode == other.unicode)
+        return type(other) == dumbEmoji and self.sendable == other.sendable
 
     
     def __str__(self) -> str:
