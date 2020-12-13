@@ -4,8 +4,11 @@ from .... import lib, bbGlobals
 from discord import Message
 import asyncio
 from ....bbConfig import bbConfig
+from .. import bbItem
+from ....logging import bbLogger
 
 
+@bbItem.spawnableItem
 class bbCrate(bbToolItem.bbToolItem):
     def __init__(self, itemPool, name : str = "", value : int = 0, wiki : str = "",
             manufacturer : str = "", icon : str = "", emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY,
@@ -14,7 +17,10 @@ class bbCrate(bbToolItem.bbToolItem):
         super().__init__(name, [], value=value, wiki=wiki,
             manufacturer=manufacturer, icon=icon, emoji=emoji,
             techLevel=techLevel, builtIn=builtIn)
-
+        
+        for item in itemPool:
+            if not isinstance(item, bbItem.bbItem):
+                raise RuntimeError("Attempted to create a bbCrate with something other than a spawnableItem in its itemPool.")
         self.itemPool = itemPool
 
 
@@ -85,15 +91,34 @@ class bbCrate(bbToolItem.bbToolItem):
         return bbCrate
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this tool into dictionary format.
         This step of implementation adds a 'type' string indicating the name of this tool's subclass.
 
         :return: The default bbItem toDict implementation, with an added 'type' field
         :rtype: dict
         """
-        data = super().toDict()
+        data = super().toDict(**kwargs)
         data["itemPool"] = []
         for item in self.itemPool:
             data["itemPool"].append(item.toDict())
         return data
+
+
+    @classmethod
+    def fromDict(cls, crateDict, **kwargs):
+        itemPool = []
+        if "itemPool" in crateDict:
+            for itemDict in crateDict["itemPool"]:
+                itemPool.append(bbItem.spawnItem(itemDict))
+        else:
+            bbLogger.log("bbCrate", "fromDict", "fromDict-ing a bbCrate with no itemPool.")
+        
+        return bbCrate(itemPool, name=crateDict["name"] if "name" in crateDict else "",
+            value=crateDict["value"] if "value" in crateDict else 0,
+            wiki=crateDict["wiki"] if "wiki" in crateDict else "",
+            manufacturer=crateDict["manufacturer"] if "manufacturer" in crateDict else "",
+            icon=crateDict["icon"] if "icon" in crateDict else "",
+            emoji=lib.emojis.dumbEmojiFromDict(crateDict["emoji"]) if "emoji" in crateDict else lib.emojis.dumbEmoji.EMPTY,
+            techLevel=crateDict["techLevel"] if "techLevel" in crateDict else -1,
+            builtIn=crateDict["builtIn"] if "builtIn" in crateDict else False)
