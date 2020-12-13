@@ -75,5 +75,7 @@ class bbToolItem(bbItem.bbItem):
         :return: The default bbItem toDict implementation, with an added 'type' field
         :rtype: dict
         """
-        return super().toDict(**kwargs)
+        data = super().toDict(**kwargs)
+        data["itemType"] = "bbToolItem"
+        return data
     
