@@ -19,7 +19,7 @@ class bbCrate(bbToolItem.bbToolItem):
             techLevel=techLevel, builtIn=builtIn)
         
         for item in itemPool:
-            if not isinstance(item, bbItem.bbItem):
+            if not bbItem.isSpawnableItemInstance(item):
                 raise RuntimeError("Attempted to create a bbCrate with something other than a spawnableItem in its itemPool.")
         self.itemPool = itemPool
 
@@ -80,16 +80,6 @@ class bbCrate(bbToolItem.bbToolItem):
         """
         return "*" + str(len(self.itemPool)) + " possible items*"
 
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The bbItem class
-        :rtype: type
-        """
-        return bbCrate
-
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this tool into dictionary format.
@@ -99,18 +89,37 @@ class bbCrate(bbToolItem.bbToolItem):
         :rtype: dict
         """
         data = super().toDict(**kwargs)
+        if "saveType" not in kwargs:
+            kwargs["saveType"] = True
+
         data["itemPool"] = []
         for item in self.itemPool:
-            data["itemPool"].append(item.toDict())
+            data["itemPool"].append(item.toDict(**kwargs))
         return data
 
 
     @classmethod
     def fromDict(cls, crateDict, **kwargs):
+        skipInvalidItems = kwargs["skipInvalidItems"] if "skipInvalidItems" in kwargs else False
+
         itemPool = []
         if "itemPool" in crateDict:
             for itemDict in crateDict["itemPool"]:
-                itemPool.append(bbItem.spawnItem(itemDict))
+                errorStr = ""
+                errorType = ""
+                if "type" not in itemDict:
+                    errorStr = "Invalid itemPool entry, missing type. Data: " + itemDict
+                    errorType = "NO_TYPE"
+                elif itemDict["type"] not in bbItem.subClassNames:
+                    errorStr = "Invalid itemPool entry, attempted to add something other than a spawnableItem. Data: " + itemDict
+                    errorType = "BAD_TYPE"
+                if errorStr:
+                    if skipInvalidItems:
+                        bbLogger.log("bbCrate", "fromDict", errorStr, eventType=errorType)
+                    else:
+                        raise ValueError(errorStr)
+                else:
+                    itemPool.append(bbItem.spawnItem(itemDict))
         else:
             bbLogger.log("bbCrate", "fromDict", "fromDict-ing a bbCrate with no itemPool.")
         
