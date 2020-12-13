@@ -95,8 +95,8 @@ class bbUser(bbSerializable.bbSerializable):
                     inactiveTools : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbToolItem.bbToolItem),
                     lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
                     duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[UserAlerts.UABase or bool]] = {},
-                    bountyWinsToday : int = 0, dailyBountyWinsReset : datetime.datetime = datetime.utcnow(), pollOwned : bool = False,
-                    homeGuildID : int = -1, guildTransferCooldownEnd : datetime.datetime = datetime.utcnow()):
+                    bountyWinsToday : int = 0, dailyBountyWinsReset : datetime = None, pollOwned : bool = False,
+                    homeGuildID : int = -1, guildTransferCooldownEnd : datetime = None):
         """
         :param int id: The user's unique ID. The same as their unique discord ID.
         :param int credits: The amount of credits (currency) this user has (Default 0)
@@ -153,6 +153,11 @@ class bbUser(bbSerializable.bbSerializable):
             bountyWins = int(bountyWins)
         elif type(bountyWins) != int:
             raise TypeError("bountyWins must be int, given " + str(type(bountyWins)))
+
+        if dailyBountyWinsReset is None:
+            dailyBountyWinsReset = datetime.utcnow()
+        if guildTransferCooldownEnd is None:
+            guildTransferCooldownEnd = datetime.utcnow()
 
         self.id = id
         self.credits = credits
@@ -629,7 +634,7 @@ class bbUser(bbSerializable.bbSerializable):
         return self.homeGuildID != -1
 
 
-    def canTransferGuild(self, now : datetime = datetime.utcnow()) -> bool:
+    def canTransferGuild(self, now : datetime = None) -> bool:
         """Decide whether this user is allowed to transfer their homeGuildID.
         This is decided based on the time passed since their last guild transfer.
 
@@ -637,6 +642,8 @@ class bbUser(bbSerializable.bbSerializable):
         :return: True if this user has no home guild, or their guild transfer cooldown has completed, false otherwise
         :rtype: bool
         """
+        if now is None:
+            now = datetime.utcnow()
         return (not self.hasHomeGuild()) or now > self.guildTransferCooldownEnd
 
     
