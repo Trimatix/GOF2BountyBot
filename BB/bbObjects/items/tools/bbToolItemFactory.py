@@ -13,10 +13,10 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
     :raise NameError: When toolDict does not contain a 'type' attribute.
     """
 
-    itemConstructors = {"bbShip": bbShip.fromDict,
-                    "bbWeapon": bbWeapon.fromDict,
+    itemConstructors = {"bbShip": bbShip.bbShip.fromDict,
+                    "bbWeapon": bbWeapon.bbWeapon.fromDict,
                     "bbModule": bbModuleFactory.fromDict,
-                    "bbTurret": bbTurret.fromDict,
+                    "bbTurret": bbTurret.bbTurret.fromDict,
                     "bbToolItem": fromDict}
 
     def crateFromDict(crateDict):
@@ -25,7 +25,10 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
             raise RuntimeError()
         itemPool = []
         for itemDict in crateDict["itemPool"]:
-            itemPool.append(itemConstructors[itemDict["itemType"]](itemDict))
+            if "itemType" in itemDict:
+                itemPool.append(itemConstructors[itemDict["itemType"]](itemDict))
+            else:
+                itemPool.append(itemConstructors[itemDict["type"]](itemDict))
         
         return bbCrate.bbCrate(itemPool, name=crateDict["name"] if "name" in crateDict else "",
             value=crateDict["value"] if "value" in crateDict else 0,
@@ -36,7 +39,7 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
             techLevel=crateDict["techLevel"] if "techLevel" in crateDict else -1,
             builtIn=crateDict["builtIn"] if "builtIn" in crateDict else False)
 
-    toolTypeConstructors = {"bbShipSkinTool": bbShipSkinTool.fromDict,
+    toolTypeConstructors = {"bbShipSkinTool": bbShipSkinTool.bbShipSkinTool.fromDict,
                         "bbCrate": crateFromDict}
     
     if "type" not in toolDict:
