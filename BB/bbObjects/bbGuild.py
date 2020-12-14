@@ -648,10 +648,19 @@ class bbGuild(bbSerializable.bbSerializable):
                 bountiesDB = bbBountyDB.bbBountyDB.fromDict(guildDict["bountiesDB"], dbReload=dbReload)
             else:
                 bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions)
+
+        if "shopDisabled" in guildDict and guildDict["shopDisabled"]:
+            print(id,"shop disabled")
+            shop = None
+        else:
+            if "shop" in guildDict:
+                shop = bbShop.bbShop.fromDict(guildDict["shop"])
+            else:
+                shop = bbShop.bbShop()
         
 
         return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel,
-                        shop=bbShop.bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
+                        shop=shop, shopDisabled=shop is None,
                         bountyBoardChannel=BountyBoardChannel.BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
                         alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0,
                         bountiesDisabled=guildDict["bountiesDisabled"] if "bountiesDisabled" in guildDict else False)
