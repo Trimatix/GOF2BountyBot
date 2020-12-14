@@ -168,6 +168,7 @@ class Bounty(bbSerializable.bbSerializable):
         :param bool dbReload: Give True if this bounty is being created during bot bootup, False otherwise. This currently toggles whether the passed bounty is checked for existence or not. (Default False)
         """
         dbReload = kwargs["dbReload"] if "dbReload" in kwargs else False
+
         return Bounty(dbReload=dbReload,
                         criminalObj=bbCriminal.Criminal.fromDict(bounty["criminal"]), 
                         config=bbBountyConfig.BountyConfig(faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], rewardPerSys=bounty["rewardPerSys"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))

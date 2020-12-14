@@ -164,13 +164,12 @@ class Criminal (bbAliasable.Aliasable):
         :return: The requested bbCriminal object reference
         :rtype: bbCriminal
         """
-        builtIn = kwargs["builtIn"] if "builtIn" in kwargs else False
+        builtIn = (kwargs["builtIn"] if "builtIn" in kwargs else False) or (crimDict["builtIn"] if "builtIn" in crimDict else False)
 
-        if "builtIn" in crimDict:
-            if crimDict["builtIn"]:
-                crimObj = bbData.builtInCriminalObjs[crimDict["name"]]
-            crimObj = Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=crimDict["builtIn"] or builtIn)
-        crimObj = Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)
+        if builtIn:
+            crimObj = bbData.builtInCriminalObjs[crimDict["name"]]
+        else:
+            crimObj = Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)
 
         if "activeShip" in crimDict and not crimObj.hasShip:
             crimObj.equipShip(bbShip.bbShip.fromDict(crimDict["activeShip"]))
