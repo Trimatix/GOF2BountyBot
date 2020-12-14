@@ -650,7 +650,6 @@ class bbGuild(bbSerializable.bbSerializable):
                 bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions)
 
         if "shopDisabled" in guildDict and guildDict["shopDisabled"]:
-            print(id,"shop disabled")
             shop = None
         else:
             if "shop" in guildDict:
