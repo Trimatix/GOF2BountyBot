@@ -15,7 +15,7 @@ from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .bbObjects import bbShipSkin
 from .bbObjects.bounties import bbCriminal, bbSystem, bbBountyConfig, bbBounty
 from .bbObjects.items import bbModuleFactory, bbShipUpgrade, bbTurret, bbWeapon
-from .bbObjects.items.tools import bbShipSkinTool, bbToolItemFactory
+from .bbObjects.items.tools import bbShipSkinTool, bbToolItemFactory, bbCrate
 from .scheduling import TimedTask
 from .bbDatabases import bbGuildDB, bbUserDB, HeirarchicalCommandsDB, reactionMenuDB
 from .scheduling import TimedTaskHeap
@@ -334,6 +334,7 @@ async def on_ready():
         toolName = lib.stringTyping.shipSkinNameToToolName(shipSkin.name)
         if toolName not in bbData.builtInToolObjs:
             bbData.builtInToolObjs[toolName] = bbShipSkinTool.bbShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=True)
+            bbData.shipSkinToolsBySkin[shipSkin] = bbData.builtInToolObjs[toolName]
 
 
     ##### SORT ITEMS BY TECHLEVEL #####
@@ -367,6 +368,22 @@ async def on_ready():
         for shipName in bbData.shipKeysByTL[shipTL]:
             print(" " + shipName + ",",end="")
         print()
+
+
+    bbData.levelUpCratesByTL = [None for level in range(bbConfig.minTechLevel, bbConfig.maxTechLevel+1)]
+    # generate bbCrates for bbShipSkinTools for each player bounty hunter level up
+    for level in range(bbConfig.minTechLevel, bbConfig.maxTechLevel+1):
+        itemPool = []
+        shipSkins = {}
+        for shipName in bbData.shipKeysByTL[level-1]:
+            if "compatibleSkins" in bbData.builtInShipData[shipName]:
+                for skinName in bbData.builtInShipData[shipName]["compatibleSkins"]:
+                    if bbData.builtInShipSkins[skinName] not in shipSkins:
+                        shipSkins[bbData.builtInShipSkins[skinName]] = None
+        
+        itemPool = [bbData.shipSkinToolsBySkin[skin] for skin in shipSkins]
+        bbData.levelUpCratesByTL[level-1] = bbCrate.bbCrate(itemPool, "Level " + str(level) + " skins crate", techLevel=level, builtIn=True, value=level * 5000)
+        
 
 
 
