@@ -17,6 +17,7 @@ async def printAndExpirePollResults(msgID : int):
 
     :param int msgID: The id of the discord message containing the menu to expire
     """
+    print("printAndExpirePollResults",msgID)
     menu = bbGlobals.reactionMenusDB[msgID]
     menuMsg = await menu.msg.channel.fetch_message(menu.msg.id)
     results = {}
@@ -191,7 +192,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
         :return: A new ReactionPollMenu object as described in rmDict
         :rtype: ReactionPollMenu
         """
-        if "msg" in kwargs:
+        if "msg" not in kwargs:
             raise NameError("Required kwarg not given: msg")
         msg = kwargs["msg"]
 

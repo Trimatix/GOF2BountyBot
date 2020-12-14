@@ -389,16 +389,17 @@ class bbBountyDB(bbSerializable.bbSerializable):
         :return: A dictionary containing all data needed to recreate this bbBountyDB.
         :rtype: dict
         """
-        data = {"escapedCriminals": []}
+        data = {"escaped": {}}
         # Serialise all factions into name : list of serialised bbBounty
         for fac in self.getFactions():
+            data["escaped"][fac] = []
             data[fac] = []
             # Serialise all of the current faction's bounties into dictionary
             for bounty in self.getFactionBounties(fac):
                 data[fac].append(bounty.toDict(**kwargs))
 
             for crim in self.escapedCriminals[fac]:
-                data["escapedCriminals"].append([crim.toDict(), self.escapedCriminalTimeouts[crim]])
+                data["escaped"][fac].append({"criminal": crim.toDict(), "timeout": self.escapedCriminalTimeouts[crim]})
         return data
 
 
@@ -418,9 +419,11 @@ class bbBountyDB(bbSerializable.bbSerializable):
         newDB = bbBountyDB(bountyDBDict.keys())
         # Iterate over all factions in the DB
         for fac in bountyDBDict.keys():
-            if fac == "escapedCriminals":
-                for crim in bountyDBDict[fac]:
-                    newDB.addEscapedCriminal(bbCriminal.Criminal.fromDict(crim[0]), crim[1])
+            if fac == "escaped":
+                for escapedFac in bountyDBDict[fac]:
+                    for crim in bountyDBDict[fac][escapedFac]:
+                        crim[0]["faction"] = escapedFac
+                        newDB.addEscapedCriminal(bbCriminal.Criminal.fromDict(crim[0]), crim[1])
             else:
                 # Convert each serialised bbBounty into a bbBounty object
                 for bountyDict in bountyDBDict[fac]:
