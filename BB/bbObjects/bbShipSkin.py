@@ -22,7 +22,7 @@ def _saveShip(ship):
 
 
 class bbShipSkin(bbSerializable.bbSerializable):
-    def __init__(self, name : str, textureRegions : int, shipRenders : Dict[str, str], path : str, designer : str, wiki : str = "", disabledRegions : List[int] = []):
+    def __init__(self, name : str, textureRegions : List[int], shipRenders : Dict[str, str], path : str, designer : str, wiki : str = "", disabledRegions : List[int] = []):
         self.name = name
         self.textureRegions = textureRegions
         self.compatibleShips = list(shipRenders.keys())
@@ -75,8 +75,9 @@ class bbShipSkin(bbSerializable.bbSerializable):
             
             # if not os.path.isfile(renderPath):
             textureFiles = {0: self.path + os.sep + "1.jpg"}
-            for i in range(self.textureRegions):
-                textureFiles[i+1] = self.path + os.sep + str(i+2) + ".jpg"
+            for textureNum in self.textureRegions:
+                if textureNum <= shipData["textureRegions"]:
+                    textureFiles[textureNum] = self.path + os.sep + str(textureNum + 1) + ".jpg"
             
             regionsToDisable = []
             if "textureRegions" in shipData and shipData["textureRegions"] > 0:
