@@ -1,3 +1,4 @@
+from __future__ import annotations
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from .. import bbGlobals, lib
@@ -82,7 +83,7 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
         await DuelRequest.rejectDuel(self.duelChallenge, self.msg, bbGlobals.client.get_user(self.duelChallenge.sourceBBUser.id), bbGlobals.client.get_user(self.duelChallenge.targetBBUser.id))
 
 
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """⚠ ReactionDuelChallengeMenus are not currently saveable. Do not use this method.
         Dummy method, once implemented this method will serialize this reactionMenu to dictionary format.
 
@@ -91,40 +92,10 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
         :raise NotImplementedError: Always.
         """
         raise NotImplementedError("Attempted to call toDict on a non-saveable reaction menu")
-        baseDict = super(ReactionDuelChallengeMenu, self).toDict()
+        baseDict = super(ReactionDuelChallengeMenu, self).toDict(**kwargs)
         return baseDict
 
-
-async def fromDict(rmDict : dict) -> ReactionDuelChallengeMenu:
-    """⚠ ReactionDuelChallengeMenus are not currently saveable. Do not use this method.
-    When implemented, this function will construct a new ReactionDuelChallengeMenu from a dictionary-serialized representation - The opposite of ReactionDuelChallengeMenu.toDict.
-
-    :param dict rmDict: A dictionary containg all information needed to construct the required ReactionDuelChallengeMenu
-    :raise NotImplementedError: Always.
-    """
-    raise NotImplementedError("Attempted to call fromDict on a non-saveable reaction menu")
-    dcGuild = bbGlobals.client.get_guild(rmDict["guild"])
-    msg = await dcGuild.get_channel(rmDict["channel"]).fetch_message(rmDict["msg"])
-
-    reactionRoles = {}
-    for reaction in rmDict["options"]:
-        reactionRoles[lib.emojis.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
-
-    timeoutTT = None
-    if "timeout" in rmDict:
-        expiryTime = datetime.utcfromtimestamp(rmDict["timeout"])
-        bbGlobals.reactionMenusTTDB.scheduleTask(TimedTask.TimedTask(expiryTime=expiryTime, expiryFunction=ReactionMenu.removeEmbedAndOptions, expiryFunctionArgs=msg.id))
-
-
-    return ReactionDuelChallengeMenu(msg, reactionRoles, dcGuild,
-                                titleTxt=rmDict["titleTxt"] if "titleTxt" in rmDict else "",
-                                desc=rmDict["desc"] if "desc" in rmDict else "",
-                                col=Colour.from_rgb(rmDict["col"][0], rmDict["col"][1], rmDict["col"][2]) if "col" in rmDict else Colour.blue(),
-                                footerTxt=rmDict["footerTxt"] if "footerTxt" in rmDict else "",
-                                img=rmDict["img"] if "img" in rmDict else "",
-                                thumb=rmDict["thumb"] if "thumb" in rmDict else "",
-                                icon=rmDict["icon"] if "icon" in rmDict else "",
-                                authorName=rmDict["authorName"] if "authorName" in rmDict else "",
-                                timeout=timeoutTT,
-                                targetMember=dcGuild.get_member(rmDict["targetMember"]) if "targetMember" in rmDict else None,
-                                targetRole=dcGuild.get_role(rmDict["targetRole"]) if "targetRole" in rmDict else None)
+    
+    @classmethod
+    def fromDict(cls, data: dict, **kwargs) -> ReactionDuelChallengeMenu:
+        raise NotImplementedError("Attempted to call fromDict on a non-saveable reaction menu")

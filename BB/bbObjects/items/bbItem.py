@@ -1,10 +1,15 @@
 # Typing imports
 from __future__ import annotations
-from typing import List
+from typing import List, Type
 
-from .. import bbAliasable
+from ...baseClasses import bbAliasable
 from abc import abstractmethod
 from ... import lib
+
+
+subClassNames = {}
+nameSubClasses = {}
+
 
 class bbItem(bbAliasable.Aliasable):
     """A game item, with a value, a manufacturer, a wiki page, an icon, an emoji, and a tech level.
@@ -63,7 +68,7 @@ class bbItem(bbAliasable.Aliasable):
         self.hasIcon = icon != ""
 
         self.emoji = emoji
-        self.hasEmoji = emoji != ""
+        self.hasEmoji = emoji is not None and emoji != lib.emojis.dumbEmoji.EMPTY
 
         self.value = value
         self.shopSpawnRate = 0
@@ -105,17 +110,36 @@ class bbItem(bbAliasable.Aliasable):
 
 
     @abstractmethod
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this item into dictionary format, for saving to file.
         This base implementation should be used in bbItem implementations, and custom attributes saved into it.
 
+        :param bool saveType: When true, include the string name of the object type in the output.
         :return: A dictionary containing all information needed to reconstruct this item. If the item is builtIn, this is only its name.
         :rtype: dict
         """
-        if self.builtIn:
-            return {"name": self.name, "builtIn": True}
+        if "saveType" in kwargs:
+            saveType = kwargs["saveType"]
+            del kwargs["saveType"]
         else:
-            return {"name": self.name, "aliases": self.aliases, "value":self.value, "wiki":self.wiki, "manufacturer":self.manufacturer, "icon":self.icon, "emoji":self.emoji.toDict(), "techLevel":self.techLevel, "builtIn":False}
+            saveType = False
+
+        if self.builtIn:
+            data = {"name": self.name, "builtIn": True}
+        else:
+            data = super().toDict(**kwargs)
+            data["value"] = self.value
+            data["wiki"] = self.wiki
+            data["manufacturer"] = self.manufacturer
+            data["icon"] = self.icon
+            data["emoji"] = self.emoji.toDict(**kwargs)
+            data["techLevel"] = self.techLevel
+            data["builtIn"] = False
+        
+        if saveType:
+            data["type"] = type(self).__name__
+
+        return data
 
     
     def __hash__(self) -> int:
@@ -125,3 +149,30 @@ class bbItem(bbAliasable.Aliasable):
         :rtype: int
         """
         return hash(repr(self))
+
+
+def spawnableItem(cls):
+    if not issubclass(cls, bbItem):
+        raise TypeError("Invalid use of spawnableItem decorator: " + cls.__name__ + " is not a bbItem subtype")
+    if cls not in nameSubClasses:
+        nameSubClasses[cls] = cls.__name__
+    if cls.__name__ not in subClassNames:
+        subClassNames[cls.__name__] = cls
+    return cls
+
+
+def spawnItem(data : dict) -> bbItem:
+    if "type" not in data or data["type"] == "":
+        raise NameError("Not given a type")
+    elif data["type"] not in subClassNames:
+        raise KeyError("Unrecognised item type: " + str(data["type"]))
+    
+    return subClassNames[data["type"]].fromDict(data)
+
+
+def isSpawnableItemClass(cls):
+    return issubclass(cls, bbItem) and cls in nameSubClasses
+
+
+def isSpawnableItemInstance(o):
+    return isinstance(o, bbItem) and type(o) in nameSubClasses

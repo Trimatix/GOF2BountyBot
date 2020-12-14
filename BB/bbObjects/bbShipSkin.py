@@ -4,6 +4,8 @@ from ..shipRenderer import shipRenderer
 from .. import lib
 from discord import File
 from typing import Dict
+from ..baseClasses import bbSerializable
+
 
 def _saveShip(ship):
     shipData = bbData.builtInShipData[ship]
@@ -19,7 +21,7 @@ def _saveShip(ship):
     shipData["path"] = shipPath
 
 
-class bbShipSkin:
+class bbShipSkin(bbSerializable.bbSerializable):
     def __init__(self, name : str, textureRegions : int, shipRenders : Dict[str, str], path : str, designer : str, wiki : str = ""):
         self.name = name
         self.textureRegions = textureRegions
@@ -38,15 +40,15 @@ class bbShipSkin:
         self.hasWiki = wiki != ""
 
 
-    def toDict(self):
+    def toDict(self, **kwargs) -> dict:
         data = {"name": self.name, "textureRegions": self.textureRegions, "ships": self.shipRenders, "designer": self.designer}
         if self.hasWiki:
             data["wiki"] = self.wiki
         return data
 
 
-    def _save(self):
-        lib.jsonHandler.writeJSON(self.path + os.sep + "META.json", self.toDict(), prettyPrint=True)
+    def _save(self, **kwargs):
+        lib.jsonHandler.writeJSON(self.path + os.sep + "META.json", self.toDict(**kwargs), prettyPrint=True)
 
 
     async def addShip(self, ship, rendersChannel):
@@ -66,10 +68,10 @@ class bbShipSkin:
             # emojiTexPath = _outputSkinFile + "_emoji.jpg"
             
             # if not os.path.isfile(renderPath):
-            textureFiles = [self.path + os.sep + "1.jpg"]
+            textureFiles = {0: self.path + os.sep + "1.jpg"}
             for i in range(self.textureRegions):
-                textureFiles.append(self.path + os.sep + str(i+2) + ".jpg")
-            await shipRenderer.renderShip(self.name, shipData["path"], shipData["model"], textureFiles, bbConfig.skinRenderIconResolution[0], bbConfig.skinRenderIconResolution[1])
+                textureFiles[i+1] = self.path + os.sep + str(i+2) + ".jpg"
+            await shipRenderer.renderShip(self.name, shipData["path"], shipData["model"], textureFiles, [], bbConfig.skinRenderIconResolution[0], bbConfig.skinRenderIconResolution[1])
             # await shipRenderer.renderShip(self.name + "_emoji", shipData["path"], shipData["model"], [texPath], bbConfig.skinRenderEmojiResolution[0], bbConfig.skinRenderEmojiResolution[1])
             # os.remove(emojiTexPath)
 
@@ -116,7 +118,8 @@ class bbShipSkin:
         self._save()
 
 
-def fromDict(skinDict):
-    if skinDict["name"] in bbData.builtInShipSkins:
-        return bbData.builtInShipSkins[skinDict["name"]]
-    return bbShipSkin(skinDict["name"], skinDict["textureRegions"], skinDict["ships"], skinDict["path"], skinDict["designer"], skinDict["wiki"] if "wiki" in skinDict else "")
+    @classmethod
+    def fromDict(cls, skinDict, **kwargs):
+        if skinDict["name"] in bbData.builtInShipSkins:
+            return bbData.builtInShipSkins[skinDict["name"]]
+        return bbShipSkin(skinDict["name"], skinDict["textureRegions"], skinDict["ships"], skinDict["path"], skinDict["designer"], skinDict["wiki"] if "wiki" in skinDict else "")

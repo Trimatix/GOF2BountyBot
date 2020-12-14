@@ -1,7 +1,10 @@
 # CURRENTLY UNUSED FILE
+from __future__ import annotations
 from ....bbDatabases import bbBountyDB
+from ....baseClasses import bbSerializable
 
-class BountyBoard:
+
+class BountyBoard(bbSerializable.bbSerializable):
     """A single message that acts as a duplicate of the output of $bounties, except it is continuously updated with new and completed bounties.
 
     :var msgID: The id of the message to continuously update
@@ -19,7 +22,7 @@ class BountyBoard:
         self.bountiesDB = bountiesDB
 
     
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialise this BountyBoard into dictionary format for saving to file
 
         :return: A dictionary containing all data needed to reload this BountyBoard
@@ -28,11 +31,12 @@ class BountyBoard:
         return {"msgID": self.msgID}
 
 
-def fromDict(bountyBoardDict : dict) -> BountyBoard:
-    """Factory function constructing a BountyBoard from the data contained in the given dictionary. The opposite of BountyBoard.toDict
+    @classmethod
+    def fromDict(bountyBoardDict : dict, **kwargs) -> BountyBoard:
+        """Factory function constructing a BountyBoard from the data contained in the given dictionary. The opposite of BountyBoard.toDict
 
-    :param dict bountyBoardDict: A dict containing all information needed to reconstruct the desired BountyBoard
-    :return: The new BountyBoard object
-    :rtype: BountyBoard
-    """
-    return BountyBoard(bountyBoardDict["msgID"])
+        :param dict bountyBoardDict: A dict containing all information needed to reconstruct the desired BountyBoard
+        :return: The new BountyBoard object
+        :rtype: BountyBoard
+        """
+        return BountyBoard(bountyBoardDict["msgID"])
