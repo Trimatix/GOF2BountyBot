@@ -12,8 +12,11 @@ from ....reactionMenus.ConfirmationReactionMenu import InlineConfirmationMenu
 @bbItem.spawnableItem
 class bbCrate(bbToolItem.bbToolItem):
     def __init__(self, itemPool, name : str = "", value : int = 0, wiki : str = "",
-            manufacturer : str = "", icon : str = "", emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY,
+            manufacturer : str = "", icon : str = bbConfig.defaultCrateIcon, emoji : lib.emojis.dumbEmoji = None,
             techLevel : int = -1, builtIn : bool = False):
+
+        if emoji is None:
+            emoji = bbConfig.defaultCrateEmoji
 
         super().__init__(name, [], value=value, wiki=wiki,
             manufacturer=manufacturer, icon=icon, emoji=emoji,
