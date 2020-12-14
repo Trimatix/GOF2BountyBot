@@ -3,7 +3,7 @@ import os
 from ..shipRenderer import shipRenderer
 from .. import lib
 from discord import File
-from typing import Dict
+from typing import Dict, List
 from ..baseClasses import bbSerializable
 
 
@@ -22,7 +22,7 @@ def _saveShip(ship):
 
 
 class bbShipSkin(bbSerializable.bbSerializable):
-    def __init__(self, name : str, textureRegions : int, shipRenders : Dict[str, str], path : str, designer : str, wiki : str = ""):
+    def __init__(self, name : str, textureRegions : int, shipRenders : Dict[str, str], path : str, designer : str, wiki : str = "", disabledRegions : List[int] = []):
         self.name = name
         self.textureRegions = textureRegions
         self.compatibleShips = list(shipRenders.keys())
@@ -38,6 +38,10 @@ class bbShipSkin(bbSerializable.bbSerializable):
         self.designer = designer
         self.wiki = wiki
         self.hasWiki = wiki != ""
+        self.disabledRegions = disabledRegions
+        for region in disabledRegions:
+            if region < 1:
+                raise ValueError("Attempted to disable an invalid region number: " + str(region) + ", skin " + name)
 
 
     def toDict(self, **kwargs) -> dict:
@@ -71,7 +75,14 @@ class bbShipSkin(bbSerializable.bbSerializable):
             textureFiles = {0: self.path + os.sep + "1.jpg"}
             for i in range(self.textureRegions):
                 textureFiles[i+1] = self.path + os.sep + str(i+2) + ".jpg"
-            await shipRenderer.renderShip(self.name, shipData["path"], shipData["model"], textureFiles, [], bbConfig.skinRenderIconResolution[0], bbConfig.skinRenderIconResolution[1])
+            
+            regionsToDisable = []
+            if "textureRegions" in shipData and shipData["textureRegions"] > 0:
+                for disabledRegionNum in self.disabledRegions:
+                    if disabledRegionNum <= shipData["textureRegions"]:
+                        regionsToDisable.append(disabledRegionNum)
+
+            await shipRenderer.renderShip(self.name, shipData["path"], shipData["model"], textureFiles, regionsToDisable, bbConfig.skinRenderIconResolution[0], bbConfig.skinRenderIconResolution[1])
             # await shipRenderer.renderShip(self.name + "_emoji", shipData["path"], shipData["model"], [texPath], bbConfig.skinRenderEmojiResolution[0], bbConfig.skinRenderEmojiResolution[1])
             # os.remove(emojiTexPath)
 
@@ -122,4 +133,5 @@ class bbShipSkin(bbSerializable.bbSerializable):
     def fromDict(cls, skinDict, **kwargs):
         if skinDict["name"] in bbData.builtInShipSkins:
             return bbData.builtInShipSkins[skinDict["name"]]
-        return bbShipSkin(skinDict["name"], skinDict["textureRegions"], skinDict["ships"], skinDict["path"], skinDict["designer"], skinDict["wiki"] if "wiki" in skinDict else "")
+        return bbShipSkin(skinDict["name"], skinDict["textureRegions"], skinDict["ships"], skinDict["path"], skinDict["designer"], skinDict["wiki"] if "wiki" in skinDict else "",
+                            disabledRegions=skinDict["disabledRegions"] if "disabledRegions" in skinDict else [])
