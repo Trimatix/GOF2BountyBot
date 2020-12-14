@@ -45,13 +45,13 @@ async def fromDict(dbDict : dict) -> ReactionMenuDB:
                 continue
                 
             elif dbDict[msgID]["type"] == "ReactionRolePicker":
-                newDB[int(msgID)] = await ReactionRolePicker.ReactionRolePicker.fromDict(dbDict[msgID], msg=msg)
+                newDB[int(msgID)] = ReactionRolePicker.ReactionRolePicker.fromDict(dbDict[msgID], msg=msg)
 
             elif dbDict[msgID]["type"] == "ReactionDuelChallengeMenu":
                 continue
 
             elif dbDict[msgID]["type"] == "ReactionPollMenu":
-                newDB[int(msgID)] = await ReactionPollMenu.ReactionPollMenu.fromDict(dbDict[msgID], msg=msg)
+                newDB[int(msgID)] = ReactionPollMenu.ReactionPollMenu.fromDict(dbDict[msgID], msg=msg)
 
             else:
                 continue
