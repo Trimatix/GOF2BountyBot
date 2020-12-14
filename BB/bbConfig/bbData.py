@@ -540,3 +540,6 @@ shipKeysByTL = []
 moduleObjsByTL = []
 weaponObjsByTL = []
 turretObjsByTL = []
+
+shipSkinToolsBySkin = {}
+levelUpCratesByTL = []
