@@ -48,6 +48,8 @@ class bbShipSkin(bbSerializable.bbSerializable):
         data = {"name": self.name, "textureRegions": self.textureRegions, "ships": self.shipRenders, "designer": self.designer}
         if self.hasWiki:
             data["wiki"] = self.wiki
+        if self.disabledRegions:
+            data["disabledRegions"] = self.disabledRegions
         return data
 
 
