@@ -173,7 +173,7 @@ class Criminal (bbAliasable.Aliasable):
         crimObj = Criminal(crimDict["name"], crimDict["faction"], crimDict["icon"], isPlayer=crimDict["isPlayer"], aliases=crimDict["aliases"], wiki=crimDict["wiki"], builtIn=builtIn)
 
         if "activeShip" in crimDict and not crimObj.hasShip:
-            crimObj.equipShip(bbShip.fromDict(crimDict["activeShip"]))
+            crimObj.equipShip(bbShip.bbShip.fromDict(crimDict["activeShip"]))
         if "techLevel" in crimDict and crimObj.techLevel == -1:
             crimObj.techLevel = crimDict["techLevel"] if "techLevel" in crimDict else crimObj.activeShip.techLevel
 

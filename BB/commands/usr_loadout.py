@@ -256,7 +256,7 @@ async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
             useDummyData = True
 
     if useDummyData:
-        activeShip = bbShip.fromDict(bbUser.defaultShipLoadoutDict)
+        activeShip = bbShip.bbShip.fromDict(bbUser.defaultShipLoadoutDict)
         loadoutEmbed = lib.discordUtil.makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours[activeShip.manufacturer] if activeShip.manufacturer in bbData.factionColours else bbData.factionColours["neutral"], thumb=activeShip.icon if activeShip.hasIcon else requestedUser.avatar_url_as(size=64))
         
         await message.channel.send(embed=activeShip.fillLoadoutEmbed(loadoutEmbed))

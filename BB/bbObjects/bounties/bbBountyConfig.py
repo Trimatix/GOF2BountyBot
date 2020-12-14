@@ -198,7 +198,7 @@ class BountyConfig:
             
             # tech leve 0 = guaranteed lowest difficulty loadout
             if self.techLevel == 0:
-                self.activeShip = bbShip.fromDict(bbConfig.level0CrimLoadout)
+                self.activeShip = bbShip.bbShip.fromDict(bbConfig.level0CrimLoadout)
             # Otherwise, generate one based on difficulty
             else:
                 itemTL = self.techLevel - 1
@@ -219,9 +219,9 @@ class BountyConfig:
                         shipHasPrimary = "maxPrimaries" in bbData.builtInShipData[shipKey] and bbData.builtInShipData[shipKey]["maxPrimaries"] > 0
 
                     if shipHasPrimary:
-                        self.activeShip = bbShip.fromDict(bbData.builtInShipData[shipKey])
+                        self.activeShip = bbShip.bbShip.fromDict(bbData.builtInShipData[shipKey])
                     else:
-                        self.activeShip = bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL])])
+                        self.activeShip = bbShip.bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL])])
 
                     # if self.techLevel < self.activeShip.maxPrimaries:
                     #     numWeapons = random.randint(self.techLevel, self.activeShip.maxPrimaries)
@@ -232,7 +232,7 @@ class BountyConfig:
                         self.activeShip.equipWeapon(random.choice(bbData.weaponObjsByTL[itemTL]))
                 
                 else:
-                    self.activeShip = bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL])])
+                    self.activeShip = bbShip.bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL])])
 
                 armourEquipped = True
                 shieldEquipped = True
@@ -312,7 +312,7 @@ class BountyConfig:
                         self.activeShip.equipTurret(random.choice(bbData.turretObjsByTL[turretTL]))
 
             # Purely random loadout generation
-            # self.activeShip = bbShip.fromDict(random.choice(list(bbData.builtInShipData.values())))
+            # self.activeShip = bbShip.bbShip.fromDict(random.choice(list(bbData.builtInShipData.values())))
             # for i in range(self.activeShip.maxPrimaries):
             #     self.activeShip.equipWeapon(random.choice(list(bbData.builtInWeaponObjs.values())))
             # for i in range(random.randint(1, self.activeShip.maxModules)):

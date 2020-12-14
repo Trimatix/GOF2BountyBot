@@ -169,5 +169,5 @@ class Bounty(bbSerializable.bbSerializable):
         """
         dbReload = kwargs["dbReload"] if "dbReload" in kwargs else False
         return Bounty(dbReload=dbReload,
-                        criminalObj=bbCriminal.fromDict(bounty["criminal"]), 
+                        criminalObj=bbCriminal.Criminal.fromDict(bounty["criminal"]), 
                         config=bbBountyConfig.BountyConfig(faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], rewardPerSys=bounty["rewardPerSys"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))
