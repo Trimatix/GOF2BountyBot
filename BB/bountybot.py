@@ -470,6 +470,8 @@ async def on_ready():
         # Respawn escaped bounties
         await bbGlobals.escapedBountiesRespawnTTDB.doTaskChecking()
 
+        await bbGlobals.reactionMenusTTDB.doTaskChecking()
+
 
 @bbGlobals.client.event
 async def on_message(message : discord.Message):
