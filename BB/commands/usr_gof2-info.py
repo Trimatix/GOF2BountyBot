@@ -804,7 +804,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")	
         else:	
             itemEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt=itemObj.manufacturer.capitalize() + " ship")	
-            await message.channel.send(embed=itemEmbed)	
+            await message.channel.send(embed=itemEmbed)
 
 # bbCommands.register("showme-ship", cmd_showme_ship)	
 

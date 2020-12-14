@@ -4,6 +4,11 @@ from . import commandsDB as bbCommands
 from ..bbConfig import bbConfig, bbData
 from ..bbObjects.items import bbShip
 from .. import lib, bbGlobals
+from ..shipRenderer import shipRenderer
+from ..logging import bbLogger
+
+import os
+CWD = os.getcwd()
 
 
 bbCommands.addHelpSection(2, "skins")
@@ -237,3 +242,124 @@ async def dev_cmd_unapplySkin(message : discord.Message, args : str, isDM : bool
         await message.channel.send("Done!")
 
 bbCommands.register("unApplySkin", dev_cmd_unapplySkin, 2, helpSection="skins", useDoc=True)
+
+
+async def dev_cmd_show_incompatible_skin(message : discord.Message, args : str, isDM : bool):
+    """Return the URL of the image bountybot uses to represent the specified inbuilt ship
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a ship name and optionally a skin, prefaced with a + character.
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "ship Groza Mk II`")
+        return
+    if "+" in args:
+        if len(args.split("+")) > 2:
+            await message.channel.send(":x: Please only provide one skin, with one `+`!")
+            return
+        elif args.split("+")[1] == "":
+            await message.channel.send(":x: Please either give a skin name after your `+`")
+            return
+        else:
+            args, skin = args.split("+")
+    else:
+        skin = ""
+    	
+    # look up the ship object
+    itemName = args.rstrip(" ").title()
+    itemObj = None
+    for ship in bbData.builtInShipData.values():
+        shipObj = bbShip.bbShip.fromDict(ship)
+        if shipObj.isCalled(itemName):	
+            itemObj = shipObj
+    # report unrecognised ship names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+        return
+
+    shipData = bbData.builtInShipData[itemObj.name]
+
+    if not shipData["skinnable"]:
+        await message.channel.send(":x: That ship is not skinnable!")
+        return
+    else:
+        skin = skin.lstrip(" ").lower()
+        if skin not in bbData.builtInShipSkins:
+            if len(itemName) < 20:
+                await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+            else:
+                await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+
+        elif skin in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:
+            itemEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0], titleTxt=itemObj.name, footerTxt="Custom skin: " + skin.capitalize())
+            await message.channel.send(embed=itemEmbed)
+            
+        else:
+            await lib.discordUtil.startLongProcess(message)
+            await bbData.builtInShipSkins[skin].addShip(itemObj.name, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+            itemEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0], titleTxt=itemObj.name, footerTxt="Custom skin: " + skin.capitalize())
+            await message.channel.send(embed=itemEmbed)
+            await bbData.builtInShipSkins[skin].removeShip(itemObj.name, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+            await lib.discordUtil.endLongProcess(message)
+
+
+bbCommands.register("show-incompatible-skin", dev_cmd_show_incompatible_skin, 2, helpSection="skins", useDoc=True)
+
+
+async def dev_cmd_try_all_skins(message : discord.Message, args : str, isDM : bool):
+    """Return the URL of the image bountybot uses to represent the specified inbuilt ship
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a ship name and optionally a skin, prefaced with a + character.
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "ship Groza Mk II`")
+        return
+    	
+    # look up the ship object
+    itemName = args.rstrip(" ").title()
+    itemObj = None
+    for ship in bbData.builtInShipData.values():
+        shipObj = bbShip.bbShip.fromDict(ship)
+        if shipObj.isCalled(itemName):	
+            itemObj = shipObj
+    # report unrecognised ship names
+    if itemObj is None:
+        if len(itemName) < 20:
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")
+        return
+
+    shipData = bbData.builtInShipData[itemObj.name]
+    
+    if not shipData["skinnable"]:
+        await message.channel.send(":x: That ship is not skinnable!")
+        return
+    else:
+        for skin in bbData.builtInShipSkins:
+            if skin not in bbData.builtInShipSkins:
+                await message.channel.send("Ignoring unrecognised skin: " + skin)
+
+            elif skin in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:
+                itemEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0], titleTxt=itemObj.name, footerTxt="Custom skin: " + skin.capitalize())
+                await message.channel.send(embed=itemEmbed)
+                
+            else:
+                await bbData.builtInShipSkins[skin].addShip(itemObj.name, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+                itemEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0], titleTxt=itemObj.name, footerTxt="Custom skin: " + skin.capitalize())
+                await message.channel.send(embed=itemEmbed)
+                await bbData.builtInShipSkins[skin].removeShip(itemObj.name, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+
+    
+    await message.channel.send("ALL SKINS SENT")
+
+
+bbCommands.register("try-all-skins", dev_cmd_try_all_skins, 2, helpSection="skins", useDoc=True)
