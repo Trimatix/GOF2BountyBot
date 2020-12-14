@@ -540,3 +540,6 @@ homeGuildTransferConfirmTimeoutSeconds = 60
 ##### SKINS #####
 
 defaultSkinCrateEmoji = UninitializedDumbEmoji(723709178736017419)
+
+defaultCrateEmoji = UninitializedDumbEmoji(723709178736017419)
+defaultCrateIcon = "https://cdn.discordapp.com/attachments/700683544103747594/723472359113359410/secure_container.png"
