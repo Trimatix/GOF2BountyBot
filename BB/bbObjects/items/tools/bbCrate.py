@@ -3,7 +3,7 @@ from . import bbToolItem
 from .... import lib, bbGlobals
 from discord import Message
 import asyncio
-from ....bbConfig import bbConfig
+from ....bbConfig import bbConfig, bbData
 from .. import bbItem
 from ....logging import bbLogger
 from ....reactionMenus.ConfirmationReactionMenu import InlineConfirmationMenu
@@ -90,22 +90,37 @@ class bbCrate(bbToolItem.bbToolItem):
         :rtype: dict
         """
         data = super().toDict(**kwargs)
-        if "saveType" not in kwargs:
-            kwargs["saveType"] = True
-
-        data["itemPool"] = []
-        for item in self.itemPool:
-            data["itemPool"].append(item.toDict(**kwargs))
+        if self.builtIn:
+            data["crateType"] = "levelUp"
+            data["typeNum"] = self.techLevel
+        else:
+            if "saveType" not in kwargs:
+                kwargs["saveType"] = True
+            
+            data["itemPool"] = []
+            for item in self.itemPool:
+                data["itemPool"].append(item.toDict(**kwargs))
         return data
 
 
     @classmethod
     def fromDict(cls, crateDict, **kwargs):
         skipInvalidItems = kwargs["skipInvalidItems"] if "skipInvalidItems" in kwargs else False
+        
+        if "builtIn" in crateDict and crateDict["builtIn"]:
+            if "crateType" in crateDict:
+                if crateDict["crateType"] == "levelUp":
+                    return bbData.levelUpCratesByTL[crateDict["typeNum"]-1]
+                else:
+                    raise ValueError("Unknown crateType: " + str(crateDict["crateType"]))
+            else:
+                raise ValueError("Attempted to spawn builtIn bbCrate with no given crateType")
+        else:
+            crateToSpawn = crateDict
 
         itemPool = []
-        if "itemPool" in crateDict:
-            for itemDict in crateDict["itemPool"]:
+        if "itemPool" in crateToSpawn:
+            for itemDict in crateToSpawn["itemPool"]:
                 errorStr = ""
                 errorType = ""
                 if "type" not in itemDict:
@@ -124,11 +139,11 @@ class bbCrate(bbToolItem.bbToolItem):
         else:
             bbLogger.log("bbCrate", "fromDict", "fromDict-ing a bbCrate with no itemPool.")
         
-        return bbCrate(itemPool, name=crateDict["name"] if "name" in crateDict else "",
-            value=crateDict["value"] if "value" in crateDict else 0,
-            wiki=crateDict["wiki"] if "wiki" in crateDict else "",
-            manufacturer=crateDict["manufacturer"] if "manufacturer" in crateDict else "",
-            icon=crateDict["icon"] if "icon" in crateDict else "",
-            emoji=lib.emojis.dumbEmojiFromDict(crateDict["emoji"]) if "emoji" in crateDict else lib.emojis.dumbEmoji.EMPTY,
-            techLevel=crateDict["techLevel"] if "techLevel" in crateDict else -1,
-            builtIn=crateDict["builtIn"] if "builtIn" in crateDict else False)
+        return bbCrate(itemPool, name=crateToSpawn["name"] if "name" in crateToSpawn else "",
+            value=crateToSpawn["value"] if "value" in crateToSpawn else 0,
+            wiki=crateToSpawn["wiki"] if "wiki" in crateToSpawn else "",
+            manufacturer=crateToSpawn["manufacturer"] if "manufacturer" in crateToSpawn else "",
+            icon=crateToSpawn["icon"] if "icon" in crateToSpawn else "",
+            emoji=lib.emojis.dumbEmojiFromDict(crateToSpawn["emoji"]) if "emoji" in crateToSpawn else lib.emojis.dumbEmoji.EMPTY,
+            techLevel=crateToSpawn["techLevel"] if "techLevel" in crateToSpawn else -1,
+            builtIn=crateToSpawn["builtIn"] if "builtIn" in crateToSpawn else False)
