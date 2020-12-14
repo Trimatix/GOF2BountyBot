@@ -138,7 +138,10 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
 
                             newLevel = bbConfig.calculateUserBountyHuntingLevel(currentBBUser.bountyHuntingXP)
                             if newLevel > oldLevel:
-                                levelUpMsg += "\n:arrow_up: **Level Up!**\n" + lib.discordUtil.userOrMemberName(bbGlobals.client.get_user(currentBBUser.id), message.guild) + " reached **Bounty Hunter Level " + str(newLevel) + "!** :partying_face:"
+                                levelUpCrate = bbData.levelUpCratesByTL[newLevel-1]
+                                currentBBUser.inactiveTools.addItem(levelUpCrate)
+                                levelUpMsg += "\n:arrow_up: **Level Up!**\n" + lib.discordUtil.userOrMemberName(bbGlobals.client.get_user(currentBBUser.id), message.guild) + " reached **Bounty Hunter Level " + str(newLevel) + "!** :partying_face:\n" + \
+                                    "You got a **" + levelUpCrate.name + "**."
                         
                         if levelUpMsg != "":
                             await message.channel.send(levelUpMsg)
