@@ -382,7 +382,7 @@ async def on_ready():
                         shipSkins[bbData.builtInShipSkins[skinName]] = None
         
         itemPool = [bbData.shipSkinToolsBySkin[skin] for skin in shipSkins]
-        bbData.levelUpCratesByTL[level-1] = bbCrate.bbCrate(itemPool, "Level " + str(level) + " skins crate", techLevel=level, builtIn=True, value=level * 5000)
+        bbData.levelUpCratesByTL[level-1] = bbCrate.bbCrate(itemPool, "Level " + str(level) + " skins crate", techLevel=level, builtIn=True, value=bbConfig.crateValueForTL(level))
         
 
 

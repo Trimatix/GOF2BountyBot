@@ -447,7 +447,20 @@ def shipSkinValueForTL(averageTL : int) -> int:
     :return: The value to assign to the ship skin
     :rtype: int
     """
-    return averageTL * 10000
+    # return averageTL * 10000
+    return 0
+
+
+def crateValueForTL(TL : int) -> int:
+    """Calculate how crate are valued with respect to their techlevel.
+
+    :param int averageTL: The techLevel of the crate
+    :return: The value to assign to the crate
+    :rtype: int
+    """
+    # TL * 5000
+    return 0
+
 
 # The maximum number of rendering threads that may be dispatched simultaneously
 maxConcurrentRenders = 1
