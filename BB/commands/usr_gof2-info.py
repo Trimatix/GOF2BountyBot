@@ -218,10 +218,13 @@ async def cmd_info_ship(message : discord.Message, args : str, isDM : bool):
     # look up the ship object
     itemName = args.title()
     itemObj = None
+    itemData = {}
     for ship in bbData.builtInShipData.values():
         shipObj = bbShip.bbShip.fromDict(ship)
         if shipObj.isCalled(itemName):
             itemObj = shipObj
+            itemData = ship
+            break
 
     # report unrecognised ship names
     if itemObj is None:
@@ -273,6 +276,13 @@ async def cmd_info_ship(message : discord.Message, args : str, isDM : bool):
                                  value=modulesStr[:-2] + "]*")
         statsEmbed.add_field(name="Max Shop Spawn Chance:",
                              value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
+
+        # Include compatible ship skin names
+        if "compatibleSkins" in itemData and len(itemData["compatibleSkins"]) > 0:
+            skinsStr = "• " + "\n• ".join(itemData["compatibleSkins"])
+            statsEmbed.add_field(name="Compatible Skins:",
+                                    value=skinsStr)
+
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
