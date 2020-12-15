@@ -265,6 +265,7 @@ userDBPath = "saveData/users.json"
 guildDBPath = "saveData/guilds.json"
 bountyDBPath = "saveData/bounties.json"
 reactionMenusDBPath = "saveData/reactionMenus.json"
+workshopSavePath = "saveData/workshop.json"
 
 # path to folder to save log txts to
 loggingFolderPath = "saveData/logs"
