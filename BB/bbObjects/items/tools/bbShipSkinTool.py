@@ -1,3 +1,4 @@
+from __future__ import annotations
 from . import bbToolItem
 from .... import lib
 from ....bbConfig import bbConfig, bbData
@@ -6,8 +7,11 @@ from ..bbShip import bbShip
 from discord import Message
 from .... import bbGlobals
 import asyncio
+from ..bbItem import spawnableItem
+from ....reactionMenus.ConfirmationReactionMenu import InlineConfirmationMenu
 
 
+@spawnableItem
 class bbShipSkinTool(bbToolItem.bbToolItem):
     """A tool that can be used to apply a skin to a ship.
     This item is named after the skin it applies.
@@ -90,24 +94,18 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         if ship.name not in self.shipSkin.compatibleShips:
             return ":x: Your ship is not compatible with this skin! Please equip a different ship, or use `" + bbConfig.commandPrefix + "info skin " + self.name + "` to see what ships are compatible with this skin."
         
-        confirmMsg = await message.channel.send("Are you sure you want to apply the " + self.shipSkin.name + " skin to your " + ship.getNameAndNick() + "? Please react to this message to confirm:\n" + bbConfig.defaultAcceptEmoji.sendable + " : Yes\n" + bbConfig.defaultRejectEmoji.sendable + " : Cancel\n\n*This menu will expire in " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + "seconds.*") 
+        callingBBUser = kwargs["callingBBUser"]
+        confirmMsg = await message.channel.send("Are you sure you want to apply the " + self.shipSkin.name + " skin to your " + ship.getNameAndNick() + "?") 
+        confirmation = await InlineConfirmationMenu(confirmMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds).doMenu()
         
-        def useConfirmCheck(reactPL):
-            return reactPL.message_id == confirmMsg.id and reactPL.user_id == message.author.id and lib.emojis.dumbEmojiFromPartial(reactPL.emoji) in [bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji]
-
-        try:
-            reactPL = await bbGlobals.client.wait_for("raw_reaction_add", check=useConfirmCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)
-        except asyncio.TimeoutError:
-            await confirmMsg.edit(content="This menu has now expired. Please use `" + bbConfig.commandPrefix + "use` again.")
-        else:
-            if lib.emojis.dumbEmojiFromPartial(reactPL.emoji) == bbConfig.defaultAcceptEmoji:
-                ship.applySkin(self.shipSkin)
-                if self in callingBBUser.inactiveTools:
-                    callingBBUser.inactiveTools.removeItem(self)
-                
-                return "🎨 Success! Your skin has been applied."
-            else:
-                return "🛑 Skin application cancelled."
+        if bbConfig.defaultRejectEmoji in confirmation:
+            return "🛑 Skin application cancelled."
+        elif bbConfig.defaultAcceptEmoji in confirmation:
+            ship.applySkin(self.shipSkin)
+            if self in callingBBUser.inactiveTools:
+                callingBBUser.inactiveTools.removeItem(self)
+            
+            return "🎨 Success! Your skin has been applied."
 
 
     def statsStringShort(self) -> str:
@@ -132,21 +130,27 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         return bbShipSkinTool
 
     
-    def toDict(self):
-        data = super().toDict()
-        data["skin"] = self.shipSkin.toDict()
+    def toDict(self, **kwargs):
+        """
+        
+        :param bool saveType: When true, include the string name of the object type in the output.
+        """
+        data = super().toDict(**kwargs)
+        data["name"] = self.shipSkin.name
+        data["skin"] = self.shipSkin.toDict(**kwargs)
         return data
         # raise RuntimeError("Attempted to save a non-builtIn bbShipSkinTool")
             
 
-def fromDict(toolDict : dict) -> bbShipSkinTool:
-    """Construct a bbShipSkinTool from its dictionary-serialized representation.
+    @classmethod
+    def fromDict(cls, toolDict : dict, **kwargs) -> bbShipSkinTool:
+        """Construct a bbShipSkinTool from its dictionary-serialized representation.
 
-    :param dict toolDict: A dictionary containing all information needed to construct the required bbShipSkinTool. Critically, a name, type, and builtIn specifier.
-    :return: A new bbShipSkinTool object as described in toolDict
-    :rtype: bbShipSkinTool
-    """
-    shipSkin = bbData.builtInShipSkins[toolDict["name"].lower()] if toolDict["builtIn"] else bbShipSkin.fromDict(toolDict["skin"])
-    if toolDict["builtIn"]:
-        return bbData.builtInToolObjs[lib.stringTyping.shipSkinNameToToolName(shipSkin.name)]
-    return bbShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=False)
+        :param dict toolDict: A dictionary containing all information needed to construct the required bbShipSkinTool. Critically, a name, type, and builtIn specifier.
+        :return: A new bbShipSkinTool object as described in toolDict
+        :rtype: bbShipSkinTool
+        """
+        shipSkin = bbData.builtInShipSkins[toolDict["name"]] if toolDict["builtIn"] else bbShipSkin.bbShipSkin.fromDict(toolDict["skin"])
+        if toolDict["builtIn"]:
+            return bbData.builtInToolObjs[lib.stringTyping.shipSkinNameToToolName(shipSkin.name)]
+        return bbShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=False)

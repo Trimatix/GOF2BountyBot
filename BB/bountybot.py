@@ -94,7 +94,7 @@ def loadUsersDB(filePath : str) -> bbUserDB.bbUserDB:
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
     :return: a bbUserDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
-    return bbUserDB.fromDict(lib.jsonHandler.readJSON(filePath))
+    return bbUserDB.bbUserDB.fromDict(lib.jsonHandler.readJSON(filePath))
 
 
 def loadGuildsDB(filePath : str, dbReload : bool = False) -> bbGuildDB.bbGuildDB:
@@ -104,7 +104,7 @@ def loadGuildsDB(filePath : str, dbReload : bool = False) -> bbGuildDB.bbGuildDB
     :param bool dbReload: Whether or not this DB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
     :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
-    return bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath), dbReload=dbReload)
+    return bbGuildDB.bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath), dbReload=dbReload)
 
 
 async def loadReactionMenusDB(filePath : str) -> reactionMenuDB.ReactionMenuDB:
@@ -265,13 +265,13 @@ async def on_ready():
 
     # generate bbCriminal objects from data in bbData
     for criminalDict in bbData.builtInCriminalData.values():
-        bbData.builtInCriminalObjs[criminalDict["name"]] = bbCriminal.fromDict(criminalDict)
+        bbData.builtInCriminalObjs[criminalDict["name"]] = bbCriminal.Criminal.fromDict(criminalDict)
         bbData.builtInCriminalObjs[criminalDict["name"]].builtIn = True
         bbData.builtInCriminalData[criminalDict["name"]]["builtIn"] = True
 
     # generate bbSystem objects from data in bbData
     for systemDict in bbData.builtInSystemData.values():
-        bbData.builtInSystemObjs[systemDict["name"]] = bbSystem.fromDict(systemDict)
+        bbData.builtInSystemObjs[systemDict["name"]] = bbSystem.System.fromDict(systemDict)
         bbData.builtInSystemData[systemDict["name"]]["builtIn"] = True
         bbData.builtInSystemObjs[systemDict["name"]].builtIn = True
 
@@ -283,19 +283,19 @@ async def on_ready():
 
     # generate bbWeapon objects from data in bbData
     for weaponDict in bbData.builtInWeaponData.values():
-        bbData.builtInWeaponObjs[weaponDict["name"]] = bbWeapon.fromDict(weaponDict)
+        bbData.builtInWeaponObjs[weaponDict["name"]] = bbWeapon.bbWeapon.fromDict(weaponDict)
         bbData.builtInWeaponData[weaponDict["name"]]["builtIn"] = True
         bbData.builtInWeaponObjs[weaponDict["name"]].builtIn = True
 
     # generate bbUpgrade objects from data in bbData
     for upgradeDict in bbData.builtInUpgradeData.values():
-        bbData.builtInUpgradeObjs[upgradeDict["name"]] = bbShipUpgrade.fromDict(upgradeDict)
+        bbData.builtInUpgradeObjs[upgradeDict["name"]] = bbShipUpgrade.bbShipUpgrade.fromDict(upgradeDict)
         bbData.builtInUpgradeData[upgradeDict["name"]]["builtIn"] = True
         bbData.builtInUpgradeObjs[upgradeDict["name"]].builtIn = True
 
     # generate bbTurret objects from data in bbData
     for turretDict in bbData.builtInTurretData.values():
-        bbData.builtInTurretObjs[turretDict["name"]] = bbTurret.fromDict(turretDict)
+        bbData.builtInTurretObjs[turretDict["name"]] = bbTurret.bbTurret.fromDict(turretDict)
         bbData.builtInTurretData[turretDict["name"]]["builtIn"] = True
         bbData.builtInTurretObjs[turretDict["name"]].builtIn = True
 
@@ -321,7 +321,7 @@ async def on_ready():
             if dirname.lower().endswith(".bbshipskin"):
                 skinData = lib.jsonHandler.readJSON(dirpath + os.sep + "META.json")
                 skinData["path"] = CWD + os.sep + dirpath
-                bbData.builtInShipSkins[skinData["name"].lower()] = bbShipSkin.fromDict(skinData)
+                bbData.builtInShipSkins[skinData["name"].lower()] = bbShipSkin.bbShipSkin.fromDict(skinData)
 
     # generate bbToolItem objects from data stored on file
     for toolDict in bbData.builtInToolData.values():

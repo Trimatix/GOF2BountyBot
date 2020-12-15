@@ -67,14 +67,15 @@ class bbToolItem(bbItem.bbItem):
 
     
     @abstractmethod
-    def toDict(self) -> dict:
+    def toDict(self, **kwargs) -> dict:
         """Serialize this tool into dictionary format.
         This step of implementation adds a 'type' string indicating the name of this tool's subclass.
 
+        :param bool saveType: When true, include the string name of the object type in the output.
         :return: The default bbItem toDict implementation, with an added 'type' field
         :rtype: dict
         """
-        data = super().toDict()
-        data["type"] = type(self).__name__
+        data = super().toDict(**kwargs)
+        data["itemType"] = "bbToolItem"
         return data
     

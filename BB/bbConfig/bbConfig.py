@@ -376,6 +376,29 @@ maxItemsPerHangarPageIndividual = 10
 # Names to be used when checking input to !bb hangar and bbUser.numInventoryPages
 validItemNames = ["ship", "weapon", "module", "turret", "all", "tool"]
 
+# the max number of each module type that can be equipped on a ship.
+maxModuleTypeEquips = {     "bbArmourModule": 1,
+                            "bbBoosterModule": 1,
+                            "bbCabinModule": -1,
+                            "bbCloakModule": 1,
+                            "bbCompressorModule": -1,
+                            "bbGammaShieldModule": 1,
+                            "bbMiningDrillModule": 1,
+                            "bbRepairBeamModule": 1,
+                            "bbRepairBotModule": 1,
+                            "bbScannerModule": 1,
+                            "bbShieldModule": 1,
+                            "bbSpectralFilterModule": 1,
+                            "bbThrusterModule": 1,
+                            "bbTractorBeamModule": 1,
+                            "bbTransfusionBeamModule": 1,
+                            "bbWeaponModModule": 1,
+                            "bbJumpDriveModule": 0,
+                            "bbEmergencySystemModule": 1,
+                            "bbSignatureModule": 1,
+                            "bbShieldInjectorModule": 1,
+                            "bbTimeExtenderModule": 1}
+
 
 
 ##### USERS #####
@@ -403,5 +426,11 @@ pollMenuDefaultTimeout = {"minutes": 5}
 expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
-skinApplyConfirmTimeoutSeconds = 60
+toolUseConfirmTimeoutSeconds = 60
 homeGuildTransferConfirmTimeoutSeconds = 60
+
+
+
+##### SKINS #####
+
+defaultSkinCrateEmoji = UninitializedDumbEmoji(723709178736017419)

@@ -4,7 +4,7 @@ import json
 from . import commandsDB as bbCommands
 from .. import lib, bbGlobals
 from ..bbConfig import bbConfig, bbData
-from ..bbObjects.items import bbShip, bbWeapon, bbModuleFactory, bbTurret
+from ..bbObjects.items import bbShip, bbWeapon, bbModuleFactory, bbTurret, bbItem
 from ..bbObjects.items.tools import bbToolItemFactory
 
 
@@ -21,7 +21,6 @@ async def dev_cmd_give(message : discord.Message, args : str, isDM : bool):
     :param str args: string, containing either a user ID or mention or nothing (to give item to caller), followed by a string from bbConfig.validItemNames (but not 'all'), followed by an item dictionary representation
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    # reset the calling user's cooldown if no user is specified
     if not lib.stringTyping.isInt(args.split(" ")[0]) and not lib.stringTyping.isMention(args.split(" ")[0]):
         requestedUser = bbGlobals.usersDB.getOrAddID(message.author.id)
         itemStr = args
@@ -35,17 +34,29 @@ async def dev_cmd_give(message : discord.Message, args : str, isDM : bool):
 
     itemType = itemStr.split(" ")[0].lower()
 
-    if itemType == "all" or itemType not in bbConfig.validItemNames:
-        await message.channel.send(":x: Invalid item type - " + itemType)
+    itemDict = json.loads(itemStr[len(itemStr.split(" ")[0]):])
+    if "type" not in itemDict:
+        await message.channel.send(":x: Please give a type in your item dictionary.")
         return
 
-    itemDict = json.loads(itemStr[len(itemStr.split(" ")[0]):])
+    if itemDict["type"] not in bbItem.subClassNames:
+        await message.channel.send(":x: Unknown bbItem subclass type: " + itemDict["type"])
+        return
+
+
+    if itemType == "all" or itemType not in bbConfig.validItemNames:
+        await message.channel.send(":x: Invalid item type arg - " + itemType)
+        return
+
+    newItem = bbItem.spawnItem(itemDict)
+
+    """itemDict = json.loads(itemStr[len(itemStr.split(" ")[0]):])
     itemConstructors = {"ship": bbShip.fromDict,
                         "weapon": bbWeapon.fromDict,
                         "module": bbModuleFactory.fromDict,
                         "turret": bbTurret.fromDict,
                         "tool": bbToolItemFactory.fromDict}
-    newItem = itemConstructors[itemType](itemDict)
+    newItem = itemConstructors[itemType](itemDict)"""
 
     requestedUser.getInactivesByName(itemType).addItem(newItem)
 
