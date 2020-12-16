@@ -96,6 +96,7 @@ class bbShipSkin(bbSerializable.bbSerializable):
                 renderMsg = await rendersChannel.send(ship + " +" + self.name, file=File(f))
                 self.shipRenders[ship] = [renderMsg.attachments[0].url, renderMsg.id]#, str(newEmoji)]
             os.remove(renderPath)
+            os.remove(texPath)
 
         if ship not in self.compatibleShips:
             self.compatibleShips.append(ship)

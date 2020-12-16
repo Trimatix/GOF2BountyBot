@@ -244,6 +244,68 @@ async def dev_cmd_unapplySkin(message : discord.Message, args : str, isDM : bool
 bbCommands.register("unApplySkin", dev_cmd_unapplySkin, 2, helpSection="skins", useDoc=True)
 
 
+async def dev_cmd_add_skin_to_all_ships(message : discord.Message, args : str, isDM : bool):
+    """Make all ships in the game compatible with the specified skin.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a skin name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a skin!")
+        return
+
+    skin = args.strip(" ").lower()
+    if skin not in bbData.builtInShipSkins:
+        if len(skin) < 20:
+            await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+
+    await lib.discordUtil.startLongProcess(message)
+
+    for shipName in bbData.builtInShipData:
+        if skin not in bbData.builtInShipData[shipName]["compatibleSkins"]:
+            await bbData.builtInShipSkins[skin].addShip(shipName, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+
+    await lib.discordUtil.endLongProcess(message)
+    await message.channel.send("Done!")
+
+bbCommands.register("add-skin-to-all-ships", dev_cmd_add_skin_to_all_ships, 2, helpSection="skins", useDoc=True)
+
+
+async def dev_cmd_del_skin_from_all_ships(message : discord.Message, args : str, isDM : bool):
+    """Make all ships in the game incompatible with the specified skin.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a skin name
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # verify a item was given
+    if args == "":
+        await message.channel.send(":x: Please provide a skin!")
+        return
+
+    skin = args.strip(" ").lower()
+    if skin not in bbData.builtInShipSkins:
+        if len(skin) < 20:
+            await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+        else:
+            await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+
+    await lib.discordUtil.startLongProcess(message)
+
+    for shipName in bbData.builtInShipData:
+        if skin in bbData.builtInShipData[shipName]["compatibleSkins"]:
+            await bbData.builtInShipSkins[skin].removeShip(shipName, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+
+    await lib.discordUtil.endLongProcess(message)
+    await message.channel.send("Done!")
+
+bbCommands.register("del-skin-from-all-ships", dev_cmd_del_skin_from_all_ships, 2, helpSection="skins", useDoc=True)
+
+
 async def dev_cmd_show_incompatible_skin(message : discord.Message, args : str, isDM : bool):
     """Return the URL of the image bountybot uses to represent the specified inbuilt ship
 
@@ -360,6 +422,5 @@ async def dev_cmd_try_all_skins(message : discord.Message, args : str, isDM : bo
 
     
     await message.channel.send("ALL SKINS SENT")
-
 
 bbCommands.register("try-all-skins", dev_cmd_try_all_skins, 2, helpSection="skins", useDoc=True)
