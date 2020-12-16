@@ -266,8 +266,11 @@ async def dev_cmd_add_skin_to_all_ships(message : discord.Message, args : str, i
     await lib.discordUtil.startLongProcess(message)
 
     for shipName in bbData.builtInShipData:
-        if skin not in bbData.builtInShipData[shipName]["compatibleSkins"]:
-            await bbData.builtInShipSkins[skin].addShip(shipName, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+        if bbData.builtInShipData[shipName]["skinnable"] and skin not in bbData.builtInShipData[shipName]["compatibleSkins"]:
+            try:
+                await bbData.builtInShipSkins[skin].addShip(shipName, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
+            except shipRenderer.RenderFailed:
+                pass
 
     await lib.discordUtil.endLongProcess(message)
     await message.channel.send("Done!")
@@ -297,7 +300,7 @@ async def dev_cmd_del_skin_from_all_ships(message : discord.Message, args : str,
     await lib.discordUtil.startLongProcess(message)
 
     for shipName in bbData.builtInShipData:
-        if skin in bbData.builtInShipData[shipName]["compatibleSkins"]:
+        if bbData.builtInShipData[shipName]["skinnable"] and skin in bbData.builtInShipData[shipName]["compatibleSkins"]:
             await bbData.builtInShipSkins[skin].removeShip(shipName, bbGlobals.client.get_guild(bbConfig.mediaServer).get_channel(bbConfig.skinRendersChannel))
 
     await lib.discordUtil.endLongProcess(message)
