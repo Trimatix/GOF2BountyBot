@@ -78,129 +78,38 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
                               item + "s").title(),
                           thumb=("https://cdn.discordapp.com/icons/" + str(message.guild.id) + "/" + message.guild.icon + ".png?size=64") if message.guild.icon is not None else "")
 
-    if item in ["all", "ship"]:
-        for shipNum in range(1, requestedShop.shipsStock.numKeys + 1):
-            if shipNum == 1:
-                shopEmbed.add_field(
-                    name="‎", value="__**Ships**__", inline=False)
+    for currentItemType in ["ship", "weapon", "module", "turret", "tool"]:
+        if item in ["all", currentItemType]:
+            currentStock = requestedShop.getStockByName(currentItemType)
+            for itemNum in range(1, currentStock.numKeys + 1):
+                if itemNum == 1:
+                    shopEmbed.add_field(
+                        name="‎", value="__**" + currentItemType.title() + "s**__", inline=False)
 
-            try:
-                currentItem = requestedShop.shipsStock[shipNum - 1].item
-            except KeyError:
                 try:
-                    bbLogger.log("Main", "cmd_shop", "Requested ship '" + requestedShop.shipsStock.keys[shipNum-1].name + "' (index " + str(shipNum-1) + "), which was not found in the shop stock",
-                                 category="shop", eventType="UNKWN_KEY")
-                except IndexError:
-                    break
-                except AttributeError as e:
-                    keysStr = ""
-                    for item in requestedShop.shipsStock.items:
-                        keysStr += str(item) + ", "
-                    bbLogger.log("Main", "cmd_shop", "Unexpected type in shipsstock KEYS, index " + str(shipNum-1) + ". Expected bbShip, got " + type(requestedShop.shipsStock.keys[shipNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
-                                 category="shop", eventType="INVTY_KEY_TYPE")
-                    shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.shipsStock.keys[shipNum-1] + "'",
+                    currentItem = currentStock[itemNum - 1].item
+                except KeyError:
+                    try:
+                        bbLogger.log("Main", "cmd_shop", "Requested " + currentItemType + " '" + currentStock.keys[itemNum-1].name + "' (index " + str(itemNum-1) + "), which was not found in the shop stock",
+                                    category="shop", eventType="UNKWN_KEY")
+                    except IndexError:
+                        break
+                    except AttributeError as e:
+                        keysStr = ""
+                        for item in currentStock.items:
+                            keysStr += str(item) + ", "
+                        bbLogger.log("Main", "cmd_shop", "Unexpected type in " + currentItemType + "sStock KEYS, index " + str(itemNum-1) + ". Got " + type(currentStock.keys[itemNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
+                                    category="shop", eventType="INVTY_KEY_TYPE")
+                        shopEmbed.add_field(name=str(itemNum) + ". **⚠ #INVALID-ITEM# '" + currentStock.keys[itemNum-1] + "'",
+                                            value="Do not attempt to buy. Could cause issues.", inline=True)
+                        continue
+                    shopEmbed.add_field(name=str(itemNum) + ". **⚠ #INVALID-ITEM# '" + currentStock.keys[itemNum-1].name + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)
                     continue
-                shopEmbed.add_field(name=str(shipNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.shipsStock.keys[shipNum-1].name + "'",
-                                    value="Do not attempt to buy. Could cause issues.", inline=True)
-                continue
 
-            currentItemCount = requestedShop.shipsStock.items[currentItem].count
-            shopEmbed.add_field(name=str(shipNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.getNameAndNick() + "**",
-                                value=lib.stringTyping.commaSplitNum(str(currentItem.getValue())) + " Credits\n" + currentItem.statsStringShort(), inline=True)
-
-    if item in ["all", "weapon"]:
-        for weaponNum in range(1, requestedShop.weaponsStock.numKeys + 1):
-            if weaponNum == 1:
-                shopEmbed.add_field(
-                    name="‎", value="__**Weapons**__", inline=False)
-
-            try:
-                currentItem = requestedShop.weaponsStock[weaponNum - 1].item
-            except KeyError:
-                try:
-                    bbLogger.log("Main", "cmd_shop", "Requested weapon '" + requestedShop.weaponsStock.keys[weaponNum-1].name + "' (index " + str(weaponNum-1) + "), which was not found in the shop stock",
-                                 category="shop", eventType="UNKWN_KEY")
-                except IndexError:
-                    break
-                except AttributeError as e:
-                    keysStr = ""
-                    for item in requestedShop.weaponsStock.items:
-                        keysStr += str(item) + ", "
-                    bbLogger.log("Main", "cmd_shop", "Unexpected type in weaponsstock KEYS, index " + str(weaponNum-1) + ". Expected bbWeapon, got " + type(requestedShop.weaponsStock.keys[weaponNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
-                                 category="shop", eventType="INVTY_KEY_TYPE")
-                    shopEmbed.add_field(name=str(weaponNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.weaponsStock.keys[weaponNum-1] + "'",
-                                        value="Do not attempt to buy. Could cause issues.", inline=True)
-                    continue
-                shopEmbed.add_field(name=str(weaponNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.weaponsStock.keys[weaponNum-1].name + "'",
-                                    value="Do not attempt to buy. Could cause issues.", inline=True)
-                continue
-
-            currentItemCount = requestedShop.weaponsStock.items[currentItem].count
-            shopEmbed.add_field(name=str(weaponNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=lib.stringTyping.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
-
-    if item in ["all", "module"]:
-        for moduleNum in range(1, requestedShop.modulesStock.numKeys + 1):
-            if moduleNum == 1:
-                shopEmbed.add_field(
-                    name="‎", value="__**Modules**__", inline=False)
-
-            try:
-                currentItem = requestedShop.modulesStock[moduleNum - 1].item
-            except KeyError:
-                try:
-                    bbLogger.log("Main", "cmd_shop", "Requested module '" + requestedShop.modulesStock.keys[moduleNum-1].name + "' (index " + str(moduleNum-1) + "), which was not found in the shop stock",
-                                 category="shop", eventType="UNKWN_KEY")
-                except IndexError:
-                    break
-                except AttributeError as e:
-                    keysStr = ""
-                    for item in requestedShop.modulesStock.items:
-                        keysStr += str(item) + ", "
-                    bbLogger.log("Main", "cmd_shop", "Unexpected type in modulesstock KEYS, index " + str(moduleNum-1) + ". Expected bbModule, got " + type(requestedShop.modulesStock.keys[moduleNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
-                                 category="shop", eventType="INVTY_KEY_TYPE")
-                    shopEmbed.add_field(name=str(moduleNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.modulesStock.keys[moduleNum-1] + "'",
-                                        value="Do not attempt to buy. Could cause issues.", inline=True)
-                    continue
-                shopEmbed.add_field(name=str(moduleNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.modulesStock.keys[moduleNum-1].name + "'",
-                                    value="Do not attempt to buy. Could cause issues.", inline=True)
-                continue
-
-            currentItemCount = requestedShop.modulesStock.items[currentItem].count
-            shopEmbed.add_field(name=str(moduleNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=lib.stringTyping.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
-
-    if item in ["all", "turret"]:
-        for turretNum in range(1, requestedShop.turretsStock.numKeys + 1):
-            if turretNum == 1:
-                shopEmbed.add_field(
-                    name="‎", value="__**Turrets**__", inline=False)
-
-            try:
-                currentItem = requestedShop.turretsStock[turretNum - 1].item
-            except KeyError:
-                try:
-                    bbLogger.log("Main", "cmd_shop", "Requested turret '" + requestedShop.turretsStock.keys[turretNum-1].name + "' (index " + str(turretNum-1) + "), which was not found in the shop stock",
-                                 category="shop", eventType="UNKWN_KEY")
-                except IndexError:
-                    break
-                except AttributeError as e:
-                    keysStr = ""
-                    for item in requestedShop.turretsStock.items:
-                        keysStr += str(item) + ", "
-                    bbLogger.log("Main", "cmd_shop", "Unexpected type in turretsstock KEYS, index " + str(turretNum-1) + ". Expected bbTurret, got " + type(requestedShop.turretsStock.keys[turretNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
-                                 category="shop", eventType="INVTY_KEY_TYPE")
-                    shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.turretsStock.keys[turretNum-1] + "'",
-                                        value="Do not attempt to buy. Could cause issues.", inline=True)
-                    continue
-                shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.turretsStock.keys[turretNum-1].name + "'",
-                                    value="Do not attempt to buy. Could cause issues.", inline=True)
-                continue
-
-            currentItemCount = requestedShop.turretsStock.items[currentItem].count
-            shopEmbed.add_field(name=str(turretNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
-                                value=lib.stringTyping.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
+                currentItemCount = currentStock.items[currentItem].count
+                shopEmbed.add_field(name=str(itemNum) + ". " + (currentItem.emoji.sendable + " " if currentItem.hasEmoji else "") + ((" `(" + str(currentItemCount) + ")` ") if currentItemCount > 1 else "") + "**" + currentItem.name + "**",
+                                    value=lib.stringTyping.commaSplitNum(str(currentItem.value)) + " Credits\n" + currentItem.statsStringShort(), inline=True)
 
     try:
         await sendChannel.send(embed=shopEmbed)
@@ -438,12 +347,13 @@ async def cmd_shop_sell(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(outStr)
 
     elif item in ["weapon", "module", "turret", "tool"]:
-        requestedBBUser.credits += requestedItem.getValue()
-        userItemInactives.removeItem(requestedItem)
+        # requestedBBUser.credits += requestedItem.getValue()
+        # userItemInactives.removeItem(requestedItem)
 
-        if requestedItem is None:
-            raise ValueError("selling NoneType Item")
-        shopItemStock.addItem(requestedItem)
+        # if requestedItem is None:
+        #     raise ValueError("selling NoneType Item")
+        # shopItemStock.addItem(requestedItem)
+        {"weapon": requestedShop.userSellWeaponObj, "module": requestedShop.userSellModuleObj, "turret": requestedShop.userSellTurretObj, "tool": requestedShop.userSellToolObj}[item](requestedBBUser, requestedItem)
 
         await message.channel.send(":moneybag: You sold your **" + requestedItem.name + "** for **" + str(requestedItem.getValue()) + " credits**!")
 
