@@ -112,6 +112,7 @@ shopDefaultShipsNum = 5
 shopDefaultWeaponsNum = 5
 shopDefaultModulesNum = 5
 shopDefaultTurretsNum = 2
+shopDefaultToolsNum = 0
 
 # bbTurret is the only item that has a probability not to be spawned. This metric indicates the percentage chance of turrets being stocked on a given day
 turretSpawnProbability = 45

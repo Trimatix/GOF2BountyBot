@@ -11,20 +11,13 @@ from . import bbInventory
 import random
 from ..logging import bbLogger
 from ..baseClasses import bbSerializable
+from .items.tools import bbToolItem, bbToolItemFactory
 
 
 class bbShop(bbSerializable.bbSerializable):
     """A shop containing a selection of items which players can buy.
     Items can be sold to the shop to the shop's inventory and listed for sale.
     
-    :var maxShips: The maximum number of ships generated on every stock refresh.
-    :vartype maxShips: int
-    :var maxModules: The maximum number of modules generated on every stock refresh.
-    :vartype maxModules: int
-    :var maxWeapons: The maximum number of weapons generated on every stock refresh.
-    :vartype maxWeapons: int
-    :var maxTurrets: The maximum number of turrets generated on every stock refresh.
-    :vartype maxTurrets: int
     :var shipsStock: A bbInventory containing the shop's stock of ships
     :vartype shipsStock: bbInventory
     :var weaponsStock: A bbInventory containing the shop's stock of weapons
@@ -33,44 +26,39 @@ class bbShop(bbSerializable.bbSerializable):
     :vartype modulesStock: bbInventory
     :var turretsStock: A bbInventory containing the shop's stock of turrets
     :vartype turretsStock: bbInventory
+    :var toolsStock: A bbInventory containing the shop's stock of tools
+    :vartype toolsStock: bbInventory
     """
 
     def __init__(self, maxShips : int = bbConfig.shopDefaultShipsNum, maxModules : int = bbConfig.shopDefaultModulesNum,
-            maxWeapons : int = bbConfig.shopDefaultWeaponsNum, maxTurrets : int = bbConfig.shopDefaultTurretsNum,
+            maxWeapons : int = bbConfig.shopDefaultWeaponsNum, maxTurrets : int = bbConfig.shopDefaultTurretsNum, maxTools : int = bbConfig.shopDefaultToolsNum,
             shipsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
             weaponsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
             modulesStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            turretsStock : bbInventory.bbInventory = bbInventory.bbInventory()):
+            turretsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
+            toolsStock : bbInventory.bbInventory = bbInventory.bbInventory()):
         """
-        :param int maxShips: The maximum number of ships generated on every stock refresh. (Default bbConfig.shopDefaultShipsNum)
-        :param int maxModules: The maximum number of modules generated on every stock refresh. (Default bbConfig.shopDefaultModulesNum)
-        :param int maxWeapons: The maximum number of weapons generated on every stock refresh. (Default bbConfig.shopDefaultWeaponsNum)
-        :param int maxTurrets: The maximum number of turrets generated on every stock refresh. (Default bbConfig.shopDefaultTurretsNum)
         :param bbInventory shipsStock: The shop's current stock of ships (Default empty bbInventory)
         :param bbInventory weaponsStock: The shop's current stock of weapons (Default empty bbInventory)
         :param bbInventory modulesStock: The shop's current stock of modules (Default empty bbInventory)
         :param bbInventory turretsStock: The shop's current stock of turrets (Default empty bbInventory)
+        :param bbInventory toolsStock: The shop's current stock of tools (Default empty bbInventory)
         """
-        
-        self.maxShips = maxShips
-        self.maxModules = maxModules
-        self.maxWeapons = maxWeapons
-        self.maxTurrets = maxTurrets
 
         # TODO: Somewhere, stocks are getting passed in and shared amongst all shops. Fix this. Temporary inventory clear here to make sure each shop gets its own inventory objects.
         self.shipsStock = bbInventory.bbInventory()
         self.weaponsStock = bbInventory.bbInventory()
         self.modulesStock = bbInventory.bbInventory()
         self.turretsStock = bbInventory.bbInventory()
+        self.toolsStock = bbInventory.bbInventory()
 
-        for itemListing in shipsStock.items.values():
-            self.shipsStock.addItem(itemListing.item, itemListing.count)
-        for itemListing in weaponsStock.items.values():
-            self.weaponsStock.addItem(itemListing.item, itemListing.count)
-        for itemListing in modulesStock.items.values():
-            self.modulesStock.addItem(itemListing.item, itemListing.count)
-        for itemListing in turretsStock.items.values():
-            self.turretsStock.addItem(itemListing.item, itemListing.count)
+        for inInv, outInv in [(shipsStock, self.shipsStock),
+                        (weaponsStock, self.weaponsStock),
+                        (modulesStock, self.modulesStock),
+                        (turretsStock, self.turretsStock),
+                        (toolsStock, self.toolsStock)]:
+            for itemListing in inInv.items.values():
+                outInv.addItem(itemListing.item, itemListing.count)
 
 
     def getStockByName(self, item : str) -> bbInventory.bbInventory:
@@ -93,6 +81,8 @@ class bbShop(bbSerializable.bbSerializable):
             return self.modulesStock
         if item == "turret":
             return self.turretsStock
+        if item == "tool":
+            return self.toolsStock
         else:
             raise NotImplementedError("Valid, but unrecognised item type: " + item)
 
@@ -375,6 +365,69 @@ class bbShop(bbSerializable.bbSerializable):
         self.userSellTurretObj(user, user.inactiveTurrets[index].item)
 
 
+
+    # TOOL MANAGEMENT
+    def userCanAffordToolIndex(self, user : bbUser.bbUser, index : int) -> bool:
+        """Decide whether a user can afford to buy a tool from the shop's stock
+
+        :param bbUser user: The user whose credits balance to check
+        :param int index: The index of the tool whose value to check, in the shop's tool bbInventory's array of keys
+        :return: True if user can afford to buy tool number index from the shop's stock, false otherwise
+        :rtype: bool
+        """
+        return self.userCanAffordItemObj(user, self.toolsStock[index].item)
+
+
+    def userBuyToolIndex(self, user : bbUser.bbUser, index : int):
+        """Sell the tool at the requested index to the given user,
+        removing the appropriate balance of credits and adding the item into the user's inventory.
+
+        :param bbUser user: The user attempting to buy the tool
+        :param int index: The index of the requested tool in the shop's tools bbInventory's array of keys
+        """
+        self.userBuyToolObj(user, self.toolsStock[index].item)
+        
+
+    def userBuyToolObj(self, user : bbUser.bbUser, requestedTool : bbToolItem.bbToolItem):
+        """Sell the given tool to the given user,
+        removing the appropriate balance of credits fromt the user and adding the item into the user's inventory.
+
+        :param bbUser user: The user attempting to buy the tool
+        :param bbToolItem requestedTool: The tool to sell to user
+        :raise RuntimeError: If user cannot afford to buy requestedTool
+        """
+        if self.userCanAffordItemObj(user, requestedTool):
+            self.toolsStock.removeItem(requestedTool)
+            user.credits -= requestedTool.getValue()
+            user.inactiveShips.addItem(requestedTool)
+        else:
+            raise RuntimeError("user " + str(user.id) + " attempted to buy tool " + requestedTool.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedTool.getValue()))
+
+
+    def userSellToolObj(self, user : bbUser.bbUser, tool : bbToolItem.bbToolItem):
+        """Buy the given tool from the given user,
+        adding the appropriate credits to their balance and adding the tool to the shop stock.
+
+        :param bbUser user: The user to buy tool from
+        :param bbTool tool: The tool to buy from user
+        """
+        user.credits += tool.getValue()
+        self.toolsStock.addItem(tool)
+        user.inactiveTools.removeItem(tool)
+    
+
+    def userSellToolIndex(self, user : bbUser.bbUser, index : int):
+        """Buy the tool at the given index in the given user's tools bbInventory,
+        adding the appropriate credits to their balance and adding the tool to the shop stock.
+
+        :param bbUser user: The user to buy tool from
+        :param int index: The index of the tool to buy from user, in the user's tools bbInventory's array of keys
+        """
+        self.userSellToolObj(user, user.inactiveTools[index].item)
+
+
+
+
     def toDict(self, **kwargs) -> dict:
         """Get a dictionary containing all information needed to reconstruct this shop instance.
         This includes maximum item counts and current stocks.
@@ -382,36 +435,23 @@ class bbShop(bbSerializable.bbSerializable):
         :return: A dictionary containing all information needed to reconstruct this shop object
         :rtype: dict
         """
-        shipsStockDict = []
-        for ship in self.shipsStock.keys:
-            if ship in self.shipsStock.items:
-                shipsStockDict.append(self.shipsStock.items[ship].toDict(**kwargs))
-            else:
-                bbLogger.log("bbShp", "toDict", "Failed to save invalid ship key '" + str(ship) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
+        if "saveType" not in kwargs or not kwargs["saveType"]:
+            kwargs["saveType"] = True
+            
+        data = {}
+        for invType in ["ship", "weapon", "module", "turret", "tool"]:
+            stockDict = []
+            currentStock = self.getStockByName(invType)
+            
+            for currentItem in currentStock.keys:
+                if currentItem in currentStock.items:
+                    stockDict.append(currentStock.items[currentItem].toDict(**kwargs))
+                else:
+                    bbLogger.log("bbShp", "toDict", "Failed to save invalid " + invType + " key '" + str(currentItem) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
+            
+            data[invType + "sStock"] = stockDict
 
-        weaponsStockDict = []
-        for weapon in self.weaponsStock.keys:
-            if weapon in self.weaponsStock.items:
-                weaponsStockDict.append(self.weaponsStock.items[weapon].toDict(**kwargs))
-            else:
-                bbLogger.log("bbShp", "toDict", "Failed to save invalid weapon key '" + str(weapon) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
-
-        modulesStockDict = []
-        for module in self.modulesStock.keys:
-            if module in self.modulesStock.items:
-                modulesStockDict.append(self.modulesStock.items[module].toDict(**kwargs))
-            else:
-                bbLogger.log("bbShp", "toDict", "Failed to save invalid module key '" + str(module) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
-
-        turretsStockDict = []
-        for turret in self.turretsStock.keys:
-            if turret in self.turretsStock.items:
-                turretsStockDict.append(self.turretsStock.items[turret].toDict(**kwargs))
-            else:
-                bbLogger.log("bbShp", "toDict", "Failed to save invalid turret key '" + str(turret) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
-
-        return {"maxShips":self.maxShips, "maxWeapons":self.maxWeapons, "maxModules":self.maxModules,
-                    "shipsStock":shipsStockDict, "weaponsStock":weaponsStockDict, "modulesStock":modulesStockDict, "turretsStock":turretsStockDict}
+        return data
 
 
     @classmethod
@@ -438,8 +478,12 @@ class bbShop(bbSerializable.bbSerializable):
         for turretListingDict in shopDict["turretsStock"]:
             turretsStock.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-        return TechLeveledShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"],
-                        shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)
+        toolsStock = bbInventory.bbInventory()
+        for toolListingDict in shopDict["toolsStock"]:
+            toolsStock.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
+
+        return TechLeveledShop(shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock,
+                                turretsStock=turretsStock, toolsStock=toolsStock)
 
 
 class TechLeveledShop(bbShop):
@@ -451,18 +495,13 @@ class TechLeveledShop(bbShop):
     :vartype currentTechLevel: int
     """
 
-    def __init__(self, maxShips : int = bbConfig.shopDefaultShipsNum, maxModules : int = bbConfig.shopDefaultModulesNum,
-            maxWeapons : int = bbConfig.shopDefaultWeaponsNum, maxTurrets : int = bbConfig.shopDefaultTurretsNum,
-            shipsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
+    def __init__(self, shipsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
             weaponsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
             modulesStock : bbInventory.bbInventory = bbInventory.bbInventory(),
             turretsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
+            toolsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
             currentTechLevel : int = bbConfig.minTechLevel, noRefresh : bool = False):
         """
-        :param int maxShips: The maximum number of ships generated on every stock refresh. (Default bbConfig.shopDefaultShipsNum)
-        :param int maxModules: The maximum number of modules generated on every stock refresh. (Default bbConfig.shopDefaultModulesNum)
-        :param int maxWeapons: The maximum number of weapons generated on every stock refresh. (Default bbConfig.shopDefaultWeaponsNum)
-        :param int maxTurrets: The maximum number of turrets generated on every stock refresh. (Default bbConfig.shopDefaultTurretsNum)
         :param int currentTechLevel: The current tech level of the shop, influencing the tech levels of the stock generated upon refresh. (Default empty bbInventory)
         :param bbInventory shipsStock: The shop's current stock of ships (Default empty bbInventory)
         :param bbInventory weaponsStock: The shop's current stock of weapons (Default empty bbInventory)
@@ -470,8 +509,7 @@ class TechLeveledShop(bbShop):
         :param bbInventory turretsStock: The shop's current stock of turrets (Default bbConfig.minTechLevel)
         :param bool noRefresh: By default, if all shop stocks are empty, the shop will refresh. Give True here to disable this functionality and allow empty shops. (Default False)
         """
-        super().__init__(maxShips=maxShips, maxModules=maxModules, maxWeapons=maxWeapons, maxTurrets=maxTurrets,
-                            shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)
+        super().__init__(shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock, toolsStock=toolsStock)
         
         self.currentTechLevel = currentTechLevel
         if (not noRefresh) and shipsStock.isEmpty() and weaponsStock.isEmpty() and modulesStock.isEmpty() and turretsStock.isEmpty():
@@ -489,7 +527,8 @@ class TechLeveledShop(bbShop):
         self.weaponsStock.clear()
         self.modulesStock.clear()
         self.turretsStock.clear()
-        # self.currentTechLevel = random.randint(bbConfig.minTechLevel, bbConfig.maxTechLevel)
+        self.toolsStock.clear()
+        
         if level == -1:
             self.currentTechLevel = bbConfig.pickRandomShopTL()
         else:
@@ -497,23 +536,22 @@ class TechLeveledShop(bbShop):
                 raise ValueError("Attempted to refresh a shop at tech level " + str(level) + ". must be within the range " + str(bbConfig.minTechLevel) + " to " + str(bbConfig.maxTechLevel))
             self.currentTechLevel = level
             
-        for i in range(self.maxShips):
+        for i in range(bbConfig.shopDefaultShipsNum):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.shipKeysByTL[itemTL - 1]) != 0:
                 self.shipsStock.addItem(bbShip.bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL - 1])]))
 
-        for i in range(self.maxModules):
+        for i in range(bbConfig.shopDefaultModulesNum):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.moduleObjsByTL[itemTL - 1]) != 0:
                 self.modulesStock.addItem(random.choice(bbData.moduleObjsByTL[itemTL - 1]))
 
-        for i in range(self.maxWeapons):
+        for i in range(bbConfig.shopDefaultWeaponsNum):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.weaponObjsByTL[itemTL - 1]) != 0:
                 self.weaponsStock.addItem(random.choice(bbData.weaponObjsByTL[itemTL - 1]))
 
-        # if random.randint(1, 100) <= bbConfig.turretSpawnProbability:
-        for i in range(self.maxTurrets):
+        for i in range(bbConfig.shopDefaultTurretsNum):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.turretObjsByTL[itemTL - 1]) != 0:
                 self.turretsStock.addItem(random.choice(bbData.turretObjsByTL[itemTL - 1]))
@@ -528,6 +566,7 @@ class TechLeveledShop(bbShop):
         """
         data = super().toDict(**kwargs)
         data["currentTechLevel"] = self.currentTechLevel
+        return data
 
 
     @classmethod
@@ -554,5 +593,10 @@ class TechLeveledShop(bbShop):
         for turretListingDict in shopDict["turretsStock"]:
             turretsStock.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-        return TechLeveledShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"], currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
-                        shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)
+        toolsStock = bbInventory.bbInventory()
+        for toolListingDict in shopDict["toolsStock"]:
+            toolsStock.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
+
+        return TechLeveledShop(currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
+                        shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock,
+                        toolsStock=toolsStock)
