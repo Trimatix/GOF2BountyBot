@@ -136,8 +136,9 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         :param bool saveType: When true, include the string name of the object type in the output.
         """
         data = super().toDict(**kwargs)
-        data["name"] = self.shipSkin.name
-        data["skin"] = self.shipSkin.toDict(**kwargs)
+        if not self.builtIn:
+            data["name"] = self.shipSkin.name
+            data["skin"] = self.shipSkin.toDict(**kwargs)
         return data
         # raise RuntimeError("Attempted to save a non-builtIn bbShipSkinTool")
             

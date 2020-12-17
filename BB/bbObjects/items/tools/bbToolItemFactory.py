@@ -1,4 +1,5 @@
 from . import bbToolItem, bbShipSkinTool, bbCrate
+from ....bbConfig import bbData
 
 
 def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
@@ -10,9 +11,11 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
     :rtype: bbToolItem.bbToolItem
     :raise NameError: When toolDict does not contain a 'type' attribute.
     """
+    if "builtIn" in toolDict and toolDict["builtIn"]:
+        return bbData.builtInToolObjs[toolDict["name"]]
 
     toolTypeConstructors = {"bbShipSkinTool": bbShipSkinTool.bbShipSkinTool.fromDict,
-                        "bbCrate": bbCrate.bbCrate.fromDict}
+                            "bbCrate": bbCrate.bbCrate.fromDict}
     
     if "type" not in toolDict:
         raise NameError("Required dictionary attribute missing: 'type'")
