@@ -4,14 +4,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import bbUser
 
-from ..bbConfig import bbData, bbConfig
-from .items import bbModuleFactory, bbShip, bbWeapon, bbTurret, bbItem
+from .items import bbModuleFactory, bbShip, bbWeapon, bbTurret
 from .items.modules import bbModule
 from . import bbInventory
-import random
-from ..logging import bbLogger
 from .items.tools import bbToolItem, bbToolItemFactory
-
 from . import bbShop
 
 
