@@ -50,7 +50,7 @@ class bbGuild(bbSerializable.bbSerializable):
     """
 
     def __init__(self, id : int, bountiesDB: bbBountyDB.bbBountyDB, dcGuild: Guild, announceChannel : channel.TextChannel = None,
-            playChannel : channel.TextChannel = None, shop : bbShop.bbShop = None,
+            playChannel : channel.TextChannel = None, shop : bbShop.TechLeveledShop = None,
             bountyBoardChannel : BountyBoardChannel.BountyBoardChannel = None, alertRoles : Dict[str, int] = {},
             ownedRoleMenus : int = 0, bountiesDisabled : bool = False, shopDisabled : bool = False):
         """
@@ -83,7 +83,7 @@ class bbGuild(bbSerializable.bbSerializable):
         if shopDisabled:
             self.shop = None
         else:
-            self.shop = bbShop.bbShop() if shop is None else shop
+            self.shop = bbShop.TechLeveledShop() if shop is None else shop
         
         self.alertRoles = {}
         for alertID in UserAlerts.userAlertsIDsTypes.keys():
@@ -551,7 +551,7 @@ class bbGuild(bbSerializable.bbSerializable):
         if not self.shopDisabled:
             raise ValueError("The shop is already enabled in this guild")
 
-        self.shop = bbShop.bbShop(noRefresh=True)
+        self.shop = bbShop.TechLeveledShop(noRefresh=True)
         self.shopDisabled = False
 
 
@@ -653,9 +653,9 @@ class bbGuild(bbSerializable.bbSerializable):
             shop = None
         else:
             if "shop" in guildDict:
-                shop = bbShop.bbShop.fromDict(guildDict["shop"])
+                shop = bbShop.TechLeveledShop.fromDict(guildDict["shop"])
             else:
-                shop = bbShop.bbShop()
+                shop = bbShop.TechLeveledShop()
         
 
         return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel,
