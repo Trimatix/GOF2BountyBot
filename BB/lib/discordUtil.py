@@ -91,21 +91,25 @@ def getMemberFromRef(uRef : str, dcGuild : Guild) -> Union[Member, None]:
 
 
 def userTagOrDiscrim(userID : str, guild : Guild = None) -> str:
-    """If a passed user mention or ID is valid and shares a common server with the bot,
-    return the user's name and discriminator. TODO: Should probably change this to display name
-    Otherwise, return the passed userID.
+    """If the given guild has a user with the given ID, return their mention.
+    Otherwise, if the bot shares any server with the user with the given ID, return their name and discriminator.
+    Otherwise, return userID.
 
     :param str userID: A user mention or ID in string form, to attempt to convert to name and discrim
     :param discord.Guild guild: Optional guild in which to search for the user rather than searching over the client, improving efficiency.
     :return: The user's name and discriminator if the user is reachable, userID otherwise
     :rtype: str
     """
-    if guild is None:
-        userObj = bbGlobals.client.get_user(int(userID.lstrip("<@!").rstrip(">")))
-    else:
+    if guild is not None:
         userObj = guild.get_member(int(userID.lstrip("<@!").rstrip(">")))
+        if userObj is not None:
+            return userObj.mention
+
+    userObj = bbGlobals.client.get_user(int(userID.lstrip("<@!").rstrip(">")))
+
     if userObj is not None:
         return userObj.name + "#" + userObj.discriminator
+        
     # Return the given mention as a fall back - might replace this with '#UNKNOWNUSER#' at some point.
     bbLogger.log("Main", "uTgOrDscrm", "Unknown user requested." + (("Guild:" + guild.name + "#" + str(str(guild.id)))
                                                                     if guild is not None else "Global/NoGuild") + ". uID:" + str(userID), eventType="UKNWN_USR")
