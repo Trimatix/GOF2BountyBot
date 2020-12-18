@@ -203,8 +203,6 @@ async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
     :param str args: either empty string, a user mention, or 'criminal' followed by a criminal alias.
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    callingBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
-
     requestedUser = message.author
     useDummyData = False
     userFound = False
@@ -217,31 +215,35 @@ async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
         return
 
     if args.split(" ")[0] == "criminal":
-        if callingBBGuild.bountiesDisabled:
-            await message.channel.send(":x: This server has bounties disabled!")
-            return
+        if isDM:
+            await message.channel.send(":x: criminal loadouts can only be requested from inside a server!")
+        else:
+            callingBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
+            if callingBBGuild.bountiesDisabled:
+                await message.channel.send(":x: This server has bounties disabled!")
+                return
 
-        # look up the criminal object
-        criminalName = args[9:].title()
+            # look up the criminal object
+            criminalName = args[9:].title()
 
-        # report unrecognised criminal names
-        if not callingBBGuild.bountiesDB.bountyNameExists(criminalName, noEscapedCrim=True):
-            errmsg = ":x: That pilot is not currently wanted!"
+            # report unrecognised criminal names
+            if not callingBBGuild.bountiesDB.bountyNameExists(criminalName, noEscapedCrim=True):
+                errmsg = ":x: That pilot is not currently wanted!"
+                
+                if lib.stringTyping.isMention(criminalName):
+                    errmsg += "\n:warning: **Don't tag users**, use their name and ID number like so: `" + bbConfig.commandPrefix + "loadout criminal Trimatix#2244`"
+                
+                await message.channel.send(errmsg)
+                return
+
+            criminalObj = callingBBGuild.bountiesDB.getBounty(criminalName).criminal
             
-            if lib.stringTyping.isMention(criminalName):
-                errmsg += "\n:warning: **Don't tag users**, use their name and ID number like so: `" + bbConfig.commandPrefix + "loadout criminal Trimatix#2244`"
+            activeShip = criminalObj.activeShip
+            loadoutEmbed = lib.discordUtil.makeEmbed(titleTxt="Loadout", desc=criminalObj.name.title() + "\n`Difficulty: " + str(criminalObj.techLevel) + "`", col=bbData.factionColours[criminalObj.faction] if criminalObj.faction in bbData.factionColours else bbData.factionColours["neutral"], thumb=criminalObj.icon)
+            loadoutEmbed = activeShip.fillLoadoutEmbed(loadoutEmbed, shipEmoji=True)
             
-            await message.channel.send(errmsg)
+            await message.channel.send(embed=loadoutEmbed)
             return
-
-        criminalObj = callingBBGuild.bountiesDB.getBounty(criminalName).criminal
-        
-        activeShip = criminalObj.activeShip
-        loadoutEmbed = lib.discordUtil.makeEmbed(titleTxt="Loadout", desc=criminalObj.name.title() + "\n`Difficulty: " + str(criminalObj.techLevel) + "`", col=bbData.factionColours[criminalObj.faction] if criminalObj.faction in bbData.factionColours else bbData.factionColours["neutral"], thumb=criminalObj.icon)
-        loadoutEmbed = activeShip.fillLoadoutEmbed(loadoutEmbed, shipEmoji=True)
-        
-        await message.channel.send(embed=loadoutEmbed)
-        return
     
     if args != "":
         requestedUser = lib.discordUtil.getMemberByRefOverDB(args, dcGuild=message.guild)
