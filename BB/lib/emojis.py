@@ -4,6 +4,7 @@ from .. import bbGlobals
 from . import stringTyping
 from ..logging import bbLogger
 import traceback
+from ..baseClasses import bbSerializable
 
 from typing import Union, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -27,7 +28,7 @@ class UnrecognisedCustomEmoji(Exception):
         self.id = id
 
 
-class dumbEmoji:
+class dumbEmoji(bbSerializable.bbSerializable):
     """A class that really shouldnt be necessary, acting as a union over the str (unicode) and Emoji type emojis used and returned by discord.
     To instance this class, provide exactly one of the constructor's keyword arguments.
 
@@ -46,7 +47,7 @@ class dumbEmoji:
     """
     EMPTY = None
 
-    def __init__(self, id : int = -1, unicode : str = ""):
+    def __init__(self, id : int = -1, unicode : str = "", rejectInvalid : bool = False):
         """
         :param int id: The ID of the custom emoji that this object should represent.
         :param str unicode: The unicode emoji that this object should represent.
@@ -72,11 +73,11 @@ class dumbEmoji:
         else:
             self.sendable = self.unicode if self.isUnicode else str(bbGlobals.client.get_emoji(self.id))
         if self.sendable == "None":
-            # raise UnrecognisedCustomEmoji("Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id),self.id)
-            bbLogger.log("dumbEmoji", "init", "Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id), trace=traceback.format_exc())
-            self.sendable = err_UnknownEmoji
-        # if self.sendable is None:
-        #     self.sendable = '❓'
+            if rejectInvalid:
+                raise UnrecognisedCustomEmoji("Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id),self.id)
+            else:
+                bbLogger.log("dumbEmoji", "init", "Unrecognised custom emoji ID in dumbEmoji constructor: " + str(self.id), trace=traceback.format_exc())
+                self.sendable = err_UnknownEmoji
 
     
     def toDict(self, **kwargs) -> dict:
@@ -88,6 +89,31 @@ class dumbEmoji:
         if self.isUnicode:
             return {"unicode":self.unicode}
         return {"id":self.id}
+
+
+    @classmethod
+    def fromDict(cls, emojiDict : dict, **kwargs) -> dumbEmoji:
+        """Construct a dumbEmoji object from its dictionary representation.
+        If both an ID and a unicode representation are provided, the emoji ID will be used.
+
+        TODO: If ID is -1, use unicode. If unicode is "", use ID.
+
+        :param dict emojiDict: A dictionary containing either an ID (for custom emojis) or a unicode emoji string (for unicode emojis)
+        :param bool ignoreInvalid: When true, invalid emojis will be logged in bbLogger. When False, an exception will be raised on invalid emojis.
+        :return: A new dumbEmoji object as described in emojiDict
+        :rtype: dumbEmoji
+        """
+        rejectInvalid = kwargs["rejectInvalid"] if "rejectInvalid" in kwargs else False
+
+        if type(emojiDict) == dumbEmoji:
+            return emojiDict
+        if "id" in emojiDict:
+            if emojiDict["id"] == 0:
+                return dumbEmoji.EMPTY
+            else:
+                return dumbEmoji(id=emojiDict["id"], rejectInvalid=rejectInvalid)
+        else:
+            return dumbEmoji(unicode=emojiDict["unicode"], rejectInvalid=rejectInvalid)
 
 
     def __repr__(self) -> str:
@@ -130,27 +156,6 @@ class dumbEmoji:
 
 # 'static' object representing an empty/lack of emoji
 dumbEmoji.EMPTY = dumbEmoji(id=0)
-
-
-def dumbEmojiFromDict(emojiDict : dict) -> dumbEmoji:
-    """Construct a dumbEmoji object from its dictionary representation.
-    If both an ID and a unicode representation are provided, the emoji ID will be used.
-
-    TODO: If ID is -1, use unicode. If unicode is "", use ID.
-
-    :param dict emojiDict: A dictionary containing either an ID (for custom emojis) or a unicode emoji string (for unicode emojis)
-    :return: A new dumbEmoji object as described in emojiDict
-    :rtype: dumbEmoji
-    """
-    if type(emojiDict) == dumbEmoji:
-        return emojiDict
-    if "id" in emojiDict:
-        if emojiDict["id"] == 0:
-            return dumbEmoji.EMPTY
-        else:
-            return dumbEmoji(id=emojiDict["id"])
-    else:
-        return dumbEmoji(unicode=emojiDict["unicode"])
 
 
 def isUnicodeEmoji(c : str) -> bool:
