@@ -44,3 +44,15 @@ class bbItemDiscount(bbSerializable.bbSerializable):
     
     def __ge__(self, o: bbItemDiscount) -> bool:
         return isinstance(o, bbItemDiscount) and self.mult <= o.mult
+
+
+    def toDict(self, **kwargs):
+        data = super().toDict(**kwargs)
+        data["mult"] = self.mult
+        data["desc"] = self.desc
+        return data
+
+
+    @classmethod
+    def fromDict(cls, data: dict, **kwargs) -> bbItemDiscount:
+        return bbItemDiscount(data["mult"], data["desc"])
