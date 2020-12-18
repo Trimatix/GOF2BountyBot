@@ -531,20 +531,28 @@ async def cmd_info_skin(message : discord.Message, args : str, isDM : bool):
         # build the stats embed	
         statsEmbed = lib.discordUtil.makeEmbed(	
             col=lib.discordUtil.randomColour(), desc="__Ship Skin File__", titleTxt=shipSkin.name.title(), thumb=bbConfig.defaultShipSkinToolIcon, footerTxt = ("Preview this skin with the " + "`" + bbConfig.commandPrefix + "showme` command.") if len(shipSkin.compatibleShips) > 0 else "")	
-        statsEmbed.add_field(	
-            name="Designed by:", value=lib.discordUtil.userTagOrDiscrim(str(shipSkin.designer), guild=message.guild))	
-        compatibleShipsStr = ""	
-        for ship in shipSkin.compatibleShips:	
-            compatibleShipsStr += " - " + ship + "\n"	
-        statsEmbed.add_field(	
-            name="Compatible ships:", value=compatibleShipsStr[:-1] if compatibleShipsStr != "" else "None")	
-        if shipSkin.averageTL != -1:	
-            statsEmbed.add_field(name="Average tech level of compatible ships:", value=shipSkin.averageTL)	
-        if shipSkin.hasWiki:	
-            statsEmbed.add_field(	
-                name="‎", value="[Wiki](" + shipSkin.wiki + ")", inline=False)	
-        # send the embed	
-        await message.channel.send(embed=statsEmbed)	
+        statsEmbed.add_field(
+            name="Designed by:", value=lib.discordUtil.userTagOrDiscrim(str(shipSkin.designer), guild=message.guild))
+        if shipSkin.averageTL != -1:
+            statsEmbed.add_field(name="Average tech level of compatible ships:", value=shipSkin.averageTL)
+        if shipSkin.hasWiki:
+            statsEmbed.add_field(
+                name="‎", value="[Wiki](" + shipSkin.wiki + ")", inline=False)
+        
+        compatibleShipStrs = []
+        for shipName in shipSkin.compatibleShips:
+            shipData = bbData.builtInShipData[shipName]
+            if "emoji" in shipData:
+                try:
+                    compatibleShipStrs.append(lib.emojis.dumbEmojiFromStr(shipData["emoji"]).sendable)
+                except lib.emojis.UnrecognisedCustomEmoji:
+                    pass
+            else:
+                compatibleShipStrs.append(shipData["name"])
+        statsEmbed.add_field(
+            name="Compatible ships:", value=" • ".join(compatibleShipStrs) if compatibleShipStrs != [] else "None", inline=False)
+        # send the embed
+        await message.channel.send(embed=statsEmbed)
 # bbCommands.register("commodity", cmd_commodity)
 
 
