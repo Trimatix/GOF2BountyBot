@@ -85,3 +85,8 @@ class bbInventoryListing(bbSerializable.bbSerializable):
     @classmethod
     def fromDict(cls, listingDict : dict, **kwargs):
         raise NotImplementedError("Cannot fromDict on bbInventoryListing in the general case. Instead instance bbInventoryListing with your fromDict-ed item object.")
+
+
+class DiscountableItemListing(bbInventoryListing):
+    """An item
+    """
