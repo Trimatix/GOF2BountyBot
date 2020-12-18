@@ -32,11 +32,11 @@ class bbShop(bbSerializable.bbSerializable):
 
     def __init__(self, maxShips : int = bbConfig.shopDefaultShipsNum, maxModules : int = bbConfig.shopDefaultModulesNum,
             maxWeapons : int = bbConfig.shopDefaultWeaponsNum, maxTurrets : int = bbConfig.shopDefaultTurretsNum, maxTools : int = bbConfig.shopDefaultToolsNum,
-            shipsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            weaponsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            modulesStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            turretsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            toolsStock : bbInventory.bbInventory = bbInventory.bbInventory()):
+            shipsStock : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbShip.bbShip),
+            weaponsStock : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbWeapon.bbWeapon),
+            modulesStock : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbModule.bbModule),
+            turretsStock : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbTurret.bbTurret),
+            toolsStock : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbToolItem.bbToolItem)):
         """
         :param bbInventory shipsStock: The shop's current stock of ships (Default empty bbInventory)
         :param bbInventory weaponsStock: The shop's current stock of weapons (Default empty bbInventory)
