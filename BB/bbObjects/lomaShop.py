@@ -16,17 +16,17 @@ class LomaShop(bbShop.bbShop):
     Items cannot be sold to Loma.
     """
 
-    def __init__(self, shipsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            weaponsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            modulesStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            turretsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            toolsStock : bbInventory.bbInventory = bbInventory.bbInventory()):
+    def __init__(self, shipsStock : bbInventory.bbInventory = bbInventory.DiscountableTypeRestrictedInventory(bbShip.bbShip),
+            weaponsStock : bbInventory.bbInventory = bbInventory.DiscountableTypeRestrictedInventory(bbWeapon.bbWeapon),
+            modulesStock : bbInventory.bbInventory = bbInventory.DiscountableTypeRestrictedInventory(bbModule.bbModule),
+            turretsStock : bbInventory.bbInventory = bbInventory.DiscountableTypeRestrictedInventory(bbTurret.bbTurret),
+            toolsStock : bbInventory.bbInventory = bbInventory.DiscountableTypeRestrictedInventory(bbToolItem.bbToolItem)):
         """
-        :param bbInventory shipsStock: The shop's current stock of ships (Default empty bbInventory)
-        :param bbInventory weaponsStock: The shop's current stock of weapons (Default empty bbInventory)
-        :param bbInventory modulesStock: The shop's current stock of modules (Default empty bbInventory)
-        :param bbInventory turretsStock: The shop's current stock of turrets (Default empty bbInventory)
-        :param bbInventory toolsStock: The shop's current stock of tools (Default empty bbInventory)
+        :param bbInventory shipsStock: The shop's current stock of ships (Default empty DiscountableTypeRestrictedInventory)
+        :param bbInventory weaponsStock: The shop's current stock of weapons (Default empty DiscountableTypeRestrictedInventory)
+        :param bbInventory modulesStock: The shop's current stock of modules (Default empty DiscountableTypeRestrictedInventory)
+        :param bbInventory turretsStock: The shop's current stock of turrets (Default empty DiscountableTypeRestrictedInventory)
+        :param bbInventory toolsStock: The shop's current stock of tools (Default empty DiscountableTypeRestrictedInventory)
         """
         super().__init__(shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock, toolsStock=toolsStock)
 
@@ -92,23 +92,24 @@ class LomaShop(bbShop.bbShop):
         :return: A new bbShop object as described by shopDict
         :rtype: bbShop
         """
-        shipsStock = bbInventory.bbInventory()
+        shipsStock = bbInventory.DiscountableTypeRestrictedInventory(bbShip.bbShip),
+        weaponsStock = bbInventory.DiscountableTypeRestrictedInventory(bbWeapon.bbWeapon),
+        modulesStock = bbInventory.DiscountableTypeRestrictedInventory(bbModule.bbModule),
+        turretsStock = bbInventory.DiscountableTypeRestrictedInventory(bbTurret.bbTurret),
+        toolsStock = bbInventory.DiscountableTypeRestrictedInventory(bbToolItem.bbToolItem)
+
         for shipListingDict in shopDict["shipsStock"]:
             shipsStock.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-        weaponsStock = bbInventory.bbInventory()
         for weaponListingDict in shopDict["weaponsStock"]:
             weaponsStock.addItem(bbWeapon.bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-        modulesStock = bbInventory.bbInventory()
         for moduleListingDict in shopDict["modulesStock"]:
             modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
-        turretsStock = bbInventory.bbInventory()
         for turretListingDict in shopDict["turretsStock"]:
             turretsStock.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-        toolsStock = bbInventory.bbInventory()
         for toolListingDict in shopDict["toolsStock"]:
             toolsStock.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
 
