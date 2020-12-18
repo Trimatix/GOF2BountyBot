@@ -279,9 +279,9 @@ async def cmd_info_ship(message : discord.Message, args : str, isDM : bool):
 
         # Include compatible ship skin names
         if "compatibleSkins" in itemData and len(itemData["compatibleSkins"]) > 0:
-            skinsStr = "• " + "\n• ".join(itemData["compatibleSkins"])
+            skinsStr = " • ".join(itemData["compatibleSkins"])
             statsEmbed.add_field(name="Compatible Skins:",
-                                    value=skinsStr)
+                                    value=skinsStr, inline=False)
 
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
