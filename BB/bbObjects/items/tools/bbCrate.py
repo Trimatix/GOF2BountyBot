@@ -56,7 +56,7 @@ class bbCrate(bbToolItem.bbToolItem):
             raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " + kwargs["callingBBUser"].__class__.__name__)
         
         callingBBUser = kwargs["callingBBUser"]
-        confirmMsg = await message.channel.send("Are you sure you want to open this crate?") 
+        confirmMsg = await message.channel.send("Are you sure you want to open your '" + self.name + "' crate?") 
         confirmation = await InlineConfirmationMenu(confirmMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds).doMenu()
 
         if bbConfig.defaultRejectEmoji in confirmation:
