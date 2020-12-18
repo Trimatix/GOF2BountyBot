@@ -8,7 +8,7 @@ from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from .items.tools import bbToolItemFactory, bbToolItem
 from .items.modules import bbModule
 from ..bbConfig import bbConfig
-from . import bbInventory
+from . import bbInventory, kaamoShop, lomaShop
 from ..userAlerts import UserAlerts
 from datetime import date, datetime
 from discord import Guild, Member
@@ -98,7 +98,8 @@ class bbUser(bbSerializable.bbSerializable):
                     lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
                     duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[UserAlerts.UABase or bool]] = {},
                     bountyWinsToday : int = 0, dailyBountyWinsReset : datetime = None, pollOwned : bool = False,
-                    homeGuildID : int = -1, guildTransferCooldownEnd : datetime = None):
+                    homeGuildID : int = -1, guildTransferCooldownEnd : datetime = None,
+                    kaamo : kaamoShop.KaamoShop = None, loma : lomaShop.LomaShop = None):
         """
         :param int id: The user's unique ID. The same as their unique discord ID.
         :param int credits: The amount of credits (currency) this user has (Default 0)
@@ -125,6 +126,8 @@ class bbUser(bbSerializable.bbSerializable):
         :param bool pollOwned: Whether or not this user has a running ReactionPollMenu (Default False)
         :param Guild homeGuildID: The ID of this user's 'home guild' - the only guild from which they may use several commands e.g buy and check.
         :param datetime.datetime guildTransferCooldownEnd: A timestamp after which this user is allowed to transfer their homeGuildID.
+        :param KaamoShop kaamo: The user's Kaamo Club storage, only accessible at bounty hunter level 10. To save memory, this is None until the user first uses it. (default None)
+        :param LomaShop loma: A shop private to this user, selling special discountable items. To save memory, this is None until the user first uses it. (default None)
         :raise TypeError: When given an argument of incorrect type
         """
         if type(id) == float:
@@ -220,6 +223,9 @@ class bbUser(bbSerializable.bbSerializable):
         self.homeGuildID = homeGuildID
         self.guildTransferCooldownEnd = guildTransferCooldownEnd
 
+        self.kaamo = kaamo
+        self.loma = loma
+
     
     def resetUser(self):
         """Reset the user's attributes back to their default values.
@@ -243,6 +249,8 @@ class bbUser(bbSerializable.bbSerializable):
         self.bountyHuntingXP = bbConfig.bountyHuntingXPForLevel(1)
         self.homeGuildID = -1
         self.guildTransferCooldownEnd = datetime.utcnow()
+        self.kaamo = None
+        self.loma = None
 
 
     def numInventoryPages(self, item : str, maxPerPage : int) -> int:
@@ -410,28 +418,34 @@ class bbUser(bbSerializable.bbSerializable):
         :return: A dictionary containing all information needed to recreate this user
         :rtype: dict
         """
-        inactiveShipsDict = self.inactiveShips.toDict(**kwargs)["items"]
-        inactiveModulesDict = self.inactiveModules.toDict(**kwargs)["items"]
-        inactiveWeaponsDict = self.inactiveWeapons.toDict(**kwargs)["items"]
-        inactiveTurretsDict = self.inactiveTurrets.toDict(**kwargs)["items"]
-
-        if "saveType" not in kwargs:
-            inactiveToolsDict = self.inactiveTools.toDict(saveType=True, **kwargs)["items"]
-        else:
-            inactiveToolsDict = self.inactiveTools.toDict(**kwargs)["items"]
-
-        alerts = {}
-        for alertID in self.userAlerts.keys():
-            if isinstance(self.userAlerts[alertID], UserAlerts.StateUserAlert):
-                alerts[alertID] = self.userAlerts[alertID].state
-
-        return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
+        data = {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
-                "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(**kwargs), "inactiveShips":inactiveShipsDict,
-                "inactiveModules":inactiveModulesDict, "inactiveWeapons":inactiveWeaponsDict, "inactiveTurrets": inactiveTurretsDict, "inactiveTools": inactiveToolsDict,
+                "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(**kwargs),
                 "lastSeenGuildId":self.lastSeenGuildId, "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins,
                 "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "bountyHuntingXP": self.bountyHuntingXP, "pollOwned": self.pollOwned,
                 "duelCreditsLosses": self.duelCreditsLosses, "homeGuildID": self.homeGuildID, "guildTransferCooldownEnd": self.guildTransferCooldownEnd.timestamp()}
+
+        data["inactiveShips"] = self.inactiveShips.toDict(**kwargs)["items"]
+        data["inactiveModules"] = self.inactiveModules.toDict(**kwargs)["items"]
+        data["inactiveWeapons"] = self.inactiveWeapons.toDict(**kwargs)["items"]
+        data["inactiveTurrets"] = self.inactiveTurrets.toDict(**kwargs)["items"]
+
+        if "saveType" not in kwargs:
+            data["inactiveTools"] = self.inactiveTools.toDict(saveType=True, **kwargs)["items"]
+        else:
+            data["inactiveTools"] = self.inactiveTools.toDict(**kwargs)["items"]
+
+        data["alerts"] = {}
+        for alertType in self.userAlerts:
+            if issubclass(alertType, UserAlerts.StateUserAlert):
+                data["alerts"][UserAlerts.userAlertsTypesIDs[alertType]] = self.userAlerts[alertType].state
+
+        if self.kaamo is not None:
+            data["kaamo"] = self.kaamo.toDict(**kwargs)
+        if self.loma is not None:
+            data["loma"] = self.loma.toDict(**kwargs)
+
+        return data
 
 
     def userDump(self) -> str:
@@ -737,6 +751,9 @@ class bbUser(bbSerializable.bbSerializable):
             # Convert pre-bountyShips savedata to bounty hunter XP by calculating XP directly from total credits earned from bounties
             bountyHuntingXP = bbConfig.bountyHuntingXPForLevel(1) if "lifetimeCredits" not in userDict else int(userDict["lifetimeCredits"] * bbConfig.bountyRewardToXPGainMult)
 
+        kaamo = kaamoShop.KaamoShop.fromDict(userDict["kaamo"]) if "kaamo" in userDict else None
+        loma = kaamoShop.KaamoShop.fromDict(userDict["loma"]) if "loma" in userDict else None
+
         return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                         bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
                         bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
@@ -752,4 +769,4 @@ class bbUser(bbSerializable.bbSerializable):
                         pollOwned=userDict["pollOwned"] if "pollOwned" in userDict else False,
                         homeGuildID=userDict["homeGuildID"] if "homeGuildID" in userDict else -1,
                         guildTransferCooldownEnd=datetime.utcfromtimestamp(userDict["guildTransferCooldownEnd"]) if "guildTransferCooldownEnd" in userDict else datetime.utcnow(),
-                        bountyHuntingXP=bountyHuntingXP)
+                        bountyHuntingXP=bountyHuntingXP, kaamo=kaamo, loma=loma)
