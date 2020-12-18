@@ -186,7 +186,7 @@ def isCustomEmoji(s : str) -> bool:
     return False
 
 
-def dumbEmojiFromStr(s : str) -> dumbEmoji:
+def dumbEmojiFromStr(s : str, rejectInvalid = False) -> dumbEmoji:
     """Construct a dumbEmoji object from a string containing either a unicode emoji or a discord custom emoji.
     s may also be a dumbEmoji (returns s), a dictionary-serialized dumbEmoji (returns dumbEmojiFromDict(s)), or
     only an ID of a discord custom emoji (may be either str or int)
@@ -198,13 +198,13 @@ def dumbEmojiFromStr(s : str) -> dumbEmoji:
     if type(s) == dumbEmoji:
         return s
     if type(s) == dict:
-        return dumbEmojiFromDict(s)
+        return dumbEmoji.fromDict(s, rejectInvalid=rejectInvalid)
     if isUnicodeEmoji(s):
-        return dumbEmoji(unicode=s)
+        return dumbEmoji(unicode=s, rejectInvalid=rejectInvalid)
     elif isCustomEmoji(s):
-        return dumbEmoji(id=int(s[s[s.index(":")+1:].index(":")+3:-1]))
+        return dumbEmoji(id=int(s[s[s.index(":")+1:].index(":")+3:-1]), rejectInvalid=rejectInvalid)
     elif stringTyping.isInt(s):
-        return dumbEmoji(id=int(s))
+        return dumbEmoji(id=int(s), rejectInvalid=rejectInvalid)
     else:
         return None
 
