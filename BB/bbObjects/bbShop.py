@@ -462,27 +462,28 @@ class bbShop(bbSerializable.bbSerializable):
         :return: A new bbShop object as described by shopDict
         :rtype: bbShop
         """
-        shipsStock = bbInventory.bbInventory()
+        shipsStock = bbInventory.TypeRestrictedInventory(bbShip.bbShip)
+        weaponsStock = bbInventory.TypeRestrictedInventory(bbWeapon.bbWeapon)
+        modulesStock = bbInventory.TypeRestrictedInventory(bbModule.bbModule)
+        turretsStock = bbInventory.TypeRestrictedInventory(bbTurret.bbTurret)
+        toolsStock = bbInventory.TypeRestrictedInventory(bbToolItem.bbToolItem)
+        
         for shipListingDict in shopDict["shipsStock"]:
             shipsStock.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-        weaponsStock = bbInventory.bbInventory()
         for weaponListingDict in shopDict["weaponsStock"]:
             weaponsStock.addItem(bbWeapon.bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-        modulesStock = bbInventory.bbInventory()
         for moduleListingDict in shopDict["modulesStock"]:
             modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
-        turretsStock = bbInventory.bbInventory()
         for turretListingDict in shopDict["turretsStock"]:
             turretsStock.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-        toolsStock = bbInventory.bbInventory()
         for toolListingDict in shopDict["toolsStock"]:
             toolsStock.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
 
-        return TechLeveledShop(shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock,
+        return bbShop(shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock,
                                 turretsStock=turretsStock, toolsStock=toolsStock)
 
 
@@ -577,23 +578,24 @@ class TechLeveledShop(bbShop):
         :return: A new bbShop object as described by shopDict
         :rtype: bbShop
         """
-        shipsStock = bbInventory.bbInventory()
+        shipsStock = bbInventory.TypeRestrictedInventory(bbShip.bbShip)
+        weaponsStock = bbInventory.TypeRestrictedInventory(bbWeapon.bbWeapon)
+        modulesStock = bbInventory.TypeRestrictedInventory(bbModule.bbModule)
+        turretsStock = bbInventory.TypeRestrictedInventory(bbTurret.bbTurret)
+        toolsStock = bbInventory.TypeRestrictedInventory(bbToolItem.bbToolItem)
+
         for shipListingDict in shopDict["shipsStock"]:
             shipsStock.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-        weaponsStock = bbInventory.bbInventory()
         for weaponListingDict in shopDict["weaponsStock"]:
             weaponsStock.addItem(bbWeapon.bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-        modulesStock = bbInventory.bbInventory()
         for moduleListingDict in shopDict["modulesStock"]:
             modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
-        turretsStock = bbInventory.bbInventory()
         for turretListingDict in shopDict["turretsStock"]:
             turretsStock.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-        toolsStock = bbInventory.bbInventory()
         for toolListingDict in shopDict["toolsStock"]:
             toolsStock.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
 
