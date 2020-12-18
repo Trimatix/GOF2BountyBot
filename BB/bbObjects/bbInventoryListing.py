@@ -107,3 +107,10 @@ class DiscountableItemListing(bbInventoryListing):
 
     def popDiscount(self) -> bbItemDiscount:
         return self.discounts.pop(0)
+
+
+    def toDict(self, **kwargs) -> dict:
+        data = super().toDict(**kwargs)
+        if self.discounts:
+            data["discounts"] = [discount.toDict(**kwargs) for discount in self.discounts]
+        return data
