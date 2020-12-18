@@ -16,20 +16,6 @@ class LomaShop(bbShop.bbShop):
     Items cannot be sold to Loma.
     """
 
-    def __init__(self, shipsStock : bbInventory.bbInventory = bbInventory.DiscountableTypeRestrictedInventory(bbShip.bbShip),
-            weaponsStock : bbInventory.bbInventory = bbInventory.DiscountableTypeRestrictedInventory(bbWeapon.bbWeapon),
-            modulesStock : bbInventory.bbInventory = bbInventory.DiscountableTypeRestrictedInventory(bbModule.bbModule),
-            turretsStock : bbInventory.bbInventory = bbInventory.DiscountableTypeRestrictedInventory(bbTurret.bbTurret),
-            toolsStock : bbInventory.bbInventory = bbInventory.DiscountableTypeRestrictedInventory(bbToolItem.bbToolItem)):
-        """
-        :param bbInventory shipsStock: The shop's current stock of ships (Default empty DiscountableTypeRestrictedInventory)
-        :param bbInventory weaponsStock: The shop's current stock of weapons (Default empty DiscountableTypeRestrictedInventory)
-        :param bbInventory modulesStock: The shop's current stock of modules (Default empty DiscountableTypeRestrictedInventory)
-        :param bbInventory turretsStock: The shop's current stock of turrets (Default empty DiscountableTypeRestrictedInventory)
-        :param bbInventory toolsStock: The shop's current stock of tools (Default empty DiscountableTypeRestrictedInventory)
-        """
-        super().__init__(shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock, toolsStock=toolsStock)
-
 
     def userSellShipObj(self, user : bbUser.bbUser, ship : bbShip.bbShip):
         """Selling items to Loma is not allowed."""

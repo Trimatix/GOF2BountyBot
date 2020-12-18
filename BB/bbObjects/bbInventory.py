@@ -270,7 +270,4 @@ class DiscountableTypeRestrictedInventory(bbInventory):
     """A TypeRestrictedInventory storing DiscountableItemListing instead of bbItemListings.
     """
     listingType = bbInventoryListing.DiscountableItemListing
-
-    def __init__(self, itemType : type):
-        super().__init__(itemType)
         
