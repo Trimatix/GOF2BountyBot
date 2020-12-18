@@ -78,10 +78,10 @@ class LomaShop(bbShop.bbShop):
         :return: A new bbShop object as described by shopDict
         :rtype: bbShop
         """
-        shipsStock = bbInventory.DiscountableTypeRestrictedInventory(bbShip.bbShip),
-        weaponsStock = bbInventory.DiscountableTypeRestrictedInventory(bbWeapon.bbWeapon),
-        modulesStock = bbInventory.DiscountableTypeRestrictedInventory(bbModule.bbModule),
-        turretsStock = bbInventory.DiscountableTypeRestrictedInventory(bbTurret.bbTurret),
+        shipsStock = bbInventory.DiscountableTypeRestrictedInventory(bbShip.bbShip)
+        weaponsStock = bbInventory.DiscountableTypeRestrictedInventory(bbWeapon.bbWeapon)
+        modulesStock = bbInventory.DiscountableTypeRestrictedInventory(bbModule.bbModule)
+        turretsStock = bbInventory.DiscountableTypeRestrictedInventory(bbTurret.bbTurret)
         toolsStock = bbInventory.DiscountableTypeRestrictedInventory(bbToolItem.bbToolItem)
 
         for shipListingDict in shopDict["shipsStock"]:
