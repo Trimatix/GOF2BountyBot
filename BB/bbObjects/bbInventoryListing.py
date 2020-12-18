@@ -1,5 +1,6 @@
 from typing import Type
 from ..baseClasses import bbSerializable
+from .bbItemDiscount import bbItemDiscount
 
 
 class bbInventoryListing(bbSerializable.bbSerializable):
@@ -88,5 +89,21 @@ class bbInventoryListing(bbSerializable.bbSerializable):
 
 
 class DiscountableItemListing(bbInventoryListing):
-    """An item
+    """An item listing that also stores a max-sorted list of single-use value modifications.
     """
+    def __init__(self, item, count : int = 0):
+        """
+        :param item: The item to store
+        :param int quantity: The amount of item to store (Default 0)
+        """
+        super().__init__(item, count=count)
+        self.discounts = []
+    
+    
+    def pushDiscount(self, discount : bbItemDiscount):
+        self.discounts.append(discount)
+        self.discounts.sort()
+
+
+    def popDiscount(self) -> bbItemDiscount:
+        return self.discounts.pop(0)
