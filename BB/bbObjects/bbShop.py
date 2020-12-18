@@ -216,7 +216,7 @@ class bbShop(bbSerializable.bbSerializable):
         if self.userCanAffordItemObj(user, requestedWeapon):
             self.weaponsStock.removeItem(requestedWeapon)
             user.credits -= requestedWeapon.getValue()
-            user.inactiveShips.addItem(requestedWeapon)
+            user.inactiveWeapons.addItem(requestedWeapon)
         else:
             raise RuntimeError("user " + str(user.id) + " attempted to buy weapon " + requestedWeapon.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedWeapon.getValue()))
 
@@ -277,7 +277,7 @@ class bbShop(bbSerializable.bbSerializable):
         if self.userCanAffordItemObj(user, requestedModule):
             self.modulesStock.removeItem(requestedModule)
             user.credits -= requestedModule.getValue()
-            user.inactiveShips.addItem(requestedModule)
+            user.inactiveModules.addItem(requestedModule)
         else:
             raise RuntimeError("user " + str(user.id) + " attempted to buy module " + requestedModule.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedModule.getValue()))
 
@@ -338,7 +338,7 @@ class bbShop(bbSerializable.bbSerializable):
         if self.userCanAffordItemObj(user, requestedTurret):
             self.turretsStock.removeItem(requestedTurret)
             user.credits -= requestedTurret.getValue()
-            user.inactiveShips.addItem(requestedTurret)
+            user.inactiveTurrets.addItem(requestedTurret)
         else:
             raise RuntimeError("user " + str(user.id) + " attempted to buy turret " + requestedTurret.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedTurret.getValue()))
 
@@ -399,7 +399,7 @@ class bbShop(bbSerializable.bbSerializable):
         if self.userCanAffordItemObj(user, requestedTool):
             self.toolsStock.removeItem(requestedTool)
             user.credits -= requestedTool.getValue()
-            user.inactiveShips.addItem(requestedTool)
+            user.inactiveTools.addItem(requestedTool)
         else:
             raise RuntimeError("user " + str(user.id) + " attempted to buy tool " + requestedTool.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedTool.getValue()))
 
