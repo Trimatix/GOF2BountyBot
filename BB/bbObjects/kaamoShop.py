@@ -13,6 +13,25 @@ class KaamoShop(bbShop.bbShop):
     KaamoShops have a maximum capacity defined in bbConfig. Items equipped onto ships count towards this cap.
     """
 
+    def __init__(self, shipsStock : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbShip.bbShip),
+            weaponsStock : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbWeapon.bbWeapon),
+            modulesStock : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbModule.bbModule),
+            turretsStock : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbTurret.bbTurret),
+            toolsStock : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbToolItem.bbToolItem)):
+        """
+        :param bbInventory shipsStock: The shop's current stock of ships (Default empty bbInventory)
+        :param bbInventory weaponsStock: The shop's current stock of weapons (Default empty bbInventory)
+        :param bbInventory modulesStock: The shop's current stock of modules (Default empty bbInventory)
+        :param bbInventory turretsStock: The shop's current stock of turrets (Default empty bbInventory)
+        :param bbInventory toolsStock: The shop's current stock of tools (Default empty bbInventory)
+        """
+
+        super().__init__(shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock, toolsStock=toolsStock)
+        self.totalItems = weaponsStock.totalItems + modulesStock.totalItems + turretsStock.totalItems + toolsStock.totalItems
+        for ship in shipsStock.items:
+            self.totalItems += shipsStock.items[ship].count
+
+
     def userCanAffordItemObj(self, user : bbUser.bbUser, item : bbItem.bbItem) -> bool:
         """No costs are incurred when transferring items to or from a KaamoShop.
         """
@@ -53,6 +72,10 @@ class KaamoShop(bbShop.bbShop):
         :param bbUser user: The user attempting to buy the ship
         :param bbShip requestedWeapon: The ship to sell to user
         """
+        self.totalItems -= 1
+        self.totalItems -= len(requestedShip.weapons)
+        self.totalItems -= len(requestedShip.modules)
+        self.totalItems -= len(requestedShip.turrets)
         self.shipsStock.removeItem(requestedShip)
         user.inactiveShips.addItem(requestedShip)
 
@@ -62,7 +85,12 @@ class KaamoShop(bbShop.bbShop):
 
         :param bbUser user: The user to buy ship from
         :param bbShip weapon: The ship to buy from user
+        :raise OverflowError: When attempting to fill the shop beyond max capacity
         """
+        numShipItems = 1 + len(ship.weapons) + len(ship.modules) + len(ship.turrets)
+        if self.totalItems + numShipItems > bbConfig.kaamoMaxCapacity:
+            raise OverflowError("Attempted to fill the shop beyond capacity.")
+        self.totalItems += numShipItems
         self.shipsStock.addItem(ship)
         user.inactiveShips.removeItem(ship)
     
@@ -99,6 +127,7 @@ class KaamoShop(bbShop.bbShop):
         :param bbUser user: The user attempting to buy the weapon
         :param bbWeapon requestedWeapon: The weapon to sell to user
         """
+        self.totalItems -= 1
         self.weaponsStock.removeItem(requestedWeapon)
         user.inactiveWeapons.addItem(requestedWeapon)
 
@@ -108,7 +137,11 @@ class KaamoShop(bbShop.bbShop):
 
         :param bbUser user: The user to buy weapon from
         :param bbWeapon weapon: The weapon to buy from user
+        :raise OverflowError: When attempting to fill the shop beyond max capacity
         """
+        if self.totalItems == bbConfig.kaamoMaxCapacity:
+            raise OverflowError("Attempted to fill the shop beyond capacity.")
+        self.totalItems += 1
         self.weaponsStock.addItem(weapon)
         user.inactiveWeapons.removeItem(weapon)
     
@@ -145,6 +178,7 @@ class KaamoShop(bbShop.bbShop):
         :param bbUser user: The user attempting to buy the module
         :param bbModule requestedModule: The module to sell to user
         """
+        self.totalItems -= 1
         self.modulesStock.removeItem(requestedModule)
         user.inactiveModules.addItem(requestedModule)
 
@@ -154,7 +188,11 @@ class KaamoShop(bbShop.bbShop):
 
         :param bbUser user: The user to buy module from
         :param bbModule module: The module to buy from user
+        :raise OverflowError: When attempting to fill the shop beyond max capacity
         """
+        if self.totalItems == bbConfig.kaamoMaxCapacity:
+            raise OverflowError("Attempted to fill the shop beyond capacity.")
+        self.totalItems += 1
         self.modulesStock.addItem(module)
         user.inactiveModules.removeItem(module)
     
@@ -191,6 +229,7 @@ class KaamoShop(bbShop.bbShop):
         :param bbUser user: The user attempting to buy the turret
         :param bbTurret requestedTurret: The turret to sell to user
         """
+        self.totalItems -= 1
         self.turretsStock.removeItem(requestedTurret)
         user.inactiveTurrets.addItem(requestedTurret)
 
@@ -200,7 +239,11 @@ class KaamoShop(bbShop.bbShop):
 
         :param bbUser user: The user to buy turret from
         :param bbTurret turret: The turret to buy from user
+        :raise OverflowError: When attempting to fill the shop beyond max capacity
         """
+        if self.totalItems == bbConfig.kaamoMaxCapacity:
+            raise OverflowError("Attempted to fill the shop beyond capacity.")
+        self.totalItems += 1
         self.turretsStock.addItem(turret)
         user.inactiveTurrets.removeItem(turret)
     
@@ -237,6 +280,7 @@ class KaamoShop(bbShop.bbShop):
         :param bbUser user: The user attempting to buy the tool
         :param bbToolItem requestedTool: The tool to sell to user
         """
+        self.totalItems -= 1
         self.toolsStock.removeItem(requestedTool)
         user.inactiveTools.addItem(requestedTool)
 
@@ -246,7 +290,11 @@ class KaamoShop(bbShop.bbShop):
 
         :param bbUser user: The user to buy tool from
         :param bbTool tool: The tool to buy from user
+        :raise OverflowError: When attempting to fill the shop beyond max capacity
         """
+        if self.totalItems == bbConfig.kaamoMaxCapacity:
+            raise OverflowError("Attempted to fill the shop beyond capacity.")
+        self.totalItems += 1
         self.toolsStock.addItem(tool)
         user.inactiveTools.removeItem(tool)
     
