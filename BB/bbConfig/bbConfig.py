@@ -252,6 +252,10 @@ def pickRandomItemTL(shopTL : int) -> int:
     return maxTechLevel
 
 
+# The number of items users may store in their Kaamo Club.
+kaamoMaxCapacity = 70
+
+
 
 ##### BOUNTIES #####
 
