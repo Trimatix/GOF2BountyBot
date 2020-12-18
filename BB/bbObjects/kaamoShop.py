@@ -1,6 +1,10 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from . import bbUser
+
 from . import bbShop
 from ..bbConfig import bbConfig
-from . import bbUser
 from .items import bbItem, bbShip, bbWeapon, bbTurret, bbModuleFactory
 from .items.modules import bbModule
 from .items.tools import bbToolItem, bbToolItemFactory
@@ -29,7 +33,7 @@ class KaamoShop(bbShop.bbShop):
         super().__init__(shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock, toolsStock=toolsStock)
         self.totalItems = weaponsStock.totalItems + modulesStock.totalItems + turretsStock.totalItems + toolsStock.totalItems
         for ship in shipsStock.items:
-            self.totalItems += shipsStock.items[ship].count
+            self.totalItems += 1 + len(ship.weapons) + len(ship.modules) + len(ship.turrets)
 
 
     def userCanAffordItemObj(self, user : bbUser.bbUser, item : bbItem.bbItem) -> bool:
@@ -329,7 +333,7 @@ class KaamoShop(bbShop.bbShop):
                 if currentItem in currentStock.items:
                     stockDict.append(currentStock.items[currentItem].toDict(**kwargs))
                 else:
-                    bbLogger.log("bbShp", "toDict", "Failed to save invalid " + invType + " key '" + str(currentItem) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
+                    bbLogger.log("kaamoShop", "toDict", "Failed to save invalid " + invType + " key '" + str(currentItem) + "' - not found in items dict", category="shop", eventType="UNKWN_KEY")
             
             data[invType + "sStock"] = stockDict
 
