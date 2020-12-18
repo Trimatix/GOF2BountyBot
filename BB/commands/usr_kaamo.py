@@ -18,9 +18,9 @@ async def cmd_kaamo_get(message : discord.Message, args : str, isDM : bool):
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
     requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
-    # if bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP) >= 10:
-    #     await message.channel.send(":x: This command can only be used by level 10 bounty hunters!")
-    #     return
+    if bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP) <= 10:
+        await message.channel.send(":x: This command can only be used by level 10 bounty hunters!")
+        return
 
     if requestedBBUser.kaamo is None or requestedBBUser.kaamo.totalItems == 0:
         await message.channel.send(":x: There are no items stored in your Kaamo Club!")
@@ -86,9 +86,9 @@ async def cmd_kaamo_store(message : discord.Message, args : str, isDM : bool):
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
     requestedBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
-    # if bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP) >= 10:
-    #     await message.channel.send(":x: This command can only be used by level 10 bounty hunters!")
-    #     return
+    if bbConfig.calculateUserBountyHuntingLevel(requestedBBUser.bountyHuntingXP) <= 10:
+        await message.channel.send(":x: This command can only be used by level 10 bounty hunters!")
+        return
         
     argsSplit = args.split(" ")
     if len(argsSplit) < 2:
