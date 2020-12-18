@@ -544,16 +544,18 @@ async def cmd_info_skin(message : discord.Message, args : str, isDM : bool):
             shipData = bbData.builtInShipData[shipName]
             if "emoji" in shipData:
                 try:
-                    compatibleShipStrs.append(lib.emojis.dumbEmojiFromStr(shipData["emoji"]).sendable)
+                    compatibleShipStrs.append(lib.emojis.dumbEmojiFromStr(shipData["emoji"], rejectInvalid=True).sendable)
                 except lib.emojis.UnrecognisedCustomEmoji:
                     pass
-            else:
-                compatibleShipStrs.append(shipData["name"])
+                else:
+                    continue
+            compatibleShipStrs.append(shipData["name"])
         statsEmbed.add_field(
             name="Compatible ships:", value=" • ".join(compatibleShipStrs) if compatibleShipStrs != [] else "None", inline=False)
         # send the embed
         await message.channel.send(embed=statsEmbed)
-# bbCommands.register("commodity", cmd_commodity)
+
+# bbCommands.register("info-skin", cmd_info_skin)
 
 
 async def cmd_info(message : discord.Message, args : str, isDM : bool):
