@@ -572,3 +572,36 @@ async def dev_cmd_set_bounty_xp(message : discord.Message, args : str, isDM : bo
 
 bbCommands.register("set-bounty-xp", dev_cmd_set_bounty_xp, 2, allowDM=True, helpSection="bounties", useDoc=True)
 
+
+async def dev_cmd_set_bounty_level(message : discord.Message, args : str, isDM : bool):
+    """
+    developer command setting the requested user's bounty hunting LEVEL.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing a user mention and an integer amount of xp
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    argsSplit = args.split(" ")
+    # verify both a user and a balance were given
+    if len(argsSplit) < 2:
+        await message.channel.send(":x: Please give a user mention followed by the new level!")
+        return
+    # verify the requested balance is an integer
+    if not lib.stringTyping.isInt(argsSplit[1]):
+        await message.channel.send(":x: that's not a number!")
+        return
+    # verify the requested user
+    requestedUser = bbGlobals.client.get_user(
+        int(argsSplit[0].lstrip("<@!").rstrip(">")))
+    if requestedUser is None:
+        await message.channel.send(":x: invalid user!!")
+        return
+    if not bbGlobals.usersDB.userIDExists(requestedUser.id):
+        requestedBBUser = bbGlobals.usersDB.addUser(requestedUser.id)
+    else:
+        requestedBBUser = bbGlobals.usersDB.getUser(requestedUser.id)
+    # update the balance
+    requestedBBUser.bountyHuntingXP = bbConfig.bountyHuntingXPForLevel(int(argsSplit[1]) + 1)
+    await message.channel.send("Done!")
+
+bbCommands.register("set-bounty-level", dev_cmd_set_bounty_level, 2, allowDM=True, helpSection="bounties", useDoc=True)
