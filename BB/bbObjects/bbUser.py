@@ -86,10 +86,12 @@ class bbUser(bbSerializable.bbSerializable):
     :vartype homeGuildID: int
     :var guildTransferCooldownEnd: A timestamp after which this user is allowed to transfer their homeGuildID.
     :vartype guildTransferCooldownEnd: datetime.datetime
+    :var prestiges: The number of times the user has prestiged
+    :vartype prestiges: int
     """
 
     def __init__(self, id : int, credits : int = 0, lifetimeCredits : int = 0, bountyHuntingXP : int = bbConfig.bountyHuntingXPForLevel(1), 
-                    bountyCooldownEnd : int = -1, systemsChecked : int = 0, bountyWins : int = 0, activeShip : bool = None,
+                    bountyCooldownEnd : int = -1, systemsChecked : int = 0, bountyWins : int = 0, activeShip : bbShip.bbShip = None,
                     inactiveShips : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbShip.bbShip),
                     inactiveModules : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbModule.bbModule),
                     inactiveWeapons : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbWeapon.bbWeapon),
@@ -98,7 +100,7 @@ class bbUser(bbSerializable.bbSerializable):
                     lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
                     duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[UserAlerts.UABase or bool]] = {},
                     bountyWinsToday : int = 0, dailyBountyWinsReset : datetime = None, pollOwned : bool = False,
-                    homeGuildID : int = -1, guildTransferCooldownEnd : datetime = None,
+                    homeGuildID : int = -1, guildTransferCooldownEnd : datetime = None, prestiges : int = 0,
                     kaamo : kaamoShop.KaamoShop = None, loma : lomaShop.LomaShop = None):
         """
         :param int id: The user's unique ID. The same as their unique discord ID.
@@ -128,6 +130,7 @@ class bbUser(bbSerializable.bbSerializable):
         :param datetime.datetime guildTransferCooldownEnd: A timestamp after which this user is allowed to transfer their homeGuildID.
         :param KaamoShop kaamo: The user's Kaamo Club storage, only accessible at bounty hunter level 10. To save memory, this is None until the user first uses it. (default None)
         :param LomaShop loma: A shop private to this user, selling special discountable items. To save memory, this is None until the user first uses it. (default None)
+        :param int prestiges: The number of times the user has prestiged (default 0)
         :raise TypeError: When given an argument of incorrect type
         """
         if type(id) == float:
@@ -226,6 +229,8 @@ class bbUser(bbSerializable.bbSerializable):
         self.kaamo = kaamo
         self.loma = loma
 
+        self.prestiges = prestiges
+
     
     def resetUser(self):
         """Reset the user's attributes back to their default values.
@@ -251,6 +256,7 @@ class bbUser(bbSerializable.bbSerializable):
         self.guildTransferCooldownEnd = datetime.utcnow()
         self.kaamo = None
         self.loma = None
+        self.prestiges = 0
 
 
     def numInventoryPages(self, item : str, maxPerPage : int) -> int:
@@ -423,7 +429,7 @@ class bbUser(bbSerializable.bbSerializable):
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(**kwargs),
                 "lastSeenGuildId":self.lastSeenGuildId, "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins,
                 "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "bountyHuntingXP": self.bountyHuntingXP, "pollOwned": self.pollOwned,
-                "duelCreditsLosses": self.duelCreditsLosses, "homeGuildID": self.homeGuildID, "guildTransferCooldownEnd": self.guildTransferCooldownEnd.timestamp()}
+                "duelCreditsLosses": self.duelCreditsLosses, "homeGuildID": self.homeGuildID, "guildTransferCooldownEnd": self.guildTransferCooldownEnd.timestamp(), "prestiges": self.prestiges}
 
         data["inactiveShips"] = self.inactiveShips.toDict(**kwargs)["items"]
         data["inactiveModules"] = self.inactiveModules.toDict(**kwargs)["items"]
@@ -498,6 +504,8 @@ class bbUser(bbSerializable.bbSerializable):
                 toolsValue += self.inactiveTools.items[tool].count * tool.getValue()
 
             return modulesValue + turretsValue + weaponsValue + shipsValue + self.activeShip.getValue() + self.credits
+        elif stat == "prestiges":
+            return self.prestiges
         else:
             raise ValueError("Unknown stat name: " + str(stat))
 
@@ -769,4 +777,4 @@ class bbUser(bbSerializable.bbSerializable):
                         pollOwned=userDict["pollOwned"] if "pollOwned" in userDict else False,
                         homeGuildID=userDict["homeGuildID"] if "homeGuildID" in userDict else -1,
                         guildTransferCooldownEnd=datetime.utcfromtimestamp(userDict["guildTransferCooldownEnd"]) if "guildTransferCooldownEnd" in userDict else datetime.utcnow(),
-                        bountyHuntingXP=bountyHuntingXP, kaamo=kaamo, loma=loma)
+                        bountyHuntingXP=bountyHuntingXP, kaamo=kaamo, loma=loma, prestiges=userDict["prestiges"] if "prestiges" in userDict else 0)
