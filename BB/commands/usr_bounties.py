@@ -12,7 +12,7 @@ from ..bbObjects import bbUser
 from ..bbObjects.items import bbShip, bbWeapon
 
 
-bbCommands.addHelpSection(0, "bounties")
+bbCommands.addHelpSection(0, "bounty hunting")
 
 
 async def cmd_check(message : discord.Message, args : str, isDM : bool):
@@ -205,7 +205,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
         seconds = int(diff.total_seconds() % 60)
         await message.channel.send(":stopwatch: **" + message.author.display_name + "**, your *Khador Drive* is still charging! please wait **" + str(minutes) + "m " + str(seconds) + "s.**")
 
-bbCommands.register("check", cmd_check, 0, aliases=["search"], allowDM=False, helpSection="bounties", signatureStr="**check <system>**", shortHelp="Check if any criminals are in the given system, arrest them, and get paid! 💰\n🌎 This command must be used in your **home server**.")
+bbCommands.register("check", cmd_check, 0, aliases=["search"], allowDM=False, helpSection="bounty hunting", signatureStr="**check <system>**", shortHelp="Check if any criminals are in the given system, arrest them, and get paid! 💰\n🌎 This command must be used in your **home server**.")
 
 
 async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
@@ -295,7 +295,7 @@ async def cmd_bounties(message : discord.Message, args : str, isDM : bool):
                     maxBountiesMsg = "\nYou have **" + str(bbConfig.maxDailyBountyWins - requestedBBUser.bountyWinsToday) + "** remaining bounty wins today!"
             await message.channel.send(outmessage + "```\nTrack down criminals and **win credits** using `" + bbConfig.commandPrefix + "route` and `" + bbConfig.commandPrefix + "check`!" + maxBountiesMsg)
 
-bbCommands.register("bounties", cmd_bounties, 0, allowDM=False, helpSection="bounties", signatureStr="**bounties** *[faction]*", shortHelp="List all active bounties, in detail if a faction is specified.", longHelp="If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties.")
+bbCommands.register("bounties", cmd_bounties, 0, allowDM=False, helpSection="bounty hunting", signatureStr="**bounties** *[faction]*", shortHelp="List all active bounties, in detail if a faction is specified.", longHelp="If no faction is given, name all currently active bounties.\nIf a faction is given, show detailed info about its active bounties.")
 
 
 async def cmd_route(message : discord.Message, args : str, isDM : bool):
@@ -338,7 +338,7 @@ async def cmd_route(message : discord.Message, args : str, isDM : bool):
                 bbConfig.commandPrefix + "route Trimatix#2244`"
         await message.channel.send(outmsg)
 
-bbCommands.register("route", cmd_route, 0, allowDM=False, helpSection="bounties", signatureStr="**route <criminal name>**", shortHelp="Get the named criminal's current route.", longHelp="Get the named criminal's current route.\nFor a list of aliases for a given criminal, see `$COMMANDPREFIX$info criminal`.")
+bbCommands.register("route", cmd_route, 0, allowDM=False, helpSection="bounty hunting", signatureStr="**route <criminal name>**", shortHelp="Get the named criminal's current route.", longHelp="Get the named criminal's current route.\nFor a list of aliases for a given criminal, see `$COMMANDPREFIX$info criminal`.")
 
 
 async def cmd_duel(message : discord.Message, args : str, isDM : bool):
@@ -490,7 +490,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
 
         await DuelRequest.fightDuel(message.author, requestedUser, requestedDuel, message)
 
-bbCommands.register("duel", cmd_duel, 0, forceKeepArgsCasing=True, allowDM=False, helpSection="bounties", signatureStr="**duel [action] [user]** *<stakes>*", shortHelp="Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`.", longHelp="Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`. When challenging another user to a duel, you must give the amount of credits you will win - the 'stakes'.")
+bbCommands.register("duel", cmd_duel, 0, forceKeepArgsCasing=True, allowDM=False, helpSection="bounty hunting", signatureStr="**duel [action] [user]** *<stakes>*", shortHelp="Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`.", longHelp="Fight other players! Action can be `challenge`, `cancel`, `accept` or `reject`. When challenging another user to a duel, you must give the amount of credits you will win - the 'stakes'.")
 
 
 async def cmd_use(message : discord.Message, args : str, isDM : bool):
@@ -517,7 +517,7 @@ async def cmd_use(message : discord.Message, args : str, isDM : bool):
             await message.channel.send(result)
 
 
-bbCommands.register("use", cmd_use, 0, allowDM=False, helpSection="bounties", signatureStr="**use [tool number]**", shortHelp="Use the tool in your hangar with the given number. See `$COMMANDPREFIX$hangar` for tool numbers.", longHelp="Use the tool in your hangar with the given number. Tool numbers can be seen next your items in `$COMMANDPREFIX$hangar tool`. For example, if tool number `1` is a ship skin, `$COMMANDPREFIX$use 1` will apply the skin to your active ship.")
+bbCommands.register("use", cmd_use, 0, allowDM=False, helpSection="bounty hunting", signatureStr="**use [tool number]**", shortHelp="Use the tool in your hangar with the given number. See `$COMMANDPREFIX$hangar` for tool numbers.", longHelp="Use the tool in your hangar with the given number. Tool numbers can be seen next your items in `$COMMANDPREFIX$hangar tool`. For example, if tool number `1` is a ship skin, `$COMMANDPREFIX$use 1` will apply the skin to your active ship.")
 
 
 async def cmd_prestige(message : discord.Message, args : str, isDM : bool):
@@ -541,7 +541,7 @@ async def cmd_prestige(message : discord.Message, args : str, isDM : bool):
     confirmResult = await ConfirmationReactionMenu.InlineConfirmationMenu(confirmMsg, message.author, bbConfig.prestigeConfirmTimeoutSeconds).doMenu()
 
     if bbConfig.defaultAcceptEmoji in confirmResult:
-        callingBBUser.bountyHunterXP = bbConfig.bountyHuntingXPForLevel(1)
+        callingBBUser.bountyHuntingXP = bbConfig.bountyHuntingXPForLevel(1)
         callingBBUser.activeShip = bbShip.bbShip.fromDict(bbUser.defaultShipLoadoutDict)
         callingBBUser.credits = 0
         callingBBUser.inactiveShips.clear()
@@ -557,10 +557,11 @@ async def cmd_prestige(message : discord.Message, args : str, isDM : bool):
             callingBBUser.loma.modulesStock.clear()
             callingBBUser.loma.turretsStock.clear()
             callingBBUser.loma.toolsStock.clear()
+        callingBBUser.prestiges += 1
 
-        await message.channel.send("👩‍🚀 **" + lib.discordUtil.userOrMemberName(message.author, message.guild) + "prestiged!** :tada:")
+        await message.channel.send("👩‍🚀 **" + lib.discordUtil.userOrMemberName(message.author, message.guild) + " prestiged!** :tada:")
     else:
         await message.channel.send("🛑 Prestige cancelled.")
 
 
-bbCommands.register("prestige", cmd_prestige, 0, helpSection="bounties", signatureStr="**prestige**", shortHelp="")
+bbCommands.register("prestige", cmd_prestige, 0, helpSection="bounty hunting", signatureStr="**prestige**", shortHelp="Reset your items and bounty hunting XP, in exchange for a ship upgrade! Command unlocked at level 10. Kaamo items are saved.", longHelp="Reset your save data, including your bounty hunter level, loadout, balance, hangar and loma. You will be awarded with a ship upgrade available in Loma!\n\nYou can save items from being removed by first storing them in `Kaamo`. Items stored in `Kaamo` will be made accessible again once you reach level 10!")
