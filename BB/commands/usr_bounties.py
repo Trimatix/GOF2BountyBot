@@ -10,6 +10,7 @@ from ..scheduling import TimedTask
 from ..reactionMenus import ReactionMenu, ReactionDuelChallengeMenu, ConfirmationReactionMenu
 from ..bbObjects import bbUser
 from ..bbObjects.items import bbShip, bbWeapon
+from ..bbObjects.items.tools import bbCrate
 
 
 bbCommands.addHelpSection(0, "bounty hunting")
@@ -537,7 +538,7 @@ async def cmd_prestige(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: This command can only be used by level 10 bounty hunters!")
         return
 
-    confirmMsg = await message.channel.send("Are you sure you want to prestige now?\nYour bounty hunter level, loadout, balance, hangar and loma will all be **reset**, and you will unlock a new ship upgrade.\nYou can save items from being removed by storing them in `" + bbConfig.commandPrefix + "kaamo`, but you will not be able to retreive your items until you reach level 10.")
+    confirmMsg = await message.channel.send("Are you sure you want to prestige now? Your bounty hunter level, loadout, balance, hangar and loma will all be **reset**.\nYou will be awarded with a ship upgrade, and a special skins crate!\nYou can save items from being removed by storing them in `" + bbConfig.commandPrefix + "kaamo`, but you will not be able to retreive your items until you reach level 10.")
     confirmResult = await ConfirmationReactionMenu.InlineConfirmationMenu(confirmMsg, message.author, bbConfig.prestigeConfirmTimeoutSeconds).doMenu()
 
     if bbConfig.defaultAcceptEmoji in confirmResult:
@@ -557,9 +558,12 @@ async def cmd_prestige(message : discord.Message, args : str, isDM : bool):
             callingBBUser.loma.modulesStock.clear()
             callingBBUser.loma.turretsStock.clear()
             callingBBUser.loma.toolsStock.clear()
-        callingBBUser.prestiges += 1
 
-        await message.channel.send("👩‍🚀 **" + lib.discordUtil.userOrMemberName(message.author, message.guild) + " prestiged!** :tada:")
+        callingBBUser.prestiges += 1
+        newCrate = bbCrate.bbCrate.fromDict({"type": "bbCrate", "crateType": "special", "typeNum": 0, "builtIn": True})
+        callingBBUser.inactiveTools.addItem(newCrate)
+
+        await message.channel.send("👩‍🚀 **" + lib.discordUtil.userOrMemberName(message.author, message.guild) + " prestiged!** :tada:\n • You got a **" + newCrate.name + "!**")
     else:
         await message.channel.send("🛑 Prestige cancelled.")
 

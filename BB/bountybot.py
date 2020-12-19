@@ -239,25 +239,40 @@ async def on_ready():
     """
     ##### EMOJI INITIALIZATION #####
 
-    # Iterate over uninitiaizedEmoji attributes in bbConfig
-    for varName, varValue in vars(bbConfig).items():
-        if isinstance(varValue, lib.emojis.UninitializedDumbEmoji):
-            uninitEmoji = varValue.value
+    for cfgMod in [bbData, bbConfig]:
+        # Iterate over uninitiaizedEmoji attributes in bbConfig
+        for varName, varValue in vars(cfgMod).items():
+            if isinstance(varValue, lib.emojis.UninitializedDumbEmoji):
+                uninitEmoji = varValue.value
+                # Create dumbEmoji instances based on the type of the uninitialized value
+                if isinstance(uninitEmoji, int):
+                    setattr(cfgMod, varName, lib.emojis.dumbEmoji(id=uninitEmoji))
+                elif isinstance(uninitEmoji, str):
+                    setattr(cfgMod, varName, lib.emojis.dumbEmojiFromStr(uninitEmoji))
+                elif isinstance(uninitEmoji, dict):
+                    setattr(cfgMod, varName, lib.emojis.dumbEmoji.fromDict(uninitEmoji))
+                # Unrecognised uninitialized value
+                else:
+                    raise ValueError("Unrecognised UninitializedDumbEmoji value type. Expecting int, str or dict, given '" + uninitEmoji.__class__.__name__ + "'")
+        
+        # Ensure all emojis have been initialized
+        for varName, varValue in vars(cfgMod).items():
+            if isinstance(varValue, lib.emojis.UninitializedDumbEmoji):
+                raise RuntimeError("Uninitialized emoji still remains in " + cfgMod.__name__ + " after emoji initialization: '" + varName + "'")
+
+    for crateData in bbData.specialCratesData:
+        if "emoji" in crateData and isinstance(crateData["emoji"], lib.emojis.UninitializedDumbEmoji):
+            uninitEmoji = crateData["emoji"].value
             # Create dumbEmoji instances based on the type of the uninitialized value
             if isinstance(uninitEmoji, int):
-                setattr(bbConfig, varName, lib.emojis.dumbEmoji(id=uninitEmoji))
+                crateData["emoji"] = lib.emojis.dumbEmoji(id=uninitEmoji)
             elif isinstance(uninitEmoji, str):
-                setattr(bbConfig, varName, lib.emojis.dumbEmojiFromStr(uninitEmoji))
+                crateData["emoji"] = lib.emojis.dumbEmojiFromStr(uninitEmoji)
             elif isinstance(uninitEmoji, dict):
-                setattr(bbConfig, varName, lib.emojis.dumbEmojiFromDict(uninitEmoji))
+                crateData["emoji"] = lib.emojis.dumbEmoji.fromDict(uninitEmoji)
             # Unrecognised uninitialized value
             else:
                 raise ValueError("Unrecognised UninitializedDumbEmoji value type. Expecting int, str or dict, given '" + uninitEmoji.__class__.__name__ + "'")
-    
-    # Ensure all emojis have been initialized
-    for varName, varValue in vars(bbConfig).items():
-        if isinstance(varValue, lib.emojis.UninitializedDumbEmoji):
-            raise RuntimeError("Uninitialized emoji still remains in bbConfig after emoji initialization: '" + varName + "'")
 
 
     ##### OBJECT SPAWNING #####
@@ -384,7 +399,13 @@ async def on_ready():
         itemPool = [bbData.shipSkinToolsBySkin[skin] for skin in shipSkins]
         bbData.levelUpCratesByTL[level-1] = bbCrate.bbCrate(itemPool, "Level " + str(level) + " skins crate", techLevel=level, builtIn=True, value=bbConfig.crateValueForTL(level))
         
-
+    # Generate special crates
+    for crateData in bbData.specialCratesData:
+        newCrate = bbCrate.bbCrate.fromDict(crateData)
+        newCrate.builtIn = True
+        bbData.specialCrateObjs.append(newCrate)
+        crateData["builtIn"] = True
+        bbData.builtInToolObjs[newCrate.name] = newCrate
 
 
     ##### MAX SPAWNRATE CALCULATION #####

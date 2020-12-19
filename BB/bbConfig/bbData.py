@@ -6,6 +6,8 @@ from discord import Colour
 import os
 import json
 
+from ..lib.emojis import UninitializedDumbEmoji
+
 shipsDir = "items" + os.sep + "ships"
 skinsDir = "items" + os.sep + "ship skins"
 CWD = os.getcwd()
@@ -543,3 +545,19 @@ turretObjsByTL = []
 
 shipSkinToolsBySkin = {}
 levelUpCratesByTL = []
+
+specialCratesData = [{"crateType": "special", "typeNum": 0, "name": "Special Skins Crate", "techLevel": 10, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/723472359113359410/secure_container.png", "emoji": UninitializedDumbEmoji(723709178736017419), "builtIn": False,
+                        "itemPool": [{"type": "bbShipSkinTool", "name": "aperture", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "blackout", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "bloodlust", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "camo", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "carbon fibre", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "leopard print", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "racing stripes", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "rainbow", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "rusted", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "soul marble", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "space", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "tex", "builtIn": True},
+                                        {"type": "bbShipSkinTool", "name": "urban-camo", "builtIn": True}]}]
+specialCrateObjs = []

@@ -13,7 +13,7 @@ from ....reactionMenus.ConfirmationReactionMenu import InlineConfirmationMenu
 class bbCrate(bbToolItem.bbToolItem):
     def __init__(self, itemPool, name : str = "", value : int = 0, wiki : str = "",
             manufacturer : str = "", icon : str = bbConfig.defaultCrateIcon, emoji : lib.emojis.dumbEmoji = None,
-            techLevel : int = -1, builtIn : bool = False):
+            techLevel : int = -1, builtIn : bool = False, crateType : str = "", typeNum : int = 0):
 
         if emoji is None:
             emoji = bbConfig.defaultCrateEmoji
@@ -26,6 +26,8 @@ class bbCrate(bbToolItem.bbToolItem):
             if not bbItem.isSpawnableItemInstance(item):
                 raise RuntimeError("Attempted to create a bbCrate with something other than a spawnableItem in its itemPool.")
         self.itemPool = itemPool
+        self.crateType = crateType
+        self.typeNum = typeNum
 
 
     async def use(self, *args, **kwargs):
@@ -91,8 +93,8 @@ class bbCrate(bbToolItem.bbToolItem):
         """
         data = super().toDict(**kwargs)
         if self.builtIn:
-            data["crateType"] = "levelUp"
-            data["typeNum"] = self.techLevel
+            data["crateType"] = self.crateType
+            data["typeNum"] = self.typeNum
         else:
             if "saveType" not in kwargs:
                 kwargs["saveType"] = True
@@ -111,6 +113,8 @@ class bbCrate(bbToolItem.bbToolItem):
             if "crateType" in crateDict:
                 if crateDict["crateType"] == "levelUp":
                     return bbData.levelUpCratesByTL[crateDict["typeNum"]-1]
+                elif crateDict["crateType"] == "special":
+                    return bbData.specialCrateObjs[crateDict["typeNum"]]
                 else:
                     raise ValueError("Unknown crateType: " + str(crateDict["crateType"]))
             else:
@@ -144,6 +148,8 @@ class bbCrate(bbToolItem.bbToolItem):
             wiki=crateToSpawn["wiki"] if "wiki" in crateToSpawn else "",
             manufacturer=crateToSpawn["manufacturer"] if "manufacturer" in crateToSpawn else "",
             icon=crateToSpawn["icon"] if "icon" in crateToSpawn else "",
-            emoji=lib.emojis.dumbEmojiFromDict(crateToSpawn["emoji"]) if "emoji" in crateToSpawn else lib.emojis.dumbEmoji.EMPTY,
+            emoji=lib.emojis.dumbEmoji.fromDict(crateToSpawn["emoji"]) if "emoji" in crateToSpawn else lib.emojis.dumbEmoji.EMPTY,
             techLevel=crateToSpawn["techLevel"] if "techLevel" in crateToSpawn else -1,
-            builtIn=crateToSpawn["builtIn"] if "builtIn" in crateToSpawn else False)
+            builtIn=crateToSpawn["builtIn"] if "builtIn" in crateToSpawn else False,
+            crateType=crateToSpawn["crateType"] if "crateType" in crateToSpawn else "",
+            typeNum=crateToSpawn["typeNum"] if "typeNum" in crateToSpawn else 0)
