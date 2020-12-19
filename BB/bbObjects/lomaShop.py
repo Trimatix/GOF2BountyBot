@@ -84,20 +84,25 @@ class LomaShop(bbShop.bbShop):
         turretsStock = bbInventory.DiscountableTypeRestrictedInventory(bbTurret.bbTurret)
         toolsStock = bbInventory.DiscountableTypeRestrictedInventory(bbToolItem.bbToolItem)
 
-        for shipListingDict in shopDict["shipsStock"]:
-            shipsStock.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
+        if "shipsStock" in shopDict:
+            for shipListingDict in shopDict["shipsStock"]:
+                shipsStock.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-        for weaponListingDict in shopDict["weaponsStock"]:
-            weaponsStock.addItem(bbWeapon.bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
+        if "weaponsStock" in shopDict:
+            for weaponListingDict in shopDict["weaponsStock"]:
+                weaponsStock.addItem(bbWeapon.bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-        for moduleListingDict in shopDict["modulesStock"]:
-            modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
+        if "modulesStock" in shopDict:
+            for moduleListingDict in shopDict["modulesStock"]:
+                modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
-        for turretListingDict in shopDict["turretsStock"]:
-            turretsStock.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
+        if "turretsStock" in shopDict:
+            for turretListingDict in shopDict["turretsStock"]:
+                turretsStock.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-        for toolListingDict in shopDict["toolsStock"]:
-            toolsStock.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
+        if "toolsStock" in shopDict:
+            for toolListingDict in shopDict["toolsStock"]:
+                toolsStock.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
 
         return LomaShop(shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock,
                         turretsStock=turretsStock, toolsStock=toolsStock)
