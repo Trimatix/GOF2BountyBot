@@ -7,7 +7,9 @@ from ..bbConfig import bbConfig, bbData
 from ..bbObjects.battles import DuelRequest
 from ..bbObjects.bounties import bbBountyConfig
 from ..scheduling import TimedTask
-from ..reactionMenus import ReactionMenu, ReactionDuelChallengeMenu
+from ..reactionMenus import ReactionMenu, ReactionDuelChallengeMenu, ConfirmationReactionMenu
+from ..bbObjects import bbUser
+from ..bbObjects.items import bbShip, bbWeapon
 
 
 bbCommands.addHelpSection(0, "bounties")
@@ -516,3 +518,49 @@ async def cmd_use(message : discord.Message, args : str, isDM : bool):
 
 
 bbCommands.register("use", cmd_use, 0, allowDM=False, helpSection="bounties", signatureStr="**use [tool number]**", shortHelp="Use the tool in your hangar with the given number. See `$COMMANDPREFIX$hangar` for tool numbers.", longHelp="Use the tool in your hangar with the given number. Tool numbers can be seen next your items in `$COMMANDPREFIX$hangar tool`. For example, if tool number `1` is a ship skin, `$COMMANDPREFIX$use 1` will apply the skin to your active ship.")
+
+
+async def cmd_prestige(message : discord.Message, args : str, isDM : bool):
+    """Reset the calling user's bounty hunter xp to zero and remove all of their items.
+    Can only be used by level 10 bounty hunters.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    if not bbGlobals.usersDB.userIDExists(message.author.id):
+        await message.channel.send(":x: This command can only be used by level 10 bounty hunters!")
+        return
+
+    callingBBUser = bbGlobals.usersDB.getUser(message.author.id)
+    if bbConfig.calculateUserBountyHuntingLevel(callingBBUser.bountyHuntingXP) < 10:
+        await message.channel.send(":x: This command can only be used by level 10 bounty hunters!")
+        return
+
+    confirmMsg = await message.channel.send("Are you sure you want to prestige now?\nYour bounty hunter level, loadout, balance, hangar and loma will all be **reset**, and you will unlock a new ship upgrade.\nYou can save items from being removed by storing them in `" + bbConfig.commandPrefix + "kaamo`, but you will not be able to retreive your items until you reach level 10.")
+    confirmResult = await ConfirmationReactionMenu.InlineConfirmationMenu(confirmMsg, message.author, bbConfig.prestigeConfirmTimeoutSeconds).doMenu()
+
+    if bbConfig.defaultAcceptEmoji in confirmResult:
+        callingBBUser.bountyHunterXP = bbConfig.bountyHuntingXPForLevel(1)
+        callingBBUser.activeShip = bbShip.bbShip.fromDict(bbUser.defaultShipLoadoutDict)
+        callingBBUser.credits = 0
+        callingBBUser.inactiveShips.clear()
+        callingBBUser.inactiveModules.clear()
+        callingBBUser.inactiveWeapons.clear()
+        for weaponDict in bbUser.defaultUserDict["inactiveWeapons"]:
+            callingBBUser.inactiveWeapons.addItem(bbWeapon.bbWeapon.fromDict(weaponDict["item"]), quantity=weaponDict["count"])
+        callingBBUser.inactiveTurrets.clear()
+        callingBBUser.inactiveTools.clear()
+        if callingBBUser.loma is not None:
+            callingBBUser.loma.shipsStock.clear()
+            callingBBUser.loma.weaponsStock.clear()
+            callingBBUser.loma.modulesStock.clear()
+            callingBBUser.loma.turretsStock.clear()
+            callingBBUser.loma.toolsStock.clear()
+
+        await message.channel.send("👩‍🚀 **" + lib.discordUtil.userOrMemberName(message.author, message.guild) + "prestiged!** :tada:")
+    else:
+        await message.channel.send("🛑 Prestige cancelled.")
+
+
+bbCommands.register("prestige", cmd_prestige, 0, helpSection="bounties", signatureStr="**prestige**", shortHelp="")

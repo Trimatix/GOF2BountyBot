@@ -552,6 +552,7 @@ pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
 toolUseConfirmTimeoutSeconds = 60
 homeGuildTransferConfirmTimeoutSeconds = 60
+prestigeConfirmTimeoutSeconds = 60
 
 
 
