@@ -114,6 +114,7 @@ async def cmd_stats(message : discord.Message, args : str, isDM : bool):
                                 value="1")
             statsEmbed.add_field(name="XP until next level:",
                                 value=str(bbConfig.bountyHuntingXPForLevel(2) - bbConfig.bountyHuntingXPForLevel(1)))
+            statsEmbed.add_field(name="Prestiges:", value="0")
             statsEmbed.add_field(
                 name="Total systems checked:", value=0, inline=True)
             statsEmbed.add_field(
@@ -141,6 +142,7 @@ async def cmd_stats(message : discord.Message, args : str, isDM : bool):
                                 value=str(hunterLvl))
             statsEmbed.add_field(name="XP until next level:",
                                 value=str(bbConfig.bountyHuntingXPForLevel(hunterLvl+1)-userObj.bountyHuntingXP))
+            statsEmbed.add_field(name="Prestiges:", value=str(userObj.prestiges))
             statsEmbed.add_field(name="Total systems checked:", value=str(
                 userObj.systemsChecked), inline=True)
             statsEmbed.add_field(name="Total bounties won:", value=str(
