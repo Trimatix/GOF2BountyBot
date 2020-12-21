@@ -11,8 +11,8 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
     :rtype: bbToolItem.bbToolItem
     :raise NameError: When toolDict does not contain a 'type' attribute.
     """
-    if "builtIn" in toolDict and toolDict["builtIn"]:
-        return bbData.builtInToolObjs[toolDict["name"]]
+    # if "builtIn" in toolDict and toolDict["builtIn"]:
+    #     return bbData.builtInToolObjs[toolDict["name"]]
 
     toolTypeConstructors = {"bbShipSkinTool": bbShipSkinTool.bbShipSkinTool.fromDict,
                             "bbCrate": bbCrate.bbCrate.fromDict}
