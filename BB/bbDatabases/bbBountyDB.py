@@ -416,7 +416,8 @@ class bbBountyDB(bbSerializable.bbSerializable):
         dbReload = kwargs["dbReload"] if "dbReload" in kwargs else False
 
         escapedCriminalData = {} if "escaped" not in bountyDBDict else bountyDBDict["escaped"]
-        del bountyDBDict["escaped"]
+        if "escaped" in bountyDBDict:
+            del bountyDBDict["escaped"]
         # Instanciate a new bbBountyDB
         newDB = bbBountyDB(bountyDBDict.keys())
         # Iterate over all factions in the DB
