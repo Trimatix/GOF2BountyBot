@@ -169,6 +169,16 @@ class BountyBoardChannel(bbSerializable.bbSerializable):
         # del self.noBountiesMsgToBeLoaded
 
 
+    def hasMessageForCriminal(self, criminal : bbCriminal.Criminal) -> bool:
+        """Decide whether this BBC stores a listing for the given criminal 
+
+        :param Criminal criminal: The criminal to check for listing existence
+        :return: True if this BBC stores a listing for criminal, False otherwise
+        :rtype: bool
+        """
+        return criminal in self.bountyMessages[criminal.faction]
+
+
     def hasMessageForBounty(self, bounty : bbBounty.Bounty) -> bool:
         """Decide whether this BBC stores a listing for the given bounty 
 
@@ -176,7 +186,7 @@ class BountyBoardChannel(bbSerializable.bbSerializable):
         :return: True if this BBC stores a listing for bounty, False otherwise
         :rtype: bool
         """
-        return bounty.criminal in self.bountyMessages[bounty.criminal.faction]
+        return self.hasMessageForCriminal(bounty.criminal)
 
 
     def getMessageForBounty(self, bounty : bbBounty.Bounty) -> Message:
@@ -237,20 +247,20 @@ class BountyBoardChannel(bbSerializable.bbSerializable):
                 print("addBounty Forbidden")
             except AttributeError:
                 print("addBounty no message")
-    
 
-    async def removeBounty(self, bounty : bbBounty.Bounty):
-        """Remove the listing message stored for the given bounty from the database. This does not attempt to delete the message from discord.
+
+    async def removeCriminal(self, criminal : bbCriminal.Criminal):
+        """Remove the listing message stored for the given criminal from the database, and delete its associated message from discord.
         If the BBC is now empty, send an empty bounty board message.
         If a HTTP error is thrown when sending the empty BBC message, wait and retry the removal for the number of times defined in bbConfig
 
-        :param Bounty bounty: The bounty whose listing should be removed from the database
-        :raise KeyError: If the database does not store a listing for the given bounty
+        :param Criminal criminal: The criminal whose listing should be removed from the database
+        :raise KeyError: If the database does not store a listing for the given criminal
         """
-        if not self.hasMessageForBounty(bounty):
-            raise KeyError("BNTY_BRD_CH-REM-BNTY_NOT_EXST: Attempted to remove a bounty from a bountyboardchannel, but the bounty is not listed")
-            bbLogger.log("BBC", "remBty", "Attempted to remove a bounty from a bountyboardchannel, but the bounty is not listed: " + bounty.criminal.name, category='bountyBoards', eventType="LISTING_REM-NO_EXST")
-        del self.bountyMessages[bounty.criminal.faction][bounty.criminal]
+        if not self.hasMessageForCriminal(criminal):
+            raise KeyError("BNTY_BRD_CH-REM-BNTY_NOT_EXST: Attempted to remove a criminal from a bountyboardchannel, but the criminal is not listed")
+            bbLogger.log("BBC", "remCrim", "Attempted to remove a criminal from a bountyboardchannel, but the criminal is not listed: " + criminal.name, category='bountyBoards', eventType="LISTING_REM-NO_EXST")
+        del self.bountyMessages[criminal.faction][criminal]
 
         if self.isEmpty():
             try:
@@ -273,6 +283,17 @@ class BountyBoardChannel(bbSerializable.bbSerializable):
             except Forbidden:
                 bbLogger.log("BBC", "remBty", "Forbidden exception thrown when sending no bounties message", category='bountyBoards', eventType="NOBTYMSG_LOAD-FORBIDDENERR")
                 self.noBountiesMessage = None
+    
+
+    async def removeBounty(self, bounty : bbBounty.Bounty):
+        """Remove the listing message stored for the given bounty from the database. This does not attempt to delete the message from discord.
+        If the BBC is now empty, send an empty bounty board message.
+        If a HTTP error is thrown when sending the empty BBC message, wait and retry the removal for the number of times defined in bbConfig
+
+        :param Bounty bounty: The bounty whose listing should be removed from the database
+        :raise KeyError: If the database does not store a listing for the given bounty
+        """
+        await self.removeCriminal(bounty.criminal)
 
 
     async def updateBountyMessage(self, bounty : bbBounty.Bounty):
@@ -312,8 +333,8 @@ class BountyBoardChannel(bbSerializable.bbSerializable):
         """Clear all bounty listings on the board.
         """
         for fac in self.bountyMessages:
-            for bounty in self.bountyMessages[fac]:
-                await self.removeBounty(bounty)
+            for criminal in self.bountyMessages[fac]:
+                await self.removeCriminal(criminal)
 
 
     def toDict(self, **kwargs) -> dict:
