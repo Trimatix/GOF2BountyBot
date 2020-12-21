@@ -1,9 +1,6 @@
 from ..reactionMenus import ReactionMenu, ReactionRolePicker, ReactionInventoryPicker, ReactionDuelChallengeMenu, ReactionPollMenu
 from .. import bbGlobals
-
-# ReactionMenu subclasses that cannot be saved to dictionary
-# TODO: change to a class-variable reference e.g menu.__class__.SAVEABLE
-unsaveableMenuTypes = ["ReactionDuelChallengeMenu"]
+from ..logging import bbLogger
 
 
 class ReactionMenuDB(dict):
@@ -18,9 +15,8 @@ class ReactionMenuDB(dict):
         """
         data = {}
         for msgID in self:
-            menuData = self[msgID].toDict(**kwargs)
-            if menuData["type"] not in unsaveableMenuTypes:
-                data[msgID] = menuData
+            if ReactionMenu.isSaveableMenuInstance(self[msgID]):
+                data[msgID] = self[msgID].toDict(**kwargs)
         return data
 
 
@@ -32,29 +28,39 @@ async def fromDict(dbDict : dict) -> ReactionMenuDB:
     :rtype: ReactionMenuDB
     """
     newDB = ReactionMenuDB()
+    requiredAttrs = ["type", "guild", "channel"]
 
     for msgID in dbDict:
-        dcGuild = bbGlobals.client.get_guild(dbDict[msgID]["guild"])
-        msg = await dcGuild.get_channel(dbDict[msgID]["channel"]).fetch_message(dbDict[msgID]["msg"])
+        menuData = dbDict[msgID]
 
-        if bbGlobals.client.get_channel(dbDict[msgID]["channel"]) is None:
-            continue
-        if "type" in dbDict[msgID]:
-            if dbDict[msgID]["type"] == "ReactionInventoryPicker":
-                # newDB[int(msgID)] = ReactionInventoryPicker.fromDict(dbDict[msgID], msg=msg)
-                continue
-                
-            elif dbDict[msgID]["type"] == "ReactionRolePicker":
-                newDB[int(msgID)] = ReactionRolePicker.ReactionRolePicker.fromDict(dbDict[msgID], msg=msg)
+        for attr in requiredAttrs:
+            if attr not in menuData:
+                bbLogger.log("reactionMenuDB", "fromDict", "Invalid menu dict (missing " + attr + "), ignoring and removing. " + " ".join(foundAttr + "=" + menuData[foundAttr] for foundAttr in requiredAttrs if foundAttr in menuData), category="reactionMenus", eventType="dictNo" + attr.capitalize)
 
-            elif dbDict[msgID]["type"] == "ReactionDuelChallengeMenu":
-                continue
+        menuDescriptor = menuData["type"] + "(" + "/".join(str(id) for id in [menuData["guild"], menuData["channel"], msgID]) + ")"
 
-            elif dbDict[msgID]["type"] == "ReactionPollMenu":
-                newDB[int(msgID)] = ReactionPollMenu.ReactionPollMenu.fromDict(dbDict[msgID], msg=msg)
+        dcGuild = bbGlobals.client.get_guild(menuData["guild"])
+        if dcGuild is None:
+            dcGuild = await bbGlobals.client.fetch_guild(menuData["guild"])
+            if dcGuild is None:
+                bbLogger.log("reactionMenuDB", "fromDict", "Unrecognised guild in menu dict, ignoring and removing: " + menuDescriptor, category="reactionMenus", eventType="unknGuild")
+                return
 
-            else:
-                continue
-                # newDB[int(msgID)] = ReactionMenu.fromDict(dbDict[msgID], msg=msg)
+        menuChannel = dcGuild.get_channel(menuData["channel"])
+        if menuChannel is None:
+            menuChannel = await dcGuild.fetch_channel(menuData["channel"])
+            if menuChannel is None:
+                bbLogger.log("reactionMenuDB", "fromDict", "Unrecognised channel in menu dict, ignoring and removing: " + menuDescriptor, category="reactionMenus", eventType="unknChannel")
+                return
+
+        msg = await menuChannel.fetch_message(menuData["msg"])
+        if msg is None:
+            bbLogger.log("reactionMenuDB", "fromDict", "Unrecognised message in menu dict, ignoring and removing: " + menuDescriptor, category="reactionMenus", eventType="unknMsg")
+            return
+
+        if menuData["type"] in ReactionMenu.saveableNameMenuTypes:
+            newDB[int(msgID)] = ReactionMenu.saveableNameMenuTypes[menuData["type"]].fromDict(menuData, msg=msg)
+        else:
+            bbLogger.log("reactionMenuDB", "fromDict", "Attempted to fromDict a non-saveable menu type, ignoring and removing. msg #" + str(msgID) + ", type " + menuData["type"], category="reactionMenus", eventType="dictUnsaveable")
     
     return newDB
