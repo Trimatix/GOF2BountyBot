@@ -315,10 +315,7 @@ class ReactionMenu(bbSerializable.bbSerializable):
     :vartype targetMember: discord.Member
     :var targetRole: In order to interact with this menu, users must possess this role. All other reactions are ignored
     :vartype targetRole: discord.Role
-    :var saveable: Class attribute indicating whether or not this type of ReactionMenu can be saved to file. If not, this menu will be forcibly deleted before bot shutdown.
-    :vartype saveable: bool
     """
-    saveable = False
 
     def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, 
                     titleTxt : str = "", desc : str ="", col : Colour = Colour.blue(), timeout : TimedTask = None,
@@ -527,7 +524,29 @@ class ReactionMenu(bbSerializable.bbSerializable):
 
     @classmethod
     def fromDict(cls, data: dict, **kwargs):
-        raise NotImplementedError("Attempted to fromDict an unserializable menu type: " + cls.__name__)
+        raise NotImplementedError("Attempted to fromDict a non-saveable menu type: " + cls.__name__)
+
+
+saveableMenuTypeNames = {}
+saveableNameMenuTypes = {}
+
+
+def saveableMenu(cls):
+    if not issubclass(cls, ReactionMenu):
+        raise TypeError("Invalid use of saveableMenu decorator: " + cls.__name__ + " is not a ReactionMenu subtype")
+    if cls not in saveableMenuTypeNames:
+        saveableMenuTypeNames[cls] = cls.__name__
+    if cls.__name__ not in saveableNameMenuTypes:
+        saveableNameMenuTypes[cls.__name__] = cls
+    return cls
+
+
+def isSaveableMenuClass(cls):
+    return issubclass(cls, ReactionMenu) and cls in saveableMenuTypeNames
+
+
+def isSaveableMenuInstance(o):
+    return isinstance(o, ReactionMenu) and type(o) in saveableNameMenuTypes
 
 
 class CancellableReactionMenu(ReactionMenu):
@@ -585,7 +604,7 @@ class CancellableReactionMenu(ReactionMenu):
         return baseDict
 
 
-class SingleUserReactionMenu(ReactionMenu):
+class InlineReactionMenu(ReactionMenu):
     """
     An in-place menu solution
     """

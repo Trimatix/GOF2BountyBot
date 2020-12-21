@@ -85,6 +85,7 @@ class ReactionRolePickerOption(ReactionMenu.ReactionMenuOption):
         return {"role": self.role.id}
 
 
+@ReactionMenu.saveableMenu
 class ReactionRolePicker(ReactionMenu.ReactionMenu):
     """A reaction menu that grants and removes roles when interacted with.
     TODO: replace dcGuild param with extracting msg.guild
@@ -124,7 +125,6 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
             desc = "React for your desired role!"
 
         super(ReactionRolePicker, self).__init__(msg, options=roleOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
-        self.saveable = True
 
 
     def toDict(self, **kwargs) -> dict:

@@ -5,7 +5,7 @@ from .. import lib
 from ..bbConfig import bbConfig
 
 
-class InlineConfirmationMenu(ReactionMenu.SingleUserReactionMenu):
+class InlineConfirmationMenu(ReactionMenu.InlineReactionMenu):
     def __init__(self, msg : Message, targetMember : Union[Member, User], timeoutSeconds : int,
                     titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), footerTxt : str = "", img : str = "",
                     thumb : str = "", icon : str = "", authorName : str = ""):

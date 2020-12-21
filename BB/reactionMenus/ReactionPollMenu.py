@@ -98,6 +98,7 @@ async def printAndExpirePollResults(msgID : int):
         await reaction.remove(menuMsg.guild.me)
     
 
+@ReactionMenu.saveableMenu
 class ReactionPollMenu(ReactionMenu.ReactionMenu):
     """A saveable reaction menu taking a vote from its participants on a selection of option strings.
     On menu expiry, the menu's TimedTask should call printAndExpirePollResults. This edits to menu embed to provide a summary and bar chart of the votes submitted to the poll.
@@ -152,7 +153,6 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
             desc = "*" + desc + "*"
 
         super(ReactionPollMenu, self).__init__(msg, options=pollOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
-        self.saveable = True
 
 
     def getMenuEmbed(self) -> Embed:

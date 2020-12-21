@@ -4,7 +4,7 @@ from discord import Message, User, Member, Colour
 from typing import Union, List
     
 
-class ReactionSkinRegionPicker(ReactionMenu.SingleUserReactionMenu):
+class ReactionSkinRegionPicker(ReactionMenu.InlineReactionMenu):
     """An unsaveable menu allowing users to choose autoskin layer indices that they want to provide.
     """
     def __init__(self, msg : Message, owningUser : Union[User, Member], timeoutSeconds : int,
@@ -51,5 +51,4 @@ class ReactionSkinRegionPicker(ReactionMenu.SingleUserReactionMenu):
         regionOptions[bbConfig.defaultCancelEmoji] = ReactionMenu.DummyReactionMenuOption("Cancel render", bbConfig.defaultCancelEmoji)
 
         super(ReactionSkinRegionPicker, self).__init__(msg, owningUser, timeoutSeconds, returnTriggers=[bbConfig.spiralEmoji, bbConfig.defaultSubmitEmoji, bbConfig.defaultCancelEmoji], options=regionOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName)
-        self.saveable = False
     
