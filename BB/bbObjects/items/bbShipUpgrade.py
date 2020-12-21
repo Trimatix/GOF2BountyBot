@@ -152,8 +152,7 @@ class bbShipUpgrade(bbSerializable.bbSerializable):
             if self.hasVendor:
                 itemDict["vendor"] = self.vendor
 
-            if self.shipToUpgradeValueMult != 1.0:
-                itemDict["shipToUpgradeValueMult"] = self.shipToUpgradeValueMult
+            itemDict["shipToUpgradeValueMult"] = self.shipToUpgradeValueMult
 
             if self.armour != 0.0:
                 itemDict["armour"] = self.armour
