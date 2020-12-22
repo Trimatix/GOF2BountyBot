@@ -57,8 +57,8 @@ class BountyBoardChannel(bbSerializable.bbSerializable):
     :vartype noBountiesMsgToBeLoaded: int
 
     Runtime atts: These are the attributes that contribute to the BBC's runtime functionality, unlike initialisation atts.
-    :var bountyMessages: A dictionary associating faction names with the bounty listings associated with that faction. Listings are stored as a dictionary of the listing's bbCriminal to the message ID of the listing message.
-    :vartype bountyMessages: dict[str, dict[bbCriminal, int]]
+    :var bountyMessages: A dictionary associating faction names with the bounty listings associated with that faction. Listings are stored as a dictionary of the listing's bbCriminal to the discord.Message of the listing.
+    :vartype bountyMessages: dict[str, dict[bbCriminal, Message]]
     :var noBountiesMessage: Either a reference to a discord.message indicating that the BBC is empty, or None if no empty board message exists 
     :vartype noBountiesMessage: discord.message or None
     :var channel: The channel where this BBC's listings are to be posted
