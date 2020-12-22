@@ -44,19 +44,19 @@ async def fromDict(dbDict : dict) -> ReactionMenuDB:
             dcGuild = await bbGlobals.client.fetch_guild(menuData["guild"])
             if dcGuild is None:
                 bbLogger.log("reactionMenuDB", "fromDict", "Unrecognised guild in menu dict, ignoring and removing: " + menuDescriptor, category="reactionMenus", eventType="unknGuild")
-                return
+                continue
 
         menuChannel = dcGuild.get_channel(menuData["channel"])
         if menuChannel is None:
             menuChannel = await dcGuild.fetch_channel(menuData["channel"])
             if menuChannel is None:
                 bbLogger.log("reactionMenuDB", "fromDict", "Unrecognised channel in menu dict, ignoring and removing: " + menuDescriptor, category="reactionMenus", eventType="unknChannel")
-                return
+                continue
 
         msg = await menuChannel.fetch_message(menuData["msg"])
         if msg is None:
             bbLogger.log("reactionMenuDB", "fromDict", "Unrecognised message in menu dict, ignoring and removing: " + menuDescriptor, category="reactionMenus", eventType="unknMsg")
-            return
+            continue
 
         if menuData["type"] in ReactionMenu.saveableNameMenuTypes:
             newDB[int(msgID)] = ReactionMenu.saveableNameMenuTypes[menuData["type"]].fromDict(menuData, msg=msg)
