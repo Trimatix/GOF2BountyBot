@@ -260,6 +260,7 @@ class BountyBoardChannel(bbSerializable.bbSerializable):
         if not self.hasMessageForCriminal(criminal):
             raise KeyError("BNTY_BRD_CH-REM-BNTY_NOT_EXST: Attempted to remove a criminal from a bountyboardchannel, but the criminal is not listed")
             bbLogger.log("BBC", "remCrim", "Attempted to remove a criminal from a bountyboardchannel, but the criminal is not listed: " + criminal.name, category='bountyBoards', eventType="LISTING_REM-NO_EXST")
+        await (await self.channel.fetch_message(self.bountyMessages[criminal.faction][criminal])).delete()
         del self.bountyMessages[criminal.faction][criminal]
 
         if self.isEmpty():
