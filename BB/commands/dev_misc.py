@@ -31,6 +31,7 @@ async def dev_cmd_sleep(message : discord.Message, args : str, isDM : bool):
     if len(bbGlobals.currentRenders) > 0 and "-f" not in args:
         await message.channel.send(":x: A render is currently in progress!")	
     else:
+        bbGlobals.shutdown = True
         await message.channel.send("zzzz....")
         await bbGlobals.client.bb_shutdown()
 
@@ -397,3 +398,17 @@ async def dev_cmd_reset_transfer_cool(message : discord.Message, args : str, isD
     
 
 bbCommands.register("reset-transfer-cool", dev_cmd_reset_transfer_cool, 2, allowDM=True, useDoc=True)
+
+
+async def dev_cmd_bot_update(message : discord.Message, args : str, isDM : bool):
+    """developer command that gracefully shuts down the bot, performs git pull, and then reboots the bot.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: ignored
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    bbGlobals.shutdown = False
+    await message.channel.send("updating and restarting...")
+    await bbGlobals.client.bb_shutdown()
+
+bbCommands.register("bot-update", dev_cmd_bot_update, 2, allowDM=True, useDoc=True)

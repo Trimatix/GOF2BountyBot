@@ -8,6 +8,7 @@ from datetime import datetime
 import asyncio
 import traceback
 import os
+import sys
 
 # BountyBot Imports
 
@@ -668,3 +669,5 @@ async def on_raw_bulk_message_delete(payload : discord.RawBulkMessageDeleteEvent
 
 # Launch the bot!! 🤘🚀
 bbGlobals.client.run(bbPRIVATE.botToken)
+
+sys.exit(int(bbGlobals.shutdown))

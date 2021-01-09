@@ -32,14 +32,10 @@ helpEmbedTimeout = {"minutes": 5}
 
 ##### USER LEVELING #####
 
-# Old method: Amount of XP to award users per system check
-# hunterXPPerSysCheck = 10
-# New method: Apply a multiplier to all rewards gained from a bounty. bounty hunter xp is thus a measure of total earnings from bounty hunting.
+
+# Apply a multiplier to all rewards gained from a bounty. bounty hunter xp is thus a measure of total earnings from bounty hunting.
 bountyRewardToXPGainMult = 0.1
 
-# Amount of XP to award users per bounty win
-# ⚠ DEPRECATED
-hunterXPPerWin = 0
 
 
 BHLa = 4
@@ -75,7 +71,6 @@ def calculateUserBountyHuntingLevel(xp):
 
 # def calculateUserBountyHuntingLevel(xp):
 #     return 4 * xp - 30001
-##### COMMANDS #####
 
 
 

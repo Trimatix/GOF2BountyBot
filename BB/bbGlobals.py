@@ -29,3 +29,5 @@ newBountyFixedDeltaChanged = False
 
 # Names of ships currently being rendered
 currentRenders = []
+
+shutdown = False
