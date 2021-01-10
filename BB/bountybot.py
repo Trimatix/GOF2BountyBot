@@ -309,12 +309,12 @@ async def on_ready():
         bbData.builtInToolData[toolDict["name"]]["builtIn"] = True
         bbData.builtInToolObjs[toolDict["name"]].builtIn = True
     
-    # generate bbShipSkinTool objects for each bbShipSkin
-    for shipSkin in bbData.builtInShipSkins.values():
-        # if len(shipSkin.compatibleShips) > 0:
-        toolName = lib.stringTyping.shipSkinNameToToolName(shipSkin.name)
-        if toolName not in bbData.builtInToolObjs:
-            bbData.builtInToolObjs[toolName] = bbShipSkinTool.bbShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=True)
+    # # generate bbShipSkinTool objects for each bbShipSkin
+    # for shipSkin in bbData.builtInShipSkins.values():
+    #     # if len(shipSkin.compatibleShips) > 0:
+    #     toolName = lib.stringTyping.shipSkinNameToToolName(shipSkin.name)
+    #     if toolName not in bbData.builtInToolObjs:
+    #         bbData.builtInToolObjs[toolName] = bbShipSkinTool.bbShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=True)
 
 
     ##### SORT ITEMS BY TECHLEVEL #####
