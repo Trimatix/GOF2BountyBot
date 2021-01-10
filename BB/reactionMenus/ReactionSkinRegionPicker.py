@@ -9,7 +9,7 @@ class ReactionSkinRegionPicker(ReactionMenu.SingleUserReactionMenu):
     """
     def __init__(self, msg : Message, owningUser : Union[User, Member], timeoutSeconds : int,
             numRegions : int = 0, possibleRegions : List[int] = [], titleTxt : str = "",
-            desc : str = "", col : Colour = Colour.default, footerTxt : str = "", img : str = "",
+            desc : str = "", col : Colour = Colour.default(), footerTxt : str = "", img : str = "",
             thumb : str = "", icon : str = bbConfig.defaultShipSkinToolIcon, authorName : str = ""):
         """
         :param discord.Message msg: the message where this menu is embedded

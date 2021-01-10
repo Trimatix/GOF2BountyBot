@@ -90,7 +90,7 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
     """
 
     def __init__(self, msg : Message, reactionRoles : Dict[lib.emojis.dumbEmoji, Role], dcGuild : Guild,
-            titleTxt : str = "", desc : str = "", col : Colour = Colour.default, timeout : TimedTask.TimedTask = None,
+            titleTxt : str = "", desc : str = "", col : Colour = Colour.default(), timeout : TimedTask.TimedTask = None,
             footerTxt : str = "", img : str = "", thumb : str = "", icon : str = "", authorName : str = "",
             targetMember : Member = None, targetRole : Role = None):
         # TODO: Stop taking dcGuild, and instead extract dcGuild from msg.guild

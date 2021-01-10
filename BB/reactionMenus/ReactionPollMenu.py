@@ -108,7 +108,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
     :vartype owningBBUser: bbUser
     """
     def __init__(self, msg : Message, pollOptions : dict, timeout : TimedTask.TimedTask, pollStarter : Union[User, Member] = None,
-            multipleChoice : bool = False, titleTxt : str = "", desc : str = "", col : Colour = Colour.default, footerTxt : str = "",
+            multipleChoice : bool = False, titleTxt : str = "", desc : str = "", col : Colour = Colour.default(), footerTxt : str = "",
             img : str = "", thumb : str = "", icon : str = "", authorName : str = "", targetMember : Member = None,
             targetRole : Role = None, owningBBUser : bbUser.bbUser = None):
         """
