@@ -487,5 +487,5 @@ def fromDict(shopDict : dict) -> bbShop:
     for turretListingDict in shopDict["turretsStock"]:
         turretsStock.addItem(bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-    return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"], currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
+    return bbShop(shopDict["maxShips"] if "maxShips" in shopDict else bbConfig.shopDefaultShipsNum, shopDict["maxWeapons"] if "maxWeapons" in shopDict else bbConfig.shopDefaultWeaponsNum, shopDict["maxModules"] if "maxModules" in shopDict else bbConfig.shopDefaultModulesNum, currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
                     shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)
