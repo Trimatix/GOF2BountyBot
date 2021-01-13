@@ -50,12 +50,12 @@ async def cmd_how_to_play(message : discord.Message, args : str, isDM : bool):
 
     try:
         newBountiesChannelStr = ""
-        if not isDM:
-            requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
-            if requestedBBGuild.hasBountyBoardChannel:
-                newBountiesChannelStr = " in <#" + str(requestedBBGuild.bountyBoardChannel.channel.id) + ">"
-            elif requestedBBGuild.hasAnnounceChannel:
-                newBountiesChannelStr = " in <#" + str(requestedBBGuild.getAnnounceChannel().id) + ">"
+        # if not isDM:
+        #     requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
+        #     if requestedBBGuild.hasBountyBoardChannel:
+        #         newBountiesChannelStr = " in <#" + str(requestedBBGuild.bountyBoardChannel.channel.id) + ">"
+        #     elif requestedBBGuild.hasAnnounceChannel:
+        #         newBountiesChannelStr = " in <#" + str(requestedBBGuild.getAnnounceChannel().id) + ">"
 
         howToPlayEmbed = lib.discordUtil.makeEmbed(titleTxt='**How To Play**', desc="This game is based on the *'Most Wanted'* system from Galaxy on Fire 2. If you have played the Supernova addon, this should be familiar!\n\nIf at any time you would like information about a command, use the `" +
                                    bbConfig.commandPrefix + "help [command]` command. To see all commands, just use `" + bbConfig.commandPrefix + "help`.\n‎", footerTxt="Have fun! 🚀", thumb='https://cdn.discordapp.com/avatars/699740424025407570/1bfc728f46646fa964c6a77fc0cf2335.webp')
