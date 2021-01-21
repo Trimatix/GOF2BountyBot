@@ -350,7 +350,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
             newDuelReq = DuelRequest.DuelRequest(
                 sourceBBUser, targetBBUser, stakes, None, bbGlobals.guildsDB.getGuild(message.guild.id))
             duelTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(
-                bbConfig.duelReqExpiryTime), expiryFunction=DuelRequest.expireAndAnnounceDuelReq, expiryFunctionArgs={"duelReq": newDuelReq})
+                bbConfig.timeouts.duelRequest), expiryFunction=DuelRequest.expireAndAnnounceDuelReq, expiryFunctionArgs={"duelReq": newDuelReq})
             newDuelReq.duelTimeoutTask = duelTT
             bbGlobals.duelRequestTTDB.scheduleTask(duelTT)
             sourceBBUser.addDuelChallenge(newDuelReq)

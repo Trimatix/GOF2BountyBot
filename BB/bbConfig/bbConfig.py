@@ -34,7 +34,8 @@ timeouts = {
     "helpMenu": {"minutes": 3},
     "BASED_updateCheckFrequency": {"days": 1},
     # The time to wait inbetween database autosaves.
-    "dataSaveFrequency": {"hours": 1}
+    "dataSaveFrequency": {"hours": 1},
+    "duelRequest": {"days":1}
 }
 
 paths = {
@@ -83,9 +84,9 @@ maxCommandsPerHelpPage = 5
 ##### DUELS #####
 
 # Amount of time before a duel request expires
-duelReqExpiryTime = {"days":1}
+# duelReqExpiryTime = {"days":1}
 # duelReqExpiryTime as a user-friendly string for printing
-duelReqExpiryTimeStr = "1 day"
+# duelReqExpiryTimeStr = "1 day"
 # The amount to vary ship stats (+-) by before executing a duel
 duelVariancePercent = 0.05
 
