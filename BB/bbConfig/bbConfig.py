@@ -8,17 +8,17 @@ from ..lib.emojis import dumbEmoji, UninitializedDumbEmoji
 
 
 # Number of decimal places to calculate itemTLSpawnChanceForShopTL values to
-tl_resolution = 3
+itemSpawnRateResDP = 3
 
 
-def truncToRes(num : float) -> float:
-    """Truncate the passed float to tl_resolution decimal places.
+def truncItemSpawnResolution(num : float) -> float:
+    """Truncate the passed float to itemSpawnRateResDP decimal places.
 
     :param float num: Float number to truncate
-    :return: num, truncated to tl_resolution decimal places
+    :return: num, truncated to itemSpawnRateResDP decimal places
     :rtype: float
     """
-    return math.trunc(num * math.pow(10, tl_resolution)) / math.pow(10, tl_resolution)
+    return math.trunc(num * math.pow(10, itemSpawnRateResDP)) / math.pow(10, itemSpawnRateResDP)
 
 
 
@@ -83,7 +83,7 @@ itemChanceSum = 0
 
 # Calculate spawn chance for each shop TL
 for shopTL in range(minTechLevel, maxTechLevel + 1):
-    itemChance = truncToRes(1 - math.exp((shopTL - 10.5) / 5))
+    itemChance = truncItemSpawnResolution(1 - math.exp((shopTL - 10.5) / 5))
     cumulativeShopTLChance[shopTL - 1] = itemChance
     itemChanceSum += itemChance
 
@@ -91,7 +91,7 @@ for shopTL in range(minTechLevel, maxTechLevel + 1):
 for shopTL in range(minTechLevel, maxTechLevel + 1):
     currentChance = cumulativeShopTLChance[shopTL - 1]
     if currentChance != 0:
-        cumulativeShopTLChance[shopTL - 1] = truncToRes(currentChance / itemChanceSum)
+        cumulativeShopTLChance[shopTL - 1] = truncItemSpawnResolution(currentChance / itemChanceSum)
 
 # Save non-cumulative probabilities
 for i in range(len(cumulativeShopTLChance)):
@@ -102,7 +102,7 @@ currentSum = 0
 for shopTL in range(minTechLevel, maxTechLevel + 1):
     currentChance = cumulativeShopTLChance[shopTL - 1]
     if currentChance != 0:
-        cumulativeShopTLChance[shopTL - 1] = truncToRes(currentSum + currentChance)
+        cumulativeShopTLChance[shopTL - 1] = truncItemSpawnResolution(currentSum + currentChance)
         currentSum += currentChance
 
 
@@ -112,7 +112,7 @@ def pickRandomShopTL() -> int:
     :return: An integer between 1 and 10 representing a shop tech level
     :rtype: int    
     """
-    tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
+    tlChance = random.randint(1, 10 ** itemSpawnRateResDP) / 10 ** itemSpawnRateResDP
     for shopTL in range(len(cumulativeShopTLChance)):
         if cumulativeShopTLChance[shopTL] >= tlChance:
             return shopTL + 1
@@ -139,7 +139,7 @@ tl_o = 2.3
     tl_n = (x - tl_o - h) / tl_s
     mid = tl_n * (1 - math.pow(tl_n, 4))
     outer = tl_s * mid - (h / 2)
-    return truncToRes(outer if outer > 0 else 0)"""
+    return truncItemSpawnResolution(outer if outer > 0 else 0)"""
 
 def tl_u(x : int, t : int) -> float:
     """mathematical function used when calculating item spawn probabilities.
@@ -149,7 +149,7 @@ def tl_u(x : int, t : int) -> float:
     :return: A partial probability for use in probability generation
     :rtype: float
     """
-    chance = truncToRes(1 - math.pow((x - t)/1.4,2))
+    chance = truncItemSpawnResolution(1 - math.pow((x - t)/1.4,2))
     return chance if chance > 0 else 0
 
 
@@ -168,7 +168,7 @@ for shopTL in range(minTechLevel, maxTechLevel + 1):
     for itemTL in range(minTechLevel, maxTechLevel + 1):
         currentChance = cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1]
         if currentChance != 0:
-            cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentChance / itemChanceSum)
+            cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncItemSpawnResolution(currentChance / itemChanceSum)
 
     # Save non-cumulative probabilities
     for i in range(len(cumulativeItemTLSpawnChanceForShopTL[shopTL - 1])):
@@ -179,7 +179,7 @@ for shopTL in range(minTechLevel, maxTechLevel + 1):
     for itemTL in range(minTechLevel, maxTechLevel + 1):
         currentChance = cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1]
         if currentChance != 0:
-            cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncToRes(currentSum + currentChance)
+            cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL - 1] = truncItemSpawnResolution(currentSum + currentChance)
             currentSum += currentChance
 
 print("[bbConfig] Item rarities generated:")
@@ -187,7 +187,7 @@ for shopTL in range(len(itemTLSpawnChanceForShopTL)):
     print("\t• shop TL" + str(shopTL+1) + ": itemTL",end="")
     for itemTL in range(len((itemTLSpawnChanceForShopTL[shopTL]))):
         if itemTLSpawnChanceForShopTL[shopTL][itemTL] != 0:
-            print(" " + str(itemTL + 1) + "=" + str(truncToRes(itemTLSpawnChanceForShopTL[shopTL][itemTL]*100)),end="% ")
+            print(" " + str(itemTL + 1) + "=" + str(truncItemSpawnResolution(itemTLSpawnChanceForShopTL[shopTL][itemTL]*100)),end="% ")
     print()
 
 
@@ -198,7 +198,7 @@ def pickRandomItemTL(shopTL : int) -> int:
     :return: An integer between 1 and 10 representing a item tech level
     :rtype: int
     """
-    tlChance = random.randint(1, 10 ** tl_resolution) / 10 ** tl_resolution
+    tlChance = random.randint(1, 10 ** itemSpawnRateResDP) / 10 ** itemSpawnRateResDP
     for itemTL in range(len(cumulativeItemTLSpawnChanceForShopTL[shopTL - 1])):
         if cumulativeItemTLSpawnChanceForShopTL[shopTL - 1][itemTL] >= tlChance:
             return itemTL + 1
