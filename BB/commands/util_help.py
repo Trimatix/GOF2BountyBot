@@ -37,11 +37,11 @@ async def util_autohelp(message : discord.Message, args : str, isDM : bool, user
         if args == "":
             owningBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
             if owningBBUser.helpMenuOwned:
-                await message.channel.send(":x: Please close your existing help menu before making a new one!\nIn case you can't find it, help menus auto exire after **" + lib.timeUtil.td_format_noYM(lib.timeUtil.timeDeltaFromDict(bbConfig.helpEmbedTimeout)) + "**.")
+                await message.channel.send(":x: Please close your existing help menu before making a new one!\nIn case you can't find it, help menus auto exire after **" + lib.timeUtil.td_format_noYM(lib.timeUtil.timeDeltaFromDict(bbConfig.timeouts.helpMenu)) + "**.")
                 return
             owningBBUser.helpMenuOwned = True
             menuMsg = await sendChannel.send("‎")
-            helpTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.helpEmbedTimeout), expiryFunction=PagedReactionMenu.expireHelpMenu, expiryFunctionArgs=menuMsg.id)
+            helpTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.timeouts.helpMenu), expiryFunction=PagedReactionMenu.expireHelpMenu, expiryFunctionArgs=menuMsg.id)
             bbGlobals.reactionMenusTTDB.scheduleTask(helpTT)
             indexEmbed = lib.discordUtil.makeEmbed(titleTxt="BB "+ bbConfig.accessLevelNames[userAccessLevel] + " Commands", desc="Select " + bbConfig.defaultNextEmoji.sendable + " to go to page one.", thumb=bbGlobals.client.user.avatar_url_as(size=64), footerTxt="This menu will expire in " + lib.timeUtil.td_format_noYM(helpTT.expiryDelta) + ".")
             sectionsStr = ""
@@ -68,11 +68,11 @@ async def util_autohelp(message : discord.Message, args : str, isDM : bool, user
             else:
                 owningBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
                 if owningBBUser.helpMenuOwned:
-                    await message.channel.send(":x: Please close your existing help menu before making a new one!\nIn case you can't find it, help menus auto exire after **" + lib.timeUtil.td_format_noYM(lib.timeUtil.timeDeltaFromDict(bbConfig.helpEmbedTimeout)) + "**.")
+                    await message.channel.send(":x: Please close your existing help menu before making a new one!\nIn case you can't find it, help menus auto exire after **" + lib.timeUtil.td_format_noYM(lib.timeUtil.timeDeltaFromDict(bbConfig.timeouts.helpMenu)) + "**.")
                     return
                 owningBBUser.helpMenuOwned = True
                 menuMsg = await sendChannel.send("‎")
-                helpTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.helpEmbedTimeout), expiryFunction=PagedReactionMenu.expireHelpMenu, expiryFunctionArgs=menuMsg.id)
+                helpTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.timeouts.helpMenu), expiryFunction=PagedReactionMenu.expireHelpMenu, expiryFunctionArgs=menuMsg.id)
                 bbGlobals.reactionMenusTTDB.scheduleTask(helpTT)
                 pages = {}
                 for helpEmbed in bbCommands.helpSectionEmbeds[userAccessLevel][args]:
