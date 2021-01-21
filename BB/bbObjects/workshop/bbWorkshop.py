@@ -1,9 +1,9 @@
-from ...baseClasses import bbSerializable
+from ...baseClasses import serializable
 from datetime import datetime
 from . import bbWorkshopListing
 
 
-class bbWorkshop(bbSerializable.bbSerializable):
+class bbWorkshop(serializable.Serializable):
     def __init__(self, itemTypes):
         self.items = {iType: [] for iType in itemTypes}
 

@@ -1,10 +1,10 @@
 from ..items import bbItem
-from ...baseClasses import bbSerializable
+from ...baseClasses import serializable
 from datetime import datetime
 from ... import bbGlobals
 
 
-class bbWorkshopListing(bbSerializable.bbSerializable):
+class bbWorkshopListing(serializable.Serializable):
     def __init__(self, item, creationDate, bbCreator):
         self.item = item
         self.creationDate = creationDate

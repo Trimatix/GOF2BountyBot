@@ -2,10 +2,10 @@
 from __future__ import annotations
 from typing import List, Tuple
 
-from ...baseClasses import bbAliasable
+from ...baseClasses import aliasable
 import math
 
-class System (bbAliasable.Aliasable):
+class System (aliasable.Aliasable):
     """A solar system where a bounty may be located.
 
     :var name: The name of this system

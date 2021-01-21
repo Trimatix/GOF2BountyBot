@@ -9,7 +9,7 @@ from abc import abstractmethod, ABC
 from typing import Union, Dict, List
 import asyncio
 from types import FunctionType
-from ..baseClasses import bbSerializable
+from ..baseClasses import serializable
 
 
 async def deleteReactionMenu(menuID : int):
@@ -81,7 +81,7 @@ async def markExpiredMenuAndRemoveOptions(menuID : int):
     await markExpiredMenu(menuID)
 
 
-class ReactionMenuOption(bbSerializable.bbSerializable):
+class ReactionMenuOption(serializable.Serializable):
     """An abstract class representing an option in a reaction menu.
     Reaction menu options must have a name and emoji. They may optionally have a function to call when added,
     a function to call when removed, and arguments for each.
@@ -264,7 +264,7 @@ class DummyReactionMenuOption(ReactionMenuOption):
         return super(DummyReactionMenuOption, self).toDict(**kwargs)
 
 
-class ReactionMenu(bbSerializable.bbSerializable):
+class ReactionMenu(serializable.Serializable):
     """A versatile class implementing emoji reaction menus.
     This class can be used as-is, to create unsaveable reaction menus of any type, with vast possibilities for behaviour.
     ReactionMenu need only be extended in the following cases:

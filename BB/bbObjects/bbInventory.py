@@ -1,8 +1,8 @@
 from __future__ import annotations
 from . import bbInventoryListing
-from ..baseClasses import bbSerializable
+from ..baseClasses import serializable
 
-class bbInventory(bbSerializable.bbSerializable):
+class bbInventory(serializable.Serializable):
     """A database of bbInventoryListings.
     Aside from the use of bbInventoryListing for the purpose of item quantities, this class is type unaware.
 

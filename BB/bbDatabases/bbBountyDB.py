@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from ..bbObjects.bounties import bbBounty
 from typing import List
-from ..baseClasses import bbSerializable
+from ..baseClasses import serializable
 from ..bbConfig import bbConfig
 
 
-class bbBountyDB(bbSerializable.bbSerializable):
+class bbBountyDB(serializable.Serializable):
     """A database of bbObject.bounties.bbBounty.
     Bounty criminal names and faction names must be unique within the database.
     Faction names are case sensitive.

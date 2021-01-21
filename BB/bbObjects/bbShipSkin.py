@@ -4,7 +4,7 @@ from ..shipRenderer import shipRenderer
 from .. import lib
 from discord import File
 from typing import Dict
-from ..baseClasses import bbSerializable
+from ..baseClasses import serializable
 
 
 def _saveShip(ship):
@@ -21,7 +21,7 @@ def _saveShip(ship):
     shipData["path"] = shipPath
 
 
-class bbShipSkin(bbSerializable.bbSerializable):
+class bbShipSkin(serializable.Serializable):
     def __init__(self, name : str, textureRegions : int, shipRenders : Dict[str, str], path : str, designer : str, wiki : str = ""):
         self.name = name
         self.textureRegions = textureRegions

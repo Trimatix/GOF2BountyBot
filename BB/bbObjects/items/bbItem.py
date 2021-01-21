@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import List, Type
 
-from ...baseClasses import bbAliasable
+from ...baseClasses import aliasable
 from abc import abstractmethod
 from ... import lib
 
@@ -11,7 +11,7 @@ subClassNames = {}
 nameSubClasses = {}
 
 
-class bbItem(bbAliasable.Aliasable):
+class bbItem(aliasable.Aliasable):
     """A game item, with a value, a manufacturer, a wiki page, an icon, an emoji, and a tech level.
 
     :var wiki: A web page to represent as the item's wikipedia article in its info page

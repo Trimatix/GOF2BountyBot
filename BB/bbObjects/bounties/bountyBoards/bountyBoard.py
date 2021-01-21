@@ -1,10 +1,10 @@
 # CURRENTLY UNUSED FILE
 from __future__ import annotations
 from ....bbDatabases import bbBountyDB
-from ....baseClasses import bbSerializable
+from ....baseClasses import serializable
 
 
-class BountyBoard(bbSerializable.bbSerializable):
+class BountyBoard(serializable.Serializable):
     """A single message that acts as a duplicate of the output of $bounties, except it is continuously updated with new and completed bounties.
 
     :var msgID: The id of the message to continuously update

@@ -15,7 +15,7 @@ from discord import Guild, Member
 from . import bbGuild
 from ..logging import bbLogger
 from .. import lib
-from ..baseClasses import bbSerializable
+from ..baseClasses import serializable
 
 
 # Dictionary-serialized bbShip to give to new players
@@ -29,7 +29,7 @@ defaultUserDict = {"credits":0, "bountyCooldownEnd":0, "lifetimeCredits":0, "sys
 defaultUserValue = 28970
 
 
-class bbUser(bbSerializable.bbSerializable):
+class bbUser(serializable.Serializable):
     """A user of the bot. There is currently no guarantee that user still shares any guilds with the bot, though this is planned to change in the future.
 
     :var id: The user's unique ID. The same as their unique discord ID.

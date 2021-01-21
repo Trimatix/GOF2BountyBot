@@ -1,12 +1,12 @@
 from typing import Type
-from ..baseClasses import bbSerializable
+from ..baseClasses import serializable
 
 
-class bbInventoryListing(bbSerializable.bbSerializable):
+class bbInventoryListing(serializable.Serializable):
     """A listing representing an object and a quantity of that object stored.
-    To ensure serializability, inventorylistings can only store bbSerializable objects.
+    To ensure serializability, inventorylistings can only store serializable objects.
 
-    bbSerializable deserializing is not defined in the general case, so bbInventoryListing does not have a general case fromDict function.
+    serializable deserializing is not defined in the general case, so bbInventoryListing does not have a general case fromDict function.
 
     :var item: The item this inventory listing represents
     :var count: The quantity of item stored
@@ -18,8 +18,8 @@ class bbInventoryListing(bbSerializable.bbSerializable):
         :param item: The item to store
         :param int quantity: The amount of item to store (Default 0)
         """
-        if not isinstance(item, bbSerializable.bbSerializable):
-            raise TypeError("bbInventoryListing can only store bbSerializables to ensure serializability. Given: " + type(item).__name__)
+        if not isinstance(item, serializable.Serializable):
+            raise TypeError("bbInventoryListing can only store serializables to ensure serializability. Given: " + type(item).__name__)
         self.item = item
         self.count = count
 
