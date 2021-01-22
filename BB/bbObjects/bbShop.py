@@ -38,18 +38,18 @@ class bbShop(serializable.Serializable):
     :vartype turretsStock: bbInventory
     """
 
-    def __init__(self, maxShips : int = bbConfig.shopDefaultShipsNum, maxModules : int = bbConfig.shopDefaultModulesNum,
-            maxWeapons : int = bbConfig.shopDefaultWeaponsNum, maxTurrets : int = bbConfig.shopDefaultTurretsNum,
+    def __init__(self, maxShips : int = bbConfig.shopRefreshShips, maxModules : int = bbConfig.shopRefreshModules,
+            maxWeapons : int = bbConfig.shopRefreshWeapons, maxTurrets : int = bbConfig.shopRefreshTurrets,
             shipsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
             weaponsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
             modulesStock : bbInventory.bbInventory = bbInventory.bbInventory(),
             turretsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
             currentTechLevel : int = bbConfig.minTechLevel, noRefresh : bool = False):
         """
-        :param int maxShips: The maximum number of ships generated on every stock refresh. (Default bbConfig.shopDefaultShipsNum)
-        :param int maxModules: The maximum number of modules generated on every stock refresh. (Default bbConfig.shopDefaultModulesNum)
-        :param int maxWeapons: The maximum number of weapons generated on every stock refresh. (Default bbConfig.shopDefaultWeaponsNum)
-        :param int maxTurrets: The maximum number of turrets generated on every stock refresh. (Default bbConfig.shopDefaultTurretsNum)
+        :param int maxShips: The maximum number of ships generated on every stock refresh. (Default bbConfig.shopRefreshShips)
+        :param int maxModules: The maximum number of modules generated on every stock refresh. (Default bbConfig.shopRefreshModules)
+        :param int maxWeapons: The maximum number of weapons generated on every stock refresh. (Default bbConfig.shopRefreshWeapons)
+        :param int maxTurrets: The maximum number of turrets generated on every stock refresh. (Default bbConfig.shopRefreshTurrets)
         :param int currentTechLevel: The current tech level of the shop, influencing the tech levels of the stock generated upon refresh. (Default empty bbInventory)
         :param bbInventory shipsStock: The shop's current stock of ships (Default empty bbInventory)
         :param bbInventory weaponsStock: The shop's current stock of weapons (Default empty bbInventory)
