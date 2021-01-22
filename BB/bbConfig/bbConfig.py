@@ -113,10 +113,10 @@ numModuleRanks = 7
 numTurretRanks = 3
 
 # The default number of items shops should generate every shopRefreshStockPeriod
-shopDefaultShipsNum = 5
-shopDefaultWeaponsNum = 5
-shopDefaultModulesNum = 5
-shopDefaultTurretsNum = 2
+shopRefreshShips = 5
+shopRefreshWeapons = 5
+shopRefreshModules = 5
+shopRefreshTurrets = 2
 
 # bbTurret is the only item that has a probability not to be spawned. This metric indicates the percentage chance of turrets being stocked on a given day
 turretSpawnProbability = 45
