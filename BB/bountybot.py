@@ -413,7 +413,7 @@ async def on_ready():
     # bot is now logged in
     bbGlobals.client.bb_loggedIn = True
     
-    bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.shopRefreshStockPeriod), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
+    bbGlobals.shopRefreshTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.timeouts.shopRefresh), autoReschedule=True, expiryFunction=refreshAndAnnounceAllShopStocks)
     bbGlobals.dbSaveTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.savePeriod), autoReschedule=True, expiryFunction=bbGlobals.client.bb_saveAllDBs)
 
     bbGlobals.duelRequestTTDB = TimedTaskHeap.TimedTaskHeap()

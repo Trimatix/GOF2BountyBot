@@ -35,7 +35,10 @@ timeouts = {
     "BASED_updateCheckFrequency": {"days": 1},
     # The time to wait inbetween database autosaves.
     "dataSaveFrequency": {"hours": 1},
-    "duelRequest": {"days":1}
+    "duelRequest": {"days": 1},
+
+    # Amount of time to wait between refreshing stock of all shops
+    "shopRefresh": {"days": 0, "hours": 6, "minutes": 0, "seconds": 0}
 }
 
 paths = {
@@ -101,7 +104,7 @@ duelCloakChance = 20
 ##### SHOPS #####
 
 # Amount of time to wait between refreshing stock of all shops
-shopRefreshStockPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
+# shopRefreshStockPeriod = {"days":0, "hours":6, "minutes":0, "seconds":0}
 
 # The number of ranks to use when randomly picking shop stock
 numShipRanks = 10
