@@ -686,9 +686,9 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                 layersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, numRegions=shipData["textureRegions"])	
                 pickedLayers = []	
                 menuOutput = await layersPickerMenu.doMenu()	
-                if bbConfig.spiralEmoji in menuOutput:	
+                if bbConfig.emojis.spiral in menuOutput:	
                     pickedLayers = layerIndices	
-                elif bbConfig.defaultCancelEmoji in menuOutput:	
+                elif bbConfig.emojis.cancel in menuOutput:	
                     await message.channel.send("🛑 Skin render cancelled.")	
                     for skinPath in skinPaths.values():	
                         os.remove(skinPath)	
@@ -697,7 +697,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                 else:	
                     for react in menuOutput:	
                         try:	
-                            pickedLayers.append(bbConfig.numberEmojis.index(react))	
+                            pickedLayers.append(bbConfig.emojis.emojis.numbers.index(react))	
                         except ValueError:	
                             pass	
                 	
@@ -705,9 +705,9 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                 if remainingIndices:	
                     disabledLayersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, possibleRegions=remainingIndices, desc="Would you like to disable any regions?")	
                     menuOutput = await disabledLayersPickerMenu.doMenu()	
-                    if bbConfig.spiralEmoji in menuOutput:	
+                    if bbConfig.emojis.spiral in menuOutput:	
                         disabledLayers = remainingIndices	
-                    elif bbConfig.defaultCancelEmoji in menuOutput:	
+                    elif bbConfig.emojis.cancel in menuOutput:	
                         await message.channel.send("🛑 Skin render cancelled.")	
                         for skinPath in skinPaths.values():	
                             os.remove(skinPath)	
@@ -716,7 +716,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                     else:	
                         for react in menuOutput:	
                             try:	
-                                disabledLayers.append(bbConfig.numberEmojis.index(react))	
+                                disabledLayers.append(bbConfig.emojis.emojis.numbers.index(react))	
                             except ValueError:	
                                 pass	
                 	

@@ -252,7 +252,7 @@ class UninitializedDumbEmoji:
     An example use case:
     Custom emojis cannot be represented in bbConfig, as at the time of importing
     this module into bountybot, bbGlobals.client is not defined.
-    TODO: Update bbConfig.defaultShipSkinToolEmoji once merged to the same branch
+    TODO: Update bbConfig.emojis.shipSkinTool once merged to the same branch
     """
     def __init__(self, value):
         """

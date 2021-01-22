@@ -29,7 +29,7 @@ class ReactionSkinRegionPicker(ReactionMenu.SingleUserReactionMenu):
         """
 
         if not possibleRegions:
-            if numRegions > len(bbConfig.numberEmojis) - 2:
+            if numRegions > len(bbConfig.emojis.emojis.numbers) - 2:
                 raise IndexError("Attempted to create a ReactionSkinRegionPicker choosing from more regions than can can be represented by bbConfig.ReactionSkinRegionPicker")
             if numRegions < 1:
                 raise IndexError("Attempted to create a ReactionSkinRegionPicker choosing from fewer than one regions, and possibleRegions not provided/empty")
@@ -43,13 +43,13 @@ class ReactionSkinRegionPicker(ReactionMenu.SingleUserReactionMenu):
             titleTxt = "Custom Skin Renderer"
 
 
-        regionOptions = {bbConfig.spiralEmoji: ReactionMenu.DummyReactionMenuOption("Select all", bbConfig.spiralEmoji)}
+        regionOptions = {bbConfig.emojis.spiral: ReactionMenu.DummyReactionMenuOption("Select all", bbConfig.emojis.spiral)}
         for regionNumber in (possibleRegions if possibleRegions else range(1, numRegions + 1)):
-            regionOptions[bbConfig.numberEmojis[regionNumber]] = ReactionMenu.DummyReactionMenuOption("Layer " + str(regionNumber), bbConfig.numberEmojis[regionNumber])
+            regionOptions[bbConfig.emojis.emojis.numbers[regionNumber]] = ReactionMenu.DummyReactionMenuOption("Layer " + str(regionNumber), bbConfig.emojis.emojis.numbers[regionNumber])
         
-        regionOptions[bbConfig.defaultSubmitEmoji] = ReactionMenu.DummyReactionMenuOption("Submit", bbConfig.defaultSubmitEmoji)
-        regionOptions[bbConfig.defaultCancelEmoji] = ReactionMenu.DummyReactionMenuOption("Cancel render", bbConfig.defaultCancelEmoji)
+        regionOptions[bbConfig.emojis.submit] = ReactionMenu.DummyReactionMenuOption("Submit", bbConfig.emojis.submit)
+        regionOptions[bbConfig.emojis.cancel] = ReactionMenu.DummyReactionMenuOption("Cancel render", bbConfig.emojis.cancel)
 
-        super(ReactionSkinRegionPicker, self).__init__(msg, owningUser, timeoutSeconds, returnTriggers=[bbConfig.spiralEmoji, bbConfig.defaultSubmitEmoji, bbConfig.defaultCancelEmoji], options=regionOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName)
+        super(ReactionSkinRegionPicker, self).__init__(msg, owningUser, timeoutSeconds, returnTriggers=[bbConfig.emojis.spiral, bbConfig.emojis.submit, bbConfig.emojis.cancel], options=regionOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName)
         self.saveable = False
     

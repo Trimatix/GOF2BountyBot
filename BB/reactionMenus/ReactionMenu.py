@@ -543,14 +543,14 @@ class CancellableReactionMenu(ReactionMenu):
     :var cancelEmoji: The emoji used for the menu's cancel button.
     :vartype cancelEmoji: lib.emojis.dumbEmoji
     """
-    def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, cancelEmoji : lib.emojis.dumbEmoji = bbConfig.defaultCancelEmoji,
+    def __init__(self, msg : Message, options : Dict[lib.emojis.dumbEmoji, ReactionMenuOption] = {}, cancelEmoji : lib.emojis.dumbEmoji = bbConfig.emojis.cancel,
                     titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), timeout : TimedTask = None, footerTxt : str = "", img : str = "", thumb : str = "",
                     icon : str = "", authorName : str = "", targetMember : Member = None, targetRole : Role = None):
         """
         :param discord.Message msg: the message where this menu is embedded
         :param options: A dictionary storing all of the menu's options and their behaviour (Default {})
         :type options: dict[lib.emojis.dumbEmoji, ReactionMenuOption]
-        :param lib.emojis.dumbEmoji emoji: The emoji members should react with to cancel the menu. (Default bbConfig.defaultCancelEmoji)
+        :param lib.emojis.dumbEmoji emoji: The emoji members should react with to cancel the menu. (Default bbConfig.emojis.cancel)
         :param str titleTxt: The content of the embed title (Default "")
         :param str desc: he content of the embed description; appears at the top below the title (Default "")
         :param discord.Colour col: The colour of the embed's side strip (Default None)

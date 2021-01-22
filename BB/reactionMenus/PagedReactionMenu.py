@@ -47,21 +47,21 @@ class PagedReactionMenu(ReactionMenu.ReactionMenu):
         self.targetRole = targetRole
         self.owningBBUser = owningBBUser
 
-        nextOption = ReactionMenu.NonSaveableReactionMenuOption("Next Page", bbConfig.defaultNextEmoji, self.nextPage, None)
-        prevOption = ReactionMenu.NonSaveableReactionMenuOption("Previous Page", bbConfig.defaultPreviousEmoji, self.previousPage, None)
-        cancelOption = ReactionMenu.NonSaveableReactionMenuOption("Close Menu", bbConfig.defaultCancelEmoji, self.delete, None)
+        nextOption = ReactionMenu.NonSaveableReactionMenuOption("Next Page", bbConfig.emojis.next, self.nextPage, None)
+        prevOption = ReactionMenu.NonSaveableReactionMenuOption("Previous Page", bbConfig.emojis.previous, self.previousPage, None)
+        cancelOption = ReactionMenu.NonSaveableReactionMenuOption("Close Menu", bbConfig.emojis.cancel, self.delete, None)
 
-        self.firstPageControls = {  bbConfig.defaultCancelEmoji:    cancelOption,
-                                    bbConfig.defaultNextEmoji:      nextOption}
+        self.firstPageControls = {  bbConfig.emojis.cancel:    cancelOption,
+                                    bbConfig.emojis.next:      nextOption}
 
-        self.midPageControls = {    bbConfig.defaultCancelEmoji:    cancelOption,
-                                    bbConfig.defaultNextEmoji:      nextOption,
-                                    bbConfig.defaultPreviousEmoji:  prevOption}
+        self.midPageControls = {    bbConfig.emojis.cancel:    cancelOption,
+                                    bbConfig.emojis.next:      nextOption,
+                                    bbConfig.emojis.previous:  prevOption}
 
-        self.lastPageControls = {   bbConfig.defaultCancelEmoji:    cancelOption,
-                                    bbConfig.defaultPreviousEmoji:  prevOption}
+        self.lastPageControls = {   bbConfig.emojis.cancel:    cancelOption,
+                                    bbConfig.emojis.previous:  prevOption}
 
-        self.onePageControls = {    bbConfig.defaultCancelEmoji:    cancelOption}
+        self.onePageControls = {    bbConfig.emojis.cancel:    cancelOption}
 
         if len(self.pages) == 1:
             self.currentPageControls = self.onePageControls
@@ -103,9 +103,9 @@ class PagedReactionMenu(ReactionMenu.ReactionMenu):
         await self.updateMessage(noRefreshOptions=True)
         if self.currentPageNum == len(self.pages) - 1:
             self.msg = await self.msg.channel.fetch_message(self.msg.id)
-            await self.msg.remove_reaction(bbConfig.defaultNextEmoji.sendable, bbGlobals.client.user)
+            await self.msg.remove_reaction(bbConfig.emojis.next.sendable, bbGlobals.client.user)
         if self.currentPageNum == 1:
-            await self.msg.add_reaction(bbConfig.defaultPreviousEmoji.sendable)
+            await self.msg.add_reaction(bbConfig.emojis.previous.sendable)
 
 
     async def previousPage(self):
@@ -116,9 +116,9 @@ class PagedReactionMenu(ReactionMenu.ReactionMenu):
         await self.updateMessage(noRefreshOptions=True)
         if self.currentPageNum == 0:
             self.msg = await self.msg.channel.fetch_message(self.msg.id)
-            await self.msg.remove_reaction(bbConfig.defaultPreviousEmoji.sendable, bbGlobals.client.user)
+            await self.msg.remove_reaction(bbConfig.emojis.previous.sendable, bbGlobals.client.user)
         if self.currentPageNum == len(self.pages) - 2:
-            await self.msg.add_reaction(bbConfig.defaultNextEmoji.sendable)
+            await self.msg.add_reaction(bbConfig.emojis.next.sendable)
 
     
     async def jumpToPage(self, pageNum : int):
@@ -131,6 +131,6 @@ class PagedReactionMenu(ReactionMenu.ReactionMenu):
             if len(self.pages) > 1:
                 if self.currentPageNum == 0:
                     self.msg = await self.msg.channel.fetch_message(self.msg.id)
-                    await self.msg.remove_reaction(bbConfig.defaultPreviousEmoji.sendable, bbGlobals.client.user)
+                    await self.msg.remove_reaction(bbConfig.emojis.previous.sendable, bbGlobals.client.user)
                 if self.currentPageNum != len(self.pages) - 1:
-                    await self.msg.add_reaction(bbConfig.defaultNextEmoji.sendable)
+                    await self.msg.add_reaction(bbConfig.emojis.next.sendable)

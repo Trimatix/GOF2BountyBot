@@ -188,7 +188,7 @@ async def cmd_hangar(message : discord.Message, args : str, isDM : bool):
         try:
             await sendChannel.send(embed=hangarEmbed)
             if sendDM:
-                await message.add_reaction(bbConfig.dmSentEmoji.sendable)
+                await message.add_reaction(bbConfig.emojis.dmSent.sendable)
         except discord.Forbidden:
             await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
 

@@ -244,7 +244,7 @@ async def startLongProcess(message : Message):
     :param discord.Message message: The message to react to
     """
     try:
-        await message.add_reaction(bbConfig.longProcessEmoji.sendable)
+        await message.add_reaction(bbConfig.emojis.longProcess.sendable)
     except (HTTPException, Forbidden):
         pass
 
@@ -255,7 +255,7 @@ async def endLongProcess(message : Message):
     :param discord.Message message: The message to remove the reaction from
     """
     try:
-        await message.remove_reaction(bbConfig.longProcessEmoji.sendable, bbGlobals.client.user)
+        await message.remove_reaction(bbConfig.emojis.longProcess.sendable, bbGlobals.client.user)
     except (HTTPException, Forbidden):
         pass
 

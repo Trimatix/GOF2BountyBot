@@ -208,7 +208,7 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
         return
     if sendDM:
-        await message.add_reaction(bbConfig.dmSentEmoji.sendable)
+        await message.add_reaction(bbConfig.emojis.dmSent.sendable)
 
 bbCommands.register("shop", cmd_shop, 0, aliases=["store"], allowDM=False, helpSection="economy", signatureStr="**shop** *[item-type]*", shortHelp="Display all items currently for sale. Shop stock is refreshed every six hours. Give an item type to only list items of that type.", longHelp="Display all items currently for sale. Shop stock is refreshed every six hours, with items based on its tech level. Give an item type (ship/weapon/turret/module/tool) to only list items of that type.")
 

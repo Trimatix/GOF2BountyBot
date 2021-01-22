@@ -25,12 +25,12 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         :param int value: The number of credits that this item can be bought/sold for at a shop. (Default 0)
         :param str wiki: A web page that is displayed as the wiki page for this item. If no wiki is given and shipSkin has one, that will be used instead. (Default "")
         :param str icon: A URL pointing to an image to use for this item's icon (Default bbConfig.defaultShipSkinToolIcon)
-        :param lib.emojis.dumbEmoji emoji: The emoji to use for this item's small icon (Default bbConfig.defaultShipSkinToolEmoji)
+        :param lib.emojis.dumbEmoji emoji: The emoji to use for this item's small icon (Default bbConfig.emojis.shipSkinTool)
         :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other items of the same type (Default shipSkin.averageTL)
         :param bool builtIn: Whether this is a BountyBot standard item (loaded in from bbData) or a custom spawned item (Default False)
         """
         if emoji is None:
-            emoji = bbConfig.defaultShipSkinToolEmoji
+            emoji = bbConfig.emojis.shipSkinTool
         super().__init__(lib.stringTyping.shipSkinNameToToolName(shipSkin.name), [shipSkin.name, "Skin: " + shipSkin.name, "Ship Skin " + shipSkin.name + "Skin " + shipSkin.name], value=value, wiki=wiki if wiki else shipSkin.wiki if shipSkin.hasWiki else "", manufacturer=shipSkin.designer, icon=icon, emoji=emoji, techLevel=techLevel if techLevel > -1 else shipSkin.averageTL, builtIn=builtIn)
         self.shipSkin = shipSkin
 
@@ -98,9 +98,9 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         confirmMsg = await message.channel.send("Are you sure you want to apply the " + self.shipSkin.name + " skin to your " + ship.getNameAndNick() + "?") 
         confirmation = await InlineConfirmationMenu(confirmMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds).doMenu()
         
-        if bbConfig.defaultRejectEmoji in confirmation:
+        if bbConfig.emojis.reject in confirmation:
             return "🛑 Skin application cancelled."
-        elif bbConfig.defaultAcceptEmoji in confirmation:
+        elif bbConfig.emojis.accept in confirmation:
             ship.applySkin(self.shipSkin)
             if self in callingBBUser.inactiveTools:
                 callingBBUser.inactiveTools.removeItem(self)

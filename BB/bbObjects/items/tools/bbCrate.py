@@ -56,9 +56,9 @@ class bbCrate(bbToolItem.bbToolItem):
         confirmMsg = await message.channel.send("Are you sure you want to open this crate?") 
         confirmation = await InlineConfirmationMenu(confirmMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds).doMenu()
 
-        if bbConfig.defaultRejectEmoji in confirmation:
+        if bbConfig.emojis.reject in confirmation:
             return "🛑 Crate open cancelled."
-        elif bbConfig.defaultAcceptEmoji in confirmation:
+        elif bbConfig.emojis.accept in confirmation:
             newItem = random.choice(self.itemPool)
             callingBBUser.getInventoryForItem(newItem).addItem(newItem)
             callingBBUser.inactiveTools.removeItem(self)

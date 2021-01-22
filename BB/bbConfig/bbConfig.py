@@ -7,6 +7,8 @@ from ..lib.emojis import UninitializedDumbEmoji as UninitializedBasedEmoji
 
 # All emojis used by the bot
 defaultEmojis = {
+    # When a message prompts a process that will take a long time (e.g rendering), this will be added to the message reactions
+    # It will be removed when the long process is finished.
     "longProcess": UninitializedBasedEmoji("⏳"),
     # When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
     "dmSent": UninitializedBasedEmoji("📬"),
@@ -27,7 +29,10 @@ defaultEmojis = {
     "menuOptions": [UninitializedBasedEmoji("0️⃣"), UninitializedBasedEmoji("1️⃣"), UninitializedBasedEmoji("2️⃣"),
                     UninitializedBasedEmoji("3️⃣"), UninitializedBasedEmoji("4️⃣"), UninitializedBasedEmoji("5️⃣"),
                     UninitializedBasedEmoji("6️⃣"), UninitializedBasedEmoji("7️⃣"), UninitializedBasedEmoji("8️⃣"),
-                    UninitializedBasedEmoji("9️⃣"), UninitializedBasedEmoji("🔟")]
+                    UninitializedBasedEmoji("9️⃣"), UninitializedBasedEmoji("🔟")],
+
+    # Default emoji to assign to bbShipSkinTool items
+    "shipSkinTool": UninitializedBasedEmoji(777166858516299786)
 }
 
 timeouts = {
@@ -353,36 +358,17 @@ timedTaskLatenessThresholdSeconds = 10
 # prefix for bot commands. dont forget a space if you want one!
 commandPrefix = "$"
 
-# When a user message prompts a DM to be sent, this emoji will be added to the message reactions.
-dmSentEmoji = dumbEmoji(unicode="📬")
-
-# When a message prompts a process that will take a long time (e.g rendering), this will be added to the message reactions. It will be removed when the long process is finished.
-longProcessEmoji = dumbEmoji(unicode="⏳")
-
 # max number of characters accepted by nameShip
 maxShipNickLength = 30
 
 # max number of characters accepted by nameShip, when called by a developer
 maxDevShipNickLength = 100
 
-# The default emojis to list in a reaction menu
-numberEmojis = [dumbEmoji(unicode="0️⃣"), dumbEmoji(unicode="1️⃣"), dumbEmoji(unicode="2️⃣"), dumbEmoji(unicode="3️⃣"), dumbEmoji(unicode="4️⃣"), dumbEmoji(unicode="5️⃣"), dumbEmoji(unicode="6️⃣"), dumbEmoji(unicode="7️⃣"), dumbEmoji(unicode="8️⃣"), dumbEmoji(unicode="9️⃣"), dumbEmoji(unicode="🔟")]
-defaultMenuEmojis = numberEmojis
-defaultCancelEmoji = dumbEmoji(unicode="🇽")
-defaultSubmitEmoji = dumbEmoji(unicode="✅")
-spiralEmoji = dumbEmoji(unicode="🌀")
-defaultErrEmoji = dumbEmoji(unicode="❓")
-defaultAcceptEmoji = dumbEmoji(unicode="👍")
-defaultRejectEmoji = dumbEmoji(unicode="👎")
-defaultNextEmoji = dumbEmoji(unicode='⏩')
-defaultPreviousEmoji = dumbEmoji(unicode='⏪')
-
 # Path to the directory to use when temporarily saving textures downloaded from showme commands.
 tempRendersDir = "rendering-temp"
 
 # Default graphics to use for ship skin application tool items
 defaultShipSkinToolIcon = "https://cdn.discordapp.com/attachments/700683544103747594/723472334362771536/documents.png"
-defaultShipSkinToolEmoji = UninitializedDumbEmoji(777166858516299786)
 
 def shipSkinValueForTL(averageTL : int) -> int:
     """Calculate how skins are valued with respect to their average compatible ship techlevel.

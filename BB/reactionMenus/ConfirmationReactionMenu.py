@@ -10,7 +10,7 @@ class InlineConfirmationMenu(ReactionMenu.SingleUserReactionMenu):
                     titleTxt : str = "", desc : str = "", col : Colour = Colour.blue(), footerTxt : str = "", img : str = "",
                     thumb : str = "", icon : str = "", authorName : str = ""):
         
-        super().__init__(msg, targetMember, timeoutSeconds, options={bbConfig.defaultAcceptEmoji: ReactionMenu.DummyReactionMenuOption("Yes", bbConfig.defaultAcceptEmoji),
-                                                                        bbConfig.defaultRejectEmoji: ReactionMenu.DummyReactionMenuOption("No", bbConfig.defaultRejectEmoji)},
-                            returnTriggers=[bbConfig.defaultAcceptEmoji, bbConfig.defaultRejectEmoji], titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt,
+        super().__init__(msg, targetMember, timeoutSeconds, options={bbConfig.emojis.accept: ReactionMenu.DummyReactionMenuOption("Yes", bbConfig.emojis.accept),
+                                                                        bbConfig.emojis.reject: ReactionMenu.DummyReactionMenuOption("No", bbConfig.emojis.reject)},
+                            returnTriggers=[bbConfig.emojis.accept, bbConfig.emojis.reject], titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt,
                             img=img, thumb=thumb, icon=icon, authorName=authorName)

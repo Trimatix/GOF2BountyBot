@@ -44,8 +44,8 @@ class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):
 
         self.duelChallenge = duelChallenge
 
-        options = {bbConfig.defaultAcceptEmoji: ReactionMenu.NonSaveableReactionMenuOption("Accept", bbConfig.defaultAcceptEmoji, addFunc=self.acceptChallenge),
-                    bbConfig.defaultRejectEmoji: ReactionMenu.NonSaveableReactionMenuOption("Reject", bbConfig.defaultRejectEmoji, addFunc=self.rejectChallenge)}
+        options = {bbConfig.emojis.accept: ReactionMenu.NonSaveableReactionMenuOption("Accept", bbConfig.emojis.accept, addFunc=self.acceptChallenge),
+                    bbConfig.emojis.reject: ReactionMenu.NonSaveableReactionMenuOption("Reject", bbConfig.emojis.reject, addFunc=self.rejectChallenge)}
 
         super(ReactionDuelChallengeMenu, self).__init__(msg, options=options, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 

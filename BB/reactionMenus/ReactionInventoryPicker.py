@@ -8,7 +8,7 @@ from .. import lib
 from ..scheduling import TimedTask
 
 # The maximum number of bbItems displayable per menu page
-maxItemsPerPage = len(bbConfig.defaultMenuEmojis)
+maxItemsPerPage = len(bbConfig.emojis.emojis.menuOptions)
 
 
 class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
@@ -25,7 +25,7 @@ class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
         :param ReactionMenu menu: The ReactionMenu where this option is active
         :param lib.emojis.dumbEmoji emoji: The emoji that a user must react with in order to trigger this menu option (Default item.emoji)
         :param str name: The name of this option as shown in the menu (Default item.name)
-        :raise ValueError: When an emoji isn't provided and the given bbItem does not have an emoji (TODO: default to bbConfig.defaultMenuEmojis)
+        :raise ValueError: When an emoji isn't provided and the given bbItem does not have an emoji (TODO: default to bbConfig.emojis.emojis.menuOptions)
         """
 
         self.item = item
@@ -99,7 +99,7 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
         itemOptions = {}
         itemPage = bbInventory.getPage(self.page, self.itemsPerPage)
         for itemNum in range(len(itemPage)):
-            optionEmoji = bbConfig.defaultMenuEmojis[itemNum]
+            optionEmoji = bbConfig.emojis.emojis.menuOptions[itemNum]
             item = itemPage[itemNum].item
             itemOptions[optionEmoji] = ReactionInventoryPickerOption(item, self, emoji=optionEmoji)
 
