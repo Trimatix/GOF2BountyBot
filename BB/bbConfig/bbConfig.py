@@ -38,7 +38,10 @@ timeouts = {
     "duelRequest": {"days": 1},
 
     # Amount of time to wait between refreshing stock of all shops
-    "shopRefresh": {"days": 0, "hours": 6, "minutes": 0, "seconds": 0}
+    "shopRefresh": {"days": 0, "hours": 6, "minutes": 0, "seconds": 0},
+
+    # time to put users on cooldown between using !bb check
+    "checkCooldown": {"minutes":3}
 }
 
 paths = {
@@ -288,9 +291,6 @@ fallbackRouteScale = 5
 
 # The number of credits to award for each bPoint (each system in a criminal route)
 bPointsToCreditsRatio = 1000
-
-# time to put users on cooldown between using !bb check
-checkCooldown = {"minutes":3}
 
 # number of bounties ahead of a checked system in a route to report a recent criminal spotting (+1)
 closeBountyThreshold = 4

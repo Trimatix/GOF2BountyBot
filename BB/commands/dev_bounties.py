@@ -131,7 +131,7 @@ async def dev_cmd_setcheckcooldown(message : discord.Message, args : str, isDM :
         await message.channel.send(":x: that's not a number!")
         return
     # update the checking cooldown amount
-    bbConfig.checkCooldown["minutes"] = int(args)
+    bbConfig.timeouts.checkCooldown["minutes"] = int(args)
     await message.channel.send("Done! *you still need to update the file though* " + message.author.mention)
 
 bbCommands.register("setcheckcooldown", dev_cmd_setcheckcooldown, 2, allowDM=True, helpSection="bounties", useDoc=True)

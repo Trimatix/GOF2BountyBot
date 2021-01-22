@@ -146,7 +146,7 @@ async def cmd_check(message : discord.Message, args : str, isDM : bool):
             requestedBBUser.systemsChecked += 1
             # Put the calling user on checking cooldown
             requestedBBUser.bountyCooldownEnd = (datetime.utcnow() +
-                                                 timedelta(minutes=bbConfig.checkCooldown["minutes"])).timestamp()
+                                                 timedelta(minutes=bbConfig.timeouts.checkCooldown["minutes"])).timestamp()
 
     # If the calling user is on checking cooldown
     else:
