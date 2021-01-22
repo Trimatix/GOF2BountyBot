@@ -32,7 +32,10 @@ defaultEmojis = {
                     UninitializedBasedEmoji("9️⃣"), UninitializedBasedEmoji("🔟")],
 
     # Default emoji to assign to bbShipSkinTool items
-    "shipSkinTool": UninitializedBasedEmoji(777166858516299786)
+    "shipSkinTool": UninitializedBasedEmoji(777166858516299786),
+    
+    # Default emoji to assign to bbCrates containing bbShipSkinTools
+    "skinCrate": UninitializedBasedEmoji(723709178736017419)
 }
 
 timeouts = {
@@ -463,9 +466,3 @@ pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
 toolUseConfirmTimeoutSeconds = 60
 homeGuildTransferConfirmTimeoutSeconds = 60
-
-
-
-##### SKINS #####
-
-defaultSkinCrateEmoji = UninitializedDumbEmoji(723709178736017419)
