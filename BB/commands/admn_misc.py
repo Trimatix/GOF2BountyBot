@@ -325,7 +325,7 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
     menuMsg = await message.channel.send("‎")
 
     if timeoutExists:
-        timeoutDelta = lib.timeUtil.timeDeltaFromDict(bbConfig.roleMenuDefaultTimeout if timeoutDict == {} else timeoutDict)
+        timeoutDelta = lib.timeUtil.timeDeltaFromDict(bbConfig.timeouts.roleMenuExpiry if timeoutDict == {} else timeoutDict)
         timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionRolePicker.markExpiredRoleMenu, expiryFunctionArgs=menuMsg.id)
         bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
     

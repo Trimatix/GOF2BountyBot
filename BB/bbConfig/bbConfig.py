@@ -46,7 +46,12 @@ timeouts = {
     "shopRefresh": {"days": 0, "hours": 6, "minutes": 0, "seconds": 0},
 
     # time to put users on cooldown between using !bb check
-    "checkCooldown": {"minutes":3}
+    "checkCooldown": {"minutes":3},
+
+    # Default amount of time reaction menus should be active for
+    "roleMenuExpiry": {"days": 1},
+    "duelChallengeMenuExpiry": {"hours": 2},
+    "pollMenuExpiry": {"minutes": 5}
 }
 
 paths = {
@@ -453,9 +458,6 @@ homeGuildTransferCooldown = {"weeks":1}
 
 ##### REACTION MENUS #####
 
-roleMenuDefaultTimeout = {"days": 1}
-duelChallengeMenuDefaultTimeout = {"hours": 2}
-pollMenuDefaultTimeout = {"minutes": 5}
 expiredMenuMsg = "😴 This role menu has now expired."
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
