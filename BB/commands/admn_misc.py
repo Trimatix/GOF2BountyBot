@@ -396,13 +396,13 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
         bbGlobals.currentRenders.remove(itemObj.name)
         return
     try:
-        await skinFile.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_0.jpg")
+        await skinFile.save(CWD + os.sep + bbConfig.paths.tempRendersDir + os.sep + str(message.id) + "_0.jpg")
     except (discord.HTTPException, discord.NotFound):
         await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")
         bbGlobals.currentRenders.remove(itemObj.name)
         return
 
-    skinPaths = {0:CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_0.jpg"}
+    skinPaths = {0:CWD + os.sep + bbConfig.paths.tempRendersDir + os.sep + str(message.id) + "_0.jpg"}
     disabledLayers = []
 
     if not full:
@@ -471,14 +471,14 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
                     bbGlobals.currentRenders.remove(itemObj.name)
                     return
                 try:
-                    await nextLayer.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_" + str(regionNum) + ".jpg")
+                    await nextLayer.save(CWD + os.sep + bbConfig.paths.tempRendersDir + os.sep + str(message.id) + "_" + str(regionNum) + ".jpg")
                 except (discord.HTTPException, discord.NotFound):
                     await message.channel.send(":x: I couldn't download your skin file. Did you delete it?\n🛑 Skin render cancelled.")
                     for skinPath in skinPaths.values():
                         os.remove(skinPath)
                     bbGlobals.currentRenders.remove(itemObj.name)
                     return
-                skinPaths[regionNum] = CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_" + str(regionNum) + ".jpg"
+                skinPaths[regionNum] = CWD + os.sep + bbConfig.paths.tempRendersDir + os.sep + str(message.id) + "_" + str(regionNum) + ".jpg"
 
     waitMsg = await message.channel.send("🤖 Render started! I'll ping you when I'm done.")
     
