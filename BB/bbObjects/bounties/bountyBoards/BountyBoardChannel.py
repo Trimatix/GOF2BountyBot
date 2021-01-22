@@ -104,13 +104,13 @@ class BountyBoardChannel(serializable.Serializable):
                 self.bountyMessages[criminal.faction][criminal] = msg
             except HTTPException:
                 succeeded = False
-                for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                for tryNum in range(bbConfig.httpErrRetries):
                     try:
                         msg = await self.channel.fetch_message(id)
                         self.bountyMessages[criminal.faction][criminal] = msg
                         succeeded = True
                     except HTTPException:
-                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        await asyncio.sleep(bbConfig.httpErrRetryDelaySeconds)
                         continue
                     break
                 if not succeeded:
@@ -129,12 +129,12 @@ class BountyBoardChannel(serializable.Serializable):
 
                 except HTTPException:
                     succeeded = False
-                    for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                    for tryNum in range(bbConfig.httpErrRetries):
                         try:
                             self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
                             succeeded = True
                         except HTTPException:
-                            await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                            await asyncio.sleep(bbConfig.httpErrRetryDelaySeconds)
                             continue
                         break
                     if not succeeded:
@@ -149,12 +149,12 @@ class BountyBoardChannel(serializable.Serializable):
                 self.noBountiesMessage = await self.channel.fetch_message(self.noBountiesMsgToBeLoaded)
             except HTTPException:
                 succeeded = False
-                for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                for tryNum in range(bbConfig.httpErrRetries):
                     try:
                         self.noBountiesMessage = await self.channel.fetch_message(self.noBountiesMsgToBeLoaded)
                         succeeded = True
                     except HTTPException:
-                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        await asyncio.sleep(bbConfig.httpErrRetryDelaySeconds)
                         continue
                     break
                 if not succeeded:
@@ -223,12 +223,12 @@ class BountyBoardChannel(serializable.Serializable):
                 await self.noBountiesMessage.delete()
             except HTTPException:
                 succeeded = False
-                for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                for tryNum in range(bbConfig.httpErrRetries):
                     try:
                         await self.noBountiesMessage.delete()
                         succeeded = True
                     except HTTPException:
-                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        await asyncio.sleep(bbConfig.httpErrRetryDelaySeconds)
                         continue
                     break
                 if not succeeded:
@@ -259,12 +259,12 @@ class BountyBoardChannel(serializable.Serializable):
 
             except HTTPException:
                 succeeded = False
-                for tryNum in range(bbConfig.bbcHTTPErrRetries):
+                for tryNum in range(bbConfig.httpErrRetries):
                     try:
                         self.noBountiesMessage = await self.channel.send(embed=noBountiesEmbed)
                         succeeded = True
                     except HTTPException:
-                        await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                        await asyncio.sleep(bbConfig.httpErrRetryDelaySeconds)
                         continue
                     break
                 if not succeeded:
@@ -291,12 +291,12 @@ class BountyBoardChannel(serializable.Serializable):
             await self.bountyMessages[bounty.criminal.faction][bounty.criminal].edit(content=content, embed=makeBountyEmbed(bounty))
         except HTTPException:
             succeeded = False
-            for tryNum in range(bbConfig.bbcHTTPErrRetries):
+            for tryNum in range(bbConfig.httpErrRetries):
                 try:
                     await self.bountyMessages[bounty.criminal.faction][bounty.criminal].edit(content=content, embed=makeBountyEmbed(bounty))
                     succeeded = True
                 except HTTPException:
-                    await asyncio.sleep(bbConfig.bbcHTTPErrRetryDelaySeconds)
+                    await asyncio.sleep(bbConfig.httpErrRetryDelaySeconds)
                     continue
                 break
             if not succeeded:
