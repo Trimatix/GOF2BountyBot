@@ -70,22 +70,19 @@ securityLevels = ["secure", "average", "risky", "dangerous"]
 mapImageWithGraphLink = "https://cdn.discordapp.com/attachments/700683544103747594/700683693215318076/gof2_coords.png"
 mapImageNoGraphLink = 'https://i.imgur.com/TmPgPd3.png'
 
-# intro for help commands
-helpIntro = "**[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments.\n"
 
 # icons for factions
-terranIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013574331596850/terran.png"
-vosskIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013681621893130/vossk.png"
-midorianIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013601019691038/midorian.png"
-nivelianIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013623257890857/nivelian.png"
-neutralIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/rocket_1f680.png"
-voidIcon = "https://cdn.discordapp.com/attachments/700683544103747594/711013699841687602/void.png"
+factionIcons = {"terran": "https://cdn.discordapp.com/attachments/700683544103747594/711013574331596850/terran.png",
+                "vossk": "https://cdn.discordapp.com/attachments/700683544103747594/711013681621893130/vossk.png",
+                "midorian": "https://cdn.discordapp.com/attachments/700683544103747594/711013601019691038/midorian.png",
+                "nivelian": "https://cdn.discordapp.com/attachments/700683544103747594/711013623257890857/nivelian.png",
+                "neutral": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/rocket_1f680.png",
+                "void": "https://cdn.discordapp.com/attachments/700683544103747594/711013699841687602/void.png"}
+
 errorIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/exclamation-mark_2757.png"
 winIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/trophy_1f3c6.png"
 rocketIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/248/rocket_1f680.png"
 
-# list associating faction names with icons
-factionIcons = {"terran":terranIcon, "vossk":vosskIcon, "midorian":midorianIcon, "nivelian":nivelianIcon, "neutral":neutralIcon}
 
 # colours to use in faction-related embed strips
 factionColours = {"terran":Colour.gold(), "vossk":Colour.dark_green(), "midorian":Colour.dark_red(), "nivelian":Colour.dark_blue(), "neutral":Colour.purple()}

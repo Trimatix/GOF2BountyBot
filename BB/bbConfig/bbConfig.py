@@ -462,6 +462,8 @@ homeGuildTransferCooldown = {"weeks":1}
 ##### REACTION MENUS #####
 
 expiredMenuMsg = "😴 This role menu has now expired."
+# intro for help commands
+helpIntro = "**[Square brackets]** indicate *optional* arguments, **<angled brackets>** indicate *required* arguments.\n"
 pollMenuResultsBarLength = 10
 maxRoleMenusPerGuild = 10
 toolUseConfirmTimeoutSeconds = 60
