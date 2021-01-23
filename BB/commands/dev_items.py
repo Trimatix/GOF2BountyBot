@@ -4,8 +4,7 @@ import json
 from . import commandsDB as bbCommands
 from .. import lib, bbGlobals
 from ..bbConfig import bbConfig, bbData
-from ..gameObjects.items import bbShip, bbWeapon, bbModuleFactory, bbTurret, gameItem
-from ..gameObjects.items.tools import bbToolItemFactory
+from ..gameObjects.items import gameItem
 
 
 bbCommands.addHelpSection(2, "items")
@@ -49,14 +48,6 @@ async def dev_cmd_give(message : discord.Message, args : str, isDM : bool):
         return
 
     newItem = gameItem.spawnItem(itemDict)
-
-    """itemDict = json.loads(itemStr[len(itemStr.split(" ")[0]):])
-    itemConstructors = {"ship": bbShip.fromDict,
-                        "weapon": bbWeapon.fromDict,
-                        "module": bbModuleFactory.fromDict,
-                        "turret": bbTurret.fromDict,
-                        "tool": bbToolItemFactory.fromDict}
-    newItem = itemConstructors[itemType](itemDict)"""
 
     requestedUser.getInactivesByName(itemType).addItem(newItem)
 
