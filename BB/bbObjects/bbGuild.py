@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from discord import Embed
 from . import bbShop
-from ..bbDatabases import bbBountyDB
+from ..bbDatabases import bountyDB
 from .bounties.bountyBoards import BountyBoardChannel
 from ..userAlerts import UserAlerts
 from discord import channel, Client, Forbidden, Guild, Member, Message, HTTPException, NotFound
@@ -40,8 +40,8 @@ class bbGuild(serializable.Serializable):
     :var ownedRoleMenus: The number of ReactionRolePickers present in this guild
     :vartype ownedRoleMenus: int
     :var bountiesDB: This guild's active bounties
-    :vartype bountiesDB: bbBountyDB.bbBountyDB
-    :var bountiesDisabled: Whether or not to disable this guild's bbBountyDB and bounty spawning
+    :vartype bountiesDB: bountyDB.bountyDB
+    :var bountiesDisabled: Whether or not to disable this guild's bountyDB and bounty spawning
     :vartype bountiesDisabled: bool
     :var shopDisabled: Whether or not to disable this guild's bbShop and shop refreshing
     :vartype shopDisabled: bool
@@ -49,13 +49,13 @@ class bbGuild(serializable.Serializable):
     :vartype dcGuild: discord.Guild
     """
 
-    def __init__(self, id : int, bountiesDB: bbBountyDB.bbBountyDB, dcGuild: Guild, announceChannel : channel.TextChannel = None,
+    def __init__(self, id : int, bountiesDB: bountyDB.BountyDB, dcGuild: Guild, announceChannel : channel.TextChannel = None,
             playChannel : channel.TextChannel = None, shop : bbShop.bbShop = None,
             bountyBoardChannel : BountyBoardChannel.BountyBoardChannel = None, alertRoles : Dict[str, int] = {},
             ownedRoleMenus : int = 0, bountiesDisabled : bool = False, shopDisabled : bool = False):
         """
         :param int id: The ID of the guild, directly corresponding to a discord guild's ID.
-        :param bbBountyDB.bbBountyDB bountiesDB: This guild's active bounties
+        :param bountyDB.bountyDB bountiesDB: This guild's active bounties
         :param discord.Guild guild: This guild's corresponding discord.Guild object
         :param discord.channel announceChannel: The discord.channel object for this guild's announcements chanel. None when no announce channel is set for this guild.
         :param discord.channel playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
@@ -63,7 +63,7 @@ class bbGuild(serializable.Serializable):
         :param dict[str, int] alertRoles: A dictionary of user alert IDs to guild role IDs.
         :param BoardBoardChannel bountyBoardChannel: A BountyBoardChannel object implementing this guild's bounty board channel if it has one, None otherwise.
         :param int ownedRoleMenus: The number of ReactionRolePickers present in this guild
-        :param bool bountiesDisabled: Whether or not to disable this guild's bbBountyDB and bounty spawning
+        :param bool bountiesDisabled: Whether or not to disable this guild's bountyDB and bounty spawning
         :param bool shopDisabled: Whether or not to disable this guild's bbShop and shop refreshing
         :raise TypeError: When given an incompatible argument type
         """
@@ -478,7 +478,7 @@ class bbGuild(serializable.Serializable):
         if not self.bountiesDisabled:
             raise ValueError("Bounties are already enabled in this guild")
 
-        self.bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions)
+        self.bountiesDB = bountyDB.BountyDB(bbData.bountyFactions)
 
         bountyDelayGenerators = {"random": lib.timeUtil.getRandomDelaySeconds,
                                 "fixed-routeScale": self.getRouteScaledBountyDelayFixed,
@@ -622,9 +622,9 @@ class bbGuild(serializable.Serializable):
             bountiesDB = None
         else:
             if "bountiesDB" in guildDict:
-                bountiesDB = bbBountyDB.bbBountyDB.fromDict(guildDict["bountiesDB"], dbReload=dbReload)
+                bountiesDB = bountyDB.BountyDB.fromDict(guildDict["bountiesDB"], dbReload=dbReload)
             else:
-                bountiesDB = bbBountyDB.bbBountyDB(bbData.bountyFactions)
+                bountiesDB = bountyDB.BountyDB(bbData.bountyFactions)
         
 
         return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel,

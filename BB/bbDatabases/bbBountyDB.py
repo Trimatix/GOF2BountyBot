@@ -6,7 +6,7 @@ from ..baseClasses import serializable
 from ..bbConfig import bbConfig
 
 
-class bbBountyDB(serializable.Serializable):
+class BountyDB(serializable.Serializable):
     """A database of bbObject.bounties.bbBounty.
     Bounty criminal names and faction names must be unique within the database.
     Faction names are case sensitive.
@@ -26,10 +26,10 @@ class bbBountyDB(serializable.Serializable):
         :param list factions: list of unique faction names useable in this db's bounties
         """
         # Dictionary of faction name : list of bounties
-        # TODO: add bbCriminal.__hash__, and change bbBountyDB.bounties into dict of faction:{criminal:bounty}
+        # TODO: add bbCriminal.__hash__, and change bountyDB.bounties into dict of faction:{criminal:bounty}
         self.bounties = {}
 
-        # Useable faction names for this bbBountyDB
+        # Useable faction names for this bountyDB
         self.factions = factions
         for fac in factions:
             self.bounties[fac] = []
@@ -291,19 +291,19 @@ class bbBountyDB(serializable.Serializable):
 
     
     def __str__(self) -> str:
-        """Return summarising info about this bbBountyDB in string format.
+        """Return summarising info about this bountyDB in string format.
         Currently: The number of factions in the DB.
 
         :return: a string summarising this db
         :rtype: str
         """
-        return "<bbBountyDB: " + str(len(self.bounties)) + " factions>"
+        return "<bountyDB: " + str(len(self.bounties)) + " factions>"
 
 
     def toDict(self, **kwargs) -> dict:
-        """Serialise the bbBountyDB and all of its bbBounties into dictionary format.
+        """Serialise the bountyDB and all of its bbBounties into dictionary format.
 
-        :return: A dictionary containing all data needed to recreate this bbBountyDB.
+        :return: A dictionary containing all data needed to recreate this bountyDB.
         :rtype: dict
         """
         data = {}
@@ -317,19 +317,19 @@ class bbBountyDB(serializable.Serializable):
 
 
     @classmethod
-    def fromDict(cls, bountyDBDict : dict, **kwargs) -> bbBountyDB:
-        """Build a bbBountyDB object from a serialised dictionary format - the reverse of bbBountyDB.toDict.
+    def fromDict(cls, bountyDBDict : dict, **kwargs) -> BountyDB:
+        """Build a bountyDB object from a serialised dictionary format - the reverse of bountyDB.toDict.
 
-        :param dict bountyDBDict: a dictionary representation of the bbBountyDB, to convert to an object
-        :param bool dbReload: Whether or not this bbBountyDB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
+        :param dict bountyDBDict: a dictionary representation of the bountyDB, to convert to an object
+        :param bool dbReload: Whether or not this bountyDB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
         
-        :return: The new bbBountyDB object
-        :rtype: bbBountyDB
+        :return: The new bountyDB object
+        :rtype: bountyDB
         """
         dbReload = kwargs["dbReload"] if "dbReload" in kwargs else False
 
-        # Instanciate a new bbBountyDB
-        newDB = bbBountyDB(bountyDBDict.keys())
+        # Instanciate a new bountyDB
+        newDB = BountyDB(bountyDBDict.keys())
         # Iterate over all factions in the DB
         for fac in bountyDBDict.keys():
             # Convert each serialised bbBounty into a bbBounty object

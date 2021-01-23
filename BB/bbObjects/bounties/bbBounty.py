@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Dict, Union, TYPE_CHECKING
 if TYPE_CHECKING:
-    from ...bbDatabases import bbBountyDB
+    from ...bbDatabases import bountyDB
 
 from . import bbBountyConfig
 from ...bbConfig import bbData
@@ -31,14 +31,14 @@ class Bounty(serializable.Serializable):
     :vartype answer: str
     """
 
-    def __init__(self, criminalObj : bbCriminal = None, config : bbBountyConfig = None, bountyDB : bbBountyDB.bbBountyDB = None, dbReload : bool = False):
+    def __init__(self, criminalObj : bbCriminal = None, config : bbBountyConfig = None, bountyDB : bountyDB.BountyDB = None, dbReload : bool = False):
         """
         :param criminalObj: The criminal to be wanted. Give None to randomly generate a criminal. (Default None)
         :type criminalObj: bbCriminal or None
         :param config: a bountyconfig describing all aspects of this bounty. Give None to randomly generate one. (Default None)
         :type config: bbBountyConfig or None
         :param bountyDB: The database of currenly active bounties. This is required unless dbReload is True. (Default None)
-        :type bountyDB: bbBountyDB or None
+        :type bountyDB: bountyDB or None
         :param bool dbReload: Give True if this bounty is being created during bot bootup, False otherwise. This currently toggles whether the passed bounty is checked for existence or not. (Default False)
         :raise ValueError: When dbReload is False but bountyDB is not given
         """

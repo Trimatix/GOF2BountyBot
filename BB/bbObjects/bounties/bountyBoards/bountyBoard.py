@@ -1,6 +1,6 @@
 # CURRENTLY UNUSED FILE
 from __future__ import annotations
-from ....bbDatabases import bbBountyDB
+from ....bbDatabases import bountyDB
 from ....baseClasses import serializable
 
 
@@ -10,13 +10,13 @@ class BountyBoard(serializable.Serializable):
     :var msgID: The id of the message to continuously update
     :vartype msgID: int
     :var bountiesDB: The database to pull active bounties from
-    :vartype bountiesDB: bbBountyDB
+    :vartype bountiesDB: bountyDB
     """
 
-    def __init__(self, msgID : int, bountiesDB : bbBountyDB.bbBounty):
+    def __init__(self, msgID : int, bountiesDB : bountyDB.bbBounty):
         """
         :param int msgID: The id of the message to continuously update
-        :param bbBountyDB bountiesDB: The database to pull active bounties from
+        :param bountyDB bountiesDB: The database to pull active bounties from
         """
         self.msgID = msgID
         self.bountiesDB = bountiesDB

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from ..bbObjects import bbGuild
 from typing import List
-from . import bbBountyDB
+from . import bountyDB
 from ..bbConfig import bbData
 from .. import bbGlobals
 from ..logging import bbLogger
@@ -110,7 +110,7 @@ class bbGuildDB(serializable.Serializable):
         if self.guildIdExists(id):
             raise KeyError("Attempted to add a guild that already exists: " + id)
         # Create and return a bbGuild for the requested ID
-        self.guilds[id] = bbGuild.bbGuild(id, bbBountyDB.bbBountyDB(bbData.bountyFactions), bbGlobals.client.get_guild(id))
+        self.guilds[id] = bbGuild.bbGuild(id, bountyDB.BountyDB(bbData.bountyFactions), bbGlobals.client.get_guild(id))
         return self.guilds[id]
 
     

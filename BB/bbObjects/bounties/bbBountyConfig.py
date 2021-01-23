@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List, Dict
 if TYPE_CHECKING:
-    from ...bbDatabases import bbBountyDB
+    from ...bbDatabases import bountyDB
     from ..items import bbShip
 
 import random
@@ -115,10 +115,10 @@ class BountyConfig:
         self.ship = ship
         
     
-    def generate(self, bountyDB : bbBountyDB.bbBountyDB, noCriminal : bool = True, forceKeepChecked : bool = False, forceNoDBCheck : bool = False):
+    def generate(self, bountyDB : bountyDB.BountyDB, noCriminal : bool = True, forceKeepChecked : bool = False, forceNoDBCheck : bool = False):
         """Validate all given config data, and randomly generate missing data.
 
-        :param bbBountyDB bountyDB: Database containing all currently active bounties. When forceNoDBCheck is True, this is ignored.
+        :param bountyDB bountyDB: Database containing all currently active bounties. When forceNoDBCheck is True, this is ignored.
         :param bool noCriminal: If this is True, randomly generate a bbCriminal object. (Default True)
         :param bool forceKeepChecked: If this is False, a blank checked dictionary will be used. This should only be set to be True when using a pre-made checked dictionary; e.g for custom bounties or for bounties loaded from file. (Default False)
         :param bool forceNoDBCheck: If this is False, do not check if the bounty already exists. This should only be used as a performance and compatibility measure when loading in a bounty from file. (Default False)
