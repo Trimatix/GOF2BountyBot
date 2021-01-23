@@ -4,12 +4,12 @@ from .... import lib, bbGlobals
 from discord import Message
 import asyncio
 from ....bbConfig import bbConfig
-from .. import bbItem
+from .. import gameItem
 from ....logging import bbLogger
 from ....reactionMenus.ConfirmationReactionMenu import InlineConfirmationMenu
 
 
-@bbItem.spawnableItem
+@gameItem.spawnableItem
 class bbCrate(bbToolItem.bbToolItem):
     def __init__(self, itemPool, name : str = "", value : int = 0, wiki : str = "",
             manufacturer : str = "", icon : str = "", emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY,
@@ -20,7 +20,7 @@ class bbCrate(bbToolItem.bbToolItem):
             techLevel=techLevel, builtIn=builtIn)
         
         for item in itemPool:
-            if not bbItem.isSpawnableItemInstance(item):
+            if not gameItem.isSpawnableItemInstance(item):
                 raise RuntimeError("Attempted to create a bbCrate with something other than a spawnableItem in its itemPool.")
         self.itemPool = itemPool
 
@@ -83,7 +83,7 @@ class bbCrate(bbToolItem.bbToolItem):
         """Serialize this tool into dictionary format.
         This step of implementation adds a 'type' string indicating the name of this tool's subclass.
 
-        :return: The default bbItem toDict implementation, with an added 'type' field
+        :return: The default gameItem toDict implementation, with an added 'type' field
         :rtype: dict
         """
         data = super().toDict(**kwargs)
@@ -108,7 +108,7 @@ class bbCrate(bbToolItem.bbToolItem):
                 if "type" not in itemDict:
                     errorStr = "Invalid itemPool entry, missing type. Data: " + itemDict
                     errorType = "NO_TYPE"
-                elif itemDict["type"] not in bbItem.subClassNames:
+                elif itemDict["type"] not in gameItem.subClassNames:
                     errorStr = "Invalid itemPool entry, attempted to add something other than a spawnableItem. Data: " + itemDict
                     errorType = "BAD_TYPE"
                 if errorStr:
@@ -117,7 +117,7 @@ class bbCrate(bbToolItem.bbToolItem):
                     else:
                         raise ValueError(errorStr)
                 else:
-                    itemPool.append(bbItem.spawnItem(itemDict))
+                    itemPool.append(gameItem.spawnItem(itemDict))
         else:
             bbLogger.log("bbCrate", "fromDict", "fromDict-ing a bbCrate with no itemPool.")
         

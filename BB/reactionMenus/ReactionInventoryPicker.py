@@ -1,31 +1,31 @@
 from __future__ import annotations
 from . import ReactionMenu
 from ..bbConfig import bbConfig
-from ..gameObjects.items import bbItem
+from ..gameObjects.items import gameItem
 from ..gameObjects import inventory
 from discord import Message, Colour, Member, Role
 from .. import lib
 from ..scheduling import TimedTask
 
-# The maximum number of bbItems displayable per menu page
+# The maximum number of gameItems displayable per menu page
 maxItemsPerPage = len(bbConfig.emojis.emojis.menuOptions)
 
 
 class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
-    """A reaction menu option that represents a bbItem instance.
+    """A reaction menu option that represents a gameItem instance.
     Unless configured otherwise, the option's name and emoji will correspond to the item's name and emoji.
 
-    :var item: The bbItem that this option represents
-    :vartype item: bbItem
+    :var item: The gameItem that this option represents
+    :vartype item: gameItem
     """
 
-    def __init__(self, item : bbItem.bbItem, menu : ReactionMenu.ReactionMenu, emoji : lib.emojis.dumbEmoji = None, name : str = None):
+    def __init__(self, item : gameItem.gameItem, menu : ReactionMenu.ReactionMenu, emoji : lib.emojis.dumbEmoji = None, name : str = None):
         """
-        :param bbItem item: The bbItem that this option represents
+        :param gameItem item: The gameItem that this option represents
         :param ReactionMenu menu: The ReactionMenu where this option is active
         :param lib.emojis.dumbEmoji emoji: The emoji that a user must react with in order to trigger this menu option (Default item.emoji)
         :param str name: The name of this option as shown in the menu (Default item.name)
-        :raise ValueError: When an emoji isn't provided and the given bbItem does not have an emoji (TODO: default to bbConfig.emojis.emojis.menuOptions)
+        :raise ValueError: When an emoji isn't provided and the given gameItem does not have an emoji (TODO: default to bbConfig.emojis.emojis.menuOptions)
         """
 
         self.item = item
@@ -55,7 +55,7 @@ class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
 
 
 class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
-    """A reaction menu allowing users to select a bbItem from a inventory.
+    """A reaction menu allowing users to select a gameItem from a inventory.
     TODO: Implement paging
     TODO: Display item counts?
 
@@ -106,25 +106,25 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
         super(ReactionInventoryPicker, self).__init__(msg, options=itemOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 
 
-    def selectItem(self, item : bbItem.bbItem) -> bbItem.bbItem:
-        """Pass back the selected bbItem to the calling function.
-        This method is called on reaction add that corresponds to a bbItem currently on display
+    def selectItem(self, item : gameItem.gameItem) -> gameItem.gameItem:
+        """Pass back the selected gameItem to the calling function.
+        This method is called on reaction add that corresponds to a gameItem currently on display
 
-        :param bbItem item: The bbItem that the user just selected
+        :param gameItem item: The gameItem that the user just selected
         :return: item
-        :rtype: bbItem
+        :rtype: gameItem
         """
         print("picked " + str(item))
         return item
 
 
-    def deselectItem(self, item : bbItem.bbItem) -> bbItem.bbItem:
-        """Pass back the deselected bbItem to the calling function.
-        This method is called on reaction remove that corresponds to a bbItem currently on display
+    def deselectItem(self, item : gameItem.gameItem) -> gameItem.gameItem:
+        """Pass back the deselected gameItem to the calling function.
+        This method is called on reaction remove that corresponds to a gameItem currently on display
 
-        :param bbItem item: The bbItem that the user just deselected
+        :param gameItem item: The gameItem that the user just deselected
         :return: item
-        :rtype: bbItem
+        :rtype: gameItem
         """
         print("unpicked " + str(item))
         return item

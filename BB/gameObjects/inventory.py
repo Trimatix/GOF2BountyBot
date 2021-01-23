@@ -41,10 +41,10 @@ class Inventory(serializable.Serializable):
         
         # increment totalItems tracker
         self.totalItems += quantity
-        # increment count for existing bbItemListing
+        # increment count for existing gameItemListing
         if item in self.items:
             self.items[item].count += quantity
-        # Add a new bbItemListing if one does not exist
+        # Add a new gameItemListing if one does not exist
         else:
             self.items[item] = inventoryListing.InventoryListing(item, quantity)
             # Update keys and numKeys trackers
@@ -87,7 +87,7 @@ class Inventory(serializable.Serializable):
             # Update item's count and inventory's totalItems tracker
             self.items[item].count -= quantity
             self.totalItems -= quantity
-            # remove the bbItemListing if it is now empty
+            # remove the gameItemListing if it is now empty
             if self.items[item].count == 0:
                 # update the keys and numKeys trackers
                 for i in range(len(self.keys)):
@@ -115,7 +115,7 @@ class Inventory(serializable.Serializable):
     
     
     def getPage(self, pageNum : int, itemsPerPage : int) -> list:
-        """Get a list of the bbItemListings on the requested page.
+        """Get a list of the gameItemListings on the requested page.
         pageNum is 1 index-based; the first page is 1.
         pageNum must be between 1 and numPages(itemsPerPage).
 
@@ -132,7 +132,7 @@ class Inventory(serializable.Serializable):
         page = []
         # Splice self.keys around the first and last indices in the requested page
         for item in self.keys[(pageNum - 1) * itemsPerPage: min(pageNum * itemsPerPage, self.numKeys)]:
-            # Add the bbItemListings for each of the page's keys to the results list
+            # Add the gameItemListings for each of the page's keys to the results list
             page.append(self.items[item])
 
         return page

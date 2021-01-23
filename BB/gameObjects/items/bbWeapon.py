@@ -1,11 +1,11 @@
-from .bbItem import bbItem, spawnableItem
+from .gameItem import gameItem, spawnableItem
 from ...bbConfig import bbData
 from ... import lib
 from typing import List
 
 
 @spawnableItem
-class bbWeapon(bbItem):
+class bbWeapon(gameItem):
     """A primary weapon that can be equipped onto a bbShip for use in duels.
 
     :var dps: The weapon's damage per second to a target ship.

@@ -1,4 +1,4 @@
-from ..items import bbItem
+from ..items import gameItem
 from ...baseClasses import serializable
 from datetime import datetime
 from ... import bbGlobals
@@ -21,6 +21,6 @@ class bbWorkshopListing(serializable.Serializable):
     def fromDict(cls, listingDict, **kwargs):
         creationYear, creationMonth, creationDay = listingDict["item"].split("-")
 
-        return bbWorkshopListing(bbItem.spawnItem(listingDict["item"]),
+        return bbWorkshopListing(gameItem.spawnItem(listingDict["item"]),
                                     datetime(year=int(creationYear), month=int(creationMonth), day=int(creationDay)),
                                     bbCreator=bbGlobals.usersDB.getUser(listingDict["creator"]))

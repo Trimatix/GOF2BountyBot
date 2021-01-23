@@ -1,10 +1,10 @@
-from .. import bbItem
+from .. import gameItem
 from abc import abstractmethod
 from .... import lib
 from discord import Message
 from typing import List
 
-class bbToolItem(bbItem.bbItem):
+class bbToolItem(gameItem.gameItem):
     """An item that has a function of some kind.
     Intended to be very generic at this level of implementation.
     """
@@ -60,10 +60,10 @@ class bbToolItem(bbItem.bbItem):
         """⚠ DEPRACATED
         Get the type of this object.
 
-        :return: The bbItem class
+        :return: The gameItem class
         :rtype: type
         """
-        return bbItem
+        return gameItem
 
     
     @abstractmethod
@@ -72,7 +72,7 @@ class bbToolItem(bbItem.bbItem):
         This step of implementation adds a 'type' string indicating the name of this tool's subclass.
 
         :param bool saveType: When true, include the string name of the object type in the output.
-        :return: The default bbItem toDict implementation, with an added 'type' field
+        :return: The default gameItem toDict implementation, with an added 'type' field
         :rtype: dict
         """
         data = super().toDict(**kwargs)

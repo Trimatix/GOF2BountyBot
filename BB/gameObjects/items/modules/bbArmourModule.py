@@ -3,7 +3,7 @@ from . import bbModule
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
-from ..bbItem import spawnableItem
+from ..gameItem import spawnableItem
 
 
 @spawnableItem

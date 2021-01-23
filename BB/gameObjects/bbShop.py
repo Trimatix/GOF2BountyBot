@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from . import bbUser
 
 from ..bbConfig import bbData, bbConfig
-from .items import bbModuleFactory, bbShip, bbWeapon, bbTurret, bbItem
+from .items import bbModuleFactory, bbShip, bbWeapon, bbTurret, gameItem
 from .items.modules import bbModule
 from . import inventory
 import random
@@ -148,11 +148,11 @@ class bbShop(serializable.Serializable):
             raise NotImplementedError("Valid, but unrecognised item type: " + item)
 
 
-    def userCanAffordItemObj(self, user : bbUser.bbUser, item : bbItem.bbItem) -> bool:
+    def userCanAffordItemObj(self, user : bbUser.bbUser, item : gameItem.gameItem) -> bool:
         """Decide whether a user has enough credits to buy an item
 
         :param bbUser user: The user whose credits balance to check
-        :param bbItem item: The item whose value to check
+        :param gameItem item: The item whose value to check
         :return: True if user's credits balance is greater than or equal to item's value. False otherwise
         :rtype: bool
         """

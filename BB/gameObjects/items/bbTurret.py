@@ -1,12 +1,12 @@
 from __future__ import annotations
-from .bbItem import bbItem, spawnableItem
+from .gameItem import gameItem, spawnableItem
 from ...bbConfig import bbData
 from ... import lib
 from typing import List
 
 
 @spawnableItem
-class bbTurret(bbItem):
+class bbTurret(gameItem):
     """A turret that can be equipped onto a bbShip for use in duels.
 
     :var dps: The turret's damage per second to a target ship.

@@ -4,7 +4,7 @@ import json
 from . import commandsDB as bbCommands
 from .. import lib, bbGlobals
 from ..bbConfig import bbConfig, bbData
-from ..gameObjects.items import bbShip, bbWeapon, bbModuleFactory, bbTurret, bbItem
+from ..gameObjects.items import bbShip, bbWeapon, bbModuleFactory, bbTurret, gameItem
 from ..gameObjects.items.tools import bbToolItemFactory
 
 
@@ -39,8 +39,8 @@ async def dev_cmd_give(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Please give a type in your item dictionary.")
         return
 
-    if itemDict["type"] not in bbItem.subClassNames:
-        await message.channel.send(":x: Unknown bbItem subclass type: " + itemDict["type"])
+    if itemDict["type"] not in gameItem.subClassNames:
+        await message.channel.send(":x: Unknown gameItem subclass type: " + itemDict["type"])
         return
 
 
@@ -48,7 +48,7 @@ async def dev_cmd_give(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Invalid item type arg - " + itemType)
         return
 
-    newItem = bbItem.spawnItem(itemDict)
+    newItem = gameItem.spawnItem(itemDict)
 
     """itemDict = json.loads(itemStr[len(itemStr.split(" ")[0]):])
     itemConstructors = {"ship": bbShip.fromDict,

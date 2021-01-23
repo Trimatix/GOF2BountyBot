@@ -11,7 +11,7 @@ subClassNames = {}
 nameSubClasses = {}
 
 
-class bbItem(aliasable.Aliasable):
+class gameItem(aliasable.Aliasable):
     """A game item, with a value, a manufacturer, a wiki page, an icon, an emoji, and a tech level.
 
     :var wiki: A web page to represent as the item's wikipedia article in its info page
@@ -57,7 +57,7 @@ class bbItem(aliasable.Aliasable):
         :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other items of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard item (loaded in from bbData) or a custom spawned item (Default False)
         """
-        super(bbItem, self).__init__(name, aliases)
+        super(gameItem, self).__init__(name, aliases)
         self.wiki = wiki
         self.hasWiki = wiki != ""
 
@@ -94,10 +94,10 @@ class bbItem(aliasable.Aliasable):
         """⚠ DEPRACATED
         Get the type of this object.
 
-        :return: The bbItem class
+        :return: The gameItem class
         :rtype: type
         """
-        return bbItem
+        return gameItem
 
     
     def getValue(self) -> int:
@@ -112,7 +112,7 @@ class bbItem(aliasable.Aliasable):
     @abstractmethod
     def toDict(self, **kwargs) -> dict:
         """Serialize this item into dictionary format, for saving to file.
-        This base implementation should be used in bbItem implementations, and custom attributes saved into it.
+        This base implementation should be used in gameItem implementations, and custom attributes saved into it.
 
         :param bool saveType: When true, include the string name of the object type in the output.
         :return: A dictionary containing all information needed to reconstruct this item. If the item is builtIn, this is only its name.
@@ -152,8 +152,8 @@ class bbItem(aliasable.Aliasable):
 
 
 def spawnableItem(cls):
-    if not issubclass(cls, bbItem):
-        raise TypeError("Invalid use of spawnableItem decorator: " + cls.__name__ + " is not a bbItem subtype")
+    if not issubclass(cls, gameItem):
+        raise TypeError("Invalid use of spawnableItem decorator: " + cls.__name__ + " is not a gameItem subtype")
     if cls not in nameSubClasses:
         nameSubClasses[cls] = cls.__name__
     if cls.__name__ not in subClassNames:
@@ -161,7 +161,7 @@ def spawnableItem(cls):
     return cls
 
 
-def spawnItem(data : dict) -> bbItem:
+def spawnItem(data : dict) -> gameItem:
     if "type" not in data or data["type"] == "":
         raise NameError("Not given a type")
     elif data["type"] not in subClassNames:
@@ -171,8 +171,8 @@ def spawnItem(data : dict) -> bbItem:
 
 
 def isSpawnableItemClass(cls):
-    return issubclass(cls, bbItem) and cls in nameSubClasses
+    return issubclass(cls, gameItem) and cls in nameSubClasses
 
 
 def isSpawnableItemInstance(o):
-    return isinstance(o, bbItem) and type(o) in nameSubClasses
+    return isinstance(o, gameItem) and type(o) in nameSubClasses

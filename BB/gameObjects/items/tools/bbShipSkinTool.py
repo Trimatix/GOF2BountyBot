@@ -7,7 +7,7 @@ from ..bbShip import bbShip
 from discord import Message
 from .... import bbGlobals
 import asyncio
-from ..bbItem import spawnableItem
+from ..gameItem import spawnableItem
 from ....reactionMenus.ConfirmationReactionMenu import InlineConfirmationMenu
 
 
@@ -124,7 +124,7 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         """⚠ DEPRACATED
         Get the type of this object.
 
-        :return: The bbItem class
+        :return: The gameItem class
         :rtype: type
         """
         return bbShipSkinTool
