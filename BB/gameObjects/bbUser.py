@@ -8,7 +8,7 @@ from .items import bbShip, bbModuleFactory, bbWeapon, bbTurret
 from .items.tools import bbToolItemFactory, bbToolItem
 from .items.modules import bbModule
 from ..bbConfig import bbConfig
-from . import bbInventory
+from . import inventory
 from ..userAlerts import UserAlerts
 from datetime import date, datetime
 from discord import Guild, Member
@@ -47,15 +47,15 @@ class bbUser(serializable.Serializable):
     :var activeShip: The user's currently equipped bbShip
     :vartype activeShip: bbShip
     :var inactiveShips: The bbShips currently in this user's inventory (unequipped)
-    :vartype inactiveShips: bbInventory
+    :vartype inactiveShips: inventory
     :var inactiveModules: The bbModules currently in this user's inventory (unequipped)
-    :vartype inactiveModules: bbInventory
+    :vartype inactiveModules: inventory
     :var inactiveWeapons: The bbWeapons currently in this user's inventory (unequipped)
-    :vartype inactiveWeapons: bbInventory
+    :vartype inactiveWeapons: inventory
     :var inactiveTurrets: The bbTurrets currently in this user's inventory (unequipped)
-    :vartype inactiveTurrets: bbInventory
+    :vartype inactiveTurrets: inventory
     :var inactiveTools: the bbToolItems currently in this user's inventory
-    :vartype inactiveTools: bbInventory
+    :vartype inactiveTools: inventory
     :var lastSeenGuildId: The ID of the guild where this user was last active. Not guaranteed to be present.
     :vartype lastSeenGuildId: int
     :var hasLastSeenGuildId: Whether or not the user currently has a lastSeenGuildId
@@ -88,11 +88,11 @@ class bbUser(serializable.Serializable):
 
     def __init__(self, id : int, credits : int = 0, lifetimeCredits : int = 0, 
                     bountyCooldownEnd : int = -1, systemsChecked : int = 0, bountyWins : int = 0, activeShip : bool = None,
-                    inactiveShips : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbShip.bbShip),
-                    inactiveModules : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbModule.bbModule),
-                    inactiveWeapons : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbWeapon.bbWeapon),
-                    inactiveTurrets : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbTurret.bbTurret),
-                    inactiveTools : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbToolItem.bbToolItem),
+                    inactiveShips : inventory.Inventory = inventory.TypeRestrictedInventory(bbShip.bbShip),
+                    inactiveModules : inventory.Inventory = inventory.TypeRestrictedInventory(bbModule.bbModule),
+                    inactiveWeapons : inventory.Inventory = inventory.TypeRestrictedInventory(bbWeapon.bbWeapon),
+                    inactiveTurrets : inventory.Inventory = inventory.TypeRestrictedInventory(bbTurret.bbTurret),
+                    inactiveTools : inventory.Inventory = inventory.TypeRestrictedInventory(bbToolItem.bbToolItem),
                     lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
                     duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[UserAlerts.UABase or bool]] = {},
                     bountyWinsToday : int = 0, dailyBountyWinsReset : datetime = None, pollOwned : bool = False,
@@ -105,11 +105,11 @@ class bbUser(serializable.Serializable):
         :param int systemsChecked: The total number of space systems this user has checked (Default 0)
         :param int bountyWins: The total number of bounties this user has won (Default 0)
         :param bbShip activeShip: The user's currently equipped bbShip (Default None)
-        :param bbInventory inactiveShips: The bbShips currently in this user's inventory (unequipped) (Default empty bbInventory)
-        :param bbInventory inactiveModules: The bbModules currently in this user's inventory (unequipped) (Default empty bbInventory)
-        :param bbInventory inactiveWeapons: The bbWeapons currently in this user's inventory (unequipped) (Default empty bbInventory)
-        :param bbInventory inactiveTurrets: The bbTurrets currently in this user's inventory (unequipped) (Default empty bbInventory)
-        :param bbInventory inactiveTools: The bbToolItems currently in this user's inventory (Default empty bbInventory)
+        :param inventory inactiveShips: The bbShips currently in this user's inventory (unequipped) (Default empty inventory)
+        :param inventory inactiveModules: The bbModules currently in this user's inventory (unequipped) (Default empty inventory)
+        :param inventory inactiveWeapons: The bbWeapons currently in this user's inventory (unequipped) (Default empty inventory)
+        :param inventory inactiveTurrets: The bbTurrets currently in this user's inventory (unequipped) (Default empty inventory)
+        :param inventory inactiveTools: The bbToolItems currently in this user's inventory (Default empty inventory)
         :param int lastSeenGuildId: The ID of the guild where this user was last active. Not guaranteed to be present. (Default -1)
         :param int duelWins: The total number of duels the user has won (Default 0)
         :param int duelLosses: The total number of duels the user has lost (Default 0)
@@ -483,13 +483,13 @@ class bbUser(serializable.Serializable):
             raise ValueError("Unknown stat name: " + str(stat))
 
 
-    def getInactivesByName(self, item : str) -> bbInventory:
+    def getInactivesByName(self, item : str) -> inventory:
         """Get the all of the user's inactive (hangar) items of the named type.
-        The given bbInventory is mutable, and can alter the contents of the user's inventory.
+        The given inventory is mutable, and can alter the contents of the user's inventory.
 
         :param str item: One of ship, weapon, module or turret
-        :return: A bbInventory containing all of the user's inactive items of the named type.
-        :rtype: bbInventory
+        :return: A inventory containing all of the user's inactive items of the named type.
+        :rtype: inventory
         :raise ValueError: When requesting an invalid item type name
         :raise NotImplementedError: When requesting a valid item type name, but one that is not yet implemented (e.g commodity)
         """
@@ -700,27 +700,27 @@ class bbUser(serializable.Serializable):
 
         activeShip = bbShip.bbShip.fromDict(userDict["activeShip"])
 
-        inactiveShips = bbInventory.TypeRestrictedInventory(bbShip.bbShip)
+        inactiveShips = inventory.TypeRestrictedInventory(bbShip.bbShip)
         if "inactiveShips" in userDict:
             for shipListingDict in userDict["inactiveShips"]:
                 inactiveShips.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-        inactiveWeapons = bbInventory.TypeRestrictedInventory(bbWeapon.bbWeapon)
+        inactiveWeapons = inventory.TypeRestrictedInventory(bbWeapon.bbWeapon)
         if "inactiveWeapons" in userDict:
             for weaponListingDict in userDict["inactiveWeapons"]:
                 inactiveWeapons.addItem(bbWeapon.bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-        inactiveModules = bbInventory.TypeRestrictedInventory(bbModule.bbModule)
+        inactiveModules = inventory.TypeRestrictedInventory(bbModule.bbModule)
         if "inactiveModules" in userDict:
             for moduleListingDict in userDict["inactiveModules"]:
                 inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
-        inactiveTurrets = bbInventory.TypeRestrictedInventory(bbTurret.bbTurret)
+        inactiveTurrets = inventory.TypeRestrictedInventory(bbTurret.bbTurret)
         if "inactiveTurrets" in userDict:
             for turretListingDict in userDict["inactiveTurrets"]:
                 inactiveTurrets.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-        inactiveTools = bbInventory.TypeRestrictedInventory(bbToolItem.bbToolItem)
+        inactiveTools = inventory.TypeRestrictedInventory(bbToolItem.bbToolItem)
         if "inactiveTools" in userDict:
             for toolListingDict in userDict["inactiveTools"]:
                 inactiveTools.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])

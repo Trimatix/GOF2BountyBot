@@ -2,7 +2,7 @@ from __future__ import annotations
 from . import inventoryListing
 from ..baseClasses import serializable
 
-class bbInventory(serializable.Serializable):
+class Inventory(serializable.Serializable):
     """A database of InventoryListings.
     Aside from the use of InventoryListing for the purpose of item quantities, this class is type unaware.
 
@@ -161,7 +161,7 @@ class bbInventory(serializable.Serializable):
 
     
     def isEmpty(self) -> bool:
-        """Decide whether or not this bbInventory currently stores any items.
+        """Decide whether or not this inventory currently stores any items.
 
         :return: True if no items are stored, False if at least one item is stored currently
         :rtype: bool
@@ -208,7 +208,7 @@ class bbInventory(serializable.Serializable):
         :param value: ignored
         :raise NotImplementedError: Always.
         """
-        raise NotImplementedError("Cannot use [subscript] assignment for class bbInventory. use addItem/removeItem instead.")
+        raise NotImplementedError("Cannot use [subscript] assignment for class inventory. use addItem/removeItem instead.")
         # self.items[self.keys[key]] = value
 
 
@@ -231,8 +231,8 @@ class bbInventory(serializable.Serializable):
 
 
     @classmethod
-    def fromDict(cls, invDict, **kwargs) -> bbInventory:
-        newInv = bbInventory()
+    def fromDict(cls, invDict, **kwargs) -> Inventory:
+        newInv = Inventory()
         if "items" in invDict:
             for listingDict in invDict["items"]:
                 newInv._addListing(inventoryListing.InventoryListing.fromDict(listingDict))
@@ -240,7 +240,7 @@ class bbInventory(serializable.Serializable):
         return newInv
 
 
-class TypeRestrictedInventory(bbInventory):
+class TypeRestrictedInventory(Inventory):
     """An inventory where the item listings are guaranteed to be of a given type.
 
     :var itemType: The type by which listings are restricted

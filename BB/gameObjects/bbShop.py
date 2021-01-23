@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 from ..bbConfig import bbData, bbConfig
 from .items import bbModuleFactory, bbShip, bbWeapon, bbTurret, bbItem
 from .items.modules import bbModule
-from . import bbInventory
+from . import inventory
 import random
 from ..logging import bbLogger
 from ..baseClasses import serializable
@@ -28,33 +28,33 @@ class bbShop(serializable.Serializable):
     :vartype maxTurrets: int
     :var currentTechLevel: The current tech level of the shop, influencing the tech levels of the stock generated upon refresh.
     :vartype currentTechLevel: int
-    :var shipsStock: A bbInventory containing the shop's stock of ships
-    :vartype shipsStock: bbInventory
-    :var weaponsStock: A bbInventory containing the shop's stock of weapons
-    :vartype weaponsStock: bbInventory
-    :var modulesStock: A bbInventory containing the shop's stock of modules
-    :vartype modulesStock: bbInventory
-    :var turretsStock: A bbInventory containing the shop's stock of turrets
-    :vartype turretsStock: bbInventory
+    :var shipsStock: A inventory containing the shop's stock of ships
+    :vartype shipsStock: inventory
+    :var weaponsStock: A inventory containing the shop's stock of weapons
+    :vartype weaponsStock: inventory
+    :var modulesStock: A inventory containing the shop's stock of modules
+    :vartype modulesStock: inventory
+    :var turretsStock: A inventory containing the shop's stock of turrets
+    :vartype turretsStock: inventory
     """
 
     def __init__(self, maxShips : int = bbConfig.shopRefreshShips, maxModules : int = bbConfig.shopRefreshModules,
             maxWeapons : int = bbConfig.shopRefreshWeapons, maxTurrets : int = bbConfig.shopRefreshTurrets,
-            shipsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            weaponsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            modulesStock : bbInventory.bbInventory = bbInventory.bbInventory(),
-            turretsStock : bbInventory.bbInventory = bbInventory.bbInventory(),
+            shipsStock : inventory.Inventory = inventory.Inventory(),
+            weaponsStock : inventory.Inventory = inventory.Inventory(),
+            modulesStock : inventory.Inventory = inventory.Inventory(),
+            turretsStock : inventory.Inventory = inventory.Inventory(),
             currentTechLevel : int = bbConfig.minTechLevel, noRefresh : bool = False):
         """
         :param int maxShips: The maximum number of ships generated on every stock refresh. (Default bbConfig.shopRefreshShips)
         :param int maxModules: The maximum number of modules generated on every stock refresh. (Default bbConfig.shopRefreshModules)
         :param int maxWeapons: The maximum number of weapons generated on every stock refresh. (Default bbConfig.shopRefreshWeapons)
         :param int maxTurrets: The maximum number of turrets generated on every stock refresh. (Default bbConfig.shopRefreshTurrets)
-        :param int currentTechLevel: The current tech level of the shop, influencing the tech levels of the stock generated upon refresh. (Default empty bbInventory)
-        :param bbInventory shipsStock: The shop's current stock of ships (Default empty bbInventory)
-        :param bbInventory weaponsStock: The shop's current stock of weapons (Default empty bbInventory)
-        :param bbInventory modulesStock: The shop's current stock of modules (Default empty bbInventory)
-        :param bbInventory turretsStock: The shop's current stock of turrets (Default bbConfig.minTechLevel)
+        :param int currentTechLevel: The current tech level of the shop, influencing the tech levels of the stock generated upon refresh. (Default empty inventory)
+        :param inventory shipsStock: The shop's current stock of ships (Default empty inventory)
+        :param inventory weaponsStock: The shop's current stock of weapons (Default empty inventory)
+        :param inventory modulesStock: The shop's current stock of modules (Default empty inventory)
+        :param inventory turretsStock: The shop's current stock of turrets (Default bbConfig.minTechLevel)
         :param bool noRefresh: By default, if all shop stocks are empty, the shop will refresh. Give True here to disable this functionality and allow empty shops. (Default False)
         """
         
@@ -65,10 +65,10 @@ class bbShop(serializable.Serializable):
         self.currentTechLevel = currentTechLevel
 
         # TODO: Somewhere, stocks are getting passed in and shared amongst all shops. Fix this. Temporary inventory clear here to make sure each shop gets its own inventory objects.
-        self.shipsStock = bbInventory.bbInventory()
-        self.weaponsStock = bbInventory.bbInventory()
-        self.modulesStock = bbInventory.bbInventory()
-        self.turretsStock = bbInventory.bbInventory()
+        self.shipsStock = inventory.Inventory()
+        self.weaponsStock = inventory.Inventory()
+        self.modulesStock = inventory.Inventory()
+        self.turretsStock = inventory.Inventory()
 
         if (not noRefresh) and shipsStock.isEmpty() and weaponsStock.isEmpty() and modulesStock.isEmpty() and turretsStock.isEmpty():
             self.refreshStock()
@@ -124,13 +124,13 @@ class bbShop(serializable.Serializable):
                 self.turretsStock.addItem(random.choice(bbData.turretObjsByTL[itemTL - 1]))
 
 
-    def getStockByName(self, item : str) -> bbInventory.bbInventory:
-        """Get the bbInventory containing all current stock of the named type.
+    def getStockByName(self, item : str) -> inventory.Inventory:
+        """Get the inventory containing all current stock of the named type.
         This object is mutable and can alter the stock of the shop.
 
         :param str item: The name of the item type to fetch. Must be one of ship, weapon, module or turret
-        :return: The bbInventory used by the shop to store all stock of the requested type
-        :rtype: bbInventory
+        :return: The inventory used by the shop to store all stock of the requested type
+        :rtype: inventory
         :raise ValueError: When requesting an unknown item type
         :raise NotImplementedError: When requesting a valid item type, but one that is not implemented yet (e.g commodity)
         """
@@ -164,7 +164,7 @@ class bbShop(serializable.Serializable):
         """Decide whether a user can afford to buy a ship from the shop's stock
 
         :param bbUser user: The user whose credits balance to check
-        :param int index: The index of the ship whose value to check, in the shop's ship bbInventory's array of keys
+        :param int index: The index of the ship whose value to check, in the shop's ship inventory's array of keys
         :return: True if user can afford to buy ship number index from the shop's stock, false otherwise
         :rtype: bool
         """
@@ -188,7 +188,7 @@ class bbShop(serializable.Serializable):
         This is used for checking whether a user would be able to afford a ship, if they sold their active one.
 
         :param int amount: The amount of credits to check against the ship's value
-        :param int index: The index of the ship whose value to check, in the shop's ship bbInventory's array of keys
+        :param int index: The index of the ship whose value to check, in the shop's ship inventory's array of keys
         :return: True if amount is at least as much as the ship's value, false otherwise
         :rtype: bool
         """
@@ -200,7 +200,7 @@ class bbShop(serializable.Serializable):
         removing the appropriate balance of credits and adding the item into the user's inventory.
 
         :param bbUser user: The user attempting to buy the ship
-        :param int index: The index of the requested ship in the shop's ships bbInventory's array of keys
+        :param int index: The index of the requested ship in the shop's ships inventory's array of keys
         """
         self.userBuyShipObj(user, self.shipsStock[index].item)
         
@@ -234,11 +234,11 @@ class bbShop(serializable.Serializable):
     
 
     def userSellShipIndex(self, user : bbUser.bbUser, index : int):
-        """Buy the weapon at the given index in the given user's ships bbInventory,
+        """Buy the weapon at the given index in the given user's ships inventory,
         adding the appropriate credits to their balance and adding the ship to the shop stock.
 
         :param bbUser user: The user to buy ship from
-        :param int index: The index of the weapon to buy from user, in the user's ships bbInventory's array of keys
+        :param int index: The index of the weapon to buy from user, in the user's ships inventory's array of keys
         """
         self.userSellShipObj(user, user.inactiveShips[index].item)
 
@@ -249,7 +249,7 @@ class bbShop(serializable.Serializable):
         """Decide whether a user can afford to buy a weapon from the shop's stock
 
         :param bbUser user: The user whose credits balance to check
-        :param int index: The index of the weapon whose value to check, in the shop's weapon bbInventory's array of keys
+        :param int index: The index of the weapon whose value to check, in the shop's weapon inventory's array of keys
         :return: True if user can afford to buy weapon number index from the shop's stock, false otherwise
         :rtype: bool
         """
@@ -261,7 +261,7 @@ class bbShop(serializable.Serializable):
         removing the appropriate balance of credits and adding the item into the user's inventory.
 
         :param bbUser user: The user attempting to buy the weapon
-        :param int index: The index of the requested weapon in the shop's weapons bbInventory's array of keys
+        :param int index: The index of the requested weapon in the shop's weapons inventory's array of keys
         """
         self.userBuyWeaponObj(user, self.weaponsStock[index].item)
         
@@ -295,11 +295,11 @@ class bbShop(serializable.Serializable):
     
 
     def userSellWeaponIndex(self, user : bbUser.bbUser, index : int):
-        """Buy the weapon at the given index in the given user's weapons bbInventory,
+        """Buy the weapon at the given index in the given user's weapons inventory,
         adding the appropriate credits to their balance and adding the weapon to the shop stock.
 
         :param bbUser user: The user to buy weapon from
-        :param int index: The index of the weapon to buy from user, in the user's weapons bbInventory's array of keys
+        :param int index: The index of the weapon to buy from user, in the user's weapons inventory's array of keys
         """
         self.userSellWeaponObj(user, user.inactiveWeapons[index].item)
 
@@ -310,7 +310,7 @@ class bbShop(serializable.Serializable):
         """Decide whether a user can afford to buy a module from the shop's stock
 
         :param bbUser user: The user whose credits balance to check
-        :param int index: The index of the module whose value to check, in the shop's module bbInventory's array of keys
+        :param int index: The index of the module whose value to check, in the shop's module inventory's array of keys
         :return: True if user can afford to buy module number index from the shop's stock, false otherwise
         :rtype: bool
         """
@@ -322,7 +322,7 @@ class bbShop(serializable.Serializable):
         removing the appropriate balance of credits and adding the item into the user's inventory.
 
         :param bbUser user: The user attempting to buy the module
-        :param int index: The index of the requested module in the shop's modules bbInventory's array of keys
+        :param int index: The index of the requested module in the shop's modules inventory's array of keys
         """
         self.userBuyModuleObj(user, self.modulesStock[index].item)
         
@@ -356,11 +356,11 @@ class bbShop(serializable.Serializable):
     
 
     def userSellModuleIndex(self, user : bbUser.bbUser, index : int):
-        """Buy the module at the given index in the given user's modules bbInventory,
+        """Buy the module at the given index in the given user's modules inventory,
         adding the appropriate credits to their balance and adding the module to the shop stock.
 
         :param bbUser user: The user to buy module from
-        :param int index: The index of the module to buy from user, in the user's modules bbInventory's array of keys
+        :param int index: The index of the module to buy from user, in the user's modules inventory's array of keys
         """
         self.userSellModuleObj(user, user.inactiveModules[index].item)
 
@@ -371,7 +371,7 @@ class bbShop(serializable.Serializable):
         """Decide whether a user can afford to buy a turret from the shop's stock
 
         :param bbUser user: The user whose credits balance to check
-        :param int index: The index of the turret whose value to check, in the shop's turret bbInventory's array of keys
+        :param int index: The index of the turret whose value to check, in the shop's turret inventory's array of keys
         :return: True if user can afford to buy turret number index from the shop's stock, false otherwise
         :rtype: bool
         """
@@ -383,7 +383,7 @@ class bbShop(serializable.Serializable):
         removing the appropriate balance of credits and adding the item into the user's inventory.
 
         :param bbUser user: The user attempting to buy the turret
-        :param int index: The index of the requested turret in the shop's turrets bbInventory's array of keys
+        :param int index: The index of the requested turret in the shop's turrets inventory's array of keys
         """
         self.userBuyTurretObj(user, self.turretsStock[index].item)
         
@@ -417,11 +417,11 @@ class bbShop(serializable.Serializable):
     
 
     def userSellTurretIndex(self, user : bbUser.bbUser, index : int):
-        """Buy the turret at the given index in the given user's turrets bbInventory,
+        """Buy the turret at the given index in the given user's turrets inventory,
         adding the appropriate credits to their balance and adding the turret to the shop stock.
 
         :param bbUser user: The user to buy turret from
-        :param int index: The index of the turret to buy from user, in the user's turrets bbInventory's array of keys
+        :param int index: The index of the turret to buy from user, in the user's turrets inventory's array of keys
         """
         self.userSellTurretObj(user, user.inactiveTurrets[index].item)
 
@@ -474,19 +474,19 @@ class bbShop(serializable.Serializable):
         :return: A new bbShop object as described by shopDict
         :rtype: bbShop
         """
-        shipsStock = bbInventory.bbInventory()
+        shipsStock = inventory.Inventory()
         for shipListingDict in shopDict["shipsStock"]:
             shipsStock.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-        weaponsStock = bbInventory.bbInventory()
+        weaponsStock = inventory.Inventory()
         for weaponListingDict in shopDict["weaponsStock"]:
             weaponsStock.addItem(bbWeapon.bbWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-        modulesStock = bbInventory.bbInventory()
+        modulesStock = inventory.Inventory()
         for moduleListingDict in shopDict["modulesStock"]:
             modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
-        turretsStock = bbInventory.bbInventory()
+        turretsStock = inventory.Inventory()
         for turretListingDict in shopDict["turretsStock"]:
             turretsStock.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 

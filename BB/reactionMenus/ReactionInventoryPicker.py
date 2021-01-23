@@ -2,7 +2,7 @@ from __future__ import annotations
 from . import ReactionMenu
 from ..bbConfig import bbConfig
 from ..gameObjects.items import bbItem
-from ..gameObjects import bbInventory
+from ..gameObjects import inventory
 from discord import Message, Colour, Member, Role
 from .. import lib
 from ..scheduling import TimedTask
@@ -55,25 +55,25 @@ class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
 
 
 class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
-    """A reaction menu allowing users to select a bbItem from a bbInventory.
+    """A reaction menu allowing users to select a bbItem from a inventory.
     TODO: Implement paging
     TODO: Display item counts?
 
-    :var bbInventory: The bbInventory to display and select from (TODO: Rename)
-    :vartype bbInventory: bbInventory
+    :var inventory: The inventory to display and select from (TODO: Rename)
+    :vartype inventory: inventory
     :var itemsPerPage: The maximum number of items that can be displayed per menu page
     :vartype itemsPerPage: int
-    :var page: The current page the menu is displaying from bbInventory
+    :var page: The current page the menu is displaying from inventory
     :vartype page: int
     """
 
-    def __init__(self, msg : Message, bbInventory : bbInventory.bbInventory, itemsPerPage : int = maxItemsPerPage,
+    def __init__(self, msg : Message, inventory : inventory.Inventory, itemsPerPage : int = maxItemsPerPage,
             titleTxt : str = "", desc : str = "", col : Colour = None, timeout : TimedTask.TimedTask = None,
             footerTxt : str = "", img : str = "", thumb : str = "", icon : str = "", authorName : str = "",
             targetMember : Member = None, targetRole : Role = None):        
         """
         :param discord.Message msg: The discord message where this menu should be embedded
-        :param bbInventory bbInventory: The bbInventory to display and select from (TODO: Rename)
+        :param inventory inventory: The inventory to display and select from (TODO: Rename)
         :param int maxPerPage: The maximum number of items that can be displayed per menu page (Default maxItemsPerPage)
         :param str titleTxt: The content of the embed title (Default "")
         :param str desc: The content of the embed description; appears at the top below the title (Default "")
@@ -91,13 +91,13 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
         if itemsPerPage > maxItemsPerPage:
             raise ValueError("Tried to instantiate a ReactionItemPicker with more than " + str(maxItemsPerPage) + " itemsPerPage (requested " + str(itemsPerPage) + ")")
         
-        # TODO: Does bbInventory actually need to be stored?
-        self.bbInventory = bbInventory
+        # TODO: Does inventory actually need to be stored?
+        self.inventory = inventory
         self.itemsPerPage = itemsPerPage
         
         self.page = 1
         itemOptions = {}
-        itemPage = bbInventory.getPage(self.page, self.itemsPerPage)
+        itemPage = inventory.getPage(self.page, self.itemsPerPage)
         for itemNum in range(len(itemPage)):
             optionEmoji = bbConfig.emojis.emojis.menuOptions[itemNum]
             item = itemPage[itemNum].item

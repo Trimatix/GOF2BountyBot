@@ -12,7 +12,7 @@ This package purely contains configuration data for the bot and, where possible,
 This package provides various database classes for the storage and management of game objects; commands,  bounties, guilds, users, and reaction menus.
 
 ## gameObjects
-Contains definitions for all *game objects* - representing the players of the game (`bbGuild`, `bbUser`), items useable by the players (`bbInventory`, `bbInventorListing`, `items`) and playing functionality of the game itself (`bbShop`, `bounties`, `battles`). This package contains the useful `Aliasable` abstract base class, which can be extended to define objects which can be referenced by a list of string names.
+Contains definitions for all *game objects* - representing the players of the game (`bbGuild`, `bbUser`), items useable by the players (`inventory`, `bbInventorListing`, `items`) and playing functionality of the game itself (`bbShop`, `bounties`, `battles`). This package contains the useful `Aliasable` abstract base class, which can be extended to define objects which can be referenced by a list of string names.
 
 ### gameObjects.battles
 This is a draft package containing work-in-progress code for an upcoming overhaul of the duels system. Currently, the outcome of a duel is decided purely as a comparison if ship statistics. The new model proposed in this package is intended to more closely represent a real fight, by simulating a series of time quanta at which players have the opportunity to make use of their items.
