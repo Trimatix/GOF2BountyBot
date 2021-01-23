@@ -15,7 +15,7 @@ import os
 from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .gameObjects import bbShipSkin
 from .gameObjects.bounties import bbCriminal, bbSystem
-from .gameObjects.items import bbModuleFactory, bbShipUpgrade, bbTurret, primaryWeapon
+from .gameObjects.items import bbModuleFactory, bbShipUpgrade, turretWeapon, primaryWeapon
 from .gameObjects.items.tools import bbShipSkinTool, bbToolItemFactory
 from .scheduling import TimedTask
 from .bbDatabases import bbGuildDB, bbUserDB, HeirarchicalCommandsDB, reactionMenuDB
@@ -293,9 +293,9 @@ async def on_ready():
         bbData.builtInUpgradeData[upgradeDict["name"]]["builtIn"] = True
         bbData.builtInUpgradeObjs[upgradeDict["name"]].builtIn = True
 
-    # generate bbTurret objects from data in bbData
+    # generate turretWeapon objects from data in bbData
     for turretDict in bbData.builtInTurretData.values():
-        bbData.builtInTurretObjs[turretDict["name"]] = bbTurret.bbTurret.fromDict(turretDict)
+        bbData.builtInTurretObjs[turretDict["name"]] = turretWeapon.TurretWeapon.fromDict(turretDict)
         bbData.builtInTurretData[turretDict["name"]]["builtIn"] = True
         bbData.builtInTurretObjs[turretDict["name"]].builtIn = True
 

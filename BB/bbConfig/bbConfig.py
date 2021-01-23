@@ -134,7 +134,7 @@ shopRefreshWeapons = 5
 shopRefreshModules = 5
 shopRefreshTurrets = 2
 
-# bbTurret is the only item that has a probability not to be spawned. This metric indicates the percentage chance of turrets being stocked on a given day
+# turretWeapon is the only item that has a probability not to be spawned. This metric indicates the percentage chance of turrets being stocked on a given day
 turretSpawnProbability = 45
 
 # The range of valid tech levels a shop may spawn at

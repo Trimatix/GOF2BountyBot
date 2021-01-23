@@ -189,7 +189,7 @@ async def cmd_shop(message : discord.Message, args : str, isDM : bool):
                     keysStr = ""
                     for item in requestedShop.turretsStock.items:
                         keysStr += str(item) + ", "
-                    bbLogger.log("Main", "cmd_shop", "Unexpected type in turretsstock KEYS, index " + str(turretNum-1) + ". Expected bbTurret, got " + type(requestedShop.turretsStock.keys[turretNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
+                    bbLogger.log("Main", "cmd_shop", "Unexpected type in turretsstock KEYS, index " + str(turretNum-1) + ". Expected turretWeapon, got " + type(requestedShop.turretsStock.keys[turretNum-1]).__name__ + ".\nInventory keys: " + keysStr[:-2],
                                  category="shop", eventType="INVTY_KEY_TYPE")
                     shopEmbed.add_field(name=str(turretNum) + ". **⚠ #INVALID-ITEM# '" + requestedShop.turretsStock.keys[turretNum-1] + "'",
                                         value="Do not attempt to buy. Could cause issues.", inline=True)

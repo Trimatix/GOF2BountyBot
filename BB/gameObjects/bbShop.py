@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from . import bbUser
 
 from ..bbConfig import bbData, bbConfig
-from .items import bbModuleFactory, bbShip, primaryWeapon, bbTurret, gameItem
+from .items import bbModuleFactory, bbShip, primaryWeapon, turretWeapon, gameItem
 from .items.modules import bbModule
 from . import inventory
 import random
@@ -388,12 +388,12 @@ class bbShop(serializable.Serializable):
         self.userBuyTurretObj(user, self.turretsStock[index].item)
         
         
-    def userBuyTurretObj(self, user : bbUser.bbUser, requestedTurret : bbTurret.bbTurret):
+    def userBuyTurretObj(self, user : bbUser.bbUser, requestedTurret : turretWeapon.TurretWeapon):
         """Sell the given turret to the given user,
         removing the appropriate balance of credits fromt the user and adding the item into the user's inventory.
 
         :param bbUser user: The user attempting to buy the turret
-        :param bbTurret requestedTurret: The turret to sell to user
+        :param turretWeapon requestedTurret: The turret to sell to user
         :raise RuntimeError: If user cannot afford to buy requestedTurret
         """
         if self.userCanAffordItemObj(user, requestedTurret):
@@ -404,12 +404,12 @@ class bbShop(serializable.Serializable):
             raise RuntimeError("user " + str(user.id) + " attempted to buy turret " + requestedTurret.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedTurret.getValue()))
 
 
-    def userSellTurretObj(self, user : bbUser.bbUser, turret : bbTurret.bbTurret):
+    def userSellTurretObj(self, user : bbUser.bbUser, turret : turretWeapon.TurretWeapon):
         """Buy the given turret from the given user,
         adding the appropriate credits to their balance and adding the turret to the shop stock.
 
         :param bbUser user: The user to buy turret from
-        :param bbTurret turret: The turret to buy from user
+        :param turretWeapon turret: The turret to buy from user
         """
         user.credits += turret.getValue()
         self.turretsStock.addItem(turret)
@@ -488,7 +488,7 @@ class bbShop(serializable.Serializable):
 
         turretsStock = inventory.Inventory()
         for turretListingDict in shopDict["turretsStock"]:
-            turretsStock.addItem(bbTurret.bbTurret.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
+            turretsStock.addItem(turretWeapon.TurretWeapon.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
         return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"], currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
                         shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)

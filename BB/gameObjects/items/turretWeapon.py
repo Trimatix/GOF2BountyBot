@@ -6,7 +6,7 @@ from typing import List
 
 
 @spawnableItem
-class bbTurret(gameItem):
+class TurretWeapon(gameItem):
     """A turret that can be equipped onto a bbShip for use in duels.
 
     :var dps: The turret's damage per second to a target ship.
@@ -28,7 +28,7 @@ class bbTurret(gameItem):
         :param int techLevel: A rating from 1 to 10 of this turret's technical advancement. Used as a measure for its effectiveness compared to other turrets of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard turret (loaded in from bbData) or a custom spawned turret (Default False)
         """
-        super(bbTurret, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
+        super(TurretWeapon, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
         self.dps = dps
 
@@ -46,10 +46,10 @@ class bbTurret(gameItem):
         """⚠ DEPRACATED
         Get the type of this object.
 
-        :return: The bbTurret class
+        :return: The turretWeapon class
         :rtype: type
         """
-        return bbTurret
+        return TurretWeapon
 
 
     def toDict(self, **kwargs) -> dict:
@@ -59,24 +59,24 @@ class bbTurret(gameItem):
         :return: A dictionary containing all information needed to reconstruct this turret. If the turret is builtIn, this is only its name.
         :rtype: dict
         """
-        itemDict = super(bbTurret, self).toDict(**kwargs)
+        itemDict = super(TurretWeapon, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["dps"] = self.dps
         return itemDict
 
 
     @classmethod
-    def fromDict(cls, turretDict : dict, **kwargs) -> bbTurret:
-        """Factory function constructing a new bbTurret object from a dictionary serialised representation - the opposite of bbTurret.toDict.
+    def fromDict(cls, turretDict : dict, **kwargs) -> TurretWeapon:
+        """Factory function constructing a new turretWeapon object from a dictionary serialised representation - the opposite of turretWeapon.toDict.
         
-        :param dict turretDict: A dictionary containing all information needed to construct the desired bbTurret
-        :return: A new bbTurret object as described in turretDict
-        :rtype: bbTurret
+        :param dict turretDict: A dictionary containing all information needed to construct the desired turretWeapon
+        :return: A new turretWeapon object as described in turretDict
+        :rtype: turretWeapon
         """
         if turretDict["builtIn"]:
             return bbData.builtInTurretObjs[turretDict["name"]]
         else:
-            return bbTurret(turretDict["name"], turretDict["aliases"], dps=turretDict["dps"], value=turretDict["value"],
+            return TurretWeapon(turretDict["name"], turretDict["aliases"], dps=turretDict["dps"], value=turretDict["value"],
                             wiki=turretDict["wiki"] if "wiki" in turretDict else "", manufacturer=turretDict["manufacturer"] if "manufacturer" in turretDict else "",
                             icon=turretDict["icon"] if "icon" in turretDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmojiFromStr(turretDict["emoji"]) if "emoji" in turretDict else lib.emojis.dumbEmoji.EMPTY,
                             techLevel=turretDict["techLevel"] if "techLevel" in turretDict else -1, builtIn=False)

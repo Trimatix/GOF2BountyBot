@@ -444,7 +444,7 @@ builtInSystemData = { #Terran
             "Skor Terpa": {"name":"Skor Terpa", "faction":"neutral", "neighbours":[], "security":3, "coordinates":(7, 1), "aliases":[], "wiki":"https://galaxyonfire.fandom.com/wiki/Category:Skor_Terpa"}
         }
 
-# data for builtIn Turrets to be used in bbTurret.fromDict
+# data for builtIn Turrets to be used in turretWeapon.fromDict
 builtInTurretData = { # Manual
                         "Hammerhead D1": {"name": "Hammerhead D1", "aliases": ["D1"], "techLevel": 5, "dps": 20, "value": 24174, "wiki": "https://galaxyonfire.fandom.com/wiki/Hammerhead_D1", "builtIn":False, "emoji": "<:hammerheadd1:723707422065033277>", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476535276863508/hammerhead_d1.png"},
                         "Hammerhead D2A2": {"name": "Hammerhead D2A2", "aliases": ["D2A2", "D2", "Hammerhead D2"], "techLevel": 6, "dps": 35.71, "value": 77097, "wiki": "https://galaxyonfire.fandom.com/wiki/Hammerhead_D2A2", "builtIn":False, "emoji": "<:hammerheadd2a2:723707422136598568>", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723476545703772210/hammerhead_d2a2.png"},
