@@ -6,7 +6,7 @@ from ..gameItem import spawnableItem
 
 
 @spawnableItem
-class primaryWeaponModModule(bbModule.bbModule):
+class PrimaryWeaponModModule(bbModule.bbModule):
     """A module providing a DPS multiplier to all equipped weapons
     """
 
@@ -26,7 +26,7 @@ class primaryWeaponModModule(bbModule.bbModule):
         :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other modules of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard module (loaded in from bbData) or a custom spawned module (Default False)
         """
-        super(primaryWeaponModModule, self).__init__(name, aliases, dpsMultiplier=dpsMultiplier, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
+        super(PrimaryWeaponModModule, self).__init__(name, aliases, dpsMultiplier=dpsMultiplier, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
 
     def getType(self) -> type:
@@ -36,7 +36,7 @@ class primaryWeaponModModule(bbModule.bbModule):
         :return: A reference to this class
         :rtype: type
         """
-        return primaryWeaponModModule
+        return PrimaryWeaponModModule
 
     
     def toDict(self, **kwargs) -> dict:
@@ -46,7 +46,7 @@ class primaryWeaponModModule(bbModule.bbModule):
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(primaryWeaponModModule, self).toDict(**kwargs)
+        itemDict = super(PrimaryWeaponModModule, self).toDict(**kwargs)
         return itemDict
 
 
@@ -61,7 +61,7 @@ class primaryWeaponModModule(bbModule.bbModule):
         if "builtIn" in moduleDict and moduleDict["builtIn"]:
             return bbData.builtInModuleObjs[moduleDict["name"]]
             
-        return primaryWeaponModModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], dpsMultiplier=moduleDict["dpsMultiplier"] if "dpsMultiplier" in moduleDict else 1,
+        return PrimaryWeaponModModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], dpsMultiplier=moduleDict["dpsMultiplier"] if "dpsMultiplier" in moduleDict else 1,
                                 value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
                                 manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
                                 emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)

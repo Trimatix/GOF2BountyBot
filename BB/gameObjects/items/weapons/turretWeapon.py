@@ -1,6 +1,6 @@
 from __future__ import annotations
-from .gameItem import GameItem, spawnableItem
-from ...bbConfig import bbData
+from ..gameItem import GameItem, spawnableItem
+from ....bbConfig import bbData
 from ... import lib
 from typing import List
 

@@ -5,7 +5,8 @@ if TYPE_CHECKING:
     from .modules import bbModule
 
 from .gameItem import GameItem, spawnableItem
-from . import turretWeapon, primaryWeapon, bbShipUpgrade, bbModuleFactory
+from . import bbShipUpgrade, bbModuleFactory
+from .weapons import primaryWeapon, turretWeapon
 from .. import bbShipSkin
 from ...bbConfig import bbConfig, bbData
 from ... import lib
@@ -47,7 +48,7 @@ class bbShip(GameItem):
     def __init__(self, name : str, maxPrimaries : int, maxTurrets : int,
                     maxModules : int, manufacturer : str = "", armour : int = 0,
                     cargo : int = 0, numSecondaries : int = 0, handling : int = 0,
-                    value : int = 0, aliases : List[str] = [], weapons : List[primaryWeapon.Weapon] = [],
+                    value : int = 0, aliases : List[str] = [], weapons : List[primaryWeapon.PrimaryWeapon] = [],
                     modules : List[bbModule.bbModule] = [], turrets : List[turretWeapon.TurretWeapon] = [], wiki : str = "",
                     upgradesApplied : List[bbShipUpgrade.bbShipUpgrade] = [], nickname : str = "", icon : str = "",
                     emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1, shopSpawnRate : float = 0,
@@ -617,7 +618,7 @@ class bbShip(GameItem):
             other.equipTurret(self.turrets.pop(0))
 
 
-    def getActivesByName(self, item : str) -> Union[primaryWeapon.Weapon, bbModule.bbModule, turretWeapon.TurretWeapon]:
+    def getActivesByName(self, item : str) -> Union[primaryWeapon.PrimaryWeapon, bbModule.bbModule, turretWeapon.TurretWeapon]:
         """Return a requested array of equipped items, specified by string name.
 
         :param str item: one of weapon, module or turret.
@@ -797,7 +798,7 @@ class bbShip(GameItem):
         weapons = []
         if "weapons" in shipDict:
             for weapon in shipDict["weapons"]:
-                weapons.append(primaryWeapon.Weapon.fromDict(weapon))
+                weapons.append(primaryWeapon.PrimaryWeapon.fromDict(weapon))
 
         modules = []
         if "modules" in shipDict:
@@ -820,7 +821,7 @@ class bbShip(GameItem):
             builtInWeapons = []
             if "weapons" in shipDict:
                 for weapon in shipDict["weapons"]:
-                    builtInWeapons.append(primaryWeapon.Weapon.fromDict(weapon))
+                    builtInWeapons.append(primaryWeapon.PrimaryWeapon.fromDict(weapon))
 
             builtInModules = []
             if "modules" in shipDict:

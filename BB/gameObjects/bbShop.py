@@ -5,7 +5,8 @@ if TYPE_CHECKING:
     from . import bbUser
 
 from ..bbConfig import bbData, bbConfig
-from .items import bbModuleFactory, bbShip, primaryWeapon, turretWeapon, gameItem
+from .items import bbModuleFactory, bbShip, gameItem
+from .items.weapons import primaryWeapon, turretWeapon
 from .items.modules import bbModule
 from . import inventory
 import random
@@ -266,7 +267,7 @@ class bbShop(serializable.Serializable):
         self.userBuyWeaponObj(user, self.weaponsStock[index].item)
         
 
-    def userBuyWeaponObj(self, user : bbUser.bbUser, requestedWeapon : primaryWeapon.Weapon):
+    def userBuyWeaponObj(self, user : bbUser.bbUser, requestedWeapon : primaryWeapon.PrimaryWeapon):
         """Sell the given weapon to the given user,
         removing the appropriate balance of credits fromt the user and adding the item into the user's inventory.
 
@@ -282,7 +283,7 @@ class bbShop(serializable.Serializable):
             raise RuntimeError("user " + str(user.id) + " attempted to buy weapon " + requestedWeapon.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedWeapon.getValue()))
 
 
-    def userSellWeaponObj(self, user : bbUser.bbUser, weapon : primaryWeapon.Weapon):
+    def userSellWeaponObj(self, user : bbUser.bbUser, weapon : primaryWeapon.PrimaryWeapon):
         """Buy the given weapon from the given user,
         adding the appropriate credits to their balance and adding the weapon to the shop stock.
 
@@ -480,7 +481,7 @@ class bbShop(serializable.Serializable):
 
         weaponsStock = inventory.Inventory()
         for weaponListingDict in shopDict["weaponsStock"]:
-            weaponsStock.addItem(primaryWeapon.Weapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
+            weaponsStock.addItem(primaryWeapon.PrimaryWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
         modulesStock = inventory.Inventory()
         for moduleListingDict in shopDict["modulesStock"]:

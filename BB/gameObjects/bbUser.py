@@ -4,7 +4,8 @@ from typing import Union, List, TYPE_CHECKING
 if TYPE_CHECKING:
     from .battles import DuelRequest
 
-from .items import bbShip, bbModuleFactory, primaryWeapon, turretWeapon
+from .items import bbShip, bbModuleFactory
+from .items.weapons import primaryWeapon, turretWeapon
 from .items.tools import bbToolItemFactory, bbToolItem
 from .items.modules import bbModule
 from ..bbConfig import bbConfig
@@ -90,7 +91,7 @@ class bbUser(serializable.Serializable):
                     bountyCooldownEnd : int = -1, systemsChecked : int = 0, bountyWins : int = 0, activeShip : bool = None,
                     inactiveShips : inventory.Inventory = inventory.TypeRestrictedInventory(bbShip.bbShip),
                     inactiveModules : inventory.Inventory = inventory.TypeRestrictedInventory(bbModule.bbModule),
-                    inactiveWeapons : inventory.Inventory = inventory.TypeRestrictedInventory(primaryWeapon.Weapon),
+                    inactiveWeapons : inventory.Inventory = inventory.TypeRestrictedInventory(primaryWeapon.PrimaryWeapon),
                     inactiveTurrets : inventory.Inventory = inventory.TypeRestrictedInventory(turretWeapon.TurretWeapon),
                     inactiveTools : inventory.Inventory = inventory.TypeRestrictedInventory(bbToolItem.bbToolItem),
                     lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
@@ -668,7 +669,7 @@ class bbUser(serializable.Serializable):
     def getInventoryForItem(self, item):
         if isinstance(item, bbShip.bbShip):
             return self.inactiveShips
-        elif isinstance(item, primaryWeapon.Weapon):
+        elif isinstance(item, primaryWeapon.PrimaryWeapon):
             return self.inactiveWeapons
         elif isinstance(item, turretWeapon.TurretWeapon):
             return self.inactiveTurrets
@@ -705,10 +706,10 @@ class bbUser(serializable.Serializable):
             for shipListingDict in userDict["inactiveShips"]:
                 inactiveShips.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
-        inactiveWeapons = inventory.TypeRestrictedInventory(primaryWeapon.Weapon)
+        inactiveWeapons = inventory.TypeRestrictedInventory(primaryWeapon.PrimaryWeapon)
         if "inactiveWeapons" in userDict:
             for weaponListingDict in userDict["inactiveWeapons"]:
-                inactiveWeapons.addItem(primaryWeapon.Weapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
+                inactiveWeapons.addItem(primaryWeapon.PrimaryWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
         inactiveModules = inventory.TypeRestrictedInventory(bbModule.bbModule)
         if "inactiveModules" in userDict:
