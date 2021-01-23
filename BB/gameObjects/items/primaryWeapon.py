@@ -5,7 +5,7 @@ from typing import List
 
 
 @spawnableItem
-class bbWeapon(gameItem):
+class PrimaryWeapon(gameItem):
     """A primary weapon that can be equipped onto a bbShip for use in duels.
 
     :var dps: The weapon's damage per second to a target ship.
@@ -27,7 +27,7 @@ class bbWeapon(gameItem):
         :param int techLevel: A rating from 1 to 10 of this weapon's technical advancement. Used as a measure for its effectiveness compared to other weapons of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard weapon (loaded in from bbData) or a custom spawned weapon (Default False)
         """
-        super(bbWeapon, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
+        super(PrimaryWeapon, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
         self.dps = dps
 
@@ -45,10 +45,10 @@ class bbWeapon(gameItem):
         """⚠ DEPRACATED
         Get the type of this object.
 
-        :return: The bbWeapon class
+        :return: The primaryWeapon class
         :rtype: type
         """
-        return bbWeapon
+        return PrimaryWeapon
 
 
     def toDict(self, **kwargs) -> dict:
@@ -58,7 +58,7 @@ class bbWeapon(gameItem):
         :return: A dictionary containing all information needed to reconstruct this weapon. If the weapon is builtIn, this is only its name.
         :rtype: dict
         """
-        itemDict = super(bbWeapon, self).toDict(**kwargs)
+        itemDict = super(PrimaryWeapon, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["dps"] = self.dps
         return itemDict
@@ -66,16 +66,16 @@ class bbWeapon(gameItem):
 
     @classmethod
     def fromDict(cls, weaponDict, **kwargs):
-        """Factory function constructing a new bbWeapon object from a dictionary serialised representation - the opposite of bbWeapon.toDict.
+        """Factory function constructing a new primaryWeapon object from a dictionary serialised representation - the opposite of primaryWeapon.toDict.
         
-        :param dict weaponDict: A dictionary containing all information needed to construct the desired bbWeapon
-        :return: A new bbWeapon object as described in weaponDict
-        :rtype: bbWeapon
+        :param dict weaponDict: A dictionary containing all information needed to construct the desired primaryWeapon
+        :return: A new primaryWeapon object as described in weaponDict
+        :rtype: primaryWeapon
         """
         if weaponDict["builtIn"]:
             return bbData.builtInWeaponObjs[weaponDict["name"]]
         else:
-            return bbWeapon(weaponDict["name"], weaponDict["aliases"], dps=weaponDict["dps"], value=weaponDict["value"],
+            return PrimaryWeapon(weaponDict["name"], weaponDict["aliases"], dps=weaponDict["dps"], value=weaponDict["value"],
             wiki=weaponDict["wiki"] if "wiki" in weaponDict else "", manufacturer=weaponDict["manufacturer"] if "manufacturer" in weaponDict else "",
             icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmojiFromStr(weaponDict["emoji"]) if "emoji" in weaponDict else lib.emojis.dumbEmoji.EMPTY,
             techLevel=weaponDict["techLevel"] if "techLevel" in weaponDict else -1, builtIn=False)

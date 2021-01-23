@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from .modules import bbModule
 
 from .gameItem import gameItem, spawnableItem
-from . import bbTurret, bbWeapon, bbShipUpgrade, bbModuleFactory
+from . import bbTurret, primaryWeapon, bbShipUpgrade, bbModuleFactory
 from .. import bbShipSkin
 from ...bbConfig import bbConfig, bbData
 from ... import lib
@@ -33,7 +33,7 @@ class bbShip(gameItem):
     :var maxModules: The maximum number of modules equippable on this ship
     :vartype maxModules: int
     :var weapons: A list containing references to all primary weapon objects equipped by this ship. May contain duplicate references to save on memory.
-    :vartype weapons: list[bbWeapon]
+    :vartype weapons: list[primaryWeapon]
     :var modules: A list containing references to all module objects equipped by this ship. May contain duplicate references to save on memory.
     :vartype modules: list[bbModule]
     :var turrets: A list containing references to all turret objects equipped by this ship. May contain duplicate references to save on memory.
@@ -47,7 +47,7 @@ class bbShip(gameItem):
     def __init__(self, name : str, maxPrimaries : int, maxTurrets : int,
                     maxModules : int, manufacturer : str = "", armour : int = 0,
                     cargo : int = 0, numSecondaries : int = 0, handling : int = 0,
-                    value : int = 0, aliases : List[str] = [], weapons : List[bbWeapon.bbWeapon] = [],
+                    value : int = 0, aliases : List[str] = [], weapons : List[primaryWeapon.Weapon] = [],
                     modules : List[bbModule.bbModule] = [], turrets : List[bbTurret.bbTurret] = [], wiki : str = "",
                     upgradesApplied : List[bbShipUpgrade.bbShipUpgrade] = [], nickname : str = "", icon : str = "",
                     emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1, shopSpawnRate : float = 0,
@@ -62,7 +62,7 @@ class bbShip(gameItem):
         :param int maxPrimaries: The maximum number of primary weapons equippable on this ship
         :param int maxTurrets: The maximum number of turrets equippable on this ship
         :param int maxModules: The maximum number of modules equippable on this ship
-        :param list[bbWeapon] weapons: A list containing references to all primary weapon objects equipped by this ship. May contain duplicate references to save on memory. (Default [])
+        :param list[primaryWeapon] weapons: A list containing references to all primary weapon objects equipped by this ship. May contain duplicate references to save on memory. (Default [])
         :param list[bbModule] modules: A list containing references to all module objects equipped by this ship. May contain duplicate references to save on memory. (Default [])
         :param list[bbTurret] turrets: A list containing references to all turret objects equipped by this ship. May contain duplicate references to save on memory. (Default [])
         :param list[bbShipUpgrade] upgradesApplied: A list containing references to all bbShipUpgrades objects applied to this ship. May contain duplicate references to save on memory. (Default [])
@@ -199,10 +199,10 @@ class bbShip(gameItem):
         return self.getNumTurretsEquipped() > 0
 
 
-    def equipWeapon(self, weapon : bbWeapon):
+    def equipWeapon(self, weapon : primaryWeapon):
         """Equip the given weapon onto the ship
 
-        :param bbWeapon weapon: The weapon object to equip
+        :param primaryWeapon weapon: The weapon object to equip
         :raise OverflowError: If no weapon slots are available on the ship
         """
         if not self.canEquipMoreWeapons():
@@ -210,10 +210,10 @@ class bbShip(gameItem):
         self.weapons.append(weapon)
     
 
-    def unequipWeaponObj(self, weapon : bbWeapon):
+    def unequipWeaponObj(self, weapon : primaryWeapon):
         """Unequip the given weapon object reference from the ship
 
-        :param bbWeapon weapon: The weapon object to unequip 
+        :param primaryWeapon weapon: The weapon object to unequip 
         """
         self.weapons.remove(weapon)
 
@@ -226,12 +226,12 @@ class bbShip(gameItem):
         self.weapons.pop(index)
 
 
-    def getWeaponAtIndex(self, index : int) -> bbWeapon:
+    def getWeaponAtIndex(self, index : int) -> primaryWeapon:
         """Fetch the weapon object equipped at the given index
 
         :param int index: The index of the weapon object to fetch
         :return: The weapon object equipped at the given index
-        :rtype: bbWeapon
+        :rtype: primaryWeapon
         """
         return self.weapons[index]
     
@@ -617,12 +617,12 @@ class bbShip(gameItem):
             other.equipTurret(self.turrets.pop(0))
 
 
-    def getActivesByName(self, item : str) -> Union[bbWeapon.bbWeapon, bbModule.bbModule, bbTurret.bbTurret]:
+    def getActivesByName(self, item : str) -> Union[primaryWeapon.Weapon, bbModule.bbModule, bbTurret.bbTurret]:
         """Return a requested array of equipped items, specified by string name.
 
         :param str item: one of weapon, module or turret.
         :return: An array of equipped items of the named typed.
-        :rtype: list[bbWeapon or bbModule or bbTurret]
+        :rtype: list[primaryWeapon or bbModule or bbTurret]
         :raise ValueError: If the requested item type is invalid
         :raise NotImplementedError: If a valid item type is requested, not just yet implemented (e.g commodity)
         """
@@ -797,7 +797,7 @@ class bbShip(gameItem):
         weapons = []
         if "weapons" in shipDict:
             for weapon in shipDict["weapons"]:
-                weapons.append(bbWeapon.bbWeapon.fromDict(weapon))
+                weapons.append(primaryWeapon.Weapon.fromDict(weapon))
 
         modules = []
         if "modules" in shipDict:
@@ -820,7 +820,7 @@ class bbShip(gameItem):
             builtInWeapons = []
             if "weapons" in shipDict:
                 for weapon in shipDict["weapons"]:
-                    builtInWeapons.append(bbWeapon.bbWeapon.fromDict(weapon))
+                    builtInWeapons.append(primaryWeapon.Weapon.fromDict(weapon))
 
             builtInModules = []
             if "modules" in shipDict:

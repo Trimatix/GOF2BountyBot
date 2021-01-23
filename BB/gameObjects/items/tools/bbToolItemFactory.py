@@ -1,5 +1,5 @@
 from . import bbToolItem, bbShipSkinTool, bbCrate
-from .. import bbShip, bbWeapon, bbModuleFactory, bbTurret
+from .. import bbShip, primaryWeapon, bbModuleFactory, bbTurret
 from .... import lib
 
 
@@ -14,7 +14,7 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
     """
 
     itemConstructors = {"bbShip": bbShip.bbShip.fromDict,
-                    "bbWeapon": bbWeapon.bbWeapon.fromDict,
+                    "primaryWeapon": primaryWeapon.Weapon.fromDict,
                     "bbModule": bbModuleFactory.fromDict,
                     "bbTurret": bbTurret.bbTurret.fromDict,
                     "bbToolItem": fromDict}

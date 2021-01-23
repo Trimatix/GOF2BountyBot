@@ -1,5 +1,5 @@
 from ...bbConfig import bbData
-from .modules import bbModule, bbArmourModule, bbBoosterModule, bbCabinModule, bbCloakModule, bbCompressorModule, bbGammaShieldModule, bbMiningDrillModule, bbRepairBeamModule, bbRepairBotModule, bbScannerModule, bbShieldModule, bbSpectralFilterModule, bbThrusterModule, bbTractorBeamModule, bbTransfusionBeamModule, bbWeaponModModule, bbJumpDriveModule, bbEmergencySystemModule, bbSignatureModule, bbShieldInjectorModule, bbTimeExtenderModule
+from .modules import bbModule, bbArmourModule, bbBoosterModule, bbCabinModule, bbCloakModule, bbCompressorModule, bbGammaShieldModule, bbMiningDrillModule, bbRepairBeamModule, bbRepairBotModule, bbScannerModule, bbShieldModule, bbSpectralFilterModule, bbThrusterModule, bbTractorBeamModule, bbTransfusionBeamModule, primaryWeaponModModule, bbJumpDriveModule, bbEmergencySystemModule, bbSignatureModule, bbShieldInjectorModule, bbTimeExtenderModule
 
 typeConstructors = {"armour": bbArmourModule.bbArmourModule.fromDict,
                     "booster": bbBoosterModule.bbBoosterModule.fromDict,
@@ -16,7 +16,7 @@ typeConstructors = {"armour": bbArmourModule.bbArmourModule.fromDict,
                     "thruster": bbThrusterModule.bbThrusterModule.fromDict,
                     "tractor beam": bbTractorBeamModule.bbTractorBeamModule.fromDict,
                     "transfusion beam": bbTransfusionBeamModule.bbTransfusionBeamModule.fromDict,
-                    "weapon mod": bbWeaponModModule.bbWeaponModModule.fromDict,
+                    "weapon mod": primaryWeaponModModule.primaryWeaponModModule.fromDict,
                     "jump drive": bbJumpDriveModule.bbJumpDriveModule.fromDict,
                     "emergency system": bbEmergencySystemModule.bbEmergencySystemModule.fromDict,
                     "signature": bbSignatureModule.bbSignatureModule.fromDict,
@@ -41,7 +41,7 @@ maxModuleTypeEquips = {     bbArmourModule.bbArmourModule: 1,
                             bbThrusterModule.bbThrusterModule: 1,
                             bbTractorBeamModule.bbTractorBeamModule: 1,
                             bbTransfusionBeamModule.bbTransfusionBeamModule: 1,
-                            bbWeaponModModule.bbWeaponModModule: 1,
+                            primaryWeaponModModule.primaryWeaponModModule: 1,
                             bbJumpDriveModule.bbJumpDriveModule: 0,
                             bbEmergencySystemModule.bbEmergencySystemModule: 1,
                             bbSignatureModule.bbSignatureModule: 1,
