@@ -1,4 +1,4 @@
-from . import bbModule
+from . import moduleItem
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
@@ -6,7 +6,7 @@ from ..gameItem import spawnableItem
 
 
 @spawnableItem
-class bbTransfusionBeamModule(bbModule.bbModule):
+class bbTransfusionBeamModule(moduleItem.ModuleItem):
     """A module that slowly steals health from nearby ships, and adds the stolen heath to this ship's health.
 
     :var HPps: The amount of health points per second to steal
@@ -54,7 +54,7 @@ class bbTransfusionBeamModule(bbModule.bbModule):
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
-        Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
+        Uses the base moduleItem toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict

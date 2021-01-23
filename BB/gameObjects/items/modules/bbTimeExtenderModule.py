@@ -1,4 +1,4 @@
-from . import bbModule
+from . import moduleItem
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
@@ -6,7 +6,7 @@ from ..gameItem import spawnableItem
 
 
 @spawnableItem
-class bbTimeExtenderModule(bbModule.bbModule):
+class bbTimeExtenderModule(moduleItem.ModuleItem):
     """A module that will slow down time around the ship. The ship remains unaffected.
 
     :var effect: The amount to slow down time as a multiplier
@@ -55,7 +55,7 @@ class bbTimeExtenderModule(bbModule.bbModule):
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
-        Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
+        Uses the base moduleItem toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict

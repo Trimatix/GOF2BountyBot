@@ -1,4 +1,4 @@
-from . import bbModule
+from . import moduleItem
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
@@ -6,7 +6,7 @@ from ..gameItem import spawnableItem
 
 
 @spawnableItem
-class bbSpectralFilterModule(bbModule.bbModule):
+class bbSpectralFilterModule(moduleItem.ModuleItem):
     """A module allowing the user to see plasma clouds in space.
 
     :var showOnRadar: Whether or not plasma clouds are marked on the ships radar
@@ -55,7 +55,7 @@ class bbSpectralFilterModule(bbModule.bbModule):
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
-        Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
+        Uses the base moduleItem toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict

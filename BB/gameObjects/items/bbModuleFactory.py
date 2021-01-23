@@ -1,5 +1,5 @@
 from ...bbConfig import bbData
-from .modules import bbModule, bbArmourModule, bbBoosterModule, bbCabinModule, bbCloakModule, bbCompressorModule, bbGammaShieldModule, bbMiningDrillModule, bbRepairBeamModule, bbRepairBotModule, bbScannerModule, bbShieldModule, bbSpectralFilterModule, bbThrusterModule, bbTractorBeamModule, bbTransfusionBeamModule, primaryWeaponModModule, bbJumpDriveModule, bbEmergencySystemModule, bbSignatureModule, bbShieldInjectorModule, bbTimeExtenderModule
+from .modules import moduleItem, bbArmourModule, bbBoosterModule, bbCabinModule, bbCloakModule, bbCompressorModule, bbGammaShieldModule, bbMiningDrillModule, bbRepairBeamModule, bbRepairBotModule, bbScannerModule, bbShieldModule, bbSpectralFilterModule, bbThrusterModule, bbTractorBeamModule, bbTransfusionBeamModule, primaryWeaponModModule, bbJumpDriveModule, bbEmergencySystemModule, bbSignatureModule, bbShieldInjectorModule, bbTimeExtenderModule
 
 typeConstructors = {"armour": bbArmourModule.bbArmourModule.fromDict,
                     "booster": bbBoosterModule.bbBoosterModule.fromDict,
@@ -50,13 +50,13 @@ maxModuleTypeEquips = {     bbArmourModule.bbArmourModule: 1,
 
 
 def fromDict(moduleDict):
-    """Factory function recreating any bbModule or bbModule subtype from a dictionary-serialized representation.
+    """Factory function recreating any moduleItem or moduleItem subtype from a dictionary-serialized representation.
     If implemented correctly, this should act as the opposite to the original object's toDict method.
     If the requested module is builtIn, return the builtIn module object of the same name.
 
-    :param dict moduleDict: A dictionary containg all information necessary to create the desired bbModule object
-    :return: The bbModule object described in moduleDict
-    :rtype: bbModule
+    :param dict moduleDict: A dictionary containg all information necessary to create the desired moduleItem object
+    :return: The moduleItem object described in moduleDict
+    :rtype: moduleItem
     """
     if "builtIn" in moduleDict and moduleDict["builtIn"]:
         return bbData.builtInModuleObjs[moduleDict["name"]]
@@ -64,4 +64,4 @@ def fromDict(moduleDict):
         if "type" in moduleDict and moduleDict["type"] in typeConstructors:
             return typeConstructors[moduleDict["type"]](moduleDict)
         else:
-            return bbModule.bbModule.fromDict(moduleDict)
+            return moduleItem.ModuleItem.fromDict(moduleDict)

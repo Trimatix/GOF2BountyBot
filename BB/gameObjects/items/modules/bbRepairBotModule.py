@@ -1,4 +1,4 @@
-from . import bbModule
+from . import moduleItem
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
@@ -6,7 +6,7 @@ from ..gameItem import spawnableItem
 
 
 @spawnableItem
-class bbRepairBotModule(bbModule.bbModule):
+class bbRepairBotModule(moduleItem.ModuleItem):
     """A module providing a ship with a slow health point increase to its hull and armour
 
     :var HPps: The amount of health points regained per second
@@ -50,7 +50,7 @@ class bbRepairBotModule(bbModule.bbModule):
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
-        Uses the base bbModule toDict method as a starting point, and adds extra attributes implemented by this specific module.
+        Uses the base moduleItem toDict method as a starting point, and adds extra attributes implemented by this specific module.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict

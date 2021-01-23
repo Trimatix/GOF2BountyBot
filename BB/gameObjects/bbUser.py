@@ -4,10 +4,10 @@ from typing import Union, List, TYPE_CHECKING
 if TYPE_CHECKING:
     from .battles import DuelRequest
 
-from .items import bbShip, bbModuleFactory
+from .items import bbShip, moduleItemFactory
 from .items.weapons import primaryWeapon, turretWeapon
 from .items.tools import bbToolItemFactory, bbToolItem
-from .items.modules import bbModule
+from .items.modules import moduleItem
 from ..bbConfig import bbConfig
 from . import inventory
 from ..userAlerts import UserAlerts
@@ -49,7 +49,7 @@ class bbUser(serializable.Serializable):
     :vartype activeShip: bbShip
     :var inactiveShips: The bbShips currently in this user's inventory (unequipped)
     :vartype inactiveShips: inventory
-    :var inactiveModules: The bbModules currently in this user's inventory (unequipped)
+    :var inactiveModules: The moduleItems currently in this user's inventory (unequipped)
     :vartype inactiveModules: inventory
     :var inactiveWeapons: The primaryWeapons currently in this user's inventory (unequipped)
     :vartype inactiveWeapons: inventory
@@ -90,7 +90,7 @@ class bbUser(serializable.Serializable):
     def __init__(self, id : int, credits : int = 0, lifetimeCredits : int = 0, 
                     bountyCooldownEnd : int = -1, systemsChecked : int = 0, bountyWins : int = 0, activeShip : bool = None,
                     inactiveShips : inventory.Inventory = inventory.TypeRestrictedInventory(bbShip.bbShip),
-                    inactiveModules : inventory.Inventory = inventory.TypeRestrictedInventory(bbModule.bbModule),
+                    inactiveModules : inventory.Inventory = inventory.TypeRestrictedInventory(moduleItem.ModuleItem),
                     inactiveWeapons : inventory.Inventory = inventory.TypeRestrictedInventory(primaryWeapon.PrimaryWeapon),
                     inactiveTurrets : inventory.Inventory = inventory.TypeRestrictedInventory(turretWeapon.TurretWeapon),
                     inactiveTools : inventory.Inventory = inventory.TypeRestrictedInventory(bbToolItem.bbToolItem),
@@ -107,7 +107,7 @@ class bbUser(serializable.Serializable):
         :param int bountyWins: The total number of bounties this user has won (Default 0)
         :param bbShip activeShip: The user's currently equipped bbShip (Default None)
         :param inventory inactiveShips: The bbShips currently in this user's inventory (unequipped) (Default empty inventory)
-        :param inventory inactiveModules: The bbModules currently in this user's inventory (unequipped) (Default empty inventory)
+        :param inventory inactiveModules: The moduleItems currently in this user's inventory (unequipped) (Default empty inventory)
         :param inventory inactiveWeapons: The primaryWeapons currently in this user's inventory (unequipped) (Default empty inventory)
         :param inventory inactiveTurrets: The turretWeapons currently in this user's inventory (unequipped) (Default empty inventory)
         :param inventory inactiveTools: The bbToolItems currently in this user's inventory (Default empty inventory)
@@ -338,7 +338,7 @@ class bbUser(serializable.Serializable):
 
 
     def validateLoadout(self):
-        """Ensure that the user's active loadout complies with bbModuleFactory.maxModuleTypeEquips
+        """Ensure that the user's active loadout complies with moduleItemFactory.maxModuleTypeEquips
         This method was written as a transferal measure when maxModuleTypeEquips was first released, and should seldom be used
         """
         incompatibleModules = []
@@ -711,10 +711,10 @@ class bbUser(serializable.Serializable):
             for weaponListingDict in userDict["inactiveWeapons"]:
                 inactiveWeapons.addItem(primaryWeapon.PrimaryWeapon.fromDict(weaponListingDict["item"]), quantity=weaponListingDict["count"])
 
-        inactiveModules = inventory.TypeRestrictedInventory(bbModule.bbModule)
+        inactiveModules = inventory.TypeRestrictedInventory(moduleItem.ModuleItem)
         if "inactiveModules" in userDict:
             for moduleListingDict in userDict["inactiveModules"]:
-                inactiveModules.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
+                inactiveModules.addItem(moduleItemFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
         inactiveTurrets = inventory.TypeRestrictedInventory(turretWeapon.TurretWeapon)
         if "inactiveTurrets" in userDict:

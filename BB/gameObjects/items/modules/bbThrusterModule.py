@@ -1,4 +1,4 @@
-from . import bbModule
+from . import moduleItem
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
@@ -6,7 +6,7 @@ from ..gameItem import spawnableItem
 
 
 @spawnableItem
-class bbThrusterModule(bbModule.bbModule):
+class bbThrusterModule(moduleItem.ModuleItem):
     """A module providing a ship with a boost to its handling.
     """
 
@@ -41,7 +41,7 @@ class bbThrusterModule(bbModule.bbModule):
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
-        No extra attributes implemented by this class, so just eses the base bbModule toDict method.
+        No extra attributes implemented by this class, so just eses the base moduleItem toDict method.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict

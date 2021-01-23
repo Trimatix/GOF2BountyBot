@@ -194,7 +194,7 @@ builtInShipSkins = {}
                     "Kinzer RS": {"name": "Kinzer RS", "manufacturer": "kaamo club", "maxPrimaries": 4, "maxTurrets": 0, "maxModules": 15, "armour": 420, "cargo": 65, "numSecondaries": 4, "handling": 125, "value": 8930000, "aliases": ["KinzerRS"], "wiki": "https://galaxyonfire.fandom.com/wiki/Kinzer_RS", "builtIn":False, "icon": "https://cdn.discordapp.com/attachments/700683544103747594/720787863171629056/kinzer_rs.png", "emoji":"<:kinzerrs:723705998723907615>"}}
 """
 
-# Data representing all module items in the game. These are used to create bbModule objects, which are stored in builtInModuleObjs in a similar dict format.
+# Data representing all module items in the game. These are used to create moduleItem objects, which are stored in builtInModuleObjs in a similar dict format.
 builtInModuleData = {   # armour
                         "E2 Exoclad": {"type": "armour", "name": "E2 Exoclad", "aliases": ["E2", "Exoclad", "Exoclad E2"], "techLevel": 1, "armour": 40, "value": 1070, "wiki": "https://galaxyonfire.fandom.com/wiki/E2_Exoclad", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723474328687214612/e2_exoclad.png", "emoji": "<:e2exoclad:723706394716536842>"},
                         "E4 Ultra Lamina": {"type": "armour", "name": "E4 Ultra Lamina", "aliases": ["E4", "Lamina", "E4 Ultra", "E4 Lamina", "Ultra Lamina"], "techLevel": 3, "armour": 80, "value": 4705, "wiki": "https://galaxyonfire.fandom.com/wiki/E4_Ultra_Lamina", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723474339860840468/e4_ultra_lamina.png", "emoji": "<:e4ultralamina:723706394485719121>"},

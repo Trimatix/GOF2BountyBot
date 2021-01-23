@@ -2,10 +2,10 @@
 from __future__ import annotations
 from typing import List, Union, TYPE_CHECKING
 if TYPE_CHECKING:
-    from .modules import bbModule
+    from .modules import moduleItem
 
 from .gameItem import GameItem, spawnableItem
-from . import bbShipUpgrade, bbModuleFactory
+from . import bbShipUpgrade, moduleItemFactory
 from .weapons import primaryWeapon, turretWeapon
 from .. import bbShipSkin
 from ...bbConfig import bbConfig, bbData
@@ -36,7 +36,7 @@ class bbShip(GameItem):
     :var weapons: A list containing references to all primary weapon objects equipped by this ship. May contain duplicate references to save on memory.
     :vartype weapons: list[primaryWeapon]
     :var modules: A list containing references to all module objects equipped by this ship. May contain duplicate references to save on memory.
-    :vartype modules: list[bbModule]
+    :vartype modules: list[moduleItem]
     :var turrets: A list containing references to all turret objects equipped by this ship. May contain duplicate references to save on memory.
     :vartype turrets: list[turretWeapon]
     :var upgradesApplied: A list containing references to all bbShipUpgrades objects applied to this ship. May contain duplicate references to save on memory.
@@ -49,7 +49,7 @@ class bbShip(GameItem):
                     maxModules : int, manufacturer : str = "", armour : int = 0,
                     cargo : int = 0, numSecondaries : int = 0, handling : int = 0,
                     value : int = 0, aliases : List[str] = [], weapons : List[primaryWeapon.PrimaryWeapon] = [],
-                    modules : List[bbModule.bbModule] = [], turrets : List[turretWeapon.TurretWeapon] = [], wiki : str = "",
+                    modules : List[moduleItem.ModuleItem] = [], turrets : List[turretWeapon.TurretWeapon] = [], wiki : str = "",
                     upgradesApplied : List[bbShipUpgrade.bbShipUpgrade] = [], nickname : str = "", icon : str = "",
                     emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1, shopSpawnRate : float = 0,
                     builtIn : bool = False, skin : str = ""):
@@ -64,7 +64,7 @@ class bbShip(GameItem):
         :param int maxTurrets: The maximum number of turrets equippable on this ship
         :param int maxModules: The maximum number of modules equippable on this ship
         :param list[primaryWeapon] weapons: A list containing references to all primary weapon objects equipped by this ship. May contain duplicate references to save on memory. (Default [])
-        :param list[bbModule] modules: A list containing references to all module objects equipped by this ship. May contain duplicate references to save on memory. (Default [])
+        :param list[moduleItem] modules: A list containing references to all module objects equipped by this ship. May contain duplicate references to save on memory. (Default [])
         :param list[turretWeapon] turrets: A list containing references to all turret objects equipped by this ship. May contain duplicate references to save on memory. (Default [])
         :param list[bbShipUpgrade] upgradesApplied: A list containing references to all bbShipUpgrades objects applied to this ship. May contain duplicate references to save on memory. (Default [])
         :param int value: The number of credits this ship can be bought/sold for at base value at a shop. does not include any modifications or equipped items. (Default 0)
@@ -241,8 +241,8 @@ class bbShip(GameItem):
         """Decide whether or not the ship has space for a module of the given type.
         This also accounts for module type limits, for example only allowing players to equip one shield module at a time.
 
-        :param type moduleType: The bbModule subclass to test for free equip space
-        :return: True if at least one module slot is free for the given bbModule type, False otherwise.
+        :param type moduleType: The moduleItem subclass to test for free equip space
+        :return: True if at least one module slot is free for the given moduleItem type, False otherwise.
         :rtype: bool
         """
         if moduleType.__name__ in bbConfig.maxModuleTypeEquips and bbConfig.maxModuleTypeEquips[moduleType.__name__] != -1:
@@ -255,10 +255,10 @@ class bbShip(GameItem):
         return True
 
 
-    def equipModule(self, module : bbModule.bbModule):
-        """Equip the given bbModule onto the ship.
+    def equipModule(self, module : moduleItem.ModuleItem):
+        """Equip the given moduleItem onto the ship.
 
-        :param bbModule module: The bbModule object to equip
+        :param moduleItem module: The moduleItem object to equip
         :raise OverflowError: When no module slots are free
         :raise ValueError: When the ship already has the maximum number of modules equipped of the given type.
         """
@@ -270,10 +270,10 @@ class bbShip(GameItem):
         self.modules.append(module)
     
 
-    def unequipModuleObj(self, module : bbModule.bbModule):
+    def unequipModuleObj(self, module : moduleItem.ModuleItem):
         """Unequip the given module object reference
 
-        :param bbModule module: The module to unequip
+        :param moduleItem module: The module to unequip
         """
         self.modules.remove(module)
 
@@ -286,12 +286,12 @@ class bbShip(GameItem):
         self.modules.pop(index)
 
 
-    def getModuleAtIndex(self, index : int) -> bbModule.bbModule:
-        """Fetch the bbModule object reference that is equipped at the given index
+    def getModuleAtIndex(self, index : int) -> moduleItem.ModuleItem:
+        """Fetch the moduleItem object reference that is equipped at the given index
 
         :param int index: The index of the module to fetch
         :return: The module reference equipped at the given index
-        :rtype: bbModule 
+        :rtype: moduleItem 
         """
         return self.modules[index]
 
@@ -618,12 +618,12 @@ class bbShip(GameItem):
             other.equipTurret(self.turrets.pop(0))
 
 
-    def getActivesByName(self, item : str) -> Union[primaryWeapon.PrimaryWeapon, bbModule.bbModule, turretWeapon.TurretWeapon]:
+    def getActivesByName(self, item : str) -> Union[primaryWeapon.PrimaryWeapon, moduleItem.ModuleItem, turretWeapon.TurretWeapon]:
         """Return a requested array of equipped items, specified by string name.
 
         :param str item: one of weapon, module or turret.
         :return: An array of equipped items of the named typed.
-        :rtype: list[primaryWeapon or bbModule or turretWeapon]
+        :rtype: list[primaryWeapon or moduleItem or turretWeapon]
         :raise ValueError: If the requested item type is invalid
         :raise NotImplementedError: If a valid item type is requested, not just yet implemented (e.g commodity)
         """
@@ -803,7 +803,7 @@ class bbShip(GameItem):
         modules = []
         if "modules" in shipDict:
             for module in shipDict["modules"]:
-                modules.append(bbModuleFactory.fromDict(module))
+                modules.append(moduleItemFactory.fromDict(module))
 
         turrets = []
         if "turrets" in shipDict:
@@ -826,7 +826,7 @@ class bbShip(GameItem):
             builtInModules = []
             if "modules" in shipDict:
                 for module in shipDict["modules"]:
-                    builtInModules.append(bbModuleFactory.fromDict(module))
+                    builtInModules.append(moduleItemFactory.fromDict(module))
 
             builtInTurrets = []
             if "turrets" in shipDict:

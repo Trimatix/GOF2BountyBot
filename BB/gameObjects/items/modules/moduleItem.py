@@ -3,9 +3,9 @@ from ....bbConfig import bbData
 from .... import lib
 from typing import List
 
-class bbModule(GameItem):
+class ModuleItem(GameItem):
     """"An equippable item, providing ships with various stat perks and new functionality.
-    All, none, or any combination of a bbModule's attributes may be populated.
+    All, none, or any combination of a moduleItem's attributes may be populated.
 
     :var armour: Provides an extra layer of health points ships must fight through before they can damage the ship's hull
     :vartype armour: int
@@ -57,7 +57,7 @@ class bbModule(GameItem):
         :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other modules of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard module (loaded in from bbData) or a custom spawned module (Default False)
         """
-        super(bbModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
+        super(ModuleItem, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
         self.armour = armour
         self.armourMultiplier = armourMultiplier
         self.shield = shield
@@ -106,22 +106,22 @@ class bbModule(GameItem):
         """⚠ DEPRACATED
         Get the type of this object.
 
-        :return: The bbModule class
+        :return: The moduleItem class
         :rtype: type
         """
-        return bbModule
+        return ModuleItem
 
     
     def toDict(self, **kwargs) -> dict:
-        """Serialize this bbModule into dictionary format, for saving to file.
+        """Serialize this moduleItem into dictionary format, for saving to file.
         This method should be overriden and used as a base in any modules that implement custom behaviour, outside of simple stat boosts.
-        For an example of using this toDict implementation as a base for an overriden implementation, please see a bbModule class (e.g bbMiningDrillModule.py)
+        For an example of using this toDict implementation as a base for an overriden implementation, please see a moduleItem class (e.g bbMiningDrillModule.py)
 
         :param bool saveType: When true, include the string name of the object type in the output.
         :return: A dictionary containing all information needed to reconstruct this module. If the module is builtIn, this is only its name.
         :rtype: dict
         """
-        itemDict = super(bbModule, self).toDict(**kwargs)
+        itemDict = super(ModuleItem, self).toDict(**kwargs)
         
         if not self.builtIn:
             if self.armour != 0.0:
@@ -159,15 +159,15 @@ class bbModule(GameItem):
 
     @classmethod
     def fromDict(cls, moduleDict : dict, **kwargs):
-        """Factory function constructing a new bbModule object from a dictionary serialised representation - the opposite of bbModule.toDict.
+        """Factory function constructing a new moduleItem object from a dictionary serialised representation - the opposite of moduleItem.toDict.
         This generic module factory function is unlikely to ever be called, your module type-specific fromDict should be used instead.
         Except of course, in the case of custom-spawned, custom-typed modules which do not correspond to a BountyBot-known module type.
         
-        :param dict moduleDict: A dictionary containing all information needed to construct the desired bbModule
-        :return: A new bbModule object as described in moduleDict
-        :rtype: bbModule
+        :param dict moduleDict: A dictionary containing all information needed to construct the desired moduleItem
+        :return: A new moduleItem object as described in moduleDict
+        :rtype: moduleItem
         """
-        return bbModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], armour=moduleDict["armour"] if "armour" in moduleDict else 0,
+        return ModuleItem(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], armour=moduleDict["armour"] if "armour" in moduleDict else 0,
                         armourMultiplier=moduleDict["armourMultiplier"] if "armourMultiplier" in moduleDict else 1, shield=moduleDict["shield"] if "shield" in moduleDict else 0,
                         shieldMultiplier=moduleDict["shieldMultiplier"] if "shieldMultiplier" in moduleDict else 1, dps=moduleDict["dps"] if "dps" in moduleDict else 0,
                         dpsMultiplier=moduleDict["dpsMultiplier"] if "dpsMultiplier" in moduleDict else 1, cargo=moduleDict["cargo"] if "cargo" in moduleDict else 0,

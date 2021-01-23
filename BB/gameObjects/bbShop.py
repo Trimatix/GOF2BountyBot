@@ -5,9 +5,9 @@ if TYPE_CHECKING:
     from . import bbUser
 
 from ..bbConfig import bbData, bbConfig
-from .items import bbModuleFactory, bbShip, gameItem
+from .items import moduleItemFactory, bbShip, gameItem
 from .items.weapons import primaryWeapon, turretWeapon
-from .items.modules import bbModule
+from .items.modules import moduleItem
 from . import inventory
 import random
 from ..logging import bbLogger
@@ -328,12 +328,12 @@ class bbShop(serializable.Serializable):
         self.userBuyModuleObj(user, self.modulesStock[index].item)
         
 
-    def userBuyModuleObj(self, user : bbUser.bbUser, requestedModule : bbModule.bbModule):
+    def userBuyModuleObj(self, user : bbUser.bbUser, requestedModule : moduleItem.ModuleItem):
         """Sell the given module to the given user,
         removing the appropriate balance of credits fromt the user and adding the item into the user's inventory.
 
         :param bbUser user: The user attempting to buy the module
-        :param bbModule requestedModule: The module to sell to user
+        :param moduleItem requestedModule: The module to sell to user
         :raise RuntimeError: If user cannot afford to buy requestedModule
         """
         if self.userCanAffordItemObj(user, requestedModule):
@@ -344,12 +344,12 @@ class bbShop(serializable.Serializable):
             raise RuntimeError("user " + str(user.id) + " attempted to buy module " + requestedModule.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedModule.getValue()))
 
 
-    def userSellModuleObj(self, user : bbUser.bbUser, module : bbModule.bbModule):
+    def userSellModuleObj(self, user : bbUser.bbUser, module : moduleItem.ModuleItem):
         """Buy the given module from the given user,
         adding the appropriate credits to their balance and adding the module to the shop stock.
 
         :param bbUser user: The user to buy module from
-        :param bbModule module: The module to buy from user
+        :param moduleItem module: The module to buy from user
         """
         user.credits += module.getValue()
         self.modulesStock.addItem(module)
@@ -485,7 +485,7 @@ class bbShop(serializable.Serializable):
 
         modulesStock = inventory.Inventory()
         for moduleListingDict in shopDict["modulesStock"]:
-            modulesStock.addItem(bbModuleFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
+            modulesStock.addItem(moduleItemFactory.fromDict(moduleListingDict["item"]), quantity=moduleListingDict["count"])
 
         turretsStock = inventory.Inventory()
         for turretListingDict in shopDict["turretsStock"]:
