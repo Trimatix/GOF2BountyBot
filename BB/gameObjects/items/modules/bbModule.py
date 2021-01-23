@@ -1,9 +1,9 @@
-from ..gameItem import gameItem
+from ..gameItem import GameItem
 from ....bbConfig import bbData
 from .... import lib
 from typing import List
 
-class bbModule(gameItem):
+class bbModule(GameItem):
     """"An equippable item, providing ships with various stat perks and new functionality.
     All, none, or any combination of a bbModule's attributes may be populated.
 

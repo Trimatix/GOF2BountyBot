@@ -4,14 +4,14 @@ from typing import List, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from .modules import bbModule
 
-from .gameItem import gameItem, spawnableItem
+from .gameItem import GameItem, spawnableItem
 from . import turretWeapon, primaryWeapon, bbShipUpgrade, bbModuleFactory
 from .. import bbShipSkin
 from ...bbConfig import bbConfig, bbData
 from ... import lib
 
 @spawnableItem
-class bbShip(gameItem):
+class bbShip(GameItem):
     """An equippable and customisable ship for use by players and NPCs.
 
     :var hasNickname: whether or not this ship has a nickname

@@ -19,7 +19,7 @@ class ReactionInventoryPickerOption(ReactionMenu.ReactionMenuOption):
     :vartype item: gameItem
     """
 
-    def __init__(self, item : gameItem.gameItem, menu : ReactionMenu.ReactionMenu, emoji : lib.emojis.dumbEmoji = None, name : str = None):
+    def __init__(self, item : gameItem.GameItem, menu : ReactionMenu.ReactionMenu, emoji : lib.emojis.dumbEmoji = None, name : str = None):
         """
         :param gameItem item: The gameItem that this option represents
         :param ReactionMenu menu: The ReactionMenu where this option is active
@@ -106,7 +106,7 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
         super(ReactionInventoryPicker, self).__init__(msg, options=itemOptions, titleTxt=titleTxt, desc=desc, col=col, footerTxt=footerTxt, img=img, thumb=thumb, icon=icon, authorName=authorName, timeout=timeout, targetMember=targetMember, targetRole=targetRole)
 
 
-    def selectItem(self, item : gameItem.gameItem) -> gameItem.gameItem:
+    def selectItem(self, item : gameItem.GameItem) -> gameItem.GameItem:
         """Pass back the selected gameItem to the calling function.
         This method is called on reaction add that corresponds to a gameItem currently on display
 
@@ -118,7 +118,7 @@ class ReactionInventoryPicker(ReactionMenu.CancellableReactionMenu):
         return item
 
 
-    def deselectItem(self, item : gameItem.gameItem) -> gameItem.gameItem:
+    def deselectItem(self, item : gameItem.GameItem) -> gameItem.GameItem:
         """Pass back the deselected gameItem to the calling function.
         This method is called on reaction remove that corresponds to a gameItem currently on display
 

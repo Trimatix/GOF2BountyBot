@@ -148,7 +148,7 @@ class bbShop(serializable.Serializable):
             raise NotImplementedError("Valid, but unrecognised item type: " + item)
 
 
-    def userCanAffordItemObj(self, user : bbUser.bbUser, item : gameItem.gameItem) -> bool:
+    def userCanAffordItemObj(self, user : bbUser.bbUser, item : gameItem.GameItem) -> bool:
         """Decide whether a user has enough credits to buy an item
 
         :param bbUser user: The user whose credits balance to check
