@@ -1,4 +1,4 @@
-from ..bbObjects import bbUser
+from ..gameObjects import bbUser
 from .import ReactionMenu
 from discord import Message, Colour, Member, Role, Embed, Forbidden, HTTPException, NotFound
 from .. import lib, bbGlobals

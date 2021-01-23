@@ -13,10 +13,10 @@ import os
 # BountyBot Imports
 
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .bbObjects import bbShipSkin
-from .bbObjects.bounties import bbCriminal, bbSystem
-from .bbObjects.items import bbModuleFactory, bbShipUpgrade, bbTurret, bbWeapon
-from .bbObjects.items.tools import bbShipSkinTool, bbToolItemFactory
+from .gameObjects import bbShipSkin
+from .gameObjects.bounties import bbCriminal, bbSystem
+from .gameObjects.items import bbModuleFactory, bbShipUpgrade, bbTurret, bbWeapon
+from .gameObjects.items.tools import bbShipSkinTool, bbToolItemFactory
 from .scheduling import TimedTask
 from .bbDatabases import bbGuildDB, bbUserDB, HeirarchicalCommandsDB, reactionMenuDB
 from .scheduling import TimedTaskHeap

@@ -4,8 +4,8 @@ import json
 from . import commandsDB as bbCommands
 from .. import lib, bbGlobals
 from ..bbConfig import bbConfig, bbData
-from ..bbObjects.items import bbShip, bbWeapon, bbModuleFactory, bbTurret, bbItem
-from ..bbObjects.items.tools import bbToolItemFactory
+from ..gameObjects.items import bbShip, bbWeapon, bbModuleFactory, bbTurret, bbItem
+from ..gameObjects.items.tools import bbToolItemFactory
 
 
 bbCommands.addHelpSection(2, "items")

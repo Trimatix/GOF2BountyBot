@@ -4,7 +4,7 @@ from datetime import datetime
 from . import commandsDB as bbCommands
 from .. import bbGlobals, lib
 from ..bbConfig import bbConfig, bbData
-from ..bbObjects.bounties import bbBounty, bbBountyConfig
+from ..gameObjects.bounties import bbBounty, bbBountyConfig
 
 
 bbCommands.addHelpSection(2, "bounties")

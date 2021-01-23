@@ -8,7 +8,7 @@ from ..bbConfig import bbConfig, bbData
 from ..userAlerts import UserAlerts
 from ..scheduling import TimedTask
 from ..reactionMenus import ReactionRolePicker, ReactionSkinRegionPicker
-from ..bbObjects.items import bbShip
+from ..gameObjects.items import bbShip
 from ..logging import bbLogger
 from ..shipRenderer import shipRenderer
 

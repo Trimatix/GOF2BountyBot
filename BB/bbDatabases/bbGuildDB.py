@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ..bbObjects import bbGuild
+from ..gameObjects import bbGuild
 from typing import List
 from . import bountyDB
 from ..bbConfig import bbData

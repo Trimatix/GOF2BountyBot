@@ -2,7 +2,7 @@ import discord
 
 from . import commandsDB as bbCommands
 from ..bbConfig import bbConfig, bbData
-from ..bbObjects.items import bbShip
+from ..gameObjects.items import bbShip
 from .. import lib, bbGlobals
 
 

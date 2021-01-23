@@ -3,8 +3,8 @@ import discord
 from . import commandsDB as bbCommands
 from .. import lib, bbGlobals
 from ..bbConfig import bbConfig, bbData
-from ..bbObjects import bbUser
-from ..bbObjects.items import bbShip
+from ..gameObjects import bbUser
+from ..gameObjects.items import bbShip
 
 
 bbCommands.addHelpSection(0, "loadout")

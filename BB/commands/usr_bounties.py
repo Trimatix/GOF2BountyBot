@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from . import commandsDB as bbCommands
 from .. import bbGlobals, lib
 from ..bbConfig import bbConfig, bbData
-from ..bbObjects.battles import DuelRequest
+from ..gameObjects.battles import DuelRequest
 from ..scheduling import TimedTask
 from ..reactionMenus import ReactionMenu, ReactionDuelChallengeMenu
 
@@ -15,7 +15,7 @@ bbCommands.addHelpSection(0, "bounties")
 async def cmd_check(message : discord.Message, args : str, isDM : bool):
     """⚠ WARNING: MARKED FOR CHANGE ⚠
     The following function is provisional and marked as planned for overhaul.
-    Details: Criminal fights are to switch algorithm, using bbObjects.items.battles as a base. Criminals are to be assigned
+    Details: Criminal fights are to switch algorithm, using gameObjects.items.battles as a base. Criminals are to be assigned
     Procedurally generated ships based on a difficulty rating (by direct extension of the items' rarity rankings from bbConfig.__init__)
 
     Check a system for bounties and handle rewards
@@ -296,7 +296,7 @@ bbCommands.register("route", cmd_route, 0, allowDM=False, helpSection="bounties"
 async def cmd_duel(message : discord.Message, args : str, isDM : bool):
     """⚠ WARNING: MARKED FOR CHANGE ⚠
     The following function is provisional and marked as planned for overhaul.
-    Details: Overhaul is part-way complete, with a few fighting algorithm provided in bbObjects.items.battles. However, printing the fight details is yet to be implemented.
+    Details: Overhaul is part-way complete, with a few fighting algorithm provided in gameObjects.items.battles. However, printing the fight details is yet to be implemented.
     This is planned to be done using simple message editing-based animation of player ships and progress bars for health etc.
     This command is functional for now, but the output is subject to change.
 

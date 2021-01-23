@@ -6,7 +6,7 @@ import discord
 from . import commandsDB as bbCommands
 from .. import lib, bbGlobals
 from ..bbConfig import bbConfig, bbData
-from ..bbObjects import bbUser
+from ..gameObjects import bbUser
 from ..reactionMenus import ReactionMenu, ReactionPollMenu, PagedReactionMenu
 from ..scheduling import TimedTask
 from ..userAlerts import UserAlerts

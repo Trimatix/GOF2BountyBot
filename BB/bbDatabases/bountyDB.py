@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ..bbObjects.bounties import bbBounty
+from ..gameObjects.bounties import bbBounty
 from typing import List
 from ..baseClasses import serializable
 from ..bbConfig import bbConfig
@@ -18,7 +18,7 @@ class BountyDB(serializable.Serializable):
     :var factions: List of str faction names, to be used in self.bounties keys
     :vartype factions: list
     :var latestBounty: The most recent bounty to be added to this db.As of writing, this is only used when scaling new bounty delays by the most recent length
-    :vartype latestBounty: bbObjects.bounties.bbBounty.Bounty
+    :vartype latestBounty: gameObjects.bounties.bbBounty.Bounty
     """
 
     def __init__(self, factions: str):
@@ -134,7 +134,7 @@ class BountyDB(serializable.Serializable):
         :param str faction: The faction by which the bbCriminal is wanted. Give None if this is not known, to search all factions. (default None)
         
         :return: the bbBounty object tracking the named criminal
-        :rtype: bbObjects.bounties.bbBounty.Bounty
+        :rtype: gameObjects.bounties.bbBounty.Bounty
 
         :raise KeyError: If the requested criminal name does not exist in this DB
         """

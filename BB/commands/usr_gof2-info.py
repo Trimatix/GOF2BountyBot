@@ -5,7 +5,7 @@ import asyncio
 from . import commandsDB as bbCommands
 from ..bbConfig import bbData, bbConfig
 from .. import lib, bbGlobals
-from ..bbObjects.items import bbShip
+from ..gameObjects.items import bbShip
 from ..reactionMenus import ReactionSkinRegionPicker
 from ..logging import bbLogger
 from ..shipRenderer import shipRenderer

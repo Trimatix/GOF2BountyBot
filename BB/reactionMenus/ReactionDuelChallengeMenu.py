@@ -5,7 +5,7 @@ from .. import bbGlobals, lib
 from discord import Colour, Message, Embed, Member, Role
 from datetime import datetime
 from ..scheduling import TimedTask
-from..bbObjects.battles import DuelRequest
+from..gameObjects.battles import DuelRequest
 
 
 class ReactionDuelChallengeMenu(ReactionMenu.ReactionMenu):

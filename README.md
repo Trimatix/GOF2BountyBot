@@ -11,16 +11,16 @@ This package purely contains configuration data for the bot and, where possible,
 ## bbDatabases
 This package provides various database classes for the storage and management of game objects; commands,  bounties, guilds, users, and reaction menus.
 
-## bbObjects
+## gameObjects
 Contains definitions for all *game objects* - representing the players of the game (`bbGuild`, `bbUser`), items useable by the players (`bbInventory`, `bbInventorListing`, `items`) and playing functionality of the game itself (`bbShop`, `bounties`, `battles`). This package contains the useful `Aliasable` abstract base class, which can be extended to define objects which can be referenced by a list of string names.
 
-### bbObjects.battles
+### gameObjects.battles
 This is a draft package containing work-in-progress code for an upcoming overhaul of the duels system. Currently, the outcome of a duel is decided purely as a comparison if ship statistics. The new model proposed in this package is intended to more closely represent a real fight, by simulating a series of time quanta at which players have the opportunity to make use of their items.
 
-### bbObjects.bounties
+### gameObjects.bounties
 Defines classes necessary for the game's bounty hunting minigame; criminals, solar systems (used for pathfinding), bounties associating the two. Also contains bountyBoards, which are discord channels listing a guild's active bounties. `bbGlobals` maintains the game state, containing various databases managing the discord client, game objects and task scheduling. The `logging` module contains a simplified string event logger, capable of saving time-sorted event logs and exception traces to file.
 
-### bbObjects.items
+### gameObjects.items
 These modules define all objects that may be contained in a player's inventory. Note that all classes within this package inherit from the `bbItem` class, which in turn inherits from `Aliasable`. Items have many descriptive attributes (e.g wiki link, manufacturer, emoji, icon), as well as functional attributes (e.g tech level, shop spawn rate, value). The `tools` package contains a new type of item with some 'use' function, that changes the game state in some way. Normal items do not have any inherent effect on the game state.
 
 ## commands

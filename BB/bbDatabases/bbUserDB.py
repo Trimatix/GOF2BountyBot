@@ -1,5 +1,5 @@
 from __future__ import annotations
-from ..bbObjects import bbUser
+from ..gameObjects import bbUser
 from .. import lib
 from ..logging import bbLogger
 import traceback

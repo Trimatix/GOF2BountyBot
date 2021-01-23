@@ -2,8 +2,8 @@ from __future__ import annotations
 from typing import Union, List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from discord import Member, Guild, User, Message
-    from ..bbObjects import bbUser, bbGuild
-    from ..bbObjects.bounties import bbCriminal
+    from ..gameObjects import bbUser, bbGuild
+    from ..gameObjects.bounties import bbCriminal
 
 from ..logging import bbLogger
 from . import stringTyping

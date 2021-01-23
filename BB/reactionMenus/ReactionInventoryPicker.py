@@ -1,8 +1,8 @@
 from __future__ import annotations
 from . import ReactionMenu
 from ..bbConfig import bbConfig
-from ..bbObjects.items import bbItem
-from ..bbObjects import bbInventory
+from ..gameObjects.items import bbItem
+from ..gameObjects import bbInventory
 from discord import Message, Colour, Member, Role
 from .. import lib
 from ..scheduling import TimedTask
