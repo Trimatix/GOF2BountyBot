@@ -102,20 +102,10 @@ class ModuleItem(GameItem):
         return (stats[:-2] + "*") if stats != "*" else "*No effect*"
 
     
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The moduleItem class
-        :rtype: type
-        """
-        return ModuleItem
-
-    
     def toDict(self, **kwargs) -> dict:
         """Serialize this moduleItem into dictionary format, for saving to file.
         This method should be overriden and used as a base in any modules that implement custom behaviour, outside of simple stat boosts.
-        For an example of using this toDict implementation as a base for an overriden implementation, please see a moduleItem class (e.g bbMiningDrillModule.py)
+        For an example of using this toDict implementation as a base for an overriden implementation, please see a moduleItem class (e.g miningDrillModule.py)
 
         :param bool saveType: When true, include the string name of the object type in the output.
         :return: A dictionary containing all information needed to reconstruct this module. If the module is builtIn, this is only its name.

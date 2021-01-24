@@ -6,7 +6,7 @@ from ..gameItem import spawnableItem
 
 
 @spawnableItem
-class bbShieldInjectorModule(moduleItem.ModuleItem):
+class ShieldInjectorModule(moduleItem.ModuleItem):
     """A module providing a ship with the ability to instantly refill their shield capacity, in exchange for blue plasma
 
     :var plasmaConsumption: The amount of plasma required to refill shields
@@ -29,23 +29,13 @@ class bbShieldInjectorModule(moduleItem.ModuleItem):
         :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other modules of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard module (loaded in from bbData) or a custom spawned module (Default False)
         """
-        super(bbShieldInjectorModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
+        super(ShieldInjectorModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
         self.plasmaConsumption = plasmaConsumption
 
     
     def statsStringShort(self):
         return "*Plasma Consumption: " + str(self.plasmaConsumption) + "*"
-
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbShieldInjectorModule
 
     
     def toDict(self, **kwargs) -> dict:
@@ -55,7 +45,7 @@ class bbShieldInjectorModule(moduleItem.ModuleItem):
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbShieldInjectorModule, self).toDict(**kwargs)
+        itemDict = super(ShieldInjectorModule, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["plasmaConsumption"] = self.plasmaConsumption
         return itemDict
@@ -72,7 +62,7 @@ class bbShieldInjectorModule(moduleItem.ModuleItem):
         if "builtIn" in moduleDict and moduleDict["builtIn"]:
             return bbData.builtInModuleObjs[moduleDict["name"]]
             
-        return bbShieldInjectorModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], plasmaConsumption=moduleDict["plasmaConsumption"] if "plasmaConsumption" in moduleDict else 1,
+        return ShieldInjectorModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], plasmaConsumption=moduleDict["plasmaConsumption"] if "plasmaConsumption" in moduleDict else 1,
                                 value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
                                 manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
                                 emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)

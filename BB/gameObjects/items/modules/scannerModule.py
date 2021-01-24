@@ -6,21 +6,28 @@ from ..gameItem import spawnableItem
 
 
 @spawnableItem
-class bbCabinModule(moduleItem.ModuleItem):
-    """"A module providing a ship with the ability to carry passengers.
+class ScannerModule(moduleItem.ModuleItem):
+    """A module providing a ship with the ability to scan in-range objects, such as asteroids and ships
 
-    :var cabinSize: The number of passengers that can fit in this cabin
-    :vartype cabinSize: int
+    :var timeToLock: The number of seconds this scanner takes to lock onto an object and obtain information
+    :vartype timeToLock: float
+    :var showClassAAsteroids: Whether or not this scanner will display nearby A-class asteroids on the ship's heads up display
+    :vartype showClassAAsteroids: bool
+    :var showCargo: Whether or not this scanner will display the contents of scanned ships' cargo holds
+    :vartype showCargo: bool
     """
 
-    def __init__(self, name : str, aliases : List[str], cabinSize : int = 0, value : int = 0,
-            wiki : int = "", manufacturer : str = "", icon : str = "",
+    def __init__(self, name : str, aliases : List[str], timeToLock : int = 0,
+            showClassAAsteroids : bool = False, showCargo : bool = False, value : int = 0,
+            wiki : str = "", manufacturer : str = "", icon : str = "",
             emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1,
             builtIn : bool = False):
         """
         :param str name: The name of the module. Must be unique.
         :param list[str] aliases: Alternative names by which this module may be referred to
-        :param int cabinSize: The number of passengers that can fit in this cabin (Default 0)
+        :param float timeToLock: The number of seconds this scanner takes to lock onto an object and obtain information (Default 0)
+        :param bool showClassAAsteroids: Whether or not this scanner will display nearby A-class asteroids on the ship's heads up display (Default False)
+        :param bool showCargo: Whether or not this scanner will display the contents of scanned ships' cargo holds (Default False)
         :param int value: The number of credits this module may be sold or bought or at a shop (Default 0)
         :param str wiki: A web page that is displayed as the wiki page for this module. (Default "")
         :param str manufacturer: The name of the manufacturer of this module (Default "")
@@ -29,23 +36,15 @@ class bbCabinModule(moduleItem.ModuleItem):
         :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other modules of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard module (loaded in from bbData) or a custom spawned module (Default False)
         """
-        super(bbCabinModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
+        super(ScannerModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
-        self.cabinSize = cabinSize
-
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbCabinModule
+        self.timeToLock = timeToLock
+        self.showClassAAsteroids = showClassAAsteroids
+        self.showCargo = showCargo
 
 
     def statsStringShort(self):
-        return "*Cabin Size: " + str(self.cabinSize) + "*"
+        return "*Time To Lock: " + str(self.timeToLock) + "s, Show Class A Asteroids: " + ("Yes" if self.showClassAAsteroids else "No") + ", Show Cargo: " + ("Yes" if self.showCargo else "No") + "*"
 
     
     def toDict(self, **kwargs) -> dict:
@@ -55,9 +54,11 @@ class bbCabinModule(moduleItem.ModuleItem):
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbCabinModule, self).toDict(**kwargs)
+        itemDict = super(ScannerModule, self).toDict(**kwargs)
         if not self.builtIn:
-            itemDict["cabinSize"] = self.cabinSize
+            itemDict["timeToLock"] = self.timeToLock
+            itemDict["showClassAAsteroids"] = self.showClassAAsteroids
+            itemDict["showCargo"] = self.showCargo
         return itemDict
 
 
@@ -72,7 +73,8 @@ class bbCabinModule(moduleItem.ModuleItem):
         if "builtIn" in moduleDict and moduleDict["builtIn"]:
             return bbData.builtInModuleObjs[moduleDict["name"]]
             
-        return bbCabinModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], cabinSize=moduleDict["cabinSize"] if "cabinSize" in moduleDict else 0,
+        return ScannerModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], timeToLock=moduleDict["timeToLock"] if "timeToLock" in moduleDict else 0,
+                                showClassAAsteroids=moduleDict["showClassAAsteroids"] if "showClassAAsteroids" in moduleDict else False, showCargo=moduleDict["showCargo"] if "showCargo" in moduleDict else 0,
                                 value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
                                 manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
                                 emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)

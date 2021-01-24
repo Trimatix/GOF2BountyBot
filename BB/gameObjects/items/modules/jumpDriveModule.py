@@ -6,25 +6,17 @@ from ..gameItem import spawnableItem
 
 
 @spawnableItem
-class bbSpectralFilterModule(moduleItem.ModuleItem):
-    """A module allowing the user to see plasma clouds in space.
-
-    :var showOnRadar: Whether or not plasma clouds are marked on the ships radar
-    :vartype showOnRadar: bool
-    :var showInfo: Whether information about plasma clouds is shown on the ship's heads up display
-    :vartype showInfo: bool
+class JumpDriveModule(moduleItem.ModuleItem):
+    """"A module providing a ship with the ability to jump anywhere within the galaxy, without the need to use jumpgates
     """
 
-    def __init__(self, name : str, aliases : List[str], showInfo : bool = False,
-            showOnRadar : bool = False, value : int = 0, wiki : str = "",
-            manufacturer : str = "", icon : str = "",
+    def __init__(self, name : str, aliases : List[str], value : int = 0,
+            wiki : str = "", manufacturer : str = "", icon : str = "",
             emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1,
             builtIn : bool = False):
         """
         :param str name: The name of the module. Must be unique.
         :param list[str] aliases: Alternative names by which this module may be referred to
-        :param bool showOnRadar: Whether or not plasma clouds are marked on the ships radar (Default False)
-        :param bool showInfo: Whether information about plasma clouds is shown on the ship's heads up display (Default False)
         :param int value: The number of credits this module may be sold or bought or at a shop (Default 0)
         :param str wiki: A web page that is displayed as the wiki page for this module. (Default "")
         :param str manufacturer: The name of the manufacturer of this module (Default "")
@@ -33,37 +25,17 @@ class bbSpectralFilterModule(moduleItem.ModuleItem):
         :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other modules of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard module (loaded in from bbData) or a custom spawned module (Default False)
         """
-        super(bbSpectralFilterModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
-
-        self.showOnRadar = showOnRadar
-        self.showInfo = showInfo
-
-    
-    def statsStringShort(self):
-        return "*Show Info? " + ("Yes" if self.showInfo else "No") + ", Show On Radar? " + ("Yes" if self.showOnRadar else "No") + "*"
-
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbSpectralFilterModule
+        super(JumpDriveModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this module into dictionary format, to be saved to file.
-        Uses the base moduleItem toDict method as a starting point, and adds extra attributes implemented by this specific module.
+        No extra attributes implemented by this class, so just eses the base moduleItem toDict method.
 
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbSpectralFilterModule, self).toDict(**kwargs)
-        if not self.builtIn:
-            itemDict["showOnRadar"] = self.showOnRadar
-            itemDict["showInfo"] = self.showInfo
+        itemDict = super(JumpDriveModule, self).toDict(**kwargs)
         return itemDict
 
 
@@ -78,8 +50,7 @@ class bbSpectralFilterModule(moduleItem.ModuleItem):
         if "builtIn" in moduleDict and moduleDict["builtIn"]:
             return bbData.builtInModuleObjs[moduleDict["name"]]
             
-        return bbSpectralFilterModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], showInfo=moduleDict["showInfo"] if "showInfo" in moduleDict else False,
-                                showOnRadar=moduleDict["showOnRadar"] if "showOnRadar" in moduleDict else False, 
+        return JumpDriveModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [],
                                 value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
                                 manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
                                 emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)

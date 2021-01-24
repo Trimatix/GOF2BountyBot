@@ -418,27 +418,27 @@ maxItemsPerHangarPageIndividual = 10
 validItemNames = ["ship", "weapon", "module", "turret", "all", "tool"]
 
 # the max number of each module type that can be equipped on a ship.
-maxModuleTypeEquips = {     "bbArmourModule": 1,
-                            "bbBoosterModule": 1,
-                            "bbCabinModule": -1,
-                            "bbCloakModule": 1,
-                            "bbCompressorModule": -1,
-                            "bbGammaShieldModule": 1,
-                            "bbMiningDrillModule": 1,
-                            "bbRepairBeamModule": 1,
-                            "bbRepairBotModule": 1,
-                            "bbScannerModule": 1,
-                            "bbShieldModule": 1,
-                            "bbSpectralFilterModule": 1,
-                            "bbThrusterModule": 1,
-                            "bbTractorBeamModule": 1,
-                            "bbTransfusionBeamModule": 1,
+maxModuleTypeEquips = {     "armourModule": 1,
+                            "boosterModule": 1,
+                            "cabinModule": -1,
+                            "cloakModule": 1,
+                            "compressorModule": -1,
+                            "gammaShieldModule": 1,
+                            "miningDrillModule": 1,
+                            "repairBeamModule": 1,
+                            "repairBotModule": 1,
+                            "scannerModule": 1,
+                            "shieldModule": 1,
+                            "spectralFilterModule": 1,
+                            "thrusterModule": 1,
+                            "tractorBeamModule": 1,
+                            "transfusionBeamModule": 1,
                             "primaryWeaponModModule": 1,
-                            "bbJumpDriveModule": 0,
-                            "bbEmergencySystemModule": 1,
-                            "bbSignatureModule": 1,
-                            "bbShieldInjectorModule": 1,
-                            "bbTimeExtenderModule": 1}
+                            "jumpDriveModule": 0,
+                            "emergencySystemModule": 1,
+                            "signatureModule": 1,
+                            "shieldInjectorModule": 1,
+                            "timeExtenderModule": 1}
 
 
 

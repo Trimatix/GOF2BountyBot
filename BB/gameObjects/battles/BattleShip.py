@@ -1,4 +1,4 @@
-from ..items.modules import bbCloakModule
+from ..items.modules import cloakModule
 from ..items import bbShip
 
 
@@ -23,7 +23,7 @@ class BattleShip:
         self.EMPCooldown = 0
         # TODO: Update to use only one cloak module per ship
         for module in bbShip.modules:
-            if isinstance(module, bbCloakModule):
+            if isinstance(module, cloakModule):
                 self.cloaks += module
     
 

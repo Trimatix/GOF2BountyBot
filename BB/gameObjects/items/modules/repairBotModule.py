@@ -6,7 +6,7 @@ from ..gameItem import spawnableItem
 
 
 @spawnableItem
-class bbRepairBotModule(moduleItem.ModuleItem):
+class RepairBotModule(moduleItem.ModuleItem):
     """A module providing a ship with a slow health point increase to its hull and armour
 
     :var HPps: The amount of health points regained per second
@@ -29,23 +29,13 @@ class bbRepairBotModule(moduleItem.ModuleItem):
         :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other modules of the same type (Default -1)
         :param bool builtIn: Whether this is a BountyBot standard module (loaded in from bbData) or a custom spawned module (Default False)
         """
-        super(bbRepairBotModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
+        super(RepairBotModule, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
 
         self.HPps = HPps
 
     
     def statsStringShort(self):
         return "*HP/s: " + str(self.HPps) + "*"
-
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the object's __class__ attribute.
-
-        :return: A reference to this class
-        :rtype: type
-        """
-        return bbRepairBotModule
 
     
     def toDict(self, **kwargs) -> dict:
@@ -55,7 +45,7 @@ class bbRepairBotModule(moduleItem.ModuleItem):
         :return: A dictionary containing all information needed to reconstruct this module
         :rtype: dict
         """
-        itemDict = super(bbRepairBotModule, self).toDict(**kwargs)
+        itemDict = super(RepairBotModule, self).toDict(**kwargs)
         if not self.builtIn:
             itemDict["HPps"] = self.HPps
         return itemDict
@@ -72,7 +62,7 @@ class bbRepairBotModule(moduleItem.ModuleItem):
         if "builtIn" in moduleDict and moduleDict["builtIn"]:
             return bbData.builtInModuleObjs[moduleDict["name"]]
             
-        return bbRepairBotModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], HPps=moduleDict["HPps"] if "HPps" in moduleDict else 0,
+        return RepairBotModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], HPps=moduleDict["HPps"] if "HPps" in moduleDict else 0,
                                 value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
                                 manufacturer=moduleDict["manufacturer"] if "manufacturer" in moduleDict else "", icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
                                 emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)
