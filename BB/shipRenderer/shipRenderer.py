@@ -111,7 +111,7 @@ def start_render():
     subprocess.call("blender -b \"" + SCRIPT_PATH + os.sep + "cube.blend\" -P \"" + SCRIPT_PATH + os.sep + "_render.py\"", shell=True)
 
 
-async def renderShip(skinName : str, shipPath : str, shipModelName : str, textures : Dict[int, str], disabledLayers: List[int], res_x : int, res_y : int, full=False): # TODO: Add 'useBaseTexture' argument. Pass to render_vars. If true, should bypass skinBase (for 'full' skins that don't use skinBase)
+async def renderShip(skinName : str, shipPath : str, shipModelName : str, textures : Dict[int, str], disabledLayers: List[int], res_x : int, res_y : int, numSamples: int, full=False): # TODO: Add 'useBaseTexture' argument. Pass to render_vars. If true, should bypass skinBase (for 'full' skins that don't use skinBase)
     """Render the given ship model with the specified skin layer(s).
     The resulting image is cropped to content and saved in shipPath + "/skins/" + skinName.jpg
 
@@ -122,6 +122,7 @@ async def renderShip(skinName : str, shipPath : str, shipModelName : str, textur
     :param List[int] disabledLayers: List of texture regions to 'disable' - setting them to the bottom texture.
     :param int res_x: The width in pixels of the render resolution. This is not the the width of the final image, as empty space around the rendered object is cropped out automatically.
     :param int res_y: The height in pixels of the render resolution. This is not the the height of the final image, as empty space around the rendered object is cropped out automatically.
+    :param int numSamples: The number of samples to render per pixel.
     :param bool full: When True, ignore all texture regions and base textures included with the ship, and render the first element in textures as the texture for the model. (Default False)
     """
     # Generate render arguments
@@ -139,11 +140,16 @@ async def renderShip(skinName : str, shipPath : str, shipModelName : str, textur
         raise ValueError("Attempted to render an image below 240p (height=" + str(res_y) + ")")
     render_resolution = str(res_x) + "x" + str(res_y)
 
+    if numSamples < 1:
+        raise ValueError("numSamples must be at least 1")
+    if numSamples > 128:
+        raise ValueError("maximum numSamples is 128")
+
     if not full:
         compositeTextures(texture_output_file, shipPath, textures, disabledLayers)
 
     # Pass the arguments to the renderer
-    setRenderArgs([render_resolution, render_output_file, current_model, textures[0] if full else texture_output_file])
+    setRenderArgs([render_resolution, render_output_file, current_model, textures[0] if full else texture_output_file, str(numSamples)])
     # Render the requested model
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(ThreadPoolExecutor(), start_render)

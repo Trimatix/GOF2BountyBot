@@ -50,13 +50,14 @@ class RenderArgs:
     :vartype material: str
     """
 
-    def __init__(self, res_x : int, res_y : int, output_file_path : str, model_path : str, texture_path : str):
+    def __init__(self, res_x : int, res_y : int, output_file_path : str, model_path : str, texture_path : str, numSamples: int):
         """
         :param int res_x: The width in pixels of the render resolution.
         :param int res_y: The height in pixels of the render resolution.
         :param str output_file_path: The path to render the output image to, including the file name and extension
         :param str model_path: The path to the model to render
         :param str texture_path: path to the texture file to render on the model
+        :param int numSamples: The number of samples to render per pixel
         """
         self.res_x = res_x
         self.res_y = res_y
@@ -67,6 +68,7 @@ class RenderArgs:
         self.model_filename_noext = Path(self.model_fullpath).stem
         self.texture_path = texture_path
         self.material = str(Path(self.model_fullpath).with_suffix(".mtl"))
+        self.numSamples = numSamples
 
 
 def getRenderArgs() -> RenderArgs:
@@ -79,7 +81,7 @@ def getRenderArgs() -> RenderArgs:
     with open(RENDER_ARGS_PATH,"r") as f:
         for line in f.readlines():
             args.append(line.rstrip("\n"))
-    return RenderArgs(int(args[0].split("x")[0]), int(args[0].split("x")[1]), args[1], args[2], args[3])
+    return RenderArgs(int(args[0].split("x")[0]), int(args[0].split("x")[1]), args[1], args[2], args[3], int(args[4]))
 
 
 
@@ -121,6 +123,7 @@ for obj in ctx.visible_objects:
 ctx.scene.render.resolution_x = args.res_x
 ctx.scene.render.resolution_y = args.res_y
 ctx.scene.render.resolution_percentage = 100
+bpy.context.scene.cycles.samples = args.numSamples
 # Set the renderer (eevee renders some strange perspective stuff...?)
 ctx.scene.render.engine = 'CYCLES'
 # Set the render output file

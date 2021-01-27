@@ -490,7 +490,7 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
 
     await lib.discordUtil.startLongProcess(waitMsg)
     try:
-        await shipRenderer.renderShip(str(message.id), shipData["path"], shipData["model"], skinPaths, disabledLayers, bbConfig.skinRenderShowmeHDResolution[0], bbConfig.skinRenderShowmeHDResolution[1], full=full)
+        await shipRenderer.renderShip(str(message.id), shipData["path"], shipData["model"], skinPaths, disabledLayers, bbConfig.skinRenderShowmeHDResolution[0], bbConfig.skinRenderShowmeHDResolution[1], bbConfig.skinRenderShowmeHDSamples, full=full)
     except shipRenderer.RenderFailed:
         await message.channel.send(message.author.mention + "\n🥺 Render failed! The error has been logged, please try a different ship.")
         bbLogger.log("Main", "admin_cmd_showmeHD", "HD ship render failed with args: '" + args + "'")

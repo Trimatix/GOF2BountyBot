@@ -154,7 +154,7 @@ def isUnicodeEmoji(c : str) -> bool:
     :return: True if c contains exactly one character, and that character is a unicode emoji. False otherwise.
     :rtype: bool
     """
-    return c in UNICODE_EMOJI
+    return c in UNICODE_EMOJI["en"]
 
 
 def isCustomEmoji(s : str) -> bool:

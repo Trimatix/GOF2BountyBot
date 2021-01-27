@@ -761,7 +761,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             outSkinPath = shipData["path"] + os.sep + "skins" + os.sep + str(message.id) + ".jpg"	
             await lib.discordUtil.startLongProcess(waitMsg)	
             try:	
-                await shipRenderer.renderShip(str(message.id), shipData["path"], shipData["model"], skinPaths, disabledLayers, bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1], full=skin == "$ATTACHEDFILEFULL$")	
+                await shipRenderer.renderShip(str(message.id), shipData["path"], shipData["model"], skinPaths, disabledLayers, bbConfig.skinRenderShowmeResolution[0], bbConfig.skinRenderShowmeResolution[1], bbConfig.skinRenderShowmeSamples, full=skin == "$ATTACHEDFILEFULL$")	
             except shipRenderer.RenderFailed:	
                 await message.channel.send(message.author.mention + "\n🥺 Render failed! The error has been logged, please try a different ship.")	
                 bbLogger.log("Main", "cmd_showme_ship", "Ship render failed with args: '" + args + "'")	
