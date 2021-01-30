@@ -1,4 +1,4 @@
-from . import bbToolItem, bbShipSkinTool, bbCrate
+from . import bbToolItem, bbShipSkinTool, crateTool
 from .. import bbShip, moduleItemFactory
 from ..weapons import primaryWeapon, turretWeapon
 from .... import lib
@@ -31,7 +31,7 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
             else:
                 itemPool.append(itemConstructors[itemDict["type"]](itemDict))
         
-        return bbCrate.bbCrate(itemPool, name=crateDict["name"] if "name" in crateDict else "",
+        return crateTool.Crate(itemPool, name=crateDict["name"] if "name" in crateDict else "",
             value=crateDict["value"] if "value" in crateDict else 0,
             wiki=crateDict["wiki"] if "wiki" in crateDict else "",
             manufacturer=crateDict["manufacturer"] if "manufacturer" in crateDict else "",
@@ -41,7 +41,7 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
             builtIn=crateDict["builtIn"] if "builtIn" in crateDict else False)
 
     toolTypeConstructors = {"bbShipSkinTool": bbShipSkinTool.bbShipSkinTool.fromDict,
-                        "bbCrate": crateFromDict}
+                        "crateTool": crateFromDict}
     
     if "type" not in toolDict:
         raise NameError("Required dictionary attribute missing: 'type'")
