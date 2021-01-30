@@ -30,10 +30,10 @@ class ShipUpgrade(serializable.Serializable):
     :vartype cargo: int
     :var cargoMultiplier: A multiplier to apply to the ship's cargo storage
     :vartype cargoMultiplier: float
-    :var numSecondaries: An additive boost to the number of secondary weapons equippable by the owning ship
-    :vartype numSecondaries: int
-    :var numSecondariesMultiplier: A multiplier to apply to the number of secondary weapons equippable by the ship
-    :vartype numSecondariesMultiplier: float
+    :var maxSecondaries: An additive boost to the number of secondary weapons equippable by the owning ship
+    :vartype maxSecondaries: int
+    :var maxSecondariesMultiplier: A multiplier to apply to the number of secondary weapons equippable by the ship
+    :vartype maxSecondariesMultiplier: float
     :var handling: An additive boost to the owning ship's handling
     :vartype handling: int
     :var handlingMultiplier: A multiplier to apply to the ship's handling
@@ -59,7 +59,7 @@ class ShipUpgrade(serializable.Serializable):
     """
     
     def __init__(self, name : str, shipToUpgradeValueMult : float,
-                    armour : int = 0.0, armourMultiplier : float = 1.0, cargo : int = 0, cargoMultiplier : float = 1.0, numSecondaries : int = 0, numSecondariesMultiplier : float = 1.0,
+                    armour : int = 0.0, armourMultiplier : float = 1.0, cargo : int = 0, cargoMultiplier : float = 1.0, maxSecondaries : int = 0, maxSecondariesMultiplier : float = 1.0,
                     handling : int = 0, handlingMultiplier : float = 1.0, maxPrimaries : int = 0, maxPrimariesMultiplier : float = 1.0, maxTurrets : int = 0, maxTurretsMultiplier : float = 1.0,
                     maxModules : int = 0, maxModulesMultiplier : float = 1.0, vendor : str = "", wiki : str = "", techLevel : int = -1, builtIn : bool = False):
         """
@@ -71,8 +71,8 @@ class ShipUpgrade(serializable.Serializable):
         :param float armourMultiplier: A multiplier to apply to the ship's armour
         :param int cargo: An additive boost to the owning ship's cargo storage
         :param float cargoMultiplier: A multiplier to apply to the ship's cargo storage
-        :param int numSecondaries: An additive boost to the number of secondary weapons equippable by the owning ship
-        :param float numSecondariesMultiplier: A multiplier to apply to the number of secondary weapons equippable by the ship
+        :param int maxSecondaries: An additive boost to the number of secondary weapons equippable by the owning ship
+        :param float maxSecondariesMultiplier: A multiplier to apply to the number of secondary weapons equippable by the ship
         :param int handling: An additive boost to the owning ship's handling
         :param float handlingMultiplier: A multiplier to apply to the ship's handling
         :param int maxPrimaries: An additive boost to the number of primary weapons equippable by the owning ship
@@ -95,8 +95,8 @@ class ShipUpgrade(serializable.Serializable):
         self.cargo = cargo
         self.cargoMultiplier = cargoMultiplier
 
-        self.numSecondaries = numSecondaries
-        self.numSecondariesMultiplier = numSecondariesMultiplier
+        self.maxSecondaries = maxSecondaries
+        self.maxSecondariesMultiplier = maxSecondariesMultiplier
 
         self.handling = handling
         self.handlingMultiplier = handlingMultiplier
@@ -167,11 +167,11 @@ class ShipUpgrade(serializable.Serializable):
             if self.cargoMultiplier != 1.0:
                 itemDict["cargoMultiplier"] = self.cargoMultiplier
 
-            if self.numSecondaries != 0:
-                itemDict["numSecondaries"] = self.numSecondaries
+            if self.maxSecondaries != 0:
+                itemDict["maxSecondaries"] = self.maxSecondaries
 
-            if self.numSecondariesMultiplier != 1.0:
-                itemDict["numSecondariesMultiplier"] = self.numSecondariesMultiplier
+            if self.maxSecondariesMultiplier != 1.0:
+                itemDict["maxSecondariesMultiplier"] = self.maxSecondariesMultiplier
 
             if self.handling != 0:
                 itemDict["handling"] = self.handling
@@ -217,10 +217,10 @@ class ShipUpgrade(serializable.Serializable):
         if self.cargoMultiplier != 1:
             stats += "Cargo: " + ("+" if self.cargoMultiplier > 1 else "-") + str(round(((self.cargoMultiplier - 1) * 100) if self.cargoMultiplier > 1 else (self.cargoMultiplier * 100))) + ", "
 
-        if self.numSecondaries != 0:
-            stats += "Max secondaries: " + ("+" if self.numSecondaries > 0 else "-") + str(self.numSecondaries) + ", "
-        if self.numSecondariesMultiplier != 1:
-            stats += "Max secondaries: " + ("+" if self.numSecondariesMultiplier > 1 else "-") + str(round(((self.numSecondariesMultiplier - 1) * 100) if self.numSecondariesMultiplier > 1 else (self.numSecondariesMultiplier * 100))) + ", "
+        if self.maxSecondaries != 0:
+            stats += "Max secondaries: " + ("+" if self.maxSecondaries > 0 else "-") + str(self.maxSecondaries) + ", "
+        if self.maxSecondariesMultiplier != 1:
+            stats += "Max secondaries: " + ("+" if self.maxSecondariesMultiplier > 1 else "-") + str(round(((self.maxSecondariesMultiplier - 1) * 100) if self.maxSecondariesMultiplier > 1 else (self.maxSecondariesMultiplier * 100))) + ", "
 
         if self.handling != 0:
             stats += "Handling: " + ("+" if self.handling > 0 else "-") + str(self.handling) + ", "
@@ -261,8 +261,8 @@ class ShipUpgrade(serializable.Serializable):
                                     armourMultiplier=upgradeDict["armourMultiplier"] if "armourMultiplier" in upgradeDict else 1.0,
                                     cargo=upgradeDict["cargo"] if "cargo" in upgradeDict else 0,
                                     cargoMultiplier=upgradeDict["cargoMultiplier"] if "cargoMultiplier" in upgradeDict else 1.0,
-                                    numSecondaries=upgradeDict["numSecondaries"] if "numSecondaries" in upgradeDict else 0,
-                                    numSecondariesMultiplier=upgradeDict["numSecondariesMultiplier"] if "numSecondariesMultiplier" in upgradeDict else 1.0,
+                                    maxSecondaries=upgradeDict["maxSecondaries"] if "maxSecondaries" in upgradeDict else 0,
+                                    maxSecondariesMultiplier=upgradeDict["maxSecondariesMultiplier"] if "maxSecondariesMultiplier" in upgradeDict else 1.0,
                                     handling=upgradeDict["handling"] if "handling" in upgradeDict else 0,
                                     handlingMultiplier=upgradeDict["handlingMultiplier"] if "handlingMultiplier" in upgradeDict else 1.0,
                                     maxPrimaries=upgradeDict["maxPrimaries"] if "maxPrimaries" in upgradeDict else 0,

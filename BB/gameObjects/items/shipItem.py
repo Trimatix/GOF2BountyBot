@@ -24,9 +24,9 @@ class Ship(GameItem):
     :vartype armour: int
     :var cargo: The amount of storage space for unequipped items and commodities this ship has
     :vartype cargo: int
-    :var numSecondaries: The maximum number of secondary weapons equippable on this ship (not yet implemented)
+    :var maxSecondaries: The maximum number of secondary weapons equippable on this ship (not yet implemented)
                             # TODO: Should probably be renamed to maxSecondaries
-    :vartype numSecondaries: int
+    :vartype maxSecondaries: int
     :var handling: A measure of this ship's driveability (controls sensitivity)
     :vartype handling: int
     :var maxPrimaries: The maximum number of primary weapons equippable on this ship
@@ -53,7 +53,7 @@ class Ship(GameItem):
 
     def __init__(self, name : str, maxPrimaries : int, maxTurrets : int,
                     maxModules : int, manufacturer : str = "", armour : int = 0,
-                    cargo : int = 0, numSecondaries : int = 0, handling : int = 0,
+                    cargo : int = 0, maxSecondaries : int = 0, handling : int = 0,
                     value : int = 0, aliases : List[str] = [], weapons : List[primaryWeapon.PrimaryWeapon] = [],
                     modules : List[moduleItem.ModuleItem] = [], turrets : List[turretWeapon.TurretWeapon] = [],
                     wiki : str = "", upgradesApplied : List[shipUpgrade.ShipUpgrade] = [], nickname : str = "",
@@ -65,7 +65,7 @@ class Ship(GameItem):
         :param int armour: The amount of HP this ship's hull has - the last line of defence before death. (Default 0)
                             # TODO: Should be renamed to hull or similar
         :param int cargo: The amount of storage space for unequipped items and commodities this ship has (Default 0)
-        :param int numSecondaries: The maximum number of secondary weapons equippable on this ship
+        :param int maxSecondaries: The maximum number of secondary weapons equippable on this ship
                                     (not yet implemented) (Default 0)
         :param int handling: A measure of this ship's driveability (controls sensitivity) (Default 0)
         :param int maxPrimaries: The maximum number of primary weapons equippable on this ship
@@ -112,7 +112,7 @@ class Ship(GameItem):
 
         self.armour = armour
         self.cargo = cargo
-        self.numSecondaries = numSecondaries
+        self.maxSecondaries = maxSecondaries
         self.handling = handling
         
         self.maxPrimaries = maxPrimaries
@@ -488,12 +488,12 @@ class Ship(GameItem):
                     (and potentially equipped items)
         :rtype: int
         """
-        total = self.numSecondaries
+        total = self.maxSecondaries
         multiplier = 1
         
         for upgrade in self.upgradesApplied:
-            total += upgrade.numSecondaries
-            multiplier *= upgrade.numSecondariesMultiplier
+            total += upgrade.maxSecondaries
+            multiplier *= upgrade.maxSecondariesMultiplier
         return int(total * multiplier)
 
 
@@ -737,7 +737,7 @@ class Ship(GameItem):
             for weapon in self.weapons:
                 stats += weapon.name + ", "
             stats = stats[:-2] + "]*\n"
-        # stats += "Max secondaries: " + str(self.numSecondaries) + ", "
+        # stats += "Max secondaries: " + str(self.maxSecondaries) + ", "
         stats += "• *Turrets: " + str(len(self.turrets)) + "/" + str(self.getMaxTurrets(shipUpgradesOnly=True)) + \
                                     ("(+)" if self.getMaxTurrets(shipUpgradesOnly=True) > self.maxTurrets else "") + "*\n"
         if len(self.turrets) > 0:
@@ -769,7 +769,7 @@ class Ship(GameItem):
         stats += "Handling: " + str(self.getHandling(shipUpgradesOnly=True)) + ("(+)" \
                                 if self.getHandling(shipUpgradesOnly=True) > self.handling else "") + ", "
         stats += "Max secondaries: " + str(self.getNumSecondaries(shipUpgradesOnly=True)) + ("(+)" \
-                                if self.getNumSecondaries(shipUpgradesOnly=True) > self.numSecondaries else "") + "*"
+                                if self.getNumSecondaries(shipUpgradesOnly=True) > self.maxSecondaries else "") + "*"
         return stats
 
 
@@ -811,7 +811,7 @@ class Ship(GameItem):
         if not self.builtIn:
             itemDict["armour"] = self.armour
             itemDict["cargo"] = self.cargo
-            itemDict["numSecondaries"] = self.numSecondaries
+            itemDict["maxSecondaries"] = self.maxSecondaries
             itemDict["handling"] = self.handling
             itemDict["maxPrimaries"] = self.maxPrimaries
             itemDict["maxTurrets"] = self.maxTurrets
@@ -891,9 +891,9 @@ class Ship(GameItem):
                                         if "armour" in builtInDict else 0,
                         cargo=shipDict["cargo"] if "cargo" in shipDict else builtInDict["cargo"]
                                         if "cargo" in builtInDict else 0,
-                        numSecondaries=shipDict["numSecondaries"] \
-                                        if "numSecondaries" in shipDict else builtInDict["numSecondaries"]
-                                        if "numSecondaries" in builtInDict else 0,
+                        maxSecondaries=shipDict["maxSecondaries"] \
+                                        if "maxSecondaries" in shipDict else builtInDict["maxSecondaries"]
+                                        if "maxSecondaries" in builtInDict else 0,
                         handling=shipDict["handling"] if "handling" in shipDict else builtInDict["handling"]
                                         if "handling" in builtInDict else 0,
                         value=shipDict["value"] if "value" in shipDict else builtInDict["value"]
@@ -926,7 +926,7 @@ class Ship(GameItem):
                             manufacturer=shipDict["manufacturer"] if "manufacturer" in shipDict else "",
                             armour=shipDict["armour"] if "armour" in shipDict else 0,
                             cargo=shipDict["cargo"] if "cargo" in shipDict else 0,
-                            numSecondaries=shipDict["numSecondaries"] if "numSecondaries" in shipDict else 0,
+                            maxSecondaries=shipDict["maxSecondaries"] if "maxSecondaries" in shipDict else 0,
                             handling=shipDict["handling"] if "handling" in shipDict else 0,
                             value=shipDict["value"] if "value" in shipDict else 0,
                             aliases=shipDict["aliases"] if "aliases" in shipDict else [],
