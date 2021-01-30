@@ -20,10 +20,13 @@ class bbToolItem(gameItem.GameItem):
         :param str manufacturer: The name of the manufacturer of this item (Default "")
         :param str icon: A URL pointing to an image to use for this item's icon (Default "")
         :param lib.emojis.dumbEmoji emoji: The emoji to use for this item's small icon (Default lib.emojis.dumbEmoji.EMPTY)
-        :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its effectiveness compared to other items of the same type (Default -1)
-        :param bool builtIn: Whether this is a BountyBot standard item (loaded in from bbData) or a custom spawned item (Default False)
+        :param int techLevel: A rating from 1 to 10 of this item's technical advancement. Used as a measure for its
+                                effectiveness compared to other items of the same type (Default -1)
+        :param bool builtIn: Whether this is a BountyBot standard item (loaded in from bbData) or a custom spawned
+                                item (Default False)
         """
-        super().__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji, techLevel=techLevel, builtIn=builtIn)
+        super().__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji,
+                            techLevel=techLevel, builtIn=builtIn)
         
 
     @abstractmethod
