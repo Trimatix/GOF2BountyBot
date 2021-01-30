@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 from .gameItem import GameItem, spawnableItem
 from . import bbShipUpgrade, moduleItemFactory
 from .weapons import primaryWeapon, turretWeapon
-from .. import bbShipSkin
+from .. import shipSkin
 from ...bbConfig import bbConfig, bbData
 from ... import lib
 
@@ -701,12 +701,12 @@ class bbShip(GameItem):
         self.turrets = []
 
 
-    def applySkin(self, skin : bbShipSkin.bbShipSkin):
+    def applySkin(self, skin : shipSkin.ShipSkin):
         """Applies the given skin to this ship.
         Must be compatible with this ship.
         This ship must not be skinned already.
 
-        :param bbShipSkin.bbShipSkin skin: The skin to apply
+        :param shipSkin.shipSkin skin: The skin to apply
         :raise ValueError: If this ship already has a skin applied
         :raise TypeError: If the given skin is not compatible with this ship
         """

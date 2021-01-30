@@ -13,7 +13,7 @@ import os
 # BountyBot Imports
 
 from .bbConfig import bbConfig, bbData, bbPRIVATE
-from .gameObjects import bbShipSkin
+from .gameObjects import shipSkin
 from .gameObjects.bounties import bbCriminal, bbSystem
 from .gameObjects.items import moduleItemFactory, bbShipUpgrade
 from .gameObjects.items.weapons import turretWeapon, primaryWeapon
@@ -314,7 +314,7 @@ async def on_ready():
 
     ##### SHIP SKIN GENERATION #####
 
-    # generate bbShipSkin objects from data stored on file
+    # generate shipSkin objects from data stored on file
     for subdir, dirs, files in os.walk(bbData.skinsDir):
         for dirname in dirs:
             dirpath = subdir + os.sep + dirname
@@ -322,7 +322,7 @@ async def on_ready():
             if dirname.lower().endswith(".bbshipskin"):
                 skinData = lib.jsonHandler.readJSON(dirpath + os.sep + "META.json")
                 skinData["path"] = CWD + os.sep + dirpath
-                bbData.builtInShipSkins[skinData["name"].lower()] = bbShipSkin.bbShipSkin.fromDict(skinData)
+                bbData.builtInShipSkins[skinData["name"].lower()] = shipSkin.ShipSkin.fromDict(skinData)
 
     # generate toolItem objects from data stored on file
     for toolDict in bbData.builtInToolData.values():
@@ -330,7 +330,7 @@ async def on_ready():
         bbData.builtInToolData[toolDict["name"]]["builtIn"] = True
         bbData.builtInToolObjs[toolDict["name"]].builtIn = True
     
-    # generate shipSkinTool objects for each bbShipSkin
+    # generate shipSkinTool objects for each shipSkin
     for shipSkin in bbData.builtInShipSkins.values():
         # if len(shipSkin.compatibleShips) > 0:
         toolName = lib.stringTyping.shipSkinNameToToolName(shipSkin.name)

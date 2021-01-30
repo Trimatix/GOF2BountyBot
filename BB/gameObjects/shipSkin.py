@@ -21,7 +21,7 @@ def _saveShip(ship):
     shipData["path"] = shipPath
 
 
-class bbShipSkin(serializable.Serializable):
+class ShipSkin(serializable.Serializable):
     def __init__(self, name : str, textureRegions : int, shipRenders : Dict[str, str], path : str, designer : str, wiki : str = ""):
         self.name = name
         self.textureRegions = textureRegions
@@ -123,4 +123,4 @@ class bbShipSkin(serializable.Serializable):
     def fromDict(cls, skinDict, **kwargs):
         if skinDict["name"] in bbData.builtInShipSkins:
             return bbData.builtInShipSkins[skinDict["name"]]
-        return bbShipSkin(skinDict["name"], skinDict["textureRegions"], skinDict["ships"], skinDict["path"], skinDict["designer"], skinDict["wiki"] if "wiki" in skinDict else "")
+        return ShipSkin(skinDict["name"], skinDict["textureRegions"], skinDict["ships"], skinDict["path"], skinDict["designer"], skinDict["wiki"] if "wiki" in skinDict else "")

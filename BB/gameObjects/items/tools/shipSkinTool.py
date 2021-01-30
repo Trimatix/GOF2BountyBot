@@ -2,7 +2,7 @@ from __future__ import annotations
 from . import toolItem
 from .... import lib
 from ....bbConfig import bbConfig, bbData
-from ... import bbShipSkin
+from ... import shipSkin
 from ..bbShip import bbShip
 from discord import Message
 from .... import bbGlobals
@@ -17,10 +17,10 @@ class ShipSkinTool(toolItem.ToolItem):
     The manufacturer is set to the skin designer.
     This tool is single use. If a calling user is given, the tool is removed from that user's inventory after use.
     """
-    def __init__(self, shipSkin : bbShipSkin, value : int = 0, wiki : str = "", icon : str = bbConfig.defaultShipSkinToolIcon,
+    def __init__(self, shipSkin : shipSkin, value : int = 0, wiki : str = "", icon : str = bbConfig.defaultShipSkinToolIcon,
             emoji : lib.emojis.dumbEmoji = None, techLevel : int = -1, builtIn : bool = False):
         """
-        :param bbShipSkin shipSkin: The skin that this tool applies.
+        :param shipSkin shipSkin: The skin that this tool applies.
         :param int value: The number of credits that this item can be bought/sold for at a shop. (Default 0)
         :param str wiki: A web page that is displayed as the wiki page for this item. If no wiki is given and shipSkin
                             has one, that will be used instead. (Default "")
@@ -160,7 +160,7 @@ class ShipSkinTool(toolItem.ToolItem):
         :rtype: shipSkinTool
         """
         shipSkin = bbData.builtInShipSkins[toolDict["name"]] if toolDict["builtIn"] else \
-                    bbShipSkin.bbShipSkin.fromDict(toolDict["skin"])
+                    shipSkin.ShipSkin.fromDict(toolDict["skin"])
         if toolDict["builtIn"]:
             return bbData.builtInToolObjs[lib.stringTyping.shipSkinNameToToolName(shipSkin.name)]
         return ShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=False)

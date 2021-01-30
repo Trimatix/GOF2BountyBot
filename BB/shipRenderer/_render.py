@@ -19,7 +19,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 
 # The camera's view distance. 5000 Should be plenty, but for larger models you may need to raise it. Tested with the Vossk Battlecruiser model.
 CAM_CLIP = 5000
-# Working directory for the script. This is used for temporarily saving intermediate textures e.g between mask applications (TODO: Save the completed texture to a cache directory [the bbShipSkin dir])
+# Working directory for the script. This is used for temporarily saving intermediate textures e.g between mask applications (TODO: Save the completed texture to a cache directory [the shipSkin dir])
 RENDER_TEMP_DIR = script_path + os.sep + "temp"
 # Path to the script's render variables file.
 # Line 1:   Path to the model to render
