@@ -1,5 +1,5 @@
 from __future__ import annotations
-from . import bbToolItem
+from . import toolItem
 from .... import lib
 from ....bbConfig import bbConfig, bbData
 from ... import bbShipSkin
@@ -11,7 +11,7 @@ from ....reactionMenus.ConfirmationReactionMenu import InlineConfirmationMenu
 
 
 @spawnableItem
-class ShipSkinTool(bbToolItem.bbToolItem):
+class ShipSkinTool(toolItem.ToolItem):
     """A tool that can be used to apply a skin to a ship.
     This item is named after the skin it applies.
     The manufacturer is set to the skin designer.

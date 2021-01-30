@@ -1,5 +1,5 @@
 import random
-from . import bbToolItem
+from . import toolItem
 from .... import lib
 from discord import Message
 from ....bbConfig import bbConfig
@@ -9,7 +9,7 @@ from ....reactionMenus.ConfirmationReactionMenu import InlineConfirmationMenu
 
 
 @gameItem.spawnableItem
-class Crate(bbToolItem.bbToolItem):
+class Crate(toolItem.ToolItem):
     def __init__(self, itemPool, name : str = "", value : int = 0, wiki : str = "",
             manufacturer : str = "", icon : str = "", emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY,
             techLevel : int = -1, builtIn : bool = False):

@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 from .items import bbShip, moduleItemFactory
 from .items.weapons import primaryWeapon, turretWeapon
-from .items.tools import bbToolItemFactory, bbToolItem
+from .items.tools import toolItemFactory, toolItem
 from .items.modules import moduleItem
 from ..bbConfig import bbConfig
 from . import inventory
@@ -55,7 +55,7 @@ class bbUser(serializable.Serializable):
     :vartype inactiveWeapons: inventory
     :var inactiveTurrets: The turretWeapons currently in this user's inventory (unequipped)
     :vartype inactiveTurrets: inventory
-    :var inactiveTools: the bbToolItems currently in this user's inventory
+    :var inactiveTools: the toolItems currently in this user's inventory
     :vartype inactiveTools: inventory
     :var lastSeenGuildId: The ID of the guild where this user was last active. Not guaranteed to be present.
     :vartype lastSeenGuildId: int
@@ -93,7 +93,7 @@ class bbUser(serializable.Serializable):
                     inactiveModules : inventory.Inventory = inventory.TypeRestrictedInventory(moduleItem.ModuleItem),
                     inactiveWeapons : inventory.Inventory = inventory.TypeRestrictedInventory(primaryWeapon.PrimaryWeapon),
                     inactiveTurrets : inventory.Inventory = inventory.TypeRestrictedInventory(turretWeapon.TurretWeapon),
-                    inactiveTools : inventory.Inventory = inventory.TypeRestrictedInventory(bbToolItem.bbToolItem),
+                    inactiveTools : inventory.Inventory = inventory.TypeRestrictedInventory(toolItem.ToolItem),
                     lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
                     duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[UserAlerts.UABase or bool]] = {},
                     bountyWinsToday : int = 0, dailyBountyWinsReset : datetime = None, pollOwned : bool = False,
@@ -110,7 +110,7 @@ class bbUser(serializable.Serializable):
         :param inventory inactiveModules: The moduleItems currently in this user's inventory (unequipped) (Default empty inventory)
         :param inventory inactiveWeapons: The primaryWeapons currently in this user's inventory (unequipped) (Default empty inventory)
         :param inventory inactiveTurrets: The turretWeapons currently in this user's inventory (unequipped) (Default empty inventory)
-        :param inventory inactiveTools: The bbToolItems currently in this user's inventory (Default empty inventory)
+        :param inventory inactiveTools: The toolItems currently in this user's inventory (Default empty inventory)
         :param int lastSeenGuildId: The ID of the guild where this user was last active. Not guaranteed to be present. (Default -1)
         :param int duelWins: The total number of duels the user has won (Default 0)
         :param int duelLosses: The total number of duels the user has lost (Default 0)
@@ -673,7 +673,7 @@ class bbUser(serializable.Serializable):
             return self.inactiveWeapons
         elif isinstance(item, turretWeapon.TurretWeapon):
             return self.inactiveTurrets
-        elif isinstance(item, bbToolItem.bbToolItem):
+        elif isinstance(item, toolItem.ToolItem):
             return self.inactiveTools
 
 
@@ -721,10 +721,10 @@ class bbUser(serializable.Serializable):
             for turretListingDict in userDict["inactiveTurrets"]:
                 inactiveTurrets.addItem(turretWeapon.TurretWeapon.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-        inactiveTools = inventory.TypeRestrictedInventory(bbToolItem.bbToolItem)
+        inactiveTools = inventory.TypeRestrictedInventory(toolItem.ToolItem)
         if "inactiveTools" in userDict:
             for toolListingDict in userDict["inactiveTools"]:
-                inactiveTools.addItem(bbToolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
+                inactiveTools.addItem(toolItemFactory.fromDict(toolListingDict["item"]), quantity=toolListingDict["count"])
 
         return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                         bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],

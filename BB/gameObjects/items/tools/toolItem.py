@@ -4,7 +4,7 @@ from .... import lib
 from discord import Message
 from typing import List
 
-class bbToolItem(gameItem.GameItem):
+class ToolItem(gameItem.GameItem):
     """An item that has a function of some kind.
     Intended to be very generic at this level of implementation.
     """
@@ -68,6 +68,6 @@ class bbToolItem(gameItem.GameItem):
         :rtype: dict
         """
         data = super().toDict(**kwargs)
-        data["itemType"] = "bbToolItem"
+        data["itemType"] = "toolItem"
         return data
     

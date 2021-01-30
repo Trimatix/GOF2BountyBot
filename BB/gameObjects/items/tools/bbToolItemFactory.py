@@ -1,17 +1,17 @@
-from . import bbToolItem, shipSkinTool, crateTool
+from . import toolItem, shipSkinTool, crateTool
 from .. import bbShip, moduleItemFactory
 from ..weapons import primaryWeapon, turretWeapon
 from .... import lib
 
 
-def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
-    """Construct a bbToolItem from its dictionary-serialized representation.
+def fromDict(toolDict : dict) -> toolItem.ToolItem:
+    """Construct a toolItem from its dictionary-serialized representation.
     This method decodes which tool constructor is appropriate based on the 'type' attribute of the given dictionary.
 
-    :param dict toolDict: A dictionary containing all information needed to construct the required bbToolItem. Critically,
+    :param dict toolDict: A dictionary containing all information needed to construct the required toolItem. Critically,
                             a name, type, and builtIn specifier.
-    :return: A new bbToolItem object as described in toolDict
-    :rtype: bbToolItem.bbToolItem
+    :return: A new toolItem object as described in toolDict
+    :rtype: toolItem.toolItem
     :raise NameError: When toolDict does not contain a 'type' attribute.
     """
 
@@ -19,7 +19,7 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
                         "primaryWeapon": primaryWeapon.PrimaryWeapon.fromDict,
                         "moduleItem": moduleItemFactory.fromDict,
                         "turretWeapon": turretWeapon.TurretWeapon.fromDict,
-                        "bbToolItem": fromDict}
+                        "toolItem": fromDict}
 
     def crateFromDict(crateDict):
         if "itemPool" not in crateDict:
