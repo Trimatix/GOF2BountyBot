@@ -16,15 +16,14 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
     """
 
     itemConstructors = {"bbShip": bbShip.bbShip.fromDict,
-                    "primaryWeapon": primaryWeapon.PrimaryWeapon.fromDict,
-                    "moduleItem": moduleItemFactory.fromDict,
-                    "turretWeapon": turretWeapon.TurretWeapon.fromDict,
-                    "bbToolItem": fromDict}
+                        "primaryWeapon": primaryWeapon.PrimaryWeapon.fromDict,
+                        "moduleItem": moduleItemFactory.fromDict,
+                        "turretWeapon": turretWeapon.TurretWeapon.fromDict,
+                        "bbToolItem": fromDict}
 
     def crateFromDict(crateDict):
         if "itemPool" not in crateDict:
-            print("CRATEDICT",crateDict)
-            raise RuntimeError()
+            raise RuntimeError("Attempted to fromDict a crate with no itemPool field: " + str(crateDict))
         itemPool = []
         for itemDict in crateDict["itemPool"]:
             if "itemType" in itemDict:
