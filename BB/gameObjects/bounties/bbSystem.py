@@ -84,7 +84,7 @@ class System (aliasable.Aliasable):
 
     def getType(self) -> type:
         """⚠ DEPRACATED
-        Get this object's __class__
+        Get this object's class
 
         :return: The System class
         :rtype: type

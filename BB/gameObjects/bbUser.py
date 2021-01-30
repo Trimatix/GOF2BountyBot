@@ -195,7 +195,7 @@ class bbUser(serializable.Serializable):
                 elif isinstance(alerts[alertType], bool):
                     self.userAlerts[alertType] = alertType(alerts[alertType])
                 else:
-                    bbLogger.log("bbUsr", "init", "Given unknown alert state type for UA " + alertID + ". Must be either UABase or bool, given " + alerts[alertType].__class__.__name__ + ". Alert reset to default (" + str(alertType(bbConfig.userAlertsIDsDefaults[alertID])) + ")", category="usersDB", eventType="LOAD-UA_STATE_TYPE")
+                    bbLogger.log("bbUsr", "init", "Given unknown alert state type for UA " + alertID + ". Must be either UABase or bool, given " + type(alerts[alertType]).__name__ + ". Alert reset to default (" + str(alertType(bbConfig.userAlertsIDsDefaults[alertID])) + ")", category="usersDB", eventType="LOAD-UA_STATE_TYPE")
                     self.userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
             elif alertID in alerts:
                 if isinstance(alerts[alertID], UserAlerts.UABase):
@@ -203,7 +203,7 @@ class bbUser(serializable.Serializable):
                 elif isinstance(alerts[alertID], bool):
                     self.userAlerts[alertType] = alertType(alerts[alertID])
                 else:
-                    bbLogger.log("bbUsr", "init", "Given unknown alert state type for UA " + alertID + ". Must be either UABase or bool, given " + alerts[alertID].__class__.__name__ + ". Alert reset to default (" + str(alertType(bbConfig.userAlertsIDsDefaults[alertID])) + ")", category="usersDB", eventType="LOAD-UA_STATE_TYPE")
+                    bbLogger.log("bbUsr", "init", "Given unknown alert state type for UA " + alertID + ". Must be either UABase or bool, given " + type(alerts[alertID]).__name__ + ". Alert reset to default (" + str(alertType(bbConfig.userAlertsIDsDefaults[alertID])) + ")", category="usersDB", eventType="LOAD-UA_STATE_TYPE")
                     self.userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
             else:
                 self.userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])

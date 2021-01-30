@@ -58,9 +58,9 @@ class dumbEmoji(serializable.Serializable):
         elif id != -1 and unicode != "":
             raise ValueError("Can only accept one of id or unicode, not both")
         if type(id) != int:
-            raise TypeError("Given incorrect type for dumbEmoji ID: " + id.__class__.__name__)
+            raise TypeError("Given incorrect type for dumbEmoji ID: " + type(id).__name__)
         if type(unicode) != str:
-            raise TypeError("Given incorrect type for dumbEmoji unicode: " + unicode.__class__.__name__)
+            raise TypeError("Given incorrect type for dumbEmoji unicode: " + type(unicode).__name__)
         
         
         self.id = id

@@ -29,9 +29,9 @@ class bbCrate(bbToolItem.bbToolItem):
         """
         if "callingBBUser" not in kwargs:
             raise NameError("Required kwarg not given: callingBBUser")
-        if kwargs["callingBBUser"] is not None and kwargs["callingBBUser"].__class__.__name__ != "bbUser":
+        if kwargs["callingBBUser"] is not None and type(kwargs["callingBBUser"]).__name__ != "bbUser":
             raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " + \
-                            kwargs["callingBBUser"].__class__.__name__)
+                            type(kwargs["callingBBUser"]).__name__)
         
         callingBBUser = kwargs["callingBBUser"]
         newItem = random.choice(self.itemPool)
@@ -49,9 +49,9 @@ class bbCrate(bbToolItem.bbToolItem):
         """
         if "callingBBUser" not in kwargs:
             raise NameError("Required kwarg not given: callingBBUser")
-        if kwargs["callingBBUser"] is not None and kwargs["callingBBUser"].__class__.__name__ != "bbUser":
+        if kwargs["callingBBUser"] is not None and type(kwargs["callingBBUser"]).__name__ != "bbUser":
             raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " + \
-                            kwargs["callingBBUser"].__class__.__name__)
+                            type(kwargs["callingBBUser"]).__name__)
         
         callingBBUser = kwargs["callingBBUser"]
         confirmMsg = await message.channel.send("Are you sure you want to open this crate?") 

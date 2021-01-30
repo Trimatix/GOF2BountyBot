@@ -254,7 +254,7 @@ async def on_ready():
                 setattr(bbConfig, varName, lib.emojis.dumbEmojiFromDict(uninitEmoji))
             # Unrecognised uninitialized value
             else:
-                raise ValueError("Unrecognised UninitializedDumbEmoji value type. Expecting int, str or dict, given '" + uninitEmoji.__class__.__name__ + "'")
+                raise ValueError("Unrecognised UninitializedDumbEmoji value type. Expecting int, str or dict, given '" + type(uninitEmoji).__name__ + "'")
     
     # Ensure all emojis have been initialized
     for varName, varValue in vars(bbConfig).items():
@@ -432,7 +432,7 @@ async def on_ready():
             f.write("{}")
             f.close()
         except IOError as e:
-            bbLogger.log("main","on_ready","IOError creating reactionMenuDB save file: " + e.__class__.__name__, trace=traceback.format_exc())
+            bbLogger.log("main","on_ready","IOError creating reactionMenuDB save file: " + type(e).__name__, trace=traceback.format_exc())
 
     bbGlobals.reactionMenusDB = await loadReactionMenusDB(bbConfig.reactionMenusDBPath)
 
@@ -517,7 +517,7 @@ async def on_message(message : discord.Message):
         except Exception as e:
             await message.channel.send(":woozy_face: Uh oh, something went wrong! The error has been logged.\nThis command probably won't work until we've looked into it.")
             bbLogger.log("Main", "on_message", "An unexpected error occured when calling command '" +
-                            command + "' with args '" + args + "': " + e.__class__.__name__, trace=traceback.format_exc())
+                            command + "' with args '" + args + "': " + type(e).__name__, trace=traceback.format_exc())
             commandFound = True
 
         # Command not found, send an error message.

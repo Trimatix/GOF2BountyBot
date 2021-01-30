@@ -49,12 +49,12 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
             raise NameError("Required kwarg not given: ship")
         if not isinstance(kwargs["ship"], bbShip):
             raise TypeError("Required kwarg is of the wrong type. Expected bbShip, received "
-                            + kwargs["ship"].__class__.__name__)
+                            + type(kwargs["ship"]).__name__)
         if "callingBBUser" not in kwargs:
             raise NameError("Required kwarg not given: callingBBUser")
-        if kwargs["callingBBUser"] is not None and kwargs["callingBBUser"].__class__.__name__ != "bbUser":
+        if kwargs["callingBBUser"] is not None and type(kwargs["callingBBUser"]).__name__ != "bbUser":
             raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received "
-                            + kwargs["callingBBUser"].__class__.__name__)
+                            + type(kwargs["callingBBUser"]).__name__)
         
         ship, callingBBUser = kwargs["ship"], kwargs["callingBBUser"]
 
@@ -85,17 +85,17 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
             raise NameError("Required kwarg not given: ship")
         if not isinstance(kwargs["ship"], bbShip):
             raise TypeError("Required kwarg is of the wrong type. Expected bbShip, received "
-                            + kwargs["ship"].__class__.__name__)
+                            + type(kwargs["ship"]).__name__)
         if "callingBBUser" not in kwargs:
             raise NameError("Required kwarg not given: callingBBUser")
         
         # converted to soft type check due to circular import
         """if (not isinstance(kwargs["callingBBUser"], bbUser)) and kwargs["callingBBUser"] is not None:
             raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " \
-                            + kwargs["callingBBUser"].__class__.__name__)"""
-        if (kwargs["callingBBUser"].__class__.__name__ != "bbUser") and kwargs["callingBBUser"] is not None:
+                            + type(kwargs["callingBBUser"]).__name__)"""
+        if (type(kwargs["callingBBUser"]).__name__ != "bbUser") and kwargs["callingBBUser"] is not None:
             raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " \
-                            + kwargs["callingBBUser"].__class__.__name__)
+                            + type(kwargs["callingBBUser"]).__name__)
         
         ship, callingBBUser = kwargs["ship"], kwargs["callingBBUser"]
 

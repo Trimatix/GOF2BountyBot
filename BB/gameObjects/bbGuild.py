@@ -73,7 +73,7 @@ class bbGuild(serializable.Serializable):
             raise TypeError("id must be int, given " + str(type(id)))
 
         if not isinstance(dcGuild, Guild):
-            raise NoneDCGuildObj("Given dcGuild of type '" + dcGuild.__class__.__name__ + "', expecting discord.Guild")
+            raise NoneDCGuildObj("Given dcGuild of type '" + type(dcGuild).__name__ + "', expecting discord.Guild")
 
         self.id = id
         self.announceChannel = announceChannel

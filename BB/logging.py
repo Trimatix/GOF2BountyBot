@@ -106,11 +106,11 @@ class logger:
                             f.close()
                             logsSaved += "[+]"
                         except IOError as e:
-                            print(nowStr + "-[LOG::SAVE]>F_NEW_IOERR: ERROR CREATING LOG FILE: " + currentFName + ":" + e.__class__.__name__ + "\n" + traceback.format_exc())
+                            print(nowStr + "-[LOG::SAVE]>F_NEW_IOERR: ERROR CREATING LOG FILE: " + currentFName + ":" + type(e).__name__ + "\n" + traceback.format_exc())
                     try:
                         files[category] = open(currentFName, 'ab')
                     except IOError as e:
-                        print(nowStr + "-[LOG::SAVE]>F_OPN_IOERR: ERROR OPENING LOG FILE: " + currentFName + ":" + e.__class__.__name__ + "\n" + traceback.format_exc())
+                        print(nowStr + "-[LOG::SAVE]>F_OPN_IOERR: ERROR OPENING LOG FILE: " + currentFName + ":" + type(e).__name__ + "\n" + traceback.format_exc())
                         files[category] = None
 
         while not self.isEmpty():
@@ -120,7 +120,7 @@ class logger:
                     # log strings first encoded to bytes (utf-8) to allow for unicode chars
                     files[category].write(log.encode())
                 except IOError as e:
-                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + files[category].name + ":" + e.__class__.__name__ + "\n" + traceback.format_exc())
+                    print(nowStr + "-[LOG::SAVE]>F_WRT_IOERR: ERROR WRITING TO LOG FILE: " + files[category].name + ":" + type(e).__name__ + "\n" + traceback.format_exc())
                 except UnicodeEncodeError as e:
                     print(e.start)
         
