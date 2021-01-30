@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List, Dict
 if TYPE_CHECKING:
     from ...bbDatabases import bountyDB
-    from ..items import bbShip
+    from ..items import shipItem
 
 import random
 from datetime import datetime, timedelta
@@ -47,15 +47,15 @@ class BountyConfig:
     :vartype builtIn: bool
     :var generated: whether or not this config is ready to be used. The config must verify and generate its attributes before they can be used in a bbBounty.
     :vartype generated: bool
-    :var ship: The bbShip this criminal should equip
-    :vartype ship: bbShip
+    :var ship: The shipItem this criminal should equip
+    :vartype ship: shipItem
     """
 
     def __init__(self, faction : str = "", name : str = "", isPlayer : bool = None,
                     route : List[str] = [], start : str = "", end : str = "",
                     answer : str = "", checked : Dict[str, int] = {}, reward : int = -1,
                     issueTime : float = -1.0, endTime : float = -1.0, icon : str = "",
-                    aliases : List[str] = [], wiki : str = "", ship : bbShip.bbShip = None):
+                    aliases : List[str] = [], wiki : str = "", ship : shipItem.Ship = None):
         """All parameters are optional. If a parameter is not given, it will be randomly generated.
 
         :param faction: The faction owning this bounty
@@ -86,8 +86,8 @@ class BountyConfig:
         :type aliases: list[str]
         :param wiki: The page to link to as the criminal's wiki, in their info embed
         :type wiki: str
-        :param ship: The bbShip this criminal should equip
-        :type ship: bbShip
+        :param ship: The shipItem this criminal should equip
+        :type ship: shipItem
         """
         self.faction = faction.lower()
         self.name = name.title()

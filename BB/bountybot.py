@@ -15,7 +15,7 @@ import os
 from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .gameObjects import shipSkin
 from .gameObjects.bounties import bbCriminal, bbSystem
-from .gameObjects.items import moduleItemFactory, bbShipUpgrade
+from .gameObjects.items import moduleItemFactory, shipItemUpgrade
 from .gameObjects.items.weapons import turretWeapon, primaryWeapon
 from .gameObjects.items.tools import shipSkinTool, toolItemFactory
 from .scheduling import TimedTask
@@ -290,7 +290,7 @@ async def on_ready():
 
     # generate bbUpgrade objects from data in bbData
     for upgradeDict in bbData.builtInUpgradeData.values():
-        bbData.builtInUpgradeObjs[upgradeDict["name"]] = bbShipUpgrade.bbShipUpgrade.fromDict(upgradeDict)
+        bbData.builtInUpgradeObjs[upgradeDict["name"]] = shipItemUpgrade.shipItemUpgrade.fromDict(upgradeDict)
         bbData.builtInUpgradeData[upgradeDict["name"]]["builtIn"] = True
         bbData.builtInUpgradeObjs[upgradeDict["name"]].builtIn = True
 

@@ -4,7 +4,7 @@ from typing import Union, List, TYPE_CHECKING
 if TYPE_CHECKING:
     from .battles import DuelRequest
 
-from .items import bbShip, moduleItemFactory
+from .items import shipItem, moduleItemFactory
 from .items.weapons import primaryWeapon, turretWeapon
 from .items.tools import toolItemFactory, toolItem
 from .items.modules import moduleItem
@@ -19,7 +19,7 @@ from .. import lib
 from ..baseClasses import serializable
 
 
-# Dictionary-serialized bbShip to give to new players
+# Dictionary-serialized shipItem to give to new players
 defaultShipLoadoutDict = {"name": "Betty", "builtIn":True,
                         "weapons":[{"name": "Micro Gun MK I", "builtIn": True}],
                         "modules":[{"name": "Telta Quickscan", "builtIn": True}, {"name": "E2 Exoclad", "builtIn": True}, {"name": "IMT Extract 1.3", "builtIn": True}]}
@@ -45,9 +45,9 @@ class bbUser(serializable.Serializable):
     :vartype systemsChecked: int
     :var bountyWins: The total number of bounties this user has won
     :vartype bountyWins: int
-    :var activeShip: The user's currently equipped bbShip
-    :vartype activeShip: bbShip
-    :var inactiveShips: The bbShips currently in this user's inventory (unequipped)
+    :var activeShip: The user's currently equipped shipItem
+    :vartype activeShip: shipItem
+    :var inactiveShips: The shipItems currently in this user's inventory (unequipped)
     :vartype inactiveShips: inventory
     :var inactiveModules: The moduleItems currently in this user's inventory (unequipped)
     :vartype inactiveModules: inventory
@@ -89,7 +89,7 @@ class bbUser(serializable.Serializable):
 
     def __init__(self, id : int, credits : int = 0, lifetimeCredits : int = 0, 
                     bountyCooldownEnd : int = -1, systemsChecked : int = 0, bountyWins : int = 0, activeShip : bool = None,
-                    inactiveShips : inventory.Inventory = inventory.TypeRestrictedInventory(bbShip.bbShip),
+                    inactiveShips : inventory.Inventory = inventory.TypeRestrictedInventory(shipItem.Ship),
                     inactiveModules : inventory.Inventory = inventory.TypeRestrictedInventory(moduleItem.ModuleItem),
                     inactiveWeapons : inventory.Inventory = inventory.TypeRestrictedInventory(primaryWeapon.PrimaryWeapon),
                     inactiveTurrets : inventory.Inventory = inventory.TypeRestrictedInventory(turretWeapon.TurretWeapon),
@@ -105,8 +105,8 @@ class bbUser(serializable.Serializable):
         :param float bountyCooldownEnd: A utc timestamp representing when the user's cmd_check cooldown is due to expire (Default -1)
         :param int systemsChecked: The total number of space systems this user has checked (Default 0)
         :param int bountyWins: The total number of bounties this user has won (Default 0)
-        :param bbShip activeShip: The user's currently equipped bbShip (Default None)
-        :param inventory inactiveShips: The bbShips currently in this user's inventory (unequipped) (Default empty inventory)
+        :param shipItem activeShip: The user's currently equipped shipItem (Default None)
+        :param inventory inactiveShips: The shipItems currently in this user's inventory (unequipped) (Default empty inventory)
         :param inventory inactiveModules: The moduleItems currently in this user's inventory (unequipped) (Default empty inventory)
         :param inventory inactiveWeapons: The primaryWeapons currently in this user's inventory (unequipped) (Default empty inventory)
         :param inventory inactiveTurrets: The turretWeapons currently in this user's inventory (unequipped) (Default empty inventory)
@@ -226,7 +226,7 @@ class bbUser(serializable.Serializable):
         self.bountyCooldownEnd = -1
         self.systemsChecked = 0
         self.bountyWins = 0
-        self.activeShip = bbShip.bbShip.fromDict(defaultShipLoadoutDict)
+        self.activeShip = shipItem.Ship.fromDict(defaultShipLoadoutDict)
         self.inactiveModules.clear()
         self.inactiveShips.clear()
         self.inactiveWeapons.clear()
@@ -310,16 +310,16 @@ class bbUser(serializable.Serializable):
             raise NotImplementedError("Valid but unsupported item name: " + item)
 
 
-    def unequipAll(self, ship : bbShip.bbShip):
-        """Unequip all items from the given bbShip, and move them into the user's inactive items ('hangar')
+    def unequipAll(self, ship : shipItem.Ship):
+        """Unequip all items from the given shipItem, and move them into the user's inactive items ('hangar')
         The user must own ship.
 
-        :param bbShip ship: the ship whose items to transfer to storage
-        :raise TypeError: When given any other type than bbShip
-        :raise RuntimeError: when given a bbShip that is not owned by this user
+        :param shipItem ship: the ship whose items to transfer to storage
+        :raise TypeError: When given any other type than shipItem
+        :raise RuntimeError: when given a shipItem that is not owned by this user
         """
-        if not type(ship) == bbShip.bbShip:
-            raise TypeError("Can only unequipAll from a bbShip. Given " + str(type(ship)))
+        if not type(ship) == shipItem.Ship:
+            raise TypeError("Can only unequipAll from a shipItem. Given " + str(type(ship)))
 
         if not self.ownsShip(ship):
             raise RuntimeError("Attempted to unequipAll on a ship that isnt owned by this bbUser")
@@ -359,23 +359,23 @@ class bbUser(serializable.Serializable):
             self.inactiveModules.addItem(currentModule)
             
 
-    def ownsShip(self, ship : bbShip.bbShip):
-        """Decide whether or not this user owns the given bbShip.
+    def ownsShip(self, ship : shipItem.Ship):
+        """Decide whether or not this user owns the given shipItem.
 
-        :param bbShip ship: The ship to test for ownership
+        :param shipItem ship: The ship to test for ownership
         :return: True if ship is either equipped or in this user's hanger. False otherwise
         :rtype: bool
         """
         return self.activeShip is ship or ship in self.inactiveShips
 
 
-    def equipShipObj(self, ship : bbShip.bbShip, noSaveActive : bool = False):
+    def equipShipObj(self, ship : shipItem.Ship, noSaveActive : bool = False):
         """Equip the given ship, replacing the active ship.
         Give noSaveActive=True to delete the currently equipped ship.
 
-        :param bbShip ship: The ship to equip. Must be owned by this user
+        :param shipItem ship: The ship to equip. Must be owned by this user
         :param bool noSaveActive: Give True to delete the currently equipped ship. Give False to move the active ship to the hangar. (Default False)
-        :raise RuntimeError: When given a bbShip that is not owned by this user
+        :raise RuntimeError: When given a shipItem that is not owned by this user
         """
         if not self.ownsShip(ship):
             raise RuntimeError("Attempted to equip a ship that isnt owned by this bbUser")
@@ -667,7 +667,7 @@ class bbUser(serializable.Serializable):
 
 
     def getInventoryForItem(self, item):
-        if isinstance(item, bbShip.bbShip):
+        if isinstance(item, shipItem.Ship):
             return self.inactiveShips
         elif isinstance(item, primaryWeapon.PrimaryWeapon):
             return self.inactiveWeapons
@@ -699,12 +699,12 @@ class bbUser(serializable.Serializable):
             raise NameError("Required kwarg not given: id")
         id = kwargs["id"]
 
-        activeShip = bbShip.bbShip.fromDict(userDict["activeShip"])
+        activeShip = shipItem.Ship.fromDict(userDict["activeShip"])
 
-        inactiveShips = inventory.TypeRestrictedInventory(bbShip.bbShip)
+        inactiveShips = inventory.TypeRestrictedInventory(shipItem.Ship)
         if "inactiveShips" in userDict:
             for shipListingDict in userDict["inactiveShips"]:
-                inactiveShips.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
+                inactiveShips.addItem(shipItem.Ship.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
         inactiveWeapons = inventory.TypeRestrictedInventory(primaryWeapon.PrimaryWeapon)
         if "inactiveWeapons" in userDict:

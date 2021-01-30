@@ -4,7 +4,7 @@ from typing import List
 
 from ...bbConfig import bbData
 from ...baseClasses import aliasable
-from ..items import bbShip
+from ..items import shipItem
 
 class Criminal (aliasable.Aliasable):
     """
@@ -25,7 +25,7 @@ class Criminal (aliasable.Aliasable):
     :var builtIn: If this criminal is an NPC, are they built in or custom?
     :vartype builtIn: bool
     :var ship: The ship equipped by this criminal
-    :vartype ship: bbShip
+    :vartype ship: shipItem
     :var hasShip: Whether this criminal has a ship equipped or not
     :vartype hasShip: bool
     """
@@ -39,7 +39,7 @@ class Criminal (aliasable.Aliasable):
         :param str wiki: A URL pointing to a web page to use as this criminal's wiki page in their info embed
         :param bool isPlayer: Whether this criminal is a player or an NPC
         :param bool builtIn: If this criminal is an NPC, are they built in or custom?
-        :param bbShip ship: The ship equipped by this criminal
+        :param shipItem ship: The ship equipped by this criminal
         :param list[str] aliases: Alias names that can be used to refer to this criminal
         """
         super(Criminal, self).__init__(name, aliases)
@@ -86,10 +86,10 @@ class Criminal (aliasable.Aliasable):
         self.hasShip = False
 
 
-    def equipShip(self, ship : bbShip):
+    def equipShip(self, ship : shipItem):
         """Equip the given ship, by reference to the given object
 
-        :param bbShip ship: The ship to equip
+        :param shipItem ship: The ship to equip
         :raise RuntimeError: If the criminal already has a ship equipped
         """
         if self.hasShip:
@@ -98,15 +98,15 @@ class Criminal (aliasable.Aliasable):
         self.hasShip = True
 
     
-    def copyShip(self, ship : bbShip):
+    def copyShip(self, ship : shipItem):
         """Equip the given ship, by taking a deep copy of the given object
 
-        :param bbShip ship: The ship to equip
+        :param shipItem ship: The ship to equip
         :raise RuntimeError: If the criminal already has a ship equipped
         """
         if self.hasShip:
             raise RuntimeError("CRIM_COPYSH_HASSH: Attempted to copyShip on a Criminal that already has an active ship")
-        self.ship = bbShip.bbShip.fromDict(ship.toDict())
+        self.ship = shipItem.Ship.fromDict(ship.toDict())
         self.hasShip = True
 
 

@@ -6,7 +6,7 @@ from typing import List
 
 @spawnableItem
 class PrimaryWeapon(GameItem):
-    """A primary weapon that can be equipped onto a bbShip for use in duels.
+    """A primary weapon that can be equipped onto a shipItem for use in duels.
 
     :var dps: The weapon's damage per second to a target ship.
     :vartype dps: float

@@ -2,7 +2,7 @@ from .BattleShip import BattleShip
 from .BattleShipState import BattleShipState
 import random
 from ...bbConfig import bbConfig
-from ..items import bbShip
+from ..items import shipItem
 
 # ⚠⚠ This file is currently unused and a work in progress
 
@@ -20,13 +20,13 @@ class ShipFight:
     :vartype battleState: list[BattleShipState]
     """
 
-    def __init__(self, bbShip1 : bbShip.bbShip, bbShip2 : bbShip.bbShip):
+    def __init__(self, shipItem1 : shipItem.Ship, shipItem2 : shipItem.Ship):
         """
-        :param bbShip bbShip1: One of the bbShips participating in this fight
-        :param bbShip bbShip2: One of the bbShips participating in this fight
+        :param shipItem shipItem1: One of the shipItems participating in this fight
+        :param shipItem shipItem2: One of the shipItems participating in this fight
         """
-        self.ship1 = BattleShip(bbShip1)
-        self.ship2 = BattleShip(bbShip2)
+        self.ship1 = BattleShip(shipItem1)
+        self.ship2 = BattleShip(shipItem2)
         self.battleLog = []
         self.battleState = []
 
@@ -34,10 +34,10 @@ class ShipFight:
     def fightShips(self, variancePercent : float) -> dict:
         """
         Simulate the fight.
-        Returns a dictionary containing a reference to the winning bbShip, as well as the battleLog.
+        Returns a dictionary containing a reference to the winning shipItem, as well as the battleLog.
 
         :param float variancePercent: The percentage to vary ship statistics by, e.g 0.5 for 50% random stat variance
-        :return: A dictionary containing the winning bbShip and the battleLog
+        :return: A dictionary containing the winning shipItem and the battleLog
         :rtype: dict
         """
         # Fetch ship total DPSs
@@ -51,11 +51,11 @@ class ShipFight:
         if ship1DPS == 0:
             if ship2DPS == 0:
                 return {"winningShip": None, "battleLog":["Both ships have zero DPS!"]}
-            return {"winningShip": self.ship2.bbShip, "battleLog":["{PILOT1NAME} has zero DPS!"]}
+            return {"winningShip": self.ship2.shipItem, "battleLog":["{PILOT1NAME} has zero DPS!"]}
         if ship2DPS == 0:
             if ship1DPS == 0:
                 return {"winningShip": None, "battleLog":["Both ships have zero DPS!"]}
-            return {"winningShip": self.ship1.bbShip, "battleLog":["{PILOT2NAME} has zero DPS!"]}
+            return {"winningShip": self.ship1.shipItem, "battleLog":["{PILOT2NAME} has zero DPS!"]}
 
 
         ship1EstimatedTTK = (self.ship1.hull + self.ship1.armour + self.ship1.shield) / self.ship2.dps
@@ -204,7 +204,7 @@ class ShipFight:
         # else:
         #     return None
 
-        return {"winningShip": None if winningShip is None else winningShip.bbShip, "battleLog":self.battleLog}
+        return {"winningShip": None if winningShip is None else winningShip.shipItem, "battleLog":self.battleLog}
 
 
         """

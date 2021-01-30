@@ -5,14 +5,14 @@ if TYPE_CHECKING:
     from .modules import moduleItem
 
 from .gameItem import GameItem, spawnableItem
-from . import bbShipUpgrade, moduleItemFactory
+from . import shipItemUpgrade, moduleItemFactory
 from .weapons import primaryWeapon, turretWeapon
 from .. import shipSkin
 from ...bbConfig import bbConfig, bbData
 from ... import lib
 
 @spawnableItem
-class bbShip(GameItem):
+class Ship(GameItem):
     """An equippable and customisable ship for use by players and NPCs.
 
     :var hasNickname: whether or not this ship has a nickname
@@ -44,9 +44,9 @@ class bbShip(GameItem):
     :var turrets: A list containing references to all turret objects equipped by this ship. May contain duplicate references
                     to save on memory.
     :vartype turrets: list[turretWeapon]
-    :var upgradesApplied: A list containing references to all bbShipUpgrades objects applied to this ship. May contain
+    :var upgradesApplied: A list containing references to all shipItemUpgrades objects applied to this ship. May contain
                     duplicate references to save on memory.
-    :vartype upgradesApplied: list[bbShipUpgrade]
+    :vartype upgradesApplied: list[shipItemUpgrade]
     :var skin: The name of the skin applied to this ship
     :vartype skin: str
     """
@@ -56,7 +56,7 @@ class bbShip(GameItem):
                     cargo : int = 0, numSecondaries : int = 0, handling : int = 0,
                     value : int = 0, aliases : List[str] = [], weapons : List[primaryWeapon.PrimaryWeapon] = [],
                     modules : List[moduleItem.ModuleItem] = [], turrets : List[turretWeapon.TurretWeapon] = [],
-                    wiki : str = "", upgradesApplied : List[bbShipUpgrade.bbShipUpgrade] = [], nickname : str = "",
+                    wiki : str = "", upgradesApplied : List[shipItemUpgrade.shipItemUpgrade] = [], nickname : str = "",
                     icon : str = "", emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1,
                     shopSpawnRate : float = 0, builtIn : bool = False, skin : str = ""):
         """
@@ -77,7 +77,7 @@ class bbShip(GameItem):
                                             May contain duplicate references to save on memory. (Default [])
         :param list[turretWeapon] turrets: A list containing references to all turret objects equipped by this ship.
                                             May contain duplicate references to save on memory. (Default [])
-        :param list[bbShipUpgrade] upgradesApplied: A list containing references to all bbShipUpgrades objects applied to this
+        :param list[shipItemUpgrade] upgradesApplied: A list containing references to all shipItemUpgrades objects applied to this
                                                     ship. May contain duplicate references to save on memory. (Default [])
         :param int value: The number of credits this ship can be bought/sold for at base value at a shop. does not
                             include any modifications or equipped items. (Default 0)
@@ -94,7 +94,7 @@ class bbShip(GameItem):
                                     (i.e its spawn probability for a shop of the same techLevel) (Default 0)
         :param str skin: The name of the skin applied to the ship 
         """
-        super(bbShip, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji,
+        super(Ship, self).__init__(name, aliases, value=value, wiki=wiki, manufacturer=manufacturer, icon=icon, emoji=emoji,
                                         techLevel=techLevel, builtIn=builtIn)
 
         # TODO: Log to bbLogger in these cases
@@ -585,11 +585,11 @@ class bbShip(GameItem):
         return total
 
     
-    def applyUpgrade(self, upgrade : bbShipUpgrade):
+    def applyUpgrade(self, upgrade : shipItemUpgrade):
         """Apply the given ship upgrade, locking it and its stats into the ship.
         Ship upgrades cannot be removed.
 
-        :param bbShipUpgrade upgrade: the upgrade to apply
+        :param shipItemUpgrade upgrade: the upgrade to apply
         """
         self.upgradesApplied.append(upgrade)
 
@@ -634,15 +634,15 @@ class bbShip(GameItem):
         return (skinStr + self.name) if not self.hasNickname else (skinStr + self.nickname + " (" + self.name + ")")
 
 
-    def transferItemsTo(self, other : bbShip):
+    def transferItemsTo(self, other : Ship):
         """Attempt to transfer as many equipped items as possible from this ship to another one.
         If there is not enough space to transfer any items, they will remain on this ship.
 
-        :param bbShip other: The ship to transfer items to
-        :raise TypeError: When given any type other than bbShip
+        :param shipItem other: The ship to transfer items to
+        :raise TypeError: When given any type other than shipItem
         """
-        if not isinstance(other, bbShip):
-            raise TypeError("Can only transfer items to another bbShip. Given " + str(type(other)))
+        if not isinstance(other, Ship):
+            raise TypeError("Can only transfer items to another shipItem. Given " + str(type(other)))
 
         while self.hasWeaponsEquipped() and other.canEquipMoreWeapons():
             other.equipWeapon(self.weapons.pop(0))
@@ -774,14 +774,14 @@ class bbShip(GameItem):
 
 
     def toDict(self, **kwargs) -> dict:
-        """Serialize this bbShip into dictionary format, for saving to file. Includes all equiped items and upgrades
+        """Serialize this shipItem into dictionary format, for saving to file. Includes all equiped items and upgrades
 
         :param bool saveType: When true, include the string name of the object type in the output.
         :return: A dictionary containing all information needed to reconstruct this ship. If the module is builtIn,
                     several statistics are omitted to save space.
         :rtype: dict
         """
-        itemDict = super(bbShip, self).toDict(**kwargs)
+        itemDict = super(Ship, self).toDict(**kwargs)
 
         weaponsList = []
         for weapon in self.weapons:
@@ -823,22 +823,22 @@ class bbShip(GameItem):
     def __str__(self) -> str:
         """Get a short string identifying the ship. Currenly only includes the ship name (type)
 
-        :return: A short string identifying this bbShip object
+        :return: A short string identifying this shipItem object
         :rtype: str
         """
-        return "<bbShip: " + self.name + ">"
+        return "<shipItem: " + self.name + ">"
 
 
     @classmethod
-    def fromDict(cls, shipDict : dict, **kwargs) -> bbShip:
-        """Factory function constructing a new bbShip object from the given dictionary representation -
-        the opposite of bbShip.toDict
+    def fromDict(cls, shipDict : dict, **kwargs) -> Ship:
+        """Factory function constructing a new shipItem object from the given dictionary representation -
+        the opposite of shipItem.toDict
         As with most other item fromDict functions, all missing information for builtIn ships is replaced
         by data from the corresponding bbData entry.
 
         :param dict shipDict: A dictionary containing all information required to construct the requested ship
-        :return: A new bbShip object as described in shipDict
-        :rtype: bbShip
+        :return: A new shipItem object as described in shipDict
+        :rtype: shipItem
         """
         weapons = []
         if "weapons" in shipDict:
@@ -858,7 +858,7 @@ class bbShip(GameItem):
         shipUpgrades = []
         if "shipUpgrades" in shipDict:
             for shipUpgrade in shipDict["shipUpgrades"]:
-                shipUpgrades.append(bbShipUpgrade.bbShipUpgrade.fromDict(shipUpgrade))
+                shipUpgrades.append(shipItemUpgrade.shipItemUpgrade.fromDict(shipUpgrade))
         
         if shipDict["builtIn"]:
             builtInDict = bbData.builtInShipData[shipDict["name"]]
@@ -881,9 +881,9 @@ class bbShip(GameItem):
             builtInShipUpgrades = []
             if "shipUpgrades" in shipDict:
                 for shipUpgrade in shipDict["shipUpgrades"]:
-                    builtInShipUpgrades.append(bbShipUpgrade.bbShipUpgrade.fromDict(shipUpgrade))
+                    builtInShipUpgrades.append(shipItemUpgrade.shipItemUpgrade.fromDict(shipUpgrade))
 
-            newShip = bbShip(builtInDict["name"], builtInDict["maxPrimaries"], builtInDict["maxTurrets"],
+            newShip = Ship(builtInDict["name"], builtInDict["maxPrimaries"], builtInDict["maxTurrets"],
                         builtInDict["maxModules"],
                         manufacturer=shipDict["manufacturer"] if "manufacturer" in shipDict else builtInDict["manufacturer"] \
                                         if "manufacturer" in builtInDict else "",
@@ -922,7 +922,7 @@ class bbShip(GameItem):
             return newShip
 
         else:
-            return bbShip(shipDict["name"], shipDict["maxPrimaries"], shipDict["maxTurrets"], shipDict["maxModules"],
+            return Ship(shipDict["name"], shipDict["maxPrimaries"], shipDict["maxTurrets"], shipDict["maxModules"],
                             manufacturer=shipDict["manufacturer"] if "manufacturer" in shipDict else "",
                             armour=shipDict["armour"] if "armour" in shipDict else 0,
                             cargo=shipDict["cargo"] if "cargo" in shipDict else 0,

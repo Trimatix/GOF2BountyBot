@@ -4,7 +4,7 @@ from . import commandsDB as bbCommands
 from .. import lib, bbGlobals
 from ..bbConfig import bbConfig, bbData
 from ..gameObjects import bbUser
-from ..gameObjects.items import bbShip
+from ..gameObjects.items import shipItem
 
 
 bbCommands.addHelpSection(0, "loadout")
@@ -224,7 +224,7 @@ async def cmd_loadout(message : discord.Message, args : str, isDM : bool):
             useDummyData = True
 
     if useDummyData:
-        activeShip = bbShip.bbShip.fromDict(bbUser.defaultShipLoadoutDict)
+        activeShip = shipItem.Ship.fromDict(bbUser.defaultShipLoadoutDict)
         loadoutEmbed = lib.discordUtil.makeEmbed(titleTxt="Loadout", desc=requestedUser.mention, col=bbData.factionColours[activeShip.manufacturer] if activeShip.manufacturer in bbData.factionColours else bbData.factionColours[
                                  "neutral"], thumb=activeShip.icon if activeShip.hasIcon else requestedUser.avatar_url_as(size=64))
         loadoutEmbed.add_field(name="Active Ship:", value=activeShip.name +

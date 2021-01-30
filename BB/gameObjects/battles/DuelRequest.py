@@ -4,7 +4,7 @@ from discord import Embed, User, Message
 from .. import bbUser
 from ...scheduling import TimedTask
 from .. import bbGuild
-from ..items import bbShip
+from ..items import shipItem
 import random
 
 
@@ -63,12 +63,12 @@ class DuelRequest:
 
 
 # ⚠⚠⚠ THIS FUNCTION IS MARKED FOR CHANGE
-def fightShips(ship1 : bbShip.bbShip, ship2 : bbShip.bbShip, variancePercent : float) -> dict:
+def fightShips(ship1 : shipItem.Ship, ship2 : shipItem.Ship, variancePercent : float) -> dict:
     """Simulate a duel between two ships.
     Returns a dictionary containing statistics about the duel, as well as a reference to the winning ship. 
 
-    :param bbShip ship1: One of the ships partaking in the duel 
-    :param bbShip ship2: One of the ships partaking in the duel
+    :param shipItem ship1: One of the ships partaking in the duel 
+    :param shipItem ship2: One of the ships partaking in the duel
     :param float variancePercent: The amount of random variance to apply to ship statistics, as a float percentage (e.g 0.5 for 50% random variance lll)
     :return: A dictionary containing statistics about the duel, as well as a reference to the winning ship.
     :rtype: dict

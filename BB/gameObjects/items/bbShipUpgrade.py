@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 from ...bbConfig import bbData
-from . import bbShip
+from . import shipItem
 from ...baseClasses import serializable
 
 
-class bbShipUpgrade(serializable.Serializable):
-    """A ship upgrade that can be applied to bbShips, but cannot be unapplied again.
+class shipItemUpgrade(serializable.Serializable):
+    """A ship upgrade that can be applied to shipItems, but cannot be unapplied again.
     There is no technical reason why a ship upgrade could not be removed, but from a game design perspective, it adds extra value and strategy to the decision to apply an upgrade.
 
     :var wiki: A web page to present as the upgrade's wikipedia article in its info page
@@ -119,20 +119,20 @@ class bbShipUpgrade(serializable.Serializable):
         self.builtIn = builtIn
 
 
-    def __eq__(self, other : bbShipUpgrade) -> bool:
+    def __eq__(self, other : shipItemUpgrade) -> bool:
         """Decide whether two ship upgrades are the same, based purely on their name and object type.
 
-        :param bbShipUpgrade other: The upgrade to compare this one against.
-        :return: True if other is a bbShipUpgrade instance, and shares the same name as this upgrade
+        :param shipItemUpgrade other: The upgrade to compare this one against.
+        :return: True if other is a shipItemUpgrade instance, and shares the same name as this upgrade
         :rtype: bool
         """
         return type(self) == type(other) and self.name == other.name
 
     
-    def valueForShip(self, ship : bbShip.bbShip) -> int:
+    def valueForShip(self, ship : shipItem.Ship) -> int:
         """Calculate the value of this ship upgrade, when it is to be applied to the given ship
 
-        :param bbShip ship: The ship that the upgrade is to be applied to
+        :param shipItem ship: The ship that the upgrade is to be applied to
         :return: The number of credits at which this upgrade is valued when being applied to ship
         :rtype: int
         """
@@ -140,7 +140,7 @@ class bbShipUpgrade(serializable.Serializable):
 
     
     def toDict(self, **kwargs) -> dict:
-        """Serialize this bbShipUpgrade into a dictionary for saving to file
+        """Serialize this shipItemUpgrade into a dictionary for saving to file
         Contains all information needed to reconstruct this upgrade. If the upgrade is builtIn, this includes only the upgrade name.
 
         :return: A dictionary-serialized representation of this upgrade
@@ -246,18 +246,18 @@ class bbShipUpgrade(serializable.Serializable):
 
 
     @classmethod
-    def fromDict(cls, upgradeDict : dict, **kwargs) -> bbShipUpgrade:
-        """Factory function reconstructing a bbShipUpgrade object from its dictionary-serialized representation. The opposite of bbShipUpgrade.toDict
+    def fromDict(cls, upgradeDict : dict, **kwargs) -> shipItemUpgrade:
+        """Factory function reconstructing a shipItemUpgrade object from its dictionary-serialized representation. The opposite of shipItemUpgrade.toDict
         If the upgrade is builtIn, return a reference to the pre-constructed upgrade object.
 
-        :param dict upgradeDict: A dictionary containing all information needed to produce the required bbShipUpgrade
-        :return: A bbShipUpgrade object as described by upgradeDict
-        :rtype: bbShipUpgrade
+        :param dict upgradeDict: A dictionary containing all information needed to produce the required shipItemUpgrade
+        :return: A shipItemUpgrade object as described by upgradeDict
+        :rtype: shipItemUpgrade
         """
         if upgradeDict["builtIn"]:
             return bbData.builtInUpgradeObjs[upgradeDict["name"]]
         else:
-            return bbShipUpgrade(upgradeDict["name"], upgradeDict["shipToUpgradeValueMult"], armour=upgradeDict["armour"] if "armour" in upgradeDict else 0.0,
+            return shipItemUpgrade(upgradeDict["name"], upgradeDict["shipToUpgradeValueMult"], armour=upgradeDict["armour"] if "armour" in upgradeDict else 0.0,
                                     armourMultiplier=upgradeDict["armourMultiplier"] if "armourMultiplier" in upgradeDict else 1.0,
                                     cargo=upgradeDict["cargo"] if "cargo" in upgradeDict else 0,
                                     cargoMultiplier=upgradeDict["cargoMultiplier"] if "cargoMultiplier" in upgradeDict else 1.0,

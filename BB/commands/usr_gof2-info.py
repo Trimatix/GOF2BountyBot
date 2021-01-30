@@ -5,7 +5,7 @@ import asyncio
 from . import commandsDB as bbCommands
 from ..bbConfig import bbData, bbConfig
 from .. import lib, bbGlobals
-from ..gameObjects.items import bbShip
+from ..gameObjects.items import shipItem
 from ..reactionMenus import ReactionSkinRegionPicker
 from ..logging import bbLogger
 from ..shipRenderer import shipRenderer
@@ -219,7 +219,7 @@ async def cmd_info_ship(message : discord.Message, args : str, isDM : bool):
     itemName = args.title()
     itemObj = None
     for ship in bbData.builtInShipData.values():
-        shipObj = bbShip.bbShip.fromDict(ship)
+        shipObj = shipItem.Ship.fromDict(ship)
         if shipObj.isCalled(itemName):
             itemObj = shipObj
 
@@ -639,7 +639,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
     itemName = args.rstrip(" ").title()	
     itemObj = None	
     for ship in bbData.builtInShipData.values():	
-        shipObj = bbShip.bbShip.fromDict(ship)	
+        shipObj = shipItem.Ship.fromDict(ship)	
         if shipObj.isCalled(itemName):	
             itemObj = shipObj	
     # report unrecognised ship names	

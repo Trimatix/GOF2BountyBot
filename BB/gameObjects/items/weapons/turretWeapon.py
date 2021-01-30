@@ -7,7 +7,7 @@ from typing import List
 
 @spawnableItem
 class TurretWeapon(GameItem):
-    """A turret that can be equipped onto a bbShip for use in duels.
+    """A turret that can be equipped onto a shipItem for use in duels.
 
     :var dps: The turret's damage per second to a target ship.
     :vartype dps: float

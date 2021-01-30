@@ -59,7 +59,7 @@ def compositeTextures(outTexPath : str, shipPath : str, textures : Dict[int, str
     """Combine a list of textures into a single image, with respect to masks provided in shipPath.
 
     :param str outTexPath: Path to which the resulting texture should be saved, including file name and extension
-    :param str shipPath: Path to the bbShip being rendered
+    :param str shipPath: Path to the shipItem being rendered
     :param Dict[int, str] textures: Dictionary associating mask indices to texture file paths to composite. If a mask index is not in textures or disabledLayers, the default texture for that region will be used. The first element corresponds to the underlayer to render beneith the ship's base texture (foreground elements). All (currently 2) remaining textures are overlayed with respect to the ship's texture region masks.
     :param List[int] disabledLayers: List of texture regions to 'disable' - setting them to the bottom texture. TODO: Instead of doing this by recompositing the bottom texture, just iterate through disabled layers and apply masks. Apply bottom texture at the end.
     """
@@ -116,7 +116,7 @@ async def renderShip(skinName : str, shipPath : str, shipModelName : str, textur
     The resulting image is cropped to content and saved in shipPath + "/skins/" + skinName.jpg
 
     :param str skinName: The name of the skin being rendered. Depicts the name of the output file.
-    :param str shipPath: Path to the bbShip being rendered. Must contain shipModelName
+    :param str shipPath: Path to the shipItem being rendered. Must contain shipModelName
     :param str shipModelName: The name of the model file to render. Not a path. Must be contained within shipPath
     :param Dict[int, str] textures: Dictionary associating mask indices to texture file paths to composite. If a mask index is not in textures or disabledLayers, the default texture for that region will be used. The first element corresponds to the underlayer to render beneith the ship's base texture (foreground elements). All (currently 2) remaining textures are overlayed with respect to the ship's texture region masks.
     :param List[int] disabledLayers: List of texture regions to 'disable' - setting them to the bottom texture.

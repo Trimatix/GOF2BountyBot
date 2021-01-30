@@ -3,7 +3,7 @@ from . import toolItem
 from .... import lib
 from ....bbConfig import bbConfig, bbData
 from ... import shipSkin
-from ..bbShip import bbShip
+from ..shipItem import Ship
 from discord import Message
 from .... import bbGlobals
 from ..gameItem import spawnableItem
@@ -47,8 +47,8 @@ class ShipSkinTool(toolItem.ToolItem):
         """
         if "ship" not in kwargs:
             raise NameError("Required kwarg not given: ship")
-        if not isinstance(kwargs["ship"], bbShip):
-            raise TypeError("Required kwarg is of the wrong type. Expected bbShip, received "
+        if not isinstance(kwargs["ship"], Ship):
+            raise TypeError("Required kwarg is of the wrong type. Expected shipItem, received "
                             + type(kwargs["ship"]).__name__)
         if "callingBBUser" not in kwargs:
             raise NameError("Required kwarg not given: callingBBUser")
@@ -83,8 +83,8 @@ class ShipSkinTool(toolItem.ToolItem):
         """
         if "ship" not in kwargs:
             raise NameError("Required kwarg not given: ship")
-        if not isinstance(kwargs["ship"], bbShip):
-            raise TypeError("Required kwarg is of the wrong type. Expected bbShip, received "
+        if not isinstance(kwargs["ship"], Ship):
+            raise TypeError("Required kwarg is of the wrong type. Expected shipItem, received "
                             + type(kwargs["ship"]).__name__)
         if "callingBBUser" not in kwargs:
             raise NameError("Required kwarg not given: callingBBUser")

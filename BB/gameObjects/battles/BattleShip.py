@@ -1,5 +1,5 @@
 from ..items.modules import cloakModule
-from ..items import bbShip
+from ..items import shipItem
 
 
 class BattleShip:
@@ -7,22 +7,22 @@ class BattleShip:
     The ship has three health pools; hull, armour and shield.
     """
 
-    def __init__(self, bbShip : bbShip.bbShip):
+    def __init__(self, shipItem : shipItem.Ship):
         """
-        :param bbShip bbShip: The bbShip for this BattleShip to inherit stats from
+        :param shipItem shipItem: The shipItem for this BattleShip to inherit stats from
         """
-        self.bbShip = bbShip
-        self.hull = bbShip.armour
-        self.armour = bbShip.getArmour() - self.hull
-        self.shield = bbShip.getShield()
-        self.dps = bbShip.getDPS()
+        self.shipItem = shipItem
+        self.hull = shipItem.armour
+        self.armour = shipItem.getArmour() - self.hull
+        self.shield = shipItem.getShield()
+        self.dps = shipItem.getDPS()
         self.cloaks = []
         self.EMPs = []
         self.remainingCloak = 0
         self.cloaking = False
         self.EMPCooldown = 0
         # TODO: Update to use only one cloak module per ship
-        for module in bbShip.modules:
+        for module in shipItem.modules:
             if isinstance(module, cloakModule):
                 self.cloaks += module
     

@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from . import bbUser
 
 from ..bbConfig import bbData, bbConfig
-from .items import moduleItemFactory, bbShip, gameItem
+from .items import moduleItemFactory, shipItem, gameItem
 from .items.weapons import primaryWeapon, turretWeapon
 from .items.modules import moduleItem
 from . import inventory
@@ -106,7 +106,7 @@ class bbShop(serializable.Serializable):
         for i in range(self.maxShips):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
             if len(bbData.shipKeysByTL[itemTL - 1]) != 0:
-                self.shipsStock.addItem(bbShip.bbShip.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL - 1])]))
+                self.shipsStock.addItem(shipItem.Ship.fromDict(bbData.builtInShipData[random.choice(bbData.shipKeysByTL[itemTL - 1])]))
 
         for i in range(self.maxModules):
             itemTL = bbConfig.pickRandomItemTL(self.currentTechLevel)
@@ -172,12 +172,12 @@ class bbShop(serializable.Serializable):
         return self.userCanAffordItemObj(user, self.shipsStock[index].item)
 
 
-    def amountCanAffordShipObj(self, amount : int, ship : bbShip.bbShip) -> bool:
+    def amountCanAffordShipObj(self, amount : int, ship : shipItem.Ship) -> bool:
         """Decide whether amount of credits is enough to buy a ship from the shop's stock.
         This is used for checking whether a user would be able to afford a ship, if they sold their active one.
 
         :param int amount: The amount of credits to check against the ship's value
-        :param bbShip ship: ship object whose value to check against credits
+        :param shipItem ship: ship object whose value to check against credits
         :return: True if amount is at least as much as ship's value, false otherwise
         :rtype: bool
         """
@@ -206,12 +206,12 @@ class bbShop(serializable.Serializable):
         self.userBuyShipObj(user, self.shipsStock[index].item)
         
         
-    def userBuyShipObj(self, user : bbUser.bbUser, requestedShip : bbShip.bbShip):
+    def userBuyShipObj(self, user : bbUser.bbUser, requestedShip : shipItem.Ship):
         """Sell the given ship to the given user,
         removing the appropriate balance of credits fromt the user and adding the item into the user's inventory.
 
         :param bbUser user: The user attempting to buy the ship
-        :param bbShip requestedWeapon: The ship to sell to user
+        :param shipItem requestedWeapon: The ship to sell to user
         :raise RuntimeError: If user cannot afford to buy requestedWeapon
         """
         if self.userCanAffordItemObj(user, requestedShip):
@@ -222,12 +222,12 @@ class bbShop(serializable.Serializable):
             raise RuntimeError("user " + str(user.id) + " attempted to buy ship " + requestedShip.name + " but can't afford it: " + str(user.credits) + " < " + str(requestedShip.getValue()))
 
 
-    def userSellShipObj(self, user : bbUser.bbUser, ship : bbShip.bbShip):
+    def userSellShipObj(self, user : bbUser.bbUser, ship : shipItem.Ship):
         """Buy the given ship from the given user,
         adding the appropriate credits to their balance and adding the ship to the shop stock.
 
         :param bbUser user: The user to buy ship from
-        :param bbShip weapon: The ship to buy from user
+        :param shipItem weapon: The ship to buy from user
         """
         user.credits += ship.getValue()
         self.shipsStock.addItem(ship)
@@ -477,7 +477,7 @@ class bbShop(serializable.Serializable):
         """
         shipsStock = inventory.Inventory()
         for shipListingDict in shopDict["shipsStock"]:
-            shipsStock.addItem(bbShip.bbShip.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
+            shipsStock.addItem(shipItem.Ship.fromDict(shipListingDict["item"]), quantity=shipListingDict["count"])
 
         weaponsStock = inventory.Inventory()
         for weaponListingDict in shopDict["weaponsStock"]:

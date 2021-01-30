@@ -87,7 +87,7 @@ rocketIcon = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/
 # colours to use in faction-related embed strips
 factionColours = {"terran":Colour.gold(), "vossk":Colour.dark_green(), "midorian":Colour.dark_red(), "nivelian":Colour.dark_blue(), "neutral":Colour.purple()}
 
-# Data representing all ship items in the game. These are used to create bbShip objects, which are stored in builtInShipObjs in a similar dict format.
+# Data representing all ship items in the game. These are used to create shipItem objects, which are stored in builtInShipObjs in a similar dict format.
 # Ships to not have tech levels in GOF2, so tech levels will be automaticaly generated for the sake of the bot during bbConfig package init.
 builtInShipData = {}
 
@@ -358,7 +358,7 @@ builtInWeaponData = {   # Lasers
                         "Berger FlaK 9-9": {"name": "Berger FlaK 9-9", "aliases": ["Berger FlaK 9-9", "Berger FlaK", "Berger 9-9", "Flak 9-9", "9-9"], "techLevel": 7, "dps":25.33, "value":135058, "wiki": "https://galaxyonfire.fandom.com/wiki/Berger_FlaK_9-9", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723477061800427560/berger_flak_9-9.png", "emoji": "<:bergerflak99:723709663610273843>"},
                         "Icarus Heavy AS": {"name": "Icarus Heavy AS", "aliases": ["Icarus Heavy AS", "Icarus Heavy", "Icarus AS", "Heavy AS", "Icarus"], "techLevel": 9, "dps":33.33, "value":356787, "wiki": "https://galaxyonfire.fandom.com/wiki/Icarus_Heavy_AS", "builtIn":False, "icon":"https://cdn.discordapp.com/attachments/700683544103747594/723477069610352681/icarus_heavy_as.png", "emoji": "<:icarusheavyas:723709663723388949>"}}
 
-# Data representing all ship upgrades in the game. These are used to create bbShipUpgrade objects, which are stored in builtInUpgradeObjs in a similar dict format.
+# Data representing all ship upgrades in the game. These are used to create shipItemUpgrade objects, which are stored in builtInUpgradeObjs in a similar dict format.
 builtInUpgradeData = {  "+30 Cargo Space": {"name": "+30 Cargo Space", "shipToUpgradeValueMult":0.3, "cargo": 30, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"},
                         "+20 Handling": {"name": "+20 Handling", "shipToUpgradeValueMult":0.2, "handling": 20, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"},
                         "Extra Equipment Slot": {"name": "Extra Equipment Slot", "shipToUpgradeValueMult":0.4, "maxModules": 1, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"},

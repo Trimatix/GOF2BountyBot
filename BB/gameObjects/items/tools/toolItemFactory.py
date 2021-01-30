@@ -1,5 +1,5 @@
 from . import toolItem, shipSkinTool, crateTool
-from .. import bbShip, moduleItemFactory
+from .. import shipItem, moduleItemFactory
 from ..weapons import primaryWeapon, turretWeapon
 from .... import lib
 
@@ -15,7 +15,7 @@ def fromDict(toolDict : dict) -> toolItem.ToolItem:
     :raise NameError: When toolDict does not contain a 'type' attribute.
     """
 
-    itemConstructors = {"bbShip": bbShip.bbShip.fromDict,
+    itemConstructors = {"shipItem": shipItem.Ship.fromDict,
                         "primaryWeapon": primaryWeapon.PrimaryWeapon.fromDict,
                         "moduleItem": moduleItemFactory.fromDict,
                         "turretWeapon": turretWeapon.TurretWeapon.fromDict,

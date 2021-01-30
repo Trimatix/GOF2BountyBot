@@ -2,7 +2,7 @@ import discord
 
 from . import commandsDB as bbCommands
 from ..bbConfig import bbConfig, bbData
-from ..gameObjects.items import bbShip
+from ..gameObjects.items import shipItem
 from .. import lib, bbGlobals
 
 
@@ -33,7 +33,7 @@ async def dev_cmd_addSkin(message : discord.Message, args : str, isDM : bool):
     itemName = args.rstrip(" ").title()
     itemObj = None
     for ship in bbData.builtInShipData.values():
-        shipObj = bbShip.bbShip.fromDict(ship)
+        shipObj = shipItem.Ship.fromDict(ship)
         if shipObj.isCalled(itemName):
             itemObj = shipObj
 
@@ -92,7 +92,7 @@ async def dev_cmd_delSkin(message : discord.Message, args : str, isDM : bool):
     itemName = args.rstrip(" ").title()
     itemObj = None
     for ship in bbData.builtInShipData.values():
-        shipObj = bbShip.bbShip.fromDict(ship)
+        shipObj = shipItem.Ship.fromDict(ship)
         if shipObj.isCalled(itemName):
             itemObj = shipObj
 
@@ -149,7 +149,7 @@ async def dev_cmd_makeSkin(message : discord.Message, args : str, isDM : bool):
     itemName = args.rstrip(" ").title()
     itemObj = None
     for ship in bbData.builtInShipData.values():
-        shipObj = bbShip.bbShip.fromDict(ship)
+        shipObj = shipItem.Ship.fromDict(ship)
         if shipObj.isCalled(itemName):
             itemObj = shipObj
 
