@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from ..bbConfig import bbData
-from . import shipItem
+from .items import shipItem
 from ..baseClasses import serializable
 
 
