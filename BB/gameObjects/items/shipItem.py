@@ -5,9 +5,9 @@ if TYPE_CHECKING:
     from .modules import moduleItem
 
 from .gameItem import GameItem, spawnableItem
-from . import shipUpgrade, moduleItemFactory
+from . import moduleItemFactory
 from .weapons import primaryWeapon, turretWeapon
-from .. import shipSkin
+from .. import shipSkin, shipUpgrade
 from ...bbConfig import bbConfig, bbData
 from ... import lib
 
