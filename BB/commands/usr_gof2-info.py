@@ -517,22 +517,22 @@ async def cmd_info_skin(message : discord.Message, args : str, isDM : bool):
         else:	
             await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")	
     else:	
-        shipSkin = bbData.builtInShipSkins[skin]	
+        requestedSkin = bbData.builtInShipSkins[skin]	
         # build the stats embed	
         statsEmbed = lib.discordUtil.makeEmbed(	
-            col=lib.discordUtil.randomColour(), desc="__Ship Skin File__", titleTxt=shipSkin.name.title(), thumb=bbConfig.defaultShipSkinToolIcon, footerTxt = ("Preview this skin with the " + "`" + bbConfig.commandPrefix + "showme` command.") if len(shipSkin.compatibleShips) > 0 else "")	
+            col=lib.discordUtil.randomColour(), desc="__Ship Skin File__", titleTxt=requestedSkin.name.title(), thumb=bbConfig.defaultShipSkinToolIcon, footerTxt = ("Preview this skin with the " + "`" + bbConfig.commandPrefix + "showme` command.") if len(requestedSkin.compatibleShips) > 0 else "")	
         statsEmbed.add_field(	
-            name="Designed by:", value=lib.discordUtil.userTagOrDiscrim(str(shipSkin.designer), guild=message.guild))	
+            name="Designed by:", value=lib.discordUtil.userTagOrDiscrim(str(requestedSkin.designer), guild=message.guild))	
         compatibleShipsStr = ""	
-        for ship in shipSkin.compatibleShips:	
+        for ship in requestedSkin.compatibleShips:	
             compatibleShipsStr += " - " + ship + "\n"	
         statsEmbed.add_field(	
             name="Compatible ships:", value=compatibleShipsStr[:-1] if compatibleShipsStr != "" else "None")	
-        if shipSkin.averageTL != -1:	
-            statsEmbed.add_field(name="Average tech level of compatible ships:", value=shipSkin.averageTL)	
-        if shipSkin.hasWiki:	
+        if requestedSkin.averageTL != -1:	
+            statsEmbed.add_field(name="Average tech level of compatible ships:", value=requestedSkin.averageTL)	
+        if requestedSkin.hasWiki:	
             statsEmbed.add_field(	
-                name="‎", value="[Wiki](" + shipSkin.wiki + ")", inline=False)	
+                name="‎", value="[Wiki](" + requestedSkin.wiki + ")", inline=False)	
         # send the embed	
         await message.channel.send(embed=statsEmbed)	
 # bbCommands.register("commodity", cmd_commodity)

@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from .modules import moduleItem
 
 from .gameItem import GameItem, spawnableItem
-from . import shipItemUpgrade, moduleItemFactory
+from . import shipUpgrade, moduleItemFactory
 from .weapons import primaryWeapon, turretWeapon
 from .. import shipSkin
 from ...bbConfig import bbConfig, bbData
@@ -44,9 +44,9 @@ class Ship(GameItem):
     :var turrets: A list containing references to all turret objects equipped by this ship. May contain duplicate references
                     to save on memory.
     :vartype turrets: list[turretWeapon]
-    :var upgradesApplied: A list containing references to all shipItemUpgrades objects applied to this ship. May contain
+    :var upgradesApplied: A list containing references to all shipUpgrades objects applied to this ship. May contain
                     duplicate references to save on memory.
-    :vartype upgradesApplied: list[shipItemUpgrade]
+    :vartype upgradesApplied: list[shipUpgrade]
     :var skin: The name of the skin applied to this ship
     :vartype skin: str
     """
@@ -56,7 +56,7 @@ class Ship(GameItem):
                     cargo : int = 0, numSecondaries : int = 0, handling : int = 0,
                     value : int = 0, aliases : List[str] = [], weapons : List[primaryWeapon.PrimaryWeapon] = [],
                     modules : List[moduleItem.ModuleItem] = [], turrets : List[turretWeapon.TurretWeapon] = [],
-                    wiki : str = "", upgradesApplied : List[shipItemUpgrade.shipItemUpgrade] = [], nickname : str = "",
+                    wiki : str = "", upgradesApplied : List[shipUpgrade.ShipUpgrade] = [], nickname : str = "",
                     icon : str = "", emoji : lib.emojis.dumbEmoji = lib.emojis.dumbEmoji.EMPTY, techLevel : int = -1,
                     shopSpawnRate : float = 0, builtIn : bool = False, skin : str = ""):
         """
@@ -77,7 +77,7 @@ class Ship(GameItem):
                                             May contain duplicate references to save on memory. (Default [])
         :param list[turretWeapon] turrets: A list containing references to all turret objects equipped by this ship.
                                             May contain duplicate references to save on memory. (Default [])
-        :param list[shipItemUpgrade] upgradesApplied: A list containing references to all shipItemUpgrades objects applied to this
+        :param list[shipUpgrade] upgradesApplied: A list containing references to all shipUpgrades objects applied to this
                                                     ship. May contain duplicate references to save on memory. (Default [])
         :param int value: The number of credits this ship can be bought/sold for at base value at a shop. does not
                             include any modifications or equipped items. (Default 0)
@@ -585,11 +585,11 @@ class Ship(GameItem):
         return total
 
     
-    def applyUpgrade(self, upgrade : shipItemUpgrade):
+    def applyUpgrade(self, upgrade : shipUpgrade):
         """Apply the given ship upgrade, locking it and its stats into the ship.
         Ship upgrades cannot be removed.
 
-        :param shipItemUpgrade upgrade: the upgrade to apply
+        :param shipUpgrade upgrade: the upgrade to apply
         """
         self.upgradesApplied.append(upgrade)
 
@@ -857,8 +857,8 @@ class Ship(GameItem):
 
         shipUpgrades = []
         if "shipUpgrades" in shipDict:
-            for shipUpgrade in shipDict["shipUpgrades"]:
-                shipUpgrades.append(shipItemUpgrade.shipItemUpgrade.fromDict(shipUpgrade))
+            for currentUpgrade in shipDict["shipUpgrades"]:
+                shipUpgrades.append(shipUpgrade.ShipUpgrade.fromDict(currentUpgrade))
         
         if shipDict["builtIn"]:
             builtInDict = bbData.builtInShipData[shipDict["name"]]
@@ -880,8 +880,8 @@ class Ship(GameItem):
 
             builtInShipUpgrades = []
             if "shipUpgrades" in shipDict:
-                for shipUpgrade in shipDict["shipUpgrades"]:
-                    builtInShipUpgrades.append(shipItemUpgrade.shipItemUpgrade.fromDict(shipUpgrade))
+                for currentUpgrade in shipDict["shipUpgrades"]:
+                    builtInShipUpgrades.append(shipUpgrade.ShipUpgrade.fromDict(currentUpgrade))
 
             newShip = Ship(builtInDict["name"], builtInDict["maxPrimaries"], builtInDict["maxTurrets"],
                         builtInDict["maxModules"],

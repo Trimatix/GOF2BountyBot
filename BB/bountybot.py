@@ -15,7 +15,7 @@ import os
 from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .gameObjects import shipSkin
 from .gameObjects.bounties import bbCriminal, bbSystem
-from .gameObjects.items import moduleItemFactory, shipItemUpgrade
+from .gameObjects.items import moduleItemFactory, shipUpgrade
 from .gameObjects.items.weapons import turretWeapon, primaryWeapon
 from .gameObjects.items.tools import shipSkinTool, toolItemFactory
 from .scheduling import TimedTask
@@ -290,7 +290,7 @@ async def on_ready():
 
     # generate bbUpgrade objects from data in bbData
     for upgradeDict in bbData.builtInUpgradeData.values():
-        bbData.builtInUpgradeObjs[upgradeDict["name"]] = shipItemUpgrade.shipItemUpgrade.fromDict(upgradeDict)
+        bbData.builtInUpgradeObjs[upgradeDict["name"]] = shipUpgrade.ShipUpgrade.fromDict(upgradeDict)
         bbData.builtInUpgradeData[upgradeDict["name"]]["builtIn"] = True
         bbData.builtInUpgradeObjs[upgradeDict["name"]].builtIn = True
 
@@ -331,11 +331,11 @@ async def on_ready():
         bbData.builtInToolObjs[toolDict["name"]].builtIn = True
     
     # generate shipSkinTool objects for each shipSkin
-    for shipSkin in bbData.builtInShipSkins.values():
-        # if len(shipSkin.compatibleShips) > 0:
-        toolName = lib.stringTyping.shipSkinNameToToolName(shipSkin.name)
+    for currentSkin in bbData.builtInShipSkins.values():
+        # if len(currentSkin.compatibleShips) > 0:
+        toolName = lib.stringTyping.shipSkinNameToToolName(currentSkin.name)
         if toolName not in bbData.builtInToolObjs:
-            bbData.builtInToolObjs[toolName] = shipSkinTool.ShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=True)
+            bbData.builtInToolObjs[toolName] = shipSkinTool.ShipSkinTool(currentSkin, value=bbConfig.shipSkinValueForTL(currentSkin.averageTL), builtIn=True)
 
 
     ##### SORT ITEMS BY TECHLEVEL #####
