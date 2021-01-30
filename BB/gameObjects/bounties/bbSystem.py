@@ -80,17 +80,7 @@ class System (aliasable.Aliasable):
         :rtype: bool
         """
         return bool(self.neighbours)
-
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get this object's class
-
-        :return: The System class
-        :rtype: type
-        """
-        return System
-
+        
 
     def toDict(self, **kwargs) -> dict:
         data = super().toDict(**kwargs)

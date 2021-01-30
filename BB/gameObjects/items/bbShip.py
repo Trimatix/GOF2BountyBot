@@ -248,7 +248,7 @@ class bbShip(GameItem):
         if moduleType.__name__ in bbConfig.maxModuleTypeEquips and bbConfig.maxModuleTypeEquips[moduleType.__name__] != -1:
             numFound = 1
             for equippedModule in self.modules:
-                if equippedModule.getType() == moduleType:
+                if type(equippedModule) == moduleType:
                     numFound += 1
                     if numFound > bbConfig.maxModuleTypeEquips[moduleType.__name__]:
                         return False
@@ -264,7 +264,7 @@ class bbShip(GameItem):
         """
         if not self.canEquipMoreModules():
             raise OverflowError("Attempted to equip a module but all module slots are full")
-        if not self.canEquipModuleType(module.getType()):
+        if not self.canEquipModuleType(type(module)):
             raise ValueError("Attempted to equip a module of a type that is already at its maximum capacity: " + str(module))
 
         self.modules.append(module)
@@ -606,7 +606,7 @@ class bbShip(GameItem):
 
         leftoverModules = []
         while self.hasModulesEquipped() and other.canEquipMoreModules():
-            if other.canEquipModuleType(self.modules[0].getType()):
+            if other.canEquipModuleType(type(self.modules[0])):
                 other.equipModule(self.modules.pop(0))
             else:
                 leftoverModules.append(self.modules.pop(0))

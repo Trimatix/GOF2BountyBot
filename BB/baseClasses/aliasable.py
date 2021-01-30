@@ -43,7 +43,7 @@ class Aliasable (serializable.Serializable):
 
         :param
         """
-        return type(other) == self.getType() and self.isCalled(other.name) or other.isCalled(self.name)
+        return type(other) == type(self) and self.isCalled(other.name) or other.isCalled(self.name)
 
 
     def isCalled(self, name : str) -> bool:

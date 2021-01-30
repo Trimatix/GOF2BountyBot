@@ -88,17 +88,6 @@ class GameItem(aliasable.Aliasable):
         """
         return "*No effect*"
 
-
-    @abstractmethod
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The gameItem class
-        :rtype: type
-        """
-        return GameItem
-
     
     def getValue(self) -> int:
         """Get the base value of this item with no additions or modifications.

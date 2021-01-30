@@ -137,16 +137,6 @@ class bbShipSkinTool(bbToolItem.bbToolItem):
         except AttributeError:
             return "*Designer: user #" + str(self.manufacturer) + "*"
 
-
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The gameItem class
-        :rtype: type
-        """
-        return bbShipSkinTool
-
     
     def toDict(self, **kwargs):
         """

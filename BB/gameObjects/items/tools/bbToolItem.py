@@ -57,17 +57,6 @@ class bbToolItem(gameItem.GameItem):
         """
         return "*No effect*"
 
-
-    @abstractmethod
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The gameItem class
-        :rtype: type
-        """
-        return gameItem
-
     
     @abstractmethod
     def toDict(self, **kwargs) -> dict:

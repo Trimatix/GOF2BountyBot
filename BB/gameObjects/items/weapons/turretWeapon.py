@@ -42,16 +42,6 @@ class TurretWeapon(GameItem):
         return "*Dps: " + str(self.dps) + "*"
 
 
-    def getType(self) -> type:
-        """⚠ DEPRACATED
-        Get the type of this object.
-
-        :return: The turretWeapon class
-        :rtype: type
-        """
-        return TurretWeapon
-
-
     def toDict(self, **kwargs) -> dict:
         """Serialize this item into dictionary format, for saving to file.
 

@@ -76,10 +76,6 @@ class bbCrate(bbToolItem.bbToolItem):
         """
         return "*" + str(len(self.itemPool)) + " possible items*"
 
-
-    def getType(self):
-        return type(self)
-
     
     def toDict(self, **kwargs) -> dict:
         """Serialize this tool into dictionary format.

@@ -365,7 +365,7 @@ async def cmd_equip(message : discord.Message, args : str, isDM : bool):
             await message.channel.send(":x: Your active ship does not have any free module slots!")
             return
 
-        if not requestedBBUser.activeShip.canEquipModuleType(requestedItem.getType()):
+        if not requestedBBUser.activeShip.canEquipModuleType(type(requestedItem)):
             await message.channel.send(":x: You already have the max of this type of module equipped!")
             return
 
