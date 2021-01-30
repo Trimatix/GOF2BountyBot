@@ -1,8 +1,7 @@
 import random
 from . import bbToolItem
-from .... import lib, bbGlobals
+from .... import lib
 from discord import Message
-import asyncio
 from ....bbConfig import bbConfig
 from .. import gameItem
 from ....logging import bbLogger
@@ -31,7 +30,8 @@ class bbCrate(bbToolItem.bbToolItem):
         if "callingBBUser" not in kwargs:
             raise NameError("Required kwarg not given: callingBBUser")
         if kwargs["callingBBUser"] is not None and kwargs["callingBBUser"].__class__.__name__ != "bbUser":
-            raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " + kwargs["callingBBUser"].__class__.__name__)
+            raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " + \
+                            kwargs["callingBBUser"].__class__.__name__)
         
         callingBBUser = kwargs["callingBBUser"]
         newItem = random.choice(self.itemPool)
@@ -50,11 +50,13 @@ class bbCrate(bbToolItem.bbToolItem):
         if "callingBBUser" not in kwargs:
             raise NameError("Required kwarg not given: callingBBUser")
         if kwargs["callingBBUser"] is not None and kwargs["callingBBUser"].__class__.__name__ != "bbUser":
-            raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " + kwargs["callingBBUser"].__class__.__name__)
+            raise TypeError("Required kwarg is of the wrong type. Expected bbUser or None, received " + \
+                            kwargs["callingBBUser"].__class__.__name__)
         
         callingBBUser = kwargs["callingBBUser"]
         confirmMsg = await message.channel.send("Are you sure you want to open this crate?") 
-        confirmation = await InlineConfirmationMenu(confirmMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds).doMenu()
+        confirmation = await InlineConfirmationMenu(confirmMsg, message.author,
+                                                    bbConfig.toolUseConfirmTimeoutSeconds).doMenu()
 
         if bbConfig.emojis.reject in confirmation:
             return "🛑 Crate open cancelled."
@@ -109,7 +111,8 @@ class bbCrate(bbToolItem.bbToolItem):
                     errorStr = "Invalid itemPool entry, missing type. Data: " + itemDict
                     errorType = "NO_TYPE"
                 elif itemDict["type"] not in gameItem.subClassNames:
-                    errorStr = "Invalid itemPool entry, attempted to add something other than a spawnableItem. Data: " + itemDict
+                    errorStr = "Invalid itemPool entry, attempted to add something other than a spawnableItem. Data: " \
+                                + str(itemDict)
                     errorType = "BAD_TYPE"
                 if errorStr:
                     if skipInvalidItems:
