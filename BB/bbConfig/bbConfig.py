@@ -31,10 +31,10 @@ defaultEmojis = {
                     UninitializedBasedEmoji("6️⃣"), UninitializedBasedEmoji("7️⃣"), UninitializedBasedEmoji("8️⃣"),
                     UninitializedBasedEmoji("9️⃣"), UninitializedBasedEmoji("🔟")],
 
-    # Default emoji to assign to bbShipSkinTool items
+    # Default emoji to assign to shipSkinTool items
     "shipSkinTool": UninitializedBasedEmoji(777166858516299786),
     
-    # Default emoji to assign to crateTools containing bbShipSkinTools
+    # Default emoji to assign to crateTools containing shipSkinTools
     "skinCrate": UninitializedBasedEmoji(723709178736017419)
 }
 

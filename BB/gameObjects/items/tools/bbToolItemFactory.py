@@ -1,4 +1,4 @@
-from . import bbToolItem, bbShipSkinTool, crateTool
+from . import bbToolItem, shipSkinTool, crateTool
 from .. import bbShip, moduleItemFactory
 from ..weapons import primaryWeapon, turretWeapon
 from .... import lib
@@ -40,7 +40,7 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
             techLevel=crateDict["techLevel"] if "techLevel" in crateDict else -1,
             builtIn=crateDict["builtIn"] if "builtIn" in crateDict else False)
 
-    toolTypeConstructors = {"bbShipSkinTool": bbShipSkinTool.bbShipSkinTool.fromDict,
+    toolTypeConstructors = {"shipSkinTool": shipSkinTool.ShipSkinTool.fromDict,
                         "crateTool": crateFromDict}
     
     if "type" not in toolDict:

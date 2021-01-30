@@ -66,9 +66,9 @@ def getNumExtension(num : int) -> str:
 
 
 def shipSkinNameToToolName(skinName : str) -> str:
-    """Construct a name of a bbShipSkinTool from the name of the skin of the skin.
+    """Construct a name of a shipSkinTool from the name of the skin of the skin.
 
     :param str skinName: The name of the skin this tool name should reference
-    :return: The name that should be given to a bbShipSkinTool that applies the named shipSkin
+    :return: The name that should be given to a shipSkinTool that applies the named shipSkin
     """
     return "Ship Skin: " + skinName

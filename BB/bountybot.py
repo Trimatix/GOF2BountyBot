@@ -17,7 +17,7 @@ from .gameObjects import bbShipSkin
 from .gameObjects.bounties import bbCriminal, bbSystem
 from .gameObjects.items import moduleItemFactory, bbShipUpgrade
 from .gameObjects.items.weapons import turretWeapon, primaryWeapon
-from .gameObjects.items.tools import bbShipSkinTool, bbToolItemFactory
+from .gameObjects.items.tools import shipSkinTool, bbToolItemFactory
 from .scheduling import TimedTask
 from .bbDatabases import bbGuildDB, bbUserDB, HeirarchicalCommandsDB, reactionMenuDB
 from .scheduling import TimedTaskHeap
@@ -330,12 +330,12 @@ async def on_ready():
         bbData.builtInToolData[toolDict["name"]]["builtIn"] = True
         bbData.builtInToolObjs[toolDict["name"]].builtIn = True
     
-    # generate bbShipSkinTool objects for each bbShipSkin
+    # generate shipSkinTool objects for each bbShipSkin
     for shipSkin in bbData.builtInShipSkins.values():
         # if len(shipSkin.compatibleShips) > 0:
         toolName = lib.stringTyping.shipSkinNameToToolName(shipSkin.name)
         if toolName not in bbData.builtInToolObjs:
-            bbData.builtInToolObjs[toolName] = bbShipSkinTool.bbShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=True)
+            bbData.builtInToolObjs[toolName] = shipSkinTool.ShipSkinTool(shipSkin, value=bbConfig.shipSkinValueForTL(shipSkin.averageTL), builtIn=True)
 
 
     ##### SORT ITEMS BY TECHLEVEL #####
