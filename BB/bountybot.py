@@ -249,9 +249,9 @@ async def on_ready():
             if isinstance(uninitEmoji, int):
                 setattr(bbConfig, varName, lib.emojis.dumbEmoji(id=uninitEmoji))
             elif isinstance(uninitEmoji, str):
-                setattr(bbConfig, varName, lib.emojis.dumbEmojiFromStr(uninitEmoji))
+                setattr(bbConfig, varName, lib.emojis.dumbEmoji.fromStr(uninitEmoji))
             elif isinstance(uninitEmoji, dict):
-                setattr(bbConfig, varName, lib.emojis.dumbEmojiFromDict(uninitEmoji))
+                setattr(bbConfig, varName, lib.emojis.dumbEmoji.fromDict(uninitEmoji))
             # Unrecognised uninitialized value
             else:
                 raise ValueError("Unrecognised UninitializedDumbEmoji value type. Expecting int, str or dict, given '" + type(uninitEmoji).__name__ + "'")
@@ -534,7 +534,7 @@ async def on_raw_reaction_add(payload : discord.RawReactionActionEvent):
     :param discord.RawReactionActionEvent payload: An event describing the message and the reaction added
     """
     if payload.user_id != bbGlobals.client.user.id:
-        emoji = lib.emojis.dumbEmojiFromPartial(payload.emoji)
+        emoji = lib.emojis.dumbEmoji.fromPartial(payload.emoji)
         if emoji.sendable is None:
             return
 
@@ -566,7 +566,7 @@ async def on_raw_reaction_remove(payload : discord.RawReactionActionEvent):
     :param discord.RawReactionActionEvent payload: An event describing the message and the reaction removed
     """
     if payload.user_id != bbGlobals.client.user.id:
-        emoji = lib.emojis.dumbEmojiFromPartial(payload.emoji)
+        emoji = lib.emojis.dumbEmoji.fromPartial(payload.emoji)
         if emoji.sendable is None:
             return
 

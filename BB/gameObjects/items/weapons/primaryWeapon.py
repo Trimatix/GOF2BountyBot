@@ -67,5 +67,5 @@ class PrimaryWeapon(GameItem):
         else:
             return PrimaryWeapon(weaponDict["name"], weaponDict["aliases"], dps=weaponDict["dps"], value=weaponDict["value"],
             wiki=weaponDict["wiki"] if "wiki" in weaponDict else "", manufacturer=weaponDict["manufacturer"] if "manufacturer" in weaponDict else "",
-            icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmojiFromStr(weaponDict["emoji"]) if "emoji" in weaponDict else lib.emojis.dumbEmoji.EMPTY,
+            icon=weaponDict["icon"] if "icon" in weaponDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmoji.fromStr(weaponDict["emoji"]) if "emoji" in weaponDict else lib.emojis.dumbEmoji.EMPTY,
             techLevel=weaponDict["techLevel"] if "techLevel" in weaponDict else -1, builtIn=False)

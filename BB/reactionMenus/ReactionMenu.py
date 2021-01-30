@@ -607,7 +607,7 @@ class SingleUserReactionMenu(ReactionMenu):
 
 
     def reactionClosesMenu(self, reactPL):
-        return (reactPL.message_id == self.msg.id and reactPL.user_id == self.targetMember.id) and (not self.returnTriggers or lib.emojis.dumbEmojiFromPartial(reactPL.emoji) in self.returnTriggers)
+        return (reactPL.message_id == self.msg.id and reactPL.user_id == self.targetMember.id) and (not self.returnTriggers or lib.emojis.dumbEmoji.fromPartial(reactPL.emoji) in self.returnTriggers)
 
 
     async def doMenu(self):
@@ -622,4 +622,4 @@ class SingleUserReactionMenu(ReactionMenu):
             return []
         else:
             updatedMsg = await self.msg.channel.fetch_message(self.msg.id)
-            return [lib.emojis.dumbEmojiFromReaction(react.emoji) for react in updatedMsg.reactions if self.targetMember in await react.users().flatten() and lib.emojis.dumbEmojiFromReaction(react.emoji) in self.options]
+            return [lib.emojis.dumbEmoji.fromReaction(react.emoji) for react in updatedMsg.reactions if self.targetMember in await react.users().flatten() and lib.emojis.dumbEmoji.fromReaction(react.emoji) in self.options]

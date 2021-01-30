@@ -8,7 +8,8 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
     """Construct a bbToolItem from its dictionary-serialized representation.
     This method decodes which tool constructor is appropriate based on the 'type' attribute of the given dictionary.
 
-    :param dict toolDict: A dictionary containing all information needed to construct the required bbToolItem. Critically, a name, type, and builtIn specifier.
+    :param dict toolDict: A dictionary containing all information needed to construct the required bbToolItem. Critically,
+                            a name, type, and builtIn specifier.
     :return: A new bbToolItem object as described in toolDict
     :rtype: bbToolItem.bbToolItem
     :raise NameError: When toolDict does not contain a 'type' attribute.
@@ -36,7 +37,7 @@ def fromDict(toolDict : dict) -> bbToolItem.bbToolItem:
             wiki=crateDict["wiki"] if "wiki" in crateDict else "",
             manufacturer=crateDict["manufacturer"] if "manufacturer" in crateDict else "",
             icon=crateDict["icon"] if "icon" in crateDict else "",
-            emoji=lib.emojis.dumbEmojiFromDict(crateDict["emoji"]) if "emoji" in crateDict else lib.emojis.dumbEmoji.EMPTY,
+            emoji=lib.emojis.dumbEmoji.fromDict(crateDict["emoji"]) if "emoji" in crateDict else lib.emojis.dumbEmoji.EMPTY,
             techLevel=crateDict["techLevel"] if "techLevel" in crateDict else -1,
             builtIn=crateDict["builtIn"] if "builtIn" in crateDict else False)
 

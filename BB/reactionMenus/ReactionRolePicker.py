@@ -155,7 +155,7 @@ class ReactionRolePicker(ReactionMenu.ReactionMenu):
 
         reactionRoles = {}
         for reaction in rmDict["options"]:
-            reactionRoles[lib.emojis.dumbEmojiFromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
+            reactionRoles[lib.emojis.dumbEmoji.fromStr(reaction)] = dcGuild.get_role(rmDict["options"][reaction]["role"])
 
         timeoutTT = None
         if "timeout" in rmDict:

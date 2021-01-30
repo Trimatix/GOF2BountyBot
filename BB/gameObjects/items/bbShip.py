@@ -843,7 +843,7 @@ class bbShip(GameItem):
                         upgradesApplied=shipUpgrades if "shipUpgrades" in shipDict else builtInShipUpgrades,
                         nickname=shipDict["nickname"] if "nickname" in shipDict else (builtInDict["nickname"] if "nickname" in builtInDict else ""),
                         icon=shipDict["icon"] if "icon" in shipDict else builtInDict["icon"] if "icon" in builtInDict else bbData.rocketIcon,
-                        emoji=lib.emojis.dumbEmojiFromStr(shipDict["emoji"]) if "emoji" in shipDict else lib.emojis.dumbEmojiFromStr(builtInDict["emoji"]) if "emoji" in builtInDict else lib.emojis.dumbEmoji.EMPTY,
+                        emoji=lib.emojis.dumbEmoji.fromStr(shipDict["emoji"]) if "emoji" in shipDict else lib.emojis.dumbEmoji.fromStr(builtInDict["emoji"]) if "emoji" in builtInDict else lib.emojis.dumbEmoji.EMPTY,
                         techLevel=shipDict["techLevel"] if "techLevel" in shipDict else builtInDict["techLevel"] if "techLevel" in builtInDict else -1,
                         shopSpawnRate=shipDict["shopSpawnRate"] if "shopSpawnRate" in shipDict else builtInDict["shopSpawnRate"] if "shopSpawnRate" in builtInDict else 0,
                         builtIn=True,
@@ -859,6 +859,6 @@ class bbShip(GameItem):
                             upgradesApplied=shipUpgrades,
                             nickname=shipDict["nickname"] if "nickname" in shipDict else "",
                             icon=shipDict["icon"] if "icon" in shipDict else bbData.rocketIcon,
-                            emoji=lib.emojis.dumbEmojiFromStr(shipDict["emoji"]) if "emoji" in shipDict else lib.emojis.dumbEmoji.EMPTY,
+                            emoji=lib.emojis.dumbEmoji.fromStr(shipDict["emoji"]) if "emoji" in shipDict else lib.emojis.dumbEmoji.EMPTY,
                             techLevel=shipDict["techLevel"] if "techLevel" in shipDict else -1, shopSpawnRate=shipDict["shopSpawnRate"] if "shopSpawnRate" in shipDict else 0,
                             builtIn=False)

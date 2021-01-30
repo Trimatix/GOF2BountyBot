@@ -60,4 +60,4 @@ class SignatureModule(moduleItem.ModuleItem):
         return SignatureModule(moduleDict["name"], moduleDict["aliases"] if "aliases" in moduleDict else [], moduleDict["manufacturer"],
                                 value=moduleDict["value"] if "value" in moduleDict else 0, wiki=moduleDict["wiki"] if "wiki" in moduleDict else "",
                                 icon=moduleDict["icon"] if "icon" in moduleDict else bbData.rocketIcon,
-                                emoji=lib.emojis.dumbEmojiFromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)
+                                emoji=lib.emojis.dumbEmoji.fromStr(moduleDict["emoji"]) if "emoji" in moduleDict else lib.emojis.dumbEmoji.EMPTY, techLevel=moduleDict["techLevel"] if "techLevel" in moduleDict else -1, builtIn=moduleDict["builtIn"] if "builtIn" in moduleDict else False)

@@ -197,7 +197,7 @@ class ReactionPollMenu(ReactionMenu.ReactionMenu):
 
         options = {}
         for emojiName in rmDict["options"]:
-            emoji = lib.emojis.dumbEmojiFromStr(emojiName)
+            emoji = lib.emojis.dumbEmoji.fromStr(emojiName)
             options[emoji] = ReactionMenu.DummyReactionMenuOption(rmDict["options"][emojiName], emoji)
 
         timeoutTT = None

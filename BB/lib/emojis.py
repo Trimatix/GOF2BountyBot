@@ -153,6 +153,67 @@ class dumbEmoji(serializable.Serializable):
         """
         return self.sendable
 
+    
+    @classmethod
+    def fromStr(cls, s : str) -> dumbEmoji:
+        """Construct a dumbEmoji object from a string containing either a unicode emoji or a discord custom emoji.
+        s may also be a dumbEmoji (returns s), a dictionary-serialized dumbEmoji (returns fromDict(s)), or
+        only an ID of a discord custom emoji (may be either str or int)
+
+        :param str s: A string containing only one of: A unicode emoji, a discord custom emoji, or the ID of a discord custom emoji.
+        :return: A dumbEmoji representing the given string emoji
+        :rtype: dumbEmoji
+        """
+        if type(s) == dumbEmoji:
+            return s
+        if type(s) == dict:
+            return dumbEmoji.fromDict(s)
+        if isUnicodeEmoji(s):
+            return dumbEmoji(unicode=s)
+        elif isCustomEmoji(s):
+            return dumbEmoji(id=int(s[s[s.index(":")+1:].index(":")+3:-1]))
+        elif stringTyping.isInt(s):
+            return dumbEmoji(id=int(s))
+        else:
+            return None
+
+
+    @classmethod
+    def fromPartial(cls, e : PartialEmoji) -> dumbEmoji:
+        """Construct a new dumbEmoji object from a given discord.PartialEmoji.
+
+        :return: A dumbEmoji representing e
+        :rtype: dumbEmoji
+        """
+        if type(e) == dumbEmoji:
+            return e
+        if e.is_unicode_emoji():
+            return dumbEmoji(unicode=e.name)
+        else:
+            return dumbEmoji(id=e.id)
+
+
+    @classmethod
+    def fromReaction(cls, e : Union[Emoji, PartialEmoji, str]) -> dumbEmoji:
+        """Construct a new dumbEmoji object from a given discord.PartialEmoji, discord.Emoji, or string.
+
+        :return: A dumbEmoji representing e
+        :rtype: dumbEmoji
+        """
+        if type(e) == dumbEmoji:
+            return e
+        if type(e) == str:
+            if isUnicodeEmoji(e):
+                return dumbEmoji(unicode=e)
+            elif isCustomEmoji(e):
+                return dumbEmoji.fromStr(e)
+            else:
+                raise ValueError("Given a string that does not match any emoji format: " + e)
+        if type(e) == PartialEmoji:
+            return dumbEmoji.fromPartial(e)
+        else:
+            return dumbEmoji(id=e.id)
+
 
 # 'static' object representing an empty/lack of emoji
 dumbEmoji.EMPTY = dumbEmoji(id=0)
@@ -184,64 +245,6 @@ def isCustomEmoji(s : str) -> bool:
             return False
         return stringTyping.isInt(s[second+1:-1])
     return False
-
-
-def dumbEmojiFromStr(s : str) -> dumbEmoji:
-    """Construct a dumbEmoji object from a string containing either a unicode emoji or a discord custom emoji.
-    s may also be a dumbEmoji (returns s), a dictionary-serialized dumbEmoji (returns dumbEmojiFromDict(s)), or
-    only an ID of a discord custom emoji (may be either str or int)
-
-    :param str s: A string containing only one of: A unicode emoji, a discord custom emoji, or the ID of a discord custom emoji.
-    :return: A dumbEmoji representing the given string emoji
-    :rtype: dumbEmoji
-    """
-    if type(s) == dumbEmoji:
-        return s
-    if type(s) == dict:
-        return dumbEmojiFromDict(s)
-    if isUnicodeEmoji(s):
-        return dumbEmoji(unicode=s)
-    elif isCustomEmoji(s):
-        return dumbEmoji(id=int(s[s[s.index(":")+1:].index(":")+3:-1]))
-    elif stringTyping.isInt(s):
-        return dumbEmoji(id=int(s))
-    else:
-        return None
-
-
-def dumbEmojiFromPartial(e : PartialEmoji) -> dumbEmoji:
-    """Construct a new dumbEmoji object from a given discord.PartialEmoji.
-
-    :return: A dumbEmoji representing e
-    :rtype: dumbEmoji
-    """
-    if type(e) == dumbEmoji:
-        return e
-    if e.is_unicode_emoji():
-        return dumbEmoji(unicode=e.name)
-    else:
-        return dumbEmoji(id=e.id)
-
-
-def dumbEmojiFromReaction(e : Union[Emoji, PartialEmoji, str]) -> dumbEmoji:
-    """Construct a new dumbEmoji object from a given discord.PartialEmoji, discord.Emoji, or string.
-
-    :return: A dumbEmoji representing e
-    :rtype: dumbEmoji
-    """
-    if type(e) == dumbEmoji:
-        return e
-    if type(e) == str:
-        if isUnicodeEmoji(e):
-            return dumbEmoji(unicode=e)
-        elif isCustomEmoji(e):
-            return dumbEmojiFromStr(e)
-        else:
-            raise ValueError("Given a string that does not match any emoji format: " + e)
-    if type(e) == PartialEmoji:
-        return dumbEmojiFromPartial(e)
-    else:
-        return dumbEmoji(id=e.id)
 
 
 class UninitializedDumbEmoji:

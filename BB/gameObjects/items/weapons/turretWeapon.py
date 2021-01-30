@@ -68,5 +68,5 @@ class TurretWeapon(GameItem):
         else:
             return TurretWeapon(turretDict["name"], turretDict["aliases"], dps=turretDict["dps"], value=turretDict["value"],
                             wiki=turretDict["wiki"] if "wiki" in turretDict else "", manufacturer=turretDict["manufacturer"] if "manufacturer" in turretDict else "",
-                            icon=turretDict["icon"] if "icon" in turretDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmojiFromStr(turretDict["emoji"]) if "emoji" in turretDict else lib.emojis.dumbEmoji.EMPTY,
+                            icon=turretDict["icon"] if "icon" in turretDict else bbData.rocketIcon, emoji=lib.emojis.dumbEmoji.fromStr(turretDict["emoji"]) if "emoji" in turretDict else lib.emojis.dumbEmoji.EMPTY,
                             techLevel=turretDict["techLevel"] if "techLevel" in turretDict else -1, builtIn=False)
