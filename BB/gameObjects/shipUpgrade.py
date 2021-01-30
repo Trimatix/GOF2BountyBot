@@ -1,9 +1,9 @@
 # Typing imports
 from __future__ import annotations
 
-from ...bbConfig import bbData
+from ..bbConfig import bbData
 from . import shipItem
-from ...baseClasses import serializable
+from ..baseClasses import serializable
 
 
 class ShipUpgrade(serializable.Serializable):
