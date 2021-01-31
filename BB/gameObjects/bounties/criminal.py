@@ -6,7 +6,7 @@ from ...bbConfig import bbData
 from ...baseClasses import aliasable
 from ..items import shipItem
 
-class Criminal (aliasable.Aliasable):
+class Criminal(aliasable.Aliasable):
     """
     A criminal to be wanted in bounties.
 
@@ -133,11 +133,11 @@ class Criminal (aliasable.Aliasable):
 
     @classmethod
     def fromDict(cls, crimDict : dict, **kwargs) -> Criminal:
-        """Factory function that will either provide a reference to a builtIn bbCriminal if a builtIn criminal is requested, or construct a new bbCriminal object from the provided data.
+        """Factory function that will either provide a reference to a builtIn criminal if a builtIn criminal is requested, or construct a new criminal object from the provided data.
 
-        :param dict crimDict: A dictionary containing all data necessary to construct the desired bbCriminal. If the criminal is builtIn, this need only be their name, "builtIn": True, and possibly the equipped ship.
-        :return: The requested bbCriminal object reference
-        :rtype: bbCriminal
+        :param dict crimDict: A dictionary containing all data necessary to construct the desired criminal. If the criminal is builtIn, this need only be their name, "builtIn": True, and possibly the equipped ship.
+        :return: The requested criminal object reference
+        :rtype: criminal
         """
         builtIn = kwargs["builtIn"] if "builtIn" in kwargs else False
         if "builtIn" in crimDict:

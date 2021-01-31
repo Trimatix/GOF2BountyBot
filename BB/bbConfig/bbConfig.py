@@ -308,7 +308,7 @@ bPointsToCreditsRatio = 1000
 # number of bounties ahead of a checked system in a route to report a recent criminal spotting (+1)
 closeBountyThreshold = 4
 
-# Text to send to a BountyBoardChannel when no bounties are currently active
+# Text to send to a bountyBoardChannel when no bounties are currently active
 bbcNoBountiesMsg = "```css\n[ NO ACTIVE BOUNTIES ]\n\nThere are currently no active bounty listings.\nPlease check back later, or use [ $notify bounties ] to be pinged when new ones become available!\n```"
 
 # The number of times to retry BBC listing updates when HTTP exceptions are thrown

@@ -13,7 +13,7 @@ from ... import lib
 
 class BountyConfig:
     """
-    Configurator class describing all attributes needed for a bbBounty object.
+    Configurator class describing all attributes needed for a bounty object.
 
     :var faction: The faction owning this bounty
     :vartype faction: str
@@ -45,7 +45,7 @@ class BountyConfig:
     :vartype wiki: str
     :var builtIn: whether or not this is a built in npc criminal
     :vartype builtIn: bool
-    :var generated: whether or not this config is ready to be used. The config must verify and generate its attributes before they can be used in a bbBounty.
+    :var generated: whether or not this config is ready to be used. The config must verify and generate its attributes before they can be used in a bounty.
     :vartype generated: bool
     :var ship: The shipItem this criminal should equip
     :vartype ship: shipItem
@@ -119,7 +119,7 @@ class BountyConfig:
         """Validate all given config data, and randomly generate missing data.
 
         :param bountyDB bountyDB: Database containing all currently active bounties. When forceNoDBCheck is True, this is ignored.
-        :param bool noCriminal: If this is True, randomly generate a bbCriminal object. (Default True)
+        :param bool noCriminal: If this is True, randomly generate a criminal object. (Default True)
         :param bool forceKeepChecked: If this is False, a blank checked dictionary will be used. This should only be set to be True when using a pre-made checked dictionary; e.g for custom bounties or for bounties loaded from file. (Default False)
         :param bool forceNoDBCheck: If this is False, do not check if the bounty already exists. This should only be used as a performance and compatibility measure when loading in a bounty from file. (Default False)
         :raise ValueError: When requesting an invalid faction, or when requesting an invalid reward amount

@@ -1,17 +1,17 @@
 # TODO: Look into third party library
 # TODO: Add failed route lookups to bbLogger (might already be done in bountybot.py)
 from __future__ import annotations
-from ..gameObjects.bounties import bbSystem
+from ..gameObjects.bounties import solarSystem
 import math
 from ..bbConfig import bbData
 from typing import Dict, List
 
-class AStarNode(bbSystem.System):
+class AStarNode(solarSystem.SolarSystem):
     """A node for use in a* pathfinding.
-    TODO: Does this really need to extend bbSystem?
+    TODO: Does this really need to extend solarSystem?
 
-    :var syst: this node's associated bbSystem object.
-    :vartype syst: bbSystem
+    :var syst: this node's associated solarSystem object.
+    :vartype syst: solarSystem
     :var parent: The previous AStarNode in the generated path
     :vartype parent: AStarNode
     :var g: The total distance travelled to get to this node
@@ -22,9 +22,9 @@ class AStarNode(bbSystem.System):
     :vartype f: float
     """
     
-    def __init__(self, syst : bbSystem.System, parent : AStarNode, g : float = 0, h : float = 0):
+    def __init__(self, syst : solarSystem.SolarSystem, parent : AStarNode, g : float = 0, h : float = 0):
         """
-        :param bbSystem syst: this node's associated bbSystem object.
+        :param solarSystem syst: this node's associated solarSystem object.
         :param AStarNode parent: The previous AStarNode in the generated path
         :param float g: The total distance travelled to get to this node (Default 0)
         :param float h: The estimated distance from this node to the nearest goal (Default 0)
@@ -37,25 +37,25 @@ class AStarNode(bbSystem.System):
         self.f = g + h
 
 
-def heuristic(start : bbSystem.System, end : bbSystem.System) -> float:
-    """Estimate the distance between two bbSystems, using straight line (pythagorean) distance.
+def heuristic(start : solarSystem.SolarSystem, end : solarSystem.SolarSystem) -> float:
+    """Estimate the distance between two solarSystems, using straight line (pythagorean) distance.
 
-    :param bbSystem start: The system to start calculating distance from
-    :param bbSystem end: The system to find distance to
+    :param solarSystem start: The system to start calculating distance from
+    :param solarSystem end: The system to find distance to
     :return: The straight-line distance from start to end
     """
     return math.sqrt((end.coordinates[1] - start.coordinates[1]) ** 2 +
                     (end.coordinates[0] - start.coordinates[0]) ** 2)
 
 
-def bbAStar(start : bbSystem.System, end : bbSystem.System, graph : Dict[str, bbSystem.System]) -> List[str]:
-    """Find the shortest path from the given start bbSystem to the end bbSystem, using the given graph for edges.
+def bbAStar(start : solarSystem.SolarSystem, end : solarSystem.SolarSystem, graph : Dict[str, solarSystem.SolarSystem]) -> List[str]:
+    """Find the shortest path from the given start solarSystem to the end solarSystem, using the given graph for edges.
     If no route can be found, the string "! " + start + " -> " + end is returned.
     If the max route length (50) is reached, "#" is returned.
 
-    :param bbSystem start: The starting system for route generation
-    :param bbSystem end: The goal system where route generation terminates
-    :param dict[str, bbSystem] graph: A dictionary mapping system names to bbSystem objects
+    :param solarSystem start: The starting system for route generation
+    :param solarSystem end: The goal system where route generation terminates
+    :param dict[str, solarSystem] graph: A dictionary mapping system names to solarSystem objects
     :return: A list containing string system names representing the shortest route from start (the first element) to end (the last element)
     :rtype: list
     """

@@ -174,7 +174,7 @@ class bbGuildDB(serializable.Serializable):
         """Construct a bbGuildDB object from dictionary-serialised format; the reverse of bbGuildDB.todict()
 
         :param dict bountyDBDict: The dictionary representation of the bbGuildDB to create
-        :param bool dbReload: Whether or not this DB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
+        :param bool dbReload: Whether or not this DB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bounty contruction.
         :return: The new bbGuildDB
         :rtype: bbGuildDB
         """

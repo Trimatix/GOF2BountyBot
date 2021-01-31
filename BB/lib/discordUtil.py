@@ -3,7 +3,7 @@ from typing import Union, List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from discord import Member, Guild, User, Message
     from ..gameObjects import bbUser, bbGuild
-    from ..gameObjects.bounties import bbCriminal
+    from ..gameObjects.bounties import criminal
 
 from ..logging import bbLogger
 from . import stringTyping
@@ -112,11 +112,11 @@ def userTagOrDiscrim(userID : str, guild : Guild = None) -> str:
     return userID
 
 
-def criminalNameOrDiscrim(criminal : bbCriminal.Criminal) -> str:
+def criminalNameOrDiscrim(criminal : criminal.Criminal) -> str:
     """If a passed criminal is a player, attempt to return the user's name and discriminator.
     Otherwise, return the passed criminal's name. TODO: Should probably change this to display name
 
-    :param bbCriminal criminal: criminal whose name to attempt to convert to name and discrim
+    :param criminal criminal: criminal whose name to attempt to convert to name and discrim
     :return: The user's name and discriminator if the criminal is a player, criminal.name otherwise
     :rtype: str
     """

@@ -7,7 +7,7 @@ from abc import abstractmethod, abstractclassmethod
 
 class Aliasable (serializable.Serializable):
     """An abstract class allowing subtype instances to be identified and compared by any list of names (aliases).
-    A great example and common use case is in BountyBot's bbCriminal class. Criminals are NPCs that each have a unique name.
+    A great example and common use case is in BountyBot's criminal class. Criminals are NPCs that each have a unique name.
     These names usually consist of a forename and sirname, for example 'Ganfor Kant'. Providing 'Ganfor' and 'Kant' as aliases
     allows the Ganfor Kant object to be identified by any of 'Ganfor', 'Kant', or 'Ganfor Kant', for user convenience.
 

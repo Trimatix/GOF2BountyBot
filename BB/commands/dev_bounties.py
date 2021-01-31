@@ -4,7 +4,7 @@ from datetime import datetime
 from . import commandsDB as bbCommands
 from .. import bbGlobals, lib
 from ..bbConfig import bbConfig, bbData
-from ..gameObjects.bounties import bbBounty, bbBountyConfig
+from ..gameObjects.bounties import bounty, bountyConfig
 
 
 bbCommands.addHelpSection(2, "bounties")
@@ -300,12 +300,12 @@ async def dev_cmd_make_bounty(message : discord.Message, args : str, isDM : bool
 
     # if no args were given, generate a completely random bounty
     if args == "":
-        newBounty = bbBounty.Bounty(bountyDB=callingBBGuild.bountiesDB)
+        newBounty = bounty.Bounty(bountyDB=callingBBGuild.bountiesDB)
     # if only one argument was given, use it as a faction
     elif len(args.split("+")) == 2:
         newFaction = args.split("+")[1]
-        newBounty = bbBounty.Bounty(
-            bountyDB=callingBBGuild.bountiesDB, config=bbBountyConfig.BountyConfig(faction=newFaction))
+        newBounty = bounty.Bounty(
+            bountyDB=callingBBGuild.bountiesDB, config=bountyConfig.BountyConfig(faction=newFaction))
 
     # if all args were given, generate a completely custom bounty
     # 9 args plus account for empty string at the start of the split = split of 10 elements
@@ -381,11 +381,11 @@ async def dev_cmd_make_bounty(message : discord.Message, args : str, isDM : bool
 
         # special bounty generation for builtIn criminals
         if builtIn:
-            newBounty = bbBounty.Bounty(bountyDB=callingBBGuild.bountiesDB, criminalObj=builtInCrimObj, config=bbBountyConfig.BountyConfig(
+            newBounty = bounty.Bounty(bountyDB=callingBBGuild.bountiesDB, criminalObj=builtInCrimObj, config=bountyConfig.BountyConfig(
                 faction=newFaction, name=newName, route=newRoute, start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=False, icon=newIcon))
         # normal bounty generation for custom criminals
         else:
-            newBounty = bbBounty.Bounty(bountyDB=callingBBGuild.bountiesDB, config=bbBountyConfig.BountyConfig(faction=newFaction, name=newName, route=newRoute,
+            newBounty = bounty.Bounty(bountyDB=callingBBGuild.bountiesDB, config=bountyConfig.BountyConfig(faction=newFaction, name=newName, route=newRoute,
                                                                                                 start=newStart, end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=False, icon=newIcon))
 
     # Report an error for invalid command syntax
@@ -444,7 +444,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
             await message.channel.send(":x: Player not found!")
             return
         # create a new bounty at random for the specified user
-        newBounty = bbBounty.Bounty(bountyDB=callingBBGuild.bountiesDB, config=bbBountyConfig.BountyConfig(
+        newBounty = bounty.Bounty(bountyDB=callingBBGuild.bountiesDB, config=bountyConfig.BountyConfig(
             name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(bbGlobals.client.get_user(requestedID).avatar_url_as(size=64)), aliases=[lib.discordUtil.userTagOrDiscrim(args)]))
 
     # if the faction is also given
@@ -456,7 +456,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
             return
         # create a bounty at random for the specified user and faction
         newFaction = args.split("+")[1]
-        newBounty = bbBounty.Bounty(bountyDB=callingBBGuild.bountiesDB, config=bbBountyConfig.BountyConfig(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(
+        newBounty = bounty.Bounty(bountyDB=callingBBGuild.bountiesDB, config=bountyConfig.BountyConfig(name="<@" + str(requestedID) + ">", isPlayer=True, icon=str(
             bbGlobals.client.get_user(requestedID).avatar_url_as(size=64)), faction=newFaction, aliases=[lib.discordUtil.userTagOrDiscrim(args.split(" ")[0])]))
 
     # if all arguments are given
@@ -524,7 +524,7 @@ async def dev_cmd_make_player_bounty(message : discord.Message, args : str, isDM
                 int(newName.lstrip("<@!").rstrip(">"))).avatar_url_as(size=64))
 
         # create the bounty object
-        newBounty = bbBounty.Bounty(bountyDB=callingBBGuild.bountiesDB, config=bbBountyConfig.BountyConfig(faction=newFaction, name=newName, route=newRoute, start=newStart,
+        newBounty = bounty.Bounty(bountyDB=callingBBGuild.bountiesDB, config=bountyConfig.BountyConfig(faction=newFaction, name=newName, route=newRoute, start=newStart,
                                                                                             end=newEnd, answer=newAnswer, reward=newReward, endTime=newEndTime, isPlayer=True, icon=newIcon, aliases=[lib.discordUtil.userTagOrDiscrim(newName)]))
 
     # print an error for incorrect syntax

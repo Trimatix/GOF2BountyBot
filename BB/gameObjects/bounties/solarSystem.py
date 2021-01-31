@@ -5,7 +5,7 @@ from typing import List, Tuple
 from ...baseClasses import aliasable
 import math
 
-class System (aliasable.Aliasable):
+class SolarSystem(aliasable.Aliasable):
     """A solar system where a bounty may be located.
 
     :var name: The name of this system
@@ -40,7 +40,7 @@ class System (aliasable.Aliasable):
         :param str wiki: A web page to display as the system's wiki article, if any (Default "")
         :param int techLevel: The tech level of the system, indicating the typical tech level of items that can be found here - this currently has no behaviour, and is used only for lore. (Default -1)
         """
-        super(System, self).__init__(name, aliases)
+        super(SolarSystem, self).__init__(name, aliases)
         self.name = name
         self.faction = faction
         self.neighbours = neighbours
@@ -62,7 +62,7 @@ class System (aliasable.Aliasable):
         return self.neighbours
 
 
-    def distanceTo(self, other : System) -> float:
+    def distanceTo(self, other : SolarSystem) -> float:
         """Calculate the straight-line distance from this system to another.
 
         :param System other: The other system to calculate distance to
@@ -98,12 +98,12 @@ class System (aliasable.Aliasable):
 
 
     @classmethod
-    def fromDict(cls, sysDict : dict, **kwargs) -> System:
+    def fromDict(cls, sysDict : dict, **kwargs) -> SolarSystem:
         """Factory function constructing a new System object from the information in the given dictionary.
 
         :param dict sysDict: A dictionary containing all information needed to construct the required System.
         :return: The requested System object
         :rtype: System
         """
-        return System(sysDict["name"], sysDict["faction"], sysDict["neighbours"], sysDict["security"], sysDict["coordinates"],
+        return SolarSystem(sysDict["name"], sysDict["faction"], sysDict["neighbours"], sysDict["security"], sysDict["coordinates"],
                                     aliases=sysDict["aliases"] if "aliases" in sysDict else [], wiki=sysDict["wiki"] if "wiki" in sysDict else "")

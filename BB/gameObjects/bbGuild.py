@@ -3,14 +3,14 @@ from __future__ import annotations
 from discord import Embed
 from . import guildShop
 from ..bbDatabases import bountyDB
-from .bounties.bountyBoards import BountyBoardChannel
+from .bounties.bountyBoards import bountyBoardChannel
 from ..userAlerts import UserAlerts
 from discord import channel, Client, Forbidden, Guild, Member, Message, HTTPException, NotFound
 from typing import List, Dict, Union
 from ..bbConfig import bbConfig, bbData
 from .. import bbGlobals, lib
 from ..scheduling import TimedTask
-from .bounties import bbBounty
+from .bounties import bounty
 from ..logging import bbLogger
 from datetime import timedelta
 from ..baseClasses import serializable
@@ -33,8 +33,8 @@ class bbGuild(serializable.Serializable):
     :vartype shop: guildShop
     :var alertRoles: A dictionary of user alert IDs to guild role IDs.
     :vartype alertRoles: dict[str, int]
-    :var bountyBoardChannel: A BountyBoardChannel object implementing this guild's bounty board channel if it has one, None otherwise.
-    :vartype bountyBoardChannel: BountyBoardChannel
+    :var bountyBoardChannel: A bountyBoardChannel object implementing this guild's bounty board channel if it has one, None otherwise.
+    :vartype bountyBoardChannel: bountyBoardChannel
     :var hasBountyBoardChannel: Whether this guild has a bounty board channel or not
     :vartype hasBountyBoardChannel: bool
     :var ownedRoleMenus: The number of ReactionRolePickers present in this guild
@@ -51,7 +51,7 @@ class bbGuild(serializable.Serializable):
 
     def __init__(self, id : int, bountiesDB: bountyDB.BountyDB, dcGuild: Guild, announceChannel : channel.TextChannel = None,
             playChannel : channel.TextChannel = None, shop : guildShop.GuildShop = None,
-            bountyBoardChannel : BountyBoardChannel.BountyBoardChannel = None, alertRoles : Dict[str, int] = {},
+            bountyBoardChannel : bountyBoardChannel.bountyBoardChannel = None, alertRoles : Dict[str, int] = {},
             ownedRoleMenus : int = 0, bountiesDisabled : bool = False, shopDisabled : bool = False):
         """
         :param int id: The ID of the guild, directly corresponding to a discord guild's ID.
@@ -61,7 +61,7 @@ class bbGuild(serializable.Serializable):
         :param discord.channel playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
         :param guildShop shop: This guild's guildShop object
         :param dict[str, int] alertRoles: A dictionary of user alert IDs to guild role IDs.
-        :param BoardBoardChannel bountyBoardChannel: A BountyBoardChannel object implementing this guild's bounty board channel if it has one, None otherwise.
+        :param BoardBoardChannel bountyBoardChannel: A bountyBoardChannel object implementing this guild's bounty board channel if it has one, None otherwise.
         :param int ownedRoleMenus: The number of ReactionRolePickers present in this guild
         :param bool bountiesDisabled: Whether or not to disable this guild's bountyDB and bounty spawning
         :param bool shopDisabled: Whether or not to disable this guild's guildShop and shop refreshing
@@ -251,19 +251,19 @@ class bbGuild(serializable.Serializable):
         :param discord.Channel channel: The channel where bounty listings should be posted
         :param discord.Client client: A logged in client used to fetch the channel and any existing listings.
         :param list[str] factions: A list of faction names with which bounty listings can be associated
-        :raise RuntimeError: If the guild already has an active BountyBoardChannel
+        :raise RuntimeError: If the guild already has an active bountyBoardChannel
         """
         if self.hasBountyBoardChannel:
             raise RuntimeError("Attempted to assign a bountyboard channel for guild " + str(self.id) + " but one is already assigned")
-        self.bountyBoardChannel = BountyBoardChannel.BountyBoardChannel(channel.id, {}, -1)
+        self.bountyBoardChannel = bountyBoardChannel.bountyBoardChannel(channel.id, {}, -1)
         await self.bountyBoardChannel.init(client, factions)
         self.hasBountyBoardChannel = True
 
     
     def removeBountyBoardChannel(self):
-        """Deactivate this guild's BountyBoardChannel. This does not remove any active bounty listing messages.
+        """Deactivate this guild's bountyBoardChannel. This does not remove any active bounty listing messages.
 
-        :raise RuntimeError: If this guild does not have an active BountyBoardChannel.
+        :raise RuntimeError: If this guild does not have an active bountyBoardChannel.
         """
         if not self.hasBountyBoardChannel:
             raise RuntimeError("Attempted to remove a bountyboard channel for guild " + str(self.id) + " but none is assigned")
@@ -271,16 +271,16 @@ class bbGuild(serializable.Serializable):
         self.hasBountyBoardChannel = False
 
 
-    async def makeBountyBoardChannelMessage(self, bounty : bbBounty.Bounty, msg : str = "", embed : Embed = None) -> Message:
-        """Create a new BountyBoardChannel listing for the given bounty, in the given guild.
-        guild must own a BountyBoardChannel.
+    async def makeBountyBoardChannelMessage(self, bounty : bounty.Bounty, msg : str = "", embed : Embed = None) -> Message:
+        """Create a new bountyBoardChannel listing for the given bounty, in the given guild.
+        guild must own a bountyBoardChannel.
 
-        :param bbBounty.Bounty bounty: The bounty for which to create a listing
+        :param bounty.Bounty bounty: The bounty for which to create a listing
         :param str msg: The text to display in the listing message content (Default "")
-        :param discord.Embed embed: The embed to display in the listing message - this will be removed immediately in place of the embed generated during BountyBoardChannel.updateBountyMessage, so is only really useful in case updateBountyMessage fails. (Default None)
+        :param discord.Embed embed: The embed to display in the listing message - this will be removed immediately in place of the embed generated during bountyBoardChannel.updateBountyMessage, so is only really useful in case updateBountyMessage fails. (Default None)
         :return: The new discord message containing the BBC listing
         :rtype: discord.Message
-        :raise ValueError: If guild does not own a BountyBoardChannel
+        :raise ValueError: If guild does not own a bountyBoardChannel
         """
         if not self.hasBountyBoardChannel:
             raise ValueError("The requested bbGuild has no bountyBoardChannel")
@@ -290,10 +290,10 @@ class bbGuild(serializable.Serializable):
         return bountyListing
 
 
-    async def removeBountyBoardChannelMessage(self, bounty : bbBounty.Bounty):
-        """Remove guild's BountyBoardChannel listing for bounty.
+    async def removeBountyBoardChannelMessage(self, bounty : bounty.Bounty):
+        """Remove guild's bountyBoardChannel listing for bounty.
 
-        :param bbBounty bounty: The bounty whose BBC listing should be removed
+        :param bounty bounty: The bounty whose BBC listing should be removed
         :raise ValueError: If guild does not own a BBC
         :raise KeyError: If the guild's BBC does not have a listing for bounty
         """
@@ -313,13 +313,13 @@ class bbGuild(serializable.Serializable):
                             bounty.criminal.name, category='bountyBoards', eventType="RM_LISTING-NOT_FOUND")
             await self.bountyBoardChannel.removeBounty(bounty)
         else:
-            raise KeyError("The requested bbGuild (" + str(self.id) + ") does not have a BountyBoardChannel listing for the given bounty: " + bounty.criminal.name)
+            raise KeyError("The requested bbGuild (" + str(self.id) + ") does not have a bountyBoardChannel listing for the given bounty: " + bounty.criminal.name)
 
 
-    async def updateBountyBoardChannel(self, bounty : bbBounty.Bounty, bountyComplete : bool = False):
+    async def updateBountyBoardChannel(self, bounty : bounty.Bounty, bountyComplete : bool = False):
         """Update the BBC listing for the given bounty in the given server.
 
-        :param bbBounty bounty: The bounty whose listings should be updated
+        :param bounty bounty: The bounty whose listings should be updated
         :param bool bountyComplete: Whether or not the bounty has now been completed. When True, bounty listings will be removed rather than updated. (Default False)
         """
         if self.hasBountyBoardChannel:
@@ -368,10 +368,10 @@ class bbGuild(serializable.Serializable):
         return delay
 
     
-    async def announceNewBounty(self, newBounty : bbBounty.Bounty):
+    async def announceNewBounty(self, newBounty : bounty.Bounty):
         """Announce the creation of a new bounty to this guild's announceChannel, if it has one
 
-        :param bbBounty newBounty: the bounty to announce
+        :param bounty newBounty: the bounty to announce
         """
         # Create the announcement embed
         bountyEmbed = lib.discordUtil.makeEmbed(titleTxt=lib.discordUtil.criminalNameOrDiscrim(newBounty.criminal), desc="⛓ __New Bounty Available__",
@@ -427,18 +427,18 @@ class bbGuild(serializable.Serializable):
             raise ValueError("Attempted to spawn a bounty into a guild where bounties are disabled")
         # ensure a new bounty can be created
         if self.bountiesDB.canMakeBounty():
-            newBounty = bbBounty.Bounty(bountyDB=self.bountiesDB)
+            newBounty = bounty.Bounty(bountyDB=self.bountiesDB)
             # activate and announce the bounty
             self.bountiesDB.addBounty(newBounty)
             await self.announceNewBounty(newBounty)
 
 
-    async def announceBountyWon(self, bounty : bbBounty.Bounty, rewards : Dict[int, Dict[str, Union[int, bool]]], winningUser : Member):
+    async def announceBountyWon(self, bounty : bounty.Bounty, rewards : Dict[int, Dict[str, Union[int, bool]]], winningUser : Member):
         """Announce the completion of a bounty
         Messages will be sent to the playChannel if one is set
 
-        :param bbBounty bounty: the bounty to announce
-        :param dict rewards: the rewards dictionary as defined by bbBounty.calculateRewards
+        :param bounty bounty: the bounty to announce
+        :param dict rewards: the rewards dictionary as defined by bounty.calculateRewards
         :param discord.Member winningUser: the guild member that won the bounty
         """
         if self.dcGuild is not None:
@@ -596,7 +596,7 @@ class bbGuild(serializable.Serializable):
 
         :param int id: The discord ID of the guild
         :param dict guildDict: A dictionary containing all information required to build the bbGuild object
-        :param bool dbReload: Whether or not this guild is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
+        :param bool dbReload: Whether or not this guild is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bounty contruction.
         :return: A bbGuild according to the information in guildDict
         :rtype: bbGuild
         """
@@ -629,6 +629,6 @@ class bbGuild(serializable.Serializable):
 
         return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel,
                         shop=guildShop.GuildShop.fromDict(guildDict["shop"]) if "shop" in guildDict else guildShop.GuildShop(),
-                        bountyBoardChannel=BountyBoardChannel.BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
+                        bountyBoardChannel=bountyBoardChannel.bountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
                         alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0,
                         bountiesDisabled=guildDict["bountiesDisabled"] if "bountiesDisabled" in guildDict else False)

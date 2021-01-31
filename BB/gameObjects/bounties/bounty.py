@@ -4,9 +4,9 @@ from typing import Dict, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...bbDatabases import bountyDB
 
-from . import bbBountyConfig
+from . import bountyConfig
 from ...bbConfig import bbData
-from . import bbCriminal
+from . import criminal
 from ...baseClasses import serializable
 
 
@@ -14,7 +14,7 @@ class Bounty(serializable.Serializable):
     """A bounty listing for a criminal, to be hunted down by players.
 
     :var criminal: The criminal who is being hunted
-    :vartype criminal: bbCriminal
+    :vartype criminal: criminal
     :var issueTime: The time at which the bounty was created
     :vartype issueTime: datetime.datetime
     :var route: the names of systems that are in the route
@@ -31,12 +31,12 @@ class Bounty(serializable.Serializable):
     :vartype answer: str
     """
 
-    def __init__(self, criminalObj : bbCriminal = None, config : bbBountyConfig = None, bountyDB : bountyDB.BountyDB = None, dbReload : bool = False):
+    def __init__(self, criminalObj : criminal = None, config : bountyConfig = None, bountyDB : bountyDB.BountyDB = None, dbReload : bool = False):
         """
         :param criminalObj: The criminal to be wanted. Give None to randomly generate a criminal. (Default None)
-        :type criminalObj: bbCriminal or None
+        :type criminalObj: criminal or None
         :param config: a bountyconfig describing all aspects of this bounty. Give None to randomly generate one. (Default None)
-        :type config: bbBountyConfig or None
+        :type config: bountyConfig or None
         :param bountyDB: The database of currenly active bounties. This is required unless dbReload is True. (Default None)
         :type bountyDB: bountyDB or None
         :param bool dbReload: Give True if this bounty is being created during bot bootup, False otherwise. This currently toggles whether the passed bounty is checked for existence or not. (Default False)
@@ -48,7 +48,7 @@ class Bounty(serializable.Serializable):
 
         if config is None:
             # generate bounty details and validate given details
-            config = bbBountyConfig.BountyConfig() if makeFresh else bbBountyConfig.BountyConfig(faction=criminalObj.faction, name=criminalObj.name)
+            config = bountyConfig.BountyConfig() if makeFresh else bountyConfig.BountyConfig(faction=criminalObj.faction, name=criminalObj.name)
 
         if not config.generated:
             config.generate(bountyDB, noCriminal=makeFresh, forceKeepChecked=dbReload, forceNoDBCheck=dbReload)
@@ -59,7 +59,7 @@ class Bounty(serializable.Serializable):
                 # builtIn criminals cannot be players, so just equip the ship
                 # self.criminal.equipShip(config.ship)
             else:
-                self.criminal = bbCriminal.Criminal(config.name, config.faction, config.icon, isPlayer=config.isPlayer, aliases=config.aliases, wiki=config.wiki)
+                self.criminal = criminal.Criminal(config.name, config.faction, config.icon, isPlayer=config.isPlayer, aliases=config.aliases, wiki=config.wiki)
                 # Don't just claim player ships! players could unequip ship items. Take a deep copy of the ship
                 if config.isPlayer:
                     self.criminal.copyShip(config.ship)
@@ -144,12 +144,12 @@ class Bounty(serializable.Serializable):
 
     @classmethod
     def fromDict(cls, bounty : dict, **kwargs) -> Bounty:
-        """Factory function constructing a new bbBounty from a dictionary serialized description - the opposite of bbBounty.toDict
+        """Factory function constructing a new bounty from a dictionary serialized description - the opposite of bounty.toDict
 
-        :param dict bounty: Dictionary containing all information needed to construct the desired bbBounty
+        :param dict bounty: Dictionary containing all information needed to construct the desired bounty
         :param bool dbReload: Give True if this bounty is being created during bot bootup, False otherwise. This currently toggles whether the passed bounty is checked for existence or not. (Default False)
         """
         dbReload = kwargs["dbReload"] if "dbReload" in kwargs else False
         return Bounty(dbReload=dbReload,
-                        criminalObj=bbCriminal.Criminal.fromDict(bounty["criminal"]), 
-                        config=bbBountyConfig.BountyConfig(faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))
+                        criminalObj=criminal.Criminal.fromDict(bounty["criminal"]), 
+                        config=bountyConfig.BountyConfig(faction=bounty["faction"], route=bounty["route"], answer=bounty["answer"], checked=bounty["checked"], reward=bounty["reward"], issueTime=bounty["issueTime"], endTime=bounty["endTime"]))

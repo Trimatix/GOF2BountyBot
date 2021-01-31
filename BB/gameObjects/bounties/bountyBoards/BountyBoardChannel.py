@@ -3,16 +3,16 @@ import discord
 from discord import Embed, HTTPException, Forbidden, NotFound, Client, Message
 from ....bbConfig import bbData, bbConfig
 from .... import lib
-from .. import bbCriminal
+from .. import criminal
 from ....logging import bbLogger
 import asyncio
-from .. import bbBounty
+from .. import bounty
 from typing import Dict, Union, List
 from ....baseClasses import serializable
 
 
-def makeBountyEmbed(bounty : bbBounty.Bounty) -> Embed:
-    """Construct a discord.Embed for listing in a BountyBoardChannel
+def makeBountyEmbed(bounty : bounty.Bounty) -> Embed:
+    """Construct a discord.Embed for listing in a bountyBoardChannel
 
     :param Bounty bounty: The bounty to describe in this embed
     :return: A discord.Embed describing statistics about the passed bounty
@@ -45,11 +45,11 @@ noBountiesEmbed = Embed(description='> Please check back later, or use the `$not
 noBountiesEmbed.set_author(name='No Bounties Available', icon_url='https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/stopwatch_23f1.png')
 
 
-class BountyBoardChannel(serializable.Serializable):
+class bountyBoardChannel(serializable.Serializable):
     """A channel which stores a continuously updating listing message for every active bounty.
 
     Initialisation atts: These attributes are used only when loading in the BBC from dictionary-serialised format. They must be used to initialise the BBC before the BBC can be used.
-    :var messagesToBeLoaded: A dictionary of bounty listings to be loaded into the BBC, where keys are message IDs, and values are bbCriminal dicts
+    :var messagesToBeLoaded: A dictionary of bounty listings to be loaded into the BBC, where keys are message IDs, and values are criminal dicts
     :vartype messagesToBeLoaded: dict[int, dict]
     :var channelIDToBeLoaded: The discord channel ID of the channel where this BBC is active, to be loaded into the BBC
     :vartype channelIDToBeLoaded: int
@@ -57,8 +57,8 @@ class BountyBoardChannel(serializable.Serializable):
     :vartype noBountiesMsgToBeLoaded: int
 
     Runtime atts: These are the attributes that contribute to the BBC's runtime functionality, unlike initialisation atts.
-    :var bountyMessages: A dictionary associating faction names with the bounty listings associated with that faction. Listings are stored as a dictionary of the listing's bbCriminal to the message ID of the listing message.
-    :vartype bountyMessages: dict[str, dict[bbCriminal, int]]
+    :var bountyMessages: A dictionary associating faction names with the bounty listings associated with that faction. Listings are stored as a dictionary of the listing's criminal to the message ID of the listing message.
+    :vartype bountyMessages: dict[str, dict[criminal, int]]
     :var noBountiesMessage: Either a reference to a discord.message indicating that the BBC is empty, or None if no empty board message exists 
     :vartype noBountiesMessage: discord.message or None
     :var channel: The channel where this BBC's listings are to be posted
@@ -68,7 +68,7 @@ class BountyBoardChannel(serializable.Serializable):
     def __init__(self, channelIDToBeLoaded : int, messagesToBeLoaded : Dict[int, dict], noBountiesMsgToBeLoaded : Union[int, None]):
         """
         :param int channelIDToBeLoaded: The discord channel ID of the channel where this BBC is active, to be loaded into the BBC
-        :param messagesToBeLoaded: A dictionary of bounty listings to be loaded into the BBC, where keys are message IDs, and values are bbCriminal dicts
+        :param messagesToBeLoaded: A dictionary of bounty listings to be loaded into the BBC, where keys are message IDs, and values are criminal dicts
         :type messagesToBeLoaded: dict[int, dict]
         :param int noBountiesMsgToBeLoaded: The id of the message to be loaded indicating that the BBC is empty, if one exists
         """
@@ -97,7 +97,7 @@ class BountyBoardChannel(serializable.Serializable):
         self.channel = client.get_channel(self.channelIDToBeLoaded)
 
         for id in self.messagesToBeLoaded:
-            criminal = bbCriminal.Criminal.fromDict(self.messagesToBeLoaded[id])
+            criminal = criminal.Criminal.fromDict(self.messagesToBeLoaded[id])
 
             try:
                 msg = await self.channel.fetch_message(id)
@@ -169,7 +169,7 @@ class BountyBoardChannel(serializable.Serializable):
         # del self.noBountiesMsgToBeLoaded
 
 
-    def hasMessageForBounty(self, bounty : bbBounty.Bounty) -> bool:
+    def hasMessageForBounty(self, bounty : bounty.Bounty) -> bool:
         """Decide whether this BBC stores a listing for the given bounty 
 
         :param Bounty bounty: The bounty to check for listing existence
@@ -179,7 +179,7 @@ class BountyBoardChannel(serializable.Serializable):
         return bounty.criminal in self.bountyMessages[bounty.criminal.faction]
 
 
-    def getMessageForBounty(self, bounty : bbBounty.Bounty) -> Message:
+    def getMessageForBounty(self, bounty : bounty.Bounty) -> Message:
         """Return the message acting as a listing for the given bounty
 
         :param Bounty bounty: The bounty to fetch a listing for
@@ -201,7 +201,7 @@ class BountyBoardChannel(serializable.Serializable):
         return True
 
     
-    async def addBounty(self, bounty : bbBounty.Bounty, message : Message):
+    async def addBounty(self, bounty : bounty.Bounty, message : Message):
         """Treat the given message as a listing for the given bounty, and store it in the database.
         If the BBC was previously empty, remove the empty bounty board message if one exists.
         If a HTTP error is thrown when attempting to remove the empty board message, wait and retry the removal for the number of times defined in bbConfig
@@ -239,7 +239,7 @@ class BountyBoardChannel(serializable.Serializable):
                 print("addBounty no message")
     
 
-    async def removeBounty(self, bounty : bbBounty.Bounty):
+    async def removeBounty(self, bounty : bounty.Bounty):
         """Remove the listing message stored for the given bounty from the database. This does not attempt to delete the message from discord.
         If the BBC is now empty, send an empty bounty board message.
         If a HTTP error is thrown when sending the empty BBC message, wait and retry the removal for the number of times defined in bbConfig
@@ -275,7 +275,7 @@ class BountyBoardChannel(serializable.Serializable):
                 self.noBountiesMessage = None
 
 
-    async def updateBountyMessage(self, bounty : bbBounty.Bounty):
+    async def updateBountyMessage(self, bounty : bounty.Bounty):
         """Update the embed for the listing associated with the given bounty. This includes newly checked and near-correct systems along the route.
         If a HTTP error is thrown when updating the listing, wait and retry the edit for the number of times defined in bbConfig
         
@@ -331,13 +331,13 @@ class BountyBoardChannel(serializable.Serializable):
 
 
     @classmethod
-    def fromDict(cls, BBCDict : dict, **kwargs) -> BountyBoardChannel:
-        """Factory function constructing a new BBC from the information in the provided dictionary - the opposite of BountyBoardChannel.toDict
+    def fromDict(cls, BBCDict : dict, **kwargs) -> bountyBoardChannel:
+        """Factory function constructing a new BBC from the information in the provided dictionary - the opposite of bountyBoardChannel.toDict
 
         :param dict BBCDict: a dictionary representation of the BBC, to convert to an object
-        :return: The new BountyBoardChannel object
-        :rtype: BountyBoardChannel
+        :return: The new bountyBoardChannel object
+        :rtype: bountyBoardChannel
         """
         if BBCDict is None:
             return None
-        return BountyBoardChannel(BBCDict["channel"], BBCDict["listings"], BBCDict["noBountiesMsg"] if "noBountiesMsg" in BBCDict else -1)
+        return bountyBoardChannel(BBCDict["channel"], BBCDict["listings"], BBCDict["noBountiesMsg"] if "noBountiesMsg" in BBCDict else -1)

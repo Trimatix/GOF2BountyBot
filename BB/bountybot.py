@@ -14,7 +14,7 @@ import os
 
 from .bbConfig import bbConfig, bbData, bbPRIVATE
 from .gameObjects import shipSkin, shipUpgrade
-from .gameObjects.bounties import bbCriminal, bbSystem
+from .gameObjects.bounties import criminal, solarSystem
 from .gameObjects.items import moduleItemFactory
 from .gameObjects.items.weapons import turretWeapon, primaryWeapon
 from .gameObjects.items.tools import shipSkinTool, toolItemFactory
@@ -102,7 +102,7 @@ def loadGuildsDB(filePath : str, dbReload : bool = False) -> bbGuildDB.bbGuildDB
     """Build a bbGuildDB from the specified JSON file.
 
     :param str filePath: path to the JSON file to load. Theoretically, this can be absolute or relative.
-    :param bool dbReload: Whether or not this DB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bbBounty contruction.
+    :param bool dbReload: Whether or not this DB is being created during the initial database loading phase of bountybot. This is used to toggle name checking in bounty contruction.
     :return: a bbGuildDB as described by the dictionary-serialized representation stored in the file located in filePath.
     """
     return bbGuildDB.bbGuildDB.fromDict(lib.jsonHandler.readJSON(filePath), dbReload=dbReload)
@@ -264,15 +264,15 @@ async def on_ready():
 
     ##### OBJECT SPAWNING #####
 
-    # generate bbCriminal objects from data in bbData
+    # generate criminal objects from data in bbData
     for criminalDict in bbData.builtInCriminalData.values():
-        bbData.builtInCriminalObjs[criminalDict["name"]] = bbCriminal.Criminal.fromDict(criminalDict)
+        bbData.builtInCriminalObjs[criminalDict["name"]] = criminal.Criminal.fromDict(criminalDict)
         bbData.builtInCriminalObjs[criminalDict["name"]].builtIn = True
         bbData.builtInCriminalData[criminalDict["name"]]["builtIn"] = True
 
-    # generate bbSystem objects from data in bbData
+    # generate solarSystem objects from data in bbData
     for systemDict in bbData.builtInSystemData.values():
-        bbData.builtInSystemObjs[systemDict["name"]] = bbSystem.System.fromDict(systemDict)
+        bbData.builtInSystemObjs[systemDict["name"]] = solarSystem.SolarSystem.fromDict(systemDict)
         bbData.builtInSystemData[systemDict["name"]]["builtIn"] = True
         bbData.builtInSystemObjs[systemDict["name"]].builtIn = True
 

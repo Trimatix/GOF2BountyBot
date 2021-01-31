@@ -63,7 +63,7 @@ for fac in bountyNames:
         if len(name) > longestBountyNameLength:
             longestBountyNameLength = len(name)
 
-# levels of security in bbSystems (bbSystem security is stored as an index in this list)
+# levels of security in solarSystems (solarSystem security is stored as an index in this list)
 securityLevels = ["secure", "average", "risky", "dangerous"]
 
 # map image URLS for cmd_map
@@ -364,7 +364,7 @@ builtInUpgradeData = {  "+30 Cargo Space": {"name": "+30 Cargo Space", "shipToUp
                         "Extra Equipment Slot": {"name": "Extra Equipment Slot", "shipToUpgradeValueMult":0.4, "maxModules": 1, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"},
                         "+40 Armor": {"name": "+40 Armor", "shipToUpgradeValueMult":0.2, "armour": 40, "builtIn":False, "wiki":"https://galaxyonfire.fandom.com/wiki/Kaamo_Club#Ship_Upgrades"}}
 
-# data for builtIn criminals to be used in bbCriminal.fromDict
+# data for builtIn criminals to be used in criminal.fromDict
 # criminals marked as not builtIn to allow for dictionary init. The criminal object is then marked as builtIn during package __init__.py
 builtInCriminalData = {"Pal Tyyrt": {"name":"Pal Tyyrt", "faction":"terran", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226618919780359/pal_tyyrt.png", "aliases":["pal", "tyyrt"], "wiki":"https://galaxyonfire.fandom.com/wiki/Pal_Tyyrt", "builtIn":False, "isPlayer":False},
                 "Kehnor": {"name":"Kehnor", "faction":"terran", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226614767419432/kehnor.png", "aliases":[], "wiki":"https://galaxyonfire.fandom.com/wiki/Kehnor", "builtIn":False, "isPlayer":False},
@@ -398,7 +398,7 @@ builtInCriminalData = {"Pal Tyyrt": {"name":"Pal Tyyrt", "faction":"terran", "ic
                 "Merson Surr": {"name":"Merson Surr", "faction":"nivelian", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226769327521872/merson_surr.png", "aliases":["merson","surr"], "wiki":"https://galaxyonfire.fandom.com/wiki/Merson_Surr", "builtIn":False, "isPlayer":False},
                 "Ganfor Kant": {"name":"Ganfor Kant", "faction":"nivelian", "icon":"https://cdn.discordapp.com/attachments/700683544103747594/711226766630584370/ganfor_kant.png", "aliases":["ganfor","kant"], "wiki":"https://galaxyonfire.fandom.com/wiki/Ganfor_Kant", "builtIn":False, "isPlayer":False}}
 
-# data for builtIn systems to be used in bbSystem.fromDict
+# data for builtIn systems to be used in solarSystem.fromDict
 builtInSystemData = { #Terran
             "Aquila": {"name":"Aquila", "faction":"terran", "neighbours":["Wolf-Reiser", "Loma", "Union"], "security":2, "coordinates":(9, 2), "aliases":[], "wiki":"https://galaxyonfire.fandom.com/wiki/Aquila_system"},
             "Augmenta": {"name":"Augmenta", "faction":"terran", "neighbours":["Weymire", "Magnetar", "V'Ikka", "Buntta"], "security":0, "coordinates":(6, 6), "aliases":[], "wiki":"https://galaxyonfire.fandom.com/wiki/Augmenta_system"},

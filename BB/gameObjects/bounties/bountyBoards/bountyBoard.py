@@ -13,7 +13,7 @@ class BountyBoard(serializable.Serializable):
     :vartype bountiesDB: bountyDB
     """
 
-    def __init__(self, msgID : int, bountiesDB : bountyDB.bbBounty):
+    def __init__(self, msgID : int, bountiesDB : bountyDB.bounty):
         """
         :param int msgID: The id of the message to continuously update
         :param bountyDB bountiesDB: The database to pull active bounties from
