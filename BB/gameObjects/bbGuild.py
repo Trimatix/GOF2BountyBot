@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from discord import Embed
-from . import bbShop
+from . import guildShop
 from ..bbDatabases import bountyDB
 from .bounties.bountyBoards import BountyBoardChannel
 from ..userAlerts import UserAlerts
@@ -29,8 +29,8 @@ class bbGuild(serializable.Serializable):
     :vartype announceChannel: discord.channel.TextChannel
     :var playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
     :vartype playChannel: discord.channel.TextChannel
-    :var shop: This guild's bbShop object
-    :vartype shop: bbShop
+    :var shop: This guild's guildShop object
+    :vartype shop: guildShop
     :var alertRoles: A dictionary of user alert IDs to guild role IDs.
     :vartype alertRoles: dict[str, int]
     :var bountyBoardChannel: A BountyBoardChannel object implementing this guild's bounty board channel if it has one, None otherwise.
@@ -43,14 +43,14 @@ class bbGuild(serializable.Serializable):
     :vartype bountiesDB: bountyDB.bountyDB
     :var bountiesDisabled: Whether or not to disable this guild's bountyDB and bounty spawning
     :vartype bountiesDisabled: bool
-    :var shopDisabled: Whether or not to disable this guild's bbShop and shop refreshing
+    :var shopDisabled: Whether or not to disable this guild's guildShop and shop refreshing
     :vartype shopDisabled: bool
     :var dcGuild: This guild's corresponding discord.Guild object
     :vartype dcGuild: discord.Guild
     """
 
     def __init__(self, id : int, bountiesDB: bountyDB.BountyDB, dcGuild: Guild, announceChannel : channel.TextChannel = None,
-            playChannel : channel.TextChannel = None, shop : bbShop.bbShop = None,
+            playChannel : channel.TextChannel = None, shop : guildShop.GuildShop = None,
             bountyBoardChannel : BountyBoardChannel.BountyBoardChannel = None, alertRoles : Dict[str, int] = {},
             ownedRoleMenus : int = 0, bountiesDisabled : bool = False, shopDisabled : bool = False):
         """
@@ -59,12 +59,12 @@ class bbGuild(serializable.Serializable):
         :param discord.Guild guild: This guild's corresponding discord.Guild object
         :param discord.channel announceChannel: The discord.channel object for this guild's announcements chanel. None when no announce channel is set for this guild.
         :param discord.channel playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
-        :param bbShop shop: This guild's bbShop object
+        :param guildShop shop: This guild's guildShop object
         :param dict[str, int] alertRoles: A dictionary of user alert IDs to guild role IDs.
         :param BoardBoardChannel bountyBoardChannel: A BountyBoardChannel object implementing this guild's bounty board channel if it has one, None otherwise.
         :param int ownedRoleMenus: The number of ReactionRolePickers present in this guild
         :param bool bountiesDisabled: Whether or not to disable this guild's bountyDB and bounty spawning
-        :param bool shopDisabled: Whether or not to disable this guild's bbShop and shop refreshing
+        :param bool shopDisabled: Whether or not to disable this guild's guildShop and shop refreshing
         :raise TypeError: When given an incompatible argument type
         """
         if type(id) == float:
@@ -83,7 +83,7 @@ class bbGuild(serializable.Serializable):
         if shopDisabled:
             self.shop = None
         else:
-            self.shop = bbShop.bbShop() if shop is None else shop
+            self.shop = guildShop.GuildShop() if shop is None else shop
         
         self.alertRoles = {}
         for alertID in UserAlerts.userAlertsIDsTypes.keys():
@@ -521,20 +521,20 @@ class bbGuild(serializable.Serializable):
 
     def enableShop(self):
         """Enable the shop for this guild.
-        Creates a new bbShop object for this guild.
+        Creates a new guildShop object for this guild.
         
         :raise ValueError: If the shop is already enabled in this guild
         """
         if not self.shopDisabled:
             raise ValueError("The shop is already enabled in this guild")
 
-        self.shop = bbShop.bbShop(noRefresh=True)
+        self.shop = guildShop.GuildShop(noRefresh=True)
         self.shopDisabled = False
 
 
     def disableShop(self):
         """Disable the shop for this guild.
-        Removes the guild's bbShop object.
+        Removes the guild's guildShop object.
         
         :raise ValueError: If the shop is already disabled in this guild
         """
@@ -628,7 +628,7 @@ class bbGuild(serializable.Serializable):
         
 
         return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel,
-                        shop=bbShop.bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
+                        shop=guildShop.GuildShop.fromDict(guildDict["shop"]) if "shop" in guildDict else guildShop.GuildShop(),
                         bountyBoardChannel=BountyBoardChannel.BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
                         alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0,
                         bountiesDisabled=guildDict["bountiesDisabled"] if "bountiesDisabled" in guildDict else False)

@@ -14,7 +14,7 @@ from ..logging import bbLogger
 from ..baseClasses import serializable
 
 
-class bbShop(serializable.Serializable):
+class GuildShop(serializable.Serializable):
     """A shop containing a random selection of items which players can buy.
     Items can be sold to the shop to the shop's inventory and listed for sale.
     Shops are assigned a random tech level, which influences ths stock generated.
@@ -468,12 +468,12 @@ class bbShop(serializable.Serializable):
 
 
     @classmethod
-    def fromDict(cls, shopDict : dict, **kwargs) -> bbShop:
-        """Recreate a bbShop instance from its dictionary-serialized representation - the opposite of bbShop.toDict
+    def fromDict(cls, shopDict : dict, **kwargs) -> GuildShop:
+        """Recreate a guildShop instance from its dictionary-serialized representation - the opposite of guildShop.toDict
         
         :param dict shopDict: A dictionary containing all information needed to construct the shop
-        :return: A new bbShop object as described by shopDict
-        :rtype: bbShop
+        :return: A new guildShop object as described by shopDict
+        :rtype: guildShop
         """
         shipsStock = inventory.Inventory()
         for shipListingDict in shopDict["shipsStock"]:
@@ -491,5 +491,5 @@ class bbShop(serializable.Serializable):
         for turretListingDict in shopDict["turretsStock"]:
             turretsStock.addItem(turretWeapon.TurretWeapon.fromDict(turretListingDict["item"]), quantity=turretListingDict["count"])
 
-        return bbShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"], currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
+        return GuildShop(shopDict["maxShips"], shopDict["maxWeapons"], shopDict["maxModules"], currentTechLevel=shopDict["currentTechLevel"] if "currentTechLevel" in shopDict else 1,
                         shipsStock=shipsStock, weaponsStock=weaponsStock, modulesStock=modulesStock, turretsStock=turretsStock)

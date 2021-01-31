@@ -39,7 +39,7 @@ bbCommands.register("balance", cmd_balance, 0, aliases=["bal", "credits"], force
 
 
 async def cmd_shop(message : discord.Message, args : str, isDM : bool):
-    """list the current stock of the bbShop owned by the guild containing the sent message.
+    """list the current stock of the guildShop owned by the guild containing the sent message.
     Can specify an item type to list. TODO: Make specified item listings more detailed as in !bb bounties
 
     :param discord.Message message: the discord message calling the command
