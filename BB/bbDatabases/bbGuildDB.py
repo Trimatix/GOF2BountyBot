@@ -53,7 +53,7 @@ class bbGuildDB(serializable.Serializable):
 
 
     
-    def guildIdExists(self, id : int) -> bool:
+    def idExists(self, id : int) -> bool:
         """Check whether a bbGuild with a given ID exists in the database.
         
         :param int id: integer discord ID to check for existence
@@ -71,7 +71,7 @@ class bbGuildDB(serializable.Serializable):
 
     
     
-    def guildObjExists(self, guild : bbGuild.bbGuild) -> bool:
+    def guildExists(self, guild : bbGuild.bbGuild) -> bool:
         """Check whether a bbGuild object exists in the database.
         Existence checking is currently handled by checking if a guild with the requested ID is stored.
 
@@ -80,24 +80,24 @@ class bbGuildDB(serializable.Serializable):
         :return: True if the exact bbGuild exists in the DB, False otherwise
         :rtype: bool
         """
-        return self.guildIdExists(guild.id)
+        return self.idExists(guild.id)
 
 
     
-    def addGuildObj(self, guild : bbGuild.bbGuild):
+    def addGuild(self, guild : bbGuild.bbGuild):
         """Add a given bbGuild object to the database.
 
         :param bbGuild guild: the bbGuild object to store
         :raise KeyError: If the the guild is already in the database
         """
         # Ensure guild is not yet in the database
-        if self.guildObjExists(guild):
+        if self.guildExists(guild):
             raise KeyError("Attempted to add a guild that already exists: " + guild.id)
         self.guilds[guild.id] = guild
 
     
     
-    def addGuildID(self, id: int) -> bbGuild.bbGuild:
+    def addID(self, id: int) -> bbGuild.bbGuild:
         """Add a bbGuild object with the requested ID to the database
 
         :param int id: integer discord ID to create and store a bbGuild for
@@ -107,7 +107,7 @@ class bbGuildDB(serializable.Serializable):
         :rtype: bbGuild
         """
         # Ensure the requested ID does not yet exist in the database
-        if self.guildIdExists(id):
+        if self.idExists(id):
             raise KeyError("Attempted to add a guild that already exists: " + id)
         # Create and return a bbGuild for the requested ID
         self.guilds[id] = bbGuild.bbGuild(id, bountyDB.BountyDB(bbData.bountyFactions), bbGlobals.client.get_guild(id))
@@ -115,7 +115,7 @@ class bbGuildDB(serializable.Serializable):
 
     
     
-    def removeGuildId(self, id : int):
+    def removeID(self, id : int):
         """Remove the bbGuild with the requested ID from the database.
         
         :param int id: integer discord ID to remove from the database
@@ -124,13 +124,13 @@ class bbGuildDB(serializable.Serializable):
 
 
     
-    def removeGuildObj(self, guild : bbGuild.bbGuild):
+    def removeGuild(self, guild : bbGuild.bbGuild):
         """Remove the given bbGuild object from the database
         Currently removes any bbGuild sharing the given guild's ID, even if it is a different object.
 
         :param bbGuild guild: the guild object to remove from the database
         """
-        self.removeGuildId(guild.id)
+        self.removeID(guild.id)
 
     
     
@@ -187,7 +187,7 @@ class bbGuildDB(serializable.Serializable):
             # Instance new bbGuilds for each ID, with the provided data
             # JSON stores properties as strings, so ids must be converted to int first.
             try:
-                newDB.addGuildObj(bbGuild.bbGuild.fromDict(guildsDBDict[id], id=int(id), dbReload=dbReload))
+                newDB.addGuild(bbGuild.bbGuild.fromDict(guildsDBDict[id], id=int(id), dbReload=dbReload))
             # Ignore guilds that don't have a corresponding dcGuild
             except bbGuild.NoneDCGuildObj:
                 bbLogger.log("bbGuildDB", "fromDict", "no corresponding discord guild found for ID " + id + ", guild removed from database",

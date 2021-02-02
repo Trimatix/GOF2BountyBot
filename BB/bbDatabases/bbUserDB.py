@@ -19,7 +19,7 @@ class bbUserDB(serializable.Serializable):
         self.users = {}
 
 
-    def userIDExists(self, id : int) -> bool:
+    def idExists(self, id : int) -> bool:
         """Check if a user is stored in the database with the given ID.
 
         :param int id: integer discord ID for the bbUser to search for
@@ -29,7 +29,7 @@ class bbUserDB(serializable.Serializable):
         return id in self.users.keys()
 
 
-    def userObjExists(self, user : bbUser.bbUser) -> bool:
+    def userExists(self, user : bbUser.bbUser) -> bool:
         """Check if a given bbUser object is stored in the database.
         Currently only checks if a user with the same ID is stored in the database, not if the objects are the same.
 
@@ -37,7 +37,7 @@ class bbUserDB(serializable.Serializable):
         :return: True if a bbUser is found in the database with a matching ID, False otherwise
         :rtype: bool
         """
-        return self.userIDExists(user.id)
+        return self.idExists(user.id)
 
 
     def validateID(self, id : int) -> int:
@@ -68,13 +68,13 @@ class bbUserDB(serializable.Serializable):
         """
         id = self.validateID(id)
         # ensure the ID exists in the database
-        if not self.userIDExists(id):
+        if not self.idExists(id):
             raise KeyError("user not found: " + str(id))
         # Reset the user
         self.users[id].resetUser()
 
 
-    def addUser(self, id : int) -> bbUser.bbUser:
+    def addID(self, id : int) -> bbUser.bbUser:
         """
         Create a new bbUser object with the specified ID and add it to the database
 
@@ -85,21 +85,21 @@ class bbUserDB(serializable.Serializable):
         """
         id = self.validateID(id)
         # Ensure no user exists with the specified ID in the database
-        if self.userIDExists(id):
+        if self.idExists(id):
             raise KeyError("Attempted to add a user that is already in this bbUserDB")
         # Create and return a new user
         newUser = bbUser.bbUser.fromDict(bbUser.defaultUserDict, id=id)
         self.users[id] = newUser
         return newUser
 
-    def addUserObj(self, userObj : bbUser.bbUser):
+    def addUser(self, userObj : bbUser.bbUser):
         """Store the given bbUser object in the database
 
         :param bbUser userObj: bbUser to store
         :raise KeyError: If a bbUser already exists in the database with the same ID as the given bbUser
         """
         # Ensure no bbUser exists in the db with the same ID as the given bbUser
-        if self.userIDExists(userObj.id):
+        if self.idExists(userObj.id):
             raise KeyError("Attempted to add a user that is already in this bbUserDB: " + str(userObj))
         # Store the passed bbUser
         self.users[userObj.id] = userObj
@@ -112,10 +112,10 @@ class bbUserDB(serializable.Serializable):
         :return: the requested/created bbUser
         :rtype: int
         """
-        return self.getUser(id) if self.userIDExists(id) else self.addUser(id)
+        return self.getUser(id) if self.idExists(id) else self.addID(id)
 
     
-    def removeUser(self, id : int):
+    def removeID(self, id : int):
         """Remove the new bbUser object with the specified ID from the database
         ⚠ The bbUser object is deleted from memory.
 
@@ -123,7 +123,7 @@ class bbUserDB(serializable.Serializable):
         :raise KeyError: If no bbUser exists in the database with the specified ID
         """
         id = self.validateID(id)
-        if not self.userIDExists(id):
+        if not self.idExists(id):
             raise KeyError("user not found: " + str(id))
         del self.users[id]
 
@@ -148,7 +148,7 @@ class bbUserDB(serializable.Serializable):
         return list(self.users.values())
 
     
-    def getIds(self) -> List[int]:
+    def getIDs(self) -> List[int]:
         """Get a list of all user IDs stored in the database
 
         :return: list containing all int discord IDs for which bbUsers are stored in the database
@@ -165,7 +165,7 @@ class bbUserDB(serializable.Serializable):
         """
         data = {}
         # Iterate over all user IDs in the database
-        for id in self.getIds():
+        for id in self.getIDs():
             # Serialise each bbUser in the database and save it, along with its ID to dict 
             # JSON stores properties as strings, so ids must be converted to str first.
             try:
@@ -199,5 +199,5 @@ class bbUserDB(serializable.Serializable):
         for id in userDBDict.keys():
             # Construct new bbUsers for each ID in the database
             # JSON stores properties as strings, so ids must be converted to int first.
-            newDB.addUserObj(bbUser.bbUser.fromDict(userDBDict[id], id=int(id)))
+            newDB.addUser(bbUser.bbUser.fromDict(userDBDict[id], id=int(id)))
         return newDB
