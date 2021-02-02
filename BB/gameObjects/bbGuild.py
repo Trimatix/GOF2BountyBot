@@ -4,7 +4,7 @@ from discord import Embed
 from . import guildShop
 from ..bbDatabases import bountyDB
 from .bounties.bountyBoards import bountyBoardChannel
-from ..userAlerts import UserAlerts
+from ..userAlerts import userAlerts
 from discord import channel, Client, Forbidden, Guild, Member, Message, HTTPException, NotFound
 from typing import List, Dict, Union
 from ..bbConfig import bbConfig, bbData
@@ -39,8 +39,8 @@ class bbGuild(serializable.Serializable):
     :vartype hasBountyBoardChannel: bool
     :var ownedRoleMenus: The number of ReactionRolePickers present in this guild
     :vartype ownedRoleMenus: int
-    :var bountiesDB: This guild's active bounties
-    :vartype bountiesDB: bountyDB.bountyDB
+    :var bounties: This guild's active bounties
+    :vartype bounties: bountyDB.bountyDB
     :var bountiesDisabled: Whether or not to disable this guild's bountyDB and bounty spawning
     :vartype bountiesDisabled: bool
     :var shopDisabled: Whether or not to disable this guild's guildShop and shop refreshing
@@ -49,13 +49,13 @@ class bbGuild(serializable.Serializable):
     :vartype dcGuild: discord.Guild
     """
 
-    def __init__(self, id : int, bountiesDB: bountyDB.BountyDB, dcGuild: Guild, announceChannel : channel.TextChannel = None,
+    def __init__(self, id : int, bounties: bountyDB.BountyDB, dcGuild: Guild, announceChannel : channel.TextChannel = None,
             playChannel : channel.TextChannel = None, shop : guildShop.GuildShop = None,
             bountyBoardChannel : bountyBoardChannel.bountyBoardChannel = None, alertRoles : Dict[str, int] = {},
             ownedRoleMenus : int = 0, bountiesDisabled : bool = False, shopDisabled : bool = False):
         """
         :param int id: The ID of the guild, directly corresponding to a discord guild's ID.
-        :param bountyDB.bountyDB bountiesDB: This guild's active bounties
+        :param bountyDB.bountyDB bounties: This guild's active bounties
         :param discord.Guild guild: This guild's corresponding discord.Guild object
         :param discord.channel announceChannel: The discord.channel object for this guild's announcements chanel. None when no announce channel is set for this guild.
         :param discord.channel playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
@@ -86,13 +86,13 @@ class bbGuild(serializable.Serializable):
             self.shop = guildShop.GuildShop() if shop is None else shop
         
         self.alertRoles = {}
-        for alertID in UserAlerts.userAlertsIDsTypes.keys():
-            if issubclass(UserAlerts.userAlertsIDsTypes[alertID], UserAlerts.GuildRoleUserAlert):
+        for alertID in userAlerts.userAlertsIDsTypes.keys():
+            if issubclass(userAlerts.userAlertsIDsTypes[alertID], userAlerts.GuildRoleUserAlert):
                 self.alertRoles[alertID] = alertRoles[alertID] if alertID in alertRoles else -1
         
         self.ownedRoleMenus = ownedRoleMenus
         self.dcGuild = dcGuild
-        self.bountiesDB = bountiesDB
+        self.bountiesDB = bounties
         self.bountiesDisabled = bountiesDisabled
 
         bountyDelayGenerators = {"random": lib.timeUtil.getRandomDelaySeconds,

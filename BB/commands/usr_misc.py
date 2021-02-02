@@ -9,7 +9,7 @@ from ..bbConfig import bbConfig, bbData
 from ..gameObjects import bbUser
 from ..reactionMenus import ReactionMenu, ReactionPollMenu, PagedReactionMenu
 from ..scheduling import TimedTask
-from ..userAlerts import UserAlerts
+from ..userAlerts import userAlerts
 from ..logging import bbLogger
 from . import util_help
 
@@ -339,23 +339,23 @@ async def cmd_notify(message : discord.Message, args : str, isDM : bool):
     requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
 
     argsSplit = args.split(" ")
-    alertsToToggle = UserAlerts.getAlertIDFromHeirarchicalAliases(argsSplit)
+    alertsToToggle = userAlerts.getAlertIDFromHeirarchicalAliases(argsSplit)
 
     if alertsToToggle[0] == "ERR":
         await message.channel.send(alertsToToggle[1])
         return
 
     for alertID in alertsToToggle:
-        alertType = UserAlerts.userAlertsIDsTypes[alertID]
+        alertType = userAlerts.userAlertsIDsTypes[alertID]
         try:
             alertNewState = await requestedBBUser.toggleAlertType(alertType, message.guild, requestedBBGuild, message.author)
-            await message.channel.send(":white_check_mark: You have " + ("subscribed to" if alertNewState else "unsubscribed from") + " " + UserAlerts.userAlertsTypesNames[alertType] + " notifications.")
+            await message.channel.send(":white_check_mark: You have " + ("subscribed to" if alertNewState else "unsubscribed from") + " " + userAlerts.userAlertsTypesNames[alertType] + " notifications.")
         except discord.Forbidden:
             await message.channel.send(":woozy_face: I don't have permission to do that! Please ensure the requested role is beneath the BountyBot role.")
         except discord.HTTPException:
             await message.channel.send(":woozy_face: Something went wrong! Please contact an admin or try again later.")
         except ValueError:
-            await message.channel.send(":x: This server does not have a role for " + UserAlerts.userAlertsTypesNames[alertType] + " notifications. :robot:")
+            await message.channel.send(":x: This server does not have a role for " + userAlerts.userAlertsTypesNames[alertType] + " notifications. :robot:")
         except client_exceptions.ClientOSError:
             await message.channel.send(":thinking: Whoops! A connection error occurred, and the error has been logged. Could you try that again please?")
             bbLogger.log("main", "cmd_notify", "aiohttp.client_exceptions.ClientOSError occurred when attempting to grant " + message.author.name + "#" + str(message.author.id) + " alert " + alertID + "in guild " + message.guild.name + "#" + str(message.guild.id) + ".", category="userAlerts", eventType="ClientOSError", trace=traceback.format_exc())

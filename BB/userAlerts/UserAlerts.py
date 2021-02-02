@@ -11,7 +11,7 @@ class UABase(ABC):
     """A base class representing a subscription to a single type of
     alert (UserAlert) - for example, a ping or DM when a certain event occurs.
     This class does not differenciate or implement any method of issueing alerts.
-    UserAlerts have a state (off/on), a toggle method (switches state), and a setState method (switches to the specified state).
+    userAlerts have a state (off/on), a toggle method (switches state), and a setState method (switches to the specified state).
     The state is not necessarily stored in an object attribute.
     A UserAlert may not necessarily depend on the guild in which it was set.
     """
@@ -302,14 +302,14 @@ def getAlertIDFromHeirarchicalAliases(alertName : Union[str, List[str]]) -> List
     - multi-alert references TODO: Currently unused and/or broken. Implement bot updates all
     - aliases at every level of the alert reference
 
-    ⚠ If the given string could not be deferenced to UserAlerts, then the 0th element of the returned list
+    ⚠ If the given string could not be deferenced to userAlerts, then the 0th element of the returned list
     will be 'ERR'. Before handling the returned list, check to make sure this is not the case.
 
     TODO: Replace with a LUT implementation
 
     # :param alertName: A reference to an alert. Heirarchy levels can be given as a space-separated string, or ordered list elements. E.g: 'bot patches major' or ['bot', 'patches', 'major']
     :type alertName: list[str] or str
-    :return: A list of UserAlert IDs in accordance with UserAlerts.userAlertsIDsTypes, that are associated with the requested alert reference.
+    :return: A list of UserAlert IDs in accordance with userAlerts.userAlertsIDsTypes, that are associated with the requested alert reference.
     :rtype: list[str]
     """
     if type(alertName) != list:

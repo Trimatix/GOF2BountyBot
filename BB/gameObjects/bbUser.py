@@ -10,7 +10,7 @@ from .items.tools import toolItemFactory, toolItem
 from .items.modules import moduleItem
 from ..bbConfig import bbConfig
 from . import inventory
-from ..userAlerts import UserAlerts
+from ..userAlerts import userAlerts
 from datetime import date, datetime
 from discord import Guild, Member
 from . import bbGuild
@@ -71,8 +71,8 @@ class bbUser(serializable.Serializable):
     :vartype duelCreditsWins: int
     :var duelCreditsLosses: The total amount of credits the user has lost through fighting duels
     :vartype duelCreditsLosses: int
-    :var userAlerts: A dictionary mapping UserAlerts.UABase subtypes to instances of that subtype
-    :vartype userAlerts: dict[type, UserAlerts.UABase]
+    :var userAlerts: A dictionary mapping userAlerts.UABase subtypes to instances of that subtype
+    :vartype userAlerts: dict[type, userAlerts.UABase]
     :var bountyWinsToday: The number of bounties the user has won today
     :vartype bountyWinsToday: int
     :var dailyBountyWinsReset: A datetime.datetime representing the time at which the user's bountyWinsToday should be reset to zero
@@ -95,7 +95,7 @@ class bbUser(serializable.Serializable):
                     inactiveTurrets : inventory.Inventory = inventory.TypeRestrictedInventory(turretWeapon.TurretWeapon),
                     inactiveTools : inventory.Inventory = inventory.TypeRestrictedInventory(toolItem.ToolItem),
                     lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
-                    duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[UserAlerts.UABase or bool]] = {},
+                    duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[userAlerts.UABase or bool]] = {},
                     bountyWinsToday : int = 0, dailyBountyWinsReset : datetime = None, pollOwned : bool = False,
                     homeGuildID : int = -1, guildTransferCooldownEnd : datetime = None):
         """
@@ -116,8 +116,8 @@ class bbUser(serializable.Serializable):
         :param int duelLosses: The total number of duels the user has lost (Default 0)
         :param int duelCreditsWins: The total amount of credits the user has won through fighting duels (Default 0)
         :param int duelCreditsLosses: The total amount of credits the user has lost through fighting duels (Default 0)
-        :param alerts: A dictionary mapping either (UserAlerts.UABase subtypes or string UA ids from UserAlerts.userAlertsIDsTypes) to either (instances of that subtype or booleans representing the alert state) (Default {})
-        :type alerts: dict[type or str, UserAlerts.UABase or bool]
+        :param alerts: A dictionary mapping either (userAlerts.UABase subtypes or string UA ids from userAlerts.userAlertsIDsTypes) to either (instances of that subtype or booleans representing the alert state) (Default {})
+        :type alerts: dict[type or str, userAlerts.UABase or bool]
         :param int bountyWinsToday: The number of bounties the user has won today (Default 0)
         :param datetime.datetime dailyBountyWinsReset: A datetime.datetime representing the time at which the user's bountyWinsToday should be reset to zero (Default datetime.utcnow())
         :param bool pollOwned: Whether or not this user has a running ReactionPollMenu (Default False)
@@ -187,10 +187,10 @@ class bbUser(serializable.Serializable):
 
         self.userAlerts = {}
         # Convert the given user alerts to types and instances. The given alerts may be IDs instead of types, or booleans instead of instances.
-        for alertID in UserAlerts.userAlertsIDsTypes:
-            alertType = UserAlerts.userAlertsIDsTypes[alertID]
+        for alertID in userAlerts.userAlertsIDsTypes:
+            alertType = userAlerts.userAlertsIDsTypes[alertID]
             if alertType in alerts:
-                if isinstance(alerts[alertType], UserAlerts.UABase):
+                if isinstance(alerts[alertType], userAlerts.UABase):
                     self.userAlerts[alertType] = alerts[alertType]
                 elif isinstance(alerts[alertType], bool):
                     self.userAlerts[alertType] = alertType(alerts[alertType])
@@ -198,7 +198,7 @@ class bbUser(serializable.Serializable):
                     bbLogger.log("bbUsr", "init", "Given unknown alert state type for UA " + alertID + ". Must be either UABase or bool, given " + type(alerts[alertType]).__name__ + ". Alert reset to default (" + str(alertType(bbConfig.userAlertsIDsDefaults[alertID])) + ")", category="usersDB", eventType="LOAD-UA_STATE_TYPE")
                     self.userAlerts[alertType] = alertType(bbConfig.userAlertsIDsDefaults[alertID])
             elif alertID in alerts:
-                if isinstance(alerts[alertID], UserAlerts.UABase):
+                if isinstance(alerts[alertID], userAlerts.UABase):
                     self.userAlerts[alertType] = alerts[alertID]
                 elif isinstance(alerts[alertID], bool):
                     self.userAlerts[alertType] = alertType(alerts[alertID])
@@ -418,7 +418,7 @@ class bbUser(serializable.Serializable):
 
         alerts = {}
         for alertID in self.userAlerts.keys():
-            if isinstance(self.userAlerts[alertID], UserAlerts.StateUserAlert):
+            if isinstance(self.userAlerts[alertID], userAlerts.StateUserAlert):
                 alerts[alertID] = self.userAlerts[alertID].state
 
         return {"credits":self.credits, "lifetimeCredits":self.lifetimeCredits,
@@ -556,11 +556,11 @@ class bbUser(serializable.Serializable):
         self.removeDuelChallengeObj(self.duelRequests[duelTarget])
 
 
-    # TODO: Consider moving these alert functions to UserAlerts.py
+    # TODO: Consider moving these alert functions to userAlerts.py
     async def setAlertByType(self, alertType : type, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member, newState : bool) -> bool:
-        """Set the state of one of this users's UserAlerts, identifying the alert by its class.
+        """Set the state of one of this users's userAlerts, identifying the alert by its class.
 
-        :param type alertType: The class of the alert whose state to set. Must be a subclass of UserAlerts.UABase
+        :param type alertType: The class of the alert whose state to set. Must be a subclass of userAlerts.UABase
         :param discord.Guild dcGuild: The discord guild in which to set the alert state (currently only relevent for role-based alerts)
         :param bbGuild bbGuild: The bbGuild in which to set the alert state (currently only relevent for role-based alerts, as the role must be looked up) 
         :param discord.Member dcMember: This user's member object in dcGuild (TODO: Just grab dcMember from dcGuild in here)
@@ -571,21 +571,21 @@ class bbUser(serializable.Serializable):
 
 
     async def setAlertByID(self, alertID : str, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member, newState) -> bool:
-        """Set the state of one of this users's UserAlerts, identifying the alert by its ID as given by UserAlerts.userAlertsIDsTypes.
+        """Set the state of one of this users's userAlerts, identifying the alert by its ID as given by userAlerts.userAlertsIDsTypes.
 
-        :param str alertID: The ID of the user alert type, as given by UserAlerts.userAlertsIDsTypes
+        :param str alertID: The ID of the user alert type, as given by userAlerts.userAlertsIDsTypes
         :param discord.Guild dcGuild: The discord guild in which to set the alert state (currently only relevent for role-based alerts)
         :param bbGuild bbGuild: The bbGuild in which to set the alert state (currently only relevent for role-based alerts, as the role must be looked up) 
         :param discord.Member dcMember: This user's member object in dcGuild (TODO: Just grab dcMember from dcGuild in here)
         :param bool newState: The new desired of the alert
         """
-        return await self.setAlertType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember, newState)
+        return await self.setAlertType(userAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember, newState)
 
 
     async def toggleAlertType(self, alertType : type, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member) -> bool:
-        """Toggle the state of one of this users's UserAlerts, identifying the alert by its class.
+        """Toggle the state of one of this users's userAlerts, identifying the alert by its class.
 
-        :param type alertType: The class of the alert whose state to toggle. Must be a subclass of UserAlerts.UABase
+        :param type alertType: The class of the alert whose state to toggle. Must be a subclass of userAlerts.UABase
         :param discord.Guild dcGuild: The discord guild in which to toggle the alert state (currently only relevent for role-based alerts)
         :param bbGuild bbGuild: The bbGuild in which to toggle the alert state (currently only relevent for role-based alerts, as the role must be looked up) 
         :param discord.Member dcMember: This user's member object in dcGuild (TODO: Just grab dcMember from dcGuild in here)
@@ -594,20 +594,20 @@ class bbUser(serializable.Serializable):
 
     
     async def toggleAlertID(self, alertID : str, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member) -> bool:
-        """Toggle the state of one of this users's UserAlerts, identifying the alert by its ID as given by UserAlerts.userAlertsIDsTypes.
+        """Toggle the state of one of this users's userAlerts, identifying the alert by its ID as given by userAlerts.userAlertsIDsTypes.
 
-        :param str alertID: The ID of the user alert type, as given by UserAlerts.userAlertsIDsTypes
+        :param str alertID: The ID of the user alert type, as given by userAlerts.userAlertsIDsTypes
         :param discord.Guild dcGuild: The discord guild in which to toggle the alert state (currently only relevent for role-based alerts)
         :param bbGuild bbGuild: The bbGuild in which to toggle the alert state (currently only relevent for role-based alerts, as the role must be looked up) 
         :param discord.Member dcMember: This user's member object in dcGuild (TODO: Just grab dcMember from dcGuild in here)
         """
-        return await self.toggleAlertType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
+        return await self.toggleAlertType(userAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
 
 
     def isAlertedForType(self, alertType : type, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member) -> bool:
-        """Get the state of one of this users's UserAlerts, identifying the alert by its class.
+        """Get the state of one of this users's userAlerts, identifying the alert by its class.
 
-        :param type alertType: The class of the alert whose state to get. Must be a subclass of UserAlerts.UABase
+        :param type alertType: The class of the alert whose state to get. Must be a subclass of userAlerts.UABase
         :param discord.Guild dcGuild: The discord guild in which to get the alert state (currently only relevent for role-based alerts)
         :param bbGuild bbGuild: The bbGuild in which to get the alert state (currently only relevent for role-based alerts, as the role must be looked up) 
         :param discord.Member dcMember: This user's member object in dcGuild (TODO: Just grab dcMember from dcGuild in here)
@@ -616,14 +616,14 @@ class bbUser(serializable.Serializable):
 
     
     def isAlertedForID(self, alertID : str, dcGuild : Guild, bbGuild : bbGuild.bbGuild, dcMember : Member) -> bool:
-        """Get the state of one of this user's UserAlerts, identifying the alert by its ID as given by UserAlerts.userAlertsIDsTypes.
+        """Get the state of one of this user's userAlerts, identifying the alert by its ID as given by userAlerts.userAlertsIDsTypes.
 
-        :param str alertID: The ID of the user alert type, as given by UserAlerts.userAlertsIDsTypes
+        :param str alertID: The ID of the user alert type, as given by userAlerts.userAlertsIDsTypes
         :param discord.Guild dcGuild: The discord guild in which to get the alert state (currently only relevent for role-based alerts)
         :param bbGuild bbGuild: The bbGuild in which to get the alert state (currently only relevent for role-based alerts, as the role must be looked up) 
         :param discord.Member dcMember: This user's member object in dcGuild (TODO: Just grab dcMember from dcGuild in here)
         """
-        return self.isAlertedForType(UserAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
+        return self.isAlertedForType(userAlerts.userAlertsIDsTypes[alertID], dcGuild, bbGuild, dcMember)
 
 
     def hasHomeGuild(self) -> bool:

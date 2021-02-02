@@ -9,7 +9,7 @@ from ..logging import bbLogger
 from . import stringTyping
 from .. import bbGlobals
 from discord import Embed, Colour, HTTPException, Forbidden
-from ..userAlerts import UserAlerts
+from ..userAlerts import userAlerts
 import random
 from ..bbConfig import bbConfig
 
@@ -179,7 +179,7 @@ def getMemberByRefOverDB(uRef : str, dcGuild : Guild = None) -> User:
     return userAttempt
 
 
-def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser : Union[User, Member] = None,
+def typeAlertedUserMentionOrName(alertType : userAlerts.UABase, dcUser : Union[User, Member] = None,
         bbUser : bbUser.bbUser = None, bbGuild : bbGuild.bbGuild = None, dcGuild : Guild = None) -> str:
     """If the given user has subscribed to the given alert type, return the user's mention. Otherwise, return their display name and discriminator.
     At least one of dcUser or bbUser must be provided.
@@ -187,7 +187,7 @@ def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser : Union[U
     This means that giving at least one of bbGuild or dcGuild will drastically improve efficiency.
     TODO: rename bbUser and bbGuild so it doesnt match the class name
 
-    :param UserAlerts.UABase alertType: The type of alert to check the state of
+    :param userAlerts.UABase alertType: The type of alert to check the state of
     :param discord.User dcUser: The user to check the alert state of. One of dcUser or bbUser is required. (Default None)
     :param bbUser bbUser: The user to check the alert state of. One of dcUser or bbUser is required. (Default None)
     :param bbGuild bbGuild: The guild in which to check the alert state. Optional, but improves efficiency. (Default None)
@@ -227,7 +227,7 @@ def IDAlertedUserMentionOrName(alertID : str, dcUser : Union[Member, User] = Non
     This means that giving at least one of bbGuild or dcGuild will drastically improve efficiency.
     TODO: rename bbUser and bbGuild so it doesnt match the class name
 
-    :param UserAlerts.UABase alertType: The ID, according to UserAlerts.userAlertsIDsTypes, of type of alert to check the state of
+    :param userAlerts.UABase alertType: The ID, according to userAlerts.userAlertsIDsTypes, of type of alert to check the state of
     :param discord.User dcUser: The user to check the alert state of. One of dcUser or bbUser is required. (Default None)
     :param bbUser bbUser: The user to check the alert state of. One of dcUser or bbUser is required. (Default None)
     :param bbGuild bbGuild: The guild in which to check the alert state. Optional, but improves efficiency. (Default None)
@@ -235,7 +235,7 @@ def IDAlertedUserMentionOrName(alertID : str, dcUser : Union[Member, User] = Non
     :return: If the given user is alerted for the given type in the selected guild, the user's mention. The user's display name otherwise.
     :rtype: str
     """
-    return typeAlertedUserMentionOrName(UserAlerts.userAlertsIDsTypes[alertID], dcUser=dcUser, bbUser=bbUser, bbGuild=bbGuild, dcGuild=dcGuild)
+    return typeAlertedUserMentionOrName(userAlerts.userAlertsIDsTypes[alertID], dcUser=dcUser, bbUser=bbUser, bbGuild=bbGuild, dcGuild=dcGuild)
 
 
 async def startLongProcess(message : Message):

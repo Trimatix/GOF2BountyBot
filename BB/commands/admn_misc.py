@@ -5,7 +5,7 @@ import asyncio
 from . import commandsDB as bbCommands
 from .. import bbGlobals, lib
 from ..bbConfig import bbConfig, bbData
-from ..userAlerts import UserAlerts
+from ..userAlerts import userAlerts
 from ..scheduling import TimedTask
 from ..reactionMenus import ReactionRolePicker, ReactionSkinRegionPicker
 from ..gameObjects.items import shipItem
@@ -118,7 +118,7 @@ async def admin_cmd_set_notify_role(message : discord.Message, args : str, isDM 
         await message.channel.send(":x: Invalid role! Please give either a role mention or ID!")
         return
 
-    alertsToSet = UserAlerts.getAlertIDFromHeirarchicalAliases(argsSplit)
+    alertsToSet = userAlerts.getAlertIDFromHeirarchicalAliases(argsSplit)
     if alertsToSet[0] == "ERR":
         await message.channel.send(alertsToSet[1])
         return
@@ -134,9 +134,9 @@ async def admin_cmd_set_notify_role(message : discord.Message, args : str, isDM 
         return
 
     for alertID in alertsToSet:
-        alertType = UserAlerts.userAlertsIDsTypes[alertID]
+        alertType = userAlerts.userAlertsIDsTypes[alertID]
         requestedBBGuild.setUserAlertRoleID(alertID, requestedRole.id)
-        await message.channel.send(":white_check_mark: Role set for " + UserAlerts.userAlertsTypesNames[alertType] + " notifications!")
+        await message.channel.send(":white_check_mark: Role set for " + userAlerts.userAlertsTypesNames[alertType] + " notifications!")
 
 bbCommands.register("set-notify-role", admin_cmd_set_notify_role, 1, signatureStr="**set-notify-role <type>** *[alert]* **<role>**", shortHelp="Set a role to ping when various events occur. For valid notification types, see `$COMMANDPREFIX$help notify`.", longHelp="Set a role to ping when various events occur. **<type>** and/or *[alert]* must specify a type of notification. **<role>** can be either a role mention, or a role ID. For valid notification types, see `$COMMANDPREFIX$help notify`.")
 
@@ -153,7 +153,7 @@ async def admin_cmd_remove_notify_role(message : discord.Message, args : str, is
         await message.channel.send(":x: Please provide both a notification type!")
         return
 
-    alertsToSet = UserAlerts.getAlertIDFromHeirarchicalAliases(args)
+    alertsToSet = userAlerts.getAlertIDFromHeirarchicalAliases(args)
     if alertsToSet[0] == "ERR":
         await message.channel.send(alertsToSet[1])
         return
@@ -161,9 +161,9 @@ async def admin_cmd_remove_notify_role(message : discord.Message, args : str, is
     requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
 
     for alertID in alertsToSet:
-        alertType = UserAlerts.userAlertsIDsTypes[alertID]
+        alertType = userAlerts.userAlertsIDsTypes[alertID]
         requestedBBGuild.removeUserAlertRoleID(alertID)
-        await message.channel.send(":white_check_mark: Role pings disabled for " + UserAlerts.userAlertsTypesNames[alertType] + " notifications.")
+        await message.channel.send(":white_check_mark: Role pings disabled for " + userAlerts.userAlertsTypesNames[alertType] + " notifications.")
 
 bbCommands.register("remove-notify-role", admin_cmd_remove_notify_role, 1, signatureStr="**remove-notify-role <type>** *[alert]*", shortHelp="Disable role pings for various events. For valid notification types, see `$COMMANDPREFIX$help notify`.", longHelp="Disable role pings for various events. **<type>** and/or *[alert]* must specify a type of notification. For valid notification types, see `$COMMANDPREFIX$help notify`.")
 
