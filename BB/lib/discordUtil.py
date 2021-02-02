@@ -171,11 +171,17 @@ def getMemberByRefOverDB(uRef : str, dcGuild : Guild = None) -> User:
         userAttempt = getMemberFromRef(uRef, dcGuild)
     else:
         userAttempt = None
-    if userAttempt is None and stringTyping.isInt(uRef):
-        if bbGlobals.usersDB.userIDExists(int(uRef)):
-            userGuild = findBBUserDCGuild(bbGlobals.usersDB.getUser(int(uRef)))
-            if userGuild is not None:
-                return userGuild.get_member(int(uRef))
+    if userAttempt is None:
+        userID = None
+        if stringTyping.isInt(uRef):
+            userID = int(uRef)
+        elif stringTyping.isMention(uRef):
+            userID = int(uRef.lstrip("<@!").rstrip(">"))
+        if userID is not None:
+            if bbGlobals.usersDB.userIDExists(userID):
+                userGuild = findBBUserDCGuild(bbGlobals.usersDB.getUser(userID))
+                if userGuild is not None:
+                    return userGuild.get_member(userID)
     return userAttempt
 
 
