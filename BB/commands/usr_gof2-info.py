@@ -6,7 +6,7 @@ from . import commandsDB as bbCommands
 from ..bbConfig import bbData, bbConfig
 from .. import lib, bbGlobals
 from ..gameObjects.items import shipItem
-from ..reactionMenus import ReactionSkinRegionPicker
+from ..reactionMenus import reactionSkinRegionPicker
 from ..logging import bbLogger
 from ..shipRenderer import shipRenderer
 

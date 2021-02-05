@@ -6,7 +6,7 @@ from .. import bbGlobals, lib
 from ..bbConfig import bbConfig, bbData
 from ..gameObjects.battles import DuelRequest
 from ..scheduling import TimedTask
-from ..reactionMenus import ReactionMenu, ReactionDuelChallengeMenu
+from ..reactionMenus import ReactionMenu, reactionDuelChallengeMenu
 
 
 bbCommands.addHelpSection(0, "bounties")

@@ -7,7 +7,7 @@ from . import commandsDB as bbCommands
 from .. import lib, bbGlobals
 from ..bbConfig import bbConfig, bbData
 from ..gameObjects import bbUser
-from ..reactionMenus import ReactionMenu, ReactionPollMenu, PagedReactionMenu
+from ..reactionMenus import ReactionMenu, reactionPollMenu, PagedReactionMenu
 from ..scheduling import TimedTask
 from ..userAlerts import userAlerts
 from ..logging import bbLogger

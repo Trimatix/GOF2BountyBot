@@ -1,4 +1,4 @@
-from ..reactionMenus import ReactionMenu, ReactionRolePicker, ReactionInventoryPicker, ReactionDuelChallengeMenu, ReactionPollMenu
+from ..reactionMenus import ReactionMenu, reactionRolePicker, reactionInventoryPicker, reactionDuelChallengeMenu, reactionPollMenu
 from .. import bbGlobals
 
 # ReactionMenu subclasses that cannot be saved to dictionary
