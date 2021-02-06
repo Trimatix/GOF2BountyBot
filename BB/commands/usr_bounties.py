@@ -387,7 +387,7 @@ async def cmd_duel(message : discord.Message, args : str, isDM : bool):
         for msg in sentMsgs:
             menuTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.timeouts.duelChallengeMenuExpiry), expiryFunction=ReactionMenu.removeEmbedAndOptions, expiryFunctionArgs=msg.id)
             bbGlobals.reactionMenusTTDB.scheduleTask(menuTT)
-            newMenu = ReactionDuelChallengeMenu.ReactionDuelChallengeMenu(msg, newDuelReq, timeout=menuTT)
+            newMenu = reactionDuelChallengeMenu.ReactionDuelChallengeMenu(msg, newDuelReq, timeout=menuTT)
             newDuelReq.menus.append(newMenu)
             await newMenu.updateMessage()
             bbGlobals.reactionMenusDB[msg.id] = newMenu
