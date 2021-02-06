@@ -683,7 +683,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             if skin == "$ATTACHEDFILE$" and shipData["textureRegions"]:	
                 layerIndices = [i for i in range(1, shipData["textureRegions"] + 1)]	
                 layersPickerMsg = await message.channel.send("** **")	
-                layersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, numRegions=shipData["textureRegions"])	
+                layersPickerMenu = reactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, numRegions=shipData["textureRegions"])	
                 pickedLayers = []	
                 menuOutput = await layersPickerMenu.doMenu()	
                 if bbConfig.emojis.spiral in menuOutput:	
@@ -697,13 +697,13 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                 else:	
                     for react in menuOutput:	
                         try:	
-                            pickedLayers.append(bbConfig.emojis.emojis.numbers.index(react))	
+                            pickedLayers.append(bbConfig.emojis.numbers.index(react))	
                         except ValueError:	
                             pass	
                 	
                 remainingIndices = [i for i in layerIndices if i not in pickedLayers]	
                 if remainingIndices:	
-                    disabledLayersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, possibleRegions=remainingIndices, desc="Would you like to disable any regions?")	
+                    disabledLayersPickerMenu = reactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, possibleRegions=remainingIndices, desc="Would you like to disable any regions?")	
                     menuOutput = await disabledLayersPickerMenu.doMenu()	
                     if bbConfig.emojis.spiral in menuOutput:	
                         disabledLayers = remainingIndices	
@@ -716,7 +716,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                     else:	
                         for react in menuOutput:	
                             try:	
-                                disabledLayers.append(bbConfig.emojis.emojis.numbers.index(react))	
+                                disabledLayers.append(bbConfig.emojis.numbers.index(react))	
                             except ValueError:	
                                 pass	
                 	

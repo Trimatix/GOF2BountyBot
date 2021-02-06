@@ -48,8 +48,8 @@ async def util_autohelp(message : discord.Message, args : str, isDM : bool, user
             pages = {indexEmbed: {}}
             for sectionNum in range(len(bbCommands.helpSectionEmbeds[userAccessLevel])):
                 sectionsStr += "\n" + str(sectionNum + 1) + ") " + list(bbCommands.helpSectionEmbeds[userAccessLevel].keys())[sectionNum].title()
-                # sectionsStr += "\n" + bbConfig.emojis.emojis.menuOptions[sectionNum + 1].sendable + " : " + list(bbCommands.helpSectionEmbeds[userAccessLevel].keys())[sectionNum].title()
-                # pages[indexEmbed][bbConfig.emojis.emojis.menuOptions[sectionNum + 1]] = ReactionMenu.NonSaveableReactionMenuOption(list(bbCommands.helpSectionEmbeds[userAccessLevel].keys())[sectionNum].title(), bbConfig.emojis.emojis.menuOptions[sectionNum + 1], addFunc=PagedReactionMenu.menuJumpToPage, addArgs={"menuID": menuMsg.id, "pageNum": sectionNum})
+                # sectionsStr += "\n" + bbConfig.emojis.menuOptions[sectionNum + 1].sendable + " : " + list(bbCommands.helpSectionEmbeds[userAccessLevel].keys())[sectionNum].title()
+                # pages[indexEmbed][bbConfig.emojis.menuOptions[sectionNum + 1]] = ReactionMenu.NonSaveableReactionMenuOption(list(bbCommands.helpSectionEmbeds[userAccessLevel].keys())[sectionNum].title(), bbConfig.emojis.menuOptions[sectionNum + 1], addFunc=PagedReactionMenu.menuJumpToPage, addArgs={"menuID": menuMsg.id, "pageNum": sectionNum})
             indexEmbed.add_field(name="Contents",value=sectionsStr)
             pageNum = 0
             for helpSectionEmbedList in bbCommands.helpSectionEmbeds[userAccessLevel].values():

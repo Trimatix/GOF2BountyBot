@@ -326,13 +326,13 @@ async def admin_cmd_make_role_menu(message : discord.Message, args : str, isDM :
 
     if timeoutExists:
         timeoutDelta = lib.timeUtil.timeDeltaFromDict(bbConfig.timeouts.roleMenuExpiry if timeoutDict == {} else timeoutDict)
-        timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=ReactionRolePicker.markExpiredRoleMenu, expiryFunctionArgs=menuMsg.id)
+        timeoutTT = TimedTask.TimedTask(expiryDelta=timeoutDelta, expiryFunction=reactionRolePicker.markExpiredRoleMenu, expiryFunctionArgs=menuMsg.id)
         bbGlobals.reactionMenusTTDB.scheduleTask(timeoutTT)
     
     else:
         timeoutTT = None
 
-    menu = ReactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, targetRole=targetRole, targetMember=targetMember, timeout=timeoutTT, titleTxt=menuSubject)
+    menu = reactionRolePicker.ReactionRolePicker(menuMsg, reactionRoles, message.guild, targetRole=targetRole, targetMember=targetMember, timeout=timeoutTT, titleTxt=menuSubject)
     await menu.updateMessage()
     bbGlobals.reactionMenusDB[menuMsg.id] = menu
 
@@ -409,7 +409,7 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
         layerIndices = [i for i in range(1, shipData["textureRegions"] + 1)]
 
         layersPickerMsg = await message.channel.send("** **")
-        layersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, numRegions=shipData["textureRegions"])
+        layersPickerMenu = reactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, numRegions=shipData["textureRegions"])
         pickedLayers = []
         menuOutput = await layersPickerMenu.doMenu()
         if bbConfig.emojis.spiral in menuOutput:
@@ -423,14 +423,14 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
         else:
             for react in menuOutput:
                 try:
-                    pickedLayers.append(bbConfig.emojis.emojis.numbers.index(react))
+                    pickedLayers.append(bbConfig.emojis.numbers.index(react))
                 except ValueError:
                     pass
         
         remainingIndices = [i for i in layerIndices if i not in pickedLayers]
 
         if remainingIndices:
-            disabledLayersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, possibleRegions=remainingIndices, desc="Would you like to disable any regions?")
+            disabledLayersPickerMenu = reactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.toolUseConfirmTimeoutSeconds, possibleRegions=remainingIndices, desc="Would you like to disable any regions?")
             menuOutput = await disabledLayersPickerMenu.doMenu()
             if bbConfig.emojis.spiral in menuOutput:
                 disabledLayers = remainingIndices
@@ -443,7 +443,7 @@ async def admin_cmd_showmeHD(message : discord.Message, args : str, isDM : bool)
             else:
                 for react in menuOutput:
                     try:
-                        disabledLayers.append(bbConfig.emojis.emojis.numbers.index(react))
+                        disabledLayers.append(bbConfig.emojis.numbers.index(react))
                     except ValueError:
                         pass
         

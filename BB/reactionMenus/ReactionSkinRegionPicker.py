@@ -29,7 +29,7 @@ class ReactionSkinRegionPicker(ReactionMenu.SingleUserReactionMenu):
         """
 
         if not possibleRegions:
-            if numRegions > len(bbConfig.emojis.emojis.numbers) - 2:
+            if numRegions > len(bbConfig.emojis.numbers) - 2:
                 raise IndexError("Attempted to create a ReactionSkinRegionPicker choosing from more regions than can can be represented by bbConfig.ReactionSkinRegionPicker")
             if numRegions < 1:
                 raise IndexError("Attempted to create a ReactionSkinRegionPicker choosing from fewer than one regions, and possibleRegions not provided/empty")
@@ -45,7 +45,7 @@ class ReactionSkinRegionPicker(ReactionMenu.SingleUserReactionMenu):
 
         regionOptions = {bbConfig.emojis.spiral: ReactionMenu.DummyReactionMenuOption("Select all", bbConfig.emojis.spiral)}
         for regionNumber in (possibleRegions if possibleRegions else range(1, numRegions + 1)):
-            regionOptions[bbConfig.emojis.emojis.numbers[regionNumber]] = ReactionMenu.DummyReactionMenuOption("Layer " + str(regionNumber), bbConfig.emojis.emojis.numbers[regionNumber])
+            regionOptions[bbConfig.emojis.numbers[regionNumber]] = ReactionMenu.DummyReactionMenuOption("Layer " + str(regionNumber), bbConfig.emojis.numbers[regionNumber])
         
         regionOptions[bbConfig.emojis.submit] = ReactionMenu.DummyReactionMenuOption("Submit", bbConfig.emojis.submit)
         regionOptions[bbConfig.emojis.cancel] = ReactionMenu.DummyReactionMenuOption("Cancel render", bbConfig.emojis.cancel)
