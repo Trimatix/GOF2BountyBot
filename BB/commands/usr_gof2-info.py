@@ -1107,6 +1107,8 @@ async def cmd_list(message : discord.Message, args : str, isDM : bool):
                                                                                         desc=resultsStr,
                                                                                         icon=bbGlobals.client.user.avatar_url_as(size=64))
             await message.channel.send(embed=resultsEmbed)
+
+        # TODO: Put results of size more than itemsPerPage on a pagedreactionmenu
         
         # await message.channel.send("No results found!" if not foundObjs else ("** **- " + "\n - ".join((item["name"] if objType in dictObjs else item.name) for item in foundObjs)))
         # resultsMenu = PagedReactionMenu.PagedReactionMenu()
