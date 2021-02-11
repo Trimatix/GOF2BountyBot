@@ -1079,7 +1079,7 @@ async def cmd_list(message : discord.Message, args : str, isDM : bool):
         if objType in dictObjs:    
             for item in manufacturerObjs[objType].values():
                 if (manufacturer == "" or (manufacturer != "" and item["manufacturer"] == manufacturer)) and \
-                        (objType not in tlObjs or (objType in tlObjs and (itemLevel == -1 or (itemLevel != -1 and item["techLevel"])) == itemLevel)):
+                        (objType not in tlObjs or (objType in tlObjs and (itemLevel == -1 or (itemLevel != -1 and item["techLevel"] == itemLevel)))):
                     foundObjs.append(item)
         else:
             for item in manufacturerObjs[objType].values():
@@ -1091,15 +1091,21 @@ async def cmd_list(message : discord.Message, args : str, isDM : bool):
         await message.channel.send("No results found!")
     else:
         itemsPerPage = 10
-        if foundObjs and len(foundObjs) < 10:
+        # if len(foundObjs) < itemsPerPage:
+        if True:
             resultsStr = ""
             for item in foundObjs:
                 if objType in dictObjs:
                     resultsStr += (item["emoji"] if "emoji" in item and item["emoji"] != " " else "•") + " " + item["name"] + "\n"
                 else:
-                    resultsStr += (item.emoji if item.hasEmoji else "•") + " " + item.name + "\n"
-            resultsEmbed = lib.discordUtil.makeEmbed(titleTxt="Search Results", desc=((("level " + str(itemLevel) + " ") if itemLevel != -1 else "") + \
-                                                                                        (manufacturer + " ") if manufacturer else "" + objType + "s:\n").capitalize() + resultsStr)
+                    try:
+                        resultsStr += (item.emoji.sendable if item.hasEmoji else "•") + " " + item.name + "\n"
+                    except AttributeError:
+                        resultsStr += "• " + item.name + "\n"
+            resultsEmbed = lib.discordUtil.makeEmbed(authorName="Search Results", titleTxt=((("level " + str(itemLevel) + " ") if itemLevel != -1 else "") + \
+                                                                                        ((manufacturer + " ") if manufacturer else "") + objType + "s").capitalize(),
+                                                                                        desc=resultsStr,
+                                                                                        icon=bbGlobals.client.user.avatar_url_as(size=64))
             await message.channel.send(embed=resultsEmbed)
         
         # await message.channel.send("No results found!" if not foundObjs else ("** **- " + "\n - ".join((item["name"] if objType in dictObjs else item.name) for item in foundObjs)))
