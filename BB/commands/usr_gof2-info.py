@@ -670,7 +670,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             skinFile = message.attachments[0]	
             if (not skinFile.filename.lower().endswith(".jpg")) or not (skinFile.width == 2048 and skinFile.height == 2048):	
                 await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")	
-                bbGlobals.currentRenders.remove(itemObj.name)	
+                bbGlobals.currentRenders.remove(itemObj.name)
                 return	
             try:	
                 await skinFile.save(CWD + os.sep + bbConfig.paths.rendererTempFolder + os.sep + str(message.id) + "_0.jpg")	
