@@ -1,6 +1,6 @@
 # Typing imports
 from __future__ import annotations
-from typing import Union, List, TYPE_CHECKING
+from typing import Union, List, TYPE_CHECKING, Dict
 if TYPE_CHECKING:
     from .battles import DuelRequest
 
@@ -14,8 +14,9 @@ from datetime import date, datetime
 from discord import Guild, Member
 from . import bbGuild
 from ..logging import bbLogger
-from .. import lib
+from .. import lib, bbGlobals
 from ..baseClasses import bbSerializable
+from ..reactionMenus import ReactionMenu, ReactionPollMenu
 
 
 # Dictionary-serialized bbShip to give to new players
@@ -78,16 +79,14 @@ class bbUser(bbSerializable.bbSerializable):
     :vartype bountyWinsToday: int
     :var dailyBountyWinsReset: A datetime.datetime representing the time at which the user's bountyWinsToday should be reset to zero
     :vartype dailyBountyWinsReset: datetime.datetime
-    :var pollOwned: Whether or not this user has a running ReactionPollMenu
-    :vartype pollOwned: bool
-    :var helpMenuOwned: Whether or not this user has a running reaction help menu
-    :vartype helpMenuOwned: bool
     :var homeGuildID: The id of this user's 'home guild' - the only guild from which they may use several commands e.g buy and check.
     :vartype homeGuildID: int
     :var guildTransferCooldownEnd: A timestamp after which this user is allowed to transfer their homeGuildID.
     :vartype guildTransferCooldownEnd: datetime.datetime
     :var prestiges: The number of times the user has prestiged
     :vartype prestiges: int
+    :var ownedMenus: Lists references to all menus that user owns, by type.
+    :vartype ownedMenus: Dict[type, List[ReactionMenu]]
     """
 
     def __init__(self, id : int, credits : int = 0, lifetimeCredits : int = 0, bountyHuntingXP : int = bbConfig.bountyHuntingXPForLevel(1), 
@@ -99,9 +98,9 @@ class bbUser(bbSerializable.bbSerializable):
                     inactiveTools : bbInventory.bbInventory = bbInventory.TypeRestrictedInventory(bbToolItem.bbToolItem),
                     lastSeenGuildId : int = -1, duelWins : int = 0, duelLosses : int = 0, duelCreditsWins : int = 0,
                     duelCreditsLosses : int = 0, alerts : dict[Union[type, str], Union[UserAlerts.UABase or bool]] = {},
-                    bountyWinsToday : int = 0, dailyBountyWinsReset : datetime = None, pollOwned : bool = False,
+                    bountyWinsToday : int = 0, dailyBountyWinsReset : datetime = None,
                     homeGuildID : int = -1, guildTransferCooldownEnd : datetime = None, prestiges : int = 0,
-                    kaamo : kaamoShop.KaamoShop = None, loma : lomaShop.LomaShop = None):
+                    kaamo : kaamoShop.KaamoShop = None, loma : lomaShop.LomaShop = None, ownedMenus : Dict[type, List[ReactionMenu.ReactionMenu]] = {}):
         """
         :param int id: The user's unique ID. The same as their unique discord ID.
         :param int credits: The amount of credits (currency) this user has (Default 0)
@@ -125,12 +124,13 @@ class bbUser(bbSerializable.bbSerializable):
         :type alerts: dict[type or str, UserAlerts.UABase or bool]
         :param int bountyWinsToday: The number of bounties the user has won today (Default 0)
         :param datetime.datetime dailyBountyWinsReset: A datetime.datetime representing the time at which the user's bountyWinsToday should be reset to zero (Default datetime.utcnow())
-        :param bool pollOwned: Whether or not this user has a running ReactionPollMenu (Default False)
         :param Guild homeGuildID: The ID of this user's 'home guild' - the only guild from which they may use several commands e.g buy and check.
         :param datetime.datetime guildTransferCooldownEnd: A timestamp after which this user is allowed to transfer their homeGuildID.
         :param KaamoShop kaamo: The user's Kaamo Club storage, only accessible at bounty hunter level 10. To save memory, this is None until the user first uses it. (default None)
         :param LomaShop loma: A shop private to this user, selling special discountable items. To save memory, this is None until the user first uses it. (default None)
         :param int prestiges: The number of times the user has prestiged (default 0)
+        :param ownedMenus: Lists references to all menus that user owns, by type. (default {})
+        :type ownedMenus: Dict[type, List[ReactionMenu]]
         :raise TypeError: When given an argument of incorrect type
         """
         if type(id) == float:
@@ -220,9 +220,6 @@ class bbUser(bbSerializable.bbSerializable):
         self.bountyWinsToday = bountyWinsToday
         self.dailyBountyWinsReset = dailyBountyWinsReset
 
-        self.pollOwned = pollOwned
-        self.helpMenuOwned = False
-
         self.homeGuildID = homeGuildID
         self.guildTransferCooldownEnd = guildTransferCooldownEnd
 
@@ -230,6 +227,8 @@ class bbUser(bbSerializable.bbSerializable):
         self.loma = loma
 
         self.prestiges = prestiges
+
+        self.ownedMenus = ownedMenus
 
     
     def resetUser(self):
@@ -250,7 +249,6 @@ class bbUser(bbSerializable.bbSerializable):
         self.duelLosses = 0
         self.duelCreditsWins = 0
         self.duelCreditsLosses = 0
-        self.pollOwned = False
         self.bountyHuntingXP = bbConfig.bountyHuntingXPForLevel(1)
         self.homeGuildID = -1
         self.guildTransferCooldownEnd = datetime.utcnow()
@@ -428,7 +426,7 @@ class bbUser(bbSerializable.bbSerializable):
                 "bountyCooldownEnd":self.bountyCooldownEnd, "systemsChecked":self.systemsChecked,
                 "bountyWins":self.bountyWins, "activeShip": self.activeShip.toDict(**kwargs),
                 "lastSeenGuildId":self.lastSeenGuildId, "duelWins": self.duelWins, "duelLosses": self.duelLosses, "duelCreditsWins": self.duelCreditsWins,
-                "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "bountyHuntingXP": self.bountyHuntingXP, "pollOwned": self.pollOwned,
+                "bountyWinsToday": self.bountyWinsToday, "dailyBountyWinsReset": self.dailyBountyWinsReset.timestamp(), "bountyHuntingXP": self.bountyHuntingXP,
                 "duelCreditsLosses": self.duelCreditsLosses, "homeGuildID": self.homeGuildID, "guildTransferCooldownEnd": self.guildTransferCooldownEnd.timestamp(), "prestiges": self.prestiges}
 
         data["inactiveShips"] = self.inactiveShips.toDict(**kwargs)["items"]
@@ -450,6 +448,12 @@ class bbUser(bbSerializable.bbSerializable):
             data["kaamo"] = self.kaamo.toDict(**kwargs)
         if self.loma is not None:
             data["loma"] = self.loma.toDict(**kwargs)
+
+        if len(self.ownedMenus) > 0:
+            data["ownedMenus"] = {}
+            for menuType in self.ownedMenus:
+                if len(self.ownedMenus[menuType]):
+                    data["ownedMenus"][menuType.__name__] = [menu.msg.id for menu in self.ownedMenus[menuType]]
 
         return data
 
@@ -761,6 +765,19 @@ class bbUser(bbSerializable.bbSerializable):
         kaamo = kaamoShop.KaamoShop.fromDict(userDict["kaamo"]) if "kaamo" in userDict else None
         loma = kaamoShop.KaamoShop.fromDict(userDict["loma"]) if "loma" in userDict else None
 
+        ownedMenus = {}
+        if "ownedMenus" in userDict:
+            for menuType in userDict["ownedMenus"]:
+                if menuType not in ReactionMenu.saveableNameMenuTypes:
+                    bbLogger.log("bbUser", "fromDict", "Ignoring unrecognised reactionmenu type: " + menuType + "stored in user #" + str(id), category="reactionMenus", eventType="unknMenuType")
+                else:
+                    ownedMenus[menuType] = []
+                    for menuID in userDict[menuType]:
+                        if menuID in bbGlobals.reactionMenusDB:
+                            ownedMenus[menuType].append(bbGlobals.reactionMenusDB[menuID])
+                        else:
+                            bbLogger.log("bbUser", "fromDict", "Ignoring unrecognised reactionmenu id: " + menuType + "#" + str(menuID) + " stored in user #" + str(id), category="reactionMenus", eventType="unknMenuID")
+
         return bbUser(id, credits=userDict["credits"], lifetimeCredits=userDict["lifetimeCredits"],
                         bountyCooldownEnd=userDict["bountyCooldownEnd"], systemsChecked=userDict["systemsChecked"],
                         bountyWins=userDict["bountyWins"], activeShip=activeShip, inactiveShips=inactiveShips,
@@ -773,7 +790,7 @@ class bbUser(bbSerializable.bbSerializable):
                         alerts=userDict["alerts"] if "alerts" in userDict else {},
                         bountyWinsToday=userDict["bountyWinsToday"] if "bountyWinsToday" in userDict else 0,
                         dailyBountyWinsReset=datetime.utcfromtimestamp(userDict["dailyBountyWinsReset"]) if "dailyBountyWinsReset" in userDict else datetime.utcnow(),
-                        pollOwned=userDict["pollOwned"] if "pollOwned" in userDict else False,
                         homeGuildID=userDict["homeGuildID"] if "homeGuildID" in userDict else -1,
                         guildTransferCooldownEnd=datetime.utcfromtimestamp(userDict["guildTransferCooldownEnd"]) if "guildTransferCooldownEnd" in userDict else datetime.utcnow(),
-                        bountyHuntingXP=bountyHuntingXP, kaamo=kaamo, loma=loma, prestiges=userDict["prestiges"] if "prestiges" in userDict else 0)
+                        bountyHuntingXP=bountyHuntingXP, kaamo=kaamo, loma=loma, prestiges=userDict["prestiges"] if "prestiges" in userDict else 0,
+                        ownedMenus=ownedMenus)
