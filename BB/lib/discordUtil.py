@@ -9,7 +9,7 @@ from ..logging import bbLogger
 from . import stringTyping
 from .. import bbGlobals
 from discord import Embed, Colour, HTTPException, Forbidden
-from ..userAlerts import userAlerts
+from ..userAlerts import UserAlerts
 import random
 from ..bbConfig import bbConfig
 
@@ -179,7 +179,7 @@ def getMemberByRefOverDB(uRef : str, dcGuild : Guild = None) -> User:
     return userAttempt
 
 
-def typeAlertedUserMentionOrName(alertType : userAlerts.UABase, dcUser : Union[User, Member] = None,
+def typeAlertedUserMentionOrName(alertType : UserAlerts.UABase, dcUser : Union[User, Member] = None,
         bbUser : bbUser.bbUser = None, bbGuild : bbGuild.bbGuild = None, dcGuild : Guild = None) -> str:
     """If the given user has subscribed to the given alert type, return the user's mention. Otherwise, return their display name and discriminator.
     At least one of dcUser or bbUser must be provided.
@@ -235,7 +235,7 @@ def IDAlertedUserMentionOrName(alertID : str, dcUser : Union[Member, User] = Non
     :return: If the given user is alerted for the given type in the selected guild, the user's mention. The user's display name otherwise.
     :rtype: str
     """
-    return typeAlertedUserMentionOrName(userAlerts.userAlertsIDsTypes[alertID], dcUser=dcUser, bbUser=bbUser, bbGuild=bbGuild, dcGuild=dcGuild)
+    return typeAlertedUserMentionOrName(UserAlerts.userAlertsIDsTypes[alertID], dcUser=dcUser, bbUser=bbUser, bbGuild=bbGuild, dcGuild=dcGuild)
 
 
 async def startLongProcess(message : Message):

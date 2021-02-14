@@ -6,7 +6,7 @@ from ..lib.emojis import dumbEmoji
 from ..lib.emojis import UninitializedDumbEmoji as UninitializedBasedEmoji
 
 # All emojis used by the bot
-defaultEmojis = {
+emojis = {
     # When a message prompts a process that will take a long time (e.g rendering), this will be added to the message reactions
     # It will be removed when the long process is finished.
     "longProcess": UninitializedBasedEmoji("⏳"),

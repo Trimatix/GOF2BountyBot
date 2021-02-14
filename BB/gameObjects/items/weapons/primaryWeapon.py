@@ -1,6 +1,6 @@
 from ..gameItem import GameItem, spawnableItem
 from ....bbConfig import bbData
-from ... import lib
+from .... import lib
 from typing import List
 
 
