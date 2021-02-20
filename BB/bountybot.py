@@ -35,7 +35,9 @@ class bbClient(ClientBaseClass):
     :type bb_loggedIn: bool
     """
     def __init__(self):
-        super().__init__(command_prefix="‎")
+        intents = discord.Intents.default()
+        intents.members = True
+        super().__init__(command_prefix="‎", intents=intents)
         self.bb_loggedIn = False
 
     
