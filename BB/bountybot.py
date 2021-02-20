@@ -294,14 +294,14 @@ async def on_ready():
     ##### SHIP SKIN GENERATION #####
 
     # generate bbShipSkin objects from data stored on file
-    for subdir, dirs, files in os.walk(bbData.skinsDir):
-        for dirname in dirs:
-            dirpath = subdir + os.sep + dirname
+    # for subdir, dirs, files in os.walk(bbData.skinsDir):
+    #     for dirname in dirs:
+    #         dirpath = subdir + os.sep + dirname
 
-            if dirname.lower().endswith(".bbshipskin"):
-                skinData = lib.jsonHandler.readJSON(dirpath + os.sep + "META.json")
-                skinData["path"] = CWD + os.sep + dirpath
-                bbData.builtInShipSkins[skinData["name"].lower()] = bbShipSkin.fromDict(skinData)
+    #         if dirname.lower().endswith(".bbshipskin"):
+    #             skinData = lib.jsonHandler.readJSON(dirpath + os.sep + "META.json")
+    #             skinData["path"] = CWD + os.sep + dirpath
+    #             bbData.builtInShipSkins[skinData["name"].lower()] = bbShipSkin.fromDict(skinData)
 
     # generate bbToolItem objects from data stored on file
     for toolDict in bbData.builtInToolData.values():
