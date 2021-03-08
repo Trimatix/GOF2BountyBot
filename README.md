@@ -1,3 +1,7 @@
+This repository is in the process of being ported onto the [BASED](https://github.com/Trimatix/BASED) platform. The new repository can be found here: [GOF2BountyBot](https://github.com/GOF2BountyBot/GOF2BountyBot)
+
+---
+
 # GOF2BountyBot
 An ambitious discord bot written in python, recreating some of the features of Galaxy on Fire 2. Currently, the standout features are the bounty hunting system, and the items/loadout/trading/dueling system.
 
