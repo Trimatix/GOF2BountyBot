@@ -425,6 +425,7 @@ async def dev_cmd_sayin(message : discord.Message, args : str, isDM : bool):
         else:
             await message.reply("Your first argument doesnt look like a user mention or channel ID. To send to this channel, use `say`.")
             return
+        args = args[len(chanSpecifier) + 1:]
 
         useAnnounceChannel = False
         broadcastEmbed = None
