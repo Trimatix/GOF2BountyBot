@@ -620,7 +620,7 @@ async def dev_cmd_reacttomsg(message : discord.Message, args : str, isDM : bool)
             await message.reply("Your second argument doesnt look like a message ID.")
         else:
             mID = int(msgSpecifier)
-            if not (targetMessage := (targetChannel.get_message(mID) or await targetChannel.fetch_message(mID))):
+            if not (targetMessage := await targetChannel.fetch_message(mID)):
                 await message.reply(f"Couldnt find a message with ID {mID} in the {targetChannel.mention} channel")
             else:
                 try:
@@ -667,7 +667,7 @@ async def dev_cmd_removereact(message : discord.Message, args : str, isDM : bool
             await message.reply("Your second argument doesnt look like a message ID.")
         else:
             mID = int(msgSpecifier)
-            if not (targetMessage := (targetChannel.get_message(mID) or await targetChannel.fetch_message(mID))):
+            if not (targetMessage := await targetChannel.fetch_message(mID)):
                 await message.reply(f"Couldnt find a message with ID {mID} in the {targetChannel.mention} channel")
             else:
                 try:
