@@ -626,18 +626,19 @@ async def dev_cmd_reacttomsg(message : discord.Message, args : str, isDM : bool)
                 await message.reply(f"Couldnt find a message with ID {mID} in the {targetChannel.mention} channel")
             else:
                 if lib.stringTyping.isInt(emojiSpecifier):
-                    emojiSpecifier = int(emojiSpecifier)
-                try:
-                    targetEmoji = lib.emojis.dumbEmojiFromStr(emojiSpecifier)
-                except Exception as e:
-                    await message.reply(f"Failed to construct emoji from \"{emojiSpecifier}\": {e}")
+                    targetEmoji = lib.emojis.dumbEmoji(id=int(emojiSpecifier))
                 else:
                     try:
-                        await targetMessage.add_reaction(targetEmoji.sendable)
-                    except (discord.NotFound, discord.HTTPException, discord.Forbidden, discord.InvalidArgument) as e:
-                        await message.reply(f"React add failed: {e}")
-                    else:
-                        await message.reply("Done!")
+                        targetEmoji = lib.emojis.dumbEmojiFromStr(emojiSpecifier)
+                    except Exception as e:
+                        await message.reply(f"Failed to construct emoji from \"{emojiSpecifier}\": {e}")
+                        return
+                try:
+                    await targetMessage.add_reaction(targetEmoji.sendable)
+                except (discord.NotFound, discord.HTTPException, discord.Forbidden, discord.InvalidArgument) as e:
+                    await message.reply(f"React add failed: {e}")
+                else:
+                    await message.reply("Done!")
 
 bbCommands.register("reactToMsg", dev_cmd_reacttomsg, 2, forceKeepArgsCasing=True, allowDM=True, useDoc=True)
 
