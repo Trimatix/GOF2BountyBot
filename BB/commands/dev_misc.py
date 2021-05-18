@@ -625,6 +625,8 @@ async def dev_cmd_reacttomsg(message : discord.Message, args : str, isDM : bool)
             if not (targetMessage := await targetChannel.fetch_message(mID)):
                 await message.reply(f"Couldnt find a message with ID {mID} in the {targetChannel.mention} channel")
             else:
+                if lib.stringTyping.isInt(emojiSpecifier):
+                    emojiSpecifier = int(emojiSpecifier)
                 try:
                     targetEmoji = lib.emojis.dumbEmojiFromStr(emojiSpecifier)
                 except Exception as e:
@@ -674,6 +676,8 @@ async def dev_cmd_removereact(message : discord.Message, args : str, isDM : bool
             if not (targetMessage := await targetChannel.fetch_message(mID)):
                 await message.reply(f"Couldnt find a message with ID {mID} in the {targetChannel.mention} channel")
             else:
+                if lib.stringTyping.isInt(emojiSpecifier):
+                    emojiSpecifier = int(emojiSpecifier)
                 try:
                     targetEmoji = lib.emojis.dumbEmojiFromStr(emojiSpecifier)
                 except Exception as e:
