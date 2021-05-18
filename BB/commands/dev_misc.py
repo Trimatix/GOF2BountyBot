@@ -585,6 +585,8 @@ async def dev_cmd_delmsg(message : discord.Message, args : str, isDM : bool):
                     await targetMessage.delete()
                 except (discord.NotFound, discord.HTTPException, discord.Forbidden) as e:
                     await message.reply(f"Delete failed: {e}")
+                else:
+                    await message.reply("Done!")
 
 bbCommands.register("delmsg", dev_cmd_delmsg, 2, forceKeepArgsCasing=False, allowDM=True, useDoc=True)
 
@@ -632,6 +634,8 @@ async def dev_cmd_reacttomsg(message : discord.Message, args : str, isDM : bool)
                         await targetMessage.add_reaction(targetEmoji.sendable)
                     except (discord.NotFound, discord.HTTPException, discord.Forbidden, discord.InvalidArgument) as e:
                         await message.reply(f"React add failed: {e}")
+                    else:
+                        await message.reply("Done!")
 
 bbCommands.register("reactToMsg", dev_cmd_reacttomsg, 2, forceKeepArgsCasing=True, allowDM=True, useDoc=True)
 
@@ -676,8 +680,10 @@ async def dev_cmd_removereact(message : discord.Message, args : str, isDM : bool
                     await message.reply(f"Failed to construct emoji from \"{emojiSpecifier}\": {e}")
                 else:
                     try:
-                        await targetMessage.remove_reaction(targetEmoji.sendable, targetChannel.me)
+                        await targetMessage.remove_reaction(targetEmoji.sendable, bbGlobals.client.user)
                     except (discord.NotFound, discord.HTTPException, discord.Forbidden, discord.InvalidArgument) as e:
                         await message.reply(f"React remove failed: {e}")
+                    else:
+                        await message.reply("Done!")
 
 bbCommands.register("removereact", dev_cmd_removereact, 2, forceKeepArgsCasing=True, allowDM=True, useDoc=True)
