@@ -544,7 +544,7 @@ async def dev_cmd_sayin(message : discord.Message, args : str, isDM : bool):
 
         await sendChannel.send(msgText, embed=broadcastEmbed)
 
-bbCommands.register("sayin", dev_cmd_say, 2, forceKeepArgsCasing=True, allowDM=True, useDoc=True)
+bbCommands.register("sayin", dev_cmd_sayin, 2, forceKeepArgsCasing=True, allowDM=True, useDoc=True)
 
 
 async def dev_cmd_delmsg(message : discord.Message, args : str, isDM : bool):
