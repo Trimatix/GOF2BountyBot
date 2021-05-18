@@ -424,7 +424,7 @@ async def cmd_poll(message : discord.Message, args : str, isDM : bool):
     if len(argsSplit) < 2:
         await message.channel.send(":x: Invalid arguments! Please provide your poll subject, followed by a new line, then a new line-separated series of poll options.\nFor more info, see `" + bbConfig.commandPrefix + "help poll`")
         return
-    pollSubject = argsSplit[0]
+    pollSubject = argsSplit[0].replace("{NL}", "\n")
     argPos = 0
     for arg in argsSplit[1:]:
         if arg == "":
