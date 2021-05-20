@@ -1096,12 +1096,12 @@ async def cmd_list(message : discord.Message, args : str, isDM : bool):
             resultsStr = ""
             for item in foundObjs:
                 if objType in dictObjs:
-                    resultsStr += (item["emoji"] if "emoji" in item and item["emoji"] != " " else "•") + " " + item["name"] + "\n"
+                    resultsStr += (item["emoji"] if "emoji" in item and item["emoji"] != " " else "•") + " " + (("[" + item["name"] + "](" + item["wiki"] + ")") if item.get("wiki", "") else item["name"]) + "\n"
                 else:
                     try:
-                        resultsStr += (item.emoji.sendable if item.hasEmoji else "•") + " " + item.name + "\n"
+                        resultsStr += (item.emoji.sendable if item.hasEmoji else "•") + " " + (("[" + item.name + "](" + item.wiki + ")") if item.hasWiki else item.name) + "\n"
                     except AttributeError:
-                        resultsStr += "• " + item.name + "\n"
+                        resultsStr += "• " + (("[" + item.name + "](" + item.wiki + ")") if item.hasWiki else item.name) + "\n"
             resultsEmbed = lib.discordUtil.makeEmbed(authorName="Search Results", titleTxt=((("level " + str(itemLevel) + " ") if itemLevel != -1 else "") + \
                                                                                         ((manufacturer + " ") if manufacturer else "") + objType + "s").capitalize(),
                                                                                         desc=resultsStr,
