@@ -140,11 +140,8 @@ async def cmd_info_system(message : discord.Message, args : str, isDM : bool):
 
         # list the system's aliases as a string
         if len(systObj.aliases) > 1:
-            aliasStr = ""
-            for alias in systObj.aliases:
-                aliasStr += alias + ", "
             statsEmbed.add_field(
-                name="Aliases:", value=aliasStr[:-2], inline=False)
+                name="Aliases:", value=", ".join(i for i in systObj.aliases if i != systObj.name.lower()), inline=False)
         # list the system's wiki if one exists
         if systObj.hasWiki:
             statsEmbed.add_field(
@@ -189,11 +186,8 @@ async def cmd_info_criminal(message : discord.Message, args : str, isDM : bool):
             name="Wanted By:", value=criminalObj.faction.title() + "s")
         # include the criminal's aliases and wiki if they exist
         if len(criminalObj.aliases) > 1:
-            aliasStr = ""
-            for alias in criminalObj.aliases:
-                aliasStr += alias + ", "
             statsEmbed.add_field(
-                name="Aliases:", value=aliasStr[:-2], inline=False)
+                name="Aliases:", value=", ".join(i for i in criminalObj.aliases if i != criminalObj.name.lower()), inline=False)
         if criminalObj.hasWiki:
             statsEmbed.add_field(
                 name="‎", value="[Wiki](" + criminalObj.wiki + ")", inline=False)
@@ -275,11 +269,8 @@ async def cmd_info_ship(message : discord.Message, args : str, isDM : bool):
         #                      value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
-            aliasStr = ""
-            for alias in itemObj.aliases:
-                aliasStr += alias + ", "
             statsEmbed.add_field(
-                name="Aliases:", value=aliasStr[:-2], inline=False)
+                name="Aliases:", value=", ".join(i for i in itemObj.aliases if i != itemObj.name.lower()), inline=False)
         if itemObj.hasWiki:
             statsEmbed.add_field(
                 name="‎", value="[Wiki](" + itemObj.wiki + ")", inline=False)
@@ -327,11 +318,8 @@ async def cmd_info_weapon(message : discord.Message, args : str, isDM : bool):
         #                      value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
-            aliasStr = ""
-            for alias in itemObj.aliases:
-                aliasStr += alias + ", "
             statsEmbed.add_field(
-                name="Aliases:", value=aliasStr[:-2], inline=False)
+                name="Aliases:", value=", ".join(i for i in itemObj.aliases if i != itemObj.name.lower()), inline=False)
         if itemObj.hasWiki:
             statsEmbed.add_field(
                 name="‎", value="[Wiki](" + itemObj.wiki + ")", inline=False)
@@ -380,11 +368,8 @@ async def cmd_info_module(message : discord.Message, args : str, isDM : bool):
         #                      value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
-            aliasStr = ""
-            for alias in itemObj.aliases:
-                aliasStr += alias + ", "
             statsEmbed.add_field(
-                name="Aliases:", value=aliasStr[:-2], inline=False)
+                name="Aliases:", value=", ".join(i for i in itemObj.aliases if i != itemObj.name.lower()), inline=False)
         if itemObj.hasWiki:
             statsEmbed.add_field(
                 name="‎", value="[Wiki](" + itemObj.wiki + ")", inline=False)
@@ -432,11 +417,8 @@ async def cmd_info_turret(message : discord.Message, args : str, isDM : bool):
         #                      value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
-            aliasStr = ""
-            for alias in itemObj.aliases:
-                aliasStr += alias + ", "
             statsEmbed.add_field(
-                name="Aliases:", value=aliasStr[:-2], inline=False)
+                name="Aliases:", value=", ".join(i for i in itemObj.aliases if i != itemObj.name.lower()), inline=False)
         if itemObj.hasWiki:
             statsEmbed.add_field(
                 name="‎", value="[Wiki](" + itemObj.wiki + ")", inline=False)
@@ -485,11 +467,8 @@ async def cmd_info_commodity(message : discord.Message, args : str, isDM : bool)
             name="Wanted By:", value=itemObj.faction.title() + "s")
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
-            aliasStr = ""
-            for alias in itemObj.aliases:
-                aliasStr += alias + ", "
             statsEmbed.add_field(
-                name="Aliases:", value=aliasStr[:-2], inline=False)
+                name="Aliases:", value=", ".join(i for i in itemObj.aliases if i != itemObj.name.lower()), inline=False)
         if itemObj.hasWiki:
             statsEmbed.add_field(
                 name="‎", value="[Wiki](" + itemObj.wiki + ")", inline=False)
