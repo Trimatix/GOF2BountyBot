@@ -951,3 +951,125 @@ async def cmd_showme(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Unknown object type! (criminal/ship/weapon/module/turret/commodity)")	
 
 bbCommands.register("showme", cmd_showme, 0, allowDM=True, aliases=["show", "render"], helpSection="gof2 info", signatureStr="**showme <object-type> <name>** *[[full]+ [skinName]]*", shortHelp="Get an image of the named item. This command can also render ships with a given skin.", longHelp="Get a larger image of the requested item. If your item is a ship, you may also specify a skin name, prefaced by a `+` symbol.\nAlternatively, give a `+` and no ship name, and attach your own 2048x2048 jpg image, and I will render it onto your ship! Give `full+` instead of `+` to disable autoskin and render exactly your provided image, with no additional texturing.")
+
+
+async def cmd_list(message : discord.Message, args : str, isDM : bool):	
+    """List all items in the game that match a set of criteria.
+    criteria must include an item type
+    can optionally include:
+        - manufacturer
+        - tech level
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string containing an object type an optionally a manufacturer and tech level in any order
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    levelFound = False
+    objType = ""
+    itemLevel = -1
+    manufacturer = ""
+    objTypes = ["system", "criminal", "ship", "weapon", "module", "turret", "commodity"]
+
+    for arg in args.split(" "):
+        if levelFound:
+            if not lib.stringTyping.isInt(arg) or int(arg) < bbConfig.minTechLevel or int(arg) > bbConfig.maxTechLevel:
+                await message.channel.send(":x: Item tech level must be a number between 1 and 10.")
+                return
+            itemLevel = int(arg)
+            levelFound = False
+
+        elif arg == "level":
+            if levelFound or itemLevel != -1:
+                await message.channel.send(":x: Please only give one tech level!")
+                return
+            levelFound = True
+        
+        elif arg in bbData.factions:
+            if manufacturer != "":
+                await message.channel.send(":x: Please only give one manufacturer!")
+                return
+            manufacturer = arg
+        
+        elif arg.rstrip("s") in objTypes:
+            if objType != "":
+                await message.channel.send(":x: Please only give one object type!")
+                return
+            objType = arg.rstrip("s")
+        
+        else:
+            await message.channel.send(":x: Unknown argument: " + arg)
+            return
+
+    if objType == "":
+        await message.channel.send(":x: Please give an object type! (system/criminal/ship/weapon/module/turret/commodity)")
+        return
+
+    if levelFound:
+        await message.channel.send(":x: Please give a tech level to match after `level`!")
+        return
+    
+    foundObjs = []
+    if itemLevel != -1:
+        print("LEVEL",itemLevel)
+
+    factionObjs = {"system": bbData.builtInSystemObjs, "criminal": bbData.builtInCriminalObjs}
+    manufacturerObjs = {"weapon" : bbData.builtInWeaponObjs, "module" : bbData.builtInModuleObjs, "turret" : bbData.builtInTurretObjs, "ship": bbData.builtInShipData}
+    tlObjs = {"criminal": bbData.builtInCriminalObjs, "weapon" : bbData.builtInWeaponObjs, "module" : bbData.builtInModuleObjs, "turret" : bbData.builtInTurretObjs, "ship": bbData.builtInShipData}
+    dictObjs = {"ship": bbData.builtInShipData}
+
+    if itemLevel != -1 and objType not in tlObjs:
+        await message.channel.send(":x: " + objType.title() + "s don't have tech levels!")
+        return
+
+    if objType in factionObjs:
+        if objType in dictObjs:
+            for item in factionObjs[objType].values():
+                if (manufacturer == "" or (manufacturer != "" and item["faction"] == manufacturer)) and \
+                        (objType not in tlObjs or (objType in tlObjs and (itemLevel == -1 or (itemLevel != -1 and item["techLevel"])) == itemLevel)):
+                    foundObjs.append(item)
+        else:
+            for item in factionObjs[objType].values():
+                if (manufacturer == "" or (manufacturer != "" and item.faction == manufacturer)) and \
+                        (objType not in tlObjs or (objType in tlObjs and (itemLevel == -1 or (itemLevel != -1 and item.techLevel == itemLevel)))):
+                    foundObjs.append(item)
+    
+    elif objType in manufacturerObjs:
+        if objType in dictObjs:    
+            for item in manufacturerObjs[objType].values():
+                if (manufacturer == "" or (manufacturer != "" and item["manufacturer"] == manufacturer)) and \
+                        (objType not in tlObjs or (objType in tlObjs and (itemLevel == -1 or (itemLevel != -1 and item["techLevel"] == itemLevel)))):
+                    foundObjs.append(item)
+        else:
+            for item in manufacturerObjs[objType].values():
+                if (manufacturer == "" or (manufacturer != "" and item.manufacturer == manufacturer)) and \
+                        (objType not in tlObjs or (objType in tlObjs and (itemLevel == -1 or (itemLevel != -1 and item.techLevel == itemLevel)))):
+                    foundObjs.append(item)
+
+    if not foundObjs:
+        await message.channel.send("No results found!")
+    else:
+        itemsPerPage = 10
+        # if len(foundObjs) < itemsPerPage:
+        if True:
+            resultsStr = ""
+            for item in foundObjs:
+                if objType in dictObjs:
+                    resultsStr += (item["emoji"] if "emoji" in item and item["emoji"] != " " else "•") + " " + (("[" + item["name"] + "](" + item["wiki"] + ")") if item.get("wiki", "") else item["name"]) + "\n"
+                else:
+                    try:
+                        resultsStr += (item.emoji.sendable if item.hasEmoji else "•") + " " + (("[" + item.name + "](" + item.wiki + ")") if item.hasWiki else item.name) + "\n"
+                    except AttributeError:
+                        resultsStr += "• " + (("[" + item.name + "](" + item.wiki + ")") if item.hasWiki else item.name) + "\n"
+            resultsEmbed = lib.discordUtil.makeEmbed(authorName="Search Results", titleTxt=((("level " + str(itemLevel) + " ") if itemLevel != -1 else "") + \
+                                                                                        ((manufacturer + " ") if manufacturer else "") + objType + "s").capitalize(),
+                                                                                        desc=resultsStr,
+                                                                                        icon=bbGlobals.client.user.avatar_url_as(size=64))
+            await message.channel.send(embed=resultsEmbed)
+
+        # TODO: Put results of size more than itemsPerPage on a pagedreactionmenu
+        
+        # await message.channel.send("No results found!" if not foundObjs else ("** **- " + "\n - ".join((item["name"] if objType in dictObjs else item.name) for item in foundObjs)))
+        # resultsMenu = PagedReactionMenu.PagedReactionMenu()
+        # resultsEmbed = lib.discordUtil.makeEmbed()
+
+bbCommands.register("list", cmd_list, 0, allowDM=True, helpSection="gof2 info", signatureStr="**list** *[level <tech-level>]* *[manufacturer]* **<object-type>**", shortHelp="List all objects in the game that match the given criteria. For example: `list vossk criminals` or `list level 3 terran ships`")
