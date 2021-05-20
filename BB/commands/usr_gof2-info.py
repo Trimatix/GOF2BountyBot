@@ -271,8 +271,8 @@ async def cmd_info_ship(message : discord.Message, args : str, isDM : bool):
                 modulesStr += module.name + ", "
             statsEmbed.add_field(name="Equipped Modules:",
                                  value=modulesStr[:-2] + "]*")
-        statsEmbed.add_field(name="Max Shop Spawn Chance:",
-                             value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
+        # statsEmbed.add_field(name="Max Shop Spawn Chance:",
+        #                      value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -323,8 +323,8 @@ async def cmd_info_weapon(message : discord.Message, args : str, isDM : bool):
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:", value=str(itemObj.value))
         statsEmbed.add_field(name="DPS:", value=str(itemObj.dps))
-        statsEmbed.add_field(name="Max Shop Spawn Chance:",
-                             value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
+        # statsEmbed.add_field(name="Max Shop Spawn Chance:",
+        #                      value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -376,8 +376,8 @@ async def cmd_info_module(message : discord.Message, args : str, isDM : bool):
         statsEmbed.add_field(name="Value:", value=str(itemObj.value))
         statsEmbed.add_field(name="Stats:", value=str(
             itemObj.statsStringShort()))
-        statsEmbed.add_field(name="Max Shop Spawn Chance:",
-                             value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
+        # statsEmbed.add_field(name="Max Shop Spawn Chance:",
+        #                      value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
@@ -428,8 +428,8 @@ async def cmd_info_turret(message : discord.Message, args : str, isDM : bool):
             statsEmbed.add_field(name="Tech Level:", value=itemObj.techLevel)
         statsEmbed.add_field(name="Value:", value=str(itemObj.value))
         statsEmbed.add_field(name="DPS:", value=str(itemObj.dps))
-        statsEmbed.add_field(name="Max Shop Spawn Chance:",
-                             value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
+        # statsEmbed.add_field(name="Max Shop Spawn Chance:",
+        #                      value=str(itemObj.shopSpawnRate) + "%\nFor shop level " + str(itemObj.techLevel))
         # include the item's aliases and wiki if they exist
         if len(itemObj.aliases) > 1:
             aliasStr = ""
