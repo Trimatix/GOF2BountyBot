@@ -1,6 +1,8 @@
 import discord
 import os
 import asyncio
+from io import BytesIO
+from PIL import Image
 
 from . import commandsDB as bbCommands
 from ..bbConfig import bbData, bbConfig
@@ -1088,21 +1090,23 @@ async def cmd_texture(message : discord.Message, args : str, isDM : bool):
                     skinPaths[regionNum] = CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_" + str(regionNum) + ".jpg"	
         
         # TODO: ALLOW RENDERING STRAIGHT TO AEI WITH AEIEDITOR BY CATLABS
-        formatEmojis = (lib.emojis.dumbEmoji(unicode="🇯"), lib.emojis.dumbEmoji(unicode="🇦"), lib.emojis.dumbEmoji(unicode="🌀"))
-        imgFormats = [formatEmojis[0]]
-        # formatOptions = {formatEmojis[0]: ReactionMenu.DummyReactionMenuOption("JPG", formatEmojis[0]),
-        #                 formatEmojis[1]: ReactionMenu.DummyReactionMenuOption("AEI", formatEmojis[1]),
-        #                 formatEmojis[2]: ReactionMenu.DummyReactionMenuOption("Both", formatEmojis[2])}
-        # formatsMenu = ReactionMenu.SingleUserReactionMenu(await message.channel.send("** **"), message.author,
-        #                                                     bbConfig.skinApplyConfirmTimeoutSeconds, formatOptions,
-        #                                                     list(formatEmojis), desc="AEI images can be dropped straight into your game.",
-        #                                                     icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/scroll_1f4dc.png",
-        #                                                     authorName="In what format(s) would you like the texture?")
-        # imgFormats = await formatsMenu.doMenu()
-        # if imgFormats == []:
-        #     return
-        # if formatEmojis[2] in imgFormats:
-        #     imgFormats = (formatEmojis[0], formatEmojis[1])
+        formatEmojis = (lib.emojis.dumbEmoji(unicode="🇯"), lib.emojis.dumbEmoji(unicode="🇵"), lib.emojis.dumbEmoji(unicode="🌀")) #lib.emojis.dumbEmoji(unicode="🇦"), lib.emojis.dumbEmoji(unicode="🌀"))
+
+        formatOptions = {formatEmojis[0]: ReactionMenu.DummyReactionMenuOption("JPG", formatEmojis[0]),
+                        # formatEmojis[1]: ReactionMenu.DummyReactionMenuOption("AEI", formatEmojis[1]),
+                        formatEmojis[1]: ReactionMenu.DummyReactionMenuOption("PNG", formatEmojis[1]),
+                        formatEmojis[2]: ReactionMenu.DummyReactionMenuOption("Both", formatEmojis[2])}
+        formatsMenu = ReactionMenu.SingleUserReactionMenu(await message.channel.send("** **"), message.author,
+                                                            bbConfig.skinApplyConfirmTimeoutSeconds, formatOptions,
+                                                            # list(formatEmojis), desc="AEI images can be dropped straight into your game.",
+                                                            list(formatEmojis),
+                                                            icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/scroll_1f4dc.png",
+                                                            authorName="In what format(s) would you like the texture?")
+        imgFormats = await formatsMenu.doMenu()
+        if imgFormats == []:
+            return
+        if formatEmojis[2] in imgFormats:
+            imgFormats = (formatEmojis[0], formatEmojis[1])
 
         if "model" in shipData:
             fName = ".".join(shipData["model"].split(".")[:-1])
@@ -1115,12 +1119,25 @@ async def cmd_texture(message : discord.Message, args : str, isDM : bool):
         # TODO: generate and send AEI here
 
 
+        if formatEmojis[1] in imgFormats:
+            im = Image.open(texPath)
+            imBytes = BytesIO()
+            im.save(imBytes, "PNG")
+            pngFile = discord.File(imBytes, filename=fName + ".png")
+            await message.reply("Autoskin complete!\n__PNG__",
+                                file=pngFile, mention_author=formatEmojis[1] not in imgFormats)
+            pngFile.close()
+            imBytes.close()
+            im.close()
+
         if formatEmojis[0] in imgFormats:
             with open(texPath, "rb") as f:
                 jpgFile = discord.File(f, filename=fName + ".jpg")
                 await message.reply("__JPG__" if formatEmojis[1] in imgFormats else "Autoskin complete!\n__JPG__",
                                     file=jpgFile, mention_author=formatEmojis[1] not in imgFormats)
                 jpgFile.close()
+
+        
 
         try:
             os.remove(texPath)
