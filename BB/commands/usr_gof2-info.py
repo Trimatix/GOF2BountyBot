@@ -1149,8 +1149,7 @@ bbCommands.register("texture", cmd_texture, 0, aliases=["tex"], helpSection="gof
                     shortHelp="Generate a ship texture file from your own images with autoskin. This is the same system as `showmme ship`.",
                     longHelp="Generate the texture file for custom ship skin with autoskin. This is the system used by" \
                                 + "`showme ship`, except this command will send you the generated texture file instead of a render." \
-                                + "\nUsage of this command is the same as `showme ship`, except you should not provide a `+`.",
-                    helpSection="gof2 info")
+                                + "\nUsage of this command is the same as `showme ship`, except you should not provide a `+`.")
 
 
 async def cmd_list(message : discord.Message, args : str, isDM : bool):	
