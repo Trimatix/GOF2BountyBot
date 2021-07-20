@@ -1123,6 +1123,7 @@ async def cmd_texture(message : discord.Message, args : str, isDM : bool):
             im = Image.open(texPath)
             imBytes = BytesIO()
             im.save(imBytes, "PNG")
+            imBytes.seek(0)
             pngFile = discord.File(imBytes, filename=fName + ".png")
             await message.reply("Autoskin complete!\n__PNG__",
                                 file=pngFile, mention_author=formatEmojis[1] not in imgFormats)
