@@ -1089,7 +1089,7 @@ async def cmd_texture(message : discord.Message, args : str, isDM : bool):
         
         # TODO: ALLOW RENDERING STRAIGHT TO AEI WITH AEIEDITOR BY CATLABS
         formatEmojis = (lib.emojis.dumbEmoji(unicode="🇯"), lib.emojis.dumbEmoji(unicode="🇦"), lib.emojis.dumbEmoji(unicode="🌀"))
-        imgFormats = formatEmojis[0]
+        imgFormats = [formatEmojis[0]]
         # formatOptions = {formatEmojis[0]: ReactionMenu.DummyReactionMenuOption("JPG", formatEmojis[0]),
         #                 formatEmojis[1]: ReactionMenu.DummyReactionMenuOption("AEI", formatEmojis[1]),
         #                 formatEmojis[2]: ReactionMenu.DummyReactionMenuOption("Both", formatEmojis[2])}
