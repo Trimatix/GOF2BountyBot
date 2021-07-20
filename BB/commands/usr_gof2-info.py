@@ -6,7 +6,7 @@ from . import commandsDB as bbCommands
 from ..bbConfig import bbData, bbConfig
 from .. import lib, bbGlobals
 from ..bbObjects.items import bbShip
-from ..reactionMenus import ReactionSkinRegionPicker
+from ..reactionMenus import ReactionSkinRegionPicker, ReactionMenu
 from ..logging import bbLogger
 from ..shipRenderer import shipRenderer
 
@@ -748,44 +748,44 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                 with open(renderPath, "rb") as f:	
                     imageEmbedMsg = await bbGlobals.client.get_channel(bbConfig.showmeSkinRendersChannel).send("u" + str(message.author.id) + "g" + ("DM" if message.channel.type in [discord.ChannelType.private, discord.ChannelType.group] else str(message.guild.id)) + "c" + str(message.channel.id) + "m" + str(message.id), file=discord.File(f))	
                     renderEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=imageEmbedMsg.attachments[0].url, authorName="Skin Render Complete!", icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/robot_1f916.png", footerTxt="Custom skinned " + itemObj.name.capitalize())	
-                    await message.channel.send(message.author.mention, embed=renderEmbed)	
-            	
-            bbGlobals.currentRenders.remove(itemObj.name)	
-            try:	
-                os.remove(renderPath)	
-            except FileNotFoundError:	
-                pass	
-            	
-            for skinPath in skinPaths.values():	
-                os.remove(skinPath)	
-            	
-            try:	
-                os.remove(outSkinPath)	
-            except FileNotFoundError:	
-                pass	
-            await lib.discordUtil.endLongProcess(waitMsg)	
-            return	
-        else:	
-            skin = skin.lstrip(" ").lower()	
-            if skin not in bbData.builtInShipSkins:	
-                if len(itemName) < 20:	
-                    await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")	
-                else:	
-                    await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")	
-            elif skin not in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:	
-                await message.channel.send(":x: That skin is not compatible with the **" + itemObj.name + "**!")	
-            	
-            else:	
-                itemEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0], titleTxt=itemObj.name, footerTxt="Custom skin: " + skin.capitalize())	
-                await message.channel.send(embed=itemEmbed)	
-    else:	
-        if not itemObj.hasIcon:	
-            await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")	
-        else:	
-            itemEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt=itemObj.manufacturer.capitalize() + " ship")	
-            await message.channel.send(embed=itemEmbed)	
+                    await message.channel.send(message.author.mention, embed=renderEmbed)
 
-# bbCommands.register("showme-ship", cmd_showme_ship)	
+            bbGlobals.currentRenders.remove(itemObj.name)
+            try:
+                os.remove(renderPath)
+            except FileNotFoundError:
+                pass
+
+            for skinPath in skinPaths.values():
+                os.remove(skinPath)
+
+            try:
+                os.remove(outSkinPath)
+            except FileNotFoundError:
+                pass
+            await lib.discordUtil.endLongProcess(waitMsg)
+            return
+        else:
+            skin = skin.lstrip(" ").lower()
+            if skin not in bbData.builtInShipSkins:
+                if len(itemName) < 20:
+                    await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+                else:
+                    await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+            elif skin not in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:
+                await message.channel.send(":x: That skin is not compatible with the **" + itemObj.name + "**!")
+
+            else:
+                itemEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0], titleTxt=itemObj.name, footerTxt="Custom skin: " + skin.capitalize())
+                await message.channel.send(embed=itemEmbed)
+    else:
+        if not itemObj.hasIcon:
+            await message.channel.send(":x: I don't have an icon for **" + itemObj.name.title() + "**!")
+        else:
+            itemEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=itemObj.icon, titleTxt=itemObj.name, footerTxt=itemObj.manufacturer.capitalize() + " ship")
+            await message.channel.send(embed=itemEmbed)
+
+# bbCommands.register("showme-ship", cmd_showme_ship)
 
 
 async def cmd_showme_weapon(message : discord.Message, args : str, isDM : bool):	
@@ -951,6 +951,206 @@ async def cmd_showme(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Unknown object type! (criminal/ship/weapon/module/turret/commodity)")	
 
 bbCommands.register("showme", cmd_showme, 0, allowDM=True, aliases=["show", "render"], helpSection="gof2 info", signatureStr="**showme <object-type> <name>** *[[full]+ [skinName]]*", shortHelp="Get an image of the named item. This command can also render ships with a given skin.", longHelp="Get a larger image of the requested item. If your item is a ship, you may also specify a skin name, prefaced by a `+` symbol.\nAlternatively, give a `+` and no ship name, and attach your own 2048x2048 jpg image, and I will render it onto your ship! Give `full+` instead of `+` to disable autoskin and render exactly your provided image, with no additional texturing.")
+
+
+async def cmd_texture(message : discord.Message, args : str, isDM : bool):	
+    """Perform autoskin image compositing, and return the resulting texture.
+    TODO: When allowing built in skin textures, update al docstrings and message sends
+    
+    :param discord.Message message: the discord message calling the command. Must have an image attached
+    :param str args: string containing a ship name.
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """	
+    # verify a item was given	
+    if args == "":	
+        await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "texture Groza Mk II`")	
+        return
+
+    # TODO: UNCOMMENT WHEN ALLOWING FOR BUILT IN SKIN TEX GETTING
+    # if "+" in args:	
+    #     if len(args.split("+")) > 2:	
+    #         await message.channel.send(":x: Please only provide one skin, with one `+`!")	
+    #         return	
+    #     elif args.split("+")[1] == "":	
+    #         if len(message.attachments) < 1:	
+    #             await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")	
+    #             return	
+    #         args, skin = args.split("+")[0], "$ATTACHEDFILE$"	
+    #         if args.lower().endswith("full"):	
+    #             args = args.split("full")[0]	
+    #             skin = "$ATTACHEDFILEFULL$"	
+    #     else:	
+    #         args, skin = args.split("+")	
+    # else:	
+    #     await message.reply(":x: Please provide a `+` followed by Example: `" + bbConfig.commandPrefix + "texture Groza Mk II` +")
+    skin="$ATTACHEDFILE$"
+    # look up the ship object	
+    itemName = args.rstrip(" ").title()	
+    itemObj = None	
+    for ship in bbData.builtInShipData.values():	
+        shipObj = bbShip.fromDict(ship)	
+        if shipObj.isCalled(itemName):	
+            itemObj = shipObj	
+    # report unrecognised ship names	
+    if itemObj is None:	
+        if len(itemName) < 20:	
+            await message.channel.send(":x: **" + itemName + "** is not in my database! :detective:")	
+        else:	
+            await message.channel.send(":x: **" + itemName[0:15] + "**... is not in my database! :detective:")	
+        return	
+    shipData = bbData.builtInShipData[itemObj.name]	
+    if not shipData["skinnable"]:	
+        await message.channel.send(":x: That ship is not skinnable!")	
+        return	
+    if skin == "$ATTACHEDFILE$":
+        if len(message.attachments) < 1:	
+            await message.channel.send(":x: Please attach a 2048x2048 jpg to render.")	
+            return	
+        skinFile = message.attachments[0]	
+        if (not skinFile.filename.lower().endswith(".jpg")) or not (skinFile.width == 2048 and skinFile.height == 2048):	
+            await message.channel.send(":x: Please attach a 2048x2048 jpg to render.")
+            return
+        try:
+            await skinFile.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_0.jpg")	
+        except (discord.HTTPException, discord.NotFound):	
+            await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")
+            return	
+        skinPaths = {0:CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_0.jpg"}	
+        disabledLayers = []	
+        if skin == "$ATTACHEDFILE$" and shipData["textureRegions"]:	
+            layerIndices = [i for i in range(1, shipData["textureRegions"] + 1)]	
+            layersPickerMsg = await message.channel.send("** **")	
+            layersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.skinApplyConfirmTimeoutSeconds, numRegions=shipData["textureRegions"])	
+            pickedLayers = []	
+            menuOutput = await layersPickerMenu.doMenu()	
+            if bbConfig.spiralEmoji in menuOutput:	
+                pickedLayers = layerIndices	
+            elif bbConfig.defaultCancelEmoji in menuOutput:	
+                await message.channel.send("🛑 Skin generation cancelled.")	
+                for skinPath in skinPaths.values():	
+                    os.remove(skinPath)	
+                return	
+            else:	
+                for react in menuOutput:	
+                    try:	
+                        pickedLayers.append(bbConfig.numberEmojis.index(react))	
+                    except ValueError:	
+                        pass	
+                
+            remainingIndices = [i for i in layerIndices if i not in pickedLayers]	
+            if remainingIndices:	
+                disabledLayersPickerMenu = ReactionSkinRegionPicker.ReactionSkinRegionPicker(layersPickerMsg, message.author, bbConfig.skinApplyConfirmTimeoutSeconds, possibleRegions=remainingIndices, desc="Would you like to disable any regions?")	
+                menuOutput = await disabledLayersPickerMenu.doMenu()	
+                if bbConfig.spiralEmoji in menuOutput:	
+                    disabledLayers = remainingIndices	
+                elif bbConfig.defaultCancelEmoji in menuOutput:	
+                    await message.channel.send("🛑 Skin generation cancelled.")	
+                    for skinPath in skinPaths.values():	
+                        os.remove(skinPath)
+                    return	
+                else:	
+                    for react in menuOutput:	
+                        try:	
+                            disabledLayers.append(bbConfig.numberEmojis.index(react))	
+                        except ValueError:	
+                            pass	
+                
+            def showmeAdditionalMessageCheck(newMessage):	
+                return newMessage.author == message.author and (newMessage.content.lower().startswith(bbConfig.commandPrefix + "cancel") or len(newMessage.attachments) > 0)	
+            for regionNum in pickedLayers:	
+                nextLayerMsg = await message.channel.send("Please send your image for texture region #" + str(regionNum) + ", or `" + bbConfig.commandPrefix + "cancel` to cancel the render, within " + str(bbConfig.skinApplyConfirmTimeoutSeconds) + " seconds.")	
+                try:	
+                    imgMsg = await bbGlobals.client.wait_for("message", check=showmeAdditionalMessageCheck, timeout=bbConfig.skinApplyConfirmTimeoutSeconds)	
+                except asyncio.TimeoutError:	
+                    await nextLayerMsg.edit(content="This menu has now expired. Please try the command again.\n🛑 Skin render cancelled.")	
+                    for skinPath in skinPaths.values():	
+                        os.remove(skinPath)
+                    return	
+                else:	
+                    if imgMsg.content.lower().startswith(bbConfig.commandPrefix + "cancel"):	
+                        await message.channel.send("🛑 Skin generation cancelled.")	
+                        for skinPath in skinPaths.values():	
+                            os.remove(skinPath)	
+                        return	
+                    nextLayer = imgMsg.attachments[0]	
+                    if (not nextLayer.filename.lower().endswith(".jpg")) or not (nextLayer.width == 2048 and nextLayer.height == 2048):	
+                        await message.channel.send(":x: Please only give 2048x2048 jpgs!\n🛑 Skin render cancelled.")	
+                        for skinPath in skinPaths.values():	
+                            os.remove(skinPath)	
+                        return	
+                    try:	
+                        await nextLayer.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_" + str(regionNum) + ".jpg")	
+                    except (discord.HTTPException, discord.NotFound):	
+                        await message.channel.send(":x: I couldn't download your skin file. Did you delete it?\n🛑 Skin render cancelled.")	
+                        for skinPath in skinPaths.values():	
+                            os.remove(skinPath)
+                        return	
+                    skinPaths[regionNum] = CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_" + str(regionNum) + ".jpg"	
+        
+        # TODO: ALLOW RENDERING STRAIGHT TO AEI WITH AEIEDITOR BY CATLABS
+        formatEmojis = (lib.emojis.dumbEmoji(unicode="🇯"), lib.emojis.dumbEmoji(unicode="🇦"), lib.emojis.dumbEmoji(unicode="🌀"))
+        imgFormats = formatEmojis[0]
+        # formatOptions = {formatEmojis[0]: ReactionMenu.DummyReactionMenuOption("JPG", formatEmojis[0]),
+        #                 formatEmojis[1]: ReactionMenu.DummyReactionMenuOption("AEI", formatEmojis[1]),
+        #                 formatEmojis[2]: ReactionMenu.DummyReactionMenuOption("Both", formatEmojis[2])}
+        # formatsMenu = ReactionMenu.SingleUserReactionMenu(await message.channel.send("** **"), message.author,
+        #                                                     bbConfig.skinApplyConfirmTimeoutSeconds, formatOptions,
+        #                                                     list(formatEmojis), desc="AEI images can be dropped straight into your game.",
+        #                                                     icon="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/scroll_1f4dc.png",
+        #                                                     authorName="In what format(s) would you like the texture?")
+        # imgFormats = await formatsMenu.doMenu()
+        # if imgFormats == []:
+        #     return
+        # if formatEmojis[2] in imgFormats:
+        #     imgFormats = (formatEmojis[0], formatEmojis[1])
+
+        if "model" in shipData:
+            fName = ".".join(shipData["model"].split(".")[:-1])
+        else:
+            fName = shipData["name"]
+        
+        texPath = shipData["path"] + os.sep + "skins" + os.sep + str(message.id) + "-GENTEX.jpg"
+        shipRenderer.compositeTextures(texPath, shipData["path"], skinPaths, disabledLayers)
+        # if formatEmojis[1] in imgFormats:
+        # TODO: generate and send AEI here
+
+
+        if formatEmojis[0] in imgFormats:
+            with open(texPath, "rb") as f:
+                jpgFile = discord.File(f, filename=fName + ".jpg")
+                await message.reply("__JPG__" if formatEmojis[1] in imgFormats else "Autoskin complete!\n__JPG__",
+                                    file=jpgFile, mention_author=formatEmojis[1] not in imgFormats)
+                jpgFile.close()
+
+        try:
+            os.remove(texPath)
+        except FileNotFoundError:
+            pass
+
+        for skinPath in skinPaths.values():
+            os.remove(skinPath)
+
+        return
+    else:
+        skin = skin.lstrip(" ").lower()
+        if skin not in bbData.builtInShipSkins:
+            if len(itemName) < 20:
+                await message.channel.send(":x: The **" + skin + "** skin is not in my database! :detective:")
+            else:
+                await message.channel.send(":x: The **" + skin[0:15] + "**... skin is not in my database! :detective:")
+        elif skin not in bbData.builtInShipData[itemObj.name]["compatibleSkins"]:
+            await message.channel.send(":x: That skin is not compatible with the **" + itemObj.name + "**!")
+
+        else:
+            itemEmbed = lib.discordUtil.makeEmbed(col=lib.discordUtil.randomColour(), img=bbData.builtInShipSkins[skin].shipRenders[itemObj.name][0], titleTxt=itemObj.name, footerTxt="Custom skin: " + skin.capitalize())
+            await message.channel.send(embed=itemEmbed)
+
+bbCommands.register("texture", cmd_texture, 0, aliases=["tex"], helpSection="gof2 info", signatureStr="**texture <ship-name>**",
+                    shortHelp="Generate a ship texture file from your own images with autoskin. This is the same system as `showmme ship`.",
+                    longHelp="Generate the texture file for custom ship skin with autoskin. This is the system used by" \
+                                + "`showme ship`, except this command will send you the generated texture file instead of a render." \
+                                + "\nUsage of this command is the same as `showme ship`, except you should not provide a `+`.",
+                    helpSection="gof2 info")
 
 
 async def cmd_list(message : discord.Message, args : str, isDM : bool):	
