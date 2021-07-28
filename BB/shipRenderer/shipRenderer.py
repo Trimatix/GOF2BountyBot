@@ -69,8 +69,8 @@ def compositeTextures(outTexPath : str, shipPath : str, textures : Dict[int, str
     try:
         workingTex = Image.alpha_composite(workingTex, baseTex)
     except ValueError as e:
-        print(f"base: {baseTex.shape} {baseTex.mode}")
-        print(f"working: {workingTex.shape} {workingTex.mode}")
+        print(f"base: {baseTex.size} {baseTex.mode}")
+        print(f"working: {workingTex.size} {workingTex.mode}")
         raise e
 
     maxLayerNum = max(max(textures), max(disabledLayers)) if disabledLayers else max(textures)
