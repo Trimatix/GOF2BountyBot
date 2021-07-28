@@ -660,7 +660,6 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                 await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")	
                 bbGlobals.currentRenders.remove(itemObj.name)	
                 return
-            print(f"{skinFile.width} x {skinFile.height} - {'resizing' if skinFile.width != 2048 or skinFile.height != 2048 else 'not resizing'}")
             if skinFile.width != 2048 or skinFile.height != 2048:
                 workingSF = Image.open(sfName)
                 workingSF = workingSF.resize((2048, 2048))
@@ -745,7 +744,6 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                                 os.remove(skinPath)	
                             bbGlobals.currentRenders.remove(itemObj.name)	
                             return
-                        print(f"{nextLayer.width} x {nextLayer.height} - {'resizing' if nextLayer.width != 2048 or nextLayer.height != 2048 else 'not resizing'}")
                         if nextLayer.width != 2048 or nextLayer.height != 2048:
                             workingSF = Image.open(nextLayerName)
                             workingSF = workingSF.resize((2048, 2048))
