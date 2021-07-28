@@ -43,7 +43,7 @@ def trim(im : Image) -> Image:
     return im
 
 
-def ensureImageMode(tex : Image, mode="RGBA") -> Image:
+def ensureImageMode(tex : Image.Image, mode="RGBA") -> Image.Image:
     """Ensure the passed image is in a given mode. If it is not, convert it.
     https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
 
@@ -66,7 +66,12 @@ def compositeTextures(outTexPath : str, shipPath : str, textures : Dict[int, str
     # Load and combine the base texture and under layer
     workingTex = ensureImageMode(Image.open(textures[0]))
     baseTex = ensureImageMode(Image.open(shipPath + os.sep + "skinBase.png"))
-    workingTex = Image.alpha_composite(workingTex, baseTex)
+    try:
+        workingTex = Image.alpha_composite(workingTex, baseTex)
+    except ValueError as e:
+        print(f"base: {baseTex.shape} {baseTex.mode}")
+        print(f"working: {workingTex.shape} {workingTex.mode}")
+        raise e
 
     maxLayerNum = max(max(textures), max(disabledLayers)) if disabledLayers else max(textures)
 
