@@ -645,21 +645,27 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                 	
             bbGlobals.currentRenders.append(itemObj.name)	
             if len(message.attachments) < 1:	
-                await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")	
+                await message.channel.send(":x: Please attach an image to render.")	
                 bbGlobals.currentRenders.remove(itemObj.name)	
                 return	
-            skinFile = message.attachments[0]	
-            if (not skinFile.filename.lower().endswith(".jpg")) or not (skinFile.width == 2048 and skinFile.height == 2048):	
-                await message.channel.send(":x: Please either give a skin name after your `+`, or attach a 2048x2048 jpg to render.")	
-                bbGlobals.currentRenders.remove(itemObj.name)	
-                return	
+            skinFile = message.attachments[0]
+            if not skinFile.content_type.startswith("image"):
+                await message.reply(":x: Please only attach images! That's a `" + skinFile.content_type + "`.")
+                bbGlobals.currentRenders.remove(itemObj.name)
+                return
+            sfName = os.path.join(CWD, bbConfig.tempRendersDir, str(message.id) + "_0" + "." + skinFile.filename.split(".")[-1])
             try:	
-                await skinFile.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_0.jpg")	
+                await skinFile.save(sfName)	
             except (discord.HTTPException, discord.NotFound):	
                 await message.channel.send(":x: I couldn't download your skin file. Did you delete it?")	
                 bbGlobals.currentRenders.remove(itemObj.name)	
-                return	
-            skinPaths = {0:CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_0.jpg"}	
+                return
+            if skinFile.width != 2048 or skinFile.height != 2048:
+                workingSF = Image.open(sfName)
+                workingSF.resize((2048, 2048))
+                workingSF.save(sfName)
+                workingSF.close()
+            skinPaths = {0:sfName}	
             disabledLayers = []	
             if skin == "$ATTACHEDFILE$" and shipData["textureRegions"]:	
                 layerIndices = [i for i in range(1, shipData["textureRegions"] + 1)]	
@@ -720,22 +726,30 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                                 os.remove(skinPath)	
                             bbGlobals.currentRenders.remove(itemObj.name)	
                             return	
-                        nextLayer = imgMsg.attachments[0]	
-                        if (not nextLayer.filename.lower().endswith(".jpg")) or not (nextLayer.width == 2048 and nextLayer.height == 2048):	
-                            await message.channel.send(":x: Please only give 2048x2048 jpgs!\n🛑 Skin render cancelled.")	
-                            for skinPath in skinPaths.values():	
-                                os.remove(skinPath)	
-                            bbGlobals.currentRenders.remove(itemObj.name)	
-                            return	
+                        nextLayer = imgMsg.attachments[0]
+                        if not nextLayer.content_type.startswith("image"):
+                            await message.reply(":x: Please only attach images! That's a `" + nextLayer.content_type + "`.")
+                            bbGlobals.currentRenders.remove(itemObj.name)
+                            for skinPath in skinPaths.values():
+                                os.remove(skinPath)
+                            return
+
+                        nextLayerName = os.path.join(CWD, bbConfig.tempRendersDir, str(message.id) + "_" + str(regionNum) + "." + skinFile.filename.split(".")[-1])
+                        
                         try:	
-                            await nextLayer.save(CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_" + str(regionNum) + ".jpg")	
+                            await nextLayer.save(nextLayerName)	
                         except (discord.HTTPException, discord.NotFound):	
                             await message.channel.send(":x: I couldn't download your skin file. Did you delete it?\n🛑 Skin render cancelled.")	
                             for skinPath in skinPaths.values():	
                                 os.remove(skinPath)	
                             bbGlobals.currentRenders.remove(itemObj.name)	
-                            return	
-                        skinPaths[regionNum] = CWD + os.sep + bbConfig.tempRendersDir + os.sep + str(message.id) + "_" + str(regionNum) + ".jpg"	
+                            return
+                        if nextLayer.width != 2048 or nextLayer.height != 2048:
+                            workingSF = Image.open(nextLayerName)
+                            workingSF.resize((2048, 2048))
+                            workingSF.save(nextLayerName)
+                            workingSF.close()
+                        skinPaths[regionNum] = nextLayerName
             waitMsg = await message.channel.send("🤖 Render started! I'll ping you when I'm done.")	
             	
             renderPath = shipData["path"] + os.sep + "skins" + os.sep + str(message.id) + "-RENDER.png"	
