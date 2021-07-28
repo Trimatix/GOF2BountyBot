@@ -663,7 +663,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
             print(f"{skinFile.width} x {skinFile.height} - {'resizing' if skinFile.width != 2048 or skinFile.height != 2048 else 'not resizing'}")
             if skinFile.width != 2048 or skinFile.height != 2048:
                 workingSF = Image.open(sfName)
-                workingSF.resize((2048, 2048))
+                workingSF = workingSF.resize((2048, 2048))
                 workingSF.save(sfName)
                 workingSF.close()
             skinPaths = {0:sfName}	
@@ -748,7 +748,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
                         print(f"{nextLayer.width} x {nextLayer.height} - {'resizing' if nextLayer.width != 2048 or nextLayer.height != 2048 else 'not resizing'}")
                         if nextLayer.width != 2048 or nextLayer.height != 2048:
                             workingSF = Image.open(nextLayerName)
-                            workingSF.resize((2048, 2048))
+                            workingSF = workingSF.resize((2048, 2048))
                             workingSF.save(nextLayerName)
                             workingSF.close()
                         skinPaths[regionNum] = nextLayerName
