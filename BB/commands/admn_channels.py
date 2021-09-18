@@ -79,7 +79,7 @@ async def admin_cmd_set_renders_channel(message : discord.Message, args : str, i
         await message.reply(":ballot_box_with_check: Renders channel set!",
                             mention_author=False)
 
-bbCommands.register("set-renders-channel", admin_cmd_set_renders_channel, 2, allowDM=False, helpSection="channels",
+bbCommands.register("set-renders-channel", admin_cmd_set_renders_channel, 1, allowDM=False, helpSection="channels",
                     signatureStr="**set-renders-channel** *[off]*",
                     longHelp="Restrict custom skin rendering with `showme ship` to this channel.\n" \
                                 + "> Use `set-renders-channel off` to disable this restriction again.")
