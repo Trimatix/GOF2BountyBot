@@ -61,7 +61,10 @@ async def admin_cmd_set_renders_channel(message : discord.Message, args : str, i
     :param str args: ignored
     :param bool isDM: Whether or not the command is being called from a DM channel
     """
-    requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
+    if bbGlobals.guildsDB.guildIdExists(message.guild.id):
+        requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
+    else:
+        requestedBBGuild = bbGlobals.guildsDB.addGuildID(message.guild.id)
     if args == "off":
         if requestedBBGuild.hasRendersChannel():
             requestedBBGuild.removeRendersChannel()
