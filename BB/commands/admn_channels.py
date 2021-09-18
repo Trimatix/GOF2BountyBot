@@ -3,6 +3,7 @@ import discord
 from . import commandsDB as bbCommands
 from .. import bbGlobals
 from ..bbConfig import bbConfig, bbData
+from ..bbObjects import bbGuild
 
 bbCommands.addHelpSection(1, "channels")
 from . import util_tempdisabled
@@ -64,7 +65,8 @@ async def admin_cmd_set_renders_channel(message : discord.Message, args : str, i
     if bbGlobals.guildsDB.guildIdExists(message.guild.id):
         requestedBBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
     else:
-        requestedBBGuild = bbGlobals.guildsDB.addGuildID(message.guild.id)
+        requestedBBGuild = bbGuild.bbGuild(message.guild.id, None, message.guild, shopDisabled=True, bountiesDisabled=True)
+        bbGlobals.guildsDB.addGuildObj(requestedBBGuild)
     if args == "off":
         if requestedBBGuild.hasRendersChannel():
             requestedBBGuild.removeRendersChannel()
