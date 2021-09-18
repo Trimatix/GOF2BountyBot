@@ -1,4 +1,5 @@
 from discord.embeds import Embed
+from discord import TextChannel
 from . import bbShop
 from ..bbDatabases import bbBountyDB
 from .bounties.bountyBoards import BountyBoardChannel
@@ -26,6 +27,8 @@ class bbGuild:
     :vartype announceChannel: discord.channel.TextChannel
     :var playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
     :vartype playChannel: discord.channel.TextChannel
+    :var rendersChannel: The discord.channel which showme ship renders should be limited to. None when no channel is set.
+    :vartype rendersChannel: Union[TextChannel, None]
     :var shop: This guild's bbShop object
     :vartype shop: bbShop
     :var alertRoles: A dictionary of user alert IDs to guild role IDs.
@@ -48,6 +51,7 @@ class bbGuild:
 
     def __init__(self, id : int, bountiesDB: bbBountyDB.bbBountyDB, dcGuild: Guild, announceChannel : channel.TextChannel = None,
             playChannel : channel.TextChannel = None, shop : bbShop.bbShop = None,
+            rendersChannel :  Union[TextChannel, None] = None,
             bountyBoardChannel : BountyBoardChannel.BountyBoardChannel = None, alertRoles : Dict[str, int] = {},
             ownedRoleMenus : int = 0, bountiesDisabled : bool = False, shopDisabled : bool = False):
         """
@@ -56,6 +60,8 @@ class bbGuild:
         :param discord.Guild guild: This guild's corresponding discord.Guild object
         :param discord.channel announceChannel: The discord.channel object for this guild's announcements chanel. None when no announce channel is set for this guild.
         :param discord.channel playChannel: The discord.channel object for this guild's bounty playing chanel. None when no bounty playing channel is set for this guild.
+        :param rendersChannel: The discord.channel which showme ship renders should be limited to. None when no channel is set.
+        :type rendersChannel: Union[TextChannel, None]
         :param bbShop shop: This guild's bbShop object
         :param dict[str, int] alertRoles: A dictionary of user alert IDs to guild role IDs.
         :param BoardBoardChannel bountyBoardChannel: A BountyBoardChannel object implementing this guild's bounty board channel if it has one, None otherwise.
@@ -75,6 +81,7 @@ class bbGuild:
         self.id = id
         self.announceChannel = announceChannel
         self.playChannel = playChannel
+        self.rendersChannel = rendersChannel
 
         self.shopDisabled = shopDisabled
         if shopDisabled:
@@ -198,6 +205,33 @@ class bbGuild:
         if not self.hasAnnounceChannel():
             raise ValueError("Attempted to remove announce channel on a bbGuild that has no announceChannel")
         self.announceChannel = None
+
+
+    def setRendersChannel(self, rendersChannel : TextChannel):
+        """Set the discord channel of the guild's autoskin renders channel.
+
+        :param TextChannel rendersChannel: The discord channel object of the guild's autoskin renders channel
+        """
+        self.rendersChannel = rendersChannel
+
+
+    def hasRendersChannel(self) -> bool:
+        """Whether or not this guild has a renders channel
+
+        :return: True if this guild has a renders channel, False otherwise
+        :rtype bool:
+        """
+        return self.rendersChannel is not None
+
+
+    def removeRendersChannel(self):
+        """Remove and deactivate this guild's announcements channel.
+
+        :raise ValueError: If this guild does not have a renders channel
+        """
+        if not self.hasRendersChannel():
+            raise ValueError("Attempted to remove renders channel on a BasedGuild that has no rendersChannel")
+        self.rendersChannel = None
 
 
 
@@ -572,6 +606,7 @@ class bbGuild:
         """
         data = {"announceChannel":self.announceChannel.id if self.hasAnnounceChannel() else -1,
                     "playChannel":self.playChannel.id if self.hasPlayChannel() else -1, 
+                    "rendersChannel": self.rendersChannel.id if self.hasRendersChannel() else -1,
                     "alertRoles": self.alertRoles,
                     "ownedRoleMenus": self.ownedRoleMenus,
                     "bountiesDisabled": self.bountiesDisabled,
@@ -607,6 +642,8 @@ def fromDict(id : int, guildDict : dict, dbReload : bool = False) -> bbGuild:
         announceChannel = dcGuild.get_channel(guildDict["announceChannel"])
     if "playChannel" in guildDict and guildDict["playChannel"] != -1:
         playChannel = dcGuild.get_channel(guildDict["playChannel"])
+    rendersChannel = guildDict.get("rendersChannel", -1)
+    rendersChannel = dcGuild.get_channel(rendersChannel) if rendersChannel != -1 else None
 
 
     # if "bountiesDisabled" in guildDict and guildDict["bountiesDisabled"]:
@@ -620,7 +657,7 @@ def fromDict(id : int, guildDict : dict, dbReload : bool = False) -> bbGuild:
     guildDict["bountiesDisabled"] = True
 
 
-    return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel,
+    return bbGuild(id, bountiesDB, dcGuild, announceChannel=announceChannel, playChannel=playChannel, rendersChannel=rendersChannel,
                     shop=bbShop.fromDict(guildDict["shop"]) if "shop" in guildDict else bbShop.bbShop(),
                     bountyBoardChannel=BountyBoardChannel.fromDict(guildDict["bountyBoardChannel"]) if "bountyBoardChannel" in guildDict and guildDict["bountyBoardChannel"] != -1 else None,
                     alertRoles=guildDict["alertRoles"] if "alertRoles" in guildDict else {}, ownedRoleMenus=guildDict["ownedRoleMenus"] if "ownedRoleMenus" in guildDict else 0,
