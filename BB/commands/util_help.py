@@ -33,13 +33,15 @@ async def util_autohelp(message : discord.Message, args : str, isDM : bool, user
     elif args == "misc":
         args = "miscellaneous"
 
+    owningBBUser = None
+    helpMenu = None
+
     try:
         if args == "":
             owningBBUser = bbGlobals.usersDB.getOrAddID(message.author.id)
             if owningBBUser.helpMenuOwned:
                 await message.channel.send(":x: Please close your existing help menu before making a new one!\nIn case you can't find it, help menus auto exire after **" + lib.timeUtil.td_format_noYM(lib.timeUtil.timeDeltaFromDict(bbConfig.helpEmbedTimeout)) + "**.")
                 return
-            owningBBUser.helpMenuOwned = True
             menuMsg = await sendChannel.send("‎")
             helpTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.helpEmbedTimeout), expiryFunction=PagedReactionMenu.expireHelpMenu, expiryFunctionArgs=menuMsg.id)
             bbGlobals.reactionMenusTTDB.scheduleTask(helpTT)
@@ -70,7 +72,6 @@ async def util_autohelp(message : discord.Message, args : str, isDM : bool, user
                 if owningBBUser.helpMenuOwned:
                     await message.channel.send(":x: Please close your existing help menu before making a new one!\nIn case you can't find it, help menus auto exire after **" + lib.timeUtil.td_format_noYM(lib.timeUtil.timeDeltaFromDict(bbConfig.helpEmbedTimeout)) + "**.")
                     return
-                owningBBUser.helpMenuOwned = True
                 menuMsg = await sendChannel.send("‎")
                 helpTT = TimedTask.TimedTask(expiryDelta=lib.timeUtil.timeDeltaFromDict(bbConfig.helpEmbedTimeout), expiryFunction=PagedReactionMenu.expireHelpMenu, expiryFunctionArgs=menuMsg.id)
                 bbGlobals.reactionMenusTTDB.scheduleTask(helpTT)
@@ -100,7 +101,11 @@ async def util_autohelp(message : discord.Message, args : str, isDM : bool, user
 
     except discord.Forbidden:
         await message.channel.send(":x: I can't DM you, " + message.author.display_name + "! Please enable DMs from users who are not friends.")
+        if helpMenu is not None and helpMenu.msg.id in bbGlobals.reactionMenusDB:
+            del bbGlobals.reactionMenusDB[helpMenu.msg.id]
         return
     else:
+        if owningBBUser is not None:
+            owningBBUser.helpMenuOwned = True
         if sendDM:
             await message.add_reaction(bbConfig.dmSentEmoji.sendable)
