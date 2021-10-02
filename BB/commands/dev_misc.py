@@ -77,6 +77,26 @@ async def dev_cmd_reset_has_poll(message : discord.Message, args : str, isDM : b
 bbCommands.register("reset-has-poll", dev_cmd_reset_has_poll, 2, allowDM=True, useDoc=True)
 
 
+async def dev_cmd_reset_has_help_menu(message : discord.Message, args : str, isDM : bool):
+    """developer command resetting the help menu ownership of the calling user, or the specified user if one is given.
+
+    :param discord.Message message: the discord message calling the command
+    :param str args: string, can be empty or contain a user mention
+    :param bool isDM: Whether or not the command is being called from a DM channel
+    """
+    # reset the calling user's cooldown if no user is specified
+    if args == "":
+        bbGlobals.usersDB.getUser(
+            message.author.id).helpMenuOwned = False
+        # otherwise get the specified user's discord object and reset their cooldown.
+        # [!] no validation is done.
+    else:
+        bbGlobals.usersDB.getUser(int(args.lstrip("<@!").rstrip(">"))).helpMenuOwned = False
+    await message.channel.send("Done!")
+
+bbCommands.register("reset-has-help", dev_cmd_reset_has_help_menu, 2, allowDM=True, useDoc=True)
+
+
 async def dev_cmd_broadcast(message : discord.Message, args : str, isDM : bool):
     """developer command sending a message to the playChannel of all guilds that have one
 
