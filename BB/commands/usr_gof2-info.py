@@ -600,7 +600,7 @@ async def cmd_showme_ship(message : discord.Message, args : str, isDM : bool):
         await message.channel.send(":x: Please provide a ship! Example: `" + bbConfig.commandPrefix + "ship Groza Mk II`")	
         return	
     if "+" in args:	
-        if isDM:
+        if not isDM:
             callingBGuild = bbGlobals.guildsDB.getGuild(message.guild.id)
             if callingBGuild.hasRendersChannel() and callingBGuild.rendersChannel.id != message.channel.id:
                 await message.reply(f":x: Skin renders are restricted to {callingBGuild.rendersChannel.mention}.")
