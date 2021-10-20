@@ -449,6 +449,8 @@ async def on_message(message : discord.Message):
     """
     # ignore messages sent by bots
     if message.author.bot:
+        if "damn boring" in message.content:
+            await message.add_reaction("<:Banwell:855741513660366859>")
         return
 
     try:
